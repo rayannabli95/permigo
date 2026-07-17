@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fiche C1a — Deck (C3 Indigo Jour)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Plus+Jakarta+Sans:wght@700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{
+    background:#3d3488;
+    -webkit-font-smoothing:antialiased;
+  }
+  body{
+    width:390px;margin:0 auto;min-height:844px;
+    position:relative;
+    font-family:'Inter',sans-serif;
+    color:#ded7ff;
+    background:
+      radial-gradient(120% 55% at 50% -6%, rgba(240,169,63,.16) 0%, rgba(240,169,63,0) 55%),
+      radial-gradient(120% 60% at 82% 12%, rgba(150,120,255,.30) 0%, rgba(150,120,255,0) 60%),
+      linear-gradient(#5a4fc0 0%, #4a3fa4 60%, #423a96 100%);
+    padding:0 0 40px;
+    overflow-x:hidden;
+  }
+
+  /* ---- gold text helper ---- */
+  .gold{
+    background:linear-gradient(180deg,#ffe9b0 0%,#f6c85f 40%,#f0a93f 72%,#d98a1f 100%);
+    -webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;color:transparent;
+  }
+
+  /* ============ HERO ============ */
+  .hero{
+    position:relative;
+    padding:16px 18px 20px;
+  }
+  .topbar{
+    display:flex;align-items:center;gap:12px;
+  }
+  .back{
+    width:42px;height:42px;flex:0 0 42px;
+    border-radius:14px;
+    background:linear-gradient(180deg,#ffffff,#efecff);
+    border:1px solid #e6e2fb;
+    border-top-color:#ffffff;
+    box-shadow:0 4px 0 rgba(20,12,60,.35), inset 0 1px 0 rgba(255,255,255,.9);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+  }
+  .back svg{display:block}
+  .tag{
+    display:inline-flex;align-items:center;gap:7px;
+    padding:7px 13px 7px 9px;
+    border-radius:999px;
+    background:linear-gradient(180deg,rgba(240,169,63,.28),rgba(240,169,63,.10));
+    border:1px solid rgba(240,169,63,.55);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.20);
+  }
+  .tag .dot{
+    width:20px;height:20px;border-radius:50%;
+    background:radial-gradient(circle at 35% 28%,#ffe9b0,#f0a93f 60%,#b46a10);
+    box-shadow:inset 0 -2px 3px rgba(120,60,0,.55), inset 0 1px 1px rgba(255,255,255,.7);
+    flex:0 0 20px;
+  }
+  .tag span{
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;
+    font-size:12px;letter-spacing:.10em;color:#ffe4a6;
+  }
+
+  .hero h1{
+    font-family:'Baloo 2',cursive;font-weight:800;
+    font-size:29px;line-height:1.06;letter-spacing:-.01em;
+    margin:15px 0 4px;
+    filter:drop-shadow(0 2px 0 rgba(60,30,0,.30));
+  }
+  .hero .sub{
+    font-size:13px;color:#ded7ff;font-weight:600;margin-bottom:16px;
+  }
+
+  /* ---- XP progression ---- */
+  .xp{
+    background:linear-gradient(180deg,#ffffff,#f6f4ff);
+    border:1px solid #e6e2fb;
+    border-top-color:#ffffff;
+    border-radius:18px;
+    padding:13px 15px 15px;
+    box-shadow:0 6px 18px rgba(20,12,60,.28), inset 0 1px 0 rgba(255,255,255,.9);
+  }
+  .xp-top{
+    display:flex;align-items:baseline;justify-content:space-between;margin-bottom:9px;
+  }
+  .xp-top .lab{
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;
+    font-size:12px;letter-spacing:.06em;color:#6b5fa0;text-transform:uppercase;
+  }
+  .xp-top .cnt{
+    font-family:'Baloo 2',cursive;font-weight:800;font-size:17px;
+  }
+  .xp-top .cnt small{font-size:13px;color:#6b5fa0;-webkit-text-fill-color:#6b5fa0;font-family:'Inter';font-weight:700}
+  .bar{
+    height:16px;border-radius:999px;
+    background:#2a2170;
+    border:1px solid rgba(20,12,60,.5);
+    box-shadow:inset 0 2px 4px rgba(0,0,0,.45);
+    position:relative;overflow:hidden;
+  }
+  .bar .fill{
+    position:absolute;inset:2px auto 2px 2px;
+    width:31%;border-radius:999px;
+    background:linear-gradient(180deg,#ffe9b0,#f0a93f 55%,#d98a1f);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.7), inset 0 -3px 4px rgba(150,80,0,.45);
+  }
+  .bar .fill::after{
+    content:"";position:absolute;top:2px;left:6px;right:14px;height:4px;border-radius:999px;
+    background:linear-gradient(90deg,rgba(255,255,255,.85),rgba(255,255,255,0));
+  }
+
+  /* ============ SECTION LABEL ============ */
+  .sec-lab{
+    display:flex;align-items:center;gap:10px;
+    padding:0 18px;margin:22px 0 12px;
+  }
+  .sec-lab h2{
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;
+    font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#ded7ff;
+    white-space:nowrap;
+  }
+  .sec-lab .line{height:1px;flex:1;background:linear-gradient(90deg,rgba(222,215,255,.55),transparent)}
+
+  /* ============ DECK — geste cards ============ */
+  .deck{padding:0 18px;display:flex;flex-direction:column;gap:9px}
+  .card{
+    position:relative;display:flex;align-items:center;gap:12px;
+    padding:12px 14px 12px 12px;border-radius:16px;
+    background:#f6f4ff;
+    border:1px solid #e6e2fb;
+    border-top-color:#ffffff;
+    box-shadow:0 4px 0 rgba(20,12,60,.35), inset 0 1px 0 rgba(255,255,255,.8);
+  }
+  /* done cards tinted gold */
+  .card.done{
+    background:linear-gradient(180deg,#fff8ea,#fdefcc);
+    border-color:rgba(240,169,63,.55);
+    border-top-color:#fff3d4;
+    box-shadow:0 4px 0 rgba(150,95,10,.32), inset 0 1px 0 rgba(255,255,255,.8), 0 0 0 1px rgba(240,169,63,.18);
+  }
+  /* next-up card gets a soft violet ring */
+  .card.next{
+    border-color:#c9bff5;
+    border-top-color:#ffffff;
+    box-shadow:0 4px 0 rgba(20,12,60,.35), inset 0 1px 0 rgba(255,255,255,.8), 0 0 0 2px rgba(150,120,255,.38);
+  }
+  .card .next-flag{
+    position:absolute;top:-9px;left:44px;
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:9px;letter-spacing:.10em;
+    color:#1a1240;background:linear-gradient(180deg,#e6d4ff,#b296ff);
+    padding:2px 8px;border-radius:999px;text-transform:uppercase;
+    box-shadow:0 2px 4px rgba(20,12,60,.3);
+  }
+
+  /* checkbox */
+  .chk{
+    flex:0 0 34px;width:34px;height:34px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;position:relative;
+  }
+  .chk.empty{
+    border:2.5px dashed rgba(107,95,160,.55);
+    background:rgba(90,79,192,.05);
+  }
+  .chk.filled{
+    background:radial-gradient(circle at 36% 28%,#ffe9b0,#f0a93f 58%,#b46a10);
+    box-shadow:inset 0 -3px 4px rgba(120,60,0,.55), inset 0 2px 2px rgba(255,255,255,.7), 0 2px 5px rgba(20,12,60,.3);
+  }
+  .chk.filled svg{filter:drop-shadow(0 1px 0 rgba(120,60,0,.4))}
+
+  .num{
+    flex:0 0 auto;
+    font-family:'Baloo 2',cursive;font-weight:800;font-size:15px;
+    width:20px;text-align:center;
+    color:#8579b8;
+  }
+  .card.done .num{color:#b46a10}
+  .card.next .num{color:#5a4fc0}
+
+  .txt{
+    font-size:12.5px;line-height:1.34;color:#241a45;font-weight:600;
+    flex:1;
+  }
+  .card.done .txt{color:#4a3712}
+  .txt b{color:#140f33;font-weight:800}
+  .card.done .txt b{color:#7a4c0d}
+
+  /* ============ CARTES COACH ============ */
+  .coach-wrap{margin-top:6px}
+  .coach{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;
+    padding:0 18px;
+  }
+  .cc{
+    border-radius:14px;padding:11px 10px 12px;
+    background:#f6f4ff;
+    border:1px solid #e6e2fb;
+    border-top-color:#ffffff;
+    box-shadow:0 3px 0 rgba(20,12,60,.28), inset 0 1px 0 rgba(255,255,255,.8);
+    display:flex;flex-direction:column;gap:7px;
+  }
+  .cc .ic{
+    width:34px;height:34px;border-radius:11px;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 2px 4px rgba(20,12,60,.2);
+  }
+  .cc.err .ic{background:linear-gradient(180deg,#ffe3d6,#ffd0bd);border:1px solid rgba(230,90,50,.4)}
+  .cc.why .ic{background:linear-gradient(180deg,#ece5ff,#ddd2ff);border:1px solid rgba(124,95,224,.4)}
+  .cc.auto .ic{background:linear-gradient(180deg,#dcebff,#c6ddff);border:1px solid rgba(63,130,214,.4)}
+  .cc h4{
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:11px;
+    letter-spacing:.02em;line-height:1.15;
+  }
+  .cc.err h4{color:#c2410c}
+  .cc.why h4{color:#5b3fbf}
+  .cc.auto h4{color:#1e5fa8}
+  .cc p{font-size:9.5px;line-height:1.34;color:#6b5fa0;font-weight:500}
+
+  /* ============ SOURCE ============ */
+  .source{
+    text-align:center;font-size:10.5px;color:#c9bdf5;font-weight:600;
+    margin:18px 18px 0;
+  }
+  .source b{color:#ffe4a6;font-weight:700}
+
+  /* ============ ACTIONS ============ */
+  .actions{padding:16px 18px 0}
+  .cta{
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    width:100%;height:60px;border:none;border-radius:20px;cursor:pointer;
+    background:linear-gradient(180deg,#ffe9b0 0%,#f6c85f 38%,#f0a93f 72%,#e2951f 100%);
+    box-shadow:0 6px 0 #b46a10, 0 12px 20px rgba(180,106,16,.35), inset 0 2px 0 rgba(255,255,255,.7);
+    position:relative;
+  }
+  .cta:active{transform:translateY(3px);box-shadow:0 3px 0 #b46a10,0 6px 12px rgba(180,106,16,.3),inset 0 2px 0 rgba(255,255,255,.7)}
+  .cta span{
+    font-family:'Baloo 2',cursive;font-weight:800;font-size:20px;color:#5a3406;
+    letter-spacing:.01em;
+    text-shadow:0 1px 0 rgba(255,255,255,.35);
+  }
+  .cta .lock{
+    display:flex;align-items:center;gap:6px;
+    font-family:'Inter';font-weight:700;font-size:10px;color:#7a4c0d;
+    text-shadow:none;
+  }
+  .secondary{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    width:100%;height:46px;margin-top:11px;border-radius:15px;cursor:pointer;
+    background:linear-gradient(180deg,#ffffff,#ece8ff);
+    border:1px solid #d9d2f5;
+    border-top-color:#ffffff;
+    box-shadow:0 4px 0 rgba(20,12,60,.3), inset 0 1px 0 rgba(255,255,255,.9);
+  }
+  .secondary span{
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:13px;color:#3d2f7a;
+  }
+</style>
+</head>
+<body>
+
+  <!-- ===== HERO ===== -->
+  <div class="hero">
+    <div class="topbar">
+      <div class="back" aria-label="Retour">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="#3d2f7a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="tag">
+        <span class="dot"></span>
+        <span>C1A · MANIEMENT · MONDE 1</span>
+      </div>
+    </div>
+
+    <h1 class="gold">Prendre en main le<br>poste de conduite</h1>
+    <div class="sub">Coche tes gestes, puis débloque le test.</div>
+
+    <div class="xp">
+      <div class="xp-top">
+        <div class="lab">Ton deck</div>
+        <div class="cnt gold">2<small> / 6 gestes</small></div>
+      </div>
+      <div class="bar"><div class="fill"></div></div>
+    </div>
+  </div>
+
+  <!-- ===== DECK ===== -->
+  <div class="sec-lab"><h2>La méthode</h2><div class="line"></div></div>
+
+  <div class="deck">
+
+    <!-- done 1 -->
+    <div class="card done">
+      <div class="chk filled">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 6" stroke="#5a3406" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="num">1</div>
+      <div class="txt">Fais le <b>tour rapide</b> de la voiture : rien sous les roues, pneus pas à plat, feux et plaques propres.</div>
+    </div>
+
+    <!-- done 2 -->
+    <div class="card done">
+      <div class="chk filled">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 6" stroke="#5a3406" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="num">2</div>
+      <div class="txt">Installe-toi, <b>ferme la portière</b>, vérifie qu'elle est bien claquée.</div>
+    </div>
+
+    <!-- next 3 -->
+    <div class="card next">
+      <div class="next-flag">à toi</div>
+      <div class="chk empty"></div>
+      <div class="num">3</div>
+      <div class="txt">Repère les commandes au <b>tableau de bord</b> sans démarrer : compteur, jauge d'essence, témoins.</div>
+    </div>
+
+    <!-- 4 -->
+    <div class="card">
+      <div class="chk empty"></div>
+      <div class="num">4</div>
+      <div class="txt">Repère les deux <b>commodos</b> derrière le volant : GAUCHE = clignotants (feux de croisement/route, appel de phare) ; DROITE = essuie-glaces.</div>
+    </div>
+
+    <!-- 5 -->
+    <div class="card">
+      <div class="chk empty"></div>
+      <div class="num">5</div>
+      <div class="txt">Repère les <b>commandes au pied</b> : à gauche l'embrayage, au milieu le frein, à droite l'accélérateur.</div>
+    </div>
+
+    <!-- 6 -->
+    <div class="card">
+      <div class="chk empty"></div>
+      <div class="num">6</div>
+      <div class="txt">Mets le <b>contact</b> (sans démarrer) : les témoins s'allument puis s'éteignent. S'il en reste un (huile, batterie, frein), signale-le.</div>
+    </div>
+
+  </div>
+
+  <!-- ===== CARTES COACH ===== -->
+  <div class="coach-wrap">
+    <div class="sec-lab"><h2>Cartes coach</h2><div class="line"></div></div>
+    <div class="coach">
+
+      <div class="cc err">
+        <div class="ic">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3l9.5 16.5H2.5L12 3z" fill="#ef6a3a"/><path d="M12 10v4.5" stroke="#fff0e8" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17.4" r="1.2" fill="#fff0e8"/></svg>
+        </div>
+        <h4>L'erreur à éviter</h4>
+        <p>Confondre les commodos → essuie-glaces au lieu du clignotant. Mémo : clignotant à gauche, balais à droite.</p>
+      </div>
+
+      <div class="cc why">
+        <div class="ic">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 18h6M9.5 21h5" stroke="#7c5fe0" stroke-width="1.8" stroke-linecap="round"/><path d="M12 3a6 6 0 0 1 3.6 10.8c-.7.5-1.1 1.2-1.1 2H9.5c0-.8-.4-1.5-1.1-2A6 6 0 0 1 12 3z" fill="#7c5fe0"/></svg>
+        </div>
+        <h4>Pourquoi ça compte</h4>
+        <p>Actionner un clignotant ou un essuie-glace sans quitter la route des yeux.</p>
+      </div>
+
+      <div class="cc auto">
+        <div class="ic">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 13l1.6-4.4A2 2 0 0 1 7.5 7h9a2 2 0 0 1 1.9 1.6L20 13v5a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-1H7v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-5z" fill="#3f82d6"/><circle cx="7.2" cy="15.4" r="1.1" fill="#eaf3ff"/><circle cx="16.8" cy="15.4" r="1.1" fill="#eaf3ff"/></svg>
+        </div>
+        <h4>En boîte auto</h4>
+        <p>Pas d'embrayage : frein (gauche) + accélérateur (droite). Levier remplacé par un sélecteur P / R / N / D.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="source">Vu chez de vrais moniteurs : <b>Las de la route</b></div>
+
+  <!-- ===== ACTIONS ===== -->
+  <div class="actions">
+    <button class="cta">
+      <span>Teste-toi</span>
+    </button>
+    <button class="secondary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 7h11M4 12h11M4 17h7" stroke="#3d2f7a" stroke-width="2" stroke-linecap="round"/><path d="M18 8l3 3-3 3" stroke="#3d2f7a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Remets dans l'ordre</span>
+    </button>
+  </div>
+
+</body>
+</html>
