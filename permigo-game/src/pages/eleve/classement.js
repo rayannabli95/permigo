@@ -22,7 +22,6 @@ import { msToNextMonday, fmtCountdown } from "@/utils/league-shared.js";
 import { blendLeagueRows, isSoloEleve } from "@/utils/league-bots.js";
 import {
   ARENE_CSS,
-  areneAccent,
   arenePodium,
   areneRow,
   areneMeRow,
@@ -52,11 +51,12 @@ const REMC_LEAGUES = [
   { id: "C4", name: "Conduite autonome", endAt: 31, color: "var(--acc-dk)" },
 ];
 
-// Accent de l'arène par ligue : Conduite suit l'accent choisi de l'app
-// (var(--a)…), Révision est en bleu (échelle théorie monochrome).
+// Accent de l'arène : l'accent du COMPTE partout (« aux couleurs de token,
+// trop de variations » — Rayan 17/07). L'ancien bleu dédié à la Révision est
+// abandonné — une seule famille de couleur, la ligue unique suit l'accent.
 const CONDUITE_ACCENT =
   "--acc:var(--a);--acc-lt:var(--a-lt);--acc-dk:var(--adk)";
-const REVISION_ACCENT = areneAccent("bleu");
+const REVISION_ACCENT = CONDUITE_ACCENT;
 
 // ─── Mount ───────────────────────────────────────────────────────
 export async function mount(root, initialTab) {
