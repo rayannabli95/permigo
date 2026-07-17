@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Réviser — 6 directions artistiques</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#0e1020; --card:#171a2e; --line:#2a2e48; --ink:#f3f4f8; --mu:#9da3c0; --a:#8e87ff; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{ background:var(--bg); color:var(--ink); font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+        padding:40px 24px 80px; -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:1240px; margin:0 auto; }
+  header h1{ font-size:30px; font-weight:800; letter-spacing:-.03em; }
+  header p{ color:var(--mu); font-weight:600; margin-top:8px; font-size:15px; line-height:1.5; max-width:720px; }
+  header .hint{ margin-top:14px; font-size:13px; color:var(--a); font-weight:700; }
+  .grid{ margin-top:32px; display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
+  @media(max-width:920px){ .grid{ grid-template-columns:repeat(2,1fr); } }
+  @media(max-width:620px){ .grid{ grid-template-columns:1fr; } }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:18px; overflow:hidden;
+         text-decoration:none; color:inherit; display:flex; flex-direction:column; transition:transform .14s ease, border-color .14s ease; }
+  .card:hover{ transform:translateY(-4px); border-color:var(--a); }
+  .thumb{ background:#000; aspect-ratio:390/560; overflow:hidden; }
+  .thumb img{ width:100%; display:block; }
+  .meta{ padding:16px 18px 18px; }
+  .tag{ font-size:11px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--a); }
+  .meta h2{ font-size:18px; font-weight:800; letter-spacing:-.02em; margin:7px 0 5px; }
+  .meta p{ font-size:13px; color:var(--mu); font-weight:600; line-height:1.45; }
+  .open{ margin-top:12px; font-size:12.5px; font-weight:800; color:var(--ink); }
+  footer{ margin-top:48px; color:var(--mu); font-size:13px; line-height:1.6; }
+  footer code{ background:#000; padding:2px 7px; border-radius:6px; color:var(--a); font-size:12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Réviser — 6 directions artistiques</h1>
+    <p>Même contenu, même hiérarchie (Mise en situation en grand + 3 entraînements plus petits, vraie image du jeu et badges du dossier). Six partis pris, du plus sobre au plus riche. Clique une carte pour l'ouvrir en vrai.</p>
+    <div class="hint">Astuce : ouvre chaque maquette en plein écran, réduis la fenêtre à la largeur d'un téléphone.</div>
+  </header>
+
+  <div class="grid">
+    <a class="card" href="da1-epure.html">
+      <div class="thumb"><img src="shots/da1-epure.png" alt="DA1 Épuré"></div>
+      <div class="meta"><span class="tag">DA1 · Épuré</span><h2>Éditorial minimal</h2>
+        <p>Silence, blanc, un seul violet, liste réglée. Le pari sûr — ton goût validé, en plus fin.</p>
+        <div class="open">Ouvrir →</div></div>
+    </a>
+    <a class="card" href="da2-plein-cadre.html">
+      <div class="thumb"><img src="shots/da2-plein-cadre.png" alt="DA2 Plein cadre"></div>
+      <div class="meta"><span class="tag">DA2 · Plein cadre</span><h2>Cinématique</h2>
+        <p>La scène du jeu en bandeau plein, titre blanc, entraînements en rangées sombres façon page store.</p>
+        <div class="open">Ouvrir →</div></div>
+    </a>
+    <a class="card" href="da3-bento.html">
+      <div class="thumb"><img src="shots/da3-bento.png" alt="DA3 Bento"></div>
+      <div class="meta"><span class="tag">DA3 · Bento</span><h2>Grille mosaïque</h2>
+        <p>Tuiles carrées, gros chiffres-stats, aplats doux. Moderne, rangé, très « app 2024 ».</p>
+        <div class="open">Ouvrir →</div></div>
+    </a>
+    <a class="card" href="da4-arene.html">
+      <div class="thumb"><img src="shots/da4-arene.png" alt="DA4 Arène"></div>
+      <div class="meta"><span class="tag">DA4 · Arène</span><h2>Sombre violet + or</h2>
+        <p>Nuit-violet, liseré or, badges 3D, bouton plastique. L'univers du jeu, gamifié et premium.</p>
+        <div class="open">Ouvrir →</div></div>
+    </a>
+    <a class="card" href="da5-magazine.html">
+      <div class="thumb"><img src="shots/da5-magazine.png" alt="DA5 Magazine"></div>
+      <div class="meta"><span class="tag">DA5 · Magazine</span><h2>Éditorial serif</h2>
+        <p>Fond crème, grands titres serif, sommaire 01·02·03. Calme, adulte, élégant.</p>
+        <div class="open">Ouvrir →</div></div>
+    </a>
+    <a class="card" href="da6-ludique.html">
+      <div class="thumb"><img src="shots/da6-ludique.png" alt="DA6 Ludique"></div>
+      <div class="meta"><span class="tag">DA6 · Ludique</span><h2>Coloré façon Duolingo</h2>
+        <p>Héros violet plein, tuiles pastel, badges 3D. Jeune, chaleureux — « les élèves kiffent ».</p>
+        <div class="open">Ouvrir →</div></div>
+    </a>
+  </div>
+
+  <footer>
+    Aperçu comparatif d'un coup d'œil : <code>CONTACT-SHEET.png</code>.<br>
+    Les vraies captures du jeu et les badges viennent de <code>public/showcase</code> et <code>public/art/reviser</code>.
+  </footer>
+</div>
+</body>
+</html>

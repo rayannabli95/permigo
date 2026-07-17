@@ -1,11 +1,11 @@
 // ═══════════════════════════════════════════════════════════════
-// Élève — Hub « Réviser » (refonte « épuré », choix Rayan 2026-07-17).
+// Élève — Hub « Réviser » (DA « Arène » — choix Rayan 2026-07-17).
 //
-// Fini le mur de tuiles « où donner de la tête ». 4 choix, point :
-//   1. Mise en situation — LA carte héros (le mini-jeu que les élèves kiffent),
-//      avec la vraie image du jeu.
+// Univers du jeu : nuit-violet + or. « Mise en situation » en héros
+// (la vraie capture du mini-jeu, cadrée sur la scène), puis 3 entraînements
+// plus petits avec les badges 3D de public/art/reviser/.
+//   1. Mise en situation — LA carte héros (le mini-jeu que les élèves kiffent)
 //   2. Examen blanc de conduite  3. Fiches de révision  4. Centre d'examen
-//      → liste nette, filets, un seul accent (violet). Zéro dégradé/glow/3D.
 //
 // Données 100 % réelles (repli gracieux, jamais inventées) :
 //   - Série            : utils/game-state.js getStreak() (local)
@@ -23,118 +23,152 @@ import { SITUATIONS } from "@/data/situations-conduite.js";
 import { FICHES } from "@/data/fiches-conduite.js";
 
 const LS_READ_KEY = "rvc_read_v1"; // même clé que revision-conduite.js
-const HERO_IMG = "/showcase/eleve-en-situation.png"; // vraie capture du jeu
+const HERO_IMG = "/showcase/eleve-en-situation.png"; // vraie capture du jeu (cadrée sur la scène)
 
-// Pictos mono-trait (sobres, ligne — pas de pastille dégradée).
+// Badges 3D glossy (public/art/reviser/), posés sans cadre sur les cartes.
+const BADGE = {
+  exam: "/art/reviser/cible.png",
+  fiche: "/art/reviser/livre.png",
+  centre: "/art/reviser/panneau.png",
+};
+
 const SVG = {
-  play: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5l12 7-12 7z"/></svg>`,
-  flame: `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2c1 3-1 4-2 6s0 4 2 4 3-2 2-5c2 1 4 4 4 7a6 6 0 1 1-12 0c0-3 2-5 3-7 .5 2 2 2 3 1 .5-2 0-4-3-6z"/></svg>`,
-  exam: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>`,
-  fiche: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`,
-  centre: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-5.2-7-11a7 7 0 0 1 14 0c0 5.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>`,
-  chev: `<svg class="rv2-chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>`,
+  flame: `<svg class="rv4-flame" viewBox="0 0 15 19" fill="none" aria-hidden="true">
+      <path d="M7.5 0.5C8.3 3.4 6.2 4.6 5 6.2 3.8 7.8 3.4 9.1 4.4 9.7 4.1 8.6 4.6 7.7 5.5 7.1 5.1 8.9 6.8 9.4 6.7 11.1 8.9 9.9 8 7.4 8.9 6.1 9.6 7.5 10.9 8.1 10.9 9.8 12.2 8.9 12.6 7.5 12.2 6.2 13.9 8 14.5 10.4 13.6 12.6 12.4 15.6 9.4 18.5 5.9 17.9 3.2 17.4 1.1 15.2 1 12.5 0.9 9.8 2.6 8.9 3.9 7.1 5.6 4.8 7.9 3.5 7.5 0.5Z" fill="url(#rv4fg)"/>
+      <defs><linearGradient id="rv4fg" x1="7.5" y1="0.5" x2="7.5" y2="18.5" gradientUnits="userSpaceOnUse">
+        <stop stop-color="#f7d878"/><stop offset="1" stop-color="#f0a828"/>
+      </linearGradient></defs>
+    </svg>`,
+  play: `<svg width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true"><path d="M4 3.2v10.6c0 .7.8 1.1 1.4.7l8.2-5.3a.85.85 0 000-1.4L5.4 2.5C4.8 2.1 4 2.5 4 3.2z" fill="#fff"/></svg>`,
 };
 
 const STYLE = `<style>
-.rv2 { max-width:480px; margin:0 auto; padding:8px 20px calc(96px + env(safe-area-inset-bottom));
-  background:var(--bg); color:var(--ink); min-height:100dvh;
-  font-family:'Plus Jakarta Sans','Nunito',sans-serif; }
+.rv4 { position:relative; overflow:hidden; max-width:480px; margin:0 auto;
+  min-height:100dvh; color:#fff;
+  background:linear-gradient(180deg,#241a52 0%,#1e1648 46%,#1a1340 100%);
+  font-family:'Nunito',sans-serif; -webkit-font-smoothing:antialiased; }
+.rv4::before { content:""; position:absolute; top:-120px; left:50%; transform:translateX(-50%);
+  width:360px; height:300px; pointer-events:none;
+  background:radial-gradient(ellipse at center,rgba(142,135,255,.18),transparent 70%); }
+.rv4-screen { position:relative; padding:14px 20px calc(96px + env(safe-area-inset-bottom)); }
 
-.rv2-top { display:flex; align-items:center; justify-content:space-between; padding:10px 0 16px; }
-.rv2-top h1 { font:800 27px/1 'Plus Jakarta Sans',sans-serif; letter-spacing:-.035em; margin:0; }
-.rv2-streak { display:inline-flex; align-items:center; gap:6px; font:800 12.5px/1 'Plus Jakarta Sans',sans-serif;
-  color:var(--ink); background:var(--su2); border:1px solid var(--bo); border-radius:11px; padding:8px 12px; }
-.rv2-streak svg { width:14px; height:14px; color:#f59e0b; }
+/* ===== HEADER ===== */
+.rv4-top { display:flex; align-items:center; justify-content:space-between; padding:8px 2px 14px; }
+.rv4-top h1 { font:800 30px/1 'Plus Jakarta Sans',sans-serif; letter-spacing:-.03em; color:#fff; margin:0; }
+.rv4-streak { display:flex; align-items:center; gap:7px; padding:7px 13px 7px 10px; border-radius:999px;
+  background:rgba(245,196,81,.12); border:1px solid rgba(245,196,81,.34); }
+.rv4-streak span { font:800 13.5px/1 'Plus Jakarta Sans',sans-serif; letter-spacing:-.01em; color:#f5c451; white-space:nowrap; }
+.rv4-flame { width:15px; height:19px; display:block; flex:none; }
 
-/* Héros : la vraie image du jeu, cadrée sur la scène */
-.rv2-hero { display:block; width:100%; border:0; padding:0; background:none; cursor:pointer; position:relative;
-  border-radius:18px; overflow:hidden; -webkit-tap-highlight-color:transparent; transition:transform .12s ease; }
-.rv2-hero:active { transform:scale(.99); }
-.rv2-hero img { display:block; width:100%; height:196px; object-fit:cover; object-position:center 7%; background:#241a52; }
-.rv2-badge { position:absolute; top:12px; left:12px; font:800 10.5px/1 'Plus Jakarta Sans',sans-serif;
-  color:#fff; background:var(--a); padding:6px 10px; border-radius:8px; }
+/* ===== HÉROS ===== */
+.rv4-hero { position:relative; display:block; width:100%; text-align:left; cursor:pointer;
+  border:1px solid rgba(245,196,81,.28); border-radius:24px; padding:14px 14px 16px;
+  background:linear-gradient(180deg,#2c2264 0%,#241a56 100%);
+  box-shadow:0 22px 44px -20px rgba(8,4,30,.9), inset 0 1px 0 rgba(255,255,255,.05);
+  -webkit-tap-highlight-color:transparent; color:inherit; }
+.rv4-eyebrow { display:block; font:800 11px/1 'Plus Jakarta Sans',sans-serif; letter-spacing:.16em;
+  text-transform:uppercase; color:#f5c451; margin:2px 2px 9px; }
+.rv4-frame { display:block; position:relative; height:202px; border-radius:18px; overflow:hidden;
+  border:1.5px solid #f5c451; box-shadow:0 14px 30px -14px rgba(6,2,22,.85); background:#241a52; }
+.rv4-frame img { position:absolute; top:0; left:50%; transform:translateX(-50%); width:104%; display:block; }
+.rv4-frame::after { content:""; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(180deg,transparent 62%,rgba(29,21,66,.55) 100%); }
+.rv4-pastille { position:absolute; top:12px; left:12px; z-index:2; display:flex; align-items:center; gap:6px;
+  background:linear-gradient(180deg,#f7cf68,#f0aa2c); color:#2a1e05;
+  font:800 11.5px/1 'Plus Jakarta Sans',sans-serif; letter-spacing:-.01em; padding:6px 11px 6px 9px; border-radius:999px;
+  box-shadow:0 6px 14px -4px rgba(240,170,44,.6), inset 0 1px 0 rgba(255,255,255,.5); }
+.rv4-pastille .dot { width:6px; height:6px; border-radius:50%; background:#2a1e05; }
+.rv4-hbody { display:block; padding:15px 4px 2px; }
+.rv4-htitle { font:800 25px/1.06 'Plus Jakarta Sans',sans-serif; letter-spacing:-.03em; color:#fff; margin:0; }
+.rv4-hsub { margin:7px 0 0; font:700 14px/1.35 'Nunito',sans-serif; color:#b3aede; }
+.rv4-cta { display:flex; align-items:center; justify-content:center; gap:9px; width:100%; margin-top:15px;
+  padding:15px; border:0; border-radius:16px; cursor:pointer;
+  background:linear-gradient(180deg,#8e87ff,#6c63ff);
+  box-shadow:0 4px 0 #4a3fc9, 0 12px 22px -10px rgba(74,63,201,.9);
+  color:#fff; font:800 16.5px/1 'Plus Jakarta Sans',sans-serif; letter-spacing:-.01em;
+  transition:transform .1s ease, box-shadow .1s ease; }
+.rv4-cta:active { transform:translateY(2px); box-shadow:0 2px 0 #4a3fc9, 0 8px 16px -10px rgba(74,63,201,.9); }
+.rv4-cta svg { display:block; }
 
-.rv2-lead { padding:15px 2px 0; }
-.rv2-lead .k { font:800 10.5px/1 'Plus Jakarta Sans',sans-serif; letter-spacing:.12em; text-transform:uppercase; color:var(--a-txt,var(--a)); }
-.rv2-lead h2 { font:800 21px/1.12 'Plus Jakarta Sans',sans-serif; letter-spacing:-.03em; margin:8px 0 3px; color:var(--ink); }
-.rv2-lead p { font:600 13px/1.45 'Nunito',sans-serif; color:var(--mu); margin:0; }
-
-.rv2-cta { margin-top:15px; width:100%; height:52px; border:0; border-radius:14px; cursor:pointer;
-  background:var(--a); color:var(--a-ink,#fff); font:800 16px/1 'Plus Jakarta Sans',sans-serif;
-  display:flex; align-items:center; justify-content:center; gap:9px; transition:transform .12s ease; }
-.rv2-cta:active { transform:scale(.985); }
-.rv2-cta svg { width:17px; height:17px; }
-
-/* Le reste : liste nette à filets, un seul accent */
-.rv2-list { margin-top:24px; }
-.rv2-row { display:flex; align-items:center; gap:14px; width:100%; text-align:left; cursor:pointer;
-  background:none; border:0; border-top:1px solid var(--bo); padding:16px 2px; color:var(--ink);
-  -webkit-tap-highlight-color:transparent; transition:opacity .12s ease; }
-.rv2-row:last-child { border-bottom:1px solid var(--bo); }
-.rv2-row:active { opacity:.55; }
-.rv2-ic { width:44px; height:44px; border-radius:12px; flex:none; display:grid; place-items:center; background:var(--su2); }
-.rv2-ic svg { width:22px; height:22px; }
-.rv2-ic.ex { color:#5b4fd0; } .rv2-ic.fi { color:#0f9d67; } .rv2-ic.ce { color:#d97a2b; }
-.rv2-rtx { flex:1; min-width:0; }
-.rv2-rtx b { display:block; font:800 15px/1.18 'Plus Jakarta Sans',sans-serif; letter-spacing:-.02em; }
-.rv2-rtx span { font:600 12px/1.3 'Nunito',sans-serif; color:var(--mu); }
-.rv2-rm { flex:none; font:800 12.5px/1 'Plus Jakarta Sans',sans-serif; color:var(--mu); }
-.rv2-chev { width:18px; height:18px; flex:none; color:var(--mu); opacity:.5; }
+/* ===== SECONDAIRES ===== */
+.rv4-rail { margin-top:20px; display:flex; flex-direction:column; gap:11px; }
+.rv4-railhead { display:flex; align-items:center; gap:10px; margin:0 2px 3px; }
+.rv4-railhead span { font:800 11px/1 'Plus Jakarta Sans',sans-serif; letter-spacing:.14em; text-transform:uppercase; color:#9089c7; }
+.rv4-railhead .rule { flex:1; height:1px; background:linear-gradient(90deg,#3a3178,transparent); }
+.rv4-item { display:flex; align-items:center; gap:13px; width:100%; text-align:left; cursor:pointer;
+  background:linear-gradient(180deg,#322a6b,#2a2160); border:1px solid #3a3178; border-radius:16px; padding:12px 14px;
+  box-shadow:0 10px 20px -16px rgba(6,2,22,.9); color:inherit;
+  -webkit-tap-highlight-color:transparent; transition:transform .1s ease; }
+.rv4-item:active { transform:scale(.99); }
+.rv4-badge { flex:none; width:64px; height:64px; display:grid; place-items:center; }
+.rv4-badge img { width:64px; height:64px; object-fit:contain; display:block; filter:drop-shadow(0 5px 8px rgba(0,0,0,.5)); }
+.rv4-itx { flex:1; min-width:0; }
+.rv4-itx h3 { font:800 16px/1.15 'Plus Jakarta Sans',sans-serif; letter-spacing:-.02em; color:#fff; margin:0; }
+.rv4-itx p { margin:2px 0 0; font:600 12.5px/1.3 'Nunito',sans-serif; color:#b3aede; }
+.rv4-meta { flex:none; text-align:right; font:800 12.5px/1.1 'Plus Jakarta Sans',sans-serif; letter-spacing:-.01em; color:#f5c451; }
+.rv4-meta small { display:block; font:700 9.5px/1 'Nunito',sans-serif; letter-spacing:.08em; text-transform:uppercase; color:#9089c7; margin-bottom:3px; }
 
 /* Skeleton */
-.rv2-skel { border-radius:18px; background:var(--su2); animation:rv2pulse 1.2s ease-in-out infinite; }
-.rv2-skel.hero { height:198px; margin-top:2px; }
-.rv2-skel.row { height:64px; margin-top:12px; border-radius:12px; }
-@keyframes rv2pulse { 0%,100%{opacity:.55} 50%{opacity:1} }
-@media (prefers-reduced-motion: reduce){ .rv2-skel{animation:none} .rv2-hero,.rv2-cta,.rv2-row{transition:none} }
+.rv4-skel { border-radius:18px; background:rgba(255,255,255,.05); animation:rv4pulse 1.2s ease-in-out infinite; }
+.rv4-skel.hero { height:300px; border-radius:24px; }
+.rv4-skel.row { height:88px; margin-top:11px; border-radius:16px; }
+@keyframes rv4pulse { 0%,100%{opacity:.5} 50%{opacity:.9} }
+@media (prefers-reduced-motion: reduce){ .rv4-skel{animation:none} .rv4-cta,.rv4-item{transition:none} }
 </style>`;
 
 function skeleton() {
-  return `${STYLE}<div class="rv2">
-    <div class="rv2-top"><h1>Réviser</h1></div>
-    <div class="rv2-skel hero"></div>
-    <div class="rv2-skel row"></div>
-    <div class="rv2-skel row"></div>
-    <div class="rv2-skel row"></div>
-  </div>`;
+  return `${STYLE}<div class="rv4"><div class="rv4-screen">
+    <div class="rv4-top"><h1>Réviser</h1></div>
+    <div class="rv4-skel hero"></div>
+    <div class="rv4-skel row"></div>
+    <div class="rv4-skel row"></div>
+    <div class="rv4-skel row"></div>
+  </div></div>`;
 }
 
 function render({ streak, sceneCount, examBest, fichesLues, fichesTotal }) {
   const streakTxt =
-    streak.count > 0 ? `Série ${streak.count} j` : "Série · nouvelle";
-  const examMeta = examBest != null ? `Record ${examBest} %` : "Se tester";
-  const row = (id, ic, cls, title, sub, meta) => `
-    <button class="rv2-row" data-go="${id}">
-      <span class="rv2-ic ${cls}">${ic}</span>
-      <span class="rv2-rtx"><b>${title}</b><span>${sub}</span></span>
-      <span class="rv2-rm">${meta}</span>
-      ${SVG.chev}
+    streak.count > 0 ? `Série ${streak.count} j` : "Nouvelle série";
+  const examMeta =
+    examBest != null
+      ? `<small>Record</small>${examBest} %`
+      : `<small>Objectif</small>/31`;
+
+  const item = (id, badge, title, sub, meta) => `
+    <button class="rv4-item" data-go="${id}">
+      <span class="rv4-badge"><img src="${badge}" alt="" loading="lazy"></span>
+      <span class="rv4-itx"><h3>${title}</h3><p>${sub}</p></span>
+      <span class="rv4-meta">${meta}</span>
     </button>`;
 
-  return `${STYLE}<div class="rv2">
-    <div class="rv2-top">
+  return `${STYLE}<div class="rv4"><div class="rv4-screen">
+
+    <div class="rv4-top">
       <h1>Réviser</h1>
-      <span class="rv2-streak">${SVG.flame}${streakTxt}</span>
+      <span class="rv4-streak">${SVG.flame}<span>${streakTxt}</span></span>
     </div>
 
-    <button class="rv2-hero" data-go="en-situation" aria-label="Jouer une scène de conduite">
-      <img src="${HERO_IMG}" alt="Une scène du jeu En situation : un croisement à décider" loading="eager">
-      <span class="rv2-badge">Le préféré des élèves</span>
+    <button class="rv4-hero" data-go="en-situation" aria-label="Jouer une scène de conduite">
+      <span class="rv4-eyebrow">Mise en situation · ${sceneCount} scènes</span>
+      <span class="rv4-frame">
+        <span class="rv4-pastille"><span class="dot"></span>Le préféré des élèves</span>
+        <img src="${HERO_IMG}" alt="Une scène du jeu En situation : un croisement à décider" loading="eager">
+      </span>
+      <span class="rv4-hbody">
+        <h2 class="rv4-htitle">Une scène, une décision</h2>
+        <p class="rv4-hsub">3 min, comme sur la route — pas du code.</p>
+        <span class="rv4-cta">${SVG.play}Jouer une scène</span>
+      </span>
     </button>
 
-    <div class="rv2-lead">
-      <div class="k">Mise en situation · ${sceneCount} scènes</div>
-      <h2>Une scène, une décision</h2>
-      <p>3 min, comme sur la route — pas du code.</p>
+    <div class="rv4-rail">
+      <div class="rv4-railhead"><span>Aussi pour s'entraîner</span><div class="rule"></div></div>
+      ${item("exam-conduite", BADGE.exam, "Examen blanc", "Comme le jour J, noté sur 31", examMeta)}
+      ${item("revision-conduite", BADGE.fiche, "Fiches de révision", "Le geste, pas le code", `<small>Fiches</small>${fichesLues} / ${fichesTotal}`)}
+      ${item("centre-examen", BADGE.centre, "Centre d'examen", "Ton centre, le jour J", `<small>Le jour J</small>Voir`)}
     </div>
-    <button class="rv2-cta" data-go="en-situation">${SVG.play}Jouer une scène</button>
 
-    <div class="rv2-list">
-      ${row("exam-conduite", SVG.exam, "ex", "Examen blanc", "Comme le jour J, noté /31", examMeta)}
-      ${row("revision-conduite", SVG.fiche, "fi", "Fiches de révision", "Le geste, pas le code", `${fichesLues}/${fichesTotal}`)}
-      ${row("centre-examen", SVG.centre, "ce", "Centre d'examen", "Ton centre, le jour J", "Voir")}
-    </div>
-  </div>`;
+  </div></div>`;
 }
 
 function wire(root) {
@@ -179,7 +213,7 @@ export async function mount(root) {
       if (attempts.length) examBest = Math.max(...attempts.map((a) => a.score));
     }
   } catch {
-    /* réseau indispo → méta « Se tester » */
+    /* réseau indispo → méta « Objectif » */
   }
 
   root.innerHTML = render({
