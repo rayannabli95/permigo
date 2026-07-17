@@ -62,17 +62,31 @@ export function getLang() {
 
 // ─── Sync depuis les préférences backend ───────────────────────
 export async function syncLangFromPrefs(sb2 = sb) {
+  const local = getLang(); // choix mémorisé côté client (ou 'fr')
   try {
     const { data } = await sb2.rpc("get_my_preferences");
     const l = data?.language;
-    if (isLang(l)) {
+    // La base porte un choix EXPLICITE (en/ar) → elle fait foi (multi-appareils).
+    if (l === "en" || l === "ar") {
       applyLang(l);
+      return;
+    }
+    // La base est au défaut 'fr'/null MAIS l'élève a un choix explicite en local
+    // (ex. posé à l'inscription avant que la persistance n'aboutisse) → on GARDE
+    // son choix et on RÉPARE la base. Évite le retour intempestif au français.
+    if (local === "en" || local === "ar") {
+      applyLang(local);
+      try {
+        await sb2.rpc("set_my_preferences", { p_data: { language: local } });
+      } catch {
+        /* le miroir localStorage tient déjà la préférence */
+      }
       return;
     }
   } catch {
     /* fallback ci-dessous */
   }
-  applyLang(getLang());
+  applyLang(local);
 }
 
 // ─── Écriture (upsert via RPC — même chemin que le thème) ──────
