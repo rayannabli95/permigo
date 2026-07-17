@@ -1,25 +1,24 @@
 // ═══════════════════════════════════════════════════════════════
-// Élève — Valider une compétence en AUTONOMIE (SANS moniteur)
+// Élève — CERTIFIER une compétence de son parcours (TOUS les élèves)
 // Route #/valider-seul/{compId} — CTA posé dans la fiche compétence de
-// parcours.js (openFiche), uniquement pour un élève sans moniteur rattaché
-// (profiles.enseignant_id NULL — cas de la pré-vente Pass Permis solo).
+// parcours.js (openFiche).
 //
-// Pourquoi cette page existe : `validations` (source de vérité) n'est écrite
-// QUE par un enseignant/gérant (policy validations_insert). Sans ce chemin,
-// un élève solo ne peut jamais rien valider dans son parcours.
+// Pivot 17/07 (décision Rayan) : l'élève avance SEUL dans son parcours —
+// rattaché ou solo, il a de toute façon un enseignant dans la voiture. Le
+// moniteur ne valide plus rien d'obligatoire ; il observe (livret : badge
+// distinct, policy #512). `validations` (écrite par l'enseignant) reste une
+// confirmation optionnelle jamais écrasée.
 //
-// Flow (décision produit Rayan, 2026-07-15) :
-//   1. Relire la fiche de la compétence (rappel condensé ici + lien vers la
-//      fiche complète #/revision-conduite/{compId}).
-//   2. Quiz de validation : moteur DB existant (quiz-engine.js, questions
-//      `questions_competence` type='post_validation' — mêmes questions que
-//      partout ailleurs, aucun nouveau contenu).
-//   3. Score ≥ 80% → RPC self_validate_competence (table self_validations,
-//      SÉPARÉE de `validations` — jamais une ligne attribuée à un
-//      enseignant, zéro impact sur les stats moniteur).
-//   4. +25 volants via claim_competence_reward — même récompense qu'une
-//      validation moniteur (migration solo_rewards_parity ; claim
-//      idempotent, 1 seule fois par compétence).
+// Flow :
+//   1. Relire la fiche de la compétence (rappel condensé + lien fiche).
+//   2. Quiz de validation (quiz-engine.js, questions post_validation DB).
+//   3. Score ≥ 80% → question de certification UNIFIÉE : « Tu te sens
+//      prêt·e à passer à la suite ? » — l'élève certifie ce qui s'est
+//      passé en vraie leçon (crédibilité : il n'a aucun intérêt à tricher,
+//      son moniteur voit ses certifications).
+//   4. Oui → RPC self_validate_competence (correction SERVEUR, table
+//      self_validations séparée de `validations`) + 25 volants
+//      (claim_competence_reward, idempotent).
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
@@ -157,16 +156,12 @@ function notFoundScreen() {
   </div>`;
 }
 
-function blockedScreen(reason, sub) {
-  const msg =
-    reason === "moniteur"
-      ? "Tu as un moniteur rattaché : c'est lui qui valide tes compétences en séance. La validation en autonomie n'est proposée qu'aux élèves sans moniteur."
-      : "Ton moniteur a déjà validé cette compétence — rien à faire ici.";
+function blockedScreen(sub) {
   return `${STYLE}<div class="vs">
     ${topBar(sub?.n || "Compétence")}
     <div class="vs-card vs-warn">
       ${icon("alert-circle", { size: 20 })}
-      <p>${esc(msg)}</p>
+      <p>Ton moniteur a déjà validé cette compétence — rien à faire ici.</p>
     </div>
   </div>`;
 }
@@ -182,7 +177,7 @@ function introScreen(sub, cat, already) {
     ? `<div class="vs-card vs-already">
         <div>${medallion("check", "violet", { size: 40 })}</div>
         <div class="vs-already-tx">
-          <b>Déjà auto-validée</b>
+          <b>Déjà certifiée</b>
           <span>Quiz réussi à ${Math.round(already.score)}% le ${new Date(already.validated_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}.</span>
         </div>
       </div>`
@@ -227,8 +222,8 @@ function introScreen(sub, cat, already) {
 function successScreen(sub, scorePct, volants = 0) {
   return `${STYLE}<div class="vsr anim-slide-up">
     <div class="vsr-med">${medallion("check", "violet", { size: 96 })}</div>
-    <span class="vsr-kick">${icon("shield", { size: 13 })} Auto-validée</span>
-    <h1 class="vsr-ttl">Compétence validée !</h1>
+    <span class="vsr-kick">${icon("shield", { size: 13 })} Certifiée par toi</span>
+    <h1 class="vsr-ttl">Compétence certifiée !</h1>
     <p class="vsr-p">« ${esc(sub.n)} » est maintenant acquise dans ton parcours.</p>
     <p class="vsr-score">Quiz réussi à ${scorePct}%</p>
     ${volants > 0 ? `<span class="vsr-volants"><img src="/skins/volant-coin.webp" alt=""> +${volants} volants</span>` : ""}
@@ -269,11 +264,10 @@ export async function mount(root, param) {
 
   root.innerHTML = skeleton();
 
-  // Garde-fous côté AFFICHAGE (la vraie garantie est côté RPC — jamais
-  // confiance au client). On vérifie ici pour ne pas laisser un élève avec
-  // moniteur atterrir sur un écran qui ne le concerne pas.
-  const [moiRes, valRes, selfRes] = await Promise.allSettled([
-    sb.from("profiles").select("enseignant_id").eq("id", me.id).maybeSingle(),
+  // Garde-fou côté AFFICHAGE (la vraie garantie est côté RPC — jamais
+  // confiance au client). Ouvert à TOUS les élèves depuis le pivot 17/07 ;
+  // seul cas fermé : le moniteur a déjà validé (rien à certifier).
+  const [valRes, selfRes] = await Promise.allSettled([
     sb
       .from("validations")
       .select("statut")
@@ -288,20 +282,13 @@ export async function mount(root, param) {
       .maybeSingle(),
   ]);
 
-  const hasMoniteur =
-    moiRes.status === "fulfilled" && !!moiRes.value.data?.enseignant_id;
   const acquisMoniteur =
     valRes.status === "fulfilled" && valRes.value.data?.statut === "acquis";
   const already =
     selfRes.status === "fulfilled" ? selfRes.value.data || null : null;
 
-  if (hasMoniteur) {
-    root.innerHTML = blockedScreen("moniteur", sub);
-    wireBack(root);
-    return;
-  }
   if (acquisMoniteur) {
-    root.innerHTML = blockedScreen("acquis", sub);
+    root.innerHTML = blockedScreen(sub);
     wireBack(root);
     return;
   }
@@ -375,6 +362,36 @@ async function handleComplete(
     return;
   }
 
+  // Quiz réussi → question de certification UNIFIÉE (décision Rayan 17/07,
+  // même formulation pour tous : rattaché ou solo, la vraie leçon a eu lieu
+  // en voiture). La compétence ne monte que si l'élève certifie.
+  haptic("success");
+  root.innerHTML = confirmScreen(sub, scorePct);
+  wireBack(root);
+  root.querySelector("#vs-certify")?.addEventListener("click", () => {
+    const b = root.querySelector("#vs-certify");
+    if (b) b.disabled = true;
+    certify(root, me, compId, sub, cat, scorePct, answers);
+  });
+  root.querySelector("#vs-not-yet")?.addEventListener("click", () => {
+    track("valider_seul.not_yet", { competence_id: compId });
+    toast("Aucune pression — reviens quand tu le sens.", "info");
+    navigate("#/parcours");
+  });
+}
+
+function confirmScreen(sub, scorePct) {
+  return `${STYLE}<div class="vsr anim-slide-up">
+    <div class="vsr-med">${medallion("check", "violet", { size: 96 })}</div>
+    <span class="vsr-kick">${icon("check", { size: 13 })} Quiz réussi à ${scorePct}%</span>
+    <h1 class="vsr-ttl">Tu te sens prêt·e à passer à la suite ?</h1>
+    <p class="vsr-p">En certifiant « ${esc(sub.n)} », tu confirmes que ce geste est acquis en vraie leçon. Ton enseignant peut voir tes certifications.</p>
+    <button class="vsr-cta" id="vs-certify" type="button">Oui, je certifie ${icon("shield", { size: 16 })}</button>
+    <button class="vsr-ghost" id="vs-not-yet" type="button">Pas encore</button>
+  </div>`;
+}
+
+async function certify(root, me, compId, sub, cat, scorePct, answers) {
   try {
     // Le SERVEUR corrige : on envoie les réponses, pas un score déclaratif
     // (migration solo_hardening — l'ancienne signature p_score est supprimée).

@@ -2566,21 +2566,19 @@ function openFiche(root, compId, ws, validatedMap, pendingMap, hasMoniteur) {
       ${icon("zap", { size: 16 })} Révise cette compétence
     </a>`;
 
-  // Validation autonome : uniquement pour un élève SANS moniteur rattaché
-  // (pré-vente Pass Permis). Sans ce chemin, son parcours resterait bloqué
-  // à vie — `validations` n'est écrite que par un enseignant/gérant.
-  const selfValidateBtn = !hasMoniteur
-    ? `
+  // Certification par l'élève — TOUS les élèves depuis le pivot 17/07
+  // (l'élève avance seul ; la validation moniteur devient une confirmation
+  // optionnelle). Le serveur reste le juge (quiz corrigé côté RPC).
+  const selfValidateBtn = `
     <a href="#/valider-seul/${esc(compId)}" role="button" class="fiche-self-cta">
-      ${icon("shield", { size: 15 })} Ton moniteur te l'a validée en leçon ? Valide-la ici.
-    </a>`
-    : "";
+      ${icon("shield", { size: 15 })} Passée en vraie leçon ? Certifie-la ici.
+    </a>`;
 
   // Bloc status contextuel selon état
   const statusBlock = (() => {
     if (st === "done" && val?.source === "auto") {
-      // Validée en autonomie (élève solo, sans moniteur) : badge distinct,
-      // jamais confondu avec une validation moniteur.
+      // Certifiée par l'élève : badge distinct, jamais confondu avec une
+      // validation moniteur.
       const scoreTxt =
         val.score_cognitif != null
           ? ` (quiz : ${Math.round(val.score_cognitif)}%)`
@@ -2589,8 +2587,8 @@ function openFiche(root, compId, ws, validatedMap, pendingMap, hasMoniteur) {
         <div class="fiche-status done fiche-status-auto">
           <div class="fiche-status-ico">${icon("check", { size: 18 })}</div>
           <div class="fiche-status-body">
-            <div class="fiche-status-title">Compétence acquise <span class="fiche-auto-pill">Auto-validée</span></div>
-            <div class="fiche-status-sub">${esc(`Tu as validé cette compétence toi-même${scoreTxt}, après avoir réussi le quiz de validation.`)}</div>
+            <div class="fiche-status-title">Compétence acquise <span class="fiche-auto-pill">Certifiée par toi</span></div>
+            <div class="fiche-status-sub">${esc(`Tu as certifié cette compétence toi-même${scoreTxt}, après avoir réussi le quiz de validation.`)}</div>
           </div>
         </div>${recapBtn}`;
     }
@@ -2643,7 +2641,7 @@ function openFiche(root, compId, ws, validatedMap, pendingMap, hasMoniteur) {
           <div class="fiche-status-ico">${icon("zap", { size: 18 })}</div>
           <div class="fiche-status-body">
             <div class="fiche-status-title">Prochaine à travailler</div>
-            <div class="fiche-status-sub">${hasMoniteur ? "Entraîne-toi en séance — ton moniteur la validera quand tu es prêt(e)." : "Révise-la, puis valide-la toi-même avec le quiz."}</div>
+            <div class="fiche-status-sub">Travaille-la en leçon, puis certifie-la ici quand tu te sens prêt·e.</div>
           </div>
         </div>${reviseBtn}${selfValidateBtn}`;
     }
