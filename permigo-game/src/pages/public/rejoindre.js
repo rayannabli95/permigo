@@ -22,6 +22,7 @@ import { getCurUser } from "@/auth/cur-user.js";
 import { icon } from "@/utils/icons.js";
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
+import { getLang, applyLang } from "@/utils/lang.js";
 
 const STYLE = `<style>
   /* DA « Arène 3D » (nuit-violet + plastique 3D) — cohérence avec le login */
@@ -227,6 +228,21 @@ export async function mount(root) {
         <p class="sg-sub">${solo ? "2 minutes, et tu entres dans l'app. Si tu as pris un Pass, utilise le même email que ton paiement." : "Entre le code que ton moniteur t'a donné, puis crée ton compte."}</p>
         <div style="text-align:center"><span class="sg-role-badge">Élève</span></div>
         ${connectedBanner}
+
+        <style>
+          .sg-lang{display:flex;gap:6px;margin-top:2px}
+          .sg-lang-b{flex:1;padding:11px 4px;border-radius:12px;border:1.5px solid var(--bo);background:var(--su);color:var(--mu);font:700 14px/1.1 inherit;cursor:pointer;transition:border-color .15s,color .15s,box-shadow .15s}
+          .sg-lang-b.active{border-color:var(--a);color:var(--a);box-shadow:inset 0 0 0 1px var(--a)}
+        </style>
+        <div class="sg-row">
+          <label class="sg-label">Langue · Language · <span lang="ar" dir="rtl">اللغة</span></label>
+          <div class="sg-lang" id="sg-lang" role="group" aria-label="Choisir ta langue / Choose your language">
+            <button type="button" class="sg-lang-b${getLang() === "fr" ? " active" : ""}" data-lang="fr">Français</button>
+            <button type="button" class="sg-lang-b${getLang() === "en" ? " active" : ""}" data-lang="en">English</button>
+            <button type="button" class="sg-lang-b${getLang() === "ar" ? " active" : ""}" data-lang="ar" lang="ar">العربية</button>
+          </div>
+          <div class="sg-help">Les questions du quiz s'affichent dans ta langue, le français gardé dessous.</div>
+        </div>
 
         <div class="sg-row" ${solo ? 'style="display:none"' : ""}>
           <label class="sg-label" for="sg-code">Code moniteur</label>
@@ -473,6 +489,21 @@ export async function mount(root) {
   // Si un code est pré-rempli via l'URL, on le vérifie immédiatement
   if (prefillCode) checkCode();
 
+  // Sélecteur de langue — applyLang = miroir localStorage UNIQUEMENT (aucun
+  // effet global : pas d'haptique, pas de re-render, pas de vol de focus, la
+  // saisie du formulaire n'est jamais perturbée). Persisté en base au submit.
+  let chosenLang = getLang();
+  root.querySelector("#sg-lang")?.addEventListener("click", (e) => {
+    const b = e.target.closest(".sg-lang-b");
+    if (!b) return;
+    chosenLang = b.dataset.lang;
+    root
+      .querySelectorAll("#sg-lang .sg-lang-b")
+      .forEach((x) => x.classList.toggle("active", x === b));
+    applyLang(chosenLang);
+    track("signup.language_picked", { language: chosenLang });
+  });
+
   submitBtn.addEventListener("click", async () => {
     submitBtn.disabled = true;
     submitBtn.textContent = "Création…";
@@ -556,6 +587,18 @@ export async function mount(root) {
         from: solo ? "pass_solo" : "join_code",
         minor: !!consentToken,
       });
+
+      // Persiste la langue choisie sur le profil (le miroir localStorage est
+      // déjà posé au clic, donc la préférence tient même si l'RPC échoue).
+      if (chosenLang !== "fr") {
+        try {
+          await sb.rpc("set_my_preferences", {
+            p_data: { language: chosenLang },
+          });
+        } catch (_) {
+          /* localStorage tient déjà la préférence */
+        }
+      }
 
       // Mesure « solo sans achat » : cet email a-t-il acheté le Pass ?
       // (get_my_pass_status, migration solo_hardening). Aucun blocage —
