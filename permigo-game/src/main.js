@@ -13,7 +13,7 @@ import { toast } from "@/components/common/toast.js";
 import { mountHeader } from "@/components/common/header-top.js";
 import { mountBottomNav } from "@/components/common/nav-bottom.js";
 import { armPopupPhase, notifyPopupSettled } from "@/utils/intro-overlays.js";
-import { initThemeEarly, syncFromPrefs } from "@/utils/theme.js";
+import { initThemeEarly, syncFromPrefs, applyTheme } from "@/utils/theme.js";
 import { initAccentEarly, applyAccent } from "@/utils/accent.js";
 import { initGameState, initEquippedTheme } from "@/utils/game-state.js";
 import { mountCookieBanner } from "@/components/common/cookie-banner.js";
@@ -41,6 +41,11 @@ async function boot() {
     if (me?.role === "eleve") {
       try {
         if (!localStorage.getItem("permigo-accent")) applyAccent("violet");
+        // Défaut CLAIR pour l'élève (DA « clair premium », décision Rayan
+        // 16/07). On ne force QUE le tout premier affichage (aucune préférence
+        // encore posée) — dès qu'il choisit sombre dans Réglages, ça prime.
+        // Persiste 'light' sinon syncFromPrefs repasserait en 'auto' → système.
+        if (!localStorage.getItem("permigo_theme")) applyTheme("light");
       } catch {
         /* localStorage indispo → tant pis, on garde le défaut global */
       }
