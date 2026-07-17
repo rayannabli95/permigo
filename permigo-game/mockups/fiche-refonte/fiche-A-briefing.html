@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fiche A — Briefing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Plus+Jakarta+Sans:wght@700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html {
+    background:#08070f;
+    font-family:'Inter',sans-serif;
+  }
+  body {
+    width:390px;
+    margin:0 auto;
+    min-height:844px;
+    position:relative;
+    background:
+      radial-gradient(120% 60% at 50% -8%, rgba(240,169,63,0.16), rgba(240,169,63,0) 55%),
+      radial-gradient(130% 80% at 85% 12%, rgba(122,86,214,0.32), rgba(122,86,214,0) 60%),
+      linear-gradient(180deg, #181241 0%, #0f0d24 52%, #0b0a1c 100%);
+    color:#e8e4f6;
+    overflow-x:hidden;
+    padding-bottom:40px;
+  }
+
+  /* ---------- HERO ---------- */
+  .hero { padding:16px 18px 18px; position:relative; }
+  .topbar { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+  .back {
+    width:42px; height:42px; border-radius:13px;
+    background:linear-gradient(180deg,#2a2154,#1c1640);
+    border:1px solid rgba(178,150,255,0.30);
+    border-top-color:rgba(200,180,255,0.5);
+    box-shadow:0 3px 0 rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08);
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0; cursor:pointer;
+  }
+  .back svg { width:18px; height:18px; }
+  .tag {
+    display:inline-flex; align-items:center; gap:7px;
+    padding:6px 12px 6px 8px; border-radius:20px;
+    background:linear-gradient(180deg,rgba(240,169,63,0.22),rgba(180,106,16,0.14));
+    border:1px solid rgba(240,169,63,0.45);
+    box-shadow:inset 0 1px 0 rgba(255,233,176,0.25);
+  }
+  .tag .dot {
+    width:20px; height:20px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #ffe9b0, #f0a93f 55%, #b46a10);
+    box-shadow:inset 0 -2px 3px rgba(120,60,0,0.5), inset 0 2px 2px rgba(255,255,255,0.6), 0 1px 2px rgba(0,0,0,0.4);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Baloo 2'; font-weight:800; font-size:9px; color:#7a3d00;
+    flex-shrink:0;
+  }
+  .tag .lbl {
+    font-family:'Plus Jakarta Sans'; font-weight:800; font-size:11px; letter-spacing:1.2px;
+    background:linear-gradient(180deg,#ffe9b0,#f0a93f);
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+  }
+
+  h1 {
+    font-family:'Baloo 2'; font-weight:800; font-size:27px; line-height:1.08;
+    margin:14px 0 4px;
+    background:linear-gradient(180deg,#fff6df 0%,#ffe9b0 40%,#f0a93f 100%);
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+    filter:drop-shadow(0 2px 0 rgba(120,60,0,0.35));
+  }
+  .world { font-size:12px; color:#b296ff; font-weight:600; margin-bottom:16px; }
+
+  /* progress pips */
+  .prog { display:flex; align-items:center; gap:9px; }
+  .pips { display:flex; gap:6px; flex:1; }
+  .pip {
+    height:9px; flex:1; border-radius:6px;
+    background:rgba(178,150,255,0.16);
+    box-shadow:inset 0 1px 2px rgba(0,0,0,0.4);
+    position:relative; overflow:hidden;
+  }
+  .pip.done {
+    background:linear-gradient(180deg,#ffe9b0,#f0a93f 60%,#b46a10);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.55), 0 0 0 1px rgba(180,106,16,0.5);
+  }
+  .prog .count {
+    font-family:'Plus Jakarta Sans'; font-weight:800; font-size:12px;
+    color:#ffe9b0; white-space:nowrap;
+  }
+
+  /* ---------- DEBRIEF CARD (final state) ---------- */
+  .stage { padding:4px 18px 0; }
+  .card {
+    border-radius:24px; position:relative;
+    background:
+      linear-gradient(180deg, rgba(52,40,98,0.95), rgba(28,22,64,0.96));
+    border:1.5px solid rgba(178,150,255,0.38);
+    border-top-color:rgba(210,190,255,0.6);
+    box-shadow:
+      0 18px 40px -12px rgba(0,0,0,0.7),
+      inset 0 1px 0 rgba(255,255,255,0.10);
+    padding:22px 20px 20px;
+    overflow:hidden;
+  }
+  .card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:70px;
+    background:radial-gradient(120% 100% at 50% 0%, rgba(240,169,63,0.14), rgba(240,169,63,0) 70%);
+    pointer-events:none;
+  }
+
+  /* debrief header: trophy badge */
+  .dhead { display:flex; align-items:center; gap:14px; margin-bottom:20px; }
+  .medal {
+    width:58px; height:58px; border-radius:50%; flex-shrink:0;
+    background:radial-gradient(circle at 34% 28%, #fff6df, #ffe9b0 30%, #f0a93f 62%, #b46a10 100%);
+    box-shadow:
+      inset 0 -4px 6px rgba(120,60,0,0.55),
+      inset 0 3px 4px rgba(255,255,255,0.75),
+      0 4px 10px rgba(0,0,0,0.45),
+      0 0 0 4px rgba(240,169,63,0.18);
+    display:flex; align-items:center; justify-content:center;
+    position:relative;
+  }
+  .medal svg { width:30px; height:30px; }
+  .dhead .txt .k {
+    font-family:'Baloo 2'; font-weight:800; font-size:20px; line-height:1;
+    color:#fff6df; margin-bottom:4px;
+  }
+  .dhead .txt .s { font-size:12.5px; color:#cabfef; line-height:1.3; }
+
+  .sectlbl {
+    font-family:'Plus Jakarta Sans'; font-weight:800; font-size:11px; letter-spacing:1.4px;
+    color:#b296ff; text-transform:uppercase; margin-bottom:12px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .sectlbl::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,rgba(178,150,255,0.3),rgba(178,150,255,0)); }
+
+  /* 3 notes as a calm unified stack */
+  .notes { display:flex; flex-direction:column; gap:10px; }
+  .note {
+    display:flex; gap:12px; align-items:flex-start;
+    padding:12px 13px 12px 12px; border-radius:14px;
+    background:rgba(14,11,32,0.55);
+    border:1px solid rgba(178,150,255,0.14);
+    position:relative;
+  }
+  .note .bar { width:4px; align-self:stretch; border-radius:4px; flex-shrink:0; }
+  .note.err .bar { background:linear-gradient(180deg,#ff9a5a,#e8622a); }
+  .note.why .bar { background:linear-gradient(180deg,#c3a6ff,#8a63e0); }
+  .note.auto .bar{ background:linear-gradient(180deg,#7fc4ff,#3d84d8); }
+  .note .ico {
+    width:26px; height:26px; border-radius:8px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(255,255,255,0.05);
+  }
+  .note .ico svg { width:15px; height:15px; }
+  .note .body { flex:1; }
+  .note .nt {
+    font-family:'Plus Jakarta Sans'; font-weight:800; font-size:11.5px;
+    letter-spacing:.3px; margin-bottom:3px;
+  }
+  .note.err .nt { color:#ffb98f; }
+  .note.why .nt { color:#c9b6ff; }
+  .note.auto .nt{ color:#a5d3ff; }
+  .note .nb { font-size:12.5px; line-height:1.42; color:#ded8f0; }
+  .note .nb b { color:#fff; font-weight:700; }
+
+  /* ---------- CTA ---------- */
+  .cta-wrap { padding:20px 18px 0; }
+  .cta {
+    display:flex; align-items:center; justify-content:center; gap:11px;
+    width:100%; height:62px; border:none; cursor:pointer;
+    border-radius:19px;
+    font-family:'Baloo 2'; font-weight:800; font-size:20px; letter-spacing:.3px;
+    color:#5a2c00;
+    background:linear-gradient(180deg,#ffe9b0 0%,#f7c25f 45%,#f0a93f 100%);
+    box-shadow:
+      0 6px 0 #b46a10,
+      0 14px 22px -6px rgba(240,169,63,0.5),
+      inset 0 2px 0 rgba(255,255,255,0.7),
+      inset 0 -3px 4px rgba(180,106,16,0.4);
+    text-shadow:0 1px 0 rgba(255,255,255,0.35);
+  }
+  .cta svg { width:24px; height:24px; }
+  .cta:active { transform:translateY(4px); box-shadow:0 2px 0 #b46a10, inset 0 2px 0 rgba(255,255,255,0.6); }
+
+  .cta-sub {
+    display:flex; align-items:center; justify-content:center; gap:9px;
+    width:100%; height:50px; margin-top:12px; cursor:pointer;
+    border-radius:16px;
+    background:linear-gradient(180deg,rgba(52,40,98,0.7),rgba(28,22,64,0.8));
+    border:1px solid rgba(178,150,255,0.28);
+    box-shadow:0 4px 0 rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08);
+    font-family:'Plus Jakarta Sans'; font-weight:800; font-size:14px;
+    color:#cabfef;
+  }
+  .cta-sub svg { width:17px; height:17px; }
+
+  .source {
+    text-align:center; margin-top:16px; font-size:11px; color:#8f7fc0;
+    display:flex; align-items:center; justify-content:center; gap:6px;
+  }
+  .source svg { width:12px; height:12px; opacity:.8; }
+</style>
+</head>
+<body>
+
+  <div class="hero">
+    <div class="topbar">
+      <div class="back" aria-label="Retour">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="#c8b8ff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="tag">
+        <span class="dot">C1a</span>
+        <span class="lbl">MANIEMENT · MONDE 1</span>
+      </div>
+    </div>
+
+    <h1>Prendre en main<br>le poste de conduite</h1>
+    <div class="world">6 gestes maîtrisés · le test est débloqué</div>
+
+    <div class="prog">
+      <div class="pips">
+        <div class="pip done"></div><div class="pip done"></div><div class="pip done"></div>
+        <div class="pip done"></div><div class="pip done"></div><div class="pip done"></div>
+      </div>
+      <span class="count">6 / 6</span>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="card">
+      <div class="dhead">
+        <div class="medal">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M6 3h12v3a6 6 0 01-12 0V3z" fill="#7a3d00"/>
+            <path d="M5 4H3v2a3 3 0 003 3M19 4h2v2a3 3 0 01-3 3" stroke="#7a3d00" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M10 12h4v4h-4z" fill="#7a3d00"/>
+            <path d="M8 20h8M12 16v4" stroke="#7a3d00" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="txt">
+          <div class="k">Débrief express</div>
+          <div class="s">3 réflexes à garder avant de tester</div>
+        </div>
+      </div>
+
+      <div class="sectlbl">À retenir</div>
+
+      <div class="notes">
+        <div class="note err">
+          <div class="bar"></div>
+          <div class="ico">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l9 16H3L12 3z" fill="#e8622a"/><path d="M12 9v5M12 16.5v.5" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <div class="body">
+            <div class="nt">L'ERREUR À ÉVITER</div>
+            <div class="nb">Confondre les deux commodos et déclencher les essuie-glaces au lieu du clignotant. <b>Mémo : clignotant à gauche, balais à droite.</b></div>
+          </div>
+        </div>
+
+        <div class="note why">
+          <div class="bar"></div>
+          <div class="ico">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 3a6 6 0 00-3 11v2h6v-2a6 6 0 00-3-11z" fill="#8a63e0"/><path d="M9 19h6M10 21h4" stroke="#c3a6ff" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </div>
+          <div class="body">
+            <div class="nt">POURQUOI ÇA COMPTE</div>
+            <div class="nb">Tu dois pouvoir actionner un clignotant ou un essuie-glace <b>sans quitter la route des yeux.</b></div>
+          </div>
+        </div>
+
+        <div class="note auto">
+          <div class="bar"></div>
+          <div class="ico">
+            <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="5" fill="#3d84d8"/><path d="M12 8v8M9 11l3-3 3 3" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="body">
+            <div class="nt">EN BOÎTE AUTO</div>
+            <div class="nb">Pas de pédale d'embrayage : au pied, <b>frein (gauche) + accélérateur (droite).</b> Au lieu du levier, un sélecteur <b>P / R / N / D.</b></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cta-wrap">
+    <button class="cta">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M7 5l12 7-12 7V5z" fill="#5a2c00"/></svg>
+      Teste-toi
+    </button>
+    <button class="cta-sub">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h10M4 12h10M4 17h6M17 8v9m0 0l3-3m-3 3l-3-3" stroke="#cabfef" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Remets dans l'ordre
+    </button>
+    <div class="source">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.3 7.2 16.7l.9-5.4L4.2 7.5l5.4-.8L12 2z" fill="#8f7fc0"/></svg>
+      Vu chez de vrais moniteurs : Las de la route
+    </div>
+  </div>
+
+</body>
+</html>

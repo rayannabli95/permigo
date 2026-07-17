@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fiche C1a — Carte de Mission</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Plus+Jakarta+Sans:wght@700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --gold-1:#ffe9b0; --gold-2:#f7c765; --gold-3:#f0a93f; --gold-4:#b46a10;
+    --gold-deep:#7d4708;
+    --vio-lt:#cabfef; --vio:#b296ff; --body:#e8e4f6;
+    --card:#20194d; --card-edge:#3a2f78;
+    --night-1:#181241; --night-2:#0f0d24; --night-3:#0b0a1c;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  html{
+    background:#07060f;
+    background-image:
+      radial-gradient(120% 55% at 50% -8%, rgba(255,214,120,.16), rgba(255,214,120,0) 55%),
+      radial-gradient(120% 70% at 85% 5%, rgba(140,90,255,.28), rgba(140,90,255,0) 60%),
+      linear-gradient(180deg, var(--night-1) 0%, var(--night-2) 52%, var(--night-3) 100%);
+    background-attachment:fixed;
+    min-height:100%;
+  }
+  body{
+    width:390px; margin:0 auto; min-height:844px;
+    font-family:'Inter',sans-serif; color:var(--body);
+    position:relative; padding-bottom:112px;
+    background-image:
+      radial-gradient(120% 45% at 50% -6%, rgba(255,214,120,.14), rgba(255,214,120,0) 55%),
+      radial-gradient(130% 60% at 88% 2%, rgba(150,100,255,.26), rgba(150,100,255,0) 58%),
+      linear-gradient(180deg, var(--night-1) 0%, var(--night-2) 55%, var(--night-3) 100%);
+    overflow-x:hidden;
+  }
+
+  /* ---------- TOP BAR ---------- */
+  .top{display:flex; align-items:center; gap:12px; padding:16px 16px 4px;}
+  .back{
+    width:44px; height:44px; border-radius:14px; flex:none;
+    background:linear-gradient(180deg,#2b2360,#1a1440);
+    border:1px solid var(--card-edge);
+    border-top-color:rgba(255,255,255,.18);
+    box-shadow:0 4px 0 #100c2c, 0 6px 14px rgba(0,0,0,.35);
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .back svg{width:20px; height:20px; stroke:var(--vio-lt);}
+  .top-track{flex:1; height:9px; border-radius:99px; background:rgba(0,0,0,.35); border:1px solid rgba(255,255,255,.05); overflow:hidden;}
+  .top-fill{height:100%; width:0%; border-radius:99px; background:linear-gradient(90deg,var(--gold-3),var(--gold-2)); box-shadow:0 0 8px rgba(240,169,63,.5);}
+  .top-count{
+    font-family:'Plus Jakarta Sans'; font-weight:800; font-size:13px; color:var(--gold-1);
+    letter-spacing:.5px; flex:none;
+  }
+
+  /* ---------- HERO : CARTE DE MISSION ---------- */
+  .hero{
+    margin:14px 16px 0; padding:18px 18px 20px; border-radius:24px;
+    position:relative; overflow:hidden;
+    background:
+      radial-gradient(140% 90% at 80% -10%, rgba(255,214,120,.14), rgba(255,214,120,0) 55%),
+      linear-gradient(180deg,#2a2260 0%, #201a4d 60%, #1a1540 100%);
+    border:1px solid var(--card-edge);
+    border-top-color:rgba(255,255,255,.2);
+    box-shadow:0 10px 0 #120d33, 0 18px 34px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.1);
+  }
+  .hero-top{display:flex; align-items:center; gap:14px;}
+  .medal{
+    width:64px; height:64px; border-radius:50%; flex:none; position:relative;
+    background:radial-gradient(circle at 34% 28%, var(--gold-1) 0%, var(--gold-2) 36%, var(--gold-3) 66%, var(--gold-4) 100%);
+    box-shadow:
+      inset 0 3px 4px rgba(255,255,255,.7),
+      inset 0 -5px 7px rgba(125,71,8,.75),
+      0 5px 0 var(--gold-deep),
+      0 9px 16px rgba(0,0,0,.45);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .medal::before{
+    content:""; position:absolute; inset:6px; border-radius:50%;
+    border:1.5px dashed rgba(125,71,8,.45);
+  }
+  .medal span{
+    font-family:'Baloo 2'; font-weight:800; font-size:24px; color:#5c3405;
+    text-shadow:0 1px 0 rgba(255,255,255,.5); line-height:1; z-index:1;
+  }
+  .hero-tags{flex:1; display:flex; flex-direction:column; gap:8px; align-items:flex-start;}
+  .tag{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:6px 11px; border-radius:99px;
+    background:rgba(178,150,255,.14); border:1px solid rgba(178,150,255,.3);
+    font-family:'Plus Jakarta Sans'; font-weight:800; font-size:11px; letter-spacing:1.2px;
+    color:var(--vio-lt); text-transform:uppercase;
+  }
+  .tag .dot{width:6px; height:6px; border-radius:50%; background:var(--gold-2); box-shadow:0 0 6px var(--gold-2);}
+  .tag-code{
+    background:linear-gradient(180deg,rgba(255,233,176,.16),rgba(240,169,63,.1));
+    border-color:rgba(247,199,101,.4); color:var(--gold-1);
+  }
+
+  .hero-title{
+    font-family:'Baloo 2'; font-weight:800; font-size:29px; line-height:1.06;
+    margin-top:16px; letter-spacing:-.2px;
+    background:linear-gradient(180deg,#fff3d4 0%, var(--gold-2) 52%, var(--gold-3) 100%);
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+    filter:drop-shadow(0 2px 0 rgba(80,45,5,.5));
+  }
+  .hero-obj{
+    margin-top:14px; display:flex; align-items:center; gap:10px;
+  }
+  .hero-obj .oi{
+    width:26px; height:26px; border-radius:8px; flex:none;
+    background:linear-gradient(180deg,#332a6e,#241c56); border:1px solid var(--card-edge);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .hero-obj .oi svg{width:15px; height:15px; stroke:var(--gold-2);}
+  .hero-obj p{font-size:13.5px; font-weight:600; color:var(--body);}
+  .hero-obj b{color:var(--gold-1); font-weight:700;}
+  .hero-bar{
+    margin-top:13px; height:12px; border-radius:99px; position:relative;
+    background:rgba(0,0,0,.35); border:1px solid rgba(0,0,0,.4);
+    box-shadow:inset 0 2px 4px rgba(0,0,0,.5);
+  }
+  .hero-bar i{
+    position:absolute; left:2px; top:2px; bottom:2px; width:0%; border-radius:99px;
+    background:linear-gradient(90deg,var(--gold-4),var(--gold-3) 60%, var(--gold-2));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.5), 0 0 10px rgba(240,169,63,.4);
+  }
+  .hero-steps{
+    position:absolute; right:12px; top:-19px;
+    font-family:'Plus Jakarta Sans'; font-weight:800; font-size:11px; color:var(--vio-lt);
+  }
+  .hero-steps b{color:var(--gold-1);}
+
+  /* ---------- SECTION BANNER ---------- */
+  .banner{display:flex; align-items:center; gap:10px; margin:26px 18px 12px;}
+  .banner h2{
+    font-family:'Baloo 2'; font-weight:800; font-size:15px; letter-spacing:1.5px;
+    text-transform:uppercase; white-space:nowrap;
+    background:linear-gradient(180deg,var(--gold-1),var(--gold-3));
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+  }
+  .banner .bi{
+    width:22px; height:22px; flex:none; display:flex; align-items:center; justify-content:center;
+  }
+  .banner .bi svg{width:20px; height:20px;}
+  .banner .rule{flex:1; height:2px; border-radius:2px; background:linear-gradient(90deg,rgba(247,199,101,.55),rgba(247,199,101,0));}
+
+  /* ---------- LA MÉTHODE ---------- */
+  .method{
+    margin:0 16px; border-radius:22px; overflow:hidden;
+    background:linear-gradient(180deg,#221b52,#1b1544);
+    border:1px solid var(--card-edge); border-top-color:rgba(255,255,255,.15);
+    box-shadow:0 8px 0 #120d33, 0 14px 26px rgba(0,0,0,.4);
+  }
+  .step{display:flex; gap:14px; padding:15px 16px; position:relative;}
+  .step + .step::before{
+    content:""; position:absolute; top:0; left:56px; right:16px; height:1px;
+    background:linear-gradient(90deg,rgba(178,150,255,.22),rgba(178,150,255,.05));
+  }
+  .num{
+    width:34px; height:34px; flex:none; border-radius:10px;
+    background:radial-gradient(circle at 35% 25%, var(--gold-1), var(--gold-2) 45%, var(--gold-3) 80%, var(--gold-4));
+    box-shadow:inset 0 2px 2px rgba(255,255,255,.6), inset 0 -3px 4px rgba(125,71,8,.6), 0 3px 0 var(--gold-deep);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Baloo 2'; font-weight:800; font-size:17px; color:#5c3405;
+    text-shadow:0 1px 0 rgba(255,255,255,.4);
+  }
+  .step p{font-size:13.5px; line-height:1.42; color:var(--body); padding-top:2px;}
+  .step p b{color:var(--gold-1); font-weight:700;}
+  .step p .lr{color:var(--vio-lt); font-weight:700;}
+
+  /* ---------- À RETENIR (onglets + carte) ---------- */
+  .segs{display:flex; gap:8px; margin:0 16px 0;}
+  .seg{
+    flex:1; padding:10px 6px; border-radius:14px 14px 0 0; cursor:pointer;
+    background:rgba(255,255,255,.03); border:1px solid transparent; border-bottom:none;
+    display:flex; flex-direction:column; align-items:center; gap:5px;
+    font-family:'Plus Jakarta Sans'; font-weight:800; font-size:11px; letter-spacing:.3px;
+    color:var(--vio); transition:.15s;
+  }
+  .seg .si{width:20px; height:20px; display:flex; align-items:center; justify-content:center;}
+  .seg .si svg{width:19px; height:19px;}
+  .seg.on{
+    background:linear-gradient(180deg,#251d59,#20194d);
+    border-color:var(--card-edge); border-bottom:none; color:var(--gold-1);
+    transform:translateY(-2px);
+  }
+  .seg.on::after{content:""; position:absolute;}
+  .retain-card{
+    margin:0 16px; padding:16px 17px 18px; border-radius:0 0 20px 20px; min-height:132px;
+    background:linear-gradient(180deg,#251d59,#1b1544);
+    border:1px solid var(--card-edge); border-top:none;
+    box-shadow:0 8px 0 #120d33, 0 14px 24px rgba(0,0,0,.4);
+    position:relative;
+  }
+  .rc-head{display:flex; align-items:center; gap:11px; margin-bottom:10px;}
+  .rc-ico{
+    width:40px; height:40px; flex:none; border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .rc-ico svg{width:26px; height:26px;}
+  .rc-ico.err{background:linear-gradient(180deg,#f79b3d,#d76a12); box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 3px 0 #7d4708;}
+  .rc-ico.why{background:linear-gradient(180deg,#a98cff,#7a58e8); box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 3px 0 #4a35a0;}
+  .rc-ico.box{background:linear-gradient(180deg,#5db8ff,#2d84e0); box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 3px 0 #175aa0;}
+  .rc-ttl{font-family:'Plus Jakarta Sans'; font-weight:800; font-size:14px; letter-spacing:.4px; text-transform:uppercase;}
+  .rc-ttl.err{color:#ffc98a;} .rc-ttl.why{color:#cabfef;} .rc-ttl.box{color:#a9d6ff;}
+  .rc-body{font-size:13.5px; line-height:1.5; color:var(--body);}
+  .rc-body b{color:#fff; font-weight:700;}
+  .rc-memo{
+    margin-top:10px; display:inline-flex; align-items:center; gap:8px;
+    padding:7px 12px; border-radius:10px;
+    background:rgba(255,201,138,.1); border:1px dashed rgba(255,201,138,.4);
+    font-size:12.5px; font-weight:700; color:#ffc98a;
+  }
+  .rc-pane{display:none;}
+  .rc-pane.on{display:block;}
+
+  /* ---------- SOURCE ---------- */
+  .source{
+    display:flex; align-items:center; gap:8px; margin:16px 20px 0;
+    font-size:11.5px; color:var(--vio); font-weight:600;
+  }
+  .source svg{width:14px; height:14px; stroke:var(--vio); flex:none;}
+
+  /* ---------- ACTION BAR ---------- */
+  .actionbar{
+    position:fixed; left:50%; transform:translateX(-50%); bottom:0; width:390px;
+    padding:14px 16px calc(16px + env(safe-area-inset-bottom));
+    display:flex; gap:11px; align-items:stretch;
+    background:linear-gradient(180deg, rgba(11,10,28,0) 0%, rgba(11,10,28,.85) 34%, #0b0a1c 100%);
+  }
+  .btn-ghost{
+    flex:none; width:120px; border-radius:16px; cursor:pointer;
+    background:linear-gradient(180deg,#2a2360,#1c1648);
+    border:1px solid var(--card-edge); border-top-color:rgba(255,255,255,.16);
+    box-shadow:0 4px 0 #120d33;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+    color:var(--vio-lt); font-family:'Plus Jakarta Sans'; font-weight:800; font-size:12.5px;
+  }
+  .btn-ghost svg{width:20px; height:20px; stroke:var(--vio-lt);}
+  .btn-gold{
+    flex:1; border-radius:16px; cursor:pointer; border:none; position:relative;
+    background:linear-gradient(180deg,var(--gold-1) 0%, var(--gold-2) 34%, var(--gold-3) 100%);
+    box-shadow:inset 0 2px 0 rgba(255,255,255,.7), inset 0 -3px 6px rgba(125,71,8,.5), 0 6px 0 var(--gold-4), 0 12px 20px rgba(240,169,63,.28);
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    color:#5c3405; font-family:'Baloo 2'; font-weight:800; font-size:20px;
+    text-shadow:0 1px 0 rgba(255,255,255,.5); padding:16px 0;
+  }
+  .btn-gold svg{width:22px; height:22px; fill:#5c3405;}
+  .btn-gold .lock{
+    position:absolute; top:-9px; right:14px;
+    background:#1c1648; border:1px solid var(--card-edge); border-radius:99px;
+    padding:3px 9px; font-family:'Plus Jakarta Sans'; font-weight:800; font-size:10px;
+    color:var(--gold-1); display:flex; align-items:center; gap:4px; text-shadow:none;
+  }
+  .btn-gold .lock svg{width:11px; height:11px; fill:none; stroke:var(--gold-1);}
+</style>
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <div class="top">
+    <div class="back" aria-label="Retour">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </div>
+    <div class="top-track"><div class="top-fill" style="width:0%"></div></div>
+    <div class="top-count">0 / 6</div>
+  </div>
+
+  <!-- HERO : CARTE DE MISSION -->
+  <div class="hero">
+    <div class="hero-top">
+      <div class="medal"><span>C1</span></div>
+      <div class="hero-tags">
+        <span class="tag tag-code"><span class="dot"></span>Fiche C1a</span>
+        <span class="tag">Maniement · Monde 1</span>
+      </div>
+    </div>
+    <h1 class="hero-title">Prendre en main<br>le poste de conduite</h1>
+    <div class="hero-obj">
+      <span class="oi"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg></span>
+      <p><b>6 gestes</b> à repérer → débloque le test</p>
+    </div>
+    <div style="position:relative">
+      <div class="hero-steps"><b>0</b> / 6</div>
+      <div class="hero-bar"><i style="width:4%"></i></div>
+    </div>
+  </div>
+
+  <!-- BANNER MÉTHODE -->
+  <div class="banner">
+    <span class="bi">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#f7c765" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4" cy="6" r="1.4" fill="#f7c765" stroke="none"/><circle cx="4" cy="12" r="1.4" fill="#f7c765" stroke="none"/><circle cx="4" cy="18" r="1.4" fill="#f7c765" stroke="none"/></svg>
+    </span>
+    <h2>La méthode</h2>
+    <span class="rule"></span>
+  </div>
+
+  <!-- LA MÉTHODE -->
+  <div class="method">
+    <div class="step">
+      <div class="num">1</div>
+      <p>Fais le <b>tour rapide</b> de la voiture : rien sous les roues, pneus pas à plat, feux et plaques propres.</p>
+    </div>
+    <div class="step">
+      <div class="num">2</div>
+      <p>Installe-toi, ferme la portière, vérifie qu'elle est <b>bien claquée</b>.</p>
+    </div>
+    <div class="step">
+      <div class="num">3</div>
+      <p>Repère les commandes au tableau de bord <b>sans démarrer</b> : compteur, jauge d'essence, témoins.</p>
+    </div>
+    <div class="step">
+      <div class="num">4</div>
+      <p>Les deux commodos derrière le volant : <span class="lr">GAUCHE</span> = clignotants (feux, appel de phare) ; <span class="lr">DROITE</span> = essuie-glaces (et lave-glace).</p>
+    </div>
+    <div class="step">
+      <div class="num">5</div>
+      <p>Les commandes au pied : à gauche l'<b>embrayage</b>, au milieu le <b>frein</b>, à droite l'<b>accélérateur</b>.</p>
+    </div>
+    <div class="step">
+      <div class="num">6</div>
+      <p>Mets le contact (sans démarrer) : les témoins s'allument puis s'éteignent. S'il en reste un allumé (huile, batterie, frein), <b>signale-le</b>.</p>
+    </div>
+  </div>
+
+  <!-- BANNER À RETENIR -->
+  <div class="banner">
+    <span class="bi">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#f7c765" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.4 5 5.6.7-4 4 1 5.6L12 20l-5 2.3 1-5.6-4-4 5.6-.7z"/></svg>
+    </span>
+    <h2>À retenir</h2>
+    <span class="rule"></span>
+  </div>
+
+  <!-- ONGLETS -->
+  <div class="segs">
+    <div class="seg on" data-pane="err">
+      <span class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9.5 17H2.5z"/><path d="M12 10v4"/><circle cx="12" cy="17.2" r=".6" fill="currentColor" stroke="none"/></svg></span>
+      Erreur
+    </div>
+    <div class="seg" data-pane="why">
+      <span class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="7.6" r=".7" fill="currentColor" stroke="none"/></svg></span>
+      Pourquoi
+    </div>
+    <div class="seg" data-pane="box">
+      <span class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M9.2 9.4a2.8 2.8 0 1 1 3.4 4c-.6.4-.9.8-.9 1.6"/><circle cx="11.7" cy="17.6" r=".6" fill="currentColor" stroke="none"/></svg></span>
+      Boîte auto
+    </div>
+  </div>
+
+  <!-- CARTE À RETENIR -->
+  <div class="retain-card">
+    <!-- ERREUR -->
+    <div class="rc-pane on" id="pane-err">
+      <div class="rc-head">
+        <div class="rc-ico err"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l8.5 15H3.5z"/><path d="M12 10v4"/><circle cx="12" cy="16.6" r=".7" fill="#fff" stroke="none"/></svg></div>
+        <div class="rc-ttl err">L'erreur à éviter</div>
+      </div>
+      <p class="rc-body">Confondre les deux commodos et déclencher les <b>essuie-glaces</b> au lieu du clignotant.</p>
+      <div class="rc-memo">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#ffc98a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.6.6 1 1.2 1 2h6c0-.8.4-1.4 1-2A6 6 0 0 0 12 3z"/></svg>
+        Clignotant à gauche, balais à droite.
+      </div>
+    </div>
+    <!-- POURQUOI -->
+    <div class="rc-pane" id="pane-why">
+      <div class="rc-head">
+        <div class="rc-ico why"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="7.6" r=".8" fill="#fff" stroke="none"/></svg></div>
+        <div class="rc-ttl why">Pourquoi ça compte</div>
+      </div>
+      <p class="rc-body">Tu dois pouvoir actionner un clignotant ou un essuie-glace <b>sans quitter la route des yeux</b>.</p>
+    </div>
+    <!-- BOÎTE AUTO -->
+    <div class="rc-pane" id="pane-box">
+      <div class="rc-head">
+        <div class="rc-ico box"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M9.2 9.4a2.8 2.8 0 1 1 3.4 4c-.6.4-.9.8-.9 1.6"/><circle cx="11.7" cy="17.6" r=".7" fill="#fff" stroke="none"/></svg></div>
+        <div class="rc-ttl box">En boîte auto</div>
+      </div>
+      <p class="rc-body">Pas de pédale d'embrayage : au pied, <b>frein (gauche)</b> + <b>accélérateur (droite)</b>. Au lieu du levier, un sélecteur <b>P / R / N / D</b>.</p>
+    </div>
+  </div>
+
+  <!-- SOURCE -->
+  <div class="source">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg>
+    Vu chez de vrais moniteurs · Las de la route
+  </div>
+
+  <!-- ACTION BAR -->
+  <div class="actionbar">
+    <button class="btn-ghost">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
+      Remets<br>dans l'ordre
+    </button>
+    <button class="btn-gold">
+      <span class="lock"><svg viewBox="0 0 24 24" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Fais les 6 gestes</span>
+      <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      Teste-toi
+    </button>
+  </div>
+
+  <script>
+    document.querySelectorAll('.seg').forEach(seg=>{
+      seg.addEventListener('click',()=>{
+        document.querySelectorAll('.seg').forEach(s=>s.classList.remove('on'));
+        document.querySelectorAll('.rc-pane').forEach(p=>p.classList.remove('on'));
+        seg.classList.add('on');
+        document.getElementById('pane-'+seg.dataset.pane).classList.add('on');
+      });
+    });
+  </script>
+</body>
+</html>
