@@ -154,7 +154,10 @@ export async function mount(root, initialTab) {
     theorie: { ligue: "revision", scope: "ecole" },
   };
   const state = {
-    ...(DEEP[initialTab] || { ligue: "conduite", scope: "ecole" }),
+    // Ligue UNIQUE (pivot 17/07) : sans deep-link, on arrive sur LA ligue —
+    // la saison hebdo. Les deep-links Conduite (#/classement/ecole|national)
+    // restent valides le temps de trancher le sort de l'onglet avec Rayan.
+    ...(DEEP[initialTab] || { ligue: "revision", scope: "ecole" }),
     solo,
   };
 
