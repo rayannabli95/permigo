@@ -30,6 +30,19 @@ export function richEsc(str) {
     );
 }
 
+// Rendu bilingue : traduction (langue de l'élève) au-dessus, français conservé
+// juste dessous (plus discret — l'examen se passe en français). En 'fr', ou si
+// la traduction manque, on rend le français seul (comportement d'origine).
+// Tout passe par richEsc()/esc() → XSS-safe pour toutes les langues.
+function biText(fr, tr, lang) {
+  if (lang === "fr" || tr == null || tr === "") return richEsc(fr);
+  const rtlAttr = lang === "ar" ? ' dir="rtl" lang="ar"' : "";
+  return (
+    `<span class="qz-tr"${rtlAttr}>${richEsc(tr)}</span>` +
+    `<span class="qz-fr" lang="fr" dir="ltr">${esc(fr)}</span>`
+  );
+}
+
 // Encouragements bonne réponse — variés, jamais 2× le même d'affilée
 const PRAISES = [
   "Dans le mille !",
@@ -132,12 +145,12 @@ export function swapVisualToReveal(container) {
 }
 
 // Corps de question complet : pips + énoncé + options A/B/C/D
-export function questionHTML({ q, idx, total }) {
+export function questionHTML({ q, idx, total, lang = "fr" }) {
   return `
     ${pipsHTML(idx, total)}
     <div class="qz-qhead">
       ${muteButtonHTML()}
-      <h3 class="qz-q">${richEsc(q.question)}</h3>
+      <h3 class="qz-q">${biText(q.question, q.question_tr, lang)}</h3>
     </div>
     ${visualSlotHTML(q.question)}
     <div class="qz-opts">
@@ -146,7 +159,7 @@ export function questionHTML({ q, idx, total }) {
           (opt, i) => `
         <button class="qz-opt" data-i="${i}" type="button">
           <span class="qz-key">${KEYS[i] || i + 1}</span>
-          <span class="qz-txt">${richEsc(opt)}</span>
+          <span class="qz-txt">${biText(opt, q.options_tr?.[i], lang)}</span>
         </button>`,
         )
         .join("")}
@@ -189,7 +202,7 @@ export function praiseHTML({ streak = 0 } = {}) {
 }
 
 // Bloc explication — coach bienveillant, jamais « faux ! »
-export function explHTML({ correct, explanation }) {
+export function explHTML({ correct, explanation, explanationTr, lang = "fr" }) {
   if (!explanation) return "";
   const head = correct
     ? `${icon("check-circle", { size: 14, strokeWidth: 2.5 })} Pourquoi c'est juste`
@@ -197,7 +210,7 @@ export function explHTML({ correct, explanation }) {
   return `
     <div class="qz-expl ${correct ? "ok" : "soft"}">
       <div class="qz-expl-h">${head}</div>
-      <div class="qz-expl-b">${richEsc(explanation)}</div>
+      <div class="qz-expl-b">${biText(explanation, explanationTr, lang)}</div>
     </div>`;
 }
 
@@ -235,7 +248,8 @@ export function setMascot(container, state) {
 
 // ─── Styles partagés ─────────────────────────────────────────────
 // Fond sombre « épreuve » commun aux deux contextes (overlay + page).
-export const QUIZ_STYLE = `<style>
+export const QUIZ_STYLE =
+  `<style>
   :root{
     --qz-out:cubic-bezier(.23,1,.32,1);--qz-spring:cubic-bezier(.34,1.56,.64,1);
     --qz-gold:#ffcb3d;--qz-gold2:#ff9b1e;--qz-gold-deep:#e07b00;
@@ -269,6 +283,14 @@ export const QUIZ_STYLE = `<style>
   .qz-mute:active{transform:scale(.92)}
   .qz-q{font:700 clamp(20px,5.4vw,25px)/1.34 'Baloo 2','Fredoka',sans-serif;color:#fff;margin:0 0 22px;letter-spacing:-.01em;max-width:32em;text-shadow:0 2px 0 rgba(0,0,0,.32),0 0 18px rgba(120,90,230,.35)}
   .qz-q strong{color:#0d0a26;font-weight:700;padding:1px 8px;border-radius:9px;background:linear-gradient(180deg,#ffe27a,#ffb02e);box-shadow:0 3px 0 var(--qz-gold-deep),inset 0 1px 0 rgba(255,255,255,.6);text-shadow:none;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+
+  /* Bilingue : traduction (langue élève) au-dessus, français gardé dessous.
+     L'app reste LTR ; seul le texte arabe (.qz-tr[dir=rtl]) passe en RTL. */
+  .qz-tr{display:block}
+  .qz-fr{display:block;margin-top:5px;font:500 .78em/1.4 'Inter',sans-serif;opacity:.6;letter-spacing:0;text-shadow:none}
+  .qz-q .qz-fr{color:#d7d2ff}
+  .qz-txt .qz-fr{color:#cbc6ee}
+  .qz-expl .qz-fr{opacity:.7}
 
   /* Options A/B/C/D — boutons « plastique » 3D */
   .qz-opts{display:flex;flex-direction:column;gap:13px}

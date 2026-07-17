@@ -21,6 +21,7 @@ import {
   renderTheoryGain,
 } from "@/components/eleve/theory-gain.js";
 import { wireQuestionSpeech, stopSpeaking } from "@/utils/speech.js";
+import { getLang } from "@/utils/lang.js";
 import { recordCompetenceAnswer } from "@/utils/weak-points.js";
 import {
   playCorrect,
@@ -48,10 +49,14 @@ export async function lancerQuiz({
   nbQuestions,
   onComplete,
 }) {
+  const lang = getLang();
   const { data: questions, error } = await sb
     .from("questions_competence")
     .select(
-      "id, competence_id, type, question, options, correct_index, explanation, difficulty",
+      "id, competence_id, type, question, options, correct_index, explanation, difficulty" +
+        (lang !== "fr"
+          ? ", question_translations(lang, question, options, explanation)"
+          : ""),
     )
     .eq("competence_id", competenceId)
     .eq("type", type)
@@ -80,6 +85,7 @@ export async function lancerQuiz({
   // l'index `correct_index` figé → toujours à la même place) + slice
   const pool = shuffle(questions)
     .slice(0, nbQuestions)
+    .map((q) => attachTranslation(q, lang))
     .map(withShuffledOptions);
   let idx = 0;
   let score = 0;
@@ -107,6 +113,7 @@ export async function lancerQuiz({
       q,
       idx,
       total: pool.length,
+      lang,
     });
 
     overlay.querySelectorAll(".qz-opt").forEach((btn) => {
@@ -153,7 +160,12 @@ export async function lancerQuiz({
     if (q.explanation) {
       zone.insertAdjacentHTML(
         "beforeend",
-        explHTML({ correct, explanation: q.explanation }),
+        explHTML({
+          correct,
+          explanation: q.explanation,
+          explanationTr: q.explanation_tr,
+          lang,
+        }),
       );
     }
 
@@ -247,12 +259,31 @@ function shuffle(a) {
 // Mélange les réponses d'une question et remappe `correct_index` vers sa
 // nouvelle position. Clone la question : le rendu (q.options) et le score
 // (q.correct_index) restent alignés sur le même objet.
+// Attache la traduction (langue élève) sur l'objet question, dans l'ORDRE
+// ORIGINAL des options — le mélange ci-dessous applique la même permutation
+// aux deux. fr / trad absente / mauvaise longueur → français seul (fallback).
+function attachTranslation(q, lang) {
+  if (lang === "fr") return q;
+  const tr = (q.question_translations || []).find((t) => t.lang === lang);
+  if (!tr) return q;
+  return {
+    ...q,
+    question_tr: tr.question,
+    options_tr: Array.isArray(tr.options) ? tr.options : null,
+    explanation_tr: tr.explanation,
+  };
+}
+
 function withShuffledOptions(q) {
   if (!Array.isArray(q.options) || q.options.length < 2) return q;
   const order = shuffle(q.options.map((_, i) => i));
+  const hasTr =
+    Array.isArray(q.options_tr) && q.options_tr.length === q.options.length;
   return {
     ...q,
     options: order.map((i) => q.options[i]),
+    // Même permutation que les options FR → l'index affiché reste aligné.
+    options_tr: hasTr ? order.map((i) => q.options_tr[i]) : undefined,
     correct_index: order.indexOf(q.correct_index),
     _order: order, // _order[index affiché] = index original DB
   };

@@ -14,6 +14,7 @@ import { mountHeader } from "@/components/common/header-top.js";
 import { mountBottomNav } from "@/components/common/nav-bottom.js";
 import { armPopupPhase, notifyPopupSettled } from "@/utils/intro-overlays.js";
 import { initThemeEarly, syncFromPrefs, applyTheme } from "@/utils/theme.js";
+import { initLangEarly, syncLangFromPrefs } from "@/utils/lang.js";
 import { initAccentEarly, applyAccent } from "@/utils/accent.js";
 import { initGameState, initEquippedTheme } from "@/utils/game-state.js";
 import { mountCookieBanner } from "@/components/common/cookie-banner.js";
@@ -25,6 +26,7 @@ import "@/utils/pwa.js"; // capte beforeinstallprompt très tôt
 // Apply saved/system theme before any rendering (reads localStorage, synchronous)
 initThemeEarly();
 initAccentEarly();
+initLangEarly(); // pose <html lang> depuis le miroir localStorage (sync)
 
 const app = document.getElementById("app");
 
@@ -53,6 +55,8 @@ async function boot() {
 
     // Sync theme preference from backend (non-blocking — fallback already applied by initThemeEarly)
     if (me) syncFromPrefs(sb).catch(() => {});
+    // Idem pour la langue élève (miroir déjà posé par initLangEarly)
+    if (me) syncLangFromPrefs(sb).catch(() => {});
 
     // Init game state: loads user_preferences.custom into localStorage (DB wins)
     if (me) {

@@ -11,6 +11,7 @@ import { toast } from "@/components/common/toast.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { applyTheme, getTheme } from "@/utils/theme.js";
+import { getLang, applyLang } from "@/utils/lang.js";
 import { ACCENTS, getAccent, setAccent } from "@/utils/accent.js";
 import { isSoundEnabled, setSoundEnabled, playBack } from "@/utils/sound.js";
 import { optInPush, optOutPush, isPushEnabled } from "@/services/web-push.js";
@@ -360,6 +361,12 @@ export async function mount(root, param) {
       myPrefs?.theme === "auto"
         ? myPrefs.theme
         : getTheme(),
+    language:
+      myPrefs?.language === "fr" ||
+      myPrefs?.language === "en" ||
+      myPrefs?.language === "ar"
+        ? myPrefs.language
+        : getLang(),
   };
 
   render(root, me, prefs);
@@ -561,6 +568,20 @@ ${
           <button class="st-theme-btn ${prefs.theme === "light" ? "active" : ""}" data-set-theme="light" aria-pressed="${prefs.theme === "light"}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg> Clair</button>
           <button class="st-theme-btn ${prefs.theme === "dark" ? "active" : ""}" data-set-theme="dark" aria-pressed="${prefs.theme === "dark"}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg> Sombre</button>
           <button class="st-theme-btn ${prefs.theme === "auto" ? "active" : ""}" data-set-theme="auto" aria-pressed="${prefs.theme === "auto"}">Système</button>
+        </div>
+      </div>
+      <div class="st-row col">
+        <div class="st-rhead">
+          <span class="st-ic" aria-hidden="true" style="font-size:26px;line-height:1;display:flex;align-items:center;justify-content:center">🌍</span>
+          <div class="st-row-left">
+            <div class="st-row-title">Langue</div>
+            <div class="st-row-sub">Les questions s'affichent dans ta langue, le français gardé dessous.</div>
+          </div>
+        </div>
+        <div class="st-theme-seg st-expand" id="lang-seg" role="group" aria-label="Choisir la langue">
+          <button class="st-theme-btn ${prefs.language === "fr" ? "active" : ""}" data-set-lang="fr" aria-pressed="${prefs.language === "fr"}">Français</button>
+          <button class="st-theme-btn ${prefs.language === "en" ? "active" : ""}" data-set-lang="en" aria-pressed="${prefs.language === "en"}">English</button>
+          <button class="st-theme-btn ${prefs.language === "ar" ? "active" : ""}" data-set-lang="ar" aria-pressed="${prefs.language === "ar"}" lang="ar">العربية</button>
         </div>
       </div>
       <div class="st-row col">
@@ -884,7 +905,7 @@ function wire(root, me, prefs) {
     const btn = e.target.closest(".st-theme-btn");
     if (!btn) return;
     const mode = btn.dataset.setTheme;
-    root.querySelectorAll(".st-theme-btn").forEach((b) => {
+    root.querySelectorAll("#theme-seg .st-theme-btn").forEach((b) => {
       b.classList.toggle("active", b === btn);
       b.setAttribute("aria-pressed", String(b === btn));
     });
@@ -894,6 +915,25 @@ function wire(root, me, prefs) {
       await sb.rpc("set_my_preferences", { p_data: { theme: mode } });
     } catch (e) {
       console.error("[settings] theme save", e);
+    }
+  });
+
+  // Langue (fr / en / ar) — même chemin que le thème (applyLang + RPC).
+  // NB : les questions du quiz apparaissent traduites, français gardé dessous.
+  root.querySelector("#lang-seg")?.addEventListener("click", async (e) => {
+    const btn = e.target.closest(".st-theme-btn");
+    if (!btn) return;
+    const lang = btn.dataset.setLang;
+    root.querySelectorAll("#lang-seg .st-theme-btn").forEach((b) => {
+      b.classList.toggle("active", b === btn);
+      b.setAttribute("aria-pressed", String(b === btn));
+    });
+    applyLang(lang);
+    track("settings.language_changed", { language: lang });
+    try {
+      await sb.rpc("set_my_preferences", { p_data: { language: lang } });
+    } catch (err) {
+      console.error("[settings] language save", err);
     }
   });
 
