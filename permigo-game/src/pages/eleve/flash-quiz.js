@@ -29,6 +29,7 @@ import {
   playPerfect,
 } from "@/utils/sound.js";
 import { wireQuestionSpeech, stopSpeaking } from "@/utils/speech.js";
+import { getLang } from "@/utils/lang.js";
 
 let _timer = null;
 
@@ -43,6 +44,20 @@ function fmtClock(ms) {
 // _order[indexAffiché] = indexOriginalEnBase. Le rendu/la correction utilisent
 // l'index affiché ; l'envoi serveur retraduit vers l'index d'origine (le score
 // est recalculé côté serveur contre le correct_index de la base).
+// Attache la traduction (langue élève) dans l'ORDRE ORIGINAL des options
+// (le mélange ci-dessous applique la même permutation aux deux).
+function attachTranslation(q, lang) {
+  if (lang === "fr") return q;
+  const tr = (q.question_translations || []).find((t) => t.lang === lang);
+  if (!tr) return q;
+  return {
+    ...q,
+    question_tr: tr.question,
+    options_tr: Array.isArray(tr.options) ? tr.options : null,
+    explanation_tr: tr.explanation,
+  };
+}
+
 function withShuffledOptions(q) {
   if (!Array.isArray(q.options) || q.options.length < 2) {
     return { ...q, _order: (q.options || []).map((_, i) => i) };
@@ -52,9 +67,13 @@ function withShuffledOptions(q) {
     const j = Math.floor(Math.random() * (i + 1));
     [order[i], order[j]] = [order[j], order[i]];
   }
+  const hasTr =
+    Array.isArray(q.options_tr) && q.options_tr.length === q.options.length;
   return {
     ...q,
     options: order.map((i) => q.options[i]),
+    // Même permutation que les options FR → index affiché aligné.
+    options_tr: hasTr ? order.map((i) => q.options_tr[i]) : undefined,
     correct_index: order.indexOf(q.correct_index),
     _order: order,
   };
@@ -94,15 +113,22 @@ export async function mount(root, flashQuizId) {
     }
 
     // Charge les questions (ordre = question_ids)
+    const lang = getLang();
     const { data: rows } = await sb
       .from("questions_competence")
-      .select("id, question, options, correct_index, explanation")
+      .select(
+        "id, question, options, correct_index, explanation" +
+          (lang !== "fr"
+            ? ", question_translations(lang, question, options, explanation)"
+            : ""),
+      )
       .in("id", quiz.question_ids);
 
     const byId = new Map((rows || []).map((q) => [q.id, q]));
     const pool = quiz.question_ids
       .map((id) => byId.get(id))
       .filter(Boolean)
+      .map((q) => attachTranslation(q, lang))
       .map(withShuffledOptions);
 
     if (pool.length === 0)
@@ -112,7 +138,7 @@ export async function mount(root, flashQuizId) {
       flash_quiz_id: quiz.id,
       competence_id: quiz.competence_id,
     });
-    runQuiz(root, { quiz, pool });
+    runQuiz(root, { quiz, pool, lang });
   } catch (e) {
     console.error("[flash-quiz] mount failed", e);
     renderClosed(
@@ -122,7 +148,7 @@ export async function mount(root, flashQuizId) {
   }
 }
 
-function runQuiz(root, { quiz, pool }) {
+function runQuiz(root, { quiz, pool, lang = "fr" }) {
   let idx = 0,
     score = 0,
     streak = 0;
@@ -170,7 +196,7 @@ function runQuiz(root, { quiz, pool }) {
     const q = pool[idx];
     if (!q) return finish();
     setMascot(cardEl, "think");
-    bodyEl.innerHTML = questionHTML({ q, idx, total: pool.length });
+    bodyEl.innerHTML = questionHTML({ q, idx, total: pool.length, lang });
     bodyEl.querySelectorAll(".qz-opt").forEach((btn) => {
       btn.addEventListener("click", () =>
         handleAnswer(parseInt(btn.dataset.i, 10), q),
@@ -211,7 +237,12 @@ function runQuiz(root, { quiz, pool }) {
     if (q.explanation) {
       bodyEl.insertAdjacentHTML(
         "beforeend",
-        explHTML({ correct, explanation: q.explanation }),
+        explHTML({
+          correct,
+          explanation: q.explanation,
+          explanationTr: q.explanation_tr,
+          lang,
+        }),
       );
     }
 
