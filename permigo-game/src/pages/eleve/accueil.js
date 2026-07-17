@@ -7,7 +7,7 @@
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { blendLeagueRows, isSoloEleve } from "@/utils/league-bots.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { REMC } from "@/data/remc.js";
 import {
@@ -32,10 +32,7 @@ import { renderSituationScene } from "@/components/eleve/situation-scene.js";
 import { getScenesVues } from "@/utils/situations-vues.js";
 import { getMyChests } from "@/utils/game-state.js";
 import { mountFeedbackFeed } from "@/components/eleve/feedback-feed.js";
-import {
-  mountDailyQuests,
-  cleanQuestTitle,
-} from "@/components/eleve/daily-quests.js";
+import { mountDailyQuests } from "@/components/eleve/daily-quests.js";
 import { toast } from "@/components/common/toast.js";
 import { navigate } from "@/router.js";
 import { haptic } from "@/utils/haptic.js";
@@ -45,12 +42,9 @@ import {
   mountLeagueHero,
   LEAGUE_HERO_CSS,
 } from "@/components/eleve/league-hero.js";
-import {
-  getDailyStreak,
-  todayKey,
-  yesterdayKey,
-  dayKey,
-} from "@/services/daily-quiz.js";
+// ⚠️ daily-quiz.js ne sert plus qu'aux helpers de date : la « question du
+// jour » a quitté l'accueil (pivot 17/07 — le hero prépare la prochaine leçon).
+import { todayKey, yesterdayKey, dayKey } from "@/services/daily-quiz.js";
 import { isStandalone } from "@/utils/pwa.js";
 import { openInstallSheet } from "@/components/common/install-nudge.js";
 
@@ -69,8 +63,8 @@ const ELEVE_TOUR_STEPS = [
   },
   {
     sel: "#action-cta-btn",
-    title: "Par où commencer",
-    text: "Un quiz par jour. Tout démarre ici.",
+    title: "Ta prochaine leçon",
+    text: "Prépare chaque heure de conduite ici. 5 minutes suffisent.",
   },
   {
     // 2026-07-16 : l'onglet « Mon permis » ré-ouvre directement le
@@ -99,7 +93,7 @@ function maybeStartEleveTour() {
   onPopupsSettled(() => {
     setTimeout(() => {
       // Ancré sur le CTA king (toujours rendu) — présent quel que soit l'état
-      // (premier run, question du jour, done...). Garanti en DOM avant ce timeout.
+      // (le hero « prépare ta leçon » est toujours rendu). Garanti en DOM avant ce timeout.
       if (!document.querySelector("#action-cta-btn")) return;
       track("eleve.tour.start");
       startTour(ELEVE_TOUR_STEPS, {
@@ -424,6 +418,228 @@ const STYLE = `<style>
 .acc2-cta-arr { font-size: 20px; }
 @media (prefers-reduced-motion: reduce) {
   .acc2-cta-king { transition: none; }
+}
+
+/* ═══ Hero « Prépare ta prochaine leçon » — gloss & pastille thème ═══ */
+/* Vernis plastique premium : voile clair en haut de la carte + balayage
+   lumineux périodique. Calque séparé avec overflow:hidden (la carte reste
+   overflow:visible pour laisser dépasser la mascotte). */
+.acc2-hero-gloss {
+  position: absolute;
+  inset: 0;
+  border-radius: 28px;
+  overflow: hidden;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(168deg,
+    rgba(255,255,255,.42) 0%,
+    rgba(255,255,255,.10) 36%,
+    transparent 55%);
+}
+.acc2-hero-gloss::after {
+  content: "";
+  position: absolute;
+  top: -40%;
+  bottom: -40%;
+  left: 0;
+  width: 44%;
+  background: linear-gradient(105deg,
+    transparent,
+    rgba(255,255,255,.30) 50%,
+    transparent);
+  transform: skewX(-14deg) translateX(-160%);
+  animation: prepSheen 7s ease-in-out infinite;
+}
+@keyframes prepSheen {
+  0%, 72%  { transform: skewX(-14deg) translateX(-160%); }
+  92%, 100% { transform: skewX(-14deg) translateX(420%); }
+}
+/* Gloss du CTA roi : reflet plastique en haut du bouton (esprit Arène 3D) */
+.acc2-cta-king {
+  position: relative;
+  overflow: hidden;
+}
+.acc2-cta-king::before {
+  content: "";
+  position: absolute;
+  inset: 2px 3px 52%;
+  border-radius: 17px 17px 60px 60px;
+  background: linear-gradient(180deg, rgba(255,255,255,.32), rgba(255,255,255,.04));
+  pointer-events: none;
+}
+.acc2-prep-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  min-height: 34px;
+  background: var(--su);
+  border: 1px solid var(--bo);
+  border-radius: 999px;
+  padding: 7px 13px;
+  font: 800 12.5px/1 'Plus Jakarta Sans', sans-serif;
+  color: var(--ink);
+  box-shadow: 0 3px 10px rgba(0,0,0,.07);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.acc2-prep-pill:active { transform: scale(.96); }
+.acc2-prep-chev { color: var(--mu); font-size: 10px; }
+@media (prefers-reduced-motion: reduce) {
+  .acc2-hero-gloss::after { animation: none; }
+}
+
+/* ═══ Carte consolidation compacte (sous le CTA) ═══
+   Le quiz de consolidation / récap garde sa porte sur l'accueil : petite
+   carte tapable, ton factuel (jamais culpabilisant). */
+.acc2-consol {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: calc(100% - 32px);
+  margin: 12px 16px 0;
+  padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--a) 26%, var(--bo));
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--a) 7%, var(--su));
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.acc2-consol:active { transform: scale(.985); }
+.acc2-consol-ico { font-size: 22px; flex: 0 0 auto; }
+.acc2-consol-txt { flex: 1; min-width: 0; }
+.acc2-consol-t { display: block; font: 800 13.5px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); }
+.acc2-consol-s { display: block; margin-top: 2px; font: 700 11.5px/1.3 'Plus Jakarta Sans', sans-serif; color: var(--mu); }
+.acc2-consol-arr { color: var(--a-txt); font-weight: 800; font-size: 17px; flex: 0 0 auto; }
+
+/* ═══ Feuille de choix du thème (pastille 🎯 du hero) ═══ */
+.prep-sheet-ov {
+  position: fixed;
+  inset: 0;
+  z-index: 340;
+  background: rgba(11,13,26,.45);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: prepOvIn .18s ease-out both;
+}
+@keyframes prepOvIn { from { opacity: 0; } to { opacity: 1; } }
+.prep-sheet {
+  width: 100%;
+  max-width: 560px;
+  max-height: 76vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--su);
+  border-radius: 24px 24px 0 0;
+  padding: 14px 16px calc(16px + env(safe-area-inset-bottom));
+  box-shadow: 0 -14px 44px rgba(11,13,26,.28);
+  animation: prepSheetIn .24s cubic-bezier(.32,.72,.28,1) both;
+}
+@keyframes prepSheetIn { from { transform: translateY(48px); opacity: .4; } to { transform: none; opacity: 1; } }
+.prep-sheet-grab { width: 40px; height: 4px; border-radius: 999px; background: var(--bo); margin: 0 auto 12px; flex: 0 0 auto; }
+.prep-sheet-h { font: 800 16px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); margin: 0 2px 2px; flex: 0 0 auto; }
+.prep-sheet-s { font: 700 12px/1.4 'Plus Jakarta Sans', sans-serif; color: var(--mu); margin: 0 2px 10px; flex: 0 0 auto; }
+.prep-sheet-list { overflow-y: auto; min-height: 0; }
+.prep-sheet-monde {
+  font: 800 11px/1 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--a-txt);
+  margin: 14px 2px 7px;
+}
+.prep-sheet-monde:first-child { margin-top: 2px; }
+.prep-sheet-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  border: 1px solid var(--bo);
+  border-radius: 14px;
+  background: var(--su);
+  font: 700 14px/1.25 'Plus Jakarta Sans', sans-serif;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.prep-sheet-item:active { transform: scale(.985); }
+.prep-sheet-item.cur {
+  border-color: color-mix(in srgb, var(--a) 45%, var(--bo));
+  background: color-mix(in srgb, var(--a) 9%, var(--su));
+}
+.prep-sheet-item .tt { flex: 1; min-width: 0; }
+.prep-sheet-item .ok { flex: 0 0 auto; font-size: 13px; color: var(--gr-txt); font-weight: 800; }
+
+/* Les 3 suggestions ciblées — en grand, avec la raison du choix */
+.prep-sheet-item.sug {
+  min-height: 68px;
+  padding: 14px 15px;
+  border-radius: 18px;
+  margin-bottom: 9px;
+  border-color: color-mix(in srgb, var(--a) 22%, var(--bo));
+  background: linear-gradient(150deg,
+    color-mix(in srgb, var(--a) 8%, var(--su)) 0%,
+    var(--su) 70%);
+  box-shadow: 0 6px 18px -10px color-mix(in srgb, var(--a) 35%, transparent);
+}
+.prep-sheet-item.sug.cur {
+  border-color: color-mix(in srgb, var(--a) 55%, var(--bo));
+  background: color-mix(in srgb, var(--a) 12%, var(--su));
+}
+.prep-sheet-item.sug .sug-n {
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: linear-gradient(180deg, var(--a-lt), var(--a));
+  color: #fff;
+  font: 800 14px/1 'Plus Jakarta Sans', sans-serif;
+  box-shadow: 0 2px 0 var(--adk);
+}
+.prep-sheet-item.sug .sug-t {
+  display: block;
+  font: 700 16.5px/1.2 'Fredoka', 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -.01em;
+  color: var(--ink);
+}
+.prep-sheet-item.sug .sug-r {
+  display: block;
+  margin-top: 3px;
+  font: 700 11.5px/1.3 'Plus Jakarta Sans', sans-serif;
+  color: var(--mu);
+}
+.prep-sheet-item.sug .sug-go {
+  flex: 0 0 auto;
+  color: var(--a-txt);
+  font-weight: 800;
+  font-size: 18px;
+}
+
+/* Lien discret vers la liste complète */
+.prep-sheet-more {
+  display: block;
+  width: 100%;
+  margin: 4px 0 8px;
+  padding: 10px;
+  border: 0;
+  background: none;
+  font: 700 12.5px/1.3 'Plus Jakarta Sans', sans-serif;
+  color: var(--mu);
+  text-align: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.prep-sheet-more u { text-underline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  .prep-sheet-ov, .prep-sheet { animation: none; }
 }
 
 /* ── Skeletons ── */
@@ -926,8 +1142,10 @@ const WORLDS = REMC.map((cat, i) => ({
 // (même règle que le parcours : 6 compétences du monde 2 acquises).
 const EXAM_UNLOCK_WORLD2_DONE = 6;
 
-// Jours d'absence depuis la visite précédente (calculé au mount, lu au render)
-let _awayDays = 0;
+// Thème déclaré par l'élève pour sa prochaine leçon (pastille 🎯 du hero).
+// Simple code de compétence REMC en localStorage — une intention, pas un
+// planning (charte : pas de réservation dans PermiGo).
+const PREP_THEME_KEY = "pg-prep-theme";
 
 // Salutation contextuelle. Revisite dans la même journée → message chaleureux.
 const LS_LAST_VISIT = "pg-last-visit";
@@ -971,7 +1189,6 @@ export async function mount(root) {
   } catch {
     /* localStorage indisponible → pas de welcome-back, pas grave */
   }
-  _awayDays = awayDays;
   if (awayDays >= 3) track("eleve.welcome_back", { awayDays });
 
   root.innerHTML = SKELETON;
@@ -1098,23 +1315,75 @@ export async function mount(root) {
     const streakSt = streakStatus(streak);
     const gemmes = profile.gemmes || 0;
 
-    // Question du jour — la boucle solo quotidienne (plan rétention).
-    // Découverte (monde 1) tant que rien n'est acquis, sinon consolidation
-    // de l'acquise la moins récemment quizzée.
-    let dailyQuiz = null;
+    // « Prépare ta prochaine leçon » — le hero de l'accueil (pivot 17/07 :
+    // l'élève prépare sa vraie leçon de conduite ; la « question du jour » a
+    // quitté l'accueil). L'algo CIBLE 3 suggestions : d'abord les compétences
+    // non acquises qui recoupent « Mes fautes », puis la suite du parcours.
+    // Le thème du hero = choix déclaré par l'élève (localStorage), sinon la
+    // 1re suggestion. Fiches chargées en dynamique pour garder le chunk léger
+    // (même raison que le deep-link `revision-conduite/next` des quêtes).
+    let prep = null;
+    let prepMondes = [];
+    let prepSuggestions = [];
     try {
-      const { isDailyDone, pickDailyQuiz } =
-        await import("@/services/daily-quiz.js");
-      const done = isDailyDone();
-      const pick = done ? null : await pickDailyQuiz(me.id, [...validated]);
-      dailyQuiz = { done, ...(pick || {}) };
-    } catch {
-      /* service indisponible → l'action du jour retombe sur le parcours */
-    }
+      const [{ getFiche, fichesByMonde, MONDES }, weakMod] = await Promise.all([
+        import("@/data/fiches-conduite.js"),
+        import("@/utils/weak-points.js"),
+      ]);
+      const order = WORLDS.flatMap((w) => w.subs.map((s) => s.c));
+      const pool = order.filter((c) => getFiche(c));
 
-    // Série quotidienne (streak question du jour) — best-effort localStorage.
-    // Indépendant du streak serveur (streaks table), purement local.
-    const dailyStreakCount = getDailyStreak();
+      // Ciblage : fautes récentes (Mes fautes) > suite du parcours > révision
+      const weakTags = new Set(
+        weakMod.getWeakPoints({ limit: 5 }).map((w) => w.tag),
+      );
+      const notDone = pool.filter((c) => !validated.has(c));
+      const targeted = notDone.filter((c) =>
+        (weakMod.REMC_THEME_TAGS[c] || []).some((t) => weakTags.has(t)),
+      );
+      const picks = [
+        ...targeted,
+        ...notDone.filter((c) => !targeted.includes(c)),
+      ].slice(0, 3);
+      if (picks.length < 3)
+        picks.push(
+          ...pool.filter((c) => !picks.includes(c)).slice(0, 3 - picks.length),
+        );
+      prepSuggestions = picks.map((c) => ({
+        code: c,
+        titre: getFiche(c).titre,
+        reason: targeted.includes(c)
+          ? "🎯 D'après tes fautes récentes"
+          : !validated.has(c)
+            ? "📍 La suite de ton parcours"
+            : "🔁 Acquise — pour consolider",
+      }));
+
+      let code = null;
+      try {
+        code = localStorage.getItem(PREP_THEME_KEY);
+      } catch {
+        /* stockage indispo → choix auto */
+      }
+      if (!code || !getFiche(code) || validated.has(code)) {
+        code = prepSuggestions[0]?.code || null;
+      }
+      const fiche = code ? getFiche(code) : null;
+      if (fiche) {
+        prep = { code, titre: fiche.titre };
+        prepMondes = MONDES.map((m) => ({
+          n: m.n,
+          nom: m.nom,
+          fiches: fichesByMonde(m.n).map((f) => ({
+            code: f.code,
+            titre: f.titre,
+            done: validated.has(f.code),
+          })),
+        }));
+      }
+    } catch {
+      /* fiches indisponibles → le CTA retombe sur le hub Réviser */
+    }
 
     track("streak.viewed", { days: streak.current_streak, status: streakSt });
 
@@ -1129,10 +1398,12 @@ export async function mount(root) {
       pendingSessions,
       todayQuests,
       pendingNotif,
-      dailyQuiz,
-      dailyStreakCount,
+      prep,
     });
     wire(root, {
+      prep,
+      prepMondes,
+      prepSuggestions,
       streak,
       streakSt,
       gemmes,
@@ -1315,8 +1586,7 @@ function render({
   pendingSessions,
   todayQuests,
   pendingNotif,
-  dailyQuiz,
-  dailyStreakCount = 0,
+  prep,
 }) {
   const totalValidated = worlds.reduce((s, w) => s + w.done, 0);
   const prenom = profile.prenom || me.prenom || "Toi";
@@ -1357,72 +1627,33 @@ function render({
   // (conservé pour usage futur — actuellement non affiché dans l'accueil)
   // const examUnlocked = (worlds[1]?.done ?? 0) >= EXAM_UNLOCK_WORLD2_DONE;
 
-  // ── Hero v2 : kicker / titre / méta selon l'état de l'action du jour ──
-  // On réutilise la même logique que renderActionDuJour mais pour alimenter
-  // le hero focal. Le CTA king prend l'id action-cta-btn pour que wire()
-  // le câble sans modification (même data-href, même listener).
-  let _heroKicker = "Ta question du jour";
-  let _heroTitle = "Révise ta dernière leçon";
-  let _heroMeta = "3 questions · 2 min";
-  let _heroCta = "C’est parti";
-  let _heroHref = "#/quiz/next/post_validation/revision";
-  let _heroDone = false;
+  // ── Hero « Prépare ta prochaine leçon » (maquette A validée 17/07) ──
+  // Toujours le même message : l'élève prépare sa vraie leçon de conduite.
+  // Le CTA king garde l'id action-cta-btn (tour guidé + wire inchangés).
+  // Repli sans fiche (données indisponibles) : le hub Réviser.
+  const _heroTitle = prep?.titre || "Prépare ta prochaine leçon";
+  const _heroHref = prep ? `#/revision-conduite/${prep.code}` : "#/reviser";
 
-  const _pendingQuestForHero = !pendingNotif
-    ? (todayQuests.find(
-        (q) => !q.completed && !q.claimed && q.quest_id !== "quest_login",
-      ) ?? null)
-    : null;
+  // La série d'activité se sauve avec un QUIZ (quiz_attempts) : le bandeau
+  // SOS pointe donc toujours vers un quiz, pas vers la fiche du hero.
+  const _sosHref = "#/quiz/next/post_validation/revision";
 
-  if (_pendingQuestForHero) {
-    const _qn = _normalizeQuest(_pendingQuestForHero);
-    _heroKicker = "Quête du jour";
-    _heroTitle = _qn.label ?? "Ta quête du jour";
-    _heroMeta = _qn.sub ?? "";
-    _heroCta = _qn.btnText ?? "Commencer";
-    _heroHref = _qn.href ?? "#/parcours";
-  } else if (pendingNotif?.data?.competence_id) {
-    const _isCons = pendingNotif.type === "consolidation_quiz";
-    _heroKicker = _isCons ? "Quiz de consolidation" : "Quiz-récap";
-    _heroTitle = _isCons
-      ? "Ancre ta nouvelle compétence"
-      : "Récap sur ta compétence";
-    _heroMeta = _isCons ? "2 questions · 30 sec" : "3 questions · optionnel";
-    _heroCta = _isCons ? "Commencer" : "Faire le récap";
-    _heroHref = `#/quiz/${pendingNotif.data.competence_id}/${_isCons ? "consolidation" : "post_validation"}`;
-  } else if (dailyQuiz && !dailyQuiz.done && dailyQuiz.competenceId) {
-    _heroKicker = "Ta question du jour";
-    if (_awayDays >= 3) {
-      _heroTitle = "Une question pour reprendre";
-      _heroMeta = "1 question · 2 min · sur ta dernière leçon";
-    } else if (dailyQuiz.mode === "decouverte") {
-      _heroTitle = "Découvre une compétence";
-      _heroMeta = "3 questions · 2 min · sur ta prochaine leçon";
-    } else {
-      _heroTitle = "Révise ta dernière leçon";
-      _heroMeta = "3 questions · 2 min";
-    }
-    _heroCta = "C’est parti";
-    _heroHref = `#/quiz/${dailyQuiz.competenceId}/post_validation/daily`;
-  } else if (dailyQuiz?.done) {
-    _heroDone = true;
-    _heroKicker = "Question du jour";
-    _heroTitle = "Terminé pour aujourd’hui";
-    _heroMeta = "Reviens demain pour ta prochaine question.";
-    _heroCta = "Continue à réviser";
-    _heroHref = "#/quiz/next/post_validation/revision";
-  } else if (totalValidated === 0) {
-    _heroKicker = "Par où commencer";
-    _heroTitle = "Lance ta première révision";
-    _heroMeta = "2 min suffisent pour démarrer.";
-    _heroCta = "C’est parti · 2 min";
-    _heroHref = "#/quiz/next/post_validation/revision";
-  } else {
-    _heroTitle = "Continue ton parcours";
-    _heroMeta = "Une révision de plus. Chaque jour compte.";
-    _heroCta = "Continue à réviser";
-    _heroHref = "#/quiz/next/post_validation/revision";
-  }
+  // Quiz de consolidation / récap en attente : la porte vit désormais dans
+  // une carte compacte sous le CTA (le hero ne change plus de visage).
+  const _isCons = pendingNotif?.type === "consolidation_quiz";
+  const consolCard = pendingNotif?.data?.competence_id
+    ? `
+  <button class="acc2-consol" id="acc-consol-btn" type="button"
+          data-href="#/quiz/${esc(pendingNotif.data.competence_id)}/${_isCons ? "consolidation" : "post_validation"}"
+          aria-label="${_isCons ? "Quiz de consolidation — 2 questions, 30 secondes" : "Quiz-récap — 3 questions"}">
+    <span class="acc2-consol-ico" aria-hidden="true">🧠</span>
+    <span class="acc2-consol-txt">
+      <span class="acc2-consol-t">${_isCons ? "Ancre ta nouvelle compétence" : "Récap sur ta compétence"}</span>
+      <span class="acc2-consol-s">${_isCons ? "Quiz de consolidation · 2 questions · 30 s" : "Quiz-récap · 3 questions · optionnel"}</span>
+    </span>
+    <span class="acc2-consol-arr" aria-hidden="true">→</span>
+  </button>`
+    : "";
 
   return `${STYLE}
 <div class="acc2${isFirstRun ? " acc2--first-run" : ""}">
@@ -1437,25 +1668,36 @@ function render({
     </button>
   </div>
 
-  ${renderStreakSos({ streak, streakSt, gemmes, href: _heroHref })}
+  ${renderStreakSos({ streak, streakSt, gemmes, href: _sosHref })}
 
-  <!-- ══ HERO FOCAL v2 — question du jour ══ -->
-  <section class="acc2-hero-v2" aria-label="${esc(_heroKicker)}">
+  <!-- ══ HERO FOCAL — Prépare ta prochaine leçon ══ -->
+  <section class="acc2-hero-v2" aria-label="Ta prochaine leçon">
     <div class="acc2-hero-halo" aria-hidden="true"></div>
+    <div class="acc2-hero-gloss" aria-hidden="true"></div>
     <div class="acc2-hero-v2-txt">
-      <p class="acc2-hero-kicker">${esc(_heroKicker)}</p>
-      <h1 class="acc2-hero-h1">${esc(_heroTitle)}</h1>
-      ${_heroMeta ? `<p class="acc2-hero-meta">${esc(_heroMeta)}</p>` : ""}
+      <p class="acc2-hero-kicker">Ta prochaine leçon</p>
+      <h1 class="acc2-hero-h1" id="prep-hero-title">${esc(_heroTitle)}</h1>
+      <p class="acc2-hero-meta">Sois prêt·e en 5 min</p>
+      ${
+        prep
+          ? `<button class="acc2-prep-pill" id="prep-theme-btn" type="button"
+              aria-label="Changer le thème de ta prochaine leçon">
+              <span aria-hidden="true">🎯</span> Changer de thème
+              <span class="acc2-prep-chev" aria-hidden="true">▾</span>
+            </button>`
+          : ""
+      }
     </div>
     <div class="acc2-hero-floor" aria-hidden="true"></div>
     <img class="acc2-hero-mascot" src="/skins/mascot-point.png" alt="" aria-hidden="true" loading="eager">
   </section>
 
   <!-- ══ CTA ROI — le seul bouton à presser ══ -->
-  <button class="acc2-cta-king${_heroDone ? " muted" : ""}"
+  <button class="acc2-cta-king"
           id="action-cta-btn" type="button" data-href="${esc(_heroHref)}">
-    ${esc(_heroCta)} <span class="acc2-cta-arr" aria-hidden="true">→</span>
+    Je me prépare <span class="acc2-cta-arr" aria-hidden="true">→</span>
   </button>
+  ${consolCard}
 
   <!-- Ancre pour les quêtes du jour (mountDailyQuests) -->
   <div id="acc-action-anchor"></div>
@@ -1606,6 +1848,9 @@ function renderSessionConfirm(session) {
 function wire(
   root,
   {
+    prep,
+    prepMondes,
+    prepSuggestions,
     streak,
     streakSt,
     gemmes,
@@ -1615,6 +1860,23 @@ function wire(
     pendingNotif,
   },
 ) {
+  // Pastille 🎯 « Changer de thème » → feuille ciblée (3 suggestions)
+  root.querySelector("#prep-theme-btn")?.addEventListener("click", () => {
+    haptic("select");
+    track("prep.theme_sheet_opened", { current: prep?.code || null });
+    openPrepThemeSheet(root, { prep, prepMondes, prepSuggestions });
+  });
+
+  // Carte consolidation / récap compacte (sous le CTA roi)
+  root.querySelector("#acc-consol-btn")?.addEventListener("click", (e) => {
+    const href = e.currentTarget.dataset.href;
+    if (href) {
+      haptic("select");
+      track("cta.clicked", { cta_type: "consolidation_card" });
+      navigate(href);
+    }
+  });
+
   // Bandeau « Installe l'app » (présent tant que pas installé) → ouvre la sheet
   const installBtn = root.querySelector("#acc-install-btn");
   if (installBtn) {
@@ -1768,6 +2030,110 @@ function wire(
       navigate(href);
     }
   });
+}
+
+// ─── Feuille « Changer de thème » (hero prépare ta leçon) ────────
+// Pas de longue liste : l'algo CIBLE 3 prochaines compétences (fautes
+// récentes > suite du parcours) affichées en grand, avec la raison du choix
+// — l'élève sent que c'est préparé POUR LUI. La liste complète reste
+// accessible derrière un lien discret (l'élève dont le moniteur a annoncé
+// « demain, créneau » doit pouvoir viser précis). Choisir un thème
+// enregistre une intention locale (PREP_THEME_KEY) et met à jour le hero
+// EN PLACE (titre + destination du CTA) — pas de re-render complet.
+function openPrepThemeSheet(root, { prep, prepMondes, prepSuggestions }) {
+  if (!prepSuggestions?.length || document.querySelector(".prep-sheet-ov"))
+    return;
+
+  const ov = document.createElement("div");
+  ov.className = "prep-sheet-ov";
+  ov.innerHTML = `
+    <div class="prep-sheet" role="dialog" aria-modal="true"
+         aria-label="Choisir le thème de ta prochaine leçon" tabindex="-1">
+      <div class="prep-sheet-grab" aria-hidden="true"></div>
+      <h2 class="prep-sheet-h">Ta prochaine leçon, c'est quoi ?</h2>
+      <p class="prep-sheet-s">PermiGo a ciblé tes 3 prochaines — à toi de choisir.</p>
+      <div class="prep-sheet-list">
+        ${prepSuggestions
+          .map(
+            (s, i) => `
+          <button class="prep-sheet-item sug${s.code === prep?.code ? " cur" : ""}"
+                  type="button" data-code="${esc(s.code)}" data-titre="${escAttr(s.titre)}">
+            <span class="sug-n" aria-hidden="true">${i + 1}</span>
+            <span class="tt">
+              <span class="sug-t">${esc(s.titre)}</span>
+              <span class="sug-r">${esc(s.reason)}</span>
+            </span>
+            <span class="sug-go" aria-hidden="true">→</span>
+          </button>`,
+          )
+          .join("")}
+        <button class="prep-sheet-more" id="prep-more-btn" type="button">
+          Un autre thème en tête ? <u>Toute la liste</u>
+        </button>
+        <div class="prep-sheet-all" hidden>
+          ${prepMondes
+            .map(
+              (m) => `
+            <div class="prep-sheet-monde">Monde ${m.n} · ${esc(m.nom)}</div>
+            ${m.fiches
+              .map(
+                (f) => `
+              <button class="prep-sheet-item${f.code === prep?.code ? " cur" : ""}"
+                      type="button" data-code="${esc(f.code)}" data-titre="${escAttr(f.titre)}">
+                <span class="tt">${esc(f.titre)}</span>
+                ${f.done ? `<span class="ok" aria-label="déjà acquise">✓</span>` : ""}
+              </button>`,
+              )
+              .join("")}`,
+            )
+            .join("")}
+        </div>
+      </div>
+    </div>`;
+
+  const close = () => {
+    document.removeEventListener("keydown", onKey);
+    ov.remove();
+  };
+  const onKey = (e) => {
+    if (e.key === "Escape") close();
+  };
+  ov.addEventListener("click", (e) => {
+    if (e.target === ov) close();
+  });
+  document.addEventListener("keydown", onKey);
+
+  // « Toute la liste » : déplie les 31 fiches par monde (une seule fois)
+  const moreBtn = ov.querySelector("#prep-more-btn");
+  moreBtn?.addEventListener("click", () => {
+    ov.querySelector(".prep-sheet-all")?.removeAttribute("hidden");
+    moreBtn.remove();
+    track("prep.theme_list_expanded", {});
+  });
+
+  ov.querySelectorAll(".prep-sheet-item").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const code = btn.dataset.code;
+      const titre = btn.dataset.titre || "";
+      try {
+        localStorage.setItem(PREP_THEME_KEY, code);
+      } catch {
+        /* stockage indispo → le choix vaut pour cette visite via le DOM */
+      }
+      // Mise à jour du hero en place
+      const h1 = root.querySelector("#prep-hero-title");
+      if (h1) h1.textContent = titre;
+      const cta = root.querySelector("#action-cta-btn");
+      if (cta) cta.dataset.href = `#/revision-conduite/${code}`;
+      if (prep) prep.code = code;
+      haptic("select");
+      track("prep.theme_changed", { code });
+      close();
+    });
+  });
+
+  document.body.appendChild(ov);
+  ov.querySelector(".prep-sheet")?.focus();
 }
 
 // ─── Héros « Ta Ligue » (async) — Conduite + Révision ────────────
@@ -2023,36 +2389,6 @@ async function _loadAndInjectFlashQuiz(root, me) {
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────
-// Les quêtes quiz mènent à UN QUIZ en un tap (deep-link « next:quiz » =
-// quiz de la première fiche non lue, résolu par revision-conduite). Avant,
-// « Faire un quiz » ouvrait le parcours → fiche sans action : cul-de-sac,
-// le mot « quiz » disparaissait du chemin.
-const _QUEST_HREF = {
-  quest_quiz_1: "#/revision-conduite/next:quiz",
-  quest_quiz_3: "#/revision-conduite/next:quiz",
-  quest_quiz_perfect: "#/revision-conduite/next:quiz",
-  quest_streak_keep: "#/",
-};
-// NB : pas de « → » ici — le CTA roi (acc2-cta-king) ajoute déjà sa propre
-// flèche (.acc2-cta-arr). En remettre une donnait « Faire un quiz → → ».
-const _QUEST_BTN = {
-  quest_quiz_1: "Faire un quiz",
-  quest_quiz_3: "Faire 3 quiz",
-  quest_quiz_perfect: "Viser 100%",
-  quest_streak_keep: "Voir mon accueil",
-};
-
-function _normalizeQuest(q) {
-  const reward = q.reward_gemmes > 0 ? `+${q.reward_gemmes} volants` : "";
-  return {
-    label: cleanQuestTitle(q.title),
-    sub: reward,
-    href: _QUEST_HREF[q.quest_id] ?? "#/parcours",
-    btnText: _QUEST_BTN[q.quest_id] ?? "Commencer",
-    type: q.quest_id,
-  };
-}
-
 function _dKey(d) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }

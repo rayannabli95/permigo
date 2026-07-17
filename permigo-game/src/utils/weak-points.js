@@ -45,7 +45,9 @@ export const TAG_LABELS = {
 // volontairement PAS mappées : mieux vaut rien que du bruit.
 // ⚠️ N'utiliser que des tags présents dans TAG_LABELS **et** portés par des
 // questions de parcours-quiz.js (sinon « Réviser » n'a rien à rejouer).
-const REMC_THEME_TAGS = {
+// Exporté depuis le pivot « prépare ta prochaine leçon » (17/07) : l'accueil
+// s'en sert pour cibler les 3 prochaines compétences selon les fautes.
+export const REMC_THEME_TAGS = {
   C1a: ["verification_interieure", "verification_exterieure"],
   C1b: ["verification_interieure"],
   C1c: ["manoeuvre"],
