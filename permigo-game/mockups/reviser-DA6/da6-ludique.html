@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Réviser — DA6 Ludique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --accent:#6c63ff;
+    --accent-dk:#4a3fc9;
+    --accent-lt:#8e87ff;
+    --ink:#0b0d1a;
+    --mute:#5f6788;
+    --bg:#f4f5fb;
+    --su:#ffffff;
+    --bo:#e2e6f2;
+    --amber:#f5a623;
+    --green:#0f9d67;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html{background:#e7e9f4}
+  body{
+    width:390px;margin:0 auto;min-height:844px;
+    background:var(--bg);
+    font-family:'Nunito',system-ui,sans-serif;
+    color:var(--ink);
+    padding:0 18px 30px;
+    overflow-x:hidden;
+  }
+
+  /* ---------- HEADER ---------- */
+  .top{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:20px 2px 14px;
+  }
+  .top h1{
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:800;font-size:34px;letter-spacing:-.03em;
+    color:var(--ink);
+  }
+  .streak{
+    display:flex;align-items:center;gap:6px;
+    background:var(--su);
+    border:1.5px solid var(--bo);
+    border-radius:999px;
+    padding:7px 14px 7px 10px;
+    box-shadow:0 2px 0 rgba(20,22,40,.05);
+  }
+  .streak .num{
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:800;font-size:16px;color:#e0891a;letter-spacing:-.02em;
+  }
+  .streak .lbl{
+    font-weight:700;font-size:12px;color:var(--mute);
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    background:var(--accent);
+    border-radius:26px;
+    padding:14px 14px 18px;
+    box-shadow:0 10px 24px -10px rgba(74,63,201,.55), 0 3px 0 var(--accent-dk);
+    overflow:hidden;
+  }
+  .hero-vis{
+    position:relative;
+    border-radius:18px;
+    overflow:hidden;
+    height:250px;
+    background:#241a52;
+  }
+  .hero-vis img{
+    width:100%;
+    display:block;
+    object-fit:cover;
+    object-position:center 24%;
+    height:100%;
+  }
+  .pastille{
+    position:absolute;top:12px;left:12px;
+    display:inline-flex;align-items:center;gap:6px;
+    background:#fff;color:var(--accent-dk);
+    font-weight:800;font-size:11.5px;letter-spacing:.01em;
+    padding:7px 12px;border-radius:999px;
+    box-shadow:0 4px 12px -3px rgba(15,17,36,.4);
+    z-index:2;
+  }
+  .pastille .dot{
+    width:7px;height:7px;border-radius:50%;
+    background:var(--amber);
+  }
+  .hero-body{padding:16px 4px 2px}
+  .hero-eyebrow{
+    font-weight:800;font-size:11px;letter-spacing:.14em;
+    color:var(--accent-lt);text-transform:uppercase;
+    margin-bottom:8px;
+  }
+  .hero h2{
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:800;font-size:27px;line-height:1.04;
+    letter-spacing:-.03em;color:#fff;
+    margin-bottom:8px;
+  }
+  .hero p{
+    font-weight:700;font-size:14px;line-height:1.35;
+    color:rgba(255,255,255,.82);
+    margin-bottom:16px;
+  }
+  .cta{
+    display:flex;align-items:center;justify-content:center;gap:9px;
+    width:100%;
+    background:#fff;color:var(--accent-dk);
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:800;font-size:17px;letter-spacing:-.01em;
+    padding:16px;border:none;border-radius:16px;
+    box-shadow:0 4px 0 #d9d5f6;
+    cursor:pointer;
+  }
+  .cta:active{transform:translateY(3px);box-shadow:0 1px 0 #d9d5f6}
+  .cta svg{display:block}
+
+  /* ---------- SECTION LABEL ---------- */
+  .seclabel{
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:800;font-size:13px;letter-spacing:.02em;
+    color:var(--mute);
+    margin:22px 4px 12px;
+  }
+
+  /* ---------- TILES ---------- */
+  .tiles{display:flex;flex-direction:column;gap:12px}
+  .tile{
+    display:flex;align-items:center;gap:14px;
+    border-radius:22px;
+    padding:14px 16px;
+    border:1.5px solid transparent;
+    box-shadow:0 3px 0 rgba(20,22,40,.04);
+    cursor:pointer;
+  }
+  .tile:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(20,22,40,.04)}
+  .tile.violet{background:#efeeff;border-color:#e3e0ff}
+  .tile.green{background:#e7f6ef;border-color:#d3efe0}
+  .tile.amber{background:#fbefdd;border-color:#f4e2c3}
+  .badge-wrap{
+    flex:0 0 58px;width:58px;height:58px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .badge-wrap img{width:56px;height:56px;object-fit:contain;
+    filter:drop-shadow(0 4px 6px rgba(20,22,40,.16))}
+  .tile-txt{flex:1;min-width:0}
+  .tile-txt h3{
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:800;font-size:16px;letter-spacing:-.01em;
+    color:var(--ink);margin-bottom:3px;
+  }
+  .tile-txt p{
+    font-weight:700;font-size:12.5px;color:var(--mute);line-height:1.25;
+  }
+  .meta{
+    flex:0 0 auto;
+    font-weight:800;font-size:11.5px;letter-spacing:.01em;
+    padding:7px 11px;border-radius:999px;white-space:nowrap;
+  }
+  .tile.violet .meta{background:#fff;color:var(--accent-dk)}
+  .tile.green  .meta{background:#fff;color:var(--green)}
+  .tile.amber  .meta{background:#fff;color:#c06a20}
+</style>
+</head>
+<body>
+
+  <header class="top">
+    <h1>Réviser</h1>
+    <div class="streak">
+      <!-- flamme dessinée -->
+      <svg width="18" height="20" viewBox="0 0 18 20" fill="none" aria-hidden="true">
+        <path d="M9 1.2c.6 2.7-.9 4.1-2.4 5.6C4.9 8.5 3.2 10.4 3.2 13c0 3.2 2.6 5.8 5.8 5.8s5.8-2.6 5.8-5.8c0-2-.9-3.5-2-4.9-.4.9-1.1 1.5-1.9 1.5 1-2.7-.3-6.4-1.9-8.4Z" fill="#f5a623"/>
+        <path d="M9 18.8c-2 0-3.6-1.6-3.6-3.6 0-1.7 1.1-2.9 2.1-3.9.2 1 .9 1.6 1.7 1.6-.5-1.6.4-3 .9-3.6.9 1 2.5 2.2 2.5 4.3 0 2.4-1.6 5.2-3.6 5.2Z" fill="#ffd24a"/>
+      </svg>
+      <span class="num">5</span>
+      <span class="lbl">j</span>
+    </div>
+  </header>
+
+  <!-- HÉROS -->
+  <section class="hero">
+    <div class="hero-vis">
+      <span class="pastille"><span class="dot"></span>Le préféré des élèves</span>
+      <img src="assets/scene.png" alt="Mini-jeu En situation — croisement">
+    </div>
+    <div class="hero-body">
+      <div class="hero-eyebrow">Mise en situation · 59 scènes</div>
+      <h2>Une scène, une décision</h2>
+      <p>3 min, comme sur la route — pas du code.</p>
+      <button class="cta">
+        <svg width="16" height="18" viewBox="0 0 16 18" fill="none" aria-hidden="true">
+          <path d="M2.5 2.3c0-1 1.1-1.6 1.9-1L14 7.2c.8.5.8 1.6 0 2.1L4.4 15.5c-.8.5-1.9 0-1.9-1V2.3Z" fill="#4a3fc9"/>
+        </svg>
+        Jouer une scène
+      </button>
+    </div>
+  </section>
+
+  <div class="seclabel">Aussi pour toi</div>
+
+  <div class="tiles">
+    <div class="tile violet">
+      <div class="badge-wrap"><img src="assets/cible.png" alt=""></div>
+      <div class="tile-txt">
+        <h3>Examen blanc</h3>
+        <p>Comme le jour J, noté sur 31</p>
+      </div>
+      <span class="meta">Record 87 %</span>
+    </div>
+
+    <div class="tile green">
+      <div class="badge-wrap"><img src="assets/livre.png" alt=""></div>
+      <div class="tile-txt">
+        <h3>Fiches de révision</h3>
+        <p>Le geste, pas le code</p>
+      </div>
+      <span class="meta">12 / 31</span>
+    </div>
+
+    <div class="tile amber">
+      <div class="badge-wrap"><img src="assets/panneau.png" alt=""></div>
+      <div class="tile-txt">
+        <h3>Centre d'examen</h3>
+        <p>Ton centre, le jour J</p>
+      </div>
+      <span class="meta">Cergy 95</span>
+    </div>
+  </div>
+
+</body>
+</html>
