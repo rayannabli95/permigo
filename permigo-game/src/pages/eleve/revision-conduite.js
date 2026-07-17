@@ -11,7 +11,6 @@ import { esc, escAttr } from "@/utils/escape.js";
 import { navigate } from "@/router.js";
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
-import { isSoloEleve } from "@/utils/league-bots.js";
 import { haptic } from "@/utils/haptic.js";
 import { mountPremiumQuiz } from "@/components/eleve/premium-quiz.js";
 import { quizByCode } from "@/data/quiz-conduite.js";
@@ -297,17 +296,22 @@ const STYLE = `<style>
   -webkit-tap-highlight-color:transparent; transition:transform .12s ease; }
 .rvs-now:active { transform:scale(.99); }
 .rvs-now::before { content:""; position:absolute; right:-40px; top:-40px; width:150px; height:150px; border-radius:50%;
-  background:radial-gradient(circle, color-mix(in srgb,var(--a,#f97316) 18%,transparent), transparent 70%); }
+  background:radial-gradient(circle, color-mix(in srgb,var(--a,#6c63ff) 18%,transparent), transparent 70%); }
 .rvs-now-k { position:relative; display:inline-flex; align-items:center; gap:7px; font:800 11px/1 'Inter',sans-serif;
   letter-spacing:.09em; text-transform:uppercase; color:var(--a-txt,var(--a));
-  background:color-mix(in srgb,var(--a,#f97316) 12%,transparent); padding:6px 10px; border-radius:999px; }
-.rvs-dot { width:7px; height:7px; border-radius:50%; background:var(--a,#f97316);
-  box-shadow:0 0 0 3px color-mix(in srgb,var(--a,#f97316) 25%,transparent); }
+  background:color-mix(in srgb,var(--a,#6c63ff) 12%,transparent); padding:6px 10px; border-radius:999px; }
+.rvs-dot { width:7px; height:7px; border-radius:50%; background:var(--a,#6c63ff);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--a,#6c63ff) 25%,transparent); }
 .rvs-now-t { position:relative; display:block; margin:11px 0 4px; font:800 20px/1.15 'Plus Jakarta Sans',sans-serif; letter-spacing:-.01em; }
 .rvs-now-meta { position:relative; display:flex; align-items:center; gap:7px; font:600 13px/1 'Inter',sans-serif; color:var(--mu,#64748b); }
 .rvs-chipm { background:var(--bg,#eef1f7); border-radius:6px; padding:3px 7px; font:800 11.5px/1 'Inter',sans-serif; color:var(--mu,#57617c); }
 .rvs-cta { position:relative; margin-top:14px; width:100%; height:54px; border-radius:16px;
-  background:linear-gradient(180deg,var(--a-lt),var(--a)); color:#fff;
+  /* Dégradé MÊME TEINTE (reflet clair → accent → foncé) : avec un skin
+     d'accent, --a-lt peut diverger de --a et le bouton devenait bicolore. */
+  background:linear-gradient(180deg,
+    color-mix(in srgb, var(--a) 88%, #fff) 0%,
+    var(--a) 50%,
+    var(--adk) 100%); color:#fff;
   box-shadow:0 5px 0 var(--adk), 0 10px 20px -6px color-mix(in srgb, var(--a) 50%, transparent);
   font:800 16px/1 'Plus Jakarta Sans',sans-serif; display:flex; align-items:center; justify-content:center; gap:9px; }
 .rvs-cta-ic { width:26px; height:26px; border-radius:8px; background:var(--adk); display:grid; place-items:center; }
@@ -319,7 +323,7 @@ const STYLE = `<style>
 .rvs-prog-x { color:var(--mu,#64748b); }
 .rvs-bar { margin-top:9px; height:9px; border-radius:99px; background:var(--bo3,#e2e7f1); overflow:hidden; }
 .rvs-bar > i { display:block; height:100%; border-radius:99px;
-  background:linear-gradient(90deg,var(--a,#f97316),color-mix(in srgb,var(--a,#f97316) 55%,#fff)); transition:width .5s ease; }
+  background:linear-gradient(90deg,var(--a,#6c63ff),color-mix(in srgb,var(--a,#6c63ff) 55%,#fff)); transition:width .5s ease; }
 
 .rvs-sec { margin:22px 2px 8px; font:800 12px/1 'Inter',sans-serif; letter-spacing:.06em; text-transform:uppercase; color:var(--mu2,#9aa3ba); }
 .rvs-list { display:flex; flex-direction:column; gap:10px; }
@@ -348,7 +352,7 @@ const STYLE = `<style>
 .rvs-grp-badge { flex:none; font:800 11px/1 'Inter',sans-serif; color:#fff;
   background:var(--mc,#6366f1); border-radius:999px; padding:6px 11px; white-space:nowrap; }
 .rvs-grp.is-done { opacity:.9; }
-.rvs-grp.is-done .rvs-grp-c { color:#16a34a; }
+.rvs-grp.is-done .rvs-grp-c { color:var(--gr-txt,#16a34a); }
 
 .rvs-extra { margin:22px 0 0; background:color-mix(in srgb,var(--ink,#141c30) 3%,var(--su,#fff));
   border:1px dashed var(--bo3,#d9dfec); border-radius:14px; padding:13px 14px; }
@@ -610,14 +614,11 @@ export async function mount(root, param) {
         </div>`;
 
     // ── Les 4 mondes : liste calme, une ligne = un monde, ouvre ses fiches ──
-    const MCOLOR = {
-      1: "linear-gradient(160deg,#818cf8,#6366f1)",
-      2: "linear-gradient(160deg,#2fe0c6,#17c9b2)",
-      3: "linear-gradient(160deg,#fbbf3f,#f59e0b)",
-      4: "linear-gradient(160deg,#f68a4f,#ec6a2e)",
-    };
-    // Couleur pleine (rail + pastille) pour différencier chaque monde d'un coup d'œil.
-    const MSOLID = { 1: "#6366f1", 2: "#17c9b2", 3: "#f59e0b", 4: "#ec6a2e" };
+    // Pivot 17/07 (Rayan, capture à l'appui : « ça surstimule mon cerveau ») :
+    // une SEULE teinte — l'accent du compte. La hiérarchie passe par le
+    // numéro, le monde EN COURS mis en avant et l'état ✓, pas par 4 couleurs.
+    const MCOLOR_ALL =
+      "linear-gradient(160deg, color-mix(in srgb, var(--a) 78%, #fff), var(--a))";
     const curMonde = nextF ? Number(nextF.monde) : null;
     const mondeRows = MONDES.map((m) => {
       const fm = fichesByMonde(m.n);
@@ -625,8 +626,8 @@ export async function mount(root, param) {
       const isCurrent = curMonde === m.n;
       const complete = fm.length > 0 && done === fm.length;
       const cls = `rvs-grp pg-loupe${isCurrent ? " is-current" : ""}${complete ? " is-done" : ""}`;
-      return `<button class="${cls}" data-monde="${m.n}" style="--mc:${MSOLID[m.n] || MSOLID[1]}">
-        <span class="rvs-num" style="background:${MCOLOR[m.n] || MCOLOR[1]}">${complete ? "✓" : m.n}</span>
+      return `<button class="${cls}" data-monde="${m.n}" style="--mc:var(--a)">
+        <span class="rvs-num" style="background:${MCOLOR_ALL}">${complete ? "✓" : m.n}</span>
         <span class="rvs-grp-t"><b>${esc(m.sous)}</b><span>${esc(m.nom)}</span></span>
         ${isCurrent ? `<span class="rvs-grp-badge">Reprendre</span>` : `<span class="rvs-grp-c">${done}/${fm.length}</span>`}
         ${chev}
@@ -638,7 +639,7 @@ export async function mount(root, param) {
         <button class="rvc-back" aria-label="Retour à l’accueil">←</button>
         <div class="rvs-head-tx">
           <h1 class="rvs-h1">Révise ta conduite</h1>
-          <p class="rvs-p">${isSoloEleve(getCurUser()) ? "Le geste, pas le code. Ici, tu t’entraînes à ton rythme." : `Le geste, pas le code. <b>Ton moniteur valide en vrai.</b> Ici, tu t’entraînes entre les leçons.`}</p>
+          <p class="rvs-p">Le geste, pas le code. Ici, tu prépares tes leçons de conduite, à ton rythme.</p>
         </div>
       </div>
 
@@ -655,8 +656,8 @@ export async function mount(root, param) {
       <div class="rvs-extra">
         <p>Pour t’entraîner autrement · optionnel</p>
         <div class="rvs-extra-row">
-          ${pf ? `<button class="rvs-mini" data-pf="${esc(pf.code)}"><span class="rvs-mini-ic" style="background:linear-gradient(160deg,#ffb257,#f97316)">${eclair}</span>Défi du jour · 1 min</button>` : ""}
-          <button class="rvs-mini" data-faute><span class="rvs-mini-ic" style="background:linear-gradient(160deg,#ff8a8a,#ef4444)">!</span>Trouve la faute</button>
+          ${pf ? `<button class="rvs-mini" data-pf="${esc(pf.code)}"><span class="rvs-mini-ic" style="background:linear-gradient(160deg, color-mix(in srgb, var(--a) 78%, #fff), var(--a))">${eclair}</span>Défi du jour · 1 min</button>` : ""}
+          <button class="rvs-mini" data-faute><span class="rvs-mini-ic" style="background:linear-gradient(160deg,var(--a),var(--adk))">!</span>Trouve la faute</button>
         </div>
       </div>
 
