@@ -62,3 +62,21 @@ export function isActive(sub) {
   if (!sub.current_period_end) return true;
   return new Date(sub.current_period_end) > new Date();
 }
+
+/**
+ * Statut d'accès MONITEUR (essai gratuit 14 j → abonnement requis). Source de
+ * vérité SERVEUR (RPC `moniteur_access_status`, non-spoofable côté client).
+ * Fail-open : en cas d'erreur réseau, on NE bloque PAS (mieux vaut un moniteur
+ * non payé qui passe qu'un légitime verrouillé sur un simple glitch).
+ * @returns {Promise<{gated:boolean, reason?:string, trial_ends_at?:string, days_left?:number}>}
+ */
+export async function getMoniteurAccess() {
+  try {
+    const { data, error } = await sb.rpc("moniteur_access_status");
+    if (error) throw error;
+    return data || { gated: false };
+  } catch (e) {
+    console.error("[billing] getMoniteurAccess", e);
+    return { gated: false, reason: "error" };
+  }
+}

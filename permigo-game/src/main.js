@@ -127,6 +127,14 @@ async function boot() {
       return;
     }
 
+    // Verrou moniteur (essai gratuit 14 j → abonnement). Statut calculé UNE
+    // fois au boot (RPC serveur) et attaché à `me` : accessGateFor le rejoue à
+    // chaque navigation sans re-fetch. Fail-open (ne bloque pas sur erreur).
+    if (me.role === "enseignant") {
+      const { getMoniteurAccess } = await import("@/services/billing.js");
+      me.moniteurAccess = await getMoniteurAccess();
+    }
+
     // Murs d'accès (consentement parental mineur, onboarding élève neuf).
     // Source unique partagée avec le router (accessGateFor) → les deux chemins
     // — boot ET navigation par hash — appliquent EXACTEMENT les mêmes règles.

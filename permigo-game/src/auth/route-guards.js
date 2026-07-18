@@ -18,7 +18,19 @@
  * @returns {((app: HTMLElement, me: any) => Promise<void>) | null}
  */
 export function accessGateFor(me) {
-  if (!me || me.role !== "eleve") return null;
+  if (!me) return null;
+
+  // Moniteur : essai gratuit terminé ET pas d'abonnement actif → mur
+  // d'abonnement (aucun accès à l'espace moniteur tant que pas payé). Le statut
+  // `me.moniteurAccess` est calculé au boot par le serveur (cf. main.js).
+  if (me.role === "enseignant" && me.moniteurAccess?.gated) {
+    return async (app, m) => {
+      const { mount } = await import("@/pages/enseignant/abonnement-requis.js");
+      await mount(app, m);
+    };
+  }
+
+  if (me.role !== "eleve") return null;
 
   // Mineur (<15 ans) en attente du consentement parental → aucun accès.
   if (me.parental_consent_required && !me.parental_consent_given_at) {
