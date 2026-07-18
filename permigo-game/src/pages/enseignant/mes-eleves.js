@@ -462,9 +462,11 @@ const STYLE = `<style>
   .me-cl-hof-t { flex: 1; min-width: 0; font: 700 13px/1.2 'Inter', sans-serif; color: #1a1f2b; }
   .me-cl-hof-s { display: inline-flex; align-items: center; gap: 5px; font: 800 10.5px/1 'Inter', sans-serif; color: #b5610a; flex-shrink: 0; }
 
-  /* ── Tri segmenté (Par état / Nom / Progrès / Compétences) ── */
-  .me-seg { display: flex; gap: 4px; padding: 4px; margin: 0 0 14px; background: #eef0f6; border-radius: 13px; }
-  .me-seg-btn { flex: 1; min-height: 40px; padding: 8px 4px; border: 0; border-radius: 10px; background: transparent; color: #5a6188; font: 700 12px/1 'Inter', sans-serif; cursor: pointer; transition: background .15s, color .15s, box-shadow .15s, transform .1s; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
+  /* ── Tri segmenté (Par état / Nom / Progrès / Compétences / Engagement) ── */
+  /* flex:1 0 auto → remplit si large, scrolle horizontalement si trop étroit (5 items). */
+  .me-seg { display: flex; gap: 4px; padding: 4px; margin: 0 0 14px; background: #eef0f6; border-radius: 13px; overflow-x: auto; scrollbar-width: none; }
+  .me-seg::-webkit-scrollbar { display: none; }
+  .me-seg-btn { flex: 1 0 auto; min-height: 40px; padding: 8px 12px; border: 0; border-radius: 10px; background: transparent; color: #5a6188; font: 700 12px/1 'Inter', sans-serif; cursor: pointer; transition: background .15s, color .15s, box-shadow .15s, transform .1s; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
   .me-seg-btn.on { background: #fff; color: #4f46e5; box-shadow: 0 2px 6px -2px rgba(60,50,130,.25); }
   .me-seg-btn:active { transform: scale(.96); }
   .me-seg-btn:focus-visible { outline: 2px solid #4f46e5; outline-offset: 1px; }
@@ -479,6 +481,14 @@ const STYLE = `<style>
   .me-pill--prevu { color: #1d4ed8; background: #dbeafe; }
   .me-pill--repass{ color: #c2410c; background: #ffedd5; }
   .me-pill--recu  { color: #a16207; background: #fef9c3; }
+
+  /* ── Engagement « vautour » : pastille couleur (coup d'œil) + étiquette texte ── */
+  .me-engdot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-left: 1px; box-shadow: 0 0 0 2px #fff; }
+  .me-eng { display: inline-flex; align-items: center; flex-shrink: 0; font: 800 10.5px/1 'Inter', sans-serif; padding: 4px 9px; border-radius: 999px; white-space: nowrap; }
+  .me-eng--det { color: #4338ca; background: #e0e7ff; }
+  .me-eng--reg { color: #0e7490; background: #cffafe; }
+  .me-eng--dec { color: #b45309; background: #fef3c7; }
+  .me-eng--new { color: #64748b; background: #eef0f6; }
 </style>`;
 
 const INACTIF_SEUIL_MS = 14 * 86400000; // 14 jours
@@ -681,7 +691,7 @@ async function loadData() {
   //    Côté frontend on marquera ensuite les "attitrés" (enseignant_id = me.id)
   // Les 3 requêtes (élèves / validations / examens) sont indépendantes →
   // en parallèle (Promise.all) : le chargement = la plus lente, pas la somme.
-  const [elevesRes, valsRes, examsRes, provMap] = await Promise.all([
+  const [elevesRes, valsRes, examsRes, provMap, engRows] = await Promise.all([
     sb
       .from("profiles")
       .select("id, prenom, nom, enseignant_id, last_active_at, avatar_url")
@@ -701,7 +711,15 @@ async function loadData() {
     ),
     // Provenance CRM (RLS = mes élèves) → Map(eleve_id → {label,color}).
     fetchProvenanceMap(),
+    // Engagement « vautour » de tous mes élèves (RPC SECURITY DEFINER agrégée).
+    // Best-effort : si la RPC n'est pas déployée, la liste marche sans étiquette.
+    sb
+      .rpc("get_eleves_engagement")
+      .then((r) => r.data || [])
+      .catch(() => []),
   ]);
+  const engMap = new Map();
+  (engRows || []).forEach((r) => engMap.set(r.eleve_id, r));
   const { data: elevesRaw, error: e1 } = elevesRes;
 
   if (e1) {
@@ -805,6 +823,7 @@ async function loadData() {
         examStatut,
         examDate,
         readiness: computeReadiness(acquisSet, examStatut),
+        engagement: engMap.get(e.id) || null,
       };
     })
     // Mes élèves attitrés en haut, puis ceux que j'ai déjà validé, puis le reste
@@ -956,6 +975,7 @@ function render() {
           <button class="me-seg-btn ${_sort === "nom" ? "on" : ""}" data-sort="nom" type="button" aria-pressed="${_sort === "nom"}">Nom</button>
           <button class="me-seg-btn ${_sort === "progres" ? "on" : ""}" data-sort="progres" type="button" aria-pressed="${_sort === "progres"}">Progrès</button>
           <button class="me-seg-btn ${_sort === "comp" ? "on" : ""}" data-sort="comp" type="button" aria-pressed="${_sort === "comp"}">Compétences</button>
+          <button class="me-seg-btn ${_sort === "engagement" ? "on" : ""}" data-sort="engagement" type="button" aria-pressed="${_sort === "engagement"}">Engagement</button>
         </div>
         <div class="me-pipeline" id="me-pipeline">
           ${renderContent()}
@@ -1060,6 +1080,30 @@ function pillMed(cls) {
   return m ? medallion(m[0], m[1], { size: 20 }) : "";
 }
 
+// ─── Engagement « vautour » : niveau + pastille (déterminé/régulier/décroche) ──
+// Alimenté par get_eleves_engagement (RPC). rank = ordre de tri (motivés en tête).
+const ENG_TIER = {
+  determine: { cls: "det", label: "Déterminé", dot: "#4f46e5", rank: 0 },
+  regulier: { cls: "reg", label: "Régulier", dot: "#0e7490", rank: 1 },
+  decroche: { cls: "dec", label: "Décroche", dot: "#d97706", rank: 2 },
+  nouveau: { cls: "new", label: "Nouveau", dot: "#9aa3b2", rank: 3 },
+};
+function engMeta(e) {
+  return (e.engagement && ENG_TIER[e.engagement.tier]) || null;
+}
+// Petite pastille couleur (coup d'œil) — masquée pour « nouveau » (aucune donnée).
+function engDot(e) {
+  const m = engMeta(e);
+  if (!m || e.engagement.tier === "nouveau") return "";
+  return `<span class="me-engdot" style="background:${m.dot}" title="${escAttr(m.label)}" aria-label="Engagement : ${escAttr(m.label)}"></span>`;
+}
+// Étiquette texte complète (vue triée « Engagement »).
+function engPill(e) {
+  const m = engMeta(e);
+  if (!m) return "";
+  return `<span class="me-eng me-eng--${m.cls}">${esc(m.label)}</span>`;
+}
+
 // ─── Contenu : pipeline (par état) ou liste triée à plat ─────────
 function renderContent() {
   return _sort === "etat" ? renderPipeline() : renderRosterFlat();
@@ -1094,6 +1138,18 @@ function renderRosterFlat() {
     );
   } else if (_sort === "comp") {
     list = [...list].sort((a, b) => b.acquis - a.acquis);
+  } else if (_sort === "engagement") {
+    // Motivés en tête (déterminé → régulier → décroche → nouveau), puis le plus
+    // régulier (jours actifs 14 j), puis le plus récemment actif.
+    const rank = (e) => (engMeta(e) ? ENG_TIER[e.engagement.tier].rank : 3);
+    const ad = (e) => (e.engagement ? e.engagement.active_days_14 || 0 : 0);
+    const ds = (e) =>
+      e.engagement && e.engagement.days_since != null
+        ? e.engagement.days_since
+        : 9999;
+    list = [...list].sort(
+      (a, b) => rank(a) - rank(b) || ad(b) - ad(a) || ds(a) - ds(b),
+    );
   } else {
     // progrès récent (validations 21 j), avancement global en départage
     list = [...list].sort(
@@ -1250,11 +1306,16 @@ function renderBandRow(eleve, opts = {}) {
     rightLabel = `${eleve.acquis}/${eleve.total}`;
   }
 
-  // Vue triée à plat : pastille d'état + valeur droite = avancement X/31.
+  // Vue triée à plat : pastille d'état (ou d'engagement dans le tri « Engagement »)
+  // + valeur droite = avancement X/31.
   let pillHtml = "";
   if (withPill) {
-    const p = pillFor(eleve);
-    pillHtml = `<span class="me-pill me-pill--${p.cls}">${pillMed(p.cls)}${esc(p.label)}</span>`;
+    if (_sort === "engagement" && engMeta(eleve)) {
+      pillHtml = engPill(eleve);
+    } else {
+      const p = pillFor(eleve);
+      pillHtml = `<span class="me-pill me-pill--${p.cls}">${pillMed(p.cls)}${esc(p.label)}</span>`;
+    }
     rightLabel = `${eleve.acquis}/${eleve.total}`;
     rightClass = "me-pr";
   }
@@ -1264,6 +1325,7 @@ function renderBandRow(eleve, opts = {}) {
          aria-label="Ouvrir le livret de ${fullNom} — ${eleve.acquis}/${eleve.total} competences acquises${eleve.readiness === "recu" ? ", examen reussi" : eleve.readiness === "rate" ? ", examen a repasser" : eleve.readiness === "planifie" ? ", examen prevu" : eleve.readiness === "pret" ? ", pret pour l'examen" : eleve.aRelancer ? ", a relancer" : ""}">
       <div class="me-av" style="flex-shrink:0">${renderUserAvatar({ avatar_url: eleve.avatar_url, prenom: eleve.prenom, nom: eleve.nom }, 36)}</div>
       <span class="me-nom">${fullNom}</span>
+      ${engDot(eleve)}
       ${provenanceBadge(eleve.provenance)}
       <span class="me-prov-sp"></span>
       ${pillHtml}
