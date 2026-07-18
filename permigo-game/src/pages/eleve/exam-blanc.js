@@ -6,6 +6,8 @@
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { esc, escAttr } from "@/utils/escape.js";
+import { getLang } from "@/utils/lang.js";
+import { examTr, examUi } from "@/data/parcours-quiz-i18n.js";
 import { icon } from "@/utils/icons.js";
 import { medallion } from "@/utils/medallions.js";
 import { track } from "@/services/analytics.js";
@@ -77,16 +79,42 @@ function clearExamTimer() {
 // les données → la bonne réponse tombe toujours à la même place (souvent la 1re).
 // On clone la question : les données sources (QUESTIONS) restent intactes, et le
 // même objet mélangé sert au rendu ET au score (cohérence garantie).
+// i18n : traduction affichée, français gardé dessous (arabe RTL par span, l'app
+// reste LTR). Sans traduction (fr ou question absente) → rendu FR d'origine.
+function examBi(fr, tr) {
+  const lang = getLang();
+  if (lang === "fr" || tr == null || tr === "") return esc(fr);
+  const rtl = lang === "ar" ? ' dir="rtl" lang="ar"' : "";
+  return (
+    `<span class="exb-tr"${rtl}>${esc(tr)}</span>` +
+    `<span class="exb-fr" lang="fr" dir="ltr">${esc(fr)}</span>`
+  );
+}
+
 function withShuffledOptions(q) {
   const idx = q.options.map((_, i) => i);
   for (let i = idx.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [idx[i], idx[j]] = [idx[j], idx[i]];
   }
+  // Traduction de la langue courante, permutée avec le MÊME idx que le FR
+  // (options mélangées → la trad suit le mélange). Attachée ici = tous les
+  // modes (parcours / officiel / révision) en profitent d'un coup.
+  const lang = getLang();
+  const t = lang !== "fr" ? examTr(q.id, lang) : null;
+  const tOk =
+    t && Array.isArray(t.options) && t.options.length === q.options.length;
   return {
     ...q,
     options: idx.map((i) => q.options[i]),
     correct: idx.indexOf(q.correct),
+    tr: tOk
+      ? {
+          enonce: t.enonce,
+          explication: t.explication,
+          options: idx.map((i) => t.options[i]),
+        }
+      : undefined,
   };
 }
 
@@ -210,7 +238,7 @@ function renderChoices(q) {
               (opt, i) => `
             <button class="exb-choice" data-idx="${i}" aria-pressed="false">
               <span class="exb-choice-letter">${String.fromCharCode(65 + i)}</span>
-              <span class="exb-choice-text">${esc(opt)}</span>
+              <span class="exb-choice-text">${examBi(opt, q.tr?.options?.[i])}</span>
             </button>`,
             )
             .join("")}
@@ -227,10 +255,10 @@ function renderQuestionBody(
 ) {
   return `<div class="exb-qbody" id="exb-qbody">
         ${mascot ? `<img class="exb-mascot" src="/skins/mascot-${esc(mascotState)}.png" alt="" aria-hidden="true" />` : ""}
-        <p class="exb-qnum">Question ${num}</p>
+        <p class="exb-qnum">${esc(examUi("qNum", "Question"))} ${num}</p>
         <div class="exb-qhead">
           ${muteButtonHTML()}
-          <p class="exb-qtext">${esc(q.enonce)}</p>
+          <p class="exb-qtext">${examBi(q.enonce, q.tr?.enonce)}</p>
         </div>
         ${q.image ? `<img class="exb-qimg" src="${esc(q.image)}" alt="Panneau routier à identifier" />` : visualSlot(q.enonce)}
         ${renderChoices(q)}
@@ -252,6 +280,7 @@ function renderFeedbackBlock({
   isCorrect,
   correct,
   explication,
+  explicationTr,
   isLast,
   lastLabel,
   faute = false,
@@ -259,20 +288,21 @@ function renderFeedbackBlock({
 }) {
   const banner =
     !isCorrect && faute
-      ? `<div class="exb-faute-banner">${medallion("panneau", "red", { size: 22 })}<span>À l’examen, cette faute est éliminatoire. Mieux vaut la corriger ici.</span></div>`
+      ? `<div class="exb-faute-banner">${medallion("panneau", "red", { size: 22 })}<span>${esc(examUi("faute", "À l’examen, cette faute est éliminatoire. Mieux vaut la corriger ici."))}</span></div>`
       : "";
   const verdict = isCorrect
-    ? "✓ Bonne réponse"
-    : (timedOut ? "⏱ Temps écoulé · " : "") +
-      "La bonne réponse était la " +
+    ? "✓ " + esc(examUi("verdictOk", "Bonne réponse"))
+    : (timedOut ? "⏱ " + esc(examUi("timeout", "Temps écoulé")) + " · " : "") +
+      esc(examUi("answerWas", "La bonne réponse était la")) +
+      " " +
       esc(String.fromCharCode(65 + correct));
   return `
     ${banner}
     <div class="exb-feedback-verdict ${isCorrect ? "exb-feedback-verdict--ok" : "exb-feedback-verdict--ko"}">
       ${verdict}
     </div>
-    <p class="exb-feedback-explication">${esc(explication)}</p>
-    <button class="exb-next-btn" id="exb-next">${isLast ? esc(lastLabel) : "Question suivante →"}</button>
+    <p class="exb-feedback-explication">${examBi(explication, explicationTr)}</p>
+    <button class="exb-next-btn" id="exb-next">${isLast ? esc(lastLabel) : esc(examUi("next", "Question suivante →"))}</button>
   `;
 }
 
@@ -514,6 +544,7 @@ function runExbQuiz(
         isCorrect,
         correct: q.correct,
         explication: q.explication,
+        explicationTr: q.tr?.explication,
         isLast: idx + 1 >= questions.length,
         lastLabel: feedbackLast,
         faute: feedbackFaute && q.tags?.includes("faute_eliminatoire"),
@@ -644,10 +675,10 @@ function showResults(root, questions, answers, parcours_id) {
           .map(
             ({ q, chosen }) => `
           <div class="exb-recap-item">
-            <p class="exb-recap-enonce">${esc(q.enonce)}</p>
+            <p class="exb-recap-enonce">${examBi(q.enonce, q.tr?.enonce)}</p>
             ${chosen !== null ? `<p class="exb-recap-wrong">Ta réponse : <strong>${esc(q.options[chosen])}</strong></p>` : ""}
             <p class="exb-recap-correct">Bonne réponse : <strong>${esc(q.options[q.correct])}</strong></p>
-            <p class="exb-recap-explication">${esc(q.explication)}</p>
+            <p class="exb-recap-explication">${examBi(q.explication, q.tr?.explication)}</p>
           </div>
         `,
           )
@@ -836,14 +867,14 @@ function showOfficielResults(root, questions, answers, startedAt) {
           .map(
             ({ q, chosen }) => `
           <div class="exb-recap-item">
-            <p class="exb-recap-enonce">${esc(q.enonce)}</p>
+            <p class="exb-recap-enonce">${examBi(q.enonce, q.tr?.enonce)}</p>
             ${
               chosen != null && chosen >= 0
                 ? `<p class="exb-recap-wrong">Ta réponse : <strong>${esc(q.options[chosen])}</strong></p>`
                 : `<p class="exb-recap-wrong">Pas de réponse · temps écoulé</p>`
             }
             <p class="exb-recap-correct">Bonne réponse : <strong>${esc(q.options[q.correct])}</strong></p>
-            <p class="exb-recap-explication">${esc(q.explication)}</p>
+            <p class="exb-recap-explication">${examBi(q.explication, q.tr?.explication)}</p>
           </div>`,
           )
           .join("")}
@@ -1023,10 +1054,10 @@ function showRevisionResults(
           .map(
             ({ q, chosen }) => `
           <div class="exb-recap-item">
-            <p class="exb-recap-enonce">${esc(q.enonce)}</p>
+            <p class="exb-recap-enonce">${examBi(q.enonce, q.tr?.enonce)}</p>
             ${chosen != null ? `<p class="exb-recap-wrong">Ta réponse : <strong>${esc(q.options[chosen])}</strong></p>` : ""}
             <p class="exb-recap-correct">Bonne réponse : <strong>${esc(q.options[q.correct])}</strong></p>
-            <p class="exb-recap-explication">${esc(q.explication)}</p>
+            <p class="exb-recap-explication">${examBi(q.explication, q.tr?.explication)}</p>
           </div>`,
           )
           .join("")}
@@ -1326,6 +1357,18 @@ const EXB_CSS = `
   color: var(--ink);
   flex: 1;
 }
+/* Bilingue (en/ar) : traduction affichée, français gardé dessous (arabe RTL par
+   span — l'app reste LTR). Voir lang.js + parcours-quiz-i18n.js. */
+.exb-tr { display: block; }
+.exb-fr {
+  display: block;
+  margin-top: 3px;
+  font-weight: 400;
+  opacity: .6;
+  font-size: .86em;
+}
+.exb-qtext .exb-fr { font-size: .6em; line-height: 1.35; }
+.exb-recap-enonce .exb-fr { font-size: .82em; }
 
 /* ── Feedback ── */
 .exb-feedback {
