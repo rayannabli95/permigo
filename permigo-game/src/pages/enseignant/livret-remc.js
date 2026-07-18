@@ -524,6 +524,61 @@ const STYLE = `<style>
     .lr-success-check { animation: none; }
     .lr-success-fill { transition: none; }
   }
+
+  /* ── Bloc « Engagement » (vue vautour : régularité, quiz, fiches lues) ── */
+  .lr-eng {
+    margin: 0 16px 12px; padding: 15px 15px 13px;
+    background: var(--su); border: 1px solid var(--bo);
+    border-radius: var(--r-xl); box-shadow: var(--ens-shadow, var(--s1));
+  }
+  .lr-eng-hd {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px; margin-bottom: 12px;
+  }
+  .lr-eng-ti {
+    font: 600 11px/1 var(--ens-body, 'Inter'), sans-serif; color: var(--mu2);
+    text-transform: uppercase; letter-spacing: .08em;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .lr-eng-ti svg { color: var(--a); }
+  /* Étiquette de niveau d'engagement (grammaire partagée avec la liste) */
+  .lr-tier {
+    display: inline-flex; align-items: center; gap: 6px;
+    font: 800 11px/1 var(--ens-body, 'Inter'), sans-serif;
+    padding: 6px 11px 6px 9px; border-radius: var(--r-full); white-space: nowrap;
+  }
+  .lr-tier-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+  .lr-tier--determine { color: #4f46e5; background: rgba(79,70,229,.10);  border: 1px solid rgba(79,70,229,.28); }
+  .lr-tier--regulier  { color: #0e7490; background: rgba(8,145,178,.10);  border: 1px solid rgba(8,145,178,.26); }
+  .lr-tier--decroche  { color: #b45309; background: rgba(245,158,11,.13); border: 1px solid rgba(245,158,11,.32); }
+  .lr-tier--nouveau   { color: var(--mu2); background: var(--bo3); border: 1px solid var(--bo); }
+  .lr-eng-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; }
+  .lr-eng-cell {
+    background: var(--bg); border: 1px solid var(--bo2); border-radius: 12px;
+    padding: 11px 12px; min-width: 0;
+  }
+  .lr-eng-k {
+    font: 600 10px/1 var(--ens-body, 'Inter'), sans-serif; color: var(--mu2);
+    text-transform: uppercase; letter-spacing: .04em; margin-bottom: 7px;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .lr-eng-k svg { flex-shrink: 0; opacity: .8; }
+  .lr-eng-v {
+    font: 800 18px/1.05 var(--ens-display, 'Fredoka'), sans-serif; color: var(--ink);
+    letter-spacing: -.02em; display: flex; align-items: baseline; gap: 5px; flex-wrap: wrap;
+  }
+  .lr-eng-u { font: 600 11px/1 var(--ens-body, 'Inter'), sans-serif; color: var(--mu2); }
+  .lr-eng-cell--cold .lr-eng-v { color: #b45309; }
+  .lr-eng-trend { font: 800 12px/1 var(--ens-body, 'Inter'), sans-serif; }
+  .lr-eng-trend--up   { color: #15803d; }
+  .lr-eng-trend--down { color: #b91c1c; }
+  .lr-eng-foot {
+    margin-top: 11px; padding-top: 10px; border-top: 1px solid var(--bo2);
+    font: 600 12px/1.4 var(--ens-body, 'Inter'), sans-serif; color: var(--mu2);
+    display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
+  }
+  .lr-eng-foot svg { color: #f59e0b; vertical-align: -2px; }
+  .lr-eng-sep { color: var(--bo4); }
 </style>`;
 
 // ─── State ────────────────────────────────────────────────────────
@@ -537,6 +592,7 @@ let _valsRaw = []; // validations brutes (avec validated_at) — pour l'analyse 
 let _quizAttempts = []; // quiz_attempts (avec completed_at) — pour l'analyse profil
 let _streakEff = 0; // streak RÉEL (vivant seulement si actif aujourd'hui/hier)
 let _theory = null; // { score, nComp, nExams } — ligue Révision (autonomie élève)
+let _engagement = null; // vue « vautour » : activité/régularité/fiches lues (RPC serveur)
 let _sheetComp = null; // { c, n } la comp ouverte dans le sheet
 let _sheetStatut = null;
 let _sheetNote = "";
@@ -653,6 +709,20 @@ async function loadData() {
   } catch (e) {
     _streakEff = 0;
   }
+
+  // Engagement « vautour » : activité in-app, régularité, fiches de conduite
+  // lues (events_analytics), heure préférée — agrégé serveur (RPC SECURITY
+  // DEFINER, RLS = mes élèves). Best-effort : si la RPC n'est pas encore
+  // déployée ou renvoie null, le bloc ne s'affiche simplement pas.
+  try {
+    const { data: eng } = await sb.rpc("get_eleve_engagement", {
+      p_eleve_id: _eleveId,
+      p_days: 30,
+    });
+    _engagement = eng || null;
+  } catch (e) {
+    _engagement = null;
+  }
 }
 
 // Streak réellement vivant : la valeur stockée ne se reset qu'au prochain login
@@ -757,6 +827,87 @@ function _renderTheoryRow() {
     <div style="font:500 11px/1.4 var(--ens-body,'Inter'),sans-serif;color:var(--mu2);margin-top:4px">${detail}</div>`;
 }
 
+// ─── Carte « Engagement » (vue vautour) ──────────────────────────
+// Agrégé serveur (get_eleve_engagement) : régularité, quiz + tendance, fiches
+// de conduite lues, heure préférée, niveau d'engagement. Best-effort : rien à
+// afficher si la RPC n'a pas répondu (bloc masqué, pas d'erreur à l'écran).
+const _TIER_LABEL = {
+  determine: { lbl: "Déterminé·e", cls: "determine" },
+  regulier: { lbl: "Régulier·e", cls: "regulier" },
+  decroche: { lbl: "Décroche", cls: "decroche" },
+  nouveau: { lbl: "Pas encore actif·ve", cls: "nouveau" },
+};
+
+function _renderEngagementCard() {
+  const e = _engagement;
+  if (!e) return "";
+  const t = _TIER_LABEL[e.tier] || _TIER_LABEL.nouveau;
+
+  // Dernière activité (relatif, ton factuel)
+  const ds = e.days_since;
+  let lastTxt;
+  if (ds == null) lastTxt = "aucune";
+  else if (ds <= 0) lastTxt = "aujourd’hui";
+  else if (ds === 1) lastTxt = "hier";
+  else if (ds < 7) lastTxt = `il y a ${ds} j`;
+  else if (ds < 30) lastTxt = `il y a ${Math.round(ds / 7)} sem`;
+  else lastTxt = `il y a ${Math.floor(ds / 30)} mois`;
+  const cold = ds != null && ds >= 10;
+
+  // Tendance quiz : 7 derniers jours vs 7 précédents
+  const q7 = Number(e.quiz_7d) || 0;
+  const qp = Number(e.quiz_prev_7d) || 0;
+  const delta = q7 - qp;
+  const trend =
+    delta > 0
+      ? `<span class="lr-eng-trend lr-eng-trend--up">↑ ${delta}</span>`
+      : delta < 0
+        ? `<span class="lr-eng-trend lr-eng-trend--down">↓ ${Math.abs(delta)}</span>`
+        : "";
+
+  const activeDays = Number(e.active_days) || 0;
+  const fiches = Number(e.fiches_read) || 0;
+  const streak = Number(e.streak) || 0;
+  const hour = Number.isInteger(e.optimal_hour) ? e.optimal_hour : null;
+
+  const foot = [];
+  if (streak >= 2)
+    foot.push(
+      `${icon("flame", { size: 13, strokeWidth: 2.3 })} Série de ${streak} jours`,
+    );
+  if (hour != null) foot.push(`Plutôt actif·ve vers ${hour} h`);
+  const footHtml = foot.length
+    ? `<div class="lr-eng-foot">${foot.join(' <span class="lr-eng-sep">·</span> ')}</div>`
+    : "";
+
+  return `
+    <div class="lr-eng">
+      <div class="lr-eng-hd">
+        <span class="lr-eng-ti">${icon("activity", { size: 13, strokeWidth: 2.3 })} Engagement</span>
+        <span class="lr-tier lr-tier--${t.cls}"><span class="lr-tier-dot"></span>${t.lbl}</span>
+      </div>
+      <div class="lr-eng-grid">
+        <div class="lr-eng-cell${cold ? " lr-eng-cell--cold" : ""}">
+          <div class="lr-eng-k">${icon("clock", { size: 12, strokeWidth: 2.2 })} Dernière activité</div>
+          <div class="lr-eng-v">${esc(lastTxt)}</div>
+        </div>
+        <div class="lr-eng-cell">
+          <div class="lr-eng-k">${icon("calendar", { size: 12, strokeWidth: 2.2 })} Jours actifs</div>
+          <div class="lr-eng-v">${activeDays}<span class="lr-eng-u">/ 30 j</span></div>
+        </div>
+        <div class="lr-eng-cell">
+          <div class="lr-eng-k">${icon("zap", { size: 12, strokeWidth: 2.2 })} Quiz (7 j)</div>
+          <div class="lr-eng-v">${q7} ${trend}</div>
+        </div>
+        <div class="lr-eng-cell">
+          <div class="lr-eng-k">${icon("book-open", { size: 12, strokeWidth: 2.2 })} Fiches lues</div>
+          <div class="lr-eng-v">${fiches}</div>
+        </div>
+      </div>
+      ${footHtml}
+    </div>`;
+}
+
 // ─── Render principal ─────────────────────────────────────────────
 function render() {
   const acquis = Object.values(_validationsMap).filter(
@@ -800,6 +951,8 @@ function render() {
         </div>
         ${_renderTheoryRow()}
       </div>
+
+      ${_renderEngagementCard()}
 
       ${_renderProfilCard()}
 
