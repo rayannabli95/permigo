@@ -22,6 +22,13 @@ import {
   getFiche,
   fichesByMonde,
 } from "@/data/fiches-conduite.js";
+import { getLang } from "@/utils/lang.js";
+import {
+  FICHES_I18N,
+  FICHE_QUIZ_I18N,
+  MONDES_I18N,
+  RVC_UI,
+} from "@/data/fiches-i18n.js";
 
 const LS_KEY = "rvc_revised_v1"; // { [code]: isoDate }
 const LS_READ_KEY = "rvc_read_v1"; // { [code]: 1 } — fiche déjà déroulée (relecture = tout affiché)
@@ -268,6 +275,9 @@ const FD_STYLE = `<style>
   box-shadow:0 4px 0 rgba(20,12,60,.3), inset 0 1px 0 rgba(255,255,255,.9); transition:transform .1s ease; }
 .fd-secondary:active{ transform:translateY(2px); box-shadow:0 2px 0 rgba(20,12,60,.3), inset 0 1px 0 rgba(255,255,255,.9); }
 .fd-secondary span{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:13px; color:#3d2f7a; }
+/* i18n : traduction affichée + français gardé dessous (arabe RTL par span) */
+.fd-tr{ display:block; }
+.fd-fr{ display:block; margin-top:4px; font-size:.92em; font-weight:500; opacity:.62; }
 @media (prefers-reduced-motion: reduce){ .fd *{ transition:none!important; animation:none!important; } }
 </style>`;
 
@@ -438,12 +448,27 @@ const HUB_STYLE = `<style>
 export async function mount(root, param) {
   track("page_view", { page: "revision-conduite" });
 
+  // ── i18n : traduction affichée + français gardé dessous (arabe RTL par span).
+  // En 'fr' (ou sans traduction dispo), le rendu d'origine est STRICTEMENT inchangé.
+  // bi() = bloc bilingue (contenu pédago : gestes + cartes coach + quiz) ;
+  // T()/U() = libellé unique traduit (titres, boutons, noms de mondes).
+  const lang = getLang();
+  const rtl = lang === "ar";
+  const fTr = (c) => (lang !== "fr" ? FICHES_I18N[lang]?.[c] : null);
+  const mTr = (n) => (lang !== "fr" ? MONDES_I18N[lang]?.[n] : null);
+  const T = (fr, tr) => (lang !== "fr" && tr ? tr : fr);
+  const U = (key, fr) => T(fr, RVC_UI[lang]?.[key]);
+  const bi = (fr, tr) =>
+    lang === "fr" || !tr
+      ? esc(fr)
+      : `<span class="fd-tr"${rtl ? ' dir="rtl" lang="ar"' : ""}>${esc(tr)}</span><span class="fd-fr" lang="fr">${esc(fr)}</span>`;
+
   // Garde-fou : si les données ne sont pas chargées (build/JSON), on n'explose pas.
   if (!FICHES.length) {
     root.innerHTML = `${STYLE}<div class="rvc"><div class="rvc-top">
       <button class="rvc-back" aria-label="Retour">←</button>
-      <h1 class="rvc-h1">Révise ta conduite</h1></div>
-      <p class="rvc-sub" style="margin-top:20px">Les fiches arrivent très vite. Reviens dans un instant.</p></div>`;
+      <h1 class="rvc-h1">${esc(U("home_title", "Révise ta conduite"))}</h1></div>
+      <p class="rvc-sub" style="margin-top:20px">${esc(U("fallback_sub", "Les fiches arrivent très vite. Reviens dans un instant."))}</p></div>`;
     root
       .querySelector(".rvc-back")
       ?.addEventListener("click", () => navigate("#/"));
@@ -530,9 +555,9 @@ export async function mount(root, param) {
         const on = !!read[f.code];
         const next = i === firstUnread;
         return `<button class="wm-fiche${on ? " done" : ""}${next ? " next" : ""}" data-code="${escAttr(f.code)}">
-          ${next ? `<span class="wm-nextflag">à lire</span>` : ""}
+          ${next ? `<span class="wm-nextflag">${esc(U("read_flag", "à lire"))}</span>` : ""}
           <span class="wm-chk ${on ? "filled" : "empty"}">${on ? CHK : ""}</span>
-          <span class="wm-ft">${esc(f.titre)}</span>
+          <span class="wm-ft">${esc(T(f.titre, fTr(f.code)?.titre))}</span>
           <span class="wm-arw">${chev}</span>
         </button>`;
       })
@@ -543,13 +568,13 @@ export async function mount(root, param) {
         <button class="wm-back" aria-label="Retour aux mondes">${back}</button>
         <span class="wm-med"><img src="${badge}" alt="" loading="lazy"></span>
         <div class="wm-htx">
-          <h1 class="wm-name wm-gold">${esc(m.nom)}</h1>
-          <div class="wm-sub">${esc(m.sous)}</div>
+          <h1 class="wm-name wm-gold">${esc(T(m.nom, mTr(m.n)?.nom))}</h1>
+          <div class="wm-sub">${esc(T(m.sous, mTr(m.n)?.sous))}</div>
         </div>
       </div>
       <div class="wm-prog">
         <div class="wm-bar"><div class="wm-fill" style="width:${done ? Math.max(p, 5) : 0}%"></div></div>
-        <span class="wm-px">${done}/${fm.length} lues</span>
+        <span class="wm-px">${done}/${fm.length} ${esc(U("read_suffix", "lues"))}</span>
       </div>
       <div class="wm-list">${items}</div>
     </div>`;
@@ -593,22 +618,24 @@ export async function mount(root, param) {
       const badge = `/art/reviser/${BADGE_MONDE[m.n] || "cible"}.png`;
       const bar = `<span class="hub-mbar"><span class="hub-mf" style="width:${done ? Math.max(mpct, 5) : 0}%"></span></span>`;
       const xn = `<span class="hub-wxn">${done ? `<b>${done}</b>/` : "0/"}${fm.length}</span>`;
+      const nom = T(m.nom, mTr(m.n)?.nom);
+      const sous = T(m.sous, mTr(m.n)?.sous);
 
       if (curMonde === m.n && nextF) {
         // Monde en cours : agrandi, porte le bouton « Continuer ».
         return `<div class="hub-world active">
-          <span class="hub-flag"><span class="hub-pulse"></span>${firstEver ? "À commencer" : "En cours"}</span>
-          <button class="hub-ahead" data-monde="${m.n}" aria-label="Voir toutes les fiches — ${escAttr(m.nom)}">
+          <span class="hub-flag"><span class="hub-pulse"></span>${esc(firstEver ? U("flag_start", "À commencer") : U("flag_current", "En cours"))}</span>
+          <button class="hub-ahead" data-monde="${m.n}" aria-label="${escAttr(nom)}">
             <span class="hub-med"><img src="${badge}" alt="" loading="lazy"></span>
             <span class="hub-wbody">
-              <span class="hub-wname">${esc(m.nom)}</span>
-              <span class="hub-wsub">${esc(m.sous)}</span>
+              <span class="hub-wname">${esc(nom)}</span>
+              <span class="hub-wsub">${esc(sous)}</span>
               <span class="hub-wprog">${bar}${xn}</span>
             </span>
           </button>
           <button class="hub-resume" ${firstEver ? "data-first" : "data-next"} data-code="${escAttr(nextF.code)}">
             <span class="hub-play"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5-11-6.5z" fill="#5a3406"/></svg></span>
-            <span class="hub-rtxt"><span class="hub-rlab">${firstEver ? "Commencer" : read[nextF.code] ? "Relire" : "Continuer"}</span><span class="hub-rttl">${esc(nextF.titre)}</span></span>
+            <span class="hub-rtxt"><span class="hub-rlab">${esc(firstEver ? U("resume_start", "Commencer") : read[nextF.code] ? U("resume_reread", "Relire") : U("resume_continue", "Continuer"))}</span><span class="hub-rttl">${esc(T(nextF.titre, fTr(nextF.code)?.titre))}</span></span>
             <span class="hub-arw">${arw("#5a3406")}</span>
           </button>
         </div>`;
@@ -617,8 +644,8 @@ export async function mount(root, param) {
       return `<button class="hub-world" data-monde="${m.n}">
         <span class="hub-med"><img src="${badge}" alt="" loading="lazy"></span>
         <span class="hub-wbody">
-          <span class="hub-wname">${esc(m.nom)}</span>
-          <span class="hub-wsub">${esc(m.sous)}</span>
+          <span class="hub-wname">${esc(nom)}</span>
+          <span class="hub-wsub">${esc(sous)}</span>
           <span class="hub-wprog">${bar}${xn}</span>
         </span>
         <span class="hub-arw">${arw("#b8afd6")}</span>
@@ -632,17 +659,17 @@ export async function mount(root, param) {
     root.innerHTML = `${HUB_STYLE}<div class="hub">
       <div class="hub-hero">
         <button class="hub-back" aria-label="Retour à Réviser">${back}</button>
-        <h1 class="hub-title hub-gold">Révise ta conduite</h1>
+        <h1 class="hub-title hub-gold">${esc(U("home_title", "Révise ta conduite"))}</h1>
         <div class="hub-gauge">
           <span class="hub-ring" style="background:conic-gradient(#f4b24a 0 ${pct}%, rgba(20,12,60,.5) ${pct}% 100%)"></span>
           <span><b class="hub-gold">${lues}</b><small> / ${totalF}</small></span>
         </div>
       </div>
-      <div class="hub-kick">Tes 4 mondes</div>
+      <div class="hub-kick">${esc(U("worlds_kicker", "Tes 4 mondes"))}</div>
       <div class="hub-worlds">${worlds}</div>
       <div class="hub-extra">
-        ${pf ? `<button class="hub-chip" data-pf="${escAttr(pf.code)}"><span class="hub-ci">${lightning}</span><span class="hub-ct"><b>Défi du jour</b><span>1 min</span></span></button>` : ""}
-        <button class="hub-chip" data-faute><span class="hub-ci">${loupe}</span><span class="hub-ct"><b>Trouve la faute</b><span>Repère l’erreur</span></span></button>
+        ${pf ? `<button class="hub-chip" data-pf="${escAttr(pf.code)}"><span class="hub-ci">${lightning}</span><span class="hub-ct"><b>${esc(U("defi_title", "Défi du jour"))}</b><span>${esc(U("defi_sub", "1 min"))}</span></span></button>` : ""}
+        <button class="hub-chip" data-faute><span class="hub-ci">${loupe}</span><span class="hub-ct"><b>${esc(U("faute_title", "Trouve la faute"))}</b><span>${esc(U("faute_sub", "Repère l’erreur"))}</span></span></button>
       </div>
     </div>`;
     wireHome();
@@ -712,6 +739,23 @@ export async function mount(root, param) {
     // Texte « propre » (préfixe de section retiré) pour le jeu « remets dans l'ordre ».
     const flatSteps = grouped ? groups.flatMap((g) => g.steps) : steps;
 
+    // i18n : méthode traduite (raw, parallèle à f.methode). Pour les fiches
+    // « à sections », on re-groupe la traduction (préfixes « Libellé — » gardés)
+    // et on vérifie qu'elle s'aligne 1-pour-1 ; sinon repli propre (FR seul).
+    const tf = fTr(f.code);
+    const trMethode = tf?.methode || null;
+    const trGroups = grouped && trMethode ? groupSteps(trMethode) : null;
+    const gAligned =
+      !!trGroups &&
+      trGroups.length === groups.length &&
+      groups.every((g, gi) => trGroups[gi].steps.length === g.steps.length);
+    const flatTr = grouped
+      ? gAligned
+        ? trGroups.flatMap((g) => g.steps)
+        : null
+      : trMethode;
+    const flatStepsData = flatSteps.map((s, i) => ({ fr: s, tr: flatTr?.[i] }));
+
     const doneSet = new Set(
       (loadGestes()[f.code] || []).filter((i) => i < total),
     );
@@ -726,14 +770,14 @@ export async function mount(root, param) {
     const pct = total ? Math.round((count / total) * 100) : 0;
 
     const CHK = `<svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 6" stroke="#5a3406" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-    const card = (s, i) => {
+    const card = (s, tr, i) => {
       const done = doneSet.has(i);
       const next = i === firstUnchecked;
       return `<button class="fd-card${done ? " done" : ""}${next ? " next" : ""}" data-geste="${i}" aria-pressed="${done}">
-        ${next ? `<span class="fd-next-flag">à toi</span>` : ""}
+        ${next ? `<span class="fd-next-flag">${esc(U("next_flag", "à toi"))}</span>` : ""}
         <span class="fd-chk ${done ? "filled" : "empty"}">${done ? CHK : ""}</span>
         <span class="fd-num">${i + 1}</span>
-        <span class="fd-txt">${esc(s)}</span>
+        <span class="fd-txt">${bi(s, tr)}</span>
       </button>`;
     };
 
@@ -745,13 +789,20 @@ export async function mount(root, param) {
     if (grouped) {
       let idx = 0;
       deckHtml = groups
-        .map((g) => {
-          const cards = g.steps.map((s) => card(s, idx++)).join("");
-          return `${seclab(g.label || "La méthode")}<div class="fd-deck">${cards}</div>`;
+        .map((g, gi) => {
+          const cards = g.steps
+            .map((s, si) =>
+              card(s, gAligned ? trGroups[gi].steps[si] : undefined, idx++),
+            )
+            .join("");
+          const label = g.label
+            ? T(g.label, gAligned ? trGroups[gi].label : null)
+            : U("method_header", "La méthode");
+          return `${seclab(label)}<div class="fd-deck">${cards}</div>`;
         })
         .join("");
     } else {
-      deckHtml = `${seclab("La méthode")}<div class="fd-deck">${steps.map((s, i) => card(s, i)).join("")}</div>`;
+      deckHtml = `${seclab(U("method_header", "La méthode"))}<div class="fd-deck">${steps.map((s, i) => card(s, trMethode?.[i], i)).join("")}</div>`;
     }
 
     // Cartes coach : uniquement celles présentes dans la fiche (repli gracieux).
@@ -759,18 +810,38 @@ export async function mount(root, param) {
     const WHY_IC = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 18h6M9.5 21h5" stroke="#7c5fe0" stroke-width="1.8" stroke-linecap="round"/><path d="M12 3a6 6 0 0 1 3.6 10.8c-.7.5-1.1 1.2-1.1 2H9.5c0-.8-.4-1.5-1.1-2A6 6 0 0 1 12 3z" fill="#7c5fe0"/></svg>`;
     const AUTO_IC = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 13l1.6-4.4A2 2 0 0 1 7.5 7h9a2 2 0 0 1 1.9 1.6L20 13v5a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-1H7v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-5z" fill="#3f82d6"/><circle cx="7.2" cy="15.4" r="1.1" fill="#eaf3ff"/><circle cx="16.8" cy="15.4" r="1.1" fill="#eaf3ff"/></svg>`;
     const coach = [];
-    if (f.erreur) coach.push(["err", "L’erreur à éviter", f.erreur, ERR_IC]);
+    if (f.erreur)
+      coach.push([
+        "err",
+        U("err_label", "L’erreur à éviter"),
+        f.erreur,
+        tf?.erreur,
+        ERR_IC,
+      ]);
     if (f.pourquoi)
-      coach.push(["why", "Pourquoi ça compte", f.pourquoi, WHY_IC]);
-    if (f.bva) coach.push(["auto", "En boîte auto", f.bva, AUTO_IC]);
+      coach.push([
+        "why",
+        U("why_label", "Pourquoi ça compte"),
+        f.pourquoi,
+        tf?.pourquoi,
+        WHY_IC,
+      ]);
+    if (f.bva)
+      coach.push([
+        "auto",
+        U("bva_label", "En boîte auto"),
+        f.bva,
+        tf?.bva,
+        AUTO_IC,
+      ]);
     const coachHtml = coach.length
       ? `<div class="fd-coach-wrap">
-          <div class="fd-seclab"><h2>Cartes coach</h2><div class="line"></div></div>
+          <div class="fd-seclab"><h2>${esc(U("coach_header", "Cartes coach"))}</h2><div class="line"></div></div>
           <div class="fd-coach" style="grid-template-columns:repeat(${coach.length},1fr)">
             ${coach
               .map(
-                ([c, h, p, ic]) =>
-                  `<div class="fd-cc ${c}"><span class="fd-ic">${ic}</span><h4>${h}</h4><p>${esc(p)}</p></div>`,
+                ([c, h, pFr, pTr, ic]) =>
+                  `<div class="fd-cc ${c}"><span class="fd-ic">${ic}</span><h4>${esc(h)}</h4><p>${bi(pFr, pTr)}</p></div>`,
               )
               .join("")}
           </div>
@@ -779,7 +850,7 @@ export async function mount(root, param) {
 
     const srcChaines = sourceChannels(f);
     const srcHtml = srcChaines.length
-      ? `<div class="fd-source">Vu chez de vrais moniteurs : <b>${srcChaines.map((s) => esc(s)).join(", ")}</b></div>`
+      ? `<div class="fd-source">${esc(U("source_prefix", "Vu chez de vrais moniteurs :"))} <b>${srcChaines.map((s) => esc(s)).join(", ")}</b></div>`
       : "";
 
     const BACK = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="#3d2f7a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
@@ -789,12 +860,12 @@ export async function mount(root, param) {
       <div class="fd-hero">
         <div class="fd-topbar">
           <button class="fd-back" aria-label="Retour">${BACK}</button>
-          <span class="fd-tag"><span class="fd-dot"></span><b>${esc(f.code)} · ${esc(f.competence)} · Monde ${esc(String(f.monde))}</b></span>
+          <span class="fd-tag"><span class="fd-dot"></span><b>${esc(f.code)} · ${esc(T(f.competence, tf?.competence))} · ${esc(U("monde_word", "Monde"))} ${esc(String(f.monde))}</b></span>
         </div>
-        <h1 class="fd-title fd-gold">${esc(f.titre)}</h1>
-        <div class="fd-sub">Coche tes gestes, puis débloque le test.</div>
+        <h1 class="fd-title fd-gold">${esc(T(f.titre, tf?.titre))}</h1>
+        <div class="fd-sub">${esc(U("deck_sub", "Coche tes gestes, puis débloque le test."))}</div>
         <div class="fd-xp">
-          <div class="fd-xp-top"><span class="lab">Ton deck</span><span class="cnt fd-gold">${count}<small> / ${total} geste${total > 1 ? "s" : ""}</small></span></div>
+          <div class="fd-xp-top"><span class="lab">${esc(U("deck_label", "Ton deck"))}</span><span class="cnt fd-gold">${count}<small> / ${total} ${esc(total > 1 ? U("geste_plur", "gestes") : U("geste_sing", "geste"))}</small></span></div>
           <div class="fd-bar"><div class="fill" style="width:${count ? Math.max(pct, 4) : 0}%"></div></div>
         </div>
       </div>
@@ -805,15 +876,15 @@ export async function mount(root, param) {
       ${srcHtml}
 
       <div class="fd-actions">
-        <button class="fd-cta" data-quiz><span>Teste-toi</span></button>
-        ${total >= 3 ? `<button class="fd-secondary" data-order>${SHUF}<span>Remets dans l’ordre</span></button>` : ""}
+        <button class="fd-cta" data-quiz><span>${esc(U("cta_test", "Teste-toi"))}</span></button>
+        ${total >= 3 ? `<button class="fd-secondary" data-order>${SHUF}<span>${esc(U("cta_order", "Remets dans l’ordre"))}</span></button>` : ""}
       </div>
     </div>`;
 
-    wireFicheDeck(f, flatSteps);
+    wireFicheDeck(f, flatStepsData);
   }
 
-  function wireFicheDeck(f, flatSteps) {
+  function wireFicheDeck(f, flatStepsData) {
     root.querySelector(".fd-back")?.addEventListener("click", () => {
       view = "home";
       render();
@@ -842,9 +913,12 @@ export async function mount(root, param) {
     });
     root.querySelector("[data-order]")?.addEventListener("click", () => {
       orderPlaced = [];
-      const flat = flatSteps && flatSteps.length ? flatSteps : f.methode || [];
+      const flat =
+        flatStepsData && flatStepsData.length
+          ? flatStepsData
+          : (f.methode || []).map((s) => ({ fr: s }));
       orderPool = flat
-        .map((t, i) => ({ i, t }))
+        .map((d, i) => ({ i, t: d.fr, tr: d.tr }))
         .sort(() => Math.random() - 0.5);
       view = "order";
       render();
@@ -861,11 +935,17 @@ export async function mount(root, param) {
     if (orderPlaced.length === steps.length) {
       markRevised(code);
       haptic("success");
+      const doneSub = U(
+        "order_done_sub",
+        "Les {n} étapes de « {titre} » : pliées.",
+      )
+        .replace("{n}", steps.length)
+        .replace("{titre}", T(f.titre, fTr(f.code)?.titre));
       root.innerHTML = `${STYLE}<div class="rvc"><div class="rvc-done">
         <div class="rvc-done-e">${medallion("check", "green", { size: 64 })}</div>
-        <div class="rvc-done-t">Dans l’ordre, nickel !</div>
-        <p class="rvc-sub">Les ${steps.length} étapes de « ${esc(f.titre)} » : pliées.</p>
-        <button class="rvc-go" data-next>Continuer</button>
+        <div class="rvc-done-t">${esc(U("order_done_title", "Dans l’ordre, nickel !"))}</div>
+        <p class="rvc-sub">${esc(doneSub)}</p>
+        <button class="rvc-go" data-next>${esc(U("order_continue", "Continuer"))}</button>
       </div></div>`;
       root.querySelector("[data-next]").addEventListener("click", () => {
         view = "fiche";
@@ -876,22 +956,22 @@ export async function mount(root, param) {
     const placed = orderPlaced
       .map(
         (p, idx) =>
-          `<div class="rvc-oslot"><span class="rvc-onum">${idx + 1}</span><span>${esc(p.t)}</span></div>`,
+          `<div class="rvc-oslot"><span class="rvc-onum">${idx + 1}</span><span>${esc(T(p.t, p.tr))}</span></div>`,
       )
       .join("");
     const pool = orderPool
       .map(
         (p) =>
-          `<button class="rvc-ochip" data-oi="${p.i}">${esc(p.t)}</button>`,
+          `<button class="rvc-ochip" data-oi="${p.i}">${esc(T(p.t, p.tr))}</button>`,
       )
       .join("");
     root.innerHTML = `${STYLE}<div class="rvc">
       <div class="rvc-top">
         <button class="rvc-back" aria-label="Retour à la fiche">←</button>
-        <h1 class="rvc-h1" style="font-size:17px">${esc(f.titre)}</h1>
+        <h1 class="rvc-h1" style="font-size:17px">${esc(T(f.titre, fTr(f.code)?.titre))}</h1>
       </div>
       <div class="rvc-prog">${orderPlaced.length + 1} / ${steps.length}</div>
-      <p class="rvc-ohint">Dans le bon ordre. À toi.</p>
+      <p class="rvc-ohint">${esc(U("order_hint", "Dans le bon ordre. À toi."))}</p>
       ${placed}
       <div class="rvc-opool">${pool}</div>
     </div>`;
@@ -931,7 +1011,21 @@ export async function mount(root, param) {
 
   function renderQuiz() {
     const f = getFiche(code);
-    const questions = quizByCode(code);
+    // i18n : on attache la traduction (énoncé + options DANS LE MÊME ORDRE +
+    // explication) à chaque question. options_tr aligné → l'index de la bonne
+    // réponse (correction) n'est jamais touché. En 'fr', questions inchangées.
+    const qtr = lang !== "fr" ? FICHE_QUIZ_I18N[lang]?.[code] : null;
+    const questions = quizByCode(code).map((q, i) => {
+      const tr = qtr?.[i];
+      return tr
+        ? {
+            ...q,
+            q_tr: tr.q,
+            options_tr: tr.options,
+            explication_tr: tr.explication,
+          }
+        : q;
+    });
     if (!questions.length) {
       view = "fiche";
       return render();
@@ -940,7 +1034,7 @@ export async function mount(root, param) {
     mountPremiumQuiz(root, {
       questions,
       questHint: true, // ce quiz alimente la quête du jour (réussi = ≥70 %)
-      title: f ? f.titre : "Quiz",
+      title: f ? T(f.titre, fTr(f.code)?.titre) : "Quiz",
       onExit: (good, total) => {
         markRevised(code);
         track("revision_conduite_quiz_done", { code, good, total });
