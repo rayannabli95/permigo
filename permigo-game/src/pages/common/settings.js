@@ -23,6 +23,174 @@ import {
   isActive,
 } from "@/services/billing.js";
 
+// ── i18n de la COQUE Réglages : les libellés se traduisent (EN/AR) pour les
+// utilisateurs non-francophones. Les NOMS de langue du sélecteur restent tels
+// quels (Français / English / العربية). st(key, fr) = traduit-ou-français, esc
+// intégré (sûr en texte ET en attribut). En 'fr' ou clé absente → français.
+const SET_I18N = {
+  en: {
+    back: "Back",
+    page_title: "Preferences",
+    app_group: "App",
+    app_add_home: "Add to home screen",
+    app_add_home_aria: "Add PermiGo to home screen",
+    app_add_home_sub: "Open PermiGo in one tap, like a real app",
+    ens_group: "Your students",
+    ens_wheel: "Your rewards wheel",
+    ens_wheel_aria: "Set up your rewards wheel",
+    ens_wheel_sub: "Choose the prizes for your students, your brand",
+    sub_group: "Subscription",
+    sub_loading: "Loading…",
+    sub_cta: "Subscribe — €9.99/month",
+    notif_group: "Notifications",
+    notif_push: "Push notifications",
+    notif_push_sub: "Reminders and updates in your browser",
+    notif_push_aria: "Enable push notifications",
+    notif_email: "Email notifications",
+    notif_email_sub: "Weekly summary by email",
+    notif_email_aria: "Enable email notifications",
+    dnd: "Do not disturb",
+    dnd_auto: "Saved automatically",
+    dnd_from: "From",
+    dnd_to: "to",
+    priv_group: "Privacy",
+    priv_rank: "National ranking",
+    priv_rank_sub: "Appear in your school's rankings",
+    priv_rank_aria: "Appear in the ranking",
+    account_group: "My account",
+    account_firstname: "Display name",
+    account_firstname_sub: "Visible to your instructor",
+    account_firstname_ph: "Your first name",
+    save: "Save",
+    account_pwd: "Password",
+    account_pwd_sub: "Change via reset email",
+    edit_arrow: "Change →",
+    appear_group: "Appearance",
+    theme: "Theme",
+    theme_sub: "App appearance",
+    theme_light: "Light",
+    theme_dark: "Dark",
+    theme_auto: "System",
+    theme_aria: "Choose theme",
+    lang: "Language",
+    lang_sub: "Questions show in your language, with French kept below.",
+    lang_aria: "Choose language",
+    accent: "Accent colour",
+    accent_sub: "Don't like green? Pick your colour.",
+    accent_aria: "Choose accent colour",
+    sound: "Interface sounds",
+    sound_sub: "Sound feedback on actions and rewards",
+    sound_aria: "Enable interface sounds",
+    help_group: "Help",
+    help_tour: "Replay the getting-started guide",
+    help_tour_sub: "Restart the step-by-step tour",
+    replay_arrow: "Replay →",
+    data_group: "My data",
+    data_export: "Export my data",
+    data_export_sub: "Download a JSON file of all your data",
+    export_arrow: "Export →",
+    marketing: "Marketing emails",
+    marketing_sub: "Tips, news and PermiGo offers",
+    marketing_aria: "Receive marketing emails",
+    privacy_policy: "Privacy policy",
+    read_arrow: "Read →",
+    cgu: "Terms of use",
+    credits: "Credits & licences",
+    danger_group: "Danger zone",
+    delete_account: "Delete my account",
+    delete_account_sub: "Irreversible — all your data will be erased",
+    delete: "Delete",
+    load_err_title: "Couldn't load your preferences",
+    load_err_sub: "Check your connection, then try again.",
+    retry: "Try again",
+    prefs_saved: "Preferences saved",
+  },
+  ar: {
+    back: "رجوع",
+    page_title: "الإعدادات",
+    app_group: "التطبيق",
+    app_add_home: "أضف إلى الشاشة الرئيسية",
+    app_add_home_aria: "أضف بيرميغو إلى الشاشة الرئيسية",
+    app_add_home_sub: "افتح بيرميغو بلمسة واحدة، مثل تطبيق حقيقي",
+    ens_group: "طلابك",
+    ens_wheel: "عجلة مكافآتك",
+    ens_wheel_aria: "اضبط عجلة مكافآتك",
+    ens_wheel_sub: "اختر الجوائز لطلابك، بعلامتك",
+    sub_group: "الاشتراك",
+    sub_loading: "جارٍ التحميل…",
+    sub_cta: "اشترك — 9,99 € / شهر",
+    notif_group: "الإشعارات",
+    notif_push: "الإشعارات الفورية",
+    notif_push_sub: "تذكيرات وتحديثات في المتصفح",
+    notif_push_aria: "تفعيل الإشعارات الفورية",
+    notif_email: "إشعارات البريد الإلكتروني",
+    notif_email_sub: "ملخّص أسبوعي عبر البريد",
+    notif_email_aria: "تفعيل إشعارات البريد",
+    dnd: "عدم الإزعاج",
+    dnd_auto: "يُحفظ تلقائياً",
+    dnd_from: "من",
+    dnd_to: "إلى",
+    priv_group: "الخصوصية",
+    priv_rank: "التصنيف الوطني",
+    priv_rank_sub: "الظهور في تصنيفات مدرستك",
+    priv_rank_aria: "الظهور في التصنيف",
+    account_group: "حسابي",
+    account_firstname: "الاسم المعروض",
+    account_firstname_sub: "مرئي لمدرّبك",
+    account_firstname_ph: "اسمك",
+    save: "حفظ",
+    account_pwd: "كلمة المرور",
+    account_pwd_sub: "التغيير عبر بريد إعادة التعيين",
+    edit_arrow: "تغيير ←",
+    appear_group: "المظهر",
+    theme: "السمة",
+    theme_sub: "مظهر التطبيق",
+    theme_light: "فاتح",
+    theme_dark: "داكن",
+    theme_auto: "النظام",
+    theme_aria: "اختر السمة",
+    lang: "اللغة",
+    lang_sub: "تظهر الأسئلة بلغتك، مع الاحتفاظ بالفرنسية تحتها.",
+    lang_aria: "اختر اللغة",
+    accent: "لون التمييز",
+    accent_sub: "لا يعجبك الأخضر؟ اختر لونك.",
+    accent_aria: "اختر لون التمييز",
+    sound: "أصوات الواجهة",
+    sound_sub: "أصوات عند الإجراءات والمكافآت",
+    sound_aria: "تفعيل أصوات الواجهة",
+    help_group: "المساعدة",
+    help_tour: "إعادة دليل البدء",
+    help_tour_sub: "إعادة الجولة التعريفية خطوة بخطوة",
+    replay_arrow: "إعادة ←",
+    data_group: "بياناتي",
+    data_export: "تصدير بياناتي",
+    data_export_sub: "نزّل ملف JSON بكل بياناتك",
+    export_arrow: "تصدير ←",
+    marketing: "رسائل تسويقية",
+    marketing_sub: "نصائح وأخبار وعروض بيرميغو",
+    marketing_aria: "استلام الرسائل التسويقية",
+    privacy_policy: "سياسة الخصوصية",
+    read_arrow: "قراءة ←",
+    cgu: "شروط الاستخدام",
+    credits: "الحقوق والتراخيص",
+    danger_group: "منطقة حسّاسة",
+    delete_account: "حذف حسابي",
+    delete_account_sub: "لا رجعة فيه — ستُمحى كل بياناتك",
+    delete: "حذف",
+    load_err_title: "تعذّر تحميل إعداداتك",
+    load_err_sub: "تحقّق من اتصالك ثم أعد المحاولة.",
+    retry: "أعد المحاولة",
+    prefs_saved: "تم حفظ الإعدادات",
+  },
+};
+// Traduit-ou-français, avec esc() intégré (sûr en texte et en attribut ""). En
+// 'fr' ou si la clé manque → le français passé en 2e argument (jamais de vide).
+function st(key, fr) {
+  const l = getLang();
+  const v = l !== "fr" ? SET_I18N[l]?.[key] : null;
+  return esc(v || fr);
+}
+
 const STYLE = `<style>
 .st {
   max-width: 480px;
@@ -330,9 +498,9 @@ export async function mount(root, param) {
   ${renderHeader()}
   <div class="st-section" style="margin-top:20px;padding:28px 20px;text-align:center">
     <div style="margin-bottom:10px;color:var(--mu3)">${icon("alert-circle", { size: 30 })}</div>
-    <div style="font:700 15px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:6px">Impossible de charger tes préférences</div>
-    <div style="font:500 13px/1.5 'Inter',sans-serif;color:var(--mu3);margin-bottom:16px">Vérifie ta connexion, puis réessaie.</div>
-    <button class="st-save-btn" id="st-retry" style="margin:0 auto;width:auto;padding:10px 20px">Réessayer</button>
+    <div style="font:700 15px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:6px">${st("load_err_title", "Impossible de charger tes préférences")}</div>
+    <div style="font:500 13px/1.5 'Inter',sans-serif;color:var(--mu3);margin-bottom:16px">${st("load_err_sub", "Vérifie ta connexion, puis réessaie.")}</div>
+    <button class="st-save-btn" id="st-retry" style="margin:0 auto;width:auto;padding:10px 20px">${st("retry", "Réessayer")}</button>
   </div>
 </div>`;
     root
@@ -381,12 +549,12 @@ export async function mount(root, param) {
 function renderHeader() {
   return `
   <div class="st-header">
-    <button class="st-back" id="st-back" aria-label="Retour">
+    <button class="st-back" id="st-back" aria-label="${st("back", "Retour")}">
       <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="15 18 9 12 15 6"/>
       </svg>
     </button>
-    <div class="st-page-title">Préférences</div>
+    <div class="st-page-title">${st("page_title", "Préférences")}</div>
   </div>`;
 }
 
@@ -404,13 +572,13 @@ ${
     : `
   <!-- APPLICATION : install écran d'accueil (masqué si déjà installée / desktop) -->
   <div>
-    <div class="st-glabel">Application</div>
+    <div class="st-glabel">${st("app_group", "Application")}</div>
     <div class="st-section">
-      <div class="st-row tap" id="st-install-row" role="button" tabindex="0" aria-label="Ajouter PermiGo à l'écran d'accueil">
+      <div class="st-row tap" id="st-install-row" role="button" tabindex="0" aria-label="${st("app_add_home_aria", "Ajouter PermiGo à l'écran d'accueil")}">
         <span class="st-ic" aria-hidden="true">${medallion("fusee", "cyan", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
-          <div class="st-row-title">Ajouter à l'écran d'accueil</div>
-          <div class="st-row-sub">Ouvre PermiGo d'un geste, comme une vraie app</div>
+          <div class="st-row-title">${st("app_add_home", "Ajouter à l'écran d'accueil")}</div>
+          <div class="st-row-sub">${st("app_add_home_sub", "Ouvre PermiGo d'un geste, comme une vraie app")}</div>
         </div>
         <div class="st-row-action">${_CHEV}</div>
       </div>
@@ -422,13 +590,13 @@ ${
     ? `
   <!-- RÉCOMPENSES ÉLÈVES -->
   <div>
-    <div class="st-glabel">Tes élèves</div>
+    <div class="st-glabel">${st("ens_group", "Tes élèves")}</div>
     <div class="st-section">
-      <div class="st-row tap" id="st-recompenses-row" role="button" tabindex="0" aria-label="Régler ta roue de récompenses">
+      <div class="st-row tap" id="st-recompenses-row" role="button" tabindex="0" aria-label="${st("ens_wheel_aria", "Régler ta roue de récompenses")}">
         <span class="st-ic" aria-hidden="true">${medallion("cadeau", "orange", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
-          <div class="st-row-title">Ta roue de récompenses</div>
-          <div class="st-row-sub">Choisis les lots offerts à tes élèves, à ta marque</div>
+          <div class="st-row-title">${st("ens_wheel", "Ta roue de récompenses")}</div>
+          <div class="st-row-sub">${st("ens_wheel_sub", "Choisis les lots offerts à tes élèves, à ta marque")}</div>
         </div>
         <div class="st-row-action">${_CHEV}</div>
       </div>
@@ -437,17 +605,17 @@ ${
 
   <!-- ABONNEMENT (bêta moniteur indé) -->
   <div>
-    <div class="st-glabel">Abonnement</div>
+    <div class="st-glabel">${st("sub_group", "Abonnement")}</div>
     <div class="st-section">
       <div class="st-row col">
         <div class="st-rhead">
           <span class="st-ic" aria-hidden="true">${medallion("etoile", "gold", { size: 32, shape: "tile" })}</span>
           <div class="st-row-left">
             <div class="st-row-title">PermiGo Pro</div>
-            <div class="st-row-sub" id="st-sub-status">Chargement…</div>
+            <div class="st-row-sub" id="st-sub-status">${st("sub_loading", "Chargement…")}</div>
           </div>
         </div>
-        <button class="st-save-btn" id="st-subscribe" style="display:none;align-self:stretch;text-align:center">S'abonner — 9,99 €/mois</button>
+        <button class="st-save-btn" id="st-subscribe" style="display:none;align-self:stretch;text-align:center">${st("sub_cta", "S'abonner — 9,99 €/mois")}</button>
       </div>
     </div>
   </div>`
@@ -456,16 +624,16 @@ ${
 
   <!-- NOTIFICATIONS -->
   <div>
-    <div class="st-glabel">Notifications</div>
+    <div class="st-glabel">${st("notif_group", "Notifications")}</div>
     <div class="st-section">
       <div class="st-row">
         <span class="st-ic" aria-hidden="true">${medallion("cloche", "violet", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
-          <div class="st-row-title">Notifications push</div>
-          <div class="st-row-sub">Rappels et mises à jour dans le navigateur</div>
+          <div class="st-row-title">${st("notif_push", "Notifications push")}</div>
+          <div class="st-row-sub">${st("notif_push_sub", "Rappels et mises à jour dans le navigateur")}</div>
         </div>
         <div class="st-row-action">
-          <label class="st-tgl" aria-label="Activer notifications push">
+          <label class="st-tgl" aria-label="${st("notif_push_aria", "Activer notifications push")}">
             <input type="checkbox" id="tgl-push" ${prefs.notifPush ? "checked" : ""}>
             <span class="st-tgl-t"></span>
           </label>
@@ -474,11 +642,11 @@ ${
       <div class="st-row">
         <span class="st-ic" aria-hidden="true">${medallion("message", "blue", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
-          <div class="st-row-title">Notifications email</div>
-          <div class="st-row-sub">Résumé hebdomadaire par email</div>
+          <div class="st-row-title">${st("notif_email", "Notifications email")}</div>
+          <div class="st-row-sub">${st("notif_email_sub", "Résumé hebdomadaire par email")}</div>
         </div>
         <div class="st-row-action">
-          <label class="st-tgl" aria-label="Activer notifications email">
+          <label class="st-tgl" aria-label="${st("notif_email_aria", "Activer notifications email")}">
             <input type="checkbox" id="tgl-email" ${prefs.notifEmail ? "checked" : ""}>
             <span class="st-tgl-t"></span>
           </label>
@@ -488,14 +656,14 @@ ${
         <div class="st-rhead">
           <span class="st-ic" aria-hidden="true">${medallion("lune", "violet", { size: 32, shape: "tile" })}</span>
           <div class="st-row-left">
-            <div class="st-row-title">Ne pas déranger</div>
-            <div class="st-row-sub">Enregistré automatiquement</div>
+            <div class="st-row-title">${st("dnd", "Ne pas déranger")}</div>
+            <div class="st-row-sub">${st("dnd_auto", "Enregistré automatiquement")}</div>
           </div>
         </div>
         <div class="st-dnd st-expand">
-          <label for="inp-dnd-start">De</label>
+          <label for="inp-dnd-start">${st("dnd_from", "De")}</label>
           <input class="st-inp time" id="inp-dnd-start" type="time" step="60" value="${prefs.dndStart}" aria-label="Ne pas déranger : heure de début" style="flex:1">
-          <label for="inp-dnd-end">à</label>
+          <label for="inp-dnd-end">${st("dnd_to", "à")}</label>
           <input class="st-inp time" id="inp-dnd-end" type="time" step="60" value="${prefs.dndEnd}" aria-label="Ne pas déranger : heure de fin" style="flex:1">
         </div>
       </div>
@@ -504,16 +672,16 @@ ${
 
   <!-- CONFIDENTIALITÉ -->
   <div>
-    <div class="st-glabel">Confidentialité</div>
+    <div class="st-glabel">${st("priv_group", "Confidentialité")}</div>
     <div class="st-section">
       <div class="st-row">
         <span class="st-ic" aria-hidden="true">${medallion("trophee", "orange", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
-          <div class="st-row-title">Classement national</div>
-          <div class="st-row-sub">Apparaître dans les classements de ton école</div>
+          <div class="st-row-title">${st("priv_rank", "Classement national")}</div>
+          <div class="st-row-sub">${st("priv_rank_sub", "Apparaître dans les classements de ton école")}</div>
         </div>
         <div class="st-row-action">
-          <label class="st-tgl" aria-label="Apparaître dans le classement">
+          <label class="st-tgl" aria-label="${st("priv_rank_aria", "Apparaître dans le classement")}">
             <input type="checkbox" id="tgl-ranking" ${prefs.showInRanking ? "checked" : ""}>
             <span class="st-tgl-t"></span>
           </label>
@@ -524,29 +692,29 @@ ${
 
   <!-- MON COMPTE -->
   <div>
-    <div class="st-glabel">Mon compte</div>
+    <div class="st-glabel">${st("account_group", "Mon compte")}</div>
     <div class="st-section">
       <div class="st-row col">
         <div class="st-rhead">
           <span class="st-ic" aria-hidden="true">${medallion("profil", "violet", { size: 32, shape: "tile" })}</span>
           <div class="st-row-left">
-            <div class="st-row-title">Prénom affiché</div>
-            <div class="st-row-sub">Visible par ton moniteur</div>
+            <div class="st-row-title">${st("account_firstname", "Prénom affiché")}</div>
+            <div class="st-row-sub">${st("account_firstname_sub", "Visible par ton moniteur")}</div>
           </div>
         </div>
         <div class="st-inp-line st-expand">
-          <input class="st-inp" id="inp-prenom" type="text" value="${esc(prefs.prenom)}" maxlength="30" placeholder="Ton prénom" autocomplete="given-name" style="flex:1">
-          <button class="st-save-btn" id="btn-save-prenom">Enregistrer</button>
+          <input class="st-inp" id="inp-prenom" type="text" value="${esc(prefs.prenom)}" maxlength="30" placeholder="${st("account_firstname_ph", "Ton prénom")}" autocomplete="given-name" style="flex:1">
+          <button class="st-save-btn" id="btn-save-prenom">${st("save", "Enregistrer")}</button>
         </div>
       </div>
       <div class="st-row">
         <span class="st-ic" aria-hidden="true">${medallion("cle", "slate", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
-          <div class="st-row-title">Mot de passe</div>
-          <div class="st-row-sub">Modifier via email de réinitialisation</div>
+          <div class="st-row-title">${st("account_pwd", "Mot de passe")}</div>
+          <div class="st-row-sub">${st("account_pwd_sub", "Modifier via email de réinitialisation")}</div>
         </div>
         <div class="st-row-action">
-          <button class="st-btn-txt" id="btn-reset-pwd">Modifier →</button>
+          <button class="st-btn-txt" id="btn-reset-pwd">${st("edit_arrow", "Modifier →")}</button>
         </div>
       </div>
     </div>
@@ -554,31 +722,31 @@ ${
 
   <!-- APPARENCE -->
   <div>
-    <div class="st-glabel">Apparence</div>
+    <div class="st-glabel">${st("appear_group", "Apparence")}</div>
     <div class="st-section">
       <div class="st-row col">
         <div class="st-rhead">
           <span class="st-ic" aria-hidden="true">${medallion("lune", "indigo", { size: 32, shape: "tile" })}</span>
           <div class="st-row-left">
-            <div class="st-row-title">Thème</div>
-            <div class="st-row-sub">Apparence de l'application</div>
+            <div class="st-row-title">${st("theme", "Thème")}</div>
+            <div class="st-row-sub">${st("theme_sub", "Apparence de l'application")}</div>
           </div>
         </div>
-        <div class="st-theme-seg st-expand" id="theme-seg" role="group" aria-label="Choisir le thème">
-          <button class="st-theme-btn ${prefs.theme === "light" ? "active" : ""}" data-set-theme="light" aria-pressed="${prefs.theme === "light"}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg> Clair</button>
-          <button class="st-theme-btn ${prefs.theme === "dark" ? "active" : ""}" data-set-theme="dark" aria-pressed="${prefs.theme === "dark"}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg> Sombre</button>
-          <button class="st-theme-btn ${prefs.theme === "auto" ? "active" : ""}" data-set-theme="auto" aria-pressed="${prefs.theme === "auto"}">Système</button>
+        <div class="st-theme-seg st-expand" id="theme-seg" role="group" aria-label="${st("theme_aria", "Choisir le thème")}">
+          <button class="st-theme-btn ${prefs.theme === "light" ? "active" : ""}" data-set-theme="light" aria-pressed="${prefs.theme === "light"}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg> ${st("theme_light", "Clair")}</button>
+          <button class="st-theme-btn ${prefs.theme === "dark" ? "active" : ""}" data-set-theme="dark" aria-pressed="${prefs.theme === "dark"}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg> ${st("theme_dark", "Sombre")}</button>
+          <button class="st-theme-btn ${prefs.theme === "auto" ? "active" : ""}" data-set-theme="auto" aria-pressed="${prefs.theme === "auto"}">${st("theme_auto", "Système")}</button>
         </div>
       </div>
       <div class="st-row col">
         <div class="st-rhead">
           <span class="st-ic" aria-hidden="true" style="font-size:26px;line-height:1;display:flex;align-items:center;justify-content:center">🌍</span>
           <div class="st-row-left">
-            <div class="st-row-title">Langue</div>
-            <div class="st-row-sub">Les questions s'affichent dans ta langue, le français gardé dessous.</div>
+            <div class="st-row-title">${st("lang", "Langue")}</div>
+            <div class="st-row-sub">${st("lang_sub", "Les questions s'affichent dans ta langue, le français gardé dessous.")}</div>
           </div>
         </div>
-        <div class="st-theme-seg st-expand" id="lang-seg" role="group" aria-label="Choisir la langue">
+        <div class="st-theme-seg st-expand" id="lang-seg" role="group" aria-label="${st("lang_aria", "Choisir la langue")}">
           <button class="st-theme-btn ${prefs.language === "fr" ? "active" : ""}" data-set-lang="fr" aria-pressed="${prefs.language === "fr"}">Français</button>
           <button class="st-theme-btn ${prefs.language === "en" ? "active" : ""}" data-set-lang="en" aria-pressed="${prefs.language === "en"}">English</button>
           <button class="st-theme-btn ${prefs.language === "ar" ? "active" : ""}" data-set-lang="ar" aria-pressed="${prefs.language === "ar"}" lang="ar">العربية</button>
@@ -588,22 +756,22 @@ ${
         <div class="st-rhead">
           <span class="st-ic" aria-hidden="true">${medallion("crayon", "pink", { size: 32, shape: "tile" })}</span>
           <div class="st-row-left">
-            <div class="st-row-title">Couleur d'accent</div>
-            <div class="st-row-sub">Le vert ne te plaît pas ? Choisis ta couleur.</div>
+            <div class="st-row-title">${st("accent", "Couleur d'accent")}</div>
+            <div class="st-row-sub">${st("accent_sub", "Le vert ne te plaît pas ? Choisis ta couleur.")}</div>
           </div>
         </div>
-        <div class="st-accent-row st-expand" id="accent-row" role="group" aria-label="Choisir la couleur d'accent">
+        <div class="st-accent-row st-expand" id="accent-row" role="group" aria-label="${st("accent_aria", "Choisir la couleur d'accent")}">
           ${ACCENTS.map((p) => `<button class="st-accent-sw" type="button" data-accent="${p.id}" aria-pressed="${getAccent() === p.id}" aria-label="${esc(p.name)}" title="${esc(p.name)}" style="--sw:${p.a}"></button>`).join("")}
         </div>
       </div>
       <div class="st-row">
         <span class="st-ic" aria-hidden="true">${medallion("casque", "green", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
-          <div class="st-row-title">Sons d'interface</div>
-          <div class="st-row-sub">Retours sonores sur les actions et récompenses</div>
+          <div class="st-row-title">${st("sound", "Sons d'interface")}</div>
+          <div class="st-row-sub">${st("sound_sub", "Retours sonores sur les actions et récompenses")}</div>
         </div>
         <div class="st-row-action">
-          <label class="st-tgl" aria-label="Activer les sons d'interface">
+          <label class="st-tgl" aria-label="${st("sound_aria", "Activer les sons d'interface")}">
             <input type="checkbox" id="tgl-sound" ${isSoundEnabled() ? "checked" : ""}>
             <span class="st-tgl-t"></span>
           </label>
@@ -616,16 +784,16 @@ ${
     TOUR_CFG[me.role]
       ? `<!-- AIDE -->
   <div>
-    <div class="st-glabel">Aide</div>
+    <div class="st-glabel">${st("help_group", "Aide")}</div>
     <div class="st-section">
       <div class="st-row">
         <span class="st-ic" aria-hidden="true">${medallion("ampoule", "cyan", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
-          <div class="st-row-title">Revoir le guide de démarrage</div>
-          <div class="st-row-sub">Relance la visite guidée pas à pas</div>
+          <div class="st-row-title">${st("help_tour", "Revoir le guide de démarrage")}</div>
+          <div class="st-row-sub">${st("help_tour_sub", "Relance la visite guidée pas à pas")}</div>
         </div>
         <div class="st-row-action">
-          <button class="st-btn-txt" id="btn-replay-tour">Relancer →</button>
+          <button class="st-btn-txt" id="btn-replay-tour">${st("replay_arrow", "Relancer →")}</button>
         </div>
       </div>
     </div>
@@ -635,26 +803,26 @@ ${
 
   <!-- MES DONNÉES (RGPD) -->
   <div>
-    <div class="st-glabel">Mes données</div>
+    <div class="st-glabel">${st("data_group", "Mes données")}</div>
     <div class="st-section">
       <div class="st-row">
         <span class="st-ic" aria-hidden="true">${medallion("fiches", "green", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
-          <div class="st-row-title">Exporter mes données</div>
-          <div class="st-row-sub">Télécharge un fichier JSON de toutes tes données</div>
+          <div class="st-row-title">${st("data_export", "Exporter mes données")}</div>
+          <div class="st-row-sub">${st("data_export_sub", "Télécharge un fichier JSON de toutes tes données")}</div>
         </div>
         <div class="st-row-action">
-          <button class="st-btn-txt" id="btn-export-data">Exporter →</button>
+          <button class="st-btn-txt" id="btn-export-data">${st("export_arrow", "Exporter →")}</button>
         </div>
       </div>
       <div class="st-row">
         <span class="st-ic" aria-hidden="true">${medallion("megaphone", "orange", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
-          <div class="st-row-title">Emails marketing</div>
-          <div class="st-row-sub">Conseils, nouveautés et offres PermiGo</div>
+          <div class="st-row-title">${st("marketing", "Emails marketing")}</div>
+          <div class="st-row-sub">${st("marketing_sub", "Conseils, nouveautés et offres PermiGo")}</div>
         </div>
         <div class="st-row-action">
-          <label class="st-tgl" aria-label="Recevoir les emails marketing">
+          <label class="st-tgl" aria-label="${st("marketing_aria", "Recevoir les emails marketing")}">
             <input type="checkbox" id="tgl-marketing" ${prefs.marketingOptin ? "checked" : ""}>
             <span class="st-tgl-t"></span>
           </label>
@@ -663,28 +831,28 @@ ${
       <div class="st-row tap">
         <span class="st-ic" aria-hidden="true">${medallion("bouclier", "slate", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
-          <div class="st-row-title">Politique de confidentialité</div>
+          <div class="st-row-title">${st("privacy_policy", "Politique de confidentialité")}</div>
         </div>
         <div class="st-row-action">
-          <button class="st-btn-txt" id="btn-privacy">Lire →</button>
+          <button class="st-btn-txt" id="btn-privacy">${st("read_arrow", "Lire →")}</button>
         </div>
       </div>
       <div class="st-row tap">
         <span class="st-ic" aria-hidden="true">${medallion("livret", "slate", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
-          <div class="st-row-title">Conditions générales d'utilisation</div>
+          <div class="st-row-title">${st("cgu", "Conditions générales d'utilisation")}</div>
         </div>
         <div class="st-row-action">
-          <button class="st-btn-txt" id="btn-cgu">Lire →</button>
+          <button class="st-btn-txt" id="btn-cgu">${st("read_arrow", "Lire →")}</button>
         </div>
       </div>
       <div class="st-row tap">
         <span class="st-ic" aria-hidden="true">${medallion("coeur", "pink", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
-          <div class="st-row-title">Crédits & licences</div>
+          <div class="st-row-title">${st("credits", "Crédits & licences")}</div>
         </div>
         <div class="st-row-action">
-          <button class="st-btn-txt" id="btn-credits">Lire →</button>
+          <button class="st-btn-txt" id="btn-credits">${st("read_arrow", "Lire →")}</button>
         </div>
       </div>
     </div>
@@ -692,16 +860,16 @@ ${
 
   <!-- ZONE DANGER -->
   <div>
-    <div class="st-glabel" style="color:var(--rd-txt)">Zone critique</div>
+    <div class="st-glabel" style="color:var(--rd-txt)">${st("danger_group", "Zone critique")}</div>
     <div class="st-section st-danger">
       <div class="st-row">
         <span class="st-ic" aria-hidden="true">${medallion("faute", "red", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
-          <div class="st-row-title" style="color:var(--rd-txt)">Supprimer mon compte</div>
-          <div class="st-row-sub">Irréversible — toutes tes données seront effacées</div>
+          <div class="st-row-title" style="color:var(--rd-txt)">${st("delete_account", "Supprimer mon compte")}</div>
+          <div class="st-row-sub">${st("delete_account_sub", "Irréversible — toutes tes données seront effacées")}</div>
         </div>
         <div class="st-row-action">
-          <button class="st-btn-txt danger" id="btn-delete-account">Supprimer</button>
+          <button class="st-btn-txt danger" id="btn-delete-account">${st("delete", "Supprimer")}</button>
         </div>
       </div>
     </div>
@@ -800,7 +968,13 @@ function wire(root, me, prefs) {
       .eq("id", me.id);
     if (!error) {
       track("settings.prefs_saved", {});
-      toast("Préférences enregistrées", "success", 2000);
+      const _l = getLang();
+      toast(
+        (_l !== "fr" && SET_I18N[_l]?.prefs_saved) ||
+          "Préférences enregistrées",
+        "success",
+        2000,
+      );
     }
   }, 800);
 
