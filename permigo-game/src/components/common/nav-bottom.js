@@ -4,6 +4,28 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { haptic } from "@/utils/haptic.js";
+import { getLang } from "@/utils/lang.js";
+
+// i18n de la COQUE élève : libellés de nav traduits (l'app reste FR ; les
+// élèves non-francophones voient la nav dans leur langue). Clé = id d'onglet
+// ÉLÈVE uniquement — appliqué seulement si role === "eleve" (l'id "default"
+// est partagé avec les autres rôles, on ne veut pas traduire leur nav).
+const NAV_I18N = {
+  en: {
+    default: "Home",
+    reviser: "Practice",
+    parcours: "My licence",
+    recompenses: "Rewards",
+    profil: "Profile",
+  },
+  ar: {
+    default: "الرئيسية",
+    reviser: "المراجعة",
+    parcours: "رخصتي",
+    recompenses: "المكافآت",
+    profil: "الملف",
+  },
+};
 
 const ICO = {
   home: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>`,
@@ -326,20 +348,24 @@ export function mountBottomNav(role) {
   document.body.classList.remove("has-enseignant-fab");
 
   const tabs = TABS[role] || TABS.eleve;
+  // Traduction des libellés — élève uniquement (voir NAV_I18N).
+  const lang = getLang();
+  const nt = role === "eleve" && lang !== "fr" ? NAV_I18N[lang] : null;
   const nav = document.createElement("nav");
   nav.id = "bottom-nav";
   nav.dataset.role = role;
   nav.setAttribute("aria-label", "Navigation principale");
   const tabsHtml = tabs
-    .map(
-      (t) => `
-      <button class="bn-tab" data-id="${t.id}"${t.match ? ` data-match="${t.match.join(",")}"` : ""} aria-label="${t.label}">
+    .map((t) => {
+      const label = nt?.[t.id] || t.label;
+      return `
+      <button class="bn-tab" data-id="${t.id}"${t.match ? ` data-match="${t.match.join(",")}"` : ""} aria-label="${label}">
         <span class="bn-ico-line">${ICO[t.ico]}</span>
         <span class="bn-ico-fill">${ICO_FILL[t.ico] || ICO[t.ico]}</span>
-        <span class="bn-label">${t.label}</span>
+        <span class="bn-label">${label}</span>
       </button>
-    `,
-    )
+    `;
+    })
     .join("");
   // Limelight en 1er dans le DOM → les onglets (plus tard) passent au-dessus.
   nav.innerHTML =
