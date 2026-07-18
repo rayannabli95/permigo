@@ -80,3 +80,21 @@ export async function getMoniteurAccess() {
     return { gated: false, reason: "error" };
   }
 }
+
+/**
+ * Statut d'accès ÉLÈVE SOLO. Un élève sans moniteur (pas de code) doit avoir un
+ * Pass payé ; un élève rattaché à un moniteur est gratuit ; les solos déjà
+ * inscrits avant le lancement sont grandfathered. Source de vérité SERVEUR
+ * (RPC `eleve_access_status`). Fail-open : erreur réseau → ne bloque pas.
+ * @returns {Promise<{gated:boolean, reason?:string}>}
+ */
+export async function getEleveAccess() {
+  try {
+    const { data, error } = await sb.rpc("eleve_access_status");
+    if (error) throw error;
+    return data || { gated: false };
+  } catch (e) {
+    console.error("[billing] getEleveAccess", e);
+    return { gated: false, reason: "error" };
+  }
+}

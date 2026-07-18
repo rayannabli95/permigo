@@ -133,6 +133,12 @@ async function boot() {
     if (me.role === "enseignant") {
       const { getMoniteurAccess } = await import("@/services/billing.js");
       me.moniteurAccess = await getMoniteurAccess();
+    } else if (me.role === "eleve" && !me.enseignant_id) {
+      // Élève SOLO (pas de moniteur) : vérifie le verrou Pass. Les élèves
+      // rattachés à un moniteur (enseignant_id présent) sont gratuits → on saute
+      // le RPC pour eux.
+      const { getEleveAccess } = await import("@/services/billing.js");
+      me.eleveAccess = await getEleveAccess();
     }
 
     // Murs d'accès (consentement parental mineur, onboarding élève neuf).
