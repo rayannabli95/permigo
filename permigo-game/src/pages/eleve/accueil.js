@@ -47,6 +47,162 @@ import {
 import { todayKey, yesterdayKey, dayKey } from "@/services/daily-quiz.js";
 import { isStandalone } from "@/utils/pwa.js";
 import { openInstallSheet } from "@/components/common/install-nudge.js";
+import { getLang } from "@/utils/lang.js";
+
+// ── i18n de la COQUE Accueil (EN/AR). L'app reste FR par défaut. at(key,fr) =
+// traduit-ou-français avec esc() (texte) ; atR = version brute (pour construire
+// les chaînes à trous {…} avant esc/escAttr). Repli FR systématique.
+const ACC_I18N = {
+  en: {
+    install_t: "Install PermiGo on your phone",
+    install_s: "Quick access and your reminders · 10 seconds.",
+    install_btn: "Install",
+    hero_aria: "Get ready for your next lesson",
+    hero_kicker: "Your next lesson",
+    hero_h1: "Get ready for your lesson",
+    prep_pill_sub: "Chosen for your next hour",
+    prep_pill_aria: "Your next lesson's topic: {t} — tap to change",
+    hero_meta: "Be ready in 5 min for your next driving hour.",
+    cta_king: "I'm getting ready",
+    debrief_k: "Let's look back at your lesson",
+    debrief_t: 'Did you go over "{t}" with your instructor?',
+    debrief_s:
+      "Some skills take several lessons — that's normal. We keep going together.",
+    debrief_keep: "I'll practise more",
+    debrief_next: "Next lesson →",
+    debrief_later: "Haven't had my lesson yet",
+    consol_aria_cons: "Consolidation quiz — 2 questions, 30 seconds",
+    consol_aria_rec: "Recap quiz — 3 questions",
+    consol_t_cons: "Lock in your new skill",
+    consol_t_rec: "Recap on your skill",
+    consol_s_cons: "Consolidation quiz · 2 questions · 30 s",
+    consol_s_rec: "Recap quiz · 3 questions · optional",
+    sos_title_crit: "Your {j} streak is about to break!",
+    sos_title_risk: "Your {j} streak breaks tonight",
+    sos_sub_crit: "Quick — one quiz saves it.",
+    sos_sub_risk: "Do your daily quiz to keep it.",
+    sos_freeze: "Freeze · 50",
+    sos_freeze_aria: "Freeze my streak for 50 tokens",
+    day_sing: "day",
+    day_plur: "days",
+    sitday_aria: "Scene of the day: {q} — play In Situation",
+    sitday_k: "Scene of the day",
+    sitday_theme_fallback: "Road rules",
+    sitday_btn: "I decide →",
+    sitday_collec: "Your collection: {c} scenes seen",
+    sitday_daily: "A different scene every day · {n} situations",
+    permis_aria: "Your virtual licence — {n} of 31 skills",
+    permis_label: "Your virtual licence",
+    permis_sub_zero_solo: "Every skill you validate completes it.",
+    permis_sub_zero_mon: "Every skill your instructor validates completes it.",
+    permis_sub_done: "All skills achieved. Well done!",
+    permis_sub_left: "{n} skill{s} left before the test",
+    bs_streak_aria: "Streak details",
+    bs_title: "Your revision streak",
+    bs_record: "Record: {r} {jr} · Current: {c}",
+    bs_mymonth: "My month",
+    bs_active: "{n} active day{s}",
+    bs_freeze: "Freeze my streak · 50",
+    bs_freeze_desc: "Protects your streak for 24 h.",
+    session_label: "Session to confirm",
+    session_moniteur_fallback: "Your instructor",
+    session_recent: "Recently",
+    session_title: "{name} logged a session",
+    session_confirm: "Confirm the session",
+    hud_streak_aria: "{n}-day streak · view details",
+    cr_aria: "Your instructor sent you a report · tap to read",
+    cr_t: "Your instructor sent you a report",
+    cr_s: "Read their feedback on your lesson.",
+    chest_label: "{n} chest{s} to open",
+    chest_sub: "Claim your daily reward.",
+    fq_aria: "Flash quiz from your instructor, answer now",
+    fq_title: "Flash quiz from your instructor",
+    fq_sub: "3 questions · answer now",
+  },
+  ar: {
+    install_t: "ثبّت بيرميغو على هاتفك",
+    install_s: "وصول سريع وتذكيراتك · 10 ثوانٍ.",
+    install_btn: "تثبيت",
+    hero_aria: "استعدّ لدرسك القادم",
+    hero_kicker: "درسك القادم",
+    hero_h1: "استعدّ لدرسك",
+    prep_pill_sub: "مختار لساعتك القادمة",
+    prep_pill_aria: "موضوع درسك القادم: {t} — اضغط للتغيير",
+    hero_meta: "كن مستعدّاً في 5 دقائق لساعة قيادتك القادمة.",
+    cta_king: "أستعدّ",
+    debrief_k: "لنعُد إلى درسك",
+    debrief_t: "هل راجعت «{t}» مع مدرّبك؟",
+    debrief_s: "بعض المهارات تحتاج عدة دروس — هذا طبيعي. نواصل معاً.",
+    debrief_keep: "أواصل التدريب",
+    debrief_next: "الدرس التالي ←",
+    debrief_later: "لم آخذ درسي بعد",
+    consol_aria_cons: "اختبار ترسيخ — سؤالان، 30 ثانية",
+    consol_aria_rec: "اختبار مراجعة — 3 أسئلة",
+    consol_t_cons: "ثبّت مهارتك الجديدة",
+    consol_t_rec: "مراجعة لمهارتك",
+    consol_s_cons: "اختبار ترسيخ · سؤالان · 30 ث",
+    consol_s_rec: "اختبار مراجعة · 3 أسئلة · اختياري",
+    sos_title_crit: "سلسلتك ({j}) على وشك الانقطاع!",
+    sos_title_risk: "ستنقطع سلسلتك ({j}) الليلة",
+    sos_sub_crit: "بسرعة — اختبار واحد ينقذها.",
+    sos_sub_risk: "أنجز اختبار اليوم للحفاظ عليها.",
+    sos_freeze: "تجميد · 50",
+    sos_freeze_aria: "تجميد سلسلتي مقابل 50 نقطة",
+    day_sing: "يوم",
+    day_plur: "أيام",
+    sitday_aria: "مشهد اليوم: {q} — العب «في موقف»",
+    sitday_k: "مشهد اليوم",
+    sitday_theme_fallback: "قانون السير",
+    sitday_btn: "أقرّر ←",
+    sitday_collec: "مجموعتك: {c} مشهد",
+    sitday_daily: "مشهد مختلف كل يوم · {n} موقف",
+    permis_aria: "رخصتك الافتراضية — {n} من 31 مهارة",
+    permis_label: "رخصتك الافتراضية",
+    permis_sub_zero_solo: "كل مهارة تثبّتها تُكملها.",
+    permis_sub_zero_mon: "كل مهارة يثبّتها مدرّبك تُكملها.",
+    permis_sub_done: "كل المهارات مكتسبة. أحسنت!",
+    permis_sub_left: "بقيت {n} مهارة قبل الامتحان",
+    bs_streak_aria: "تفاصيل سلسلتك",
+    bs_title: "سلسلة مراجعتك",
+    bs_record: "الرقم القياسي: {r} {jr} · الحالية: {c}",
+    bs_mymonth: "شهري",
+    bs_active: "{n} يوم نشط",
+    bs_freeze: "تجميد سلسلتي · 50",
+    bs_freeze_desc: "تحمي سلسلتك لمدة 24 ساعة.",
+    session_label: "جلسة للتأكيد",
+    session_moniteur_fallback: "مدرّبك",
+    session_recent: "مؤخّراً",
+    session_title: "{name} سجّل جلسة",
+    session_confirm: "تأكيد الجلسة",
+    hud_streak_aria: "سلسلة {n} يوم · عرض التفاصيل",
+    cr_aria: "أرسل لك مدرّبك تقريراً · اضغط للقراءة",
+    cr_t: "أرسل لك مدرّبك تقريراً",
+    cr_s: "اقرأ ملاحظاته على درسك.",
+    chest_label: "{n} صندوق للفتح",
+    chest_sub: "احصل على مكافأتك اليومية.",
+    fq_aria: "اختبار سريع من مدرّبك، أجب الآن",
+    fq_title: "اختبار سريع من مدرّبك",
+    fq_sub: "3 أسئلة · أجب الآن",
+  },
+};
+function atR(key, fr) {
+  const l = getLang();
+  return (l !== "fr" && ACC_I18N[l]?.[key]) || fr;
+}
+function at(key, fr) {
+  return esc(atR(key, fr));
+}
+// Mot « jour/jours » traduit selon le nombre (pluriel simple).
+function atDay(n) {
+  return atR(n > 1 ? "day_plur" : "day_sing", n > 1 ? "jours" : "jour");
+}
+// Titre de fiche du hero : contenu DYNAMIQUE (pas de la coque). On le laisse en
+// français — il est traduit sur l'écran Réviser (fiche). Importer les 31 titres
+// obligerait à charger le chunk fiches-i18n (~69 ko gzip) sur l'ACCUEIL pour une
+// seule ligne : pas rentable. (Passthrough : garde les sites d'appel simples.)
+function ficheTitre(_code, fr) {
+  return fr;
+}
 
 // Tour guidé élève — 1× à la première arrivée sur l'accueil (l'onboarding
 // plein écran est déjà passé : main.js le monte AVANT cette page).
@@ -1713,17 +1869,23 @@ function renderStreakSos({ streak, streakSt, gemmes, href }) {
   const n = streak.current_streak || 0;
   if (n < 1) return "";
   const crit = streakSt === "critical";
-  const jours = `${n} jour${n > 1 ? "s" : ""}`;
+  const jours = `${n} ${atDay(n)}`;
   const title = crit
-    ? `Ta série de ${jours} saute bientôt&nbsp;!`
-    : `Ta série de ${jours} va sauter ce soir`;
+    ? atR("sos_title_crit", "Ta série de {j} saute bientôt&nbsp;!").replace(
+        "{j}",
+        jours,
+      )
+    : atR("sos_title_risk", "Ta série de {j} va sauter ce soir").replace(
+        "{j}",
+        jours,
+      );
   const sub = crit
-    ? "Vite — un quiz suffit pour la sauver."
-    : "Fais ton quiz du jour pour la garder.";
+    ? atR("sos_sub_crit", "Vite — un quiz suffit pour la sauver.")
+    : atR("sos_sub_risk", "Fais ton quiz du jour pour la garder.");
   const freeze =
     gemmes >= 50
       ? `<button class="acc2-sos-freeze" id="sos-freeze-btn" type="button"
-           aria-label="Geler ma série pour 50 volants">Geler · 50 ${volantImg(15)}</button>`
+           aria-label="${escAttr(atR("sos_freeze_aria", "Geler ma série pour 50 volants"))}">${at("sos_freeze", "Geler · 50")} ${volantImg(15)}</button>`
       : "";
   return `
   <div class="acc2-sos${crit ? " crit" : ""}" id="acc-sos">
@@ -1778,10 +1940,10 @@ function render({
     <div class="acc-install" id="acc-install">
       <div class="acc-install-ico" aria-hidden="true">${medallion("fusee", "cyan", { size: 38 })}</div>
       <div class="acc-install-txt">
-        <div class="acc-install-t">Installe PermiGo sur ton téléphone</div>
-        <div class="acc-install-s">Accès direct et tes rappels · 10 secondes.</div>
+        <div class="acc-install-t">${at("install_t", "Installe PermiGo sur ton téléphone")}</div>
+        <div class="acc-install-s">${at("install_s", "Accès direct et tes rappels · 10 secondes.")}</div>
       </div>
-      <button class="acc-install-btn" id="acc-install-btn" type="button">Installer</button>
+      <button class="acc-install-btn" id="acc-install-btn" type="button">${at("install_btn", "Installer")}</button>
     </div>`
     : "";
   const isActive = streakSt !== "broken";
@@ -1822,14 +1984,14 @@ function render({
   const debriefCard = _debriefDue
     ? `
   <section class="acc2-debrief" id="acc-debrief" aria-label="Revenons sur ta leçon">
-    <p class="acc2-debrief-k">🚗 Revenons sur ta leçon</p>
-    <p class="acc2-debrief-t">Tu as revu « ${esc(prep.titre)} » avec ton enseignant ?</p>
-    <p class="acc2-debrief-s">Certaines compétences demandent plusieurs leçons — c'est normal. On continue ensemble.</p>
+    <p class="acc2-debrief-k">🚗 ${at("debrief_k", "Revenons sur ta leçon")}</p>
+    <p class="acc2-debrief-t">${esc(atR("debrief_t", "Tu as revu « {t} » avec ton enseignant ?").replace("{t}", ficheTitre(prep.code, prep.titre)))}</p>
+    <p class="acc2-debrief-s">${at("debrief_s", "Certaines compétences demandent plusieurs leçons — c'est normal. On continue ensemble.")}</p>
     <div class="acc2-debrief-row">
-      <button class="acc2-debrief-btn keep" id="debrief-keep" type="button">Je consolide encore</button>
-      <button class="acc2-debrief-btn next" id="debrief-next" type="button">Leçon suivante →</button>
+      <button class="acc2-debrief-btn keep" id="debrief-keep" type="button">${at("debrief_keep", "Je consolide encore")}</button>
+      <button class="acc2-debrief-btn next" id="debrief-next" type="button">${at("debrief_next", "Leçon suivante →")}</button>
     </div>
-    <button class="acc2-debrief-later" id="debrief-later" type="button">Pas encore eu ma leçon</button>
+    <button class="acc2-debrief-later" id="debrief-later" type="button">${at("debrief_later", "Pas encore eu ma leçon")}</button>
   </section>`
     : "";
 
@@ -1844,11 +2006,11 @@ function render({
     ? `
   <button class="acc2-consol" id="acc-consol-btn" type="button"
           data-href="#/quiz/${esc(pendingNotif.data.competence_id)}/${_isCons ? "consolidation" : "post_validation"}"
-          aria-label="${_isCons ? "Quiz de consolidation — 2 questions, 30 secondes" : "Quiz-récap — 3 questions"}">
+          aria-label="${escAttr(_isCons ? atR("consol_aria_cons", "Quiz de consolidation — 2 questions, 30 secondes") : atR("consol_aria_rec", "Quiz-récap — 3 questions"))}">
     <span class="acc2-consol-ico" aria-hidden="true">🧠</span>
     <span class="acc2-consol-txt">
-      <span class="acc2-consol-t">${_isCons ? "Ancre ta nouvelle compétence" : "Récap sur ta compétence"}</span>
-      <span class="acc2-consol-s">${_isCons ? "Quiz de consolidation · 2 questions · 30 s" : "Quiz-récap · 3 questions · optionnel"}</span>
+      <span class="acc2-consol-t">${_isCons ? at("consol_t_cons", "Ancre ta nouvelle compétence") : at("consol_t_rec", "Récap sur ta compétence")}</span>
+      <span class="acc2-consol-s">${_isCons ? at("consol_s_cons", "Quiz de consolidation · 2 questions · 30 s") : at("consol_s_rec", "Quiz-récap · 3 questions · optionnel")}</span>
     </span>
     <span class="acc2-consol-arr" aria-hidden="true">→</span>
   </button>`
@@ -1861,7 +2023,7 @@ function render({
   <!-- ══ HUD — série ══ (le solde de volants vit dans le header global) -->
   <div class="acc2-hud">
     <button class="acc2-chip streak${isActive ? "" : " inactive"}" id="streak-badge-btn"
-            type="button" aria-label="Série de ${streak.current_streak} jours · voir le détail">
+            type="button" aria-label="${escAttr(atR("hud_streak_aria", "Série de {n} jours · voir le détail").replace("{n}", streak.current_streak))}">
       <img src="/skins/permigo-streak-flame-v1.webp" alt="" aria-hidden="true">
       <span class="num">${streak.current_streak}</span>
     </button>
@@ -1870,28 +2032,28 @@ function render({
   ${renderStreakSos({ streak, streakSt, gemmes, href: _sosHref })}
 
   <!-- ══ HERO FOCAL — Prépare ta leçon (grand) ══ -->
-  <section class="acc2-hero-v2" aria-label="Prépare ta prochaine leçon">
+  <section class="acc2-hero-v2" aria-label="${escAttr(atR("hero_aria", "Prépare ta prochaine leçon"))}">
     <div class="acc2-hero-halo" aria-hidden="true"></div>
     <div class="acc2-hero-gloss" aria-hidden="true"></div>
     <div class="acc2-hero-v2-txt">
-      <p class="acc2-hero-kicker">Ta prochaine leçon</p>
-      <h1 class="acc2-hero-h1" id="prep-hero-title">Prépare ta leçon</h1>
+      <p class="acc2-hero-kicker">${at("hero_kicker", "Ta prochaine leçon")}</p>
+      <h1 class="acc2-hero-h1" id="prep-hero-title">${at("hero_h1", "Prépare ta leçon")}</h1>
       ${
         prep
           ? `<button class="acc2-prep-pill" id="prep-theme-btn" type="button"
-              aria-label="Thème de ta prochaine leçon : ${escAttr(prep.titre)} — appuie pour changer">
+              aria-label="${escAttr(atR("prep_pill_aria", "Thème de ta prochaine leçon : {t} — appuie pour changer").replace("{t}", ficheTitre(prep.code, prep.titre)))}">
               <span class="acc2-prep-pill-ic" aria-hidden="true">🎯</span>
               <span class="acc2-prep-pill-tl">
-                <b id="prep-theme-name">${esc(prep.titre)}</b>
-                <span>Choisi pour ta prochaine heure</span>
+                <b id="prep-theme-name">${esc(ficheTitre(prep.code, prep.titre))}</b>
+                <span>${at("prep_pill_sub", "Choisi pour ta prochaine heure")}</span>
               </span>
               <span class="acc2-prep-chev" aria-hidden="true">›</span>
             </button>`
-          : `<p class="acc2-hero-meta">Sois prêt·e en 5 min pour ta prochaine heure de conduite.</p>`
+          : `<p class="acc2-hero-meta">${at("hero_meta", "Sois prêt·e en 5 min pour ta prochaine heure de conduite.")}</p>`
       }
       <button class="acc2-cta-king"
               id="action-cta-btn" type="button" data-href="${esc(_heroHref)}">
-        Je me prépare <span class="acc2-cta-arr" aria-hidden="true">→</span>
+        ${at("cta_king", "Je me prépare")} <span class="acc2-cta-arr" aria-hidden="true">→</span>
       </button>
     </div>
     <div class="acc2-hero-floor" aria-hidden="true"></div>
@@ -1920,17 +2082,23 @@ function render({
     .acc2-sitday-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#ffcb3d,#ff9b1e)}
   </style>
   <button class="acc2-sitday" id="acc-sit-day" type="button"
-          aria-label="Scène du jour : ${esc(_sit.question)} — jouer à En situation">
-    <span class="acc2-sitday-k">Scène du jour <span class="th">${esc(THEME_LABELS[_sit.theme] || "Code de la route")}</span></span>
+          aria-label="${escAttr(atR("sitday_aria", "Scène du jour : {q} — jouer à En situation").replace("{q}", _sit.question))}">
+    <span class="acc2-sitday-k">${at("sitday_k", "Scène du jour")} <span class="th">${esc(THEME_LABELS[_sit.theme] || atR("sitday_theme_fallback", "Code de la route"))}</span></span>
     <span class="acc2-sitday-row">
       <span class="acc2-sitday-q">${esc(_sit.question)}</span>
-      <span class="acc2-sitday-btn" aria-hidden="true">Je décide →</span>
+      <span class="acc2-sitday-btn" aria-hidden="true">${at("sitday_btn", "Je décide →")}</span>
     </span>
     <span class="acc2-sitday-scene" aria-hidden="true">${renderSituationScene(_sit.scene)}</span>
     <span class="acc2-sitday-m">${
       _sitVues > 0
-        ? `Ta collection : <b>${_sitVues} / ${SITUATIONS.length}</b> scènes vues`
-        : `Une scène différente chaque jour · ${SITUATIONS.length} situations`
+        ? atR("sitday_collec", "Ta collection : {c} scènes vues").replace(
+            "{c}",
+            `<b>${_sitVues} / ${SITUATIONS.length}</b>`,
+          )
+        : atR(
+            "sitday_daily",
+            "Une scène différente chaque jour · {n} situations",
+          ).replace("{n}", SITUATIONS.length)
     }</span>
     ${
       _sitVues > 0
@@ -1941,13 +2109,13 @@ function render({
 
   <!-- ══ PERMIS VIRTUEL — carte compacte maquette ══ -->
   <div class="acc2-permis-compact" id="acc-permis" role="button" tabindex="0"
-       aria-label="Ton permis virtuel — ${totalValidated} sur 31 compétences">
+       aria-label="${escAttr(atR("permis_aria", "Ton permis virtuel — {n} sur 31 compétences").replace("{n}", totalValidated))}">
     <div class="acc2-permis-thumb">
       <img src="/skins/trophy-permis-virtuel.webp" alt="" aria-hidden="true" loading="eager">
     </div>
     <div class="acc2-permis-body">
       <div class="acc2-permis-row">
-        <span class="acc2-permis-label2">Ton permis virtuel</span>
+        <span class="acc2-permis-label2">${at("permis_label", "Ton permis virtuel")}</span>
         <span class="acc2-permis-val">${totalValidated}/31</span>
       </div>
       <div class="acc2-permis-bar">
@@ -1956,11 +2124,27 @@ function render({
       <span class="acc2-permis-sub">${
         totalValidated === 0
           ? isSoloEleve(me)
-            ? "Chaque compétence que tu valides le complète."
-            : "Chaque compétence validée par ton moniteur le complète."
+            ? at(
+                "permis_sub_zero_solo",
+                "Chaque compétence que tu valides le complète.",
+              )
+            : at(
+                "permis_sub_zero_mon",
+                "Chaque compétence validée par ton moniteur le complète.",
+              )
           : totalValidated >= 31
-            ? "Toutes les compétences acquises. Bravo !"
-            : `Plus que ${31 - totalValidated} compétence${31 - totalValidated > 1 ? "s" : ""} avant l’examen`
+            ? at("permis_sub_done", "Toutes les compétences acquises. Bravo !")
+            : esc(
+                atR(
+                  "permis_sub_left",
+                  "Plus que {n} compétence{s} avant l’examen",
+                )
+                  .replace("{n}", 31 - totalValidated)
+                  .replace(
+                    "{s}",
+                    31 - totalValidated > 1 && getLang() !== "ar" ? "s" : "",
+                  ),
+              )
       }</span>
     </div>
   </div>
@@ -1985,16 +2169,28 @@ function render({
 
 <!-- STREAK BOTTOM SHEET -->
 <div class="bs-bg" id="bs-bg"></div>
-<div class="bs-streak" id="bs-streak" role="dialog" aria-label="Détail de ta série">
+<div class="bs-streak" id="bs-streak" role="dialog" aria-label="${escAttr(atR("bs_streak_aria", "Détail de ta série"))}">
   <div class="bs-handle"></div>
   <div class="bs-hd">
-    <div class="bs-hd-title">Ta série de révision</div>
-    <div class="bs-hd-sub">Record : ${streak.longest_streak} jour${streak.longest_streak > 1 ? "s" : ""} · En cours : ${streak.current_streak}</div>
+    <div class="bs-hd-title">${at("bs_title", "Ta série de révision")}</div>
+    <div class="bs-hd-sub">${esc(
+      atR("bs_record", "Record : {r} {jr} · En cours : {c}")
+        .replace("{r}", streak.longest_streak)
+        .replace("{jr}", atDay(streak.longest_streak))
+        .replace("{c}", streak.current_streak),
+    )}</div>
   </div>
   <div class="bs-hmap-wrap">
     <div class="bs-hmap-head">
-      <span class="bs-hmap-title">Mon mois</span>
-      <span class="bs-hmap-sub">${activityDays.totalActive} jour${activityDays.totalActive > 1 ? "s" : ""} actif${activityDays.totalActive > 1 ? "s" : ""}</span>
+      <span class="bs-hmap-title">${at("bs_mymonth", "Mon mois")}</span>
+      <span class="bs-hmap-sub">${esc(
+        atR("bs_active", "{n} jour{s} actif{s}")
+          .replace("{n}", activityDays.totalActive)
+          .replace(
+            /\{s\}/g,
+            activityDays.totalActive > 1 && getLang() !== "ar" ? "s" : "",
+          ),
+      )}</span>
     </div>
     ${renderHeatmap({ activeDates: activityDays.activeDates, activityLevels: activityDays.levels, activityDetails: activityDays.details, weeks: 5, title: "" })}
     <div class="hmap-tap-info" id="hmap-info" style="opacity:0"> </div>
@@ -2003,8 +2199,8 @@ function render({
     (streakSt === "critical" || streakSt === "at_risk") && gemmes >= 50
       ? `
   <div class="bs-freeze-wrap">
-    <button class="bs-freeze-btn" id="bs-freeze-btn">Geler ma série · 50 ${volantImg(16)}</button>
-    <div class="bs-freeze-desc">Protège ta série pendant 24 h.</div>
+    <button class="bs-freeze-btn" id="bs-freeze-btn">${at("bs_freeze", "Geler ma série · 50")} ${volantImg(16)}</button>
+    <div class="bs-freeze-desc">${at("bs_freeze_desc", "Protège ta série pendant 24 h.")}</div>
   </div>`
       : ""
   }
@@ -2014,7 +2210,8 @@ function render({
 // ─── Bloc 2 renderers ────────────────────────────────────────────
 
 function renderSessionConfirm(session) {
-  const prenom = session.moniteur_prenom ?? "Ton moniteur";
+  const prenom =
+    session.moniteur_prenom ?? atR("session_moniteur_fallback", "Ton moniteur");
   const initials = prenom.slice(0, 2).toUpperCase();
   const dateStr = session.session_date
     ? new Date(session.session_date).toLocaleDateString("fr-FR", {
@@ -2022,7 +2219,7 @@ function renderSessionConfirm(session) {
         day: "numeric",
         month: "long",
       })
-    : "Récemment";
+    : atR("session_recent", "Récemment");
   const durStr = session.duration_minutes
     ? `${session.duration_minutes} min`
     : "";
@@ -2030,17 +2227,17 @@ function renderSessionConfirm(session) {
 
   return `
     <div class="acc2-ms-session">
-      <div class="acc2-ms-session-label">Séance à confirmer</div>
+      <div class="acc2-ms-session-label">${at("session_label", "Séance à confirmer")}</div>
       <div class="acc2-ms-session-top">
         <div class="acc2-ms-session-av">${esc(initials)}</div>
         <div class="acc2-ms-session-info">
-          <div class="acc2-ms-session-title">${esc(prenom)} a enregistré une séance</div>
+          <div class="acc2-ms-session-title">${esc(atR("session_title", "{name} a enregistré une séance").replace("{name}", prenom))}</div>
           <div class="acc2-ms-session-sub">${esc(sub)}</div>
         </div>
       </div>
       <button class="acc2-ms-session-btn" id="confirm-session-btn" data-session-id="${esc(session.session_id)}">
         ${icon("check", { size: 16, strokeWidth: 2.8 })}
-        Confirmer la séance
+        ${at("session_confirm", "Confirmer la séance")}
       </button>
     </div>`;
 }
@@ -2514,11 +2711,11 @@ async function _loadAndInjectCompteRendu(root, me) {
       .acc2-cr-arr{flex:0 0 24px;width:24px;height:24px;border-radius:50%;background:var(--a);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:800}
       </style>
       <div class="acc2-cr-banner" id="acc-cr-banner" role="button" tabindex="0"
-           aria-label="Ton moniteur t’a envoyé un compte-rendu · appuie pour le lire">
+           aria-label="${escAttr(atR("cr_aria", "Ton moniteur t’a envoyé un compte-rendu · appuie pour le lire"))}">
         <div class="acc2-cr-ico" aria-hidden="true">${medallion("fiches", "violet", { size: 38 })}</div>
         <div class="acc2-cr-txt">
-          <div class="acc2-cr-t">Ton moniteur t’a envoyé un compte-rendu</div>
-          <div class="acc2-cr-s">Lis son retour sur ta leçon.</div>
+          <div class="acc2-cr-t">${at("cr_t", "Ton moniteur t’a envoyé un compte-rendu")}</div>
+          <div class="acc2-cr-s">${at("cr_s", "Lis son retour sur ta leçon.")}</div>
         </div>
         <div class="acc2-cr-arr" aria-hidden="true">›</div>
       </div>`;
@@ -2549,7 +2746,9 @@ async function _loadAndInjectChests(root) {
     if (!slot) return;
 
     const n = pending.length;
-    const label = `${n} coffre${n > 1 ? "s" : ""} à ouvrir`;
+    const label = atR("chest_label", "{n} coffre{s} à ouvrir")
+      .replace("{n}", n)
+      .replace("{s}", n > 1 && getLang() !== "ar" ? "s" : "");
 
     slot.innerHTML = `
       <div class="acc2-chest-v2" id="acc-chest-teaser" role="button" tabindex="0"
@@ -2557,7 +2756,7 @@ async function _loadAndInjectChests(root) {
         <img src="/skins/chests/chest_welcome.png" alt="" aria-hidden="true" loading="lazy">
         <div class="acc2-chest-v2-body">
           <strong class="acc2-chest-v2-title">${esc(label)}</strong>
-          <span class="acc2-chest-v2-sub">Réclame ta récompense du jour.</span>
+          <span class="acc2-chest-v2-sub">${at("chest_sub", "Réclame ta récompense du jour.")}</span>
         </div>
         <span class="acc2-chest-v2-arr" aria-hidden="true">›</span>
       </div>`;
@@ -2626,11 +2825,11 @@ async function _loadAndInjectFlashQuiz(root, me) {
     hero.insertAdjacentHTML(
       "afterend",
       `
-      <div class="acc2-flashq" id="acc-flashq" role="button" tabindex="0" aria-label="Quiz éclair de ton moniteur, réponds maintenant">
+      <div class="acc2-flashq" id="acc-flashq" role="button" tabindex="0" aria-label="${escAttr(atR("fq_aria", "Quiz éclair de ton moniteur, réponds maintenant"))}">
         <span class="acc2-fq-ico" aria-hidden="true">${medallion("eclair", "gold", { size: 34 })}</span>
         <div class="acc2-fq-text">
-          <div class="acc2-fq-title">Quiz éclair de ton moniteur</div>
-          <div class="acc2-fq-sub">3 questions · réponds maintenant</div>
+          <div class="acc2-fq-title">${at("fq_title", "Quiz éclair de ton moniteur")}</div>
+          <div class="acc2-fq-sub">${at("fq_sub", "3 questions · réponds maintenant")}</div>
         </div>
         <span class="acc2-fq-clock" id="acc-fq-clock">${esc(fmt(expiresMs - Date.now()))}</span>
       </div>`,
