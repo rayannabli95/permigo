@@ -15,7 +15,7 @@ import { haptic } from "@/utils/haptic.js";
 import { mountPremiumQuiz } from "@/components/eleve/premium-quiz.js";
 import { quizByCode } from "@/data/quiz-conduite.js";
 import { track } from "@/services/analytics.js";
-import { medallion, medStatus } from "@/utils/medallions.js";
+import { medallion } from "@/utils/medallions.js";
 import {
   FICHES,
   MONDES,
@@ -154,32 +154,6 @@ const STYLE = `<style>
 .rvc-ochip:active { transform: scale(0.985); }
 .rvc-shake { animation: rvcshake .35s; border-color:#ef4444 !important; }
 @keyframes rvcshake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
-
-/* ───── Home « Bento » : navigation engageante vers les fiches ───── */
-.rvcb { --lime:#c8ff4d; --lime-ink:#1f2a00; --rb:24px; }
-.rvcb-top { display:flex; align-items:center; gap:11px; padding:16px 0 12px; }
-.rvcb-hi { display:flex; flex-direction:column; gap:1px; flex:1; min-width:0; }
-.rvcb-k { font:600 12px 'Plus Jakarta Sans',sans-serif; letter-spacing:.04em; text-transform:uppercase; color:var(--mu,#9499a8); }
-.rvcb-n { font:800 21px/1.1 'Plus Jakarta Sans',sans-serif; letter-spacing:-.02em; color:var(--ink); }
-
-.rvcb-bar { height:7px; border-radius:99px; background:var(--bo3,#e7e9f0); overflow:hidden; margin-top:10px; }
-.rvcb-bar > i { display:block; height:100%; border-radius:99px; background:linear-gradient(90deg,var(--a,#6366f1),var(--a-lt,#818cf8)); }
-
-/* liste de fiches d'un monde (renderMonde) */
-.rvcb-mprog { display:flex; align-items:center; gap:10px; margin:2px 0 14px; }
-.rvcb-mprog .rvcb-bar { flex:1; margin-top:0; }
-.rvcb-mprog-x { font:700 12px 'Plus Jakarta Sans',sans-serif; color:var(--mu,#9499a8); white-space:nowrap; }
-.rvcb-flist { display:flex; flex-direction:column; gap:9px; }
-.rvcb-frow { display:flex; align-items:center; gap:12px; width:100%; text-align:left; cursor:pointer; color:var(--ink);
-  background:var(--su,#fff); border:1px solid var(--bo3,#e7e9f0); border-radius:15px; padding:13px 14px;
-  box-shadow:0 6px 18px -14px rgba(40,30,90,.4); transition:transform .15s cubic-bezier(.23,1,.32,1); }
-.rvcb-frow:active { transform:scale(.985); }
-.rvcb-frow-code { flex:none; font:700 11px 'IBM Plex Mono',monospace; color:var(--a,#6366f1);
-  background:color-mix(in srgb,var(--a,#6366f1) 12%,transparent); padding:5px 8px; border-radius:8px; }
-.rvcb-frow-t { flex:1; font:700 14px/1.25 'Plus Jakarta Sans',sans-serif; }
-.rvcb-frow.is-read .rvcb-frow-t { color:var(--mu,#9499a8); }
-.rvcb-frow-st { flex:none; width:22px; height:22px; display:grid; place-items:center; }
-.rvcb-frow-st .pg-med { width:22px; height:22px; }
 
 @media (prefers-reduced-motion: reduce) { .rvc *, .rvc *::before { transition:none !important; animation:none !important; } }
 </style>`;
@@ -323,6 +297,57 @@ function saveGestes(codeK, arr) {
 // le monde EN COURS agrandi porte l'unique bouton or « Continuer » (pas de carte
 // dupliquée). Même DA indigo que la fiche « Deck ». CSS auto-contenu scopé .hub.
 // ═══════════════════════════════════════════════════════════════
+// Un badge 3D par monde (public/art/reviser/) — partagé hub + liste de monde.
+const BADGE_MONDE = { 1: "voiture", 2: "feu", 3: "eclair", 4: "toque" };
+
+// Liste des fiches d'un monde, DA indigo (cohérente avec .hub et .fd). Scopé .wm.
+const MONDE_STYLE = `<style>
+.wm{ position:relative; max-width:480px; margin:0 auto; min-height:100dvh;
+  font-family:'Inter',sans-serif; color:#ded7ff; overflow-x:hidden;
+  padding:0 0 calc(96px + env(safe-area-inset-bottom));
+  background:
+    radial-gradient(120% 46% at 50% -8%, rgba(255,223,150,.18) 0%, rgba(255,223,150,0) 55%),
+    radial-gradient(120% 52% at 84% 8%, rgba(150,120,235,.32) 0%, rgba(150,120,235,0) 60%),
+    linear-gradient(#5a4fc0 0%, #4a3fa4 60%, #423a96 100%); }
+.wm *{ box-sizing:border-box; }
+.wm-gold{ background:linear-gradient(180deg,#fff2cf 0%,#ffe093 38%,#f4b24a 72%,#e0921f 100%);
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent; }
+.wm-hero{ display:flex; align-items:center; gap:12px; padding:16px 18px 4px; }
+.wm-back{ flex:0 0 38px; width:38px; height:38px; border-radius:12px; cursor:pointer;
+  background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14); display:flex; align-items:center; justify-content:center; }
+.wm-back:active{ transform:scale(.95); }
+.wm-back svg{ display:block; }
+.wm-med{ flex:0 0 52px; width:52px; height:52px; border-radius:50%; position:relative;
+  background:radial-gradient(circle at 38% 30%,#fff6df,#f6ead0 62%,#e6d6b4); border:1px solid #e6dcc4;
+  box-shadow:inset 0 -3px 5px rgba(150,110,40,.22), inset 0 2px 2px rgba(255,255,255,.9), 0 3px 6px rgba(20,12,60,.14);
+  display:flex; align-items:center; justify-content:center; }
+.wm-med img{ width:40px; height:40px; object-fit:contain; display:block; filter:drop-shadow(0 2px 2px rgba(80,50,10,.28)); }
+.wm-htx{ flex:1; min-width:0; }
+.wm-name{ font-family:'Baloo 2',cursive; font-weight:800; font-size:21px; line-height:1.05; letter-spacing:-.01em; filter:drop-shadow(0 2px 0 rgba(90,52,6,.3)); }
+.wm-sub{ font-family:'Inter',sans-serif; font-weight:600; font-size:12px; color:#c3b8ec; margin-top:2px; }
+.wm-prog{ display:flex; align-items:center; gap:10px; padding:10px 20px 16px; }
+.wm-bar{ position:relative; flex:1; height:10px; border-radius:999px; background:#2a2170; border:1px solid rgba(20,12,60,.5); box-shadow:inset 0 2px 4px rgba(0,0,0,.4); overflow:hidden; }
+.wm-fill{ position:absolute; top:1px; bottom:1px; left:1px; border-radius:999px; background:linear-gradient(180deg,#ffe9b0,#f4b24a 60%,#dd921f); box-shadow:inset 0 1px 0 rgba(255,255,255,.7); }
+.wm-px{ flex:0 0 auto; font-family:'Baloo 2',cursive; font-weight:800; font-size:12.5px; color:#e8ddff; }
+.wm-list{ padding:0 16px; display:flex; flex-direction:column; gap:9px; }
+.wm-fiche{ position:relative; display:flex; align-items:center; gap:12px; width:100%; text-align:left; cursor:pointer;
+  padding:13px 14px; border-radius:15px; background:#f6f4ff; border:1px solid #e6e2fb; border-top-color:#fff;
+  box-shadow:0 3px 0 rgba(20,12,60,.32), inset 0 1px 0 #fff; -webkit-tap-highlight-color:transparent; transition:transform .1s ease; }
+.wm-fiche:active{ transform:scale(.99); }
+.wm-fiche.done{ background:linear-gradient(180deg,#fff8ea,#fdefcc); border-color:rgba(240,169,63,.5); border-top-color:#fff3d4; }
+.wm-fiche.next{ border-color:#c9bff5; box-shadow:0 3px 0 rgba(20,12,60,.32), inset 0 1px 0 #fff, 0 0 0 2px rgba(150,120,255,.36); }
+.wm-nextflag{ position:absolute; top:-8px; left:42px; font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:9px; letter-spacing:.1em; text-transform:uppercase;
+  color:#1a1240; background:linear-gradient(180deg,#e6d4ff,#b296ff); padding:2px 8px; border-radius:999px; box-shadow:0 2px 4px rgba(20,12,60,.3); }
+.wm-chk{ flex:0 0 30px; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+.wm-chk.empty{ border:2.5px dashed rgba(107,95,160,.5); background:rgba(90,79,192,.05); }
+.wm-chk.filled{ background:radial-gradient(circle at 36% 28%,#ffe9b0,#f0a93f 58%,#b46a10); box-shadow:inset 0 -3px 4px rgba(120,60,0,.5), inset 0 2px 2px rgba(255,255,255,.7), 0 2px 5px rgba(20,12,60,.3); }
+.wm-ft{ flex:1; min-width:0; font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:14px; line-height:1.2; color:#241a45; letter-spacing:-.01em; }
+.wm-fiche.done .wm-ft{ color:#5a4712; }
+.wm-arw{ flex:0 0 auto; display:flex; }
+@media (prefers-reduced-motion: reduce){ .wm *{ transition:none!important; } }
+</style>`;
+
 const HUB_STYLE = `<style>
 .hub{ position:relative; max-width:480px; margin:0 auto; min-height:100dvh;
   font-family:'Inter',sans-serif; color:#ded7ff; overflow-x:hidden;
@@ -480,6 +505,9 @@ export async function mount(root, param) {
     return renderHome();
   }
 
+  // Liste des fiches d'UN monde — même DA indigo que le hub et la fiche Deck.
+  // Chaque fiche = une carte tap-pour-ouvrir ; lue = coche or, prochaine à lire
+  // = liseré violet + « à lire ». Retour → le hub des 4 mondes.
   function renderMonde() {
     const m = MONDES.find((x) => x.n === mondeN);
     if (!m) {
@@ -490,32 +518,47 @@ export async function mount(root, param) {
     const fm = fichesByMonde(m.n);
     const done = fm.filter((f) => read[f.code]).length;
     const p = fm.length ? Math.round((done / fm.length) * 100) : 0;
+    const badge = `/art/reviser/${BADGE_MONDE[m.n] || "cible"}.png`;
+    const firstUnread = fm.findIndex((f) => !read[f.code]);
+
+    const CHK = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 6" stroke="#5a3406" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    const chev = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#b8afd6" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    const back = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="#efe9ff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
     const items = fm
-      .map((f) => {
+      .map((f, i) => {
         const on = !!read[f.code];
-        return `<button class="rvcb-frow ${on ? "is-read" : ""}" data-code="${esc(f.code)}">
-            <span class="rvcb-frow-code">${esc(f.code)}</span>
-            <span class="rvcb-frow-t">${esc(f.titre)}</span>
-            <span class="rvcb-frow-st">${on ? medStatus("acquis", { size: 22 }) : ""}</span>
-          </button>`;
+        const next = i === firstUnread;
+        return `<button class="wm-fiche${on ? " done" : ""}${next ? " next" : ""}" data-code="${escAttr(f.code)}">
+          ${next ? `<span class="wm-nextflag">à lire</span>` : ""}
+          <span class="wm-chk ${on ? "filled" : "empty"}">${on ? CHK : ""}</span>
+          <span class="wm-ft">${esc(f.titre)}</span>
+          <span class="wm-arw">${chev}</span>
+        </button>`;
       })
       .join("");
-    root.innerHTML = `${STYLE}<div class="rvc rvcb">
-      <div class="rvcb-top">
-        <button class="rvc-back" aria-label="Retour">←</button>
-        <div class="rvcb-hi">
-          <span class="rvcb-k">Monde ${m.n} · ${esc(m.nom)}</span>
-          <span class="rvcb-n">${esc(m.sous)}</span>
+
+    root.innerHTML = `${MONDE_STYLE}<div class="wm">
+      <div class="wm-hero">
+        <button class="wm-back" aria-label="Retour aux mondes">${back}</button>
+        <span class="wm-med"><img src="${badge}" alt="" loading="lazy"></span>
+        <div class="wm-htx">
+          <h1 class="wm-name wm-gold">${esc(m.nom)}</h1>
+          <div class="wm-sub">${esc(m.sous)}</div>
         </div>
       </div>
-      <div class="rvcb-mprog"><div class="rvcb-bar"><i style="width:${p}%"></i></div><span class="rvcb-mprog-x">${done}/${fm.length} lues</span></div>
-      <div class="rvcb-flist">${items}</div>
+      <div class="wm-prog">
+        <div class="wm-bar"><div class="wm-fill" style="width:${done ? Math.max(p, 5) : 0}%"></div></div>
+        <span class="wm-px">${done}/${fm.length} lues</span>
+      </div>
+      <div class="wm-list">${items}</div>
     </div>`;
-    root.querySelector(".rvc-back").addEventListener("click", () => {
+
+    root.querySelector(".wm-back").addEventListener("click", () => {
       view = "home";
       render();
     });
-    root.querySelectorAll(".rvcb-frow").forEach((b) =>
+    root.querySelectorAll("[data-code]").forEach((b) =>
       b.addEventListener("click", () => {
         code = b.getAttribute("data-code");
         focusId = null;
@@ -540,8 +583,6 @@ export async function mount(root, param) {
     const firstEver = lues === 0;
     const curMonde = nextF ? Number(nextF.monde) : null;
 
-    // Un badge 3D par monde (public/art/reviser/). Repli : cible.
-    const BADGE_MONDE = { 1: "voiture", 2: "feu", 3: "eclair", 4: "toque" };
     const arw = (c) =>
       `<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="${c}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
