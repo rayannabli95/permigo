@@ -16,6 +16,8 @@ import { mountPremiumQuiz } from "@/components/eleve/premium-quiz.js";
 import { quizByCode } from "@/data/quiz-conduite.js";
 import { track } from "@/services/analytics.js";
 import { medallion } from "@/utils/medallions.js";
+import { getLang } from "@/utils/lang.js";
+import { ficheTr, uiFiche } from "@/data/fiches-i18n.js";
 import {
   FICHES,
   MONDES,
@@ -268,6 +270,17 @@ const FD_STYLE = `<style>
   box-shadow:0 4px 0 rgba(20,12,60,.3), inset 0 1px 0 rgba(255,255,255,.9); transition:transform .1s ease; }
 .fd-secondary:active{ transform:translateY(2px); box-shadow:0 2px 0 rgba(20,12,60,.3), inset 0 1px 0 rgba(255,255,255,.9); }
 .fd-secondary span{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:13px; color:#3d2f7a; }
+/* Bilingue (en/ar) : traduction affichée, français gardé dessous (arabe RTL par
+   span — l'app reste LTR). Voir lang.js + fiches-i18n.js. */
+.fd-tr{ display:block; }
+.fd-fr{ display:block; margin-top:4px; font-weight:500; opacity:.62; }
+.fd-txt .fd-fr{ font-size:.9em; color:#5b5286; opacity:.72; }
+.fd-card.done .fd-txt .fd-fr{ color:#6f5a2a; }
+.fd-cc p .fd-fr{ font-size:.94em; color:#8a7fb5; opacity:.8; margin-top:3px; }
+.fd-title .fd-tr{ display:block; }
+.fd-title .fd-fr{ -webkit-text-fill-color:#cabef7; color:#cabef7; background:none;
+  font-family:'Inter',sans-serif; font-size:.5em; font-weight:600; line-height:1.25; filter:none; }
+.fd-seclab h2[dir="rtl"]{ direction:rtl; }
 @media (prefers-reduced-motion: reduce){ .fd *{ transition:none!important; animation:none!important; } }
 </style>`;
 
@@ -705,12 +718,38 @@ export async function mount(root, param) {
       lastFicheTracked = f.code;
     }
 
+    // ── i18n : traduction affichée, français gardé dessous (arabe RTL par span) ──
+    const lang = getLang();
+    const rtl = lang === "ar";
+    const tr = ficheTr(f.code, lang); // {titre,competence,methode,pourquoi,erreur,bva,quiz} | null
+    const bi = (fr, t) =>
+      lang === "fr" || t == null || t === ""
+        ? esc(fr)
+        : `<span class="fd-tr"${rtl ? ' dir="rtl" lang="ar"' : ""}>${esc(t)}</span>` +
+          `<span class="fd-fr" lang="fr" dir="ltr">${esc(fr)}</span>`;
+    const ui = (key, frTxt) => uiFiche(lang, key, frTxt);
+
     const steps = Array.isArray(f.methode) ? f.methode : [];
     const total = steps.length;
     const groups = groupSteps(steps);
     const grouped = useGrouped(steps, groups);
     // Texte « propre » (préfixe de section retiré) pour le jeu « remets dans l'ordre ».
     const flatSteps = grouped ? groups.flatMap((g) => g.steps) : steps;
+    // Gestes traduits, parallèles au FR. En mode groupé on n'utilise la
+    // traduction que si le découpage en sections est identique (sinon repli FR) ;
+    // en mode plat on mappe geste à geste par index.
+    const stepsTR =
+      tr && tr.methode && tr.methode.length === steps.length
+        ? tr.methode
+        : null;
+    let groupsTR = null;
+    if (grouped && stepsTR) {
+      const g2 = groupSteps(stepsTR);
+      const aligned =
+        g2.length === groups.length &&
+        groups.every((g, i) => g2[i] && g.steps.length === g2[i].steps.length);
+      if (aligned) groupsTR = g2;
+    }
 
     const doneSet = new Set(
       (loadGestes()[f.code] || []).filter((i) => i < total),
@@ -726,32 +765,41 @@ export async function mount(root, param) {
     const pct = total ? Math.round((count / total) * 100) : 0;
 
     const CHK = `<svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 6" stroke="#5a3406" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-    const card = (s, i) => {
+    const card = (s, i, sTr) => {
       const done = doneSet.has(i);
       const next = i === firstUnchecked;
       return `<button class="fd-card${done ? " done" : ""}${next ? " next" : ""}" data-geste="${i}" aria-pressed="${done}">
-        ${next ? `<span class="fd-next-flag">à toi</span>` : ""}
+        ${next ? `<span class="fd-next-flag">${esc(ui("next", "à toi"))}</span>` : ""}
         <span class="fd-chk ${done ? "filled" : "empty"}">${done ? CHK : ""}</span>
         <span class="fd-num">${i + 1}</span>
-        <span class="fd-txt">${esc(s)}</span>
+        <span class="fd-txt">${bi(s, sTr)}</span>
       </button>`;
     };
 
     // Le sous-titre de section fait office d'en-tête « La méthode » (pas de
     // double titre) : chaque groupe a le sien, le 1er sans libellé retombe dessus.
-    const seclab = (t) =>
-      `<div class="fd-seclab"><h2>${esc(t)}</h2><div class="line"></div></div>`;
+    // En en/ar : libellé traduit seul (chrome), français en repli.
+    const seclab = (fr, trLab) =>
+      `<div class="fd-seclab"><h2${rtl && trLab ? ' dir="rtl" lang="ar"' : ""}>${esc(lang !== "fr" && trLab ? trLab : fr)}</h2><div class="line"></div></div>`;
+    const methLab = lang !== "fr" ? ui("methode", "La méthode") : null;
     let deckHtml = "";
     if (grouped) {
       let idx = 0;
       deckHtml = groups
-        .map((g) => {
-          const cards = g.steps.map((s) => card(s, idx++)).join("");
-          return `${seclab(g.label || "La méthode")}<div class="fd-deck">${cards}</div>`;
+        .map((g, gi) => {
+          const gTR = groupsTR ? groupsTR[gi] : null;
+          const cards = g.steps
+            .map((s, j) => card(s, idx++, gTR ? gTR.steps[j] : null))
+            .join("");
+          const lab = g.label || "La méthode";
+          const labTR = g.label ? (gTR ? gTR.label : null) : methLab;
+          return `${seclab(lab, labTR)}<div class="fd-deck">${cards}</div>`;
         })
         .join("");
     } else {
-      deckHtml = `${seclab("La méthode")}<div class="fd-deck">${steps.map((s, i) => card(s, i)).join("")}</div>`;
+      deckHtml = `${seclab("La méthode", methLab)}<div class="fd-deck">${steps
+        .map((s, i) => card(s, i, stepsTR ? stepsTR[i] : null))
+        .join("")}</div>`;
     }
 
     // Cartes coach : uniquement celles présentes dans la fiche (repli gracieux).
@@ -759,18 +807,35 @@ export async function mount(root, param) {
     const WHY_IC = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 18h6M9.5 21h5" stroke="#7c5fe0" stroke-width="1.8" stroke-linecap="round"/><path d="M12 3a6 6 0 0 1 3.6 10.8c-.7.5-1.1 1.2-1.1 2H9.5c0-.8-.4-1.5-1.1-2A6 6 0 0 1 12 3z" fill="#7c5fe0"/></svg>`;
     const AUTO_IC = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 13l1.6-4.4A2 2 0 0 1 7.5 7h9a2 2 0 0 1 1.9 1.6L20 13v5a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-1H7v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-5z" fill="#3f82d6"/><circle cx="7.2" cy="15.4" r="1.1" fill="#eaf3ff"/><circle cx="16.8" cy="15.4" r="1.1" fill="#eaf3ff"/></svg>`;
     const coach = [];
-    if (f.erreur) coach.push(["err", "L’erreur à éviter", f.erreur, ERR_IC]);
+    if (f.erreur)
+      coach.push([
+        "err",
+        ui("err_h", "L’erreur à éviter"),
+        bi(f.erreur, tr?.erreur),
+        ERR_IC,
+      ]);
     if (f.pourquoi)
-      coach.push(["why", "Pourquoi ça compte", f.pourquoi, WHY_IC]);
-    if (f.bva) coach.push(["auto", "En boîte auto", f.bva, AUTO_IC]);
+      coach.push([
+        "why",
+        ui("why_h", "Pourquoi ça compte"),
+        bi(f.pourquoi, tr?.pourquoi),
+        WHY_IC,
+      ]);
+    if (f.bva)
+      coach.push([
+        "auto",
+        ui("bva_h", "En boîte auto"),
+        bi(f.bva, tr?.bva),
+        AUTO_IC,
+      ]);
     const coachHtml = coach.length
       ? `<div class="fd-coach-wrap">
-          <div class="fd-seclab"><h2>Cartes coach</h2><div class="line"></div></div>
+          ${seclab("Cartes coach", lang !== "fr" ? ui("coach", "Cartes coach") : null)}
           <div class="fd-coach" style="grid-template-columns:repeat(${coach.length},1fr)">
             ${coach
               .map(
                 ([c, h, p, ic]) =>
-                  `<div class="fd-cc ${c}"><span class="fd-ic">${ic}</span><h4>${h}</h4><p>${esc(p)}</p></div>`,
+                  `<div class="fd-cc ${c}"><span class="fd-ic">${ic}</span><h4>${esc(h)}</h4><p>${p}</p></div>`,
               )
               .join("")}
           </div>
@@ -779,22 +844,24 @@ export async function mount(root, param) {
 
     const srcChaines = sourceChannels(f);
     const srcHtml = srcChaines.length
-      ? `<div class="fd-source">Vu chez de vrais moniteurs : <b>${srcChaines.map((s) => esc(s)).join(", ")}</b></div>`
+      ? `<div class="fd-source">${esc(ui("source", "Vu chez de vrais moniteurs :"))} <b>${srcChaines.map((s) => esc(s)).join(", ")}</b></div>`
       : "";
 
     const BACK = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="#3d2f7a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
     const SHUF = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 7h11M4 12h11M4 17h7" stroke="#3d2f7a" stroke-width="2" stroke-linecap="round"/><path d="M18 8l3 3-3 3" stroke="#3d2f7a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
+    const competenceTxt =
+      lang !== "fr" && tr?.competence ? tr.competence : f.competence;
     root.innerHTML = `${FD_STYLE}<div class="fd">
       <div class="fd-hero">
         <div class="fd-topbar">
-          <button class="fd-back" aria-label="Retour">${BACK}</button>
-          <span class="fd-tag"><span class="fd-dot"></span><b>${esc(f.code)} · ${esc(f.competence)} · Monde ${esc(String(f.monde))}</b></span>
+          <button class="fd-back" aria-label="${escAttr(ui("back", "Retour"))}">${BACK}</button>
+          <span class="fd-tag"><span class="fd-dot"></span><b>${esc(f.code)} · ${esc(competenceTxt)} · ${esc(ui("monde", "Monde"))} ${esc(String(f.monde))}</b></span>
         </div>
-        <h1 class="fd-title fd-gold">${esc(f.titre)}</h1>
-        <div class="fd-sub">Coche tes gestes, puis débloque le test.</div>
+        <h1 class="fd-title fd-gold">${bi(f.titre, tr?.titre)}</h1>
+        <div class="fd-sub">${esc(ui("sub", "Coche tes gestes, puis débloque le test."))}</div>
         <div class="fd-xp">
-          <div class="fd-xp-top"><span class="lab">Ton deck</span><span class="cnt fd-gold">${count}<small> / ${total} geste${total > 1 ? "s" : ""}</small></span></div>
+          <div class="fd-xp-top"><span class="lab">${esc(ui("deck", "Ton deck"))}</span><span class="cnt fd-gold">${count}<small> / ${total} ${esc(ui(total > 1 ? "gestes" : "geste", total > 1 ? "gestes" : "geste"))}</small></span></div>
           <div class="fd-bar"><div class="fill" style="width:${count ? Math.max(pct, 4) : 0}%"></div></div>
         </div>
       </div>
@@ -805,8 +872,8 @@ export async function mount(root, param) {
       ${srcHtml}
 
       <div class="fd-actions">
-        <button class="fd-cta" data-quiz><span>Teste-toi</span></button>
-        ${total >= 3 ? `<button class="fd-secondary" data-order>${SHUF}<span>Remets dans l’ordre</span></button>` : ""}
+        <button class="fd-cta" data-quiz><span>${esc(ui("cta", "Teste-toi"))}</span></button>
+        ${total >= 3 ? `<button class="fd-secondary" data-order>${SHUF}<span>${esc(ui("order", "Remets dans l’ordre"))}</span></button>` : ""}
       </div>
     </div>`;
 
@@ -931,7 +998,13 @@ export async function mount(root, param) {
 
   function renderQuiz() {
     const f = getFiche(code);
-    const questions = quizByCode(code);
+    const lang = getLang();
+    const trF = ficheTr(code, lang); // { titre, quiz:[{q,options,explication}], … } | null
+    // Chaque question reçoit sa traduction (premium-quiz affiche la trad + le FR
+    // dessous ; sans `tr`, rendu FR d'origine). Ordre garanti = même que la source.
+    const questions = quizByCode(code).map((q, i) =>
+      trF && trF.quiz && trF.quiz[i] ? { ...q, tr: trF.quiz[i] } : q,
+    );
     if (!questions.length) {
       view = "fiche";
       return render();
@@ -940,7 +1013,7 @@ export async function mount(root, param) {
     mountPremiumQuiz(root, {
       questions,
       questHint: true, // ce quiz alimente la quête du jour (réussi = ≥70 %)
-      title: f ? f.titre : "Quiz",
+      title: (trF && trF.titre) || (f ? f.titre : "Quiz"),
       onExit: (good, total) => {
         markRevised(code);
         track("revision_conduite_quiz_done", { code, good, total });

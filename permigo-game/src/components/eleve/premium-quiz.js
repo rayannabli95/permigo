@@ -12,6 +12,7 @@ import { esc } from "@/utils/escape.js";
 import { haptic, hapticPulses, tapHaptic } from "@/utils/haptic.js";
 import { playPop, playCoin, playReveal } from "@/utils/sound.js";
 import { recordAnswer, recordCompetenceAnswer } from "@/utils/weak-points.js";
+import { getLang } from "@/utils/lang.js";
 
 // Récompense VARIABLE : jamais 2× le même d'affilée (sinon le cerveau
 // s'habitue et le pic dopamine disparaît — cf. reward prediction error).
@@ -120,6 +121,15 @@ body.pq-immersive { background: #0c0a26 !important; }
 .pq-fb.win .pq-fb-h { color:#ffd06a; }
 .pq-fb.lose .pq-fb-h { color:#c7d2fe; }
 .pq-fb-t { font-size:14px; line-height:1.5; color:#e2e0ff; }
+/* Bilingue (en/ar) : traduction affichée, français gardé dessous (arabe RTL par
+   span — l'arène reste LTR). Voir lang.js + situations-i18n. */
+.pq-tr { display:block; }
+.pq-fr { display:block; margin-top:5px; font-weight:500; opacity:.62; }
+.pq-q .pq-fr { font-size:.6em; line-height:1.3; color:#cbc6f0; text-shadow:none; }
+.pq-opt .pq-fr { font-size:.82em; color:#cdc7ee; }
+.pq-fb-t .pq-fr { font-size:.9em; color:#c8c4ee; }
+.pq-opt.good .pq-fr { color:#5a3200; opacity:.72; }
+.pq-opt.bad .pq-fr { color:#e8c3ad; }
 .pq-next { width:100%; border:0; border-radius:16px; padding:16px; cursor:pointer; margin-top:14px; min-height:54px;
   font:800 16px 'Baloo 2','Fredoka',sans-serif; color:#3a1d00; background:linear-gradient(180deg,#ffd24a,#ff9c1c);
   box-shadow:0 5px 0 #b85e00, 0 8px 18px rgba(255,140,30,.35), inset 0 1px 0 rgba(255,255,255,.5); transition: transform .1s, box-shadow .1s; }
@@ -151,6 +161,16 @@ export function mountPremiumQuiz(
     onExit?.();
     return;
   }
+  // i18n : si une question porte un champ `tr` (traduction de la langue courante),
+  // on affiche la traduction AVEC le français gardé dessous (l'examen reste FR).
+  // Sans `tr` (mini-jeux, langue = fr) → rendu français d'origine, inchangé.
+  const lang = getLang();
+  const rtl = lang === "ar";
+  const bi = (fr, tr) =>
+    lang === "fr" || tr == null || tr === ""
+      ? esc(fr)
+      : `<span class="pq-tr"${rtl ? ' dir="rtl" lang="ar"' : ""}>${esc(tr)}</span>` +
+        `<span class="pq-fr" lang="fr" dir="ltr">${esc(fr)}</span>`;
   // Immersion : masque le chrome (header + nav) pendant le quiz, restauré à la sortie.
   document.body.classList.add("pq-immersive");
   // Filet de sécurité : si on quitte le quiz par une navigation (bouton
@@ -204,7 +224,7 @@ export function mountPremiumQuiz(
           else cls = "dim";
         }
         return `<button class="pq-opt ${cls}" data-i="${i}" ${answered ? "disabled" : ""}>
-          <span class="pq-opt-k">${letter}</span><span>${esc(o)}</span>
+          <span class="pq-opt-k">${letter}</span><span>${bi(o, q.tr?.options?.[i])}</span>
         </button>`;
       })
       .join("");
@@ -215,7 +235,7 @@ export function mountPremiumQuiz(
       const head = win ? pick(PRAISES, lastPraise) : pick(COACH, lastCoach);
       fb = `<div class="pq-fb ${win ? "win" : "lose"}">
           <div class="pq-fb-h">${win ? esc(head) + " !" : esc(head)}</div>
-          <div class="pq-fb-t">${esc(q.explication || q.options[q.correct])}</div>
+          <div class="pq-fb-t">${bi(q.explication || q.options[q.correct], q.tr?.explication || q.tr?.options?.[q.correct])}</div>
         </div>
         <button class="pq-next" data-next>${idx + 1 >= qs.length ? "Mon score" : "Suivant"}</button>`;
     }
@@ -228,7 +248,7 @@ export function mountPremiumQuiz(
       </div>
       <div class="pq-mid">
         <div class="pq-qn">${esc(title)} · ${idx + 1}/${qs.length}</div>
-        <div class="pq-q">${esc(q.q)}</div>
+        <div class="pq-q">${bi(q.q, q.tr?.q)}</div>
         <div class="pq-opts">${opts}</div>
         ${fb}
       </div>
