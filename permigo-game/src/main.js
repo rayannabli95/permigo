@@ -97,6 +97,17 @@ async function boot() {
         const { mount } = await import("@/pages/public/pass.js");
         return mount(app);
       }
+      // Landing B2B auto-écoles + demande de devis (lien partageable : /#/pro)
+      if (
+        location.hash === "#/pro" ||
+        location.hash.startsWith("#/pro?") ||
+        location.hash.startsWith("#/pro/") ||
+        location.hash.startsWith("#/devis") ||
+        location.hash.startsWith("#/auto-ecole")
+      ) {
+        const { mount } = await import("@/pages/public/pro.js");
+        return mount(app);
+      }
       // Questionnaire de départ (résiliation / remboursement)
       if (location.hash.startsWith("#/avis-depart")) {
         const { mount } = await import("@/pages/public/avis-depart.js");

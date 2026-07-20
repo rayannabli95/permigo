@@ -393,6 +393,14 @@ async function routePublic(app) {
     m = await import("@/pages/public/avis-depart.js");
   } else if (hash.startsWith("#/pass")) {
     m = await import("@/pages/public/pass.js");
+  } else if (
+    hash === "#/pro" ||
+    hash.startsWith("#/pro?") ||
+    hash.startsWith("#/pro/") ||
+    hash.startsWith("#/devis") ||
+    hash.startsWith("#/auto-ecole")
+  ) {
+    m = await import("@/pages/public/pro.js");
   } else if (hash.startsWith("#/legal")) {
     m = await import("@/pages/common/legal.js");
   } else if (hash.startsWith("#/login")) {
