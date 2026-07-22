@@ -21,6 +21,8 @@ import { haptic } from "@/utils/haptic.js";
 import { getStreak } from "@/utils/game-state.js";
 import { SITUATIONS } from "@/data/situations-conduite.js";
 import { FICHES } from "@/data/fiches-conduite.js";
+import { isFreeTierUser } from "@/utils/free-tier.js";
+import { discoveryBannerHTML } from "@/components/eleve/free-tier-wall.js";
 
 const LS_READ_KEY = "rvc_read_v1"; // même clé que revision-conduite.js
 const HERO_IMG = "/showcase/eleve-en-situation.png"; // vraie capture du jeu (cadrée sur la scène)
@@ -126,7 +128,14 @@ function skeleton() {
   </div></div>`;
 }
 
-function render({ streak, sceneCount, examBest, fichesLues, fichesTotal }) {
+function render({
+  streak,
+  sceneCount,
+  examBest,
+  fichesLues,
+  fichesTotal,
+  discovery,
+}) {
   const streakTxt =
     streak.count > 0 ? `Série ${streak.count} j` : "Nouvelle série";
   const examMeta =
@@ -147,6 +156,8 @@ function render({ streak, sceneCount, examBest, fichesLues, fichesTotal }) {
       <h1>Réviser</h1>
       <span class="rv4-streak">${SVG.flame}<span>${streakTxt}</span></span>
     </div>
+
+    ${discovery ? discoveryBannerHTML() : ""}
 
     <button class="rv4-hero" data-go="en-situation" aria-label="Jouer une scène de conduite">
       <span class="rv4-eyebrow">Mise en situation · ${sceneCount} scènes</span>
@@ -222,6 +233,7 @@ export async function mount(root) {
     examBest,
     fichesLues,
     fichesTotal: FICHES.length,
+    discovery: isFreeTierUser(me),
   });
   wire(root);
 }

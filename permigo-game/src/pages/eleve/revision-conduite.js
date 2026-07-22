@@ -20,6 +20,13 @@ import { getLang } from "@/utils/lang.js";
 import { ficheTr, uiFiche } from "@/data/fiches-i18n.js";
 import { openCoachSheet } from "@/components/eleve/coach-sheet.js";
 import {
+  isFreeTierUser,
+  freeQuota,
+  consumeFree,
+  resetIfNewDay,
+} from "@/utils/free-tier.js";
+import { mountFreeTierWall } from "@/components/eleve/free-tier-wall.js";
+import {
   FICHES,
   MONDES,
   getFiche,
@@ -829,6 +836,24 @@ export async function mount(root, param) {
       return render();
     }
 
+    // ── Mode découverte : 1 fiche lisible par jour ─────────────────────────
+    // Ré-ouvrir la MÊME fiche reste permis (relecture) ; une AUTRE fiche après
+    // la fiche du jour → mur découverte. Les re-render de coche de geste
+    // repassent par ici : consumeFree est idempotent sur le même code.
+    const meFt = getCurUser();
+    if (isFreeTierUser(meFt)) {
+      resetIfNewDay();
+      if (!freeQuota("fiche", f.code).allowed) {
+        track("freetier.quota_hit", { kind: "fiche", code: f.code });
+        return mountFreeTierWall(root, {
+          me: meFt,
+          reason: "quota",
+          kind: "fiche",
+        });
+      }
+      consumeFree("fiche", f.code);
+    }
+
     // Ouvrir = « lue » (progression du hub), tracké UNE fois — pas à chaque coche
     // de geste, qui re-render la fiche.
     if (lastFicheTracked !== f.code) {
@@ -1166,13 +1191,33 @@ export async function mount(root, param) {
     const trF = ficheTr(code, lang); // { titre, quiz:[{q,options,explication}], … } | null
     // Chaque question reçoit sa traduction (premium-quiz affiche la trad + le FR
     // dessous ; sans `tr`, rendu FR d'origine). Ordre garanti = même que la source.
-    const questions = quizByCode(code).map((q, i) =>
+    let questions = quizByCode(code).map((q, i) =>
       trF && trF.quiz && trF.quiz[i] ? { ...q, tr: trF.quiz[i] } : q,
     );
     if (!questions.length) {
       view = "fiche";
       return render();
     }
+
+    // ── Mode découverte : « Teste-toi » consomme aussi le quota de questions ──
+    // (même compteur que #/quiz — 3 questions/jour). Épuisé → mur découverte ;
+    // sinon on plafonne le nombre de questions au reste du quota.
+    const meFt = getCurUser();
+    if (isFreeTierUser(meFt)) {
+      resetIfNewDay();
+      const q = freeQuota("quiz");
+      if (q.remaining <= 0) {
+        track("freetier.quota_hit", { kind: "quiz" });
+        return mountFreeTierWall(root, {
+          me: meFt,
+          reason: "quota",
+          kind: "quiz",
+        });
+      }
+      questions = questions.slice(0, Math.min(questions.length, q.remaining));
+      consumeFree("quiz", null, questions.length);
+    }
+
     track("revision_conduite_quiz_start", { code });
     mountPremiumQuiz(root, {
       questions,

@@ -34,6 +34,13 @@ import {
 } from "@/utils/sound.js";
 import { haptic } from "@/utils/haptic.js";
 import { burstConfetti } from "@/components/common/confetti.js";
+import {
+  isFreeTierUser,
+  freeQuota,
+  consumeFree,
+  resetIfNewDay,
+} from "@/utils/free-tier.js";
+import { mountFreeTierWall } from "@/components/eleve/free-tier-wall.js";
 
 // Emoji d'action des réponses (data/situations-conduite.js) → mini-médaillon 3D.
 // On ne touche pas la donnée : on traduit l'emoji au rendu. Emoji inconnu →
@@ -80,6 +87,11 @@ export async function mount(root, param) {
   // démarre par la scène du jour.
   const isJour = param === "jour";
   track("page.view", { page: "en-situation", intro: isIntro, jour: isJour });
+
+  // Mode découverte (élève solo non payé) : 1 scène par jour. L'accroche
+  // post-onboarding (isIntro) reste jouée en entier — c'est la première
+  // dégustation. Les manches « normales » sont réduites à 1 scène puis murées.
+  const gatedScene = isFreeTierUser(me) && !isIntro;
 
   // Plein écran arène : header + nav masqués (filet : restauré au hashchange)
   document.body.classList.add("sit-immersive");
@@ -145,6 +157,14 @@ export async function mount(root, param) {
 
   // ── Manche ───────────────────────────────────────────────────
   function startRound() {
+    // Mode découverte : scène du jour déjà jouée → mur direct (avant la manche).
+    if (gatedScene) {
+      resetIfNewDay();
+      if (freeQuota("scene").remaining <= 0) {
+        track("freetier.quota_hit", { kind: "scene" });
+        return mountFreeTierWall(root, { me, reason: "quota", kind: "scene" });
+      }
+    }
     session = pickSession(
       isIntro ? INTRO_SIZE : ROUND_SIZE,
       getScenesVues(me.id),
@@ -155,6 +175,11 @@ export async function mount(root, param) {
         0,
         ROUND_SIZE,
       );
+    }
+    // Découverte : une seule scène par manche, puis mur (cf. renderRecap).
+    if (gatedScene) {
+      session = session.slice(0, 1);
+      consumeFree("scene");
     }
     idx = 0;
     bonnes = 0;
@@ -306,6 +331,15 @@ export async function mount(root, param) {
   // ── Récap de manche ──────────────────────────────────────────
   function renderRecap() {
     clearTimers();
+
+    // Mode découverte : la scène du jour est jouée → mur chaleureux (on ne
+    // crédite pas de volants : les récompenses sont réservées au Pass).
+    if (gatedScene) {
+      track("situation.completed", { score: bonnes, total: session.length });
+      track("freetier.quota_hit", { kind: "scene" });
+      return mountFreeTierWall(root, { me, reason: "quota", kind: "scene" });
+    }
+
     const total = session.length;
     const pct = Math.round((bonnes / total) * 100);
     const gagnes = bonnes * VOLANTS_PAR_BONNE;
