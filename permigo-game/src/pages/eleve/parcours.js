@@ -165,9 +165,9 @@ const STYLE = `<style>
 .stt-pill.todo   { background: var(--bg2); color: var(--mu3); }
 .stt-pill.locked { background: var(--bg2); color: var(--mu2); }
 
-/* padding-bottom large : le dernier bloc (conseil du coach) doit pouvoir
-   défiler entièrement au-dessus de la barre de nav fixe (~60px). */
-.fiche-body { padding: 0 18px calc(28px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 12px; }
+/* padding-bottom large : le dernier bloc (désormais les boutons d'action)
+   doit pouvoir défiler entièrement au-dessus de la barre de nav fixe (~64px). */
+.fiche-body { padding: 0 18px calc(80px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 12px; }
 
 /* ── Fiche compacte (mobile) ── */
 .fiche-summary-txt {
@@ -484,6 +484,34 @@ const STYLE = `<style>
 .stt-pill.todo   { background: rgba(255,255,255,.08); color: #b9aee0; }
 .stt-pill.locked { background: rgba(255,255,255,.06); color: #8d80b8; }
 .fiche-summary-txt, .fiche-summary p { color: #d9cffa !important; opacity: 1; }
+/* Ligne d'état unique sous le titre (remplace fiche-id + stt-pill + bloc statut).
+   Sheet toujours nuit-violet → couleurs codées en dur (pas de var(--ink)). */
+.fiche-state {
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-top: 8px;
+  font: 700 12.5px/1.3 'Inter', sans-serif;
+  color: #cdbff5;
+}
+.fiche-state-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  flex: none; background: #b9aee0;
+}
+.fiche-state.done      .fiche-state-dot { background: #3ee07e; box-shadow: 0 0 10px rgba(62,224,126,.55); }
+.fiche-state.next      .fiche-state-dot,
+.fiche-state.a_valider .fiche-state-dot { background: #ffd24a; box-shadow: 0 0 10px rgba(255,210,74,.55); }
+.fiche-state.locked    .fiche-state-dot { background: #8d80b8; }
+.fiche-state.done      .fiche-state-txt { color: #8ef0b0; }
+/* Note « verrouillée » — pas de CTA, juste comment débloquer */
+.fiche-locked-note {
+  display: flex; align-items: center; gap: 10px;
+  margin: 2px 0 0; padding: 14px 16px;
+  border-radius: var(--r-lg);
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.09);
+  font: 500 12.5px/1.45 'Inter', sans-serif;
+  color: #b9aee0;
+}
+.fiche-locked-note svg { color: #cdbff5; flex-shrink: 0; }
 /* Blocs status */
 .fiche-status { border: 1px solid rgba(255,255,255,.09); }
 .fiche-status.done   { background: rgba(62,224,126,.1) !important; }
@@ -524,6 +552,21 @@ const STYLE = `<style>
 .fiche-quiz-cta svg { color: #3a1c00; }
 .fiche-quiz-cta:active { transform: translateY(4px); box-shadow: 0 2px 0 #b85e00, 0 8px 16px -8px rgba(255,156,28,.7), inset 0 2px 0 rgba(255,255,255,.7); }
 .fiche-quiz-cta:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+/* Variante violette — action « forward » (préparer / certifier), cf maquette
+   validée « Variante A » : violet = j'avance, or = je revois (état acquis). */
+.fiche-quiz-cta.v {
+  color: #fff;
+  background: linear-gradient(180deg, #a89bff 0%, #7c4dff 48%, #5b50e0 100%);
+  box-shadow:
+    0 6px 0 #3a30a8,
+    0 14px 26px -8px rgba(124,77,255,.7),
+    inset 0 2px 0 rgba(255,255,255,.35);
+}
+.fiche-quiz-cta.v svg { color: #fff; }
+.fiche-quiz-cta.v:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #3a30a8, 0 8px 16px -8px rgba(124,77,255,.7), inset 0 2px 0 rgba(255,255,255,.35);
+}
 
 /* CTA « Valider en autonomie » — élève SANS moniteur uniquement. Secondaire
    (contour), sous le CTA doré, pour ne jamais laisser croire que c'est le
@@ -2600,16 +2643,37 @@ function openFiche(root, compId, ws, validatedMap, pendingMap, hasMoniteur) {
     pendingMap,
   );
   const val = validatedMap[compId];
-  const stLabel = {
-    done: "Acquise",
-    a_valider: "À valider",
-    next: "Prochaine compétence",
-    todo: "À venir",
-    locked: "Verrouillée",
-  }[st];
   const compNum = cat.subs.findIndex((s) => s.c === compId) + 1;
   const total = cat.subs.length;
   const detail = getCompDetail(compId);
+
+  // ── UNE ligne d'état simple (remplace le gros bloc statut coloré) ──
+  // Vocabulaire verrouillé : « certifiée par toi » / « à préparer », jamais
+  // « acquis / maîtrisé / échec ». Date courte quand elle existe.
+  const fmtShort = (iso) =>
+    iso
+      ? new Date(iso).toLocaleDateString("fr-FR", {
+          day: "numeric",
+          month: "short",
+        })
+      : null;
+  const stateLine = (() => {
+    if (st === "done") {
+      const d = fmtShort(val?.validated_at);
+      if (val?.source === "auto")
+        return `Certifiée par toi${d ? ` · ${d}` : ""}`;
+      const who = val?.teacherName
+        ? ` par ${val.teacherName}`
+        : hasMoniteur
+          ? " par ton moniteur"
+          : "";
+      return `Validée${who}${d ? ` · ${d}` : ""}`;
+    }
+    if (st === "a_valider") return "Prête à certifier";
+    if (st === "next") return `Étape ${compNum} sur ${total} · à préparer`;
+    if (st === "locked") return "Pas encore accessible";
+    return `Étape ${compNum} sur ${total} · à venir`; // todo
+  })();
 
   // Conseil du coach — SORTI de l'accordéon replié (demande Rayan 22/07) :
   // encart toujours visible + tapable → lecture en grand (coach-sheet.js).
@@ -2640,121 +2704,45 @@ function openFiche(root, compId, ws, validatedMap, pendingMap, hasMoniteur) {
       locked: medStatus("verrouille", { size: 58 }),
     }[st] ?? medStatus("encours", { size: 58 });
 
-  // Progression visuelle dans le monde (n / total)
-  const pctInWorld = Math.round((compNum / total) * 100);
-
-  // Quiz-récap : rappel OPTIONNEL proposé sur une compétence acquise.
-  // Ne change pas le statut (already_acquired) — joue l'animation + crédite l'XP d'engagement.
-  const recapBtn = `
-    <a href="#/quiz/${esc(compId)}/post_validation" role="button" class="fiche-quiz-cta">
-      ${icon("zap", { size: 16 })} Révise cette compétence
+  // ── Boutons : UN principal (doré 3D) + UN secondaire (discret) max.
+  // Deux destinations seulement depuis cette fenêtre : se préparer
+  // (#/revision-conduite) ou certifier (#/valider-seul). Le 3e moteur
+  // (re-quiz #/quiz/…) est retiré — plus de cul-de-sac ni de doublon.
+  const btnPrepare = `
+    <a href="#/revision-conduite/${esc(compId)}" role="button" class="fiche-quiz-cta v">
+      Je me prépare ${icon("arrow-right", { size: 17 })}
     </a>`;
-
-  // Compétence pas encore acquise : la fiche doit donner un geste à faire
-  // (avant, elle se refermait sur rien — cul-de-sac du 1er jour). Direction
-  // la fiche de révision conduite (méthode + « Teste-toi »).
-  const reviseBtn = `
+  const btnRevoir = `
     <a href="#/revision-conduite/${esc(compId)}" role="button" class="fiche-quiz-cta">
-      ${icon("zap", { size: 16 })} Révise cette compétence
+      ${icon("refresh", { size: 16 })} Revoir en 2 min
     </a>`;
-
-  // Certification par l'élève — TOUS les élèves depuis le pivot 17/07
-  // (l'élève avance seul ; la validation moniteur devient une confirmation
-  // optionnelle). Le serveur reste le juge (quiz corrigé côté RPC).
-  const selfValidateBtn = `
+  const btnCertifierMain = `
+    <a href="#/valider-seul/${esc(compId)}" role="button" class="fiche-quiz-cta v">
+      ${icon("shield", { size: 16 })} Certifier cette compétence
+    </a>`;
+  const btnCertifierSecond = `
     <a href="#/valider-seul/${esc(compId)}" role="button" class="fiche-self-cta">
-      ${icon("shield", { size: 15 })} Passée en vraie leçon ? Certifie-la ici.
+      ${icon("shield", { size: 15 })} Déjà vue en leçon ? Certifie-la
+    </a>`;
+  const btnRevoirFiche = `
+    <a href="#/revision-conduite/${esc(compId)}" role="button" class="fiche-self-cta">
+      ${icon("book-open", { size: 15 })} Revoir la fiche
     </a>`;
 
-  // Bloc status contextuel selon état
-  const statusBlock = (() => {
-    if (st === "done" && val?.source === "auto") {
-      // Certifiée par l'élève : badge distinct, jamais confondu avec une
-      // validation moniteur.
-      const scoreTxt =
-        val.score_cognitif != null
-          ? ` (quiz : ${Math.round(val.score_cognitif)}%)`
-          : "";
-      return `
-        <div class="fiche-status done fiche-status-auto">
-          <div class="fiche-status-ico">${icon("check", { size: 18 })}</div>
-          <div class="fiche-status-body">
-            <div class="fiche-status-title">Compétence acquise <span class="fiche-auto-pill">Certifiée par toi</span></div>
-            <div class="fiche-status-sub">${esc(`Tu as certifié cette compétence toi-même${scoreTxt}, après avoir réussi le quiz de validation.`)}</div>
-          </div>
-        </div>${recapBtn}`;
-    }
-    if (st === "done" && val) {
-      const dateStr = val.validated_at
-        ? new Date(val.validated_at).toLocaleDateString("fr-FR", {
-            day: "numeric",
-            month: "long",
-          })
-        : null;
-      const parts = [];
-      if (dateStr) parts.push(`Validée le ${dateStr}`);
-      if (val.teacherName) parts.push(`par ${val.teacherName}`);
-      if (val.score_cognitif != null)
-        parts.push(`Quiz : ${Math.round(val.score_cognitif)}%`);
-      return `
-        <div class="fiche-status done">
-          <div class="fiche-status-ico">${icon("check", { size: 18 })}</div>
-          <div class="fiche-status-body">
-            <div class="fiche-status-title">Compétence acquise</div>
-            <div class="fiche-status-sub">${esc(parts.join(" · ") || (hasMoniteur ? "Ton moniteur a validé cette compétence." : "Compétence validée."))}</div>
-          </div>
-        </div>${recapBtn}`;
-    }
-    if (st === "done") {
-      return `
-        <div class="fiche-status done">
-          <div class="fiche-status-ico">${icon("check", { size: 18 })}</div>
-          <div class="fiche-status-body">
-            <div class="fiche-status-title">Compétence acquise</div>
-            <div class="fiche-status-sub">${hasMoniteur ? "Ton moniteur a validé cette compétence en séance." : "Compétence validée. Bien joué !"}</div>
-          </div>
-        </div>${recapBtn}`;
-    }
-    if (st === "a_valider") {
-      // Legacy : ne devrait plus apparaître (validation moniteur = acquis direct).
-      // Affiché comme acquise + quiz-récap optionnel.
-      return `
-        <div class="fiche-status done">
-          <div class="fiche-status-ico">${icon("check", { size: 18 })}</div>
-          <div class="fiche-status-body">
-            <div class="fiche-status-title">Compétence acquise</div>
-            <div class="fiche-status-sub">${hasMoniteur ? "Validée par ton moniteur en séance de conduite." : "Validée — compétence acquise."}</div>
-          </div>
-        </div>${recapBtn}`;
-    }
-    if (st === "next") {
-      return `
-        <div class="fiche-status next" style="--wc:${meta.color}">
-          <div class="fiche-status-ico">${icon("zap", { size: 18 })}</div>
-          <div class="fiche-status-body">
-            <div class="fiche-status-title">Prochaine à travailler</div>
-            <div class="fiche-status-sub">Travaille-la en leçon, puis certifie-la ici quand tu te sens prêt·e.</div>
-          </div>
-        </div>${reviseBtn}${selfValidateBtn}`;
-    }
+  // Boutons par état — « 1 principal + 1 secondaire max ».
+  const actionsBlock = (() => {
     if (st === "locked") {
+      // Verrouillée : comportement conservé — pas de CTA, on explique
+      // seulement comment débloquer.
       return `
-        <div class="fiche-status locked">
-          <div class="fiche-status-ico">${icon("lock", { size: 18 })}</div>
-          <div class="fiche-status-body">
-            <div class="fiche-status-title">Pas encore accessible</div>
-            <div class="fiche-status-sub">Valide les compétences précédentes pour débloquer celle-ci.</div>
-          </div>
-        </div>`;
+        <p class="fiche-locked-note">
+          ${icon("lock", { size: 15 })}
+          <span>Valide les compétences précédentes pour débloquer celle-ci.</span>
+        </p>`;
     }
-    return `
-      <div class="fiche-status next" style="--wc:${meta.color}">
-        <div class="fiche-status-ico">${icon("clock", { size: 18 })}</div>
-        <div class="fiche-status-body">
-          <div class="fiche-status-title">À venir</div>
-          <div class="fiche-status-sub">Tu travailleras cette compétence avec ton moniteur au fil des séances.</div>
-        </div>
-      </div>${reviseBtn}${selfValidateBtn}`;
+    if (st === "done") return btnRevoir; // un seul bouton
+    if (st === "a_valider") return btnCertifierMain + btnRevoirFiche;
+    return btnPrepare + btnCertifierSecond; // next & todo
   })();
 
   const body =
@@ -2768,31 +2756,21 @@ function openFiche(root, compId, ws, validatedMap, pendingMap, hasMoniteur) {
         ${stIcon}
       </div>
       <h3 id="bsheet-title">${esc(sub.n)}</h3>
-      <div class="fiche-id">${compNum} sur ${total} dans ce chapitre</div>
-      ${st === "done" ? "" : `<div><span class="stt-pill ${st}" style="--wc:${meta.color}">${esc(stLabel)}</span></div>`}
+      <div class="fiche-state ${st}">
+        <span class="fiche-state-dot" aria-hidden="true"></span>
+        <span class="fiche-state-txt">${esc(stateLine)}</span>
+      </div>
     </div>
     <div class="fiche-body">
 
-      <!-- SUMMARY — une phrase -->
+      <!-- Résumé — une phrase : ce que c'est. -->
       <p class="fiche-summary-txt">${esc(detail.summary)}</p>
 
-      <!-- STATUS contextuel (+ CTA quiz si acquise) -->
-      ${statusBlock}
-
-      <!-- CONSEIL DU COACH — toujours visible, tapable pour lire en grand -->
+      <!-- Conseil du coach — toujours visible, tapable pour lire en grand. -->
       ${tipBlock}
 
-      <!-- POINTS CLÉS — repliés par défaut (mobile : moins de texte) -->
-      <details class="fiche-acc" style="--wc:${meta.color}">
-        <summary>
-          ${medallion("cible", "teal", { size: 22 })}
-          ${st === "done" ? "Ce que tu maîtrises" : "Ce que tu vas maîtriser"}
-          <span class="fiche-acc-chev">${icon("chevron-down", { size: 15 })}</span>
-        </summary>
-        <ul class="fiche-block-list">
-          ${detail.keyPoints.map((kp) => `<li><span class="kp-check">${icon("check", { size: 11, strokeWidth: 3 })}</span>${esc(kp)}</li>`).join("")}
-        </ul>
-      </details>
+      <!-- Action(s) — 1 principal + 1 secondaire max. -->
+      ${actionsBlock}
 
     </div>`;
 
