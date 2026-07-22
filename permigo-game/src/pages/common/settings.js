@@ -1092,18 +1092,22 @@ function wire(root, me, prefs) {
     }
   });
 
-  // Langue (fr / en / ar) — même chemin que le thème (applyLang + RPC).
-  // NB : les questions du quiz apparaissent traduites, français gardé dessous.
+  // Langue (fr / en / ar) — même chemin que le thème (applyLang + RPC), mais
+  // contrairement au thème le TEXTE de la page vient de st()/SET_I18N évalués
+  // au render initial → il ne bascule pas tout seul. On re-rend donc toute la
+  // page (render+wire sur le DOM existant, pas de fuite : innerHTML remplace
+  // les anciens nœuds/listeners). La nav du bas se reconstruit de son côté en
+  // écoutant l'event permigo:lang-changed émis par applyLang().
   root.querySelector("#lang-seg")?.addEventListener("click", async (e) => {
     const btn = e.target.closest(".st-theme-btn");
     if (!btn) return;
     const lang = btn.dataset.setLang;
-    root.querySelectorAll("#lang-seg .st-theme-btn").forEach((b) => {
-      b.classList.toggle("active", b === btn);
-      b.setAttribute("aria-pressed", String(b === btn));
-    });
+    if (lang === prefs.language) return;
     applyLang(lang);
     track("settings.language_changed", { language: lang });
+    prefs.language = lang;
+    render(root, me, prefs);
+    wire(root, me, prefs);
     try {
       await sb.rpc("set_my_preferences", { p_data: { language: lang } });
     } catch (err) {

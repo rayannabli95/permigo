@@ -325,12 +325,35 @@ const STYLE = `
   }
 `;
 
+// Rôle courant (pour la reconstruction sur changement de langue) + garde
+// d'abonnement unique à permigo:lang-changed (cf. mountBottomNav ci-dessous).
+let _currentRole = null;
+let _langListenerBound = false;
+
 export function mountBottomNav(role) {
+  _currentRole = role;
+
   if (!document.head.querySelector("#bn-style")) {
     const s = document.createElement("style");
     s.id = "bn-style";
     s.textContent = STYLE;
     document.head.appendChild(s);
+  }
+
+  // Bascule de langue immédiate (Réglages) : les libellés NAV_I18N sont
+  // figés au montage → sur permigo:lang-changed on force une reconstruction
+  // complète MÊME rôle en contournant la garde d'idempotence ci-dessous
+  // (sentinelle sur dataset.role). Un seul abonnement pour toute la durée de
+  // vie de l'app, pas un par montage (mountBottomNav est appelée à chaque
+  // navigation).
+  if (!_langListenerBound) {
+    _langListenerBound = true;
+    window.addEventListener("permigo:lang-changed", () => {
+      const nav = document.querySelector("#bottom-nav");
+      if (!nav || !_currentRole) return;
+      nav.dataset.role = "__lang-stale__";
+      mountBottomNav(_currentRole);
+    });
   }
 
   // Idempotent : main.js appelle mountBottomNav() à CHAQUE navigation.
