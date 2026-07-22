@@ -41,16 +41,13 @@ export function accessGateFor(me) {
     };
   }
 
-  // Élève SOLO (pas de code moniteur) sans Pass payé → mur de paiement. Après
-  // le consentement parental (légal d'abord), avant l'onboarding : on paie à la
-  // création. Les élèves rattachés / grandfathered / avec Pass ne sont pas gatés
-  // (statut serveur `me.eleveAccess`, cf. main.js).
-  if (me.eleveAccess?.gated) {
-    return async (app, m) => {
-      const { mount } = await import("@/pages/eleve/pass-requis.js");
-      await mount(app, m);
-    };
-  }
+  // Élève SOLO (pas de code moniteur) sans Pass payé → « mode découverte ».
+  // On ne mure PLUS tout d'un bloc ici (décision Rayan : l'élève goûte un peu
+  // avant de payer). Il traverse le routing normal AVEC le chrome ; le router
+  // (route()) mure au cas par cas les surfaces premium vers le mur découverte,
+  // et les pages (quiz / fiches / en-situation) appliquent les quotas du jour.
+  // → aucun `return` ici : on tombe sur l'onboarding puis le routing normal.
+  // Les élèves rattachés / grandfathered / avec Pass ne sont jamais gatés.
 
   // Élève tout neuf jamais passé par le flow d'accueil → onboarding d'abord.
   if (!me.first_value_action_at && !safeGet("permigo_eleve_onboarding_done")) {

@@ -3,6 +3,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { phPageview } from "@/services/posthog.js";
 import { accessGateFor } from "@/auth/route-guards.js";
+import { isFreeTierUser, isDiscoveryAllowedRoute } from "@/utils/free-tier.js";
 
 // Direction de navigation → transition d'écran directionnelle (sensation « feed »).
 const _navStack = [];
@@ -328,6 +329,26 @@ export async function route(root, me) {
   const segments = rawPath.split("/");
   const routeName = segments[0] || "default";
   const param = segments[1] || null; // ex: eleveId pour #/livret/{id}
+
+  // Mode découverte (élève solo non payé) : les surfaces premium (récompenses,
+  // parcours-jeu, examen blanc, certification, classement…) sont murées vers le
+  // mur découverte chaleureux — mais on garde le chrome (le mur est monté APRÈS
+  // ce return par le boot, ou persiste en navigation), donc l'élève peut
+  // revenir explorer l'accueil / Réviser via la nav du bas. Les surfaces de
+  // découverte (accueil, Réviser, quiz, fiches, en-situation) passent ici et
+  // appliquent elles-mêmes leurs quotas du jour.
+  if (isFreeTierUser(me) && !isDiscoveryAllowedRoute(routeName)) {
+    await _unmountCurrent();
+    const dir = _navDir(location.hash || "#/");
+    const { mountFreeTierWall } =
+      await import("@/components/eleve/free-tier-wall.js");
+    await mountFreeTierWall(root, { me, reason: "route", routeName });
+    _currentMod = null; // le mur se gère seul (pas d'unmount router)
+    _playEnter(root, dir);
+    _setPageTitle(root, routeName);
+    return;
+  }
+
   const loader = map[routeName] || map.default;
 
   try {

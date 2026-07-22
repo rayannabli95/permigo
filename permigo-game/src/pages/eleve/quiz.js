@@ -17,6 +17,16 @@ import { unlockChest } from "@/utils/game-state.js";
 import { promptInstallAtValueMoment } from "@/components/common/install-nudge.js";
 import { hideBottomNav } from "@/utils/nav.js";
 import { playSuccess } from "@/utils/sound.js";
+import {
+  isFreeTierUser,
+  freeQuota,
+  consumeFree,
+  resetIfNewDay,
+} from "@/utils/free-tier.js";
+import {
+  discoveryPillHTML,
+  DISCOVERY_PILL_STYLE,
+} from "@/components/eleve/free-tier-wall.js";
 
 // Mappe l'icône de catégorie REMC (cat.ico) vers un médaillon 3D premium.
 // [glyphe, rampe] — les 4 mondes ont chacun leur identité visuelle.
@@ -261,7 +271,25 @@ export async function mount(root, params = {}) {
 
   const sub = findSubComp(competenceId);
   const cat = findCategory(competenceId);
-  const nbQuestions = type === "post_validation" ? 3 : 2;
+  let nbQuestions = type === "post_validation" ? 3 : 2;
+
+  // ── Mode découverte (élève solo non payé) : quota de questions du jour ──────
+  // Quota épuisé → mur découverte chaleureux. Sinon on plafonne le nombre de
+  // questions au reste du quota (le moteur s'arrête donc « après 3 questions »).
+  const gated = isFreeTierUser(me);
+  if (gated) {
+    resetIfNewDay();
+    const q = freeQuota("quiz");
+    if (q.remaining <= 0) {
+      _restoreNav();
+      track("freetier.quota_hit", { kind: "quiz" });
+      const { mountFreeTierWall } =
+        await import("@/components/eleve/free-tier-wall.js");
+      await mountFreeTierWall(root, { me, reason: "quota", kind: "quiz" });
+      return;
+    }
+    nbQuestions = Math.min(nbQuestions, q.remaining);
+  }
   const typeLabel = isDaily
     ? "Question du jour"
     : type === "post_validation"
@@ -287,6 +315,7 @@ export async function mount(root, params = {}) {
           <span class="qp-meta-item">${icon("file-text", { size: 14 })} ${nbQuestions} questions</span>
           <span class="qp-meta-item">${icon("zap", { size: 14 })} ~30 secondes</span>
         </div>
+        ${gated ? `${DISCOVERY_PILL_STYLE}<div style="margin:0 0 16px">${discoveryPillHTML("quiz")}</div>` : ""}
         <button class="btn-start" id="btn-start">Commencer</button>
         <button class="btn-skip" id="btn-skip">Plus tard</button>
       </div>
@@ -326,6 +355,9 @@ export async function mount(root, params = {}) {
       if (startBtn) startBtn.disabled = false;
       toast("Pas encore de questions sur cette compétence", "info");
       if (autoStart) location.hash = "#/";
+    } else if (gated) {
+      // Le quiz est bien lancé : on décompte les questions du quota du jour.
+      consumeFree("quiz", null, nbQuestions);
     }
   };
 
