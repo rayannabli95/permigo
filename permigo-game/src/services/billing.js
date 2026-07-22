@@ -41,6 +41,23 @@ export async function startPassCheckout(plan) {
 }
 
 /**
+ * Ouvre le portail de facturation Stripe (edge function billing-portal) pour
+ * gérer / RÉSILIER l'abonnement en ligne, puis redirige vers ce portail.
+ * supabase-js attache automatiquement le JWT user à l'invocation.
+ * @returns {Promise<void>} redirige la page si succès ; throw sinon (ex : pas de
+ *   customer Stripe → le client affiche un e-mail de secours).
+ */
+export async function openBillingPortal() {
+  const { data, error } = await sb.functions.invoke("billing-portal", {
+    body: {},
+  });
+  if (error) throw error;
+  const url = data?.url;
+  if (!url) throw new Error("portal_url_missing");
+  window.location.href = url;
+}
+
+/**
  * Lit l'abonnement de l'utilisateur courant (RLS : il ne voit que le sien).
  * @returns {Promise<{status:string,current_period_end:string|null,cancel_at_period_end:boolean}|null>}
  */
