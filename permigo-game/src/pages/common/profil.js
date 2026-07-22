@@ -33,6 +33,7 @@ import {
   optInPush,
 } from "@/services/web-push.js";
 import { mountMoniteurRanking } from "@/components/enseignant/moniteur-ranking.js";
+import { getLang } from "@/utils/lang.js";
 
 // ─── Labels rôle ─────────────────────────────────────────────
 let _areneEscHandler = null;
@@ -1399,7 +1400,7 @@ function _competenceState(validated) {
 function _areneAchievements(unlockedKeys, achOk, validated, streak) {
   return CATALOG.map((def) => ({
     image: def.image,
-    name: def.title,
+    name: ptAch(def.key, def.title),
     need: achOk
       ? unlockedKeys.has(def.key)
       : _fallbackUnlocked(def.key, validated, streak),
@@ -1616,6 +1617,158 @@ const STYLE_ARENE = `<style>
 
 const _LOCK_SVG = medallion("cadenas", "slate", { size: 18 });
 
+// ── i18n de la COQUE du profil ÉLÈVE (EN/AR) — pour les élèves non-
+// francophones. Dict LOCAL au composant (pas de fichier partagé → évite les
+// collisions multi-session). pt(key, fr) = traduit-ou-français avec esc intégré
+// (sûr en texte ET en attribut), ptR = version brute (textContent / toasts /
+// interpolation). En 'fr' ou clé absente → français, byte-identique (esc ne
+// touche pas les apostrophes). Uniquement appelé depuis le chemin ÉLÈVE
+// (mountEleveArene / _wireEleveArene / _areneAchievements) → moniteur & gérant
+// restent 100 % en français. On NE traduit PAS le contenu REMC dynamique
+// (nom/rang de compétence, sous-compétence) : laissé à sa source (comme accueil).
+const PROF_I18N = {
+  en: {
+    h1_title: "My profile",
+    pseudo_ph: "your_handle",
+    pseudo_edit_aria: "Change username",
+    photo_edit: "Change my photo",
+    comp_n: "Skill {n}",
+    valid_lab: "Validations",
+    valid_sub: "booklet objectives",
+    bar_done: "done ✓",
+    bar_next: "next validation",
+    stat_streak: "Streak",
+    stat_volants: "Steering wheels",
+    stat_remaining: "Remaining",
+    ach_title: "Your achievements",
+    ach_list_aria: "Your achievements (scrollable list)",
+    next_kick: "Your next challenge",
+    all_done: "Everything validated — virtual licence unlocked",
+    next_skill: "Next skill",
+    cta_review: "Revise now",
+    settings: "Settings",
+    row_notifs: "My notifications",
+    row_notifs_sub: "Validations, encouragements, reports",
+    row_reminders: "Revision reminders",
+    notif_off: "Off",
+    notif_rhythm: "Stay on track",
+    notif_blocked: "Blocked by the browser",
+    row_settings_sub: "Theme, language, privacy",
+    logout: "Log out",
+    delete_account: "Delete my account",
+    member_since: "Member since",
+    modal_title: "Choose your player name",
+    modal_close: "Close",
+    modal_tip: "This is the name other students see in the arena ranking.",
+    pseudo_rule: "3 to 16 characters: letters, numbers or _",
+    modal_save: "Save my name",
+    pseudo_not_allowed: "This username isn't allowed.",
+    pseudo_taken_err: "This username is already taken.",
+    pseudo_save_err: "Couldn't save.",
+    toast_photo: "Photo updated ✓",
+    toast_logout_err: "Couldn't log out — try again",
+    toast_pseudo_taken: "This username is already taken",
+    toast_pseudo_save_err: "Couldn't save the username",
+    toast_pseudo_saved: "Username saved",
+    toast_pseudo_removed: "Username removed",
+    toast_conn_err: "Connection error",
+  },
+  ar: {
+    h1_title: "ملفي الشخصي",
+    pseudo_ph: "لقبك",
+    pseudo_edit_aria: "تغيير اللقب",
+    photo_edit: "تغيير صورتي",
+    comp_n: "المهارة {n}",
+    valid_lab: "التحقّقات",
+    valid_sub: "أهداف الدفتر",
+    bar_done: "اكتمل ✓",
+    bar_next: "التحقق التالي",
+    stat_streak: "السلسلة",
+    stat_volants: "مقود",
+    stat_remaining: "المتبقية",
+    ach_title: "إنجازاتك",
+    ach_list_aria: "إنجازاتك (قائمة قابلة للتمرير)",
+    next_kick: "تحديك التالي",
+    all_done: "كل شيء مُتحقق — الرخصة الافتراضية مفتوحة",
+    next_skill: "المهارة التالية",
+    cta_review: "راجع الآن",
+    settings: "الإعدادات",
+    row_notifs: "إشعاراتي",
+    row_notifs_sub: "التحقّقات، التشجيعات، التقارير",
+    row_reminders: "تذكيرات المراجعة",
+    notif_off: "معطّلة",
+    notif_rhythm: "حافظ على وتيرتك",
+    notif_blocked: "محظورة من المتصفح",
+    row_settings_sub: "السمة، اللغة، الخصوصية",
+    logout: "تسجيل الخروج",
+    delete_account: "حذف حسابي",
+    member_since: "عضو منذ",
+    modal_title: "اختر اسم لاعبك",
+    modal_close: "إغلاق",
+    modal_tip: "هذا هو الاسم الذي يراه بقية الطلاب في تصنيف الحلبة.",
+    pseudo_rule: "من 3 إلى 16 حرفًا: أحرف أو أرقام أو _",
+    modal_save: "حفظ اسمي",
+    pseudo_not_allowed: "هذا اللقب غير مسموح به.",
+    pseudo_taken_err: "هذا اللقب مأخوذ بالفعل.",
+    pseudo_save_err: "تعذّر الحفظ.",
+    toast_photo: "تم تحديث الصورة ✓",
+    toast_logout_err: "تعذّر تسجيل الخروج — أعد المحاولة",
+    toast_pseudo_taken: "هذا اللقب مأخوذ بالفعل",
+    toast_pseudo_save_err: "تعذّر حفظ اللقب",
+    toast_pseudo_saved: "تم حفظ اللقب",
+    toast_pseudo_removed: "تمت إزالة اللقب",
+    toast_conn_err: "خطأ في الاتصال",
+  },
+};
+
+function pt(key, fr) {
+  const l = getLang();
+  return esc((l !== "fr" && PROF_I18N[l]?.[key]) || fr);
+}
+function ptR(key, fr) {
+  const l = getLang();
+  return (l !== "fr" && PROF_I18N[l]?.[key]) || fr;
+}
+
+// Noms des succès (« Tes succès ») — même métaphore automobile que le FR, une
+// entrée par clé de trophée (CATALOG). Traduits avec soin, pas de « gems ».
+const PROF_ACH_I18N = {
+  en: {
+    comp_5: "First adjustments",
+    comp_10: "Chassis set",
+    comp_15: "Engine fitted",
+    comp_20: "Body mounted",
+    comp_25: "Headlights on",
+    comp_28: "Mock exam ready",
+    comp_31: "Open road",
+    streak_3: "Engine started",
+    streak_14: "Full tank",
+    streak_60: "Streak driver",
+    quiz_10: "Brakes tested",
+    quiz_50: "Steering calibrated",
+    quiz_perfect_5: "Retro rim",
+  },
+  ar: {
+    comp_5: "الضبط الأول",
+    comp_10: "الهيكل جاهز",
+    comp_15: "المحرك مثبّت",
+    comp_20: "البدن مركّب",
+    comp_25: "الأضواء مشتعلة",
+    comp_28: "جاهز للامتحان التجريبي",
+    comp_31: "الطريق مفتوح",
+    streak_3: "المحرك يعمل",
+    streak_14: "خزان ممتلئ",
+    streak_60: "سائق مثابر",
+    quiz_10: "الفرامل مُختبرة",
+    quiz_50: "المقود مُعاير",
+    quiz_perfect_5: "جنط كلاسيكي",
+  },
+};
+function ptAch(key, fr) {
+  const l = getLang();
+  return (l !== "fr" && PROF_ACH_I18N[l]?.[key]) || fr;
+}
+
 async function mountEleveArene(root, me) {
   root.innerHTML = `${STYLE_ARENE}<div class="arn"><div class="skel skel-card" style="height:300px;margin:14px 16px 0;border-radius:28px"></div><div class="skel skel-card" style="height:90px;margin:18px 16px 0;border-radius:18px"></div></div>`;
 
@@ -1669,10 +1822,12 @@ async function mountEleveArene(root, me) {
   const st = _competenceState(validated);
   const emblem = REMC_EMBLEM[st.comp.id] || REMC_EMBLEM.C1;
   const compPct = st.total ? Math.round((st.inComp / st.total) * 100) : 0;
+  // « Compétence N » traduit ; le nom de la compétence (REMC) reste à sa source.
+  const compLabel = (n) => ptR("comp_n", `Compétence ${n}`).replace("{n}", n);
   const nextName = st.allDone
-    ? "Tout est validé — permis virtuel débloqué"
-    : st.next?.n || "Compétence suivante";
-  const nextCode = `Compétence ${st.idx} · ${st.comp.name}`;
+    ? ptR("all_done", "Tout est validé — permis virtuel débloqué")
+    : st.next?.n || ptR("next_skill", "Compétence suivante");
+  const nextCode = `${compLabel(st.idx)} · ${esc(st.comp.name)}`;
 
   const pseudo = (profile?.username || "").trim();
   const legalName =
@@ -1689,8 +1844,10 @@ async function mountEleveArene(root, me) {
   let memberSince = "";
   if (profile?.created_at) {
     const d = new Date(profile.created_at);
+    const _dateLoc =
+      { fr: "fr-FR", en: "en-GB", ar: "ar" }[getLang()] || "fr-FR";
     if (!isNaN(d))
-      memberSince = d.toLocaleDateString("fr-FR", {
+      memberSince = d.toLocaleDateString(_dateLoc, {
         month: "long",
         year: "numeric",
       });
@@ -1707,6 +1864,16 @@ async function mountEleveArene(root, me) {
     streak,
   );
   const unlocked = achievements.filter((a) => a.need).length;
+  // Compteur succès + suffixe « jours » (pluriel FR géré, invariant EN/AR).
+  const _lg = getLang();
+  const _toCome = achievements.length - unlocked;
+  const achCountTxt =
+    _lg === "en"
+      ? `${unlocked} unlocked · ${_toCome} to come`
+      : _lg === "ar"
+        ? `${unlocked} مفتوحة · ${_toCome} قادمة`
+        : `${unlocked} débloqué${unlocked > 1 ? "s" : ""} · ${_toCome} à venir`;
+  const daysSuffix = _lg === "en" ? " d" : _lg === "ar" ? " يوم" : " j";
 
   // ── Notifications : état réel ──────────────────────────────
   const notifSupported = "Notification" in window;
@@ -1716,7 +1883,7 @@ async function mountEleveArene(root, me) {
   // ── Render ─────────────────────────────────────────────────
   root.innerHTML = `${STYLE_ARENE}
 <div class="arn anim-slide-up">
-  <h1 class="arn-h1">Mon profil</h1>
+  <h1 class="arn-h1">${pt("h1_title", "Mon profil")}</h1>
 
   <div class="arn-card">
     <span class="arn-corner tl"></span><span class="arn-corner tr"></span>
@@ -1724,8 +1891,8 @@ async function mountEleveArene(root, me) {
 
     <div class="arn-banner">
       <div class="arn-pseudo-row">
-        <span class="arn-pseudo ${pseudo ? "" : "unset"}" id="arn-pseudo"><span class="at">@</span>${esc(pseudo || "ton_pseudo")}</span>
-        <button class="arn-edit" id="arn-edit-pseudo" aria-label="Changer de pseudo">
+        <span class="arn-pseudo ${pseudo ? "" : "unset"}" id="arn-pseudo"><span class="at">@</span>${esc(pseudo || ptR("pseudo_ph", "ton_pseudo"))}</span>
+        <button class="arn-edit" id="arn-edit-pseudo" aria-label="${pt("pseudo_edit_aria", "Changer de pseudo")}">
           ${icon("edit", { size: 14, strokeWidth: 2.2 })}
         </button>
       </div>
@@ -1735,7 +1902,7 @@ async function mountEleveArene(root, me) {
     <div class="arn-body">
       <div class="arn-crest">
         <div class="arn-crest-disc"><div class="arn-crest-inner">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="" referrerpolicy="no-referrer" />` : esc(initials)}</div></div>
-        <button class="arn-crest-edit" id="arn-edit-avatar" aria-label="Changer ma photo" title="Changer ma photo">${icon("image", { size: 14, strokeWidth: 2.2 })}</button>
+        <button class="arn-crest-edit" id="arn-edit-avatar" aria-label="${pt("photo_edit", "Changer ma photo")}" title="${pt("photo_edit", "Changer ma photo")}">${icon("image", { size: 14, strokeWidth: 2.2 })}</button>
       </div>
       <div class="arn-meta">
         <span class="arn-permis"><span class="dot"></span>Permis B</span>
@@ -1743,7 +1910,7 @@ async function mountEleveArene(root, me) {
           <span class="arn-comp-emblem"><img src="${emblem}" alt="" /></span>
           <div class="arn-comp-txt">
             <div class="arn-rank">${esc(st.comp.tname)}</div>
-            <div class="arn-csub">Compétence ${st.idx} · ${esc(st.comp.name)}</div>
+            <div class="arn-csub">${compLabel(st.idx)} · ${esc(st.comp.name)}</div>
           </div>
         </div>
       </div>
@@ -1753,15 +1920,15 @@ async function mountEleveArene(root, me) {
       <span class="arn-valid-emblem"><img src="/skins/trophy-permis-virtuel.webp" alt="" /></span>
       <div class="arn-valid-num"><b>${validated}</b><span class="sl">/</span><span class="tt">${REMC_TOTAL}</span></div>
       <div class="arn-valid-meta">
-        <div class="arn-vm-lab">Validations</div>
-        <div class="arn-vm-sub">objectifs du livret</div>
+        <div class="arn-vm-lab">${pt("valid_lab", "Validations")}</div>
+        <div class="arn-vm-sub">${pt("valid_sub", "objectifs du livret")}</div>
       </div>
     </div>
 
     <div class="arn-bar-wrap">
       <div class="arn-bar-head">
-        <span class="arn-bar-l">Compétence ${st.idx} · ${st.inComp} / ${st.total}</span>
-        <span class="arn-bar-r">${st.allDone ? "terminé ✓" : "prochaine validation"}</span>
+        <span class="arn-bar-l">${compLabel(st.idx)} · ${st.inComp} / ${st.total}</span>
+        <span class="arn-bar-r">${st.allDone ? pt("bar_done", "terminé ✓") : pt("bar_next", "prochaine validation")}</span>
       </div>
       <div class="arn-bar"><div class="arn-bar-fill" style="width:${Math.max(4, compPct)}%"></div></div>
     </div>
@@ -1771,28 +1938,28 @@ async function mountEleveArene(root, me) {
   <div class="arn-stats">
     <div class="arn-stat">
       <img class="arn-s-ico" src="/skins/permigo-streak-flame-v1.webp" alt="" />
-      <div class="arn-s-num gd">${streak} j</div>
-      <div class="arn-s-lab">Série</div>
+      <div class="arn-s-num gd">${streak}${daysSuffix}</div>
+      <div class="arn-s-lab">${pt("stat_streak", "Série")}</div>
     </div>
     <div class="arn-stat">
       <img class="arn-s-ico" src="/skins/volant-coin.webp" alt="" />
       <div class="arn-s-num gd">${volants}</div>
-      <div class="arn-s-lab">Volants</div>
+      <div class="arn-s-lab">${pt("stat_volants", "Volants")}</div>
     </div>
     <div class="arn-stat">
       ${medallion("etoile", "gold", { size: 30, cls: "arn-s-ico" })}
       <div class="arn-s-num">${restantes}</div>
-      <div class="arn-s-lab">Restantes</div>
+      <div class="arn-s-lab">${pt("stat_remaining", "Restantes")}</div>
     </div>
   </div>
 
   <!-- succès : vrais badges -->
   <div class="arn-ach-block">
     <div class="arn-ach-head">
-      <span class="arn-ach-title">Tes succès</span>
-      <span class="arn-ach-count">${unlocked} débloqué${unlocked > 1 ? "s" : ""} · ${achievements.length - unlocked} à venir</span>
+      <span class="arn-ach-title">${pt("ach_title", "Tes succès")}</span>
+      <span class="arn-ach-count">${achCountTxt}</span>
     </div>
-    <div class="arn-ach-scroll" tabindex="0" role="group" aria-label="Tes succès (liste défilante)">
+    <div class="arn-ach-scroll" tabindex="0" role="group" aria-label="${pt("ach_list_aria", "Tes succès (liste défilante)")}">
       ${achievements
         .map(
           (a) => `
@@ -1810,26 +1977,26 @@ async function mountEleveArene(root, me) {
 
   <!-- prochain défi -->
   <div class="arn-next">
-    <span class="arn-next-kick">${icon("zap", { size: 14 })} Ton prochain défi</span>
+    <span class="arn-next-kick">${icon("zap", { size: 14 })} ${pt("next_kick", "Ton prochain défi")}</span>
     <div class="arn-next-main">
       <span class="arn-next-emblem"><img src="${emblem}" alt="" /></span>
       <div class="arn-next-info">
-        <div class="arn-next-code">${esc(nextCode)}</div>
+        <div class="arn-next-code">${nextCode}</div>
         <div class="arn-next-name">${esc(nextName)}</div>
       </div>
     </div>
     <button class="arn-cta" id="arn-reviser">
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 4l13 8-13 8V4z" fill="#1c3306"/></svg> Réviser maintenant
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 4l13 8-13 8V4z" fill="#1c3306"/></svg> ${pt("cta_review", "Réviser maintenant")}
     </button>
   </div>
 
   <!-- réglages -->
   <div class="arn-set">
-    <p class="arn-set-title">Réglages</p>
+    <p class="arn-set-title">${pt("settings", "Réglages")}</p>
     <div class="arn-set-list">
       <a class="arn-row" href="#/notifications">
         <span class="arn-row-ico">${medallion("message", "blue", { size: 30, shape: "tile" })}</span>
-        <span class="arn-row-lab">Mes notifications<small>Validations, encouragements, comptes-rendus</small></span>
+        <span class="arn-row-lab">${pt("row_notifs", "Mes notifications")}<small>${pt("row_notifs_sub", "Validations, encouragements, comptes-rendus")}</small></span>
         <span class="arn-chev"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </a>
       ${
@@ -1837,44 +2004,44 @@ async function mountEleveArene(root, me) {
           ? `
       <button class="arn-row" id="arn-notif" type="button" aria-pressed="${notifOn}">
         <span class="arn-row-ico">${medallion("cloche", "orange", { size: 30, shape: "tile" })}</span>
-        <span class="arn-row-lab">Rappels de révision<small id="arn-notif-sub">${notifDenied ? "Bloqués par le navigateur" : notifOn ? "Reste dans le rythme" : "Désactivés"}</small></span>
+        <span class="arn-row-lab">${pt("row_reminders", "Rappels de révision")}<small id="arn-notif-sub">${notifDenied ? pt("notif_blocked", "Bloqués par le navigateur") : notifOn ? pt("notif_rhythm", "Reste dans le rythme") : pt("notif_off", "Désactivés")}</small></span>
         ${notifDenied ? "" : `<span class="arn-tog ${notifOn ? "on" : ""}" id="arn-notif-tog"><span class="knob"></span></span>`}
       </button>`
           : ""
       }
       <a class="arn-row" href="#/settings">
         <span class="arn-row-ico">${medallion("reglages", "slate", { size: 30, shape: "tile" })}</span>
-        <span class="arn-row-lab">Réglages<small>Thème, langue, confidentialité</small></span>
+        <span class="arn-row-lab">${pt("settings", "Réglages")}<small>${pt("row_settings_sub", "Thème, langue, confidentialité")}</small></span>
         <span class="arn-chev"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </a>
     </div>
   </div>
 
   <button class="arn-logout" id="arn-logout">
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 12H4m0 0l4-4m-4 4l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 3h8a2 2 0 012 2v14a2 2 0 01-2 2H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Se déconnecter
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 12H4m0 0l4-4m-4 4l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 3h8a2 2 0 012 2v14a2 2 0 01-2 2H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> ${pt("logout", "Se déconnecter")}
   </button>
-  <button class="arn-del" id="arn-del">Supprimer mon compte</button>
+  <button class="arn-del" id="arn-del">${pt("delete_account", "Supprimer mon compte")}</button>
 
-  <div class="arn-since">${memberSince ? `Membre depuis ${esc(memberSince)}` : ""}</div>
+  <div class="arn-since">${memberSince ? `${pt("member_since", "Membre depuis")} ${esc(memberSince)}` : ""}</div>
 
   <!-- modale changer de pseudo -->
-  <div class="arn-modal-scrim" id="arn-modal" role="dialog" aria-modal="true" aria-label="Changer de pseudo">
+  <div class="arn-modal-scrim" id="arn-modal" role="dialog" aria-modal="true" aria-label="${pt("pseudo_edit_aria", "Changer de pseudo")}">
     <div class="arn-modal">
       <div class="arn-modal-head">
-        <h3>Choisis ton nom de joueur</h3>
-        <button class="arn-modal-close" id="arn-modal-close" aria-label="Fermer">✕</button>
+        <h3>${pt("modal_title", "Choisis ton nom de joueur")}</h3>
+        <button class="arn-modal-close" id="arn-modal-close" aria-label="${pt("modal_close", "Fermer")}">✕</button>
       </div>
       <div class="arn-modal-body">
-        <p class="arn-modal-tip">C'est le nom que voient les autres élèves au classement de l'arène.</p>
+        <p class="arn-modal-tip">${pt("modal_tip", "C'est le nom que voient les autres élèves au classement de l'arène.")}</p>
         <div class="arn-field" id="arn-field">
           <span class="at">@</span>
           <input id="arn-input" type="text" maxlength="16" autocomplete="off" spellcheck="false" placeholder="speedy_lea" value="${esc(pseudo)}" />
         </div>
         <div class="arn-rules">
-          <small id="arn-rule">3 à 16 caractères : lettres, chiffres ou _</small>
+          <small id="arn-rule">${pt("pseudo_rule", "3 à 16 caractères : lettres, chiffres ou _")}</small>
           <small id="arn-count">${pseudo.length} / 16</small>
         </div>
-        <button class="arn-modal-save" id="arn-save">Valider mon nom</button>
+        <button class="arn-modal-save" id="arn-save">${pt("modal_save", "Valider mon nom")}</button>
       </div>
     </div>
   </div>
@@ -1907,7 +2074,7 @@ function _wireEleveArene(root, me, avatarUrl) {
       haptic("success");
       track("profile.avatar_updated", { user_role: me.role });
       const { toast } = await import("@/components/common/toast.js");
-      toast("Photo mise à jour ✓", "success", 2500);
+      toast(ptR("toast_photo", "Photo mise à jour ✓"), "success", 2500);
     });
 
   // ── Déconnexion ──
@@ -1919,7 +2086,10 @@ function _wireEleveArene(root, me, avatarUrl) {
     } catch (e) {
       console.error("[profil] logout", e);
       const { toast } = await import("@/components/common/toast.js");
-      toast("Déconnexion impossible — réessaie", "error");
+      toast(
+        ptR("toast_logout_err", "Déconnexion impossible — réessaie"),
+        "error",
+      );
     }
   });
 
@@ -1944,16 +2114,18 @@ function _wireEleveArene(root, me, avatarUrl) {
         await optOutPush();
         tog?.classList.remove("on");
         notifRow.setAttribute("aria-pressed", "false");
-        if (sub) sub.textContent = "Désactivés";
+        if (sub) sub.textContent = ptR("notif_off", "Désactivés");
       } else {
         const ok = await optInPush();
         if (ok) {
           haptic("success");
           tog?.classList.add("on");
           notifRow.setAttribute("aria-pressed", "true");
-          if (sub) sub.textContent = "Reste dans le rythme";
+          if (sub)
+            sub.textContent = ptR("notif_rhythm", "Reste dans le rythme");
         } else if (Notification.permission === "denied") {
-          if (sub) sub.textContent = "Bloqués par le navigateur";
+          if (sub)
+            sub.textContent = ptR("notif_blocked", "Bloqués par le navigateur");
           tog?.remove();
         }
       }
@@ -1992,7 +2164,10 @@ function _wireEleveArene(root, me, avatarUrl) {
     if (count) count.textContent = `${v.length} / 16`;
     field?.classList.remove("bad");
     if (rule) {
-      rule.textContent = "3 à 16 caractères : lettres, chiffres ou _";
+      rule.textContent = ptR(
+        "pseudo_rule",
+        "3 à 16 caractères : lettres, chiffres ou _",
+      );
       rule.classList.remove("err");
     }
   });
@@ -2008,11 +2183,13 @@ function _wireEleveArene(root, me, avatarUrl) {
     };
     if (raw !== "") {
       if (!PSEUDO_RE.test(raw)) {
-        showErr("3 à 16 caractères : lettres, chiffres ou _");
+        showErr(
+          ptR("pseudo_rule", "3 à 16 caractères : lettres, chiffres ou _"),
+        );
         return;
       }
       if (_isBlocked(raw)) {
-        showErr("Ce pseudo n'est pas autorisé.");
+        showErr(ptR("pseudo_not_allowed", "Ce pseudo n'est pas autorisé."));
         return;
       }
     }
@@ -2026,22 +2203,31 @@ function _wireEleveArene(root, me, avatarUrl) {
         .eq("id", me.id);
       const { toast } = await import("@/components/common/toast.js");
       if (error) {
-        if (error.code === "23505") showErr("Ce pseudo est déjà pris.");
-        else showErr("Impossible d'enregistrer.");
+        if (error.code === "23505")
+          showErr(ptR("pseudo_taken_err", "Ce pseudo est déjà pris."));
+        else showErr(ptR("pseudo_save_err", "Impossible d'enregistrer."));
         toast(
           error.code === "23505"
-            ? "Ce pseudo est déjà pris"
-            : "Impossible d'enregistrer le pseudo",
+            ? ptR("toast_pseudo_taken", "Ce pseudo est déjà pris")
+            : ptR(
+                "toast_pseudo_save_err",
+                "Impossible d'enregistrer le pseudo",
+              ),
           "error",
         );
       } else {
         haptic("success");
         track("pseudo.updated", { has_pseudo: value !== null });
-        toast(value ? "Pseudo enregistré" : "Pseudo retiré", "success");
+        toast(
+          value
+            ? ptR("toast_pseudo_saved", "Pseudo enregistré")
+            : ptR("toast_pseudo_removed", "Pseudo retiré"),
+          "success",
+        );
         // Met à jour le bandeau sans recharger
         const ps = root.querySelector("#arn-pseudo");
         if (ps) {
-          ps.innerHTML = `<span class="at">@</span>${esc(value || "ton_pseudo")}`;
+          ps.innerHTML = `<span class="at">@</span>${esc(value || ptR("pseudo_ph", "ton_pseudo"))}`;
           ps.classList.toggle("unset", !value);
         }
         closeModal();
@@ -2049,10 +2235,10 @@ function _wireEleveArene(root, me, avatarUrl) {
     } catch (e) {
       console.error("[profil] pseudo", e);
       const { toast } = await import("@/components/common/toast.js");
-      toast("Erreur de connexion", "error");
+      toast(ptR("toast_conn_err", "Erreur de connexion"), "error");
     } finally {
       saveBtn.disabled = false;
-      saveBtn.textContent = "Valider mon nom";
+      saveBtn.textContent = ptR("modal_save", "Valider mon nom");
     }
   });
 }
