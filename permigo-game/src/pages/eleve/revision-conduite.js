@@ -18,6 +18,7 @@ import { track } from "@/services/analytics.js";
 import { medallion } from "@/utils/medallions.js";
 import { getLang } from "@/utils/lang.js";
 import { ficheTr, uiFiche } from "@/data/fiches-i18n.js";
+import { openCoachSheet } from "@/components/eleve/coach-sheet.js";
 import {
   FICHES,
   MONDES,
@@ -125,6 +126,70 @@ function sourceChannels(f) {
     : [];
 }
 
+// ═══════════════════════════════════════════════════════════════
+// Intro narrative personnalisée (demande Rayan 22/07) : une à deux phrases
+// chaleureuses qui s'adressent à l'élève par son prénom, composées PAR
+// TEMPLATE à partir des champs existants (titre + 1re phrase du « pourquoi »).
+// Template choisi par hash du code de fiche → stable d'un rendu à l'autre
+// (pas de Math.random au rendu). Prénom vide → formulation neutre sans trou.
+// Ton : encourageant simple — jamais « échec » ni « maîtrisé ».
+// ═══════════════════════════════════════════════════════════════
+function firstSentence(txt) {
+  const s = String(txt || "").trim();
+  const m = s.match(/^[\s\S]*?[.!?…؟](?=\s|$)/);
+  return (m ? m[0] : s).trim();
+}
+function hashStr(s) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  return h;
+}
+const INTRO_TPL = {
+  fr: [
+    (p, t) =>
+      p
+        ? `Aujourd'hui ${p}, tu attaques « ${t} ».`
+        : `Aujourd'hui, tu attaques « ${t} ».`,
+    (p, t) =>
+      p
+        ? `À toi de jouer, ${p} : « ${t} », ça se travaille dès maintenant.`
+        : `À toi de jouer : « ${t} », ça se travaille dès maintenant.`,
+    (p, t) =>
+      p
+        ? `C'est parti, ${p} ! Prochaine étape : « ${t} ».`
+        : `C'est parti ! Prochaine étape : « ${t} ».`,
+  ],
+  en: [
+    (p, t) =>
+      p
+        ? `Today ${p}, you're taking on "${t}".`
+        : `Today, you're taking on "${t}".`,
+    (p, t) =>
+      p
+        ? `Your turn, ${p}: "${t}" starts right now.`
+        : `Your turn: "${t}" starts right now.`,
+    (p, t) =>
+      p
+        ? `Here we go, ${p}! Next step: "${t}".`
+        : `Here we go! Next step: "${t}".`,
+  ],
+  ar: [
+    (p, t) => (p ? `اليوم يا ${p}، تبدأ « ${t} ».` : `اليوم تبدأ « ${t} ».`),
+    (p, t) =>
+      p ? `دورك يا ${p} : « ${t} » يبدأ الآن.` : `دورك : « ${t} » يبدأ الآن.`,
+    (p, t) =>
+      p
+        ? `هيا يا ${p} ! الخطوة التالية : « ${t} ».`
+        : `هيا ! الخطوة التالية : « ${t} ».`,
+  ],
+};
+function introText(lang, i, prenom, titre, pourquoi) {
+  const bank = INTRO_TPL[lang] || INTRO_TPL.fr;
+  const lead = bank[i % bank.length](prenom, titre);
+  const why = firstSentence(pourquoi);
+  return why ? `${lead} ${why}` : lead;
+}
+
 const STYLE = `<style>
 .rvc { max-width: 480px; margin: 0 auto; padding: 0 16px calc(110px + env(safe-area-inset-bottom));
   background: var(--bg); color: var(--ink); font-family: 'Inter', sans-serif; }
@@ -212,6 +277,14 @@ const FD_STYLE = `<style>
   background:linear-gradient(180deg,#ffe9b0,#f0a93f 55%,#d98a1f);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.7), inset 0 -3px 4px rgba(150,80,0,.45); transition:width .35s cubic-bezier(.23,1,.32,1); }
 
+/* Intro narrative personnalisée (prénom) — bloc discret sous le héros. */
+.fd-intro{ margin:0 18px 2px; display:flex; gap:11px; align-items:flex-start; padding:13px 15px 14px; border-radius:16px;
+  background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.16); box-shadow:inset 0 1px 0 rgba(255,255,255,.10); }
+.fd-intro-ic{ flex:0 0 30px; width:30px; height:30px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+  background:rgba(255,223,150,.14); border:1px solid rgba(255,223,150,.30); }
+.fd-intro p{ margin:0; font:600 13.5px/1.6 'Inter',sans-serif; color:#efe9ff; }
+.fd-intro p .fd-fr{ color:#b9aee0; opacity:.85; }
+
 .fd-seclab{ display:flex; align-items:center; gap:10px; padding:0 18px; margin:22px 0 12px; }
 .fd-seclab h2{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:13px; letter-spacing:.10em; text-transform:uppercase; color:#ded7ff; white-space:nowrap; margin:0; }
 .fd-seclab .line{ height:1px; flex:1; background:linear-gradient(90deg,rgba(222,215,255,.55),transparent); }
@@ -243,18 +316,26 @@ const FD_STYLE = `<style>
 
 .fd-coach-wrap{ margin-top:6px; }
 .fd-coach{ display:grid; gap:9px; padding:0 18px; align-items:stretch; }
-.fd-cc{ border-radius:14px; padding:11px 10px 12px; background:#f6f4ff; border:1px solid #e6e2fb; border-top-color:#fff;
-  box-shadow:0 3px 0 rgba(20,12,60,.28), inset 0 1px 0 rgba(255,255,255,.8); display:flex; flex-direction:column; gap:7px; }
+/* Carte coach = bouton (demande Rayan 22/07 : tap → lecture en grand). */
+.fd-cc{ position:relative; border-radius:14px; padding:11px 10px 12px; background:#f6f4ff; border:1px solid #e6e2fb; border-top-color:#fff;
+  box-shadow:0 3px 0 rgba(20,12,60,.28), inset 0 1px 0 rgba(255,255,255,.8); display:flex; flex-direction:column; gap:7px;
+  width:100%; text-align:left; font-family:inherit; cursor:pointer;
+  -webkit-tap-highlight-color:transparent; transition:transform .1s ease; }
+.fd-cc:active{ transform:scale(.97); }
+.fd-cc-zoom{ position:absolute; top:8px; right:8px; width:22px; height:22px; border-radius:7px;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(90,79,192,.08); border:1px solid rgba(90,79,192,.16); }
 .fd-ic{ width:34px; height:34px; border-radius:11px; flex:none; display:flex; align-items:center; justify-content:center;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 2px 4px rgba(20,12,60,.2); }
 .fd-cc.err .fd-ic{ background:linear-gradient(180deg,#ffe3d6,#ffd0bd); border:1px solid rgba(230,90,50,.4); }
 .fd-cc.why .fd-ic{ background:linear-gradient(180deg,#ece5ff,#ddd2ff); border:1px solid rgba(124,95,224,.4); }
 .fd-cc.auto .fd-ic{ background:linear-gradient(180deg,#dcebff,#c6ddff); border:1px solid rgba(63,130,214,.4); }
-.fd-cc h4{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:11px; letter-spacing:.02em; line-height:1.15; margin:0; }
-.fd-cc.err h4{ color:#c2410c; }
-.fd-cc.why h4{ color:#5b3fbf; }
-.fd-cc.auto h4{ color:#1e5fa8; }
-.fd-cc p{ font-size:10.5px; line-height:1.4; color:#6b5fa0; font-weight:500; margin:0; }
+/* Spans display:block (pas de h4/p dans un <button> — contenu phrasé only). */
+.fd-cc-h{ display:block; font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:11px; letter-spacing:.02em; line-height:1.15; margin:0; }
+.fd-cc.err .fd-cc-h{ color:#c2410c; }
+.fd-cc.why .fd-cc-h{ color:#5b3fbf; }
+.fd-cc.auto .fd-cc-h{ color:#1e5fa8; }
+.fd-cc-p{ display:block; font-size:10.5px; line-height:1.4; color:#6b5fa0; font-weight:500; margin:0; }
 
 .fd-source{ text-align:center; font-size:10.5px; color:#c9bdf5; font-weight:600; margin:18px 18px 0; }
 .fd-source b{ color:#ffe4a6; font-weight:700; }
@@ -276,7 +357,7 @@ const FD_STYLE = `<style>
 .fd-fr{ display:block; margin-top:4px; font-weight:500; opacity:.62; }
 .fd-txt .fd-fr{ font-size:.9em; color:#5b5286; opacity:.72; }
 .fd-card.done .fd-txt .fd-fr{ color:#6f5a2a; }
-.fd-cc p .fd-fr{ font-size:.94em; color:#8a7fb5; opacity:.8; margin-top:3px; }
+.fd-cc-p .fd-fr{ font-size:.94em; color:#8a7fb5; opacity:.8; margin-top:3px; }
 .fd-title .fd-tr{ display:block; }
 .fd-title .fd-fr{ -webkit-text-fill-color:#cabef7; color:#cabef7; background:none;
   font-family:'Inter',sans-serif; font-size:.5em; font-weight:600; line-height:1.25; filter:none; }
@@ -845,36 +926,44 @@ export async function mount(root, param) {
     const ERR_IC = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3l9.5 16.5H2.5L12 3z" fill="#ef6a3a"/><path d="M12 10v4.5" stroke="#fff0e8" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17.4" r="1.2" fill="#fff0e8"/></svg>`;
     const WHY_IC = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 18h6M9.5 21h5" stroke="#7c5fe0" stroke-width="1.8" stroke-linecap="round"/><path d="M12 3a6 6 0 0 1 3.6 10.8c-.7.5-1.1 1.2-1.1 2H9.5c0-.8-.4-1.5-1.1-2A6 6 0 0 1 12 3z" fill="#7c5fe0"/></svg>`;
     const AUTO_IC = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 13l1.6-4.4A2 2 0 0 1 7.5 7h9a2 2 0 0 1 1.9 1.6L20 13v5a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-1H7v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-5z" fill="#3f82d6"/><circle cx="7.2" cy="15.4" r="1.1" fill="#eaf3ff"/><circle cx="16.8" cy="15.4" r="1.1" fill="#eaf3ff"/></svg>`;
+    // Loupe discrète (affordance) : la carte se tape pour lire en grand.
+    const ZOOM_IC = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><circle cx="10.5" cy="10.5" r="6.5" stroke="#8579b8" stroke-width="2"/><path d="M15.5 15.5L21 21" stroke="#8579b8" stroke-width="2" stroke-linecap="round"/><path d="M10.5 8v5M8 10.5h5" stroke="#8579b8" stroke-width="1.8" stroke-linecap="round"/></svg>`;
     const coach = [];
     if (f.erreur)
-      coach.push([
-        "err",
-        ui("err_h", "L’erreur à éviter"),
-        bi(f.erreur, tr?.erreur),
-        ERR_IC,
-      ]);
+      coach.push({
+        k: "err",
+        h: ui("err_h", "L’erreur à éviter"),
+        fr: f.erreur,
+        tr: tr?.erreur,
+        ic: ERR_IC,
+      });
     if (f.pourquoi)
-      coach.push([
-        "why",
-        ui("why_h", "Pourquoi ça compte"),
-        bi(f.pourquoi, tr?.pourquoi),
-        WHY_IC,
-      ]);
+      coach.push({
+        k: "why",
+        h: ui("why_h", "Pourquoi ça compte"),
+        fr: f.pourquoi,
+        tr: tr?.pourquoi,
+        ic: WHY_IC,
+      });
     if (f.bva)
-      coach.push([
-        "auto",
-        ui("bva_h", "En boîte auto"),
-        bi(f.bva, tr?.bva),
-        AUTO_IC,
-      ]);
+      coach.push({
+        k: "auto",
+        h: ui("bva_h", "En boîte auto"),
+        fr: f.bva,
+        tr: tr?.bva,
+        ic: AUTO_IC,
+      });
+    // Carte = <button> tapable (≥ 44px) → bottom-sheet « lecture en grand »
+    // (demande Rayan 22/07 : « c'est tout petit »). Spans block, pas de h4/p
+    // dans un <button> (contenu phrasé uniquement).
     const coachHtml = coach.length
       ? `<div class="fd-coach-wrap">
           ${seclab("Cartes coach", lang !== "fr" ? ui("coach", "Cartes coach") : null)}
           <div class="fd-coach" style="grid-template-columns:repeat(${coach.length},1fr)">
             ${coach
               .map(
-                ([c, h, p, ic]) =>
-                  `<div class="fd-cc ${c}"><span class="fd-ic">${ic}</span><h4>${esc(h)}</h4><p>${p}</p></div>`,
+                (c, i) =>
+                  `<button type="button" class="fd-cc ${c.k}" data-coach="${i}" aria-haspopup="dialog"><span class="fd-cc-zoom" aria-hidden="true">${ZOOM_IC}</span><span class="fd-ic">${c.ic}</span><span class="fd-cc-h">${esc(c.h)}</span><span class="fd-cc-p">${bi(c.fr, c.tr)}</span></button>`,
               )
               .join("")}
           </div>
@@ -885,6 +974,26 @@ export async function mount(root, param) {
     const srcHtml = srcChaines.length
       ? `<div class="fd-source">${esc(ui("source", "Vu chez de vrais moniteurs :"))} <b>${srcChaines.map((s) => esc(s)).join(", ")}</b></div>`
       : "";
+
+    // Intro narrative personnalisée (ton voulu par Rayan : « Aujourd'hui
+    // {prenom}, tu attaques le giratoire… »). Composée par template stable
+    // (hash du code), esc() appliqué via bi(). Bilingue comme le reste de la
+    // page : traduction affichée + français gardé dessous.
+    const prenom = String(getCurUser()?.prenom || "").trim();
+    const tplIdx = hashStr(f.code) % INTRO_TPL.fr.length;
+    const introFr = introText("fr", tplIdx, prenom, f.titre, f.pourquoi);
+    const introTr =
+      lang !== "fr" && tr
+        ? introText(
+            lang,
+            tplIdx,
+            prenom,
+            tr.titre || f.titre,
+            tr.pourquoi || f.pourquoi,
+          )
+        : null;
+    const SPARK_IC = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.2 6.6L21 11l-6.8 2.4L12 20l-2.2-6.6L3 11l6.8-2.4L12 2z" fill="#ffd76e"/></svg>`;
+    const introHtml = `<div class="fd-intro"><span class="fd-intro-ic" aria-hidden="true">${SPARK_IC}</span><p>${bi(introFr, introTr)}</p></div>`;
 
     const BACK = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="#3d2f7a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
     const SHUF = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 7h11M4 12h11M4 17h7" stroke="#3d2f7a" stroke-width="2" stroke-linecap="round"/><path d="M18 8l3 3-3 3" stroke="#3d2f7a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
@@ -905,6 +1014,7 @@ export async function mount(root, param) {
         </div>
       </div>
 
+      ${introHtml}
       ${deckHtml}
 
       ${coachHtml}
@@ -916,10 +1026,10 @@ export async function mount(root, param) {
       </div>
     </div>`;
 
-    wireFicheDeck(f, flatSteps);
+    wireFicheDeck(f, flatSteps, coach, rtl);
   }
 
-  function wireFicheDeck(f, flatSteps) {
+  function wireFicheDeck(f, flatSteps, coach = [], rtl = false) {
     root.querySelector(".fd-back")?.addEventListener("click", () => {
       view = "home";
       render();
@@ -940,6 +1050,21 @@ export async function mount(root, param) {
         const y = window.scrollY;
         renderFicheDeck();
         window.scrollTo(0, y);
+      }),
+    );
+    // Carte coach → bottom-sheet « lecture en grand » (demande Rayan 22/07).
+    root.querySelectorAll("[data-coach]").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        const c = coach[Number(btn.getAttribute("data-coach"))];
+        if (!c) return;
+        haptic("select");
+        openCoachSheet({
+          title: c.h,
+          fr: c.fr,
+          tr: c.tr || null,
+          rtl,
+          icon: c.ic,
+        });
       }),
     );
     root.querySelector("[data-quiz]")?.addEventListener("click", () => {
