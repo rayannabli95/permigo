@@ -89,11 +89,14 @@ Deno.serve(async (req) => {
     }
 
     // 3. Achat invité rattaché plus tard (même e-mail) : pass_purchases.email.
+    // ilike = insensible à la casse ; on échappe %/_ pour qu'un e-mail ne
+    // puisse jamais servir de motif joker et matcher la ligne d'un autre.
     if (!customerId && user.email) {
+      const emailPattern = user.email.replace(/([%_\\])/g, "\\$1");
       const { data: ppe } = await admin
         .from("pass_purchases")
         .select("stripe_customer_id")
-        .ilike("email", user.email)
+        .ilike("email", emailPattern)
         .not("stripe_customer_id", "is", null)
         .order("created_at", { ascending: false })
         .limit(1)
