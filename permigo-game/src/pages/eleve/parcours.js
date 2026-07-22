@@ -11,6 +11,8 @@ import { REMC } from "@/data/remc.js";
 import { WORLDS } from "@/data/worlds.js";
 import { ASSETS } from "@/utils/assets.js";
 import { getCompDetail } from "@/data/remc-details.js";
+import { getFiche } from "@/data/fiches-conduite.js";
+import { openCoachSheet } from "@/components/eleve/coach-sheet.js";
 import { icon } from "@/utils/icons.js";
 import { medallion, medStatus } from "@/utils/medallions.js";
 import { haptic } from "@/utils/haptic.js";
@@ -341,7 +343,9 @@ const STYLE = `<style>
   color: var(--wc, var(--a));
 }
 
-/* Bloc "Conseil du coach" — accent jaune doux */
+/* Bloc "Conseil du coach" — accent jaune doux. Bouton tapable (demande Rayan
+   22/07) : tap → lecture en grand (coach-sheet.js), d'où le reset bouton +
+   la loupe d'affordance. Enfants en <span> display:block (contenu phrasé). */
 .fiche-tip {
   display: flex;
   gap: 12px;
@@ -350,7 +354,22 @@ const STYLE = `<style>
   border: 0;
   border-radius: var(--r-lg);
   margin: 0;
+  position: relative;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .1s ease;
 }
+.fiche-tip:active { transform: scale(.99); }
+.fiche-tip-zoom {
+  position: absolute; top: 10px; right: 10px;
+  width: 24px; height: 24px; border-radius: 8px;
+  display: grid; place-items: center;
+  background: rgba(180, 120, 10, .10);
+  border: 1px solid rgba(180, 120, 10, .18);
+}
+.fiche-tip-zoom svg { color: var(--amx); }
 .fiche-tip-ico {
   flex-shrink: 0;
   width: 32px; height: 32px;
@@ -361,8 +380,9 @@ const STYLE = `<style>
   place-items: center;
 }
 .fiche-tip-ico svg { color: #fff; }
-.fiche-tip-body { flex: 1; }
+.fiche-tip-body { flex: 1; padding-right: 26px; }
 .fiche-tip-label {
+  display: block;
   font: 700 10px/1 'Inter', sans-serif;
   letter-spacing: .12em;
   text-transform: uppercase;
@@ -370,6 +390,7 @@ const STYLE = `<style>
   margin-bottom: 4px;
 }
 .fiche-tip-text {
+  display: block;
   font: 500 13.5px/1.45 'Inter', sans-serif;
   /* Fond crème codé en dur (.fiche-tip) → couleur fixe lisible.
      var(--ink) devenait blanc en dark mode = texte blanc sur fond clair. */
@@ -2590,6 +2611,24 @@ function openFiche(root, compId, ws, validatedMap, pendingMap, hasMoniteur) {
   const total = cat.subs.length;
   const detail = getCompDetail(compId);
 
+  // Conseil du coach — SORTI de l'accordéon replié (demande Rayan 22/07) :
+  // encart toujours visible + tapable → lecture en grand (coach-sheet.js).
+  // Texte : le « pourquoi » de la fiche de révision conduite quand elle
+  // existe (31/31, plus riche), sinon repli sur detail.tip.
+  const tipTxt = getFiche(compId)?.pourquoi || detail.tip;
+  const TIP_ZOOM = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="2"/><path d="M15.5 15.5L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M10.5 8v5M8 10.5h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`;
+  const tipBlock = tipTxt
+    ? `
+      <button class="fiche-tip" type="button" aria-haspopup="dialog">
+        <span class="fiche-tip-zoom" aria-hidden="true">${TIP_ZOOM}</span>
+        <span class="fiche-tip-ico">${icon("zap", { size: 16 })}</span>
+        <span class="fiche-tip-body">
+          <span class="fiche-tip-label">Conseil du coach</span>
+          <span class="fiche-tip-text">${esc(tipTxt)}</span>
+        </span>
+      </button>`
+    : "";
+
   // Médaillon de statut (grammaire commune à toute l'app, cf medStatus).
   // Remplit le disque héros → celui-ci perd son fond plat (.has-med).
   const stIcon =
@@ -2740,6 +2779,9 @@ function openFiche(root, compId, ws, validatedMap, pendingMap, hasMoniteur) {
       <!-- STATUS contextuel (+ CTA quiz si acquise) -->
       ${statusBlock}
 
+      <!-- CONSEIL DU COACH — toujours visible, tapable pour lire en grand -->
+      ${tipBlock}
+
       <!-- POINTS CLÉS — repliés par défaut (mobile : moins de texte) -->
       <details class="fiche-acc" style="--wc:${meta.color}">
         <summary>
@@ -2750,10 +2792,20 @@ function openFiche(root, compId, ws, validatedMap, pendingMap, hasMoniteur) {
         <ul class="fiche-block-list">
           ${detail.keyPoints.map((kp) => `<li><span class="kp-check">${icon("check", { size: 11, strokeWidth: 3 })}</span>${esc(kp)}</li>`).join("")}
         </ul>
-        <div class="fiche-acc-tip">${medallion("ampoule", "gold", { size: 22 })} ${esc(detail.tip)}</div>
       </details>
 
     </div>`;
+
+  // Conseil du coach → lecture en grand (même mécanisme que les cartes coach
+  // de la fiche de révision conduite).
+  body.querySelector(".fiche-tip")?.addEventListener("click", () => {
+    haptic("select");
+    openCoachSheet({
+      title: "Conseil du coach",
+      fr: tipTxt,
+      icon: icon("zap", { size: 22 }),
+    });
+  });
 
   body.querySelector(".fiche-close")?.addEventListener("click", () => {
     const bg = document.getElementById("bsheet-bg");
