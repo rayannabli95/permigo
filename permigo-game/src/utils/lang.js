@@ -47,6 +47,17 @@ export function applyLang(lang) {
   } catch {
     /* mode privé */
   }
+  // Signal live pour les écrans/composants déjà montés (ex. Réglages, nav du
+  // bas) : leur texte vient de st()/dicts évalués au render initial et ne
+  // change pas tout seul quand getLang() change sous eux. Ils s'abonnent à
+  // cet event pour se re-rendre immédiatement, sans reload.
+  try {
+    window.dispatchEvent(
+      new CustomEvent("permigo:lang-changed", { detail: { lang: l } }),
+    );
+  } catch {
+    /* SSR / indispo */
+  }
 }
 
 // ─── Current (source unique pour le rendu) ─────────────────────
