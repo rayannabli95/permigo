@@ -196,6 +196,129 @@ const STYLE = `<style>
   }
 </style>`;
 
+// ─── i18n (coque du formulaire) — traduction seule, repli FR. « moniteur » =
+// instructor / مدرّب, marque = PermiGo (بيرميغو en prose arabe). Le sélecteur
+// de langue pilote un re-rendu COMPLET (renderForm) : tout bascule aussitôt. ───
+const SG_I18N = {
+  en: {
+    title_solo: "Create your student account",
+    title_join: "Join your instructor",
+    sub_solo:
+      "2 minutes and you're in the app. If you bought a Pass, use the same email as your payment.",
+    sub_join:
+      "Enter the code your instructor gave you, then create your account.",
+    role_badge: "Student",
+    already_connected: "You're already signed in as {name}.",
+    already_switch: "Sign out to create an account",
+    lang_help: "Questions show in your language, with French kept below.",
+    code_label: "Instructor code",
+    code_help_default: "Ask your instructor for it.",
+    code_checking: "Checking…",
+    code_notfound_help: "✗ Code not found. Double-check with your instructor.",
+    code_notfound_join: "No instructor matches this code.",
+    code_valid: "✓ Valid code",
+    code_check_failed: "Check failed, try again.",
+    join_school: "You're joining {school}{with}.",
+    join_with: " with {name}",
+    email_label: "Your email",
+    prenom_label: "First name",
+    prenom_ph: "Your first name",
+    nom_label: "Last name",
+    nom_ph: "Your last name",
+    naissance_label: "Date of birth",
+    parent_label: "A parent's email",
+    parent_italic:
+      "You're under 15: we need consent from your parent or legal guardian. A confirmation link will be sent to them.",
+    pwd_label: "Password",
+    pwd_ph: "8 characters minimum",
+    pwd_hide_aria: "Hide password",
+    pwd_show_aria: "Show password",
+    pwd_help: "Minimum 8 characters.",
+    pwd_too_short: "Too short (minimum 8 characters).",
+    submit: "Create my account",
+    submitting: "Creating…",
+    have_account: "Already have an account? ",
+    login_link: "Log in",
+    toast_code_invalid: "Invalid instructor code — check it again.",
+    code_notfound_short: "✗ Code not found.",
+    toast_already_school:
+      "This account is already linked to an instructor. Please log in.",
+    toast_parent_required: "Enter a valid parent email",
+    toast_exists: "An account already exists with this email. Log in directly.",
+    toast_generic: "Error while creating the account",
+    consent_title: "Almost there! We're waiting for your parent's consent",
+    consent_sub:
+      "Since you're under 15, a parent or guardian must give their consent before you can use PermiGo. Send them this link:",
+    consent_copy: "Copy the link",
+    consent_copied: "✓ Link copied",
+    consent_sub2:
+      "You can paste it into WhatsApp or a text to your parent. As soon as they approve, your account unlocks.",
+    consent_ok: "Got it",
+    consent_manual: "Select and copy the link manually",
+  },
+  ar: {
+    title_solo: "أنشئ حسابك كطالب",
+    title_join: "انضمّ إلى مدرّبك",
+    sub_solo:
+      "دقيقتان وتدخل التطبيق. إن اشتريت باقة، استعمل البريد نفسه الذي دفعت به.",
+    sub_join: "أدخِل الرمز الذي أعطاك إياه مدرّبك، ثم أنشئ حسابك.",
+    role_badge: "طالب",
+    already_connected: "أنت مسجّل الدخول بالفعل باسم {name}.",
+    already_switch: "سجّل الخروج لإنشاء حساب",
+    lang_help: "تظهر الأسئلة بلغتك، مع الاحتفاظ بالفرنسية تحتها.",
+    code_label: "رمز المدرّب",
+    code_help_default: "اطلبه من مدرّبك.",
+    code_checking: "جارٍ التحقّق…",
+    code_notfound_help: "✗ الرمز غير موجود. تحقّق مجدّداً مع مدرّبك.",
+    code_notfound_join: "لا يوجد مدرّب يطابق هذا الرمز.",
+    code_valid: "✓ رمز صالح",
+    code_check_failed: "تعذّر التحقّق، أعد المحاولة.",
+    join_school: "أنت تنضمّ إلى {school}{with}.",
+    join_with: " مع {name}",
+    email_label: "بريدك الإلكتروني",
+    prenom_label: "الاسم",
+    prenom_ph: "اسمك",
+    nom_label: "اللقب",
+    nom_ph: "لقبك",
+    naissance_label: "تاريخ الميلاد",
+    parent_label: "بريد أحد الوالدين",
+    parent_italic:
+      "عمرك أقل من 15 سنة: علينا الحصول على موافقة أحد والديك أو وليّك الشرعي. سيُرسَل إليه رابط تأكيد.",
+    pwd_label: "كلمة المرور",
+    pwd_ph: "8 أحرف على الأقل",
+    pwd_hide_aria: "إخفاء كلمة المرور",
+    pwd_show_aria: "إظهار كلمة المرور",
+    pwd_help: "8 أحرف على الأقل.",
+    pwd_too_short: "قصيرة جداً (8 أحرف على الأقل).",
+    submit: "إنشاء حسابي",
+    submitting: "جارٍ الإنشاء…",
+    have_account: "لديك حساب بالفعل؟ ",
+    login_link: "تسجيل الدخول",
+    toast_code_invalid: "رمز المدرّب غير صالح — تحقّق منه مجدّداً.",
+    code_notfound_short: "✗ الرمز غير موجود.",
+    toast_already_school: "هذا الحساب مرتبط بمدرّب بالفعل. سجّل الدخول.",
+    toast_parent_required: "أدخِل بريد أحد الوالدين صحيحاً",
+    toast_exists: "يوجد حساب بالفعل بهذا البريد. سجّل الدخول مباشرة.",
+    toast_generic: "خطأ أثناء إنشاء الحساب",
+    consent_title: "اقتربت! ننتظر موافقة أحد والديك",
+    consent_sub:
+      "بما أنّ عمرك أقل من 15 سنة، يجب أن يوافق أحد والديك أو وليّك قبل أن تستعمل بيرميغو. أرسِل إليه هذا الرابط:",
+    consent_copy: "نسخ الرابط",
+    consent_copied: "✓ تمّ نسخ الرابط",
+    consent_sub2:
+      "يمكنك لصقه في واتساب أو رسالة نصية إلى والدك. بمجرّد موافقته، يُفتح حسابك.",
+    consent_ok: "فهمت",
+    consent_manual: "حدّد الرابط وانسخه يدوياً",
+  },
+};
+function sgtR(key, fr) {
+  const l = getLang();
+  return (l !== "fr" && SG_I18N[l]?.[key]) || fr;
+}
+function sgt(key, fr) {
+  return esc(sgtR(key, fr));
+}
+
 export async function mount(root) {
   // Pré-remplissage éventuel du code : #/rejoindre?code=PERMIS75
   // Mode SOLO (#/rejoindre?solo=1) : élève sans moniteur (acheteurs du Pass
@@ -212,21 +335,32 @@ export async function mount(root) {
   // prévient au lieu de laisser croire que le circuit est cassé — créer un
   // compte par-dessus une session existante sème la confusion.
   const connected = getCurUser();
-  const connectedBanner = connected
-    ? `<div class="sg-join show" id="sg-connected" style="margin-bottom:18px">
-        <span class="sg-join-ico">${icon("alert-circle", { size: 20, strokeWidth: 2 })}</span>
-        <span class="sg-join-txt">Tu es déjà connecté en tant que <strong>${esc(connected.prenom || connected.username || connected.email || "quelqu'un")}</strong>.
-          <a href="#" id="sg-switch" style="color:var(--gold);font-weight:800">Se déconnecter pour créer un compte</a></span>
-      </div>`
-    : "";
 
-  root.innerHTML = `${STYLE}
+  // État persistant à travers les re-rendus déclenchés par le changement de
+  // langue (le compte n'est créé qu'une fois ; la langue choisie tient).
+  let chosenLang = getLang();
+  let accountCreated = false; // permet de retenter sans recréer le compte
+
+  // Construit (ou RECONSTRUIT) tout le formulaire dans la langue courante et
+  // rebranche les handlers. Appelé à l'init puis à chaque changement de langue
+  // (re-rendu complet : innerHTML remplace nœuds/listeners → pas de fuite). La
+  // saisie déjà tapée est préservée via `preserve` (recette page Réglages).
+  function renderForm(preserve) {
+    const connectedBanner = connected
+      ? `<div class="sg-join show" id="sg-connected" style="margin-bottom:18px">
+        <span class="sg-join-ico">${icon("alert-circle", { size: 20, strokeWidth: 2 })}</span>
+        <span class="sg-join-txt">${sgtR("already_connected", "Tu es déjà connecté en tant que {name}.").replace("{name}", `<strong>${esc(connected.prenom || connected.username || connected.email || "quelqu'un")}</strong>`)}
+          <a href="#" id="sg-switch" style="color:var(--gold);font-weight:800">${sgt("already_switch", "Se déconnecter pour créer un compte")}</a></span>
+      </div>`
+      : "";
+
+    root.innerHTML = `${STYLE}
     <div class="sg">
       <div class="sg-card">
         <img class="sg-logo" src="/skins/avatars/permigo-badge-icon.png" alt="PermiGo" width="88" height="88" />
-        <h1 class="sg-title">${solo ? "Crée ton compte élève" : "Rejoins ton moniteur"}</h1>
-        <p class="sg-sub">${solo ? "2 minutes, et tu entres dans l'app. Si tu as pris un Pass, utilise le même email que ton paiement." : "Entre le code que ton moniteur t'a donné, puis crée ton compte."}</p>
-        <div style="text-align:center"><span class="sg-role-badge">Élève</span></div>
+        <h1 class="sg-title">${solo ? sgt("title_solo", "Crée ton compte élève") : sgt("title_join", "Rejoins ton moniteur")}</h1>
+        <p class="sg-sub">${solo ? sgt("sub_solo", "2 minutes, et tu entres dans l'app. Si tu as pris un Pass, utilise le même email que ton paiement.") : sgt("sub_join", "Entre le code que ton moniteur t'a donné, puis crée ton compte.")}</p>
+        <div style="text-align:center"><span class="sg-role-badge">${sgt("role_badge", "Élève")}</span></div>
         ${connectedBanner}
 
         <style>
@@ -237,19 +371,19 @@ export async function mount(root) {
         <div class="sg-row">
           <label class="sg-label">Langue · Language · <span lang="ar" dir="rtl">اللغة</span></label>
           <div class="sg-lang" id="sg-lang" role="group" aria-label="Choisir ta langue / Choose your language">
-            <button type="button" class="sg-lang-b${getLang() === "fr" ? " active" : ""}" data-lang="fr">Français</button>
-            <button type="button" class="sg-lang-b${getLang() === "en" ? " active" : ""}" data-lang="en">English</button>
-            <button type="button" class="sg-lang-b${getLang() === "ar" ? " active" : ""}" data-lang="ar" lang="ar">العربية</button>
+            <button type="button" class="sg-lang-b${chosenLang === "fr" ? " active" : ""}" data-lang="fr">Français</button>
+            <button type="button" class="sg-lang-b${chosenLang === "en" ? " active" : ""}" data-lang="en">English</button>
+            <button type="button" class="sg-lang-b${chosenLang === "ar" ? " active" : ""}" data-lang="ar" lang="ar">العربية</button>
           </div>
-          <div class="sg-help">Les questions du quiz s'affichent dans ta langue, le français gardé dessous.</div>
+          <div class="sg-help">${sgt("lang_help", "Les questions du quiz s'affichent dans ta langue, le français gardé dessous.")}</div>
         </div>
 
         <div class="sg-row" ${solo ? 'style="display:none"' : ""}>
-          <label class="sg-label" for="sg-code">Code moniteur</label>
+          <label class="sg-label" for="sg-code">${sgt("code_label", "Code moniteur")}</label>
           <input class="sg-input sg-code-input" id="sg-code" type="text" autocomplete="off"
             autocorrect="off" autocapitalize="characters" spellcheck="false"
             maxlength="16" placeholder="PERMIS75" value="${esc(prefillCode)}" />
-          <div class="sg-help" id="sg-code-help">Demande-le à ton moniteur.</div>
+          <div class="sg-help" id="sg-code-help">${sgt("code_help_default", "Demande-le à ton moniteur.")}</div>
         </div>
 
         <div class="sg-join" id="sg-join">
@@ -258,381 +392,455 @@ export async function mount(root) {
         </div>
 
         <div class="sg-row">
-          <label class="sg-label" for="sg-email">Ton email</label>
+          <label class="sg-label" for="sg-email">${sgt("email_label", "Ton email")}</label>
           <input class="sg-input" id="sg-email" type="email" autocomplete="email" autocapitalize="off" placeholder="toi@exemple.fr" />
         </div>
 
         <div class="sg-row">
-          <label class="sg-label" for="sg-prenom">Prénom</label>
-          <input class="sg-input" id="sg-prenom" type="text" autocomplete="given-name" placeholder="Ton prénom" />
+          <label class="sg-label" for="sg-prenom">${sgt("prenom_label", "Prénom")}</label>
+          <input class="sg-input" id="sg-prenom" type="text" autocomplete="given-name" placeholder="${sgt("prenom_ph", "Ton prénom")}" />
         </div>
 
         <div class="sg-row">
-          <label class="sg-label" for="sg-nom">Nom</label>
-          <input class="sg-input" id="sg-nom" type="text" autocomplete="family-name" placeholder="Ton nom" />
+          <label class="sg-label" for="sg-nom">${sgt("nom_label", "Nom")}</label>
+          <input class="sg-input" id="sg-nom" type="text" autocomplete="family-name" placeholder="${sgt("nom_ph", "Ton nom")}" />
         </div>
 
         <div class="sg-row">
-          <label class="sg-label" for="sg-naissance">Date de naissance</label>
+          <label class="sg-label" for="sg-naissance">${sgt("naissance_label", "Date de naissance")}</label>
           <input class="sg-input" id="sg-naissance" type="date" />
         </div>
 
         <div class="sg-row" id="sg-parent-block" style="display:none">
-          <label class="sg-label" for="sg-parent-email">Email d'un parent</label>
+          <label class="sg-label" for="sg-parent-email">${sgt("parent_label", "Email d'un parent")}</label>
           <input class="sg-input" id="sg-parent-email" type="email" autocomplete="email" placeholder="parent@exemple.fr" />
-          <div class="sg-italic">Tu as moins de 15 ans : on doit recueillir l'accord de ton parent ou tuteur légal. Un lien de validation lui sera transmis.</div>
+          <div class="sg-italic">${sgt("parent_italic", "Tu as moins de 15 ans : on doit recueillir l'accord de ton parent ou tuteur légal. Un lien de validation lui sera transmis.")}</div>
         </div>
 
         <div class="sg-row">
-          <label class="sg-label" for="sg-password">Mot de passe</label>
+          <label class="sg-label" for="sg-password">${sgt("pwd_label", "Mot de passe")}</label>
           <div class="sg-pwd-wrap">
             <!-- Visible par défaut (type=text) : sur iPhone, un champ
                  type=password + new-password remplace le clavier par la
                  suggestion « mot de passe fort » → impossible de taper le sien.
                  L'œil permet de le masquer. -->
-            <input class="sg-input" id="sg-password" type="text" autocomplete="new-password" minlength="8" placeholder="8 caractères minimum" />
-            <button class="sg-pwd-toggle" id="sg-pwd-toggle" type="button" aria-label="Masquer le mot de passe" aria-pressed="true">${icon("eye-off", { size: 18, strokeWidth: 2 })}</button>
+            <input class="sg-input" id="sg-password" type="text" autocomplete="new-password" minlength="8" placeholder="${sgt("pwd_ph", "8 caractères minimum")}" />
+            <button class="sg-pwd-toggle" id="sg-pwd-toggle" type="button" aria-label="${sgt("pwd_hide_aria", "Masquer le mot de passe")}" aria-pressed="true">${icon("eye-off", { size: 18, strokeWidth: 2 })}</button>
           </div>
-          <div class="sg-help" id="sg-pwd-help">Minimum 8 caractères.</div>
+          <div class="sg-help" id="sg-pwd-help">${sgt("pwd_help", "Minimum 8 caractères.")}</div>
         </div>
 
-        <button class="sg-btn" id="sg-submit" disabled>Créer mon compte</button>
+        <button class="sg-btn" id="sg-submit" disabled>${sgt("submit", "Créer mon compte")}</button>
         <div class="sg-sep"></div>
-        <div class="sg-login-row">Déjà un compte&nbsp;? <a href="/#/login">Se connecter</a></div>
+        <div class="sg-login-row">${sgtR("have_account", "Déjà un compte&nbsp;? ")}<a href="/#/login">${sgt("login_link", "Se connecter")}</a></div>
       </div>
     </div>
   `;
 
-  const codeEl = root.querySelector("#sg-code");
-  const codeHelp = root.querySelector("#sg-code-help");
-  const joinBox = root.querySelector("#sg-join");
-  const joinIco = root.querySelector("#sg-join-ico");
-  const joinTxt = root.querySelector("#sg-join-txt");
-  const emailEl = root.querySelector("#sg-email");
-  const prenomEl = root.querySelector("#sg-prenom");
-  const nomEl = root.querySelector("#sg-nom");
-  const naissanceEl = root.querySelector("#sg-naissance");
-  const parentBlock = root.querySelector("#sg-parent-block");
-  const parentEmailEl = root.querySelector("#sg-parent-email");
-  const pwdEl = root.querySelector("#sg-password");
-  const pwdHelp = root.querySelector("#sg-pwd-help");
-  const submitBtn = root.querySelector("#sg-submit");
+    const codeEl = root.querySelector("#sg-code");
+    const codeHelp = root.querySelector("#sg-code-help");
+    const joinBox = root.querySelector("#sg-join");
+    const joinIco = root.querySelector("#sg-join-ico");
+    const joinTxt = root.querySelector("#sg-join-txt");
+    const emailEl = root.querySelector("#sg-email");
+    const prenomEl = root.querySelector("#sg-prenom");
+    const nomEl = root.querySelector("#sg-nom");
+    const naissanceEl = root.querySelector("#sg-naissance");
+    const parentBlock = root.querySelector("#sg-parent-block");
+    const parentEmailEl = root.querySelector("#sg-parent-email");
+    const pwdEl = root.querySelector("#sg-password");
+    const pwdHelp = root.querySelector("#sg-pwd-help");
+    const submitBtn = root.querySelector("#sg-submit");
 
-  // Déconnexion express depuis le bandeau « déjà connecté » : on reste sur
-  // la page (reload avec le même hash) pour reprendre l'inscription à zéro.
-  root.querySelector("#sg-switch")?.addEventListener("click", async (e) => {
-    e.preventDefault();
-    try {
-      await sb.auth.signOut();
-    } catch {
-      /* session déjà morte : on recharge quand même */
+    // Restaure la saisie déjà tapée après un re-rendu (changement de langue).
+    if (preserve) {
+      if (codeEl && preserve.code) codeEl.value = preserve.code;
+      emailEl.value = preserve.email || "";
+      prenomEl.value = preserve.prenom || "";
+      nomEl.value = preserve.nom || "";
+      naissanceEl.value = preserve.naissance || "";
+      if (parentEmailEl) parentEmailEl.value = preserve.parent || "";
+      pwdEl.value = preserve.pwd || "";
     }
-    window.location.reload();
-  });
-
-  const pwdToggle = root.querySelector("#sg-pwd-toggle");
-  pwdToggle?.addEventListener("click", () => {
-    const show = pwdEl.type === "password";
-    pwdEl.type = show ? "text" : "password";
-    pwdToggle.setAttribute("aria-pressed", String(show));
-    pwdToggle.setAttribute(
-      "aria-label",
-      show ? "Masquer le mot de passe" : "Afficher le mot de passe",
-    );
-    pwdToggle.innerHTML = icon(show ? "eye-off" : "eye", {
-      size: 18,
-      strokeWidth: 2,
+    const collectValues = () => ({
+      code: codeEl?.value || "",
+      email: emailEl.value,
+      prenom: prenomEl.value,
+      nom: nomEl.value,
+      naissance: naissanceEl.value,
+      parent: parentEmailEl?.value || "",
+      pwd: pwdEl.value,
     });
-    pwdEl.focus();
-  });
 
-  const emailValid = (v) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test((v || "").trim());
-  const normCode = (v) => (v || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
-
-  // Pseudo auto-généré (plus de champ « Identifiant » dans le formulaire) :
-  // slug du prénom (sans accents) + 4 chiffres → 3-24 car., quasi jamais en
-  // collision. L'élève pourra le changer plus tard dans l'app.
-  const genUsername = (prenom) => {
-    const base =
-      (prenom || "eleve")
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[^a-z0-9]/g, "")
-        .slice(0, 14) || "eleve";
-    const safe = base.length >= 2 ? base : "eleve";
-    return safe + String(Math.floor(1000 + Math.random() * 9000));
-  };
-
-  let codeValid = false; // résolu par get_join_code_info
-  let codeChecking = false;
-  let codeTimer = null;
-  let accountCreated = false; // permet de retenter sans recréer le compte
-
-  const validate = () => {
-    const codeOk = solo || (codeValid && !codeChecking);
-    const emailOk = emailValid(emailEl.value);
-    const prenomOk = prenomEl.value.trim().length >= 2;
-    const nomOk = nomEl.value.trim().length >= 1;
-    const dateOk = !!naissanceEl.value;
-    const minor = isMinorDate(naissanceEl.value);
-    const parentOk =
-      !minor ||
-      /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test((parentEmailEl?.value || "").trim());
-    const pwdOk = pwdEl.value.length >= 8;
-    submitBtn.disabled = !(
-      codeOk &&
-      emailOk &&
-      prenomOk &&
-      nomOk &&
-      dateOk &&
-      parentOk &&
-      pwdOk
-    );
-
-    if (pwdEl.value && !pwdOk) {
-      pwdEl.classList.add("error");
-      pwdHelp.classList.add("error");
-      pwdHelp.textContent = "Trop court (minimum 8 caractères).";
-    } else {
-      pwdEl.classList.remove("error");
-      pwdHelp.classList.remove("error");
-      pwdHelp.textContent = "Minimum 8 caractères.";
-    }
-  };
-
-  // Aperçu du code (debounce 400ms) — get_join_code_info
-  const checkCode = () => {
-    const v = normCode(codeEl.value);
-    codeValid = false;
-    joinBox.classList.remove("show", "err");
-    if (v.length < 3) {
-      codeChecking = false;
-      codeHelp.className = "sg-help";
-      codeHelp.textContent = "Demande-le à ton moniteur.";
-      validate();
-      return;
-    }
-    codeChecking = true;
-    codeHelp.className = "sg-help";
-    codeHelp.textContent = "Vérification…";
-    validate();
-    clearTimeout(codeTimer);
-    codeTimer = setTimeout(async () => {
-      if (normCode(codeEl.value) !== v) return;
+    // Déconnexion express depuis le bandeau « déjà connecté » : on reste sur
+    // la page (reload avec le même hash) pour reprendre l'inscription à zéro.
+    root.querySelector("#sg-switch")?.addEventListener("click", async (e) => {
+      e.preventDefault();
       try {
-        const { data, error } = await sb.rpc("get_join_code_info", {
-          p_code: v,
-        });
-        if (normCode(codeEl.value) !== v) return;
-        codeChecking = false;
-        const info = Array.isArray(data) ? data[0] : data;
-        if (error || !info) {
-          codeValid = false;
-          codeHelp.className = "sg-help error";
-          codeHelp.textContent =
-            "✗ Code introuvable. Revérifie auprès de ton moniteur.";
-          joinBox.classList.add("show", "err");
-          joinIco.innerHTML = icon("alert-circle", {
-            size: 20,
-            strokeWidth: 2,
-          });
-          joinTxt.textContent = "Aucun moniteur ne correspond à ce code.";
-        } else {
-          codeValid = true;
-          codeHelp.className = "sg-help ok";
-          codeHelp.textContent = "✓ Code valide";
-          joinBox.classList.add("show");
-          joinBox.classList.remove("err");
-          joinIco.innerHTML = icon("check-circle", {
-            size: 20,
-            strokeWidth: 2,
-          });
-          const ecole = info.ecole_nom || "ton auto-école";
-          // Si le nom de l'école contient déjà le prénom du moniteur
-          // (« Auto École de Rayan »), on ne rajoute pas « avec Rayan » :
-          // la répétition faisait phrase de robot.
-          const dejaDansEcole =
-            info.moniteur_prenom &&
-            ecole.toLowerCase().includes(info.moniteur_prenom.toLowerCase());
-          const prenom =
-            info.moniteur_prenom && !dejaDansEcole
-              ? ` avec ${esc(info.moniteur_prenom)}`
-              : "";
-          joinTxt.innerHTML = `Tu rejoins <strong>${esc(ecole)}</strong>${prenom}.`;
-        }
+        await sb.auth.signOut();
       } catch {
-        codeChecking = false;
-        codeValid = false;
-        codeHelp.className = "sg-help error";
-        codeHelp.textContent = "Vérification impossible, réessaie.";
+        /* session déjà morte : on recharge quand même */
       }
+      window.location.reload();
+    });
+
+    const pwdToggle = root.querySelector("#sg-pwd-toggle");
+    pwdToggle?.addEventListener("click", () => {
+      const show = pwdEl.type === "password";
+      pwdEl.type = show ? "text" : "password";
+      pwdToggle.setAttribute("aria-pressed", String(show));
+      pwdToggle.setAttribute(
+        "aria-label",
+        show
+          ? sgtR("pwd_hide_aria", "Masquer le mot de passe")
+          : sgtR("pwd_show_aria", "Afficher le mot de passe"),
+      );
+      pwdToggle.innerHTML = icon(show ? "eye-off" : "eye", {
+        size: 18,
+        strokeWidth: 2,
+      });
+      pwdEl.focus();
+    });
+
+    const emailValid = (v) =>
+      /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test((v || "").trim());
+    const normCode = (v) => (v || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+
+    // Pseudo auto-généré (plus de champ « Identifiant » dans le formulaire) :
+    // slug du prénom (sans accents) + 4 chiffres → 3-24 car., quasi jamais en
+    // collision. L'élève pourra le changer plus tard dans l'app.
+    const genUsername = (prenom) => {
+      const base =
+        (prenom || "eleve")
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[^a-z0-9]/g, "")
+          .slice(0, 14) || "eleve";
+      const safe = base.length >= 2 ? base : "eleve";
+      return safe + String(Math.floor(1000 + Math.random() * 9000));
+    };
+
+    let codeValid = false; // résolu par get_join_code_info
+    let codeChecking = false;
+    let codeTimer = null;
+
+    const validate = () => {
+      const codeOk = solo || (codeValid && !codeChecking);
+      const emailOk = emailValid(emailEl.value);
+      const prenomOk = prenomEl.value.trim().length >= 2;
+      const nomOk = nomEl.value.trim().length >= 1;
+      const dateOk = !!naissanceEl.value;
+      const minor = isMinorDate(naissanceEl.value);
+      const parentOk =
+        !minor ||
+        /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test((parentEmailEl?.value || "").trim());
+      const pwdOk = pwdEl.value.length >= 8;
+      submitBtn.disabled = !(
+        codeOk &&
+        emailOk &&
+        prenomOk &&
+        nomOk &&
+        dateOk &&
+        parentOk &&
+        pwdOk
+      );
+
+      if (pwdEl.value && !pwdOk) {
+        pwdEl.classList.add("error");
+        pwdHelp.classList.add("error");
+        pwdHelp.textContent = sgtR(
+          "pwd_too_short",
+          "Trop court (minimum 8 caractères).",
+        );
+      } else {
+        pwdEl.classList.remove("error");
+        pwdHelp.classList.remove("error");
+        pwdHelp.textContent = sgtR("pwd_help", "Minimum 8 caractères.");
+      }
+    };
+
+    // Aperçu du code (debounce 400ms) — get_join_code_info
+    const checkCode = () => {
+      const v = normCode(codeEl.value);
+      codeValid = false;
+      joinBox.classList.remove("show", "err");
+      if (v.length < 3) {
+        codeChecking = false;
+        codeHelp.className = "sg-help";
+        codeHelp.textContent = sgtR(
+          "code_help_default",
+          "Demande-le à ton moniteur.",
+        );
+        validate();
+        return;
+      }
+      codeChecking = true;
+      codeHelp.className = "sg-help";
+      codeHelp.textContent = sgtR("code_checking", "Vérification…");
       validate();
-    }, 400);
-  };
-
-  const updateMinor = () => {
-    if (!parentBlock) return;
-    parentBlock.style.display = isMinorDate(naissanceEl.value) ? "" : "none";
-  };
-
-  codeEl.addEventListener("input", checkCode);
-  emailEl.addEventListener("input", validate);
-  prenomEl.addEventListener("input", validate);
-  nomEl.addEventListener("input", validate);
-  naissanceEl.addEventListener("input", () => {
-    updateMinor();
-    validate();
-  });
-  parentEmailEl?.addEventListener("input", validate);
-  pwdEl.addEventListener("input", validate);
-
-  // Si un code est pré-rempli via l'URL, on le vérifie immédiatement
-  if (prefillCode) checkCode();
-
-  // Sélecteur de langue — applyLang = miroir localStorage UNIQUEMENT (aucun
-  // effet global : pas d'haptique, pas de re-render, pas de vol de focus, la
-  // saisie du formulaire n'est jamais perturbée). Persisté en base au submit.
-  let chosenLang = getLang();
-  root.querySelector("#sg-lang")?.addEventListener("click", (e) => {
-    const b = e.target.closest(".sg-lang-b");
-    if (!b) return;
-    chosenLang = b.dataset.lang;
-    root
-      .querySelectorAll("#sg-lang .sg-lang-b")
-      .forEach((x) => x.classList.toggle("active", x === b));
-    applyLang(chosenLang);
-    track("signup.language_picked", { language: chosenLang });
-  });
-
-  submitBtn.addEventListener("click", async () => {
-    submitBtn.disabled = true;
-    submitBtn.textContent = "Création…";
-    const { toast } = await import("@/components/common/toast.js");
-    const email = emailEl.value.trim().toLowerCase();
-    const code = normCode(codeEl.value);
-
-    try {
-      if (!accountCreated) {
-        // 1. Sign up — le trigger handle_new_user_signup crée un profil "nu" élève
-        const { error: authErr } = await sb.auth.signUp({
-          email,
-          password: pwdEl.value,
-          options: { data: { prenom: prenomEl.value.trim(), role: "eleve" } },
-        });
-        if (authErr) throw authErr;
-
-        // 2. Rattache au moniteur via son code (sauf inscription solo)
-        const { error: joinErr } = solo
-          ? { error: null }
-          : await sb.rpc("join_moniteur_by_code", { p_code: code });
-        if (joinErr) {
-          if (/invalid_code/i.test(joinErr.message || "")) {
-            toast("Code moniteur invalide — revérifie-le.", "error", 4000);
+      clearTimeout(codeTimer);
+      codeTimer = setTimeout(async () => {
+        if (normCode(codeEl.value) !== v) return;
+        try {
+          const { data, error } = await sb.rpc("get_join_code_info", {
+            p_code: v,
+          });
+          if (normCode(codeEl.value) !== v) return;
+          codeChecking = false;
+          const info = Array.isArray(data) ? data[0] : data;
+          if (error || !info) {
             codeValid = false;
             codeHelp.className = "sg-help error";
-            codeHelp.textContent = "✗ Code introuvable.";
-            submitBtn.textContent = "Créer mon compte";
+            codeHelp.textContent = sgtR(
+              "code_notfound_help",
+              "✗ Code introuvable. Revérifie auprès de ton moniteur.",
+            );
+            joinBox.classList.add("show", "err");
+            joinIco.innerHTML = icon("alert-circle", {
+              size: 20,
+              strokeWidth: 2,
+            });
+            joinTxt.textContent = sgtR(
+              "code_notfound_join",
+              "Aucun moniteur ne correspond à ce code.",
+            );
+          } else {
+            codeValid = true;
+            codeHelp.className = "sg-help ok";
+            codeHelp.textContent = sgtR("code_valid", "✓ Code valide");
+            joinBox.classList.add("show");
+            joinBox.classList.remove("err");
+            joinIco.innerHTML = icon("check-circle", {
+              size: 20,
+              strokeWidth: 2,
+            });
+            const ecole = info.ecole_nom || "ton auto-école";
+            // Si le nom de l'école contient déjà le prénom du moniteur
+            // (« Auto École de Rayan »), on ne rajoute pas « avec Rayan » :
+            // la répétition faisait phrase de robot.
+            const dejaDansEcole =
+              info.moniteur_prenom &&
+              ecole.toLowerCase().includes(info.moniteur_prenom.toLowerCase());
+            const withPart =
+              info.moniteur_prenom && !dejaDansEcole
+                ? sgtR("join_with", " avec {name}").replace(
+                    "{name}",
+                    esc(info.moniteur_prenom),
+                  )
+                : "";
+            joinTxt.innerHTML = sgtR(
+              "join_school",
+              "Tu rejoins {school}{with}.",
+            )
+              .replace("{school}", `<strong>${esc(ecole)}</strong>`)
+              .replace("{with}", withPart);
+          }
+        } catch {
+          codeChecking = false;
+          codeValid = false;
+          codeHelp.className = "sg-help error";
+          codeHelp.textContent = sgtR(
+            "code_check_failed",
+            "Vérification impossible, réessaie.",
+          );
+        }
+        validate();
+      }, 400);
+    };
+
+    const updateMinor = () => {
+      if (!parentBlock) return;
+      parentBlock.style.display = isMinorDate(naissanceEl.value) ? "" : "none";
+    };
+
+    codeEl.addEventListener("input", checkCode);
+    emailEl.addEventListener("input", validate);
+    prenomEl.addEventListener("input", validate);
+    nomEl.addEventListener("input", validate);
+    naissanceEl.addEventListener("input", () => {
+      updateMinor();
+      validate();
+    });
+    parentEmailEl?.addEventListener("input", validate);
+    pwdEl.addEventListener("input", validate);
+
+    // Code pré-rempli (URL) ou restauré après changement de langue → vérifier.
+    if (codeEl && normCode(codeEl.value)) checkCode();
+    else validate();
+
+    // Sélecteur de langue — pilote un RE-RENDU COMPLET du formulaire : tout le
+    // texte bascule aussitôt (recette de la page Réglages). applyLang pose le
+    // miroir localStorage + émet permigo:lang-changed (nav, etc.). La saisie déjà
+    // tapée est préservée. La préférence est persistée en base au submit.
+    root.querySelector("#sg-lang")?.addEventListener("click", (e) => {
+      const b = e.target.closest(".sg-lang-b");
+      if (!b || b.dataset.lang === chosenLang) return;
+      chosenLang = b.dataset.lang;
+      applyLang(chosenLang);
+      track("signup.language_picked", { language: chosenLang });
+      renderForm(collectValues());
+    });
+
+    submitBtn.addEventListener("click", async () => {
+      submitBtn.disabled = true;
+      submitBtn.textContent = sgtR("submitting", "Création…");
+      const { toast } = await import("@/components/common/toast.js");
+      const email = emailEl.value.trim().toLowerCase();
+      const code = normCode(codeEl.value);
+
+      try {
+        if (!accountCreated) {
+          // 1. Sign up — le trigger handle_new_user_signup crée un profil "nu" élève
+          const { error: authErr } = await sb.auth.signUp({
+            email,
+            password: pwdEl.value,
+            options: { data: { prenom: prenomEl.value.trim(), role: "eleve" } },
+          });
+          if (authErr) throw authErr;
+
+          // 2. Rattache au moniteur via son code (sauf inscription solo)
+          const { error: joinErr } = solo
+            ? { error: null }
+            : await sb.rpc("join_moniteur_by_code", { p_code: code });
+          if (joinErr) {
+            if (/invalid_code/i.test(joinErr.message || "")) {
+              toast(
+                sgtR(
+                  "toast_code_invalid",
+                  "Code moniteur invalide — revérifie-le.",
+                ),
+                "error",
+                4000,
+              );
+              codeValid = false;
+              codeHelp.className = "sg-help error";
+              codeHelp.textContent = sgtR(
+                "code_notfound_short",
+                "✗ Code introuvable.",
+              );
+              submitBtn.textContent = sgtR("submit", "Créer mon compte");
+              validate();
+              return;
+            }
+            if (/already_has_school/i.test(joinErr.message || "")) {
+              toast(
+                sgtR(
+                  "toast_already_school",
+                  "Ce compte est déjà rattaché à un moniteur. Connecte-toi.",
+                ),
+                "error",
+                4500,
+              );
+              submitBtn.textContent = sgtR("submit", "Créer mon compte");
+              return;
+            }
+            throw joinErr;
+          }
+          accountCreated = true;
+        }
+
+        // 3. Pose le profil : pseudo AUTO-GÉNÉRÉ (plus de champ « Identifiant »),
+        //    nom, date, email parent si mineur. On retente avec un autre pseudo
+        //    en cas de collision (quasi impossible, mais défensif).
+        let consentToken = null;
+        let profData = null;
+        let profErr = null;
+        for (let attempt = 0; attempt < 6; attempt++) {
+          const res = await sb.rpc("set_eleve_signup_profile", {
+            p_username: genUsername(prenomEl.value.trim()),
+            p_nom: nomEl.value.trim(),
+            p_prenom: prenomEl.value.trim(),
+            p_date_naissance: naissanceEl.value,
+            p_parent_email: parentEmailEl?.value.trim() || null,
+          });
+          profData = res.data;
+          profErr = res.error;
+          if (!profErr || !/username_taken/i.test(profErr.message || "")) break;
+        }
+        if (profErr) {
+          if (/parent_email_required/i.test(profErr.message || "")) {
+            toast(
+              sgtR(
+                "toast_parent_required",
+                "Renseigne un email de parent valide",
+              ),
+              "error",
+              4000,
+            );
+            submitBtn.disabled = false;
+            submitBtn.textContent = sgtR("submit", "Créer mon compte");
+            updateMinor();
             validate();
             return;
           }
-          if (/already_has_school/i.test(joinErr.message || "")) {
-            toast(
-              "Ce compte est déjà rattaché à un moniteur. Connecte-toi.",
-              "error",
-              4500,
-            );
-            submitBtn.textContent = "Créer mon compte";
-            return;
-          }
-          throw joinErr;
+          throw profErr;
         }
-        accountCreated = true;
-      }
+        const cr = Array.isArray(profData) ? profData[0] : profData;
+        if (cr?.consent_required && cr?.consent_token)
+          consentToken = cr.consent_token;
 
-      // 3. Pose le profil : pseudo AUTO-GÉNÉRÉ (plus de champ « Identifiant »),
-      //    nom, date, email parent si mineur. On retente avec un autre pseudo
-      //    en cas de collision (quasi impossible, mais défensif).
-      let consentToken = null;
-      let profData = null;
-      let profErr = null;
-      for (let attempt = 0; attempt < 6; attempt++) {
-        const res = await sb.rpc("set_eleve_signup_profile", {
-          p_username: genUsername(prenomEl.value.trim()),
-          p_nom: nomEl.value.trim(),
-          p_prenom: prenomEl.value.trim(),
-          p_date_naissance: naissanceEl.value,
-          p_parent_email: parentEmailEl?.value.trim() || null,
+        track("signup.completed", {
+          role: "eleve",
+          from: solo ? "pass_solo" : "join_code",
+          minor: !!consentToken,
         });
-        profData = res.data;
-        profErr = res.error;
-        if (!profErr || !/username_taken/i.test(profErr.message || "")) break;
-      }
-      if (profErr) {
-        if (/parent_email_required/i.test(profErr.message || "")) {
-          toast("Renseigne un email de parent valide", "error", 4000);
-          submitBtn.disabled = false;
-          submitBtn.textContent = "Créer mon compte";
-          updateMinor();
-          validate();
+
+        // Persiste la langue choisie sur le profil (le miroir localStorage est
+        // déjà posé au clic, donc la préférence tient même si l'RPC échoue).
+        if (chosenLang !== "fr") {
+          try {
+            await sb.rpc("set_my_preferences", {
+              p_data: { language: chosenLang },
+            });
+          } catch (_) {
+            /* localStorage tient déjà la préférence */
+          }
+        }
+
+        // Mesure « solo sans achat » : cet email a-t-il acheté le Pass ?
+        // (get_my_pass_status, migration solo_hardening). Aucun blocage —
+        // juste la donnée pour décider plus tard d'un éventuel verrou.
+        if (solo) {
+          try {
+            const { data: pass } = await sb.rpc("get_my_pass_status");
+            track("signup.solo_pass_check", { has_pass: !!pass?.has_pass });
+          } catch (_) {
+            /* best-effort */
+          }
+        }
+
+        // 3bis. Élève mineur : compte en attente du consentement parental
+        if (consentToken) {
+          renderConsentPending(root, consentToken);
           return;
         }
-        throw profErr;
+
+        // 4. Succès → entrée dans l'app (l'onboarding élève gère l'add-to-home)
+        window.location.href = "/#";
+        window.location.reload();
+      } catch (e) {
+        console.error("[rejoindre] failed", e);
+        const msg = /already.*registered|already.*exists/i.test(
+          e?.message || "",
+        )
+          ? sgtR(
+              "toast_exists",
+              "Un compte existe déjà avec cet email. Connecte-toi directement.",
+            )
+          : e?.message ||
+            sgtR("toast_generic", "Erreur lors de la création du compte");
+        toast(msg, "error", 4500);
+        submitBtn.disabled = false;
+        submitBtn.textContent = sgtR("submit", "Créer mon compte");
       }
-      const cr = Array.isArray(profData) ? profData[0] : profData;
-      if (cr?.consent_required && cr?.consent_token)
-        consentToken = cr.consent_token;
+    });
 
-      track("signup.completed", {
-        role: "eleve",
-        from: solo ? "pass_solo" : "join_code",
-        minor: !!consentToken,
-      });
+    // Focus initial seulement au 1er rendu (pas à chaque changement de langue).
+    if (!preserve)
+      setTimeout(() => (solo || prefillCode ? emailEl : codeEl).focus(), 100);
+  }
 
-      // Persiste la langue choisie sur le profil (le miroir localStorage est
-      // déjà posé au clic, donc la préférence tient même si l'RPC échoue).
-      if (chosenLang !== "fr") {
-        try {
-          await sb.rpc("set_my_preferences", {
-            p_data: { language: chosenLang },
-          });
-        } catch (_) {
-          /* localStorage tient déjà la préférence */
-        }
-      }
-
-      // Mesure « solo sans achat » : cet email a-t-il acheté le Pass ?
-      // (get_my_pass_status, migration solo_hardening). Aucun blocage —
-      // juste la donnée pour décider plus tard d'un éventuel verrou.
-      if (solo) {
-        try {
-          const { data: pass } = await sb.rpc("get_my_pass_status");
-          track("signup.solo_pass_check", { has_pass: !!pass?.has_pass });
-        } catch (_) {
-          /* best-effort */
-        }
-      }
-
-      // 3bis. Élève mineur : compte en attente du consentement parental
-      if (consentToken) {
-        renderConsentPending(root, consentToken);
-        return;
-      }
-
-      // 4. Succès → entrée dans l'app (l'onboarding élève gère l'add-to-home)
-      window.location.href = "/#";
-      window.location.reload();
-    } catch (e) {
-      console.error("[rejoindre] failed", e);
-      const msg = /already.*registered|already.*exists/i.test(e?.message || "")
-        ? "Un compte existe déjà avec cet email. Connecte-toi directement."
-        : e?.message || "Erreur lors de la création du compte";
-      toast(msg, "error", 4500);
-      submitBtn.disabled = false;
-      submitBtn.textContent = "Créer mon compte";
-    }
-  });
-
-  setTimeout(() => (solo || prefillCode ? emailEl : codeEl).focus(), 100);
+  renderForm();
 }
 
 // Moins de 15 ans (âge du consentement numérique en France)
@@ -655,14 +863,14 @@ function renderConsentPending(root, token) {
     <div class="sg">
       <div class="sg-card" style="text-align:center">
         <div style="margin-bottom:10px;color:var(--gold);display:flex;justify-content:center">${icon("users", { size: 42 })}</div>
-        <h1 class="sg-title">Presque&nbsp;! On attend l'accord de ton parent</h1>
-        <p class="sg-sub">Comme tu as moins de 15 ans, un parent ou tuteur doit donner son accord avant que tu puisses utiliser PermiGo. Envoie-lui ce lien&nbsp;:</p>
+        <h1 class="sg-title">${sgtR("consent_title", "Presque&nbsp;! On attend l'accord de ton parent")}</h1>
+        <p class="sg-sub">${sgtR("consent_sub", "Comme tu as moins de 15 ans, un parent ou tuteur doit donner son accord avant que tu puisses utiliser PermiGo. Envoie-lui ce lien&nbsp;:")}</p>
         <div class="sg-row">
           <input class="sg-input" id="sg-consent-link" type="text" readonly value="${esc(link)}" />
         </div>
-        <button class="sg-btn" id="sg-copy-link" type="button">${icon("copy", { size: 16 })} Copier le lien</button>
-        <p class="sg-sub" style="margin-top:16px;margin-bottom:0">Tu peux le coller dans WhatsApp ou un SMS à ton parent. Dès qu'il valide, ton compte se débloque.</p>
-        <a class="sg-login-row" href="/#" style="display:block;margin-top:18px">J'ai compris</a>
+        <button class="sg-btn" id="sg-copy-link" type="button">${icon("copy", { size: 16 })} ${sgt("consent_copy", "Copier le lien")}</button>
+        <p class="sg-sub" style="margin-top:16px;margin-bottom:0">${sgt("consent_sub2", "Tu peux le coller dans WhatsApp ou un SMS à ton parent. Dès qu'il valide, ton compte se débloque.")}</p>
+        <a class="sg-login-row" href="/#" style="display:block;margin-top:18px">${sgt("consent_ok", "J'ai compris")}</a>
       </div>
     </div>`;
   const linkEl = root.querySelector("#sg-consent-link");
@@ -670,14 +878,18 @@ function renderConsentPending(root, token) {
     try {
       await navigator.clipboard.writeText(link);
       const btn = root.querySelector("#sg-copy-link");
-      btn.textContent = "✓ Lien copié";
+      btn.textContent = sgtR("consent_copied", "✓ Lien copié");
       setTimeout(() => {
-        btn.innerHTML = `${icon("copy", { size: 16 })} Copier le lien`;
+        btn.innerHTML = `${icon("copy", { size: 16 })} ${sgt("consent_copy", "Copier le lien")}`;
       }, 2000);
     } catch {
       linkEl?.select();
       const { toast } = await import("@/components/common/toast.js");
-      toast("Sélectionne et copie le lien manuellement", "info", 3500);
+      toast(
+        sgtR("consent_manual", "Sélectionne et copie le lien manuellement"),
+        "info",
+        3500,
+      );
     }
   });
 }
