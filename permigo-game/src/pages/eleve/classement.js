@@ -172,8 +172,13 @@ export async function mount(root, initialTab) {
 const OF = { conduite: 31, revision: 50 };
 
 function _rowsFor(state, data) {
-  // Révision = classement de la SAISON (points de la semaine).
-  if (state.ligue === "revision") return data.theorieWeekly;
+  // Révision = classement de la SAISON (points de la semaine). Repli sur le
+  // classement THÉORIE À VIE si le hebdo est vide/en panne — sinon la ligue
+  // (onglet par défaut) s'affichait « 0 joueur » dès que la seule RPC weekly
+  // échouait, alors que les autres classements marchaient (elle est exclue du
+  // garde-fou allFailed). Le repli a la même forme de lignes.
+  if (state.ligue === "revision")
+    return data.theorieWeekly.length ? data.theorieWeekly : data.theorie;
   return state.scope === "national" ? data.national : data.ecole;
 }
 function _myRow(rows) {
