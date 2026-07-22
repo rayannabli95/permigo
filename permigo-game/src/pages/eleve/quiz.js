@@ -504,12 +504,26 @@ async function handleComplete(
       // Compte le total de compétences acquises pour le bloc stats + la barre.
       let acquiredCount = null;
       try {
-        const { count } = await sb
-          .from("validations")
-          .select("id", { count: "exact", head: true })
-          .eq("eleve_id", me.id)
-          .eq("statut", "acquis");
-        if (typeof count === "number") acquiredCount = count;
+        const [valRes, selfValRes] = await Promise.allSettled([
+          sb
+            .from("validations")
+            .select("competence_id")
+            .eq("eleve_id", me.id)
+            .eq("statut", "acquis"),
+          // Validation autonome (élève solo, valider-seul.js) : table séparée
+          // de `validations`, fusionnée pour ne pas laisser le compteur
+          // bloqué. Même pattern que accueil.js / mon-permis.js.
+          sb
+            .from("self_validations")
+            .select("competence_id")
+            .eq("eleve_id", me.id),
+        ]);
+        const _compSet = new Set(
+          (valRes.value?.data || []).map((v) => v.competence_id),
+        );
+        for (const s of selfValRes.value?.data || [])
+          _compSet.add(s.competence_id);
+        acquiredCount = _compSet.size;
       } catch {
         /* best-effort — l'écran s'affiche sans le compteur */
       }
