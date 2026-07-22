@@ -10,6 +10,7 @@ import { blendLeagueRows, isSoloEleve } from "@/utils/league-bots.js";
 import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { REMC } from "@/data/remc.js";
+import { labelComp } from "@/utils/remc-label.js";
 import {
   renderHeatmap,
   ensureHeatmapStyles,
@@ -113,6 +114,11 @@ const ACC_I18N = {
     cr_aria: "Your instructor sent you a report · tap to read",
     cr_t: "Your instructor sent you a report",
     cr_s: "Read their feedback on your lesson.",
+    cr_cta: "Read it",
+    cr_apercu_one: "Skill validated: {c}",
+    cr_apercu_multi: "{n} skills validated, including {c}",
+    cr_revisit_t: "Revisit your last lesson's report",
+    cr_revisit_aria: "Revisit your last lesson's report · tap to open",
     chest_label: "{n} chest{s} to open",
     chest_sub: "Claim your daily reward.",
     fq_aria: "Flash quiz from your instructor, answer now",
@@ -178,6 +184,11 @@ const ACC_I18N = {
     cr_aria: "أرسل لك مدرّبك تقريراً · اضغط للقراءة",
     cr_t: "أرسل لك مدرّبك تقريراً",
     cr_s: "اقرأ ملاحظاته على درسك.",
+    cr_cta: "اقرأه",
+    cr_apercu_one: "مهارة مكتسبة: {c}",
+    cr_apercu_multi: "{n} مهارات مكتسبة، منها {c}",
+    cr_revisit_t: "راجع تقرير درسك الأخير",
+    cr_revisit_aria: "راجع تقرير درسك الأخير · اضغط لفتحه",
     chest_label: "{n} صندوق للفتح",
     chest_sub: "احصل على مكافأتك اليومية.",
     fq_aria: "اختبار سريع من مدرّبك، أجب الآن",
@@ -2059,6 +2070,11 @@ function render({
     <div class="acc2-hero-floor" aria-hidden="true"></div>
     <img class="acc2-hero-mascot" src="/skins/mascot-point.png" alt="" aria-hidden="true" loading="eager">
   </section>
+
+  <!-- Compte-rendu du moniteur (injecté async) — juste sous le hero, au-dessus
+       du fold : c'est la porte d'entrée la plus fiable vers le retour du
+       moniteur (voir #acc-cr-slot plus bas, réservé à l'ancre du feed avis). -->
+  <div id="acc-cr-top-slot"></div>
   ${debriefCard}
   ${consolCard}
 
@@ -2159,7 +2175,8 @@ function render({
        centre d'examen) vit dans les onglets « Réviser » et « Mon permis ».
        L'accueil ne garde ici que ce qui vient du moniteur + les coffres. -->
 
-  <!-- Compte-rendu non lu du moniteur (injecté async) -->
+  <!-- Ancre pour mountFeedbackFeed (le contenu compte-rendu vit désormais
+       dans #acc-cr-top-slot, juste sous le hero — ne pas y injecter le CR). -->
   <div id="acc-cr-slot"></div>
 
   <!-- Slot coffre (injecté async par _loadAndInjectChests) -->
@@ -2685,21 +2702,44 @@ export async function fetchLastCompteRendu(me) {
   }
 }
 
+// Aperçu court affiché dans la bannière/carte compte-rendu — priorité au mot
+// du moniteur (texte libre), sinon un résumé des compétences validées.
+function _crApercu(cr) {
+  const note = typeof cr.note === "string" ? cr.note.trim() : "";
+  if (note) return note.length > 70 ? `${note.slice(0, 68).trimEnd()}…` : note;
+  const acquis = Array.isArray(cr.acquis) ? cr.acquis : [];
+  if (acquis.length === 1) {
+    return atR("cr_apercu_one", "Compétence validée : {c}").replace(
+      "{c}",
+      labelComp(acquis[0]),
+    );
+  }
+  if (acquis.length > 1) {
+    return atR("cr_apercu_multi", "{n} compétences validées, dont {c}")
+      .replace("{n}", acquis.length)
+      .replace("{c}", labelComp(acquis[0]));
+  }
+  return atR("cr_s", "Lis son retour sur ta leçon.");
+}
+
 async function _loadAndInjectCompteRendu(root, me) {
   try {
     if (!me) return;
-    const { data, error } = await sb
-      .from("comptes_rendus")
-      .select("id, created_at, read_at")
-      .eq("eleve_id", me.id)
-      .is("read_at", null)
-      .order("created_at", { ascending: false })
-      .limit(1);
-    if (error || !data?.length) return;
-    const cr = data[0];
-    const slot = root.querySelector("#acc-cr-slot");
+    const slot = root.querySelector("#acc-cr-top-slot");
     if (!slot) return;
-    slot.innerHTML = `
+    const cr = await fetchLastCompteRendu(me);
+    if (!cr) return;
+
+    // Non lu → grosse bannière engageante. Lu depuis < 7 j → petite carte
+    // discrète (porte de retour). Au-delà : rien, l'historique reste dans
+    // mes-lecons.
+    const isUnread = !cr.read_at;
+    const readRecently =
+      !isUnread &&
+      Date.now() - new Date(cr.read_at).getTime() < 7 * 24 * 60 * 60 * 1000;
+    if (!isUnread && !readRecently) return;
+
+    const style = `
       <style>
       .acc2-cr-banner{display:flex;align-items:center;gap:12px;margin:14px 16px 0;padding:14px 14px 14px 16px;background:color-mix(in srgb,var(--a) 8%,var(--su));border:1px solid color-mix(in srgb,var(--a) 20%,transparent);border-radius:18px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .12s;text-decoration:none}
       .acc2-cr-banner:active{background:color-mix(in srgb,var(--a) 14%,var(--su))}
@@ -2707,21 +2747,44 @@ async function _loadAndInjectCompteRendu(root, me) {
       .acc2-cr-ico .pg-med{filter:drop-shadow(0 3px 6px rgba(0,0,0,.16))}
       .acc2-cr-txt{flex:1;min-width:0}
       .acc2-cr-t{font:700 13.5px/1.2 'Plus Jakarta Sans',sans-serif;color:var(--ink)}
-      .acc2-cr-s{font:500 11.5px/1.3 'Inter',sans-serif;color:var(--mu);margin-top:2px}
-      .acc2-cr-arr{flex:0 0 24px;width:24px;height:24px;border-radius:50%;background:var(--a);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:800}
-      </style>
+      .acc2-cr-s{font:500 11.5px/1.3 'Inter',sans-serif;color:var(--mu);margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+      .acc2-cr-cta{flex:0 0 auto;display:flex;align-items:center;gap:3px;color:var(--a-txt);font:800 12.5px/1 'Plus Jakarta Sans',sans-serif}
+      .acc2-cr-cta-arr{font-size:15px}
+      .acc2-cr-revisit{display:flex;align-items:center;gap:10px;margin:14px 16px 0;padding:11px 14px;background:var(--su);border:1px solid var(--bo);border-radius:14px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .12s}
+      .acc2-cr-revisit:active{background:color-mix(in srgb,var(--a) 6%,var(--su))}
+      .acc2-cr-revisit-ico{flex:0 0 auto;font-size:17px;line-height:1}
+      .acc2-cr-revisit-t{flex:1;min-width:0;font:600 12.5px/1.3 'Inter',sans-serif;color:var(--mu)}
+      .acc2-cr-revisit-arr{flex:0 0 auto;color:var(--a-txt);font-weight:800;font-size:15px}
+      </style>`;
+
+    slot.innerHTML = isUnread
+      ? `${style}
       <div class="acc2-cr-banner" id="acc-cr-banner" role="button" tabindex="0"
            aria-label="${escAttr(atR("cr_aria", "Ton moniteur t’a envoyé un compte-rendu · appuie pour le lire"))}">
         <div class="acc2-cr-ico" aria-hidden="true">${medallion("fiches", "violet", { size: 38 })}</div>
         <div class="acc2-cr-txt">
           <div class="acc2-cr-t">${at("cr_t", "Ton moniteur t’a envoyé un compte-rendu")}</div>
-          <div class="acc2-cr-s">${at("cr_s", "Lis son retour sur ta leçon.")}</div>
+          <div class="acc2-cr-s">${esc(_crApercu(cr))}</div>
         </div>
-        <div class="acc2-cr-arr" aria-hidden="true">›</div>
+        <div class="acc2-cr-cta" aria-hidden="true">
+          <span>${at("cr_cta", "Le lire")}</span>
+          <span class="acc2-cr-cta-arr">›</span>
+        </div>
+      </div>`
+      : `${style}
+      <div class="acc2-cr-revisit" id="acc-cr-banner" role="button" tabindex="0"
+           aria-label="${escAttr(atR("cr_revisit_aria", "Revoir le compte-rendu de ta dernière leçon · appuie pour l’ouvrir"))}">
+        <span class="acc2-cr-revisit-ico" aria-hidden="true">📋</span>
+        <span class="acc2-cr-revisit-t">${at("cr_revisit_t", "Revoir le compte-rendu de ta dernière leçon")}</span>
+        <span class="acc2-cr-revisit-arr" aria-hidden="true">›</span>
       </div>`;
+
     const banner = slot.querySelector("#acc-cr-banner");
     const go = () => {
-      track("accueil.cr_banner.tapped", { cr_id: cr.id });
+      track("accueil.cr_banner.tapped", {
+        cr_id: cr.id,
+        state: isUnread ? "unread" : "revisit",
+      });
       navigate(`#/compte-rendu/${cr.id}`);
     };
     banner?.addEventListener("click", go);
