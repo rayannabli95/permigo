@@ -448,6 +448,45 @@ const HUB_STYLE = `<style>
 @media (prefers-reduced-motion: reduce){ .hub *{ transition:none!important; } }
 </style>`;
 
+// ═══════════════════════════════════════════════════════════════
+// Pont vers la certification (pivot 17/07 : l'élève certifie lui-même).
+// Après un quiz « Teste-toi » RÉUSSI, on propose de certifier la compétence —
+// mais le juge officiel reste le quiz de #/valider-seul (5 questions corrigées
+// SERVEUR). On ne valide JAMAIS ici : les questions locales ne sont pas celles
+// du serveur. DA nuit-indigo + or, cohérente avec l'écran de certification.
+// ═══════════════════════════════════════════════════════════════
+const PONT_STYLE = `<style>
+.pont{ position:relative; min-height:calc(100dvh - 60px);
+  padding:32px 22px calc(40px + env(safe-area-inset-bottom));
+  color:#f2f0fa; font-family:'Inter',sans-serif; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; text-align:center;
+  background:
+    radial-gradient(120% 55% at 50% -5%, rgba(255,190,70,.12) 0%, transparent 55%),
+    radial-gradient(120% 60% at 50% 22%, rgba(110,70,220,.24) 0%, transparent 62%),
+    linear-gradient(180deg,#181241 0%,#0f0d24 58%,#0b0a1c 100%); }
+.pont-med{ width:88px; height:88px; margin-bottom:16px; animation:pontPop .5s cubic-bezier(.34,1.56,.64,1) both; }
+@keyframes pontPop{ from{opacity:0;transform:scale(.7)} to{opacity:1;transform:scale(1)} }
+.pont-kick{ display:inline-flex; align-items:center; gap:6px; font:800 11px/1 'Inter',sans-serif;
+  letter-spacing:.12em; text-transform:uppercase; color:#ffd76e;
+  background:rgba(255,210,74,.12); border:1px solid rgba(255,210,74,.3); padding:6px 14px; border-radius:99px; margin-bottom:14px; }
+.pont-ttl{ font:800 24px/1.22 'Baloo 2',cursive; margin:0 0 10px;
+  background:linear-gradient(180deg,#ffe9b0,#f5b73d); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.pont-p{ font:500 14px/1.55 'Inter',sans-serif; color:#cabfef; margin:0; max-width:340px; }
+.pont-p b{ color:#e9e2ff; font-weight:700; }
+.pont-cta{ width:100%; max-width:340px; margin-top:26px; min-height:54px; padding:16px; border:0; border-radius:14px; cursor:pointer;
+  font:800 15px/1.2 'Plus Jakarta Sans',sans-serif; color:#4a2500;
+  background:linear-gradient(180deg,#ffd76e,#f0a93f); box-shadow:0 6px 0 #b46a10, 0 12px 22px rgba(0,0,0,.4);
+  display:flex; align-items:center; justify-content:center; gap:9px; }
+.pont-cta:active{ transform:translateY(3px); box-shadow:0 3px 0 #b46a10, 0 7px 14px rgba(0,0,0,.4); }
+.pont-ghost{ width:100%; max-width:340px; margin-top:11px; min-height:48px; padding:13px; border:1.5px solid rgba(255,255,255,.32);
+  background:transparent; color:#fff; border-radius:14px; cursor:pointer; font:700 13.5px/1.2 'Plus Jakarta Sans',sans-serif; }
+.pont-ghost:active{ transform:scale(.98); }
+.pont-link{ margin-top:20px; min-height:44px; display:inline-flex; align-items:center; gap:7px; padding:6px 8px; background:none; border:0; cursor:pointer;
+  font:700 14px/1.2 'Plus Jakarta Sans',sans-serif; color:#ffd76e; text-decoration:underline; text-underline-offset:3px; }
+.pont-link:active{ opacity:.7; }
+@media (prefers-reduced-motion: reduce){ .pont-med{ animation:none; } }
+</style>`;
+
 export async function mount(root, param) {
   track("page_view", { page: "revision-conduite" });
 
@@ -1020,8 +1059,10 @@ export async function mount(root, param) {
         // Alimente la ligue Révision : +1 pt si ≥70% sur cette compétence.
         // Insertion directe (RLS : l'élève écrit les siens), type 'review' →
         // compté par get_theory_leaderboard (DISTINCT competence_id, score≥70).
-        // On n'appelle PAS submit_competence_quiz : il passe la validation à
-        // « acquis », or l'élève ne valide JAMAIS sa conduite (c'est le moniteur).
+        // On n'appelle PAS submit_competence_quiz ni self_validate_competence
+        // ici : ces questions sont LOCALES, le juge officiel reste le quiz de
+        // #/valider-seul (5 questions corrigées serveur). Ce quiz « Teste-toi »
+        // ne fait qu'alimenter quête + ligue, puis PROPOSE la certification.
         const me = getCurUser();
         if (me?.id && total > 0) {
           // Cette ligne alimente la quête du jour (trigger advance_quest_quiz)
@@ -1056,9 +1097,100 @@ export async function mount(root, param) {
           focuses = focuses.filter((x) => x.id !== fid);
           markFocusDone(fid);
         }
+        // Pont vers la certification : quiz RÉUSSI (même seuil que le composant,
+        // ≥70 %) → on propose de certifier la compétence dans Mon permis. Sinon,
+        // retour au hub comme avant. Le pont récupère lui-même l'état (déjà
+        // certifiée / validée moniteur) pour adapter son CTA.
+        const passed = total > 0 && good >= Math.ceil(total * 0.7);
+        if (passed) {
+          showCertBridge(code, good, total);
+          return;
+        }
         view = "home";
         render();
       },
+    });
+  }
+
+  // ── Pont Réviser → certification (pivot 17/07) ──────────────────────────
+  // Récupère l'état de certification de la compétence puis affiche l'écran de
+  // fin adapté. On NE valide RIEN ici : le bouton mène au quiz officiel de
+  // #/valider-seul (juge serveur). Best-effort : si l'état est indéterminé, on
+  // propose quand même la certification (le garde-fou serveur tranchera).
+  async function certState(compId) {
+    const me = getCurUser();
+    if (!me?.id) return { moniteur: false, certified: false };
+    try {
+      const [vRes, sRes] = await Promise.allSettled([
+        sb
+          .from("validations")
+          .select("statut")
+          .eq("eleve_id", me.id)
+          .eq("competence_id", compId)
+          .maybeSingle(),
+        sb
+          .from("self_validations")
+          .select("validated_at")
+          .eq("eleve_id", me.id)
+          .eq("competence_id", compId)
+          .maybeSingle(),
+      ]);
+      return {
+        moniteur:
+          vRes.status === "fulfilled" && vRes.value.data?.statut === "acquis",
+        certified: sRes.status === "fulfilled" && !!sRes.value.data,
+      };
+    } catch {
+      return { moniteur: false, certified: false };
+    }
+  }
+
+  async function showCertBridge(compId, good, total) {
+    const { moniteur, certified } = await certState(compId);
+    const f = getFiche(compId);
+    const titre = f ? f.titre : "cette compétence";
+    const done = moniteur || certified;
+    track("revision_conduite_cert_bridge", { code: compId, done });
+
+    const BOUCLIER = medallion("bouclier", "violet", { size: 88 });
+    const CHECK = medallion("check", "violet", { size: 88 });
+
+    if (done) {
+      // Déjà certifiée par toi (ou validée par ton moniteur) : pas de nouvelle
+      // certification à faire — juste un petit lien pour la revoir dans Mon permis.
+      root.innerHTML = `${PONT_STYLE}<div class="pont anim-slide-up">
+        <div class="pont-med">${CHECK}</div>
+        <span class="pont-kick">Déjà dans Mon permis</span>
+        <h1 class="pont-ttl">Déjà certifiée par toi</h1>
+        <p class="pont-p">« <b>${esc(titre)}</b> » est déjà acquise dans ton parcours. Beau boulot — continue à réviser quand tu veux.</p>
+        <button class="pont-cta" data-continue type="button">Continuer à réviser</button>
+        <button class="pont-link" data-revoir type="button">Revoir dans Mon permis →</button>
+      </div>`;
+    } else {
+      // Non certifiée : on propose de la certifier via le quiz officiel.
+      root.innerHTML = `${PONT_STYLE}<div class="pont anim-slide-up">
+        <div class="pont-med">${BOUCLIER}</div>
+        <span class="pont-kick">Quiz réussi</span>
+        <h1 class="pont-ttl">Prêt·e à certifier cette compétence ?</h1>
+        <p class="pont-p">Tu viens de réviser « <b>${esc(titre)}</b> ». Certifie-la pour la faire avancer dans <b>Mon permis</b> — un quiz officiel de 5 questions confirme que c'est acquis.</p>
+        <button class="pont-cta" data-certify type="button">Certifier cette compétence</button>
+        <button class="pont-ghost" data-continue type="button">Plus tard</button>
+      </div>`;
+    }
+
+    root.querySelector("[data-certify]")?.addEventListener("click", () => {
+      haptic("tap");
+      track("revision_conduite_cert_bridge_go", { code: compId });
+      navigate(`#/valider-seul/${compId}`);
+    });
+    root.querySelector("[data-revoir]")?.addEventListener("click", () => {
+      haptic("tap");
+      navigate(`#/parcours?focus=${encodeURIComponent(compId)}`);
+    });
+    root.querySelector("[data-continue]")?.addEventListener("click", () => {
+      haptic("select");
+      view = "home";
+      render();
     });
   }
 

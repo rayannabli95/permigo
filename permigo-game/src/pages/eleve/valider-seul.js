@@ -22,7 +22,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { icon } from "@/utils/icons.js";
 import { medallion } from "@/utils/medallions.js";
 import { track } from "@/services/analytics.js";
@@ -227,7 +227,7 @@ function successScreen(sub, scorePct, volants = 0) {
     <p class="vsr-p">« ${esc(sub.n)} » est maintenant acquise dans ton parcours.</p>
     <p class="vsr-score">Quiz réussi à ${scorePct}%</p>
     ${volants > 0 ? `<span class="vsr-volants"><img src="/skins/volant-coin.webp" alt=""> +${volants} volants</span>` : ""}
-    <button class="vsr-cta" id="vs-cta-parcours" type="button">Voir mon parcours</button>
+    <button class="vsr-cta" id="vs-cta-parcours" type="button" data-comp="${escAttr(sub.c)}">Retrouve cette compétence dans Mon permis</button>
   </div>`;
 }
 
@@ -453,9 +453,13 @@ async function certify(root, me, compId, sub, cat, scorePct, answers) {
 }
 
 function wireResult(root, me, compId, sub, cat) {
-  root
-    .querySelector("#vs-cta-parcours")
-    ?.addEventListener("click", () => navigate("#/parcours"));
+  root.querySelector("#vs-cta-parcours")?.addEventListener("click", (e) => {
+    // Écran de succès : on ramène l'élève DIRECTEMENT sur le nœud de la
+    // compétence dans « Mon permis » (param focus → zoom + pulse). L'écran
+    // d'échec réutilise le même id sans data-comp → retour simple au parcours.
+    const c = e.currentTarget.getAttribute("data-comp");
+    navigate(c ? `#/parcours?focus=${encodeURIComponent(c)}` : "#/parcours");
+  });
   root.querySelector("#vs-retry")?.addEventListener("click", () => {
     root.innerHTML = introScreen(sub, cat, null);
     wireIntro(root, me, compId, sub, cat);
