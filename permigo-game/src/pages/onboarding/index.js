@@ -778,24 +778,30 @@ export async function mount(root) {
       title: "Bienvenue dans PermiGo !",
     }).catch(() => {});
 
-    // Accroche « mise en situation » : 3 scènes jouées juste après le tuto →
-    // premier contact « wow » avec le produit. Le jeu est plein écran (le chrome
-    // n'est pas encore monté) ; sa sortie recharge l'app sur l'accueil, où le
-    // coffre de bienvenue s'ouvre. Zappée si l'élève a choisi « Passer ».
+    // Sortie vers l'accueil : le chrome n'a pas été monté pendant l'onboarding,
+    // c'est le boot (reload) qui le montera ; le coffre de bienvenue s'y ouvre.
+    const goHome = () => {
+      location.hash = "#/";
+      location.reload();
+    };
+
+    // Accroche « présentation » : une carte « Laisse-nous te présenter PermiGo »
+    // + bouton OK, puis la vidéo promotionnelle plein écran (croix pour passer).
+    // Le clic sur OK autorise la lecture AVEC le son (geste utilisateur).
+    // Fin de vidéo / croix / erreur → accueil. Zappée si l'élève a « Passer ».
     if (withIntro) {
       try {
-        const { mount: mountSituations } =
-          await import("@/pages/eleve/en-situation.js");
-        await mountSituations(root, "intro");
+        const { mountVideoIntro } =
+          await import("@/pages/onboarding/video-intro.js");
+        mountVideoIntro(root, goHome);
         return;
       } catch (e) {
-        console.error("[onboarding] accroche en-situation KO", e);
+        console.error("[onboarding] intro vidéo KO", e);
         /* repli : atterrissage direct sur l'accueil ci-dessous */
       }
     }
 
-    location.hash = "#/";
-    location.reload();
+    goHome();
   }
 
   // ─── Init ─────────────────────────────────────────────────────
