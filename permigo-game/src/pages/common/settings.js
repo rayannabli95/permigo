@@ -601,21 +601,27 @@ ${
         <div class="st-row-action">${_CHEV}</div>
       </div>
     </div>
-  </div>
-
-  <!-- ABONNEMENT (bêta moniteur indé) -->
-  <div>
+  </div>`
+    : ""
+}
+${
+  me.role === "enseignant" || me.role === "eleve"
+    ? `
+  <!-- ABONNEMENT — moniteur (toujours visible) ou élève avec abo mensuel actif
+       (masqué par défaut, révélé dans wire() : un élève sans abo ne voit rien). -->
+  <div id="st-sub-group"${me.role === "eleve" ? ' style="display:none"' : ""}>
     <div class="st-glabel">${st("sub_group", "Abonnement")}</div>
     <div class="st-section">
       <div class="st-row col">
         <div class="st-rhead">
           <span class="st-ic" aria-hidden="true">${medallion("etoile", "gold", { size: 32, shape: "tile" })}</span>
           <div class="st-row-left">
-            <div class="st-row-title">PermiGo Pro</div>
+            <div class="st-row-title">${me.role === "enseignant" ? "PermiGo Pro" : "Mon abonnement"}</div>
             <div class="st-row-sub" id="st-sub-status">${st("sub_loading", "Chargement…")}</div>
           </div>
         </div>
         <button class="st-save-btn" id="st-subscribe" style="display:none;align-self:stretch;text-align:center">${st("sub_cta", "S'abonner — 9,99 €/mois")}</button>
+        <button class="st-save-btn" id="st-manage-sub" style="display:none;align-self:stretch;text-align:center;background:var(--su);color:var(--a-txt);border:1.5px solid var(--bo4)">${st("sub_manage", "Gérer mon abonnement")}</button>
       </div>
     </div>
   </div>`
@@ -906,9 +912,11 @@ function wire(root, me, prefs) {
     });
   }
 
-  // ── Abonnement (bêta moniteur indé) ──
+  // ── Abonnement (moniteur : bêta indé ; élève : abo mensuel Pass Permis) ──
   const subBtn = root.querySelector("#st-subscribe");
+  const manageBtn = root.querySelector("#st-manage-sub");
   const subStatus = root.querySelector("#st-sub-status");
+  const subGroup = root.querySelector("#st-sub-group");
   if (subStatus) {
     // Retour de Stripe Checkout (#/settings?checkout=success|cancel)
     const checkout = (location.hash.split("?")[1] || "")
@@ -919,37 +927,71 @@ function wire(root, me, prefs) {
       toast("Merci ! Ton abonnement est en cours d'activation.", "success");
     else if (checkout === "cancel") toast("Paiement annulé.", "info");
 
-    getSubscription().then((sub) => {
-      if (isActive(sub)) {
-        const until = sub.current_period_end
-          ? new Date(sub.current_period_end).toLocaleDateString("fr-FR")
-          : null;
-        subStatus.textContent = sub.cancel_at_period_end
-          ? `Abonnement actif — se termine le ${until}`
-          : until
-            ? `Abonnement actif — prochain renouvellement le ${until}`
-            : "Abonnement actif";
-        if (subBtn) subBtn.style.display = "none";
-      } else {
-        subStatus.textContent =
-          "PermiGo Pro — livret REMC numérique, suivi élèves, sans pub.";
-        if (subBtn) subBtn.style.display = "";
-      }
+    // « Gérer mon abonnement » → étape de rétention DANS l'app (questionnaire),
+    // qui débouche sur la résiliation en ligne via le portail Stripe.
+    manageBtn?.addEventListener("click", () => {
+      track("billing.manage_opened", { role: me?.role });
+      navigate("#/avis-depart?from=settings");
     });
 
-    subBtn?.addEventListener("click", async () => {
-      subBtn.disabled = true;
-      subBtn.textContent = "Redirection…";
-      track("billing.checkout_start", { role: me?.role });
-      try {
-        await startCheckout(); // redirige vers Stripe si OK
-      } catch (e) {
-        console.error("[settings] checkout", e);
-        toast("Paiement indisponible pour le moment.", "error");
-        subBtn.disabled = false;
-        subBtn.textContent = "S'abonner — 9,99 €/mois";
-      }
-    });
+    // Libellé « abonnement actif » enrichi de la période Stripe (si connue).
+    const activeLabel = (sub, base) => {
+      const until = sub?.current_period_end
+        ? new Date(sub.current_period_end).toLocaleDateString("fr-FR")
+        : null;
+      return sub?.cancel_at_period_end
+        ? `${base} — se termine le ${until}`
+        : until
+          ? `${base} — prochain prélèvement le ${until}`
+          : base;
+    };
+
+    if (me.role === "eleve") {
+      // Un élève ne voit ce bloc QUE s'il a un abonnement MENSUEL récurrent :
+      // les Pass 3/6 mois sont des achats uniques (rien à résilier, ils expirent).
+      (async () => {
+        let hasMonthly = false;
+        try {
+          const { data } = await sb.rpc("get_my_pass_status");
+          hasMonthly = !!data?.has_pass && data.plan === "mensuel";
+        } catch (e) {
+          console.error("[settings] pass status", e);
+        }
+        if (!hasMonthly) return; // rien de neuf pour un élève sans abo mensuel
+        const sub = await getSubscription();
+        subStatus.textContent = activeLabel(sub, "Abonnement mensuel actif");
+        if (manageBtn) manageBtn.style.display = "";
+        if (subGroup) subGroup.style.display = "";
+      })();
+    } else {
+      // Moniteur : bloc toujours visible. Abonné → gérer ; sinon → s'abonner.
+      getSubscription().then((sub) => {
+        if (isActive(sub)) {
+          subStatus.textContent = activeLabel(sub, "Abonnement actif");
+          if (subBtn) subBtn.style.display = "none";
+          if (manageBtn) manageBtn.style.display = "";
+        } else {
+          subStatus.textContent =
+            "PermiGo Pro — livret REMC numérique, suivi élèves, sans pub.";
+          if (subBtn) subBtn.style.display = "";
+          if (manageBtn) manageBtn.style.display = "none";
+        }
+      });
+
+      subBtn?.addEventListener("click", async () => {
+        subBtn.disabled = true;
+        subBtn.textContent = "Redirection…";
+        track("billing.checkout_start", { role: me?.role });
+        try {
+          await startCheckout(); // redirige vers Stripe si OK
+        } catch (e) {
+          console.error("[settings] checkout", e);
+          toast("Paiement indisponible pour le moment.", "error");
+          subBtn.disabled = false;
+          subBtn.textContent = "S'abonner — 9,99 €/mois";
+        }
+      });
+    }
   }
 
   // Toggle changes — save debounced

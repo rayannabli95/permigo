@@ -64,6 +64,26 @@ async function upsertFromSubscription(admin: any, sub: any) {
     // On throw → 500 → Stripe re-tente la livraison (auto-healing).
     throw new Error(`upsert failed: ${error.message}`);
   }
+
+  // Résiliation / impayé d'un abonnement MENSUEL (moniteur ou Pass Permis élève) :
+  // en plus de subscriptions, on EXPIRE l'accès mensuel acheté via pass-checkout.
+  // Sans ça, eleve_access_status() (qui ne compte que les pass_purchases 'paid')
+  // laisserait un « mensuel résilié = accès à vie ». On matche par
+  // stripe_subscription_id (posé à l'achat) → aucun risque de toucher une autre
+  // ligne. On ne touche JAMAIS pass3/pass6 (achats uniques à durée déterminée).
+  const TERMINATED = ["canceled", "unpaid"];
+  if (TERMINATED.includes(sub.status)) {
+    const { error: exErr } = await admin
+      .from("pass_purchases")
+      .update({ status: "expired" })
+      .eq("plan", "mensuel")
+      .eq("status", "paid")
+      .eq("stripe_subscription_id", sub.id);
+    if (exErr) {
+      console.error("[stripe-webhook] mensuel expire error", exErr);
+      throw new Error(`mensuel expire failed: ${exErr.message}`);
+    }
+  }
 }
 
 Deno.serve(async (req) => {

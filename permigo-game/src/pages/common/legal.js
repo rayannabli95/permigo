@@ -75,7 +75,11 @@ const CONTENT = {
         body: "PermiGo est un outil d'aide à la préparation du permis de conduire. Les résultats obtenus dans l'application ne préjugent pas des résultats à l'examen officiel.",
       },
       {
-        heading: "Résiliation",
+        heading: "Abonnements, résiliation et remboursement",
+        body: "Les abonnements PermiGo (abonnement mensuel élève et abonnement moniteur, 9,99 €/mois) sont sans engagement et se renouvellent automatiquement chaque mois. Vous pouvez les résilier en ligne à tout moment, en quelques clics, depuis Réglages → Gérer mon abonnement (portail de gestion sécurisé). La résiliation prend effet à la fin de la période déjà payée : aucun nouveau prélèvement n'a lieu ensuite, et l'accès reste ouvert jusqu'à cette échéance. Garantie « satisfait ou remboursé » : le Pass Permis (3 ou 6 mois) est intégralement remboursable sur simple demande dans les 3 jours suivant l'achat, à contact@permigo.fr. Droit de rétractation : conformément aux articles L221-18 et suivants du Code de la consommation, vous disposez d'un délai de rétractation de 14 jours. S'agissant d'un contenu numérique fourni immédiatement, vous demandez expressément l'accès dès le paiement et reconnaissez renoncer à votre droit de rétractation pour la partie du contenu déjà exécutée ; notre garantie de remboursement 3 jours ci-dessus reste, elle, acquise.",
+      },
+      {
+        heading: "Résiliation du compte",
         body: "L'accès peut être résilié par l'auto-école ou sur demande de l'utilisateur. Les données sont supprimées selon la politique de confidentialité.",
       },
       {
