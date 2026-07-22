@@ -651,7 +651,7 @@ export const SITUATIONS = [
       kind: "route",
       vehicules: [
         { id: "lead", at: "S", d: 1.35, couleur: "gris" },
-        { id: "moi", at: "S", d: 1.9, couleur: "joueur", label: "Toi" },
+        { id: "moi", at: "S", d: 2.55, couleur: "joueur", label: "Toi" },
       ],
     },
     question:
@@ -683,7 +683,7 @@ export const SITUATIONS = [
       ligne: "continue",
       vehicules: [
         { id: "lead", at: "S", d: 1.35, couleur: "gris" },
-        { id: "moi", at: "S", d: 2.0, couleur: "joueur", label: "Toi" },
+        { id: "moi", at: "S", d: 2.55, couleur: "joueur", label: "Toi" },
         { id: "face", at: "N", d: 2.6, couleur: "rouge" },
       ],
     },
@@ -1038,7 +1038,7 @@ export const SITUATIONS = [
       kind: "route",
       vehicules: [
         { id: "lead", at: "S", d: 1.25, type: "camion" },
-        { id: "moi", at: "S", d: 2.15, couleur: "joueur", label: "Toi" },
+        { id: "moi", at: "S", d: 2.75, couleur: "joueur", label: "Toi" },
       ],
     },
     question: "Ce camion te cache tout ce qui se passe devant. Que fais-tu ?",
@@ -1414,7 +1414,7 @@ export const SITUATIONS = [
       kind: "route",
       vehicules: [
         { id: "lead", at: "S", d: 1.35, couleur: "gris" },
-        { id: "moi", at: "S", d: 2.05, couleur: "joueur", label: "Toi" },
+        { id: "moi", at: "S", d: 2.55, couleur: "joueur", label: "Toi" },
       ],
     },
     question:
@@ -1443,7 +1443,7 @@ export const SITUATIONS = [
       kind: "route",
       vehicules: [
         { id: "lead", at: "S", d: 1.35, couleur: "gris" },
-        { id: "moi", at: "S", d: 2.05, couleur: "joueur", label: "Toi" },
+        { id: "moi", at: "S", d: 2.55, couleur: "joueur", label: "Toi" },
         { id: "face", at: "N", d: 1.9, couleur: "rouge" },
       ],
     },
