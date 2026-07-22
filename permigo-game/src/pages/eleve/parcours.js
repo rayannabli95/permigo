@@ -1024,6 +1024,18 @@ const STYLE = `<style>
 @keyframes cvRise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) { .prc-cv-ms { opacity: 1; } }
 
+/* ── Deep-link « focus » (#/parcours?focus=C1a) : arrivée depuis la certification.
+   Le nœud ciblé est mis en avant ~2 s (halo or), puis la classe est retirée. ── */
+.prc-cv-ms.prc-focus-pulse { border-radius: 22px; animation: prcFocusPulse 2s cubic-bezier(.23,1,.32,1) 1; }
+@keyframes prcFocusPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(244,178,74,0); }
+  18%  { box-shadow: 0 0 0 4px rgba(244,178,74,.6), 0 0 30px 8px rgba(244,178,74,.5); }
+  100% { box-shadow: 0 0 0 0 rgba(244,178,74,0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .prc-cv-ms.prc-focus-pulse { animation: none; box-shadow: 0 0 0 3px rgba(244,178,74,.6); }
+}
+
 /* ── Node (pastille) ────────────────────────────────────────── */
 .prc-cv-node {
   position: relative;
@@ -1581,6 +1593,24 @@ export async function mount(root) {
     return lastComplete;
   })();
 
+  // ── Deep-link « focus » : #/parcours?focus=C1a (arrivée depuis la certification) ──
+  // Le router retire la query AVANT de dispatcher → on la relit ici sur
+  // location.hash. On ouvre le chapitre qui contient la compétence pour que son
+  // nœud soit bien rendu, puis on scrolle + pulse dessus (focusOnComp). Robuste :
+  // un code inconnu est ignoré silencieusement.
+  const focusComp = (() => {
+    const raw = new URLSearchParams(location.hash.split("?")[1] || "").get(
+      "focus",
+    );
+    return raw && REMC.some((cat) => cat.subs.some((s) => s.c === raw))
+      ? raw
+      : null;
+  })();
+  if (focusComp) {
+    const ci = REMC.findIndex((cat) => cat.subs.some((s) => s.c === focusComp));
+    if (ci !== -1) currentChapIdx = ci;
+  }
+
   const renderAndWire = () => {
     root.innerHTML = renderPage(
       worldStates,
@@ -1701,6 +1731,9 @@ export async function mount(root) {
   };
   renderAndWire();
 
+  // Arrivée depuis la certification (#/parcours?focus=…) : zoom + pulse.
+  if (focusComp) focusOnComp(root, focusComp);
+
   // Persister en DB les coffres des mondes complétés (idempotent)
   const CHEST_REWARDS = [
     { xp: 200, gemmes: 50 },
@@ -1789,6 +1822,26 @@ export async function mount(root) {
       setTimeout(() => flashFreshComp(root, fresh), 400);
     }
   }
+}
+
+/**
+ * Deep-link « focus » (#/parcours?focus=C1a) : scrolle jusqu'au nœud de la
+ * compétence puis joue un halo or temporaire (~2 s). Best-effort : si le nœud
+ * n'est pas dans le DOM (compId inconnu, ou chapitre non rendu), on ne fait rien.
+ * Le nœud « next » ne porte pas data-comp sur le .prc-cv-ms lui-même (c'est la
+ * carte CTA interne) → on remonte au conteneur .prc-cv-ms pour le halo.
+ */
+function focusOnComp(root, compId) {
+  const hit = root.querySelector(`[data-comp="${CSS.escape(compId)}"]`);
+  if (!hit) return;
+  const ms = hit.closest(".prc-cv-ms") || hit;
+  // Léger délai : laisse la route/entrée se poser avant de scroller (parité
+  // flashFreshComp), et évite de lutter avec le scrollTo(0,0) du router.
+  setTimeout(() => {
+    ms.scrollIntoView({ behavior: "smooth", block: "center" });
+    ms.classList.add("prc-focus-pulse");
+    setTimeout(() => ms.classList.remove("prc-focus-pulse"), 2200);
+  }, 450);
 }
 
 /**
