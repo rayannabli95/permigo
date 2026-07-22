@@ -435,10 +435,11 @@ export async function mount(root) {
 }
 
 // ─── Étape abonnement post-inscription ──────────────────────────
-// Le compte est créé : on présente l'abonnement (9,99 €/mois, Stripe Checkout
-// hébergé — même circuit que le bouton de Réglages). « Plus tard » reste
-// possible : on ne bloque pas l'entrée dans l'app (l'essai vaut mieux qu'un
-// abandon), le bouton de Réglages prend le relais.
+// Le compte est créé : le paiement (9,99 €/mois, Stripe Checkout hébergé — même
+// circuit que le bouton de Réglages) est OBLIGATOIRE — c'est le SEUL chemin vers
+// l'app (décision Rayan : plus d'essai/« Plus tard » à l'inscription). Après
+// paiement, Stripe renvoie sur /#/settings?checkout=success ; sans paiement, le
+// verrou d'accès moniteur bloque l'entrée tant qu'aucun abo n'est actif.
 function renderPaymentStep(root, prenom) {
   track("signup.payment_viewed", { role: "enseignant" });
   root.innerHTML = `${STYLE}
@@ -451,27 +452,14 @@ function renderPaymentStep(root, prenom) {
           <div style="font:800 22px/1.2 'Baloo 2',var(--fb),sans-serif;color:var(--gold);margin-bottom:8px">9,99 €/mois</div>
           <div style="display:flex;flex-direction:column;gap:7px;font:600 13.5px/1.4 'Baloo 2',var(--fb),sans-serif;color:var(--ink-soft)">
             <span style="display:flex;gap:7px;align-items:center">${icon("check", { size: 14, strokeWidth: 2.5 })} Jusqu'à 100 élèves — gratuit pour eux</span>
-            <span style="display:flex;gap:7px;align-items:center">${icon("check", { size: 14, strokeWidth: 2.5 })} Sans engagement, résiliable en 2 clics</span>
+            <span style="display:flex;gap:7px;align-items:center">${icon("check", { size: 14, strokeWidth: 2.5 })} Sans engagement, résiliable en ligne à tout moment</span>
             <span style="display:flex;gap:7px;align-items:center">${icon("check", { size: 14, strokeWidth: 2.5 })} Ta marque, ton code élève, ton suivi</span>
           </div>
         </div>
-        <button class="sg-btn" id="sg-pay" type="button" style="margin-top:0">Activer mon abonnement</button>
-        <div class="sg-login-row" style="margin-top:14px">
-          <a href="#" id="sg-pay-later">Plus tard — découvrir l'app d'abord</a>
-        </div>
+        <button class="sg-btn" id="sg-pay" type="button" style="margin-top:0">Activer mon abonnement — 9,99 €/mois</button>
+        <p style="margin:14px 0 0;font:600 12px/1.5 'Baloo 2',var(--fb),sans-serif;color:var(--ink-mu)">Paiement sécurisé Stripe. Résiliable en ligne à tout moment, sans frais.</p>
       </div>
     </div>`;
-
-  const goToApp = async () => {
-    const { renderAddToHome } =
-      await import("@/components/common/add-to-home.js");
-    renderAddToHome(root, {
-      onDone: () => {
-        window.location.href = "/#";
-        window.location.reload();
-      },
-    });
-  };
 
   const payBtn = root.querySelector("#sg-pay");
   payBtn?.addEventListener("click", async () => {
@@ -485,18 +473,12 @@ function renderPaymentStep(root, prenom) {
       console.error("[creer-compte] checkout", err);
       const { toast } = await import("@/components/common/toast.js");
       toast(
-        "Paiement indisponible pour le moment — tu pourras t'abonner depuis Réglages.",
+        "Paiement indisponible pour le moment. Réessaie dans un instant.",
         "error",
         4500,
       );
       payBtn.disabled = false;
-      payBtn.textContent = "Activer mon abonnement";
+      payBtn.textContent = "Activer mon abonnement — 9,99 €/mois";
     }
-  });
-
-  root.querySelector("#sg-pay-later")?.addEventListener("click", (e) => {
-    e.preventDefault();
-    track("signup.payment_skipped", { role: "enseignant" });
-    goToApp();
   });
 }

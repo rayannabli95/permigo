@@ -66,11 +66,23 @@ export async function mount(root, me) {
     .getElementById("bottom-nav")
     ?.style.setProperty("display", "none", "important");
   const prenom = me?.prenom || me?.nom || "";
+  // Moniteur inscrit après le paywall (2026-07-23) : jamais d'essai → copie
+  // honnête (pas de « essai terminé »). Les moniteurs d'avant gardent leur essai
+  // 14 j et la copie « essai terminé » historique.
+  const isPaywall = me?.moniteurAccess?.reason === "signup_paywall";
 
   root.innerHTML = `${STYLE}<div class="mpw">
     <div class="mpw-badge">${LOCK}</div>
-    <h1 class="mpw-title">Ton essai gratuit est terminé${prenom ? `,<br>${esc(prenom)}` : ""}</h1>
-    <p class="mpw-sub">Active ton abonnement pour retrouver ton espace moniteur — et garder tes élèves gratuits.</p>
+    <h1 class="mpw-title">${
+      isPaywall
+        ? `Active ton abonnement${prenom ? `,<br>${esc(prenom)}` : ""}`
+        : `Ton essai gratuit est terminé${prenom ? `,<br>${esc(prenom)}` : ""}`
+    }</h1>
+    <p class="mpw-sub">${
+      isPaywall
+        ? "Ton espace moniteur t'attend — active ton abonnement pour y accéder et garder tes élèves gratuits."
+        : "Active ton abonnement pour retrouver ton espace moniteur — et garder tes élèves gratuits."
+    }</p>
     <div class="mpw-card">
       <div class="mpw-price">9,99 €<small>/ mois</small></div>
       <div class="mpw-feat">
