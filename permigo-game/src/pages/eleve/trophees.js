@@ -443,11 +443,11 @@ export async function mount(root, openKey = null) {
 </div>`;
 
   try {
-    const [achRes, cntRes, strkRes] = await Promise.allSettled([
+    const [achRes, cntRes, strkRes, selfValRes] = await Promise.allSettled([
       sb.rpc("get_my_achievements"),
       sb
         .from("validations")
-        .select("id", { count: "exact", head: true })
+        .select("competence_id")
         .eq("eleve_id", me.id)
         .eq("statut", "acquis"),
       sb
@@ -455,6 +455,10 @@ export async function mount(root, openKey = null) {
         .select("current_streak, last_activity_date")
         .eq("user_id", me.id)
         .maybeSingle(),
+      // Validation autonome (élève solo, valider-seul.js) : table séparée de
+      // `validations`, fusionnée pour ne pas laisser le compteur de trophées
+      // bloqué. Même pattern que accueil.js / mon-permis.js.
+      sb.from("self_validations").select("competence_id").eq("eleve_id", me.id),
     ]);
     // Si la RPC échoue, on NE jette PAS : on rend quand même la grille (tout
     // verrouillé) — l'élève voit les trophées à viser au lieu d'un écran vide.
@@ -462,9 +466,15 @@ export async function mount(root, openKey = null) {
       console.warn("[trophees] get_my_achievements:", achRes.value.error);
     const _skRow = strkRes.value?.data;
     const _yStr = yesterdayKey();
+    // Compétences acquises (moniteur ou auto-validées) : dédupliquées par Set
+    // pour qu'une compétence présente dans les deux tables ne compte qu'une fois.
+    const _compSet = new Set(
+      (cntRes.value?.data || []).map((v) => v.competence_id),
+    );
+    for (const s of selfValRes.value?.data || []) _compSet.add(s.competence_id);
     // Série d'activité : périmée si dernière activité < hier (cf. accueil).
     const stats = {
-      compCount: cntRes.value?.count ?? 0,
+      compCount: _compSet.size,
       streak:
         _skRow && _skRow.last_activity_date >= _yStr
           ? (_skRow.current_streak ?? 0)

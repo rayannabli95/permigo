@@ -76,6 +76,18 @@ export async function celebrateNewValidations({
         .eq("eleve_id", me.id)
         .eq("statut", "acquis");
       rows = data || [];
+      // Validation autonome (élève solo, valider-seul.js) : table séparée de
+      // `validations`, fusionnée pour que les paliers se déclenchent aussi
+      // pour un compte sans moniteur. Même pattern que accueil.js.
+      try {
+        const { data: selfData } = await sb
+          .from("self_validations")
+          .select("competence_id, validated_at")
+          .eq("eleve_id", me.id);
+        rows = rows.concat(selfData || []);
+      } catch {
+        /* self_validations optionnel : célébration reste basée sur validations */
+      }
     } catch {
       return 0;
     }

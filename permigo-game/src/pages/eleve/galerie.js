@@ -274,11 +274,11 @@ export async function mount(root) {
   let currentStreak = 0;
   let unlockedMap = new Map();
   try {
-    const [achRes, validRes, streakRes] = await Promise.allSettled([
+    const [achRes, validRes, streakRes, selfValRes] = await Promise.allSettled([
       sb.rpc("get_my_achievements"),
       sb
         .from("validations")
-        .select("id", { count: "exact", head: true })
+        .select("competence_id")
         .eq("eleve_id", me.id)
         .eq("statut", "acquis"),
       sb
@@ -286,11 +286,20 @@ export async function mount(root) {
         .select("current_streak, last_activity_date")
         .eq("user_id", me.id)
         .maybeSingle(),
+      // Validation autonome (élève solo, valider-seul.js) : table séparée de
+      // `validations`, fusionnée pour ne pas laisser la collection bloquée.
+      // Même pattern que accueil.js / mon-permis.js.
+      sb.from("self_validations").select("competence_id").eq("eleve_id", me.id),
     ]);
     unlockedMap = new Map(
       (achRes.value?.data ?? []).map((u) => [u.achievement_key, u]),
     );
-    validatedCount = validRes.value?.count ?? 0;
+    // Compétences acquises (moniteur ou auto-validées), dédupliquées.
+    const _compSet = new Set(
+      (validRes.value?.data || []).map((v) => v.competence_id),
+    );
+    for (const s of selfValRes.value?.data || []) _compSet.add(s.competence_id);
+    validatedCount = _compSet.size;
     const _skRow = streakRes.value?.data;
     const _yStr = yesterdayKey();
     // Série d'activité : périmée si dernière activité < hier (sinon on afficherait

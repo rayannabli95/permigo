@@ -619,6 +619,7 @@ export async function mount(root) {
     itemsRes,
     condRes,
     revRes,
+    selfValRes,
   ] = await Promise.allSettled([
     sb
       .from("roue_daily_spins")
@@ -630,12 +631,16 @@ export async function mount(root) {
     sb.rpc("get_my_achievements"),
     sb
       .from("validations")
-      .select("id", { count: "exact", head: true })
+      .select("competence_id")
       .eq("eleve_id", me.id)
       .eq("statut", "acquis"),
     sb.rpc("get_items_catalog"),
     sb.rpc("get_eleve_leaderboard", { p_scope: "ecole", p_limit: 50 }),
     sb.rpc("get_theory_leaderboard_weekly", { p_scope: "ecole", p_limit: 50 }),
+    // Validation autonome (élève solo, valider-seul.js) : table séparée de
+    // `validations`, fusionnée pour ne pas laisser le palier permis bloqué.
+    // Même pattern que accueil.js / mon-permis.js.
+    sb.from("self_validations").select("competence_id").eq("eleve_id", me.id),
   ]);
 
   // ── Roue ──
@@ -669,8 +674,16 @@ export async function mount(root) {
   const lockedDefs = CATALOG.filter((t) => !unlockedSet.has(t.key));
   const freshTrophies = getFreshTrophies(unlockedDefs);
 
-  const validatedCount =
-    validRes.status === "fulfilled" ? (validRes.value?.count ?? 0) : 0;
+  // Compétences acquises (moniteur ou auto-validées), dédupliquées.
+  const _compSet = new Set(
+    validRes.status === "fulfilled"
+      ? (validRes.value?.data || []).map((v) => v.competence_id)
+      : [],
+  );
+  if (selfValRes.status === "fulfilled") {
+    for (const s of selfValRes.value?.data || []) _compSet.add(s.competence_id);
+  }
+  const validatedCount = _compSet.size;
   const unlockedPermisCount = PERMIS_TIERS.filter(
     (t) => validatedCount >= t.min,
   ).length;

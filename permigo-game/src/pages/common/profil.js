@@ -1622,8 +1622,8 @@ async function mountEleveArene(root, me) {
   // ── Fetch réel ─────────────────────────────────────────────
   // get_my_achievements = MÊME source que la salle des trophées → « Tes
   // succès » affiche exactement les mêmes badges (débloqués inclus).
-  const [{ data: profile }, { data: valData }, { data: streakRow }, achRes] =
-    await Promise.all([
+  const [profileRes, valRes, streakRes, achRes, selfValRes] =
+    await Promise.allSettled([
       sb
         .from("profiles")
         .select("email, prenom, nom, username, gemmes, created_at, avatar_url")
@@ -1640,9 +1640,20 @@ async function mountEleveArene(root, me) {
         .eq("user_id", me.id)
         .maybeSingle(),
       sb.rpc("get_my_achievements"),
+      // Validation autonome (élève solo, valider-seul.js) : table séparée de
+      // `validations`, fusionnée en lecture pour que le profil élève solo ne
+      // reste pas figé à 0/31. Même pattern que accueil.js / mon-permis.js.
+      sb.from("self_validations").select("competence_id").eq("eleve_id", me.id),
     ]);
 
-  const validated = (valData || []).length;
+  const profile = profileRes.value?.data;
+  const streakRow = streakRes.value?.data;
+  const validatedSet = new Set(
+    (valRes.value?.data || []).map((v) => v.competence_id),
+  );
+  for (const s of selfValRes.value?.data || [])
+    validatedSet.add(s.competence_id);
+  const validated = validatedSet.size;
   const _yStrS = yesterdayKey();
   // Série d'activité : périmée si dernière activité < hier (cf. accueil).
   const streak =
@@ -1685,9 +1696,9 @@ async function mountEleveArene(root, me) {
       });
   }
 
-  const achOk = !achRes?.error && Array.isArray(achRes?.data);
+  const achOk = !achRes.value?.error && Array.isArray(achRes.value?.data);
   const unlockedKeys = new Set(
-    (achRes?.data || []).map((u) => u.achievement_key),
+    (achRes.value?.data || []).map((u) => u.achievement_key),
   );
   const achievements = _areneAchievements(
     unlockedKeys,

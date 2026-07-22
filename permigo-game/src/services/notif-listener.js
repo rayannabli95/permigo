@@ -132,11 +132,22 @@ async function _celebrateValidation(compId) {
     const me = (await import("@/auth/cur-user.js")).getCurUser();
     if (!me?.id) return;
     const { sb } = await import("@/auth/auth.js");
-    const { count } = await sb
-      .from("validations")
-      .select("id", { count: "exact", head: true })
-      .eq("eleve_id", me.id)
-      .eq("statut", "acquis");
+    const [valRes, selfValRes] = await Promise.allSettled([
+      sb
+        .from("validations")
+        .select("competence_id")
+        .eq("eleve_id", me.id)
+        .eq("statut", "acquis"),
+      // Validation autonome (élève solo, valider-seul.js) : table séparée de
+      // `validations`, fusionnée pour que les paliers 10/28/31 se déclenchent
+      // aussi pour un compte sans moniteur. Même pattern que accueil.js.
+      sb.from("self_validations").select("competence_id").eq("eleve_id", me.id),
+    ]);
+    const _compSet = new Set(
+      (valRes.value?.data || []).map((v) => v.competence_id),
+    );
+    for (const s of selfValRes.value?.data || []) _compSet.add(s.competence_id);
+    const count = _compSet.size;
     if (typeof count === "number") {
       const { maybeCelebrateMilestone } =
         await import("@/components/common/celebrate-screen.js");

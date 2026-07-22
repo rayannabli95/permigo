@@ -193,7 +193,10 @@ const ALL_COMPETENCES = REMC.flatMap((cat) => cat.subs.map((s) => s.c));
 export async function pickRevisionQuiz(userId) {
   const recent = new Set(readRecent());
 
-  // Compétences acquises de l'élève
+  // Compétences acquises de l'élève (moniteur ou auto-validées). Fusion avec
+  // `self_validations` (élève solo, valider-seul.js) pour que le pool de
+  // consolidation ne reste pas vide pour un compte sans moniteur. Même
+  // pattern que accueil.js / mon-permis.js.
   let acquired = [];
   try {
     const { data, error } = await sb
@@ -202,7 +205,17 @@ export async function pickRevisionQuiz(userId) {
       .eq("eleve_id", userId)
       .eq("statut", "acquis");
     if (error) throw error;
-    acquired = (data || []).map((r) => r.competence_id);
+    const _compSet = new Set((data || []).map((r) => r.competence_id));
+    try {
+      const { data: selfData } = await sb
+        .from("self_validations")
+        .select("competence_id")
+        .eq("eleve_id", userId);
+      for (const s of selfData || []) _compSet.add(s.competence_id);
+    } catch {
+      /* self_validations optionnel : pool consolidation reste basé sur validations */
+    }
+    acquired = [..._compSet];
   } catch {
     acquired = [];
   }
