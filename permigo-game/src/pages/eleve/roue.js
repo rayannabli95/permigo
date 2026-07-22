@@ -24,6 +24,7 @@ import {
   playReward,
 } from "@/utils/sound.js";
 import { medallion, medLot } from "@/utils/medallions.js";
+import { volantImg } from "@/utils/volant.js";
 
 const SPIN_MS = 5200; // = durée de la transition CSS du disque
 
@@ -131,13 +132,8 @@ const STYLE = `<style>
 .roue-seg { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform: translate(-50%,-50%) rotate(var(--a)); }
 .roue-seg > span {
   position: absolute; left: 50%; top: -98px; transform: translateX(-50%);
-  display: inline-flex; align-items: center; gap: 2px; white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 3px; white-space: nowrap;
   font: 800 15px/1 'Baloo 2', cursive; color: #1a1030; text-shadow: 0 1px 0 rgba(255,255,255,.35);
-}
-.roue-seg .rcoin {
-  width: 14px; height: 14px; border-radius: 50%;
-  background: radial-gradient(circle at 36% 30%, #fff7da, #ffd24a 60%, #ff9c1c);
-  border: 1px solid #fff5cf; box-shadow: 0 1px 0 #c87d12;
 }
 .roue-hub {
   position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); z-index: 4;
@@ -174,7 +170,6 @@ const STYLE = `<style>
 }
 @keyframes rouepop { from { opacity: 0; transform: scale(.9); } to { opacity: 1; transform: scale(1); } }
 .roue-result-v { font: 800 26px/1 'Baloo 2', cursive; color: var(--gold-s); display: inline-flex; align-items: center; gap: 7px; }
-.roue-result-v .rcoin2 { width: 24px; height: 24px; border-radius: 50%; background: radial-gradient(circle at 36% 30%, #fff7da, #ffd24a 60%, #ff9c1c); border: 1.5px solid #fff5cf; box-shadow: 0 2px 0 #c87d12; }
 .roue-result-s { font: 700 12px/1.5 'Nunito', sans-serif; color: var(--mu2); margin-top: 5px; }
 
 .roue-real {
@@ -238,7 +233,8 @@ const STYLE = `<style>
 </style>`;
 
 function segLabel(v) {
-  return `<span><span class="rcoin" aria-hidden="true"></span>${v}</span>`;
+  // Même volant que partout ailleurs dans l'app (header, boutique…).
+  return `<span>${volantImg(14, { drop: true })}${v}</span>`;
 }
 
 // Panneau « gros lots réels » : les lots ACTIVÉS par le moniteur (via
@@ -471,7 +467,7 @@ export async function mount(root) {
     if (!slot) return;
     slot.innerHTML = `
     <div class="roue-result">
-      <div class="roue-result-v"><span class="rcoin2" aria-hidden="true"></span>+${volants}</div>
+      <div class="roue-result-v">${volantImg(24, { drop: true })}+${volants}</div>
       <div class="roue-result-s">${
         apercu
           ? "Aperçu. Tes volants seront crédités à l’ouverture de la roue."
@@ -545,8 +541,20 @@ export async function mount(root) {
     }
 
     if (res?.already) {
-      spinTo(0);
-      setTimeout(finishDone, 900);
+      // Le serveur (date de Paris) sait que le tour du jour est DÉJÀ passé,
+      // même si le front (date locale) le croyait dispo — cas de la fenêtre
+      // minuit → ~02h où l'UTC est en retard d'un jour. On NE lance PAS de
+      // faux spin (roue qui tourne sans rien créditer = incompréhensible) :
+      // on affiche honnêtement l'état « déjà tourné » et on resynchronise
+      // l'état local pour ne plus reproposer le bouton (ni au reload).
+      mode = "done";
+      try {
+        localStorage.setItem(LS_FREE, todayKey());
+      } catch {
+        /* noop */
+      }
+      toast("Tu as déjà tourné aujourd’hui. Reviens demain !", "info", 2600);
+      finishDone();
       return;
     }
 
