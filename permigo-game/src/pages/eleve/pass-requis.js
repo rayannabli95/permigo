@@ -11,6 +11,74 @@ import { sb } from "@/auth/auth.js";
 import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { startPassCheckout } from "@/services/billing.js";
+import { getLang } from "@/utils/lang.js";
+
+// ─── i18n (coque) — traduction seule, repli FR. « Pass » = باقة, « moniteur »
+// = مدرّب, « volants » hors sujet ici. Prix/€ inchangés. ───
+const PRQ_I18N = {
+  en: {
+    kick: "Just one more step",
+    title: "Choose your Pass to<br>start training",
+    sub: "All the content, your progress, your rewards — unlocked right away.",
+    guarantee: "Money-back guarantee — 3 days. Zero risk.",
+    or: "— or —",
+    code_lab: "I have a code from my instructor",
+    code_help: "Your instructor pays for you: enter their code, it's free.",
+    code_ph: "E.G. PERMIS75",
+    code_btn: "Confirm",
+    code_empty: "Enter your instructor's code.",
+    code_checking: "Checking…",
+    code_ok: "All set! Signing you in…",
+    code_invalid: "Invalid code. Check with your instructor.",
+    launch_price: "launch price",
+    checkout_err: "Payment unavailable right now — try again in a moment.",
+    logout: "Log out",
+    tier_pass3_nom: "Gold Pass",
+    tier_pass3_sous: "3 months",
+    tier_pass3_note: "most popular",
+    tier_mensuel_nom: "Monthly Pass",
+    tier_mensuel_sous: "no commitment",
+    tier_mensuel_note: "/ month",
+    tier_pass6_nom: "Platinum Pass",
+    tier_pass6_sous: "6 months",
+    tier_pass6_note: "cheapest per month",
+  },
+  ar: {
+    kick: "خطوة أخيرة فقط",
+    title: "اختر باقتك لتبدأ<br>تدريبك",
+    sub: "كل المحتوى وتقدّمك ومكافآتك — مفتوحة فوراً.",
+    guarantee: "استرداد المال مضمون — 3 أيام. دون أي مخاطرة.",
+    or: "— أو —",
+    code_lab: "لديّ رمز من مدرّبي",
+    code_help: "مدرّبك يدفع عنك: أدخِل رمزه، والاشتراك مجاني.",
+    code_ph: "مثال: PERMIS75",
+    code_btn: "تأكيد",
+    code_empty: "أدخِل رمز مدرّبك.",
+    code_checking: "جارٍ التحقّق…",
+    code_ok: "تمّ! جارٍ تسجيل دخولك…",
+    code_invalid: "رمز غير صالح. تحقّق مع مدرّبك.",
+    launch_price: "سعر الإطلاق",
+    checkout_err: "الدفع غير متاح حالياً — أعد المحاولة بعد لحظات.",
+    logout: "تسجيل الخروج",
+    tier_pass3_nom: "الباقة الذهبية",
+    tier_pass3_sous: "3 أشهر",
+    tier_pass3_note: "الأكثر اختياراً",
+    tier_mensuel_nom: "الباقة الشهرية",
+    tier_mensuel_sous: "دون التزام",
+    tier_mensuel_note: "/ شهر",
+    tier_pass6_nom: "الباقة البلاتينية",
+    tier_pass6_sous: "6 أشهر",
+    tier_pass6_note: "الأرخص شهرياً",
+  },
+};
+function pt(key, fr) {
+  const l = getLang();
+  return esc((l !== "fr" && PRQ_I18N[l]?.[key]) || fr);
+}
+function ptR(key, fr) {
+  const l = getLang();
+  return (l !== "fr" && PRQ_I18N[l]?.[key]) || fr;
+}
 
 const TIERS = [
   {
@@ -103,31 +171,31 @@ export async function mount(root, me) {
     (
       t,
     ) => `<button class="prq-tier${t.best ? " best" : ""}" data-plan="${escAttr(t.plan)}">
-      ${t.best ? `<span class="prq-badge">${esc(t.note)}</span>` : ""}
-      <span class="prq-tinfo"><span class="prq-tnom">${esc(t.nom)}</span><span class="prq-tsous">${esc(t.sous)}</span></span>
-      <span class="prq-tprice"><b>${esc(t.price)}</b><span>${t.best ? "prix de lancement" : esc(t.note)}</span></span>
+      ${t.best ? `<span class="prq-badge">${pt(`tier_${t.plan}_note`, t.note)}</span>` : ""}
+      <span class="prq-tinfo"><span class="prq-tnom">${pt(`tier_${t.plan}_nom`, t.nom)}</span><span class="prq-tsous">${pt(`tier_${t.plan}_sous`, t.sous)}</span></span>
+      <span class="prq-tprice"><b>${esc(t.price)}</b><span>${t.best ? pt("launch_price", "prix de lancement") : pt(`tier_${t.plan}_note`, t.note)}</span></span>
     </button>`,
   ).join("");
 
   root.innerHTML = `${STYLE}<div class="prq">
     <div class="prq-head">
-      <div class="prq-kick">Plus qu'une étape</div>
-      <h1 class="prq-title">Choisis ton Pass pour<br>commencer ton entraînement</h1>
-      <p class="prq-sub">Tout le contenu, ta progression, tes récompenses — débloqués tout de suite.</p>
+      <div class="prq-kick">${pt("kick", "Plus qu'une étape")}</div>
+      <h1 class="prq-title">${ptR("title", "Choisis ton Pass pour<br>commencer ton entraînement")}</h1>
+      <p class="prq-sub">${pt("sub", "Tout le contenu, ta progression, tes récompenses — débloqués tout de suite.")}</p>
     </div>
     <div class="prq-tiers">${tiers}</div>
-    <div class="prq-guar">${SHIELD} Satisfait ou remboursé — 3 jours. Zéro risque.</div>
-    <div class="prq-or">— ou —</div>
+    <div class="prq-guar">${SHIELD} ${pt("guarantee", "Satisfait ou remboursé — 3 jours. Zéro risque.")}</div>
+    <div class="prq-or">${pt("or", "— ou —")}</div>
     <div class="prq-code">
-      <div class="prq-code-lab">J'ai un code de mon moniteur</div>
-      <div class="prq-code-help">Ton moniteur paie pour toi : entre son code, c'est gratuit.</div>
+      <div class="prq-code-lab">${pt("code_lab", "J'ai un code de mon moniteur")}</div>
+      <div class="prq-code-help">${pt("code_help", "Ton moniteur paie pour toi : entre son code, c'est gratuit.")}</div>
       <div class="prq-code-row">
-        <input class="prq-code-in" id="prq-code" type="text" autocomplete="off" maxlength="12" placeholder="EX : PERMIS75" />
-        <button class="prq-code-btn" id="prq-code-btn" type="button">Valider</button>
+        <input class="prq-code-in" id="prq-code" type="text" autocomplete="off" maxlength="12" placeholder="${pt("code_ph", "EX : PERMIS75")}" />
+        <button class="prq-code-btn" id="prq-code-btn" type="button">${pt("code_btn", "Valider")}</button>
       </div>
       <div class="prq-msg" id="prq-msg" role="status" aria-live="polite"></div>
     </div>
-    <button class="prq-logout" id="prq-logout" type="button">Me déconnecter</button>
+    <button class="prq-logout" id="prq-logout" type="button">${pt("logout", "Me déconnecter")}</button>
   </div>`;
 
   root.querySelectorAll("[data-plan]").forEach((btn) =>
@@ -140,7 +208,10 @@ export async function mount(root, me) {
         console.error("[pass-requis] checkout", err);
         const { toast } = await import("@/components/common/toast.js");
         toast(
-          "Paiement indisponible pour le moment — réessaie dans un instant.",
+          ptR(
+            "checkout_err",
+            "Paiement indisponible pour le moment — réessaie dans un instant.",
+          ),
           "error",
           4500,
         );
@@ -155,18 +226,18 @@ export async function mount(root, me) {
     const code = (codeIn.value || "").trim().toUpperCase();
     if (code.length < 3) {
       msg.className = "prq-msg err";
-      msg.textContent = "Entre le code de ton moniteur.";
+      msg.textContent = ptR("code_empty", "Entre le code de ton moniteur.");
       return;
     }
     codeBtn.disabled = true;
     msg.className = "prq-msg";
-    msg.textContent = "Vérification…";
+    msg.textContent = ptR("code_checking", "Vérification…");
     try {
       const { error } = await sb.rpc("join_moniteur_by_code", { p_code: code });
       if (error) throw error;
       track("eleve.pass_wall_code_joined", { code });
       msg.className = "prq-msg ok";
-      msg.textContent = "C'est bon ! On te connecte…";
+      msg.textContent = ptR("code_ok", "C'est bon ! On te connecte…");
       setTimeout(() => {
         window.location.href = "/#";
         window.location.reload();
@@ -174,7 +245,10 @@ export async function mount(root, me) {
     } catch (err) {
       console.error("[pass-requis] join code", err);
       msg.className = "prq-msg err";
-      msg.textContent = "Code invalide. Vérifie auprès de ton moniteur.";
+      msg.textContent = ptR(
+        "code_invalid",
+        "Code invalide. Vérifie auprès de ton moniteur.",
+      );
       codeBtn.disabled = false;
     }
   });

@@ -36,6 +36,158 @@ import { optInPush } from "@/services/web-push.js";
 import { unlockChest } from "@/utils/game-state.js";
 import { ACCENTS, getAccent, setAccent } from "@/utils/accent.js";
 import { a2hsStepsHTML, A2HS_STYLE } from "@/components/common/a2hs-steps.js";
+import { getLang } from "@/utils/lang.js";
+
+// ─── i18n (coque de l'onboarding) — traduction seule, repli FR systématique.
+// « moniteur » = instructor / مدرّب · « volants » = steering wheels / مقود ·
+// marque = PermiGo (بيرميغو en prose arabe, comme accueil.js/settings.js). Le
+// détail des étapes « Ajoute l'appli » vient du composant partagé a2hs-steps
+// (hors périmètre) et reste en français. ───
+const OB_I18N = {
+  en: {
+    dialog_aria: "Welcome tour",
+    prog_aria: "Progress",
+    skip: "Skip",
+    skip_aria: "Skip the intro",
+    hero_lead:
+      "I'm <b>PermiGo</b>. In 30 seconds we'll set up your app — then you'll revise <b>2 min each evening</b>.",
+    sec_identity: "Let's get to know you",
+    id_prenom: "First name",
+    id_nom: "Last name",
+    id_naissance: "Date of birth",
+    id_parent: "A parent's email",
+    id_parent_micro:
+      "Under 15: a parent's consent is required — a confirmation link will be sent to them.",
+    id_code_label: "Instructor code",
+    id_code_opt: "— if you have one",
+    id_code_help:
+      "Did your instructor give you a code? Enter it to join them. Otherwise, leave it empty.",
+    ph_prenom: "Your first name",
+    ph_nom: "Your last name",
+    sec_avatar: "Profile picture",
+    avatar_group_aria: "Choose your avatar",
+    avatar_item_aria: "Avatar {n}",
+    avatar_helper: "Choose your avatar",
+    color_label: "Your colour",
+    color_group_aria: "Choose your colour",
+    sec_reminders: "Your evening reminders",
+    rem_title: "Reminder every evening",
+    rem_sub: "8 pm · gentle, never spam",
+    rem_switch_aria: "Turn on evening reminders",
+    rem_note:
+      "<b>3 questions every evening, 2 minutes</b> — that's what really makes you progress.",
+    reward_aria: "Welcome chest: 50 XP and 25 steering wheels",
+    reward_tag: "Reward",
+    reward_title: "A chest is waiting for you tonight",
+    pill_vol: "25&nbsp;steering wheels",
+    sec_a2hs: "Add the app",
+    a2hs_lead:
+      "<b>2 taps, 10 seconds</b> — your reminders and rewards land right here.",
+    a2hs_plat_aria: "Switch the instructions platform (iPhone / Android)",
+    cta: "Let's go",
+    cue: "Scroll down to pick your colour",
+    code_checking: "Checking…",
+    code_invalid:
+      "✗ Code not found — check with your instructor, or leave it empty.",
+    code_join: "✓ You're joining {ecole}",
+    code_err_generic: "Check failed — try again.",
+    ecole_fallback: "your driving school",
+    toast_parent_required: "Enter a valid parent email.",
+    toast_save_failed: "Couldn't save — try again.",
+    toast_join_failed:
+      "Couldn't link to your instructor right now — your account is ready anyway.",
+    notif_on_note: "<b>Reminders on</b> — see you tonight!",
+    notif_on_announce: "Reminders on! You'll get 3 questions tonight.",
+    notif_denied_note:
+      "Blocked — turn them on in settings if you change your mind.",
+    notif_denied_announce:
+      "Reminders not turned on. You can enable them later in settings.",
+    a2hs_install: "Install the app in 1 tap",
+    a2hs_installing: "Installing…",
+    plat_android: "On Android?",
+    plat_iphone: "On iPhone?",
+    cta_saving: "Saving…",
+    cta_going: "Let's go…",
+    chest_title: "Welcome to PermiGo!",
+    greet_generic: "there",
+  },
+  ar: {
+    dialog_aria: "جولة ترحيب",
+    prog_aria: "التقدّم",
+    skip: "تخطّي",
+    skip_aria: "تخطّي المقدّمة",
+    hero_lead:
+      "أنا <b>بيرميغو</b>. في 30 ثانية نجهّز تطبيقك — بعدها تراجع <b>دقيقتين كل مساء</b>.",
+    sec_identity: "لنتعارف",
+    id_prenom: "الاسم",
+    id_nom: "اللقب",
+    id_naissance: "تاريخ الميلاد",
+    id_parent: "بريد أحد الوالدين",
+    id_parent_micro:
+      "أقل من 15 سنة: موافقة أحد الوالدين إلزامية — سيُرسَل إليه رابط تأكيد.",
+    id_code_label: "رمز المدرّب",
+    id_code_opt: "— إن كان لديك واحد",
+    id_code_help:
+      "أعطاك مدرّبك رمزاً؟ أدخِله للانضمام إليه. وإلّا، اتركه فارغاً.",
+    ph_prenom: "اسمك",
+    ph_nom: "لقبك",
+    sec_avatar: "صورة الملف",
+    avatar_group_aria: "اختر صورتك الرمزية",
+    avatar_item_aria: "صورة رمزية {n}",
+    avatar_helper: "اختر صورتك الرمزية",
+    color_label: "لونك",
+    color_group_aria: "اختر لونك",
+    sec_reminders: "تذكيراتك المسائية",
+    rem_title: "تذكير كل مساء",
+    rem_sub: "الساعة 20 · لطيف، دون إزعاج",
+    rem_switch_aria: "تفعيل التذكيرات المسائية",
+    rem_note: "<b>3 أسئلة كل مساء، دقيقتان</b> — هذا ما يجعلك تتقدّم فعلاً.",
+    reward_aria: "صندوق ترحيب: 50 XP و25 مقوداً",
+    reward_tag: "مكافأة",
+    reward_title: "صندوق ينتظرك هذا المساء",
+    pill_vol: "25&nbsp;مقوداً",
+    sec_a2hs: "أضِف التطبيق",
+    a2hs_lead: "<b>لمستان، 10 ثوانٍ</b> — تذكيراتك ومكافآتك تصل إلى هنا.",
+    a2hs_plat_aria: "تغيير منصّة التعليمات (iPhone / Android)",
+    cta: "لننطلق",
+    cue: "انزل لاختيار لونك",
+    code_checking: "جارٍ التحقّق…",
+    code_invalid: "✗ الرمز غير موجود — تحقّق مع مدرّبك، أو اتركه فارغاً.",
+    code_join: "✓ أنت تنضمّ إلى {ecole}",
+    code_err_generic: "تعذّر التحقّق — أعد المحاولة.",
+    ecole_fallback: "مدرسة القيادة",
+    toast_parent_required: "أدخِل بريد أحد الوالدين صحيحاً.",
+    toast_save_failed: "تعذّر الحفظ — أعد المحاولة.",
+    toast_join_failed: "تعذّر ربطك بمدرّبك الآن — حسابك جاهز على أي حال.",
+    notif_on_note: "<b>التذكيرات مفعّلة</b> — إلى اللقاء هذا المساء!",
+    notif_on_announce: "التذكيرات مفعّلة! ستصلك 3 أسئلة هذا المساء.",
+    notif_denied_note: "محظورة — فعّلها من الإعدادات إن غيّرت رأيك.",
+    notif_denied_announce:
+      "التذكيرات غير مفعّلة. يمكنك تفعيلها لاحقاً من الإعدادات.",
+    a2hs_install: "ثبّت التطبيق بلمسة واحدة",
+    a2hs_installing: "جارٍ التثبيت…",
+    plat_android: "تستعمل Android؟",
+    plat_iphone: "تستعمل iPhone؟",
+    cta_saving: "جارٍ الحفظ…",
+    cta_going: "لننطلق…",
+    chest_title: "مرحباً بك في بيرميغو!",
+    greet_generic: "بك",
+  },
+};
+function obR(key, fr) {
+  const l = getLang();
+  return (l !== "fr" && OB_I18N[l]?.[key]) || fr;
+}
+function ob(key, fr) {
+  return esc(obR(key, fr));
+}
+// Salutation localisée : le prénom (déjà échappé) est injecté tel quel.
+function obGreet(n) {
+  const l = getLang();
+  if (l === "en") return `Hi ${n}!`;
+  if (l === "ar") return `مرحباً ${n}!`;
+  return `Salut, ${n}&nbsp;!`;
+}
 
 export async function mount(root) {
   const me = getCurUser();
@@ -83,23 +235,29 @@ export async function mount(root) {
   let notifAsked = false; // permission déjà demandée durant cette session
   let finishing = false;
 
-  const prenom = needsIdentity ? "toi" : esc(me.prenom || me.nom || "toi");
+  // Prénom affiché : générique traduit si l'identité est encore à saisir.
+  const prenom = needsIdentity
+    ? ob("greet_generic", "toi")
+    : esc(me.prenom || me.nom || "toi");
+  const arrow = getLang() === "ar" ? "←" : "→";
+  const ctaHTML = () =>
+    `${ob("cta", "C'est parti")} <span class="ob-arrow" aria-hidden="true">${arrow}</span>`;
 
   // ─── Rendu HTML ────────────────────────────────────────────────
   root.innerHTML = `
     ${STYLE}
     <style>${A2HS_STYLE}</style>
-    <div class="ob" role="dialog" aria-modal="true" aria-label="Tour de bienvenue">
+    <div class="ob" role="dialog" aria-modal="true" aria-label="${ob("dialog_aria", "Tour de bienvenue")}">
 
       <!-- Barre de progression (remplie au scroll) + Passer -->
       <div class="ob-top">
-        <div class="ob-prog" role="progressbar" aria-label="Progression" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div class="ob-prog" role="progressbar" aria-label="${ob("prog_aria", "Progression")}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
           <i id="ob-prog-fill" style="width:8%"></i>
         </div>
         ${
           needsIdentity
             ? "" /* pas de « Passer » : l'identité (date de naissance) est obligatoire */
-            : `<button class="ob-skip" id="ob-skip" type="button" aria-label="Passer l'introduction">Passer</button>`
+            : `<button class="ob-skip" id="ob-skip" type="button" aria-label="${ob("skip_aria", "Passer l'introduction")}">${ob("skip", "Passer")}</button>`
         }
       </div>
 
@@ -115,8 +273,8 @@ export async function mount(root) {
             <div class="ob-mascot-wrap">
               <img class="ob-mascot" src="/skins/mascot-hello.png" alt="" />
             </div>
-            <h1 class="ob-h1" id="ob-h1">Salut, ${prenom}&nbsp;!</h1>
-            <p class="ob-lead">Moi c'est <b>PermiGo</b>. En 30&nbsp;secondes, on prépare ton appli — après, tu réviseras <b>2&nbsp;min par soir</b>.</p>
+            <h1 class="ob-h1" id="ob-h1">${obGreet(prenom)}</h1>
+            <p class="ob-lead">${obR("hero_lead", "Moi c'est <b>PermiGo</b>. En 30&nbsp;secondes, on prépare ton appli — après, tu réviseras <b>2&nbsp;min par soir</b>.")}</p>
           </header>
 
           ${
@@ -126,30 +284,30 @@ export async function mount(root) {
           <section class="ob-section" aria-labelledby="ob-sec0-t">
             <div class="ob-sec-head">
               <span class="ob-sec-num">1</span>
-              <h2 class="ob-sec-title" id="ob-sec0-t">Fais connaissance</h2>
+              <h2 class="ob-sec-title" id="ob-sec0-t">${ob("sec_identity", "Fais connaissance")}</h2>
             </div>
             <div class="ob-card ob-id-card">
               <div>
-                <label class="ob-id-label" for="ob-id-prenom">Prénom</label>
-                <input class="ob-id-input" id="ob-id-prenom" type="text" autocomplete="given-name" placeholder="Ton prénom" value="${esc(idPrenomPrefill)}">
+                <label class="ob-id-label" for="ob-id-prenom">${ob("id_prenom", "Prénom")}</label>
+                <input class="ob-id-input" id="ob-id-prenom" type="text" autocomplete="given-name" placeholder="${ob("ph_prenom", "Ton prénom")}" value="${esc(idPrenomPrefill)}">
               </div>
               <div>
-                <label class="ob-id-label" for="ob-id-nom">Nom</label>
-                <input class="ob-id-input" id="ob-id-nom" type="text" autocomplete="family-name" placeholder="Ton nom">
+                <label class="ob-id-label" for="ob-id-nom">${ob("id_nom", "Nom")}</label>
+                <input class="ob-id-input" id="ob-id-nom" type="text" autocomplete="family-name" placeholder="${ob("ph_nom", "Ton nom")}">
               </div>
               <div>
-                <label class="ob-id-label" for="ob-id-naissance">Date de naissance</label>
+                <label class="ob-id-label" for="ob-id-naissance">${ob("id_naissance", "Date de naissance")}</label>
                 <input class="ob-id-input" id="ob-id-naissance" type="date">
               </div>
               <div id="ob-id-parent-row" style="display:none">
-                <label class="ob-id-label" for="ob-id-parent">Email d'un parent</label>
+                <label class="ob-id-label" for="ob-id-parent">${ob("id_parent", "Email d'un parent")}</label>
                 <input class="ob-id-input" id="ob-id-parent" type="email" autocomplete="off" placeholder="parent@exemple.fr">
-                <p class="ob-micro">Moins de 15 ans : l'accord d'un parent est obligatoire — un lien de validation lui sera transmis.</p>
+                <p class="ob-micro">${ob("id_parent_micro", "Moins de 15 ans : l'accord d'un parent est obligatoire — un lien de validation lui sera transmis.")}</p>
               </div>
               <div>
-                <label class="ob-id-label" for="ob-id-code">Code moniteur <span class="ob-id-opt">— si tu en as un</span></label>
+                <label class="ob-id-label" for="ob-id-code">${ob("id_code_label", "Code moniteur")} <span class="ob-id-opt">${ob("id_code_opt", "— si tu en as un")}</span></label>
                 <input class="ob-id-input ob-id-code" id="ob-id-code" type="text" maxlength="16" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="PERMIS75">
-                <p class="ob-micro" id="ob-id-code-help">Ton moniteur t'a donné un code ? Tape-le pour le rejoindre. Sinon, laisse vide.</p>
+                <p class="ob-micro" id="ob-id-code-help">${ob("id_code_help", "Ton moniteur t'a donné un code ? Tape-le pour le rejoindre. Sinon, laisse vide.")}</p>
               </div>
             </div>
           </section>`
@@ -160,9 +318,9 @@ export async function mount(root) {
           <section class="ob-section" aria-labelledby="ob-sec1-t">
             <div class="ob-sec-head">
               <span class="ob-sec-num">${secN.avatar}</span>
-              <h2 class="ob-sec-title" id="ob-sec1-t">Photo de profil</h2>
+              <h2 class="ob-sec-title" id="ob-sec1-t">${ob("sec_avatar", "Photo de profil")}</h2>
             </div>
-            <div class="ob-av-grid" id="ob-av-grid" role="radiogroup" aria-label="Choix de l'avatar">
+            <div class="ob-av-grid" id="ob-av-grid" role="radiogroup" aria-label="${ob("avatar_group_aria", "Choix de l'avatar")}">
               ${(ASSETS.avatar || [])
                 .map(
                   (url, i) => `
@@ -171,7 +329,7 @@ export async function mount(root) {
                   data-url="${esc(url)}"
                   role="radio"
                   aria-checked="${url === avatar ? "true" : "false"}"
-                  aria-label="Avatar ${i + 1}"
+                  aria-label="${esc(obR("avatar_item_aria", "Avatar {n}").replace("{n}", i + 1))}"
                   type="button"
                 >
                   <img class="ob-av-img" src="${esc(url)}" alt="" loading="lazy" />
@@ -182,10 +340,10 @@ export async function mount(root) {
                 )
                 .join("")}
             </div>
-            <p class="ob-helper">Choisis ton avatar</p>
+            <p class="ob-helper">${ob("avatar_helper", "Choisis ton avatar")}</p>
 
-            <p class="ob-color-label">Ta couleur</p>
-            <div class="ob-color-grid" id="ob-color-grid" role="radiogroup" aria-label="Choix de la couleur">
+            <p class="ob-color-label">${ob("color_label", "Ta couleur")}</p>
+            <div class="ob-color-grid" id="ob-color-grid" role="radiogroup" aria-label="${ob("color_group_aria", "Choix de la couleur")}">
               ${ACCENTS.map(
                 (c) => `
                 <button
@@ -207,14 +365,14 @@ export async function mount(root) {
           <section class="ob-section" aria-labelledby="ob-sec2-t">
             <div class="ob-sec-head">
               <span class="ob-sec-num">${secN.notif}</span>
-              <h2 class="ob-sec-title" id="ob-sec2-t">Tes rappels du soir</h2>
+              <h2 class="ob-sec-title" id="ob-sec2-t">${ob("sec_reminders", "Tes rappels du soir")}</h2>
             </div>
 
             <div class="ob-card">
               <div class="ob-toggle-row">
                 <div class="ob-toggle-txt">
-                  <div class="ob-toggle-tt">Rappel chaque soir</div>
-                  <div class="ob-toggle-ts">20&nbsp;h · doux, jamais spam</div>
+                  <div class="ob-toggle-tt">${ob("rem_title", "Rappel chaque soir")}</div>
+                  <div class="ob-toggle-ts">${obR("rem_sub", "20&nbsp;h · doux, jamais spam")}</div>
                 </div>
                 <button
                   class="ob-switch${notifWanted ? "" : " off"}"
@@ -222,25 +380,25 @@ export async function mount(root) {
                   type="button"
                   role="switch"
                   aria-checked="${notifWanted ? "true" : "false"}"
-                  aria-label="Activer les rappels du soir"
+                  aria-label="${ob("rem_switch_aria", "Activer les rappels du soir")}"
                 >
                   <span class="ob-knob" aria-hidden="true"></span>
                 </button>
               </div>
-              <p class="ob-micro" id="ob-notif-note"><b>3 questions chaque soir, 2 minutes</b> — c'est ce qui fait progresser pour de vrai.</p>
+              <p class="ob-micro" id="ob-notif-note">${obR("rem_note", "<b>3 questions chaque soir, 2 minutes</b> — c'est ce qui fait progresser pour de vrai.")}</p>
             </div>
 
             <!-- Carte récompense -->
-            <div class="ob-reward" aria-label="Coffre de bienvenue : 50 XP et 25 volants">
+            <div class="ob-reward" aria-label="${ob("reward_aria", "Coffre de bienvenue : 50 XP et 25 volants")}">
               <div class="ob-reward-chest">
                 <img src="/skins/chest-closed.png" alt="" />
               </div>
               <div class="ob-reward-body">
-                <div class="ob-reward-tag">Récompense</div>
-                <div class="ob-reward-title">Un coffre t'attend dès ce soir</div>
+                <div class="ob-reward-tag">${ob("reward_tag", "Récompense")}</div>
+                <div class="ob-reward-title">${ob("reward_title", "Un coffre t'attend dès ce soir")}</div>
                 <div class="ob-pills">
                   <span class="ob-pill ob-pill-xp"><span class="ob-xp-ic" aria-hidden="true">XP</span>50&nbsp;XP</span>
-                  <span class="ob-pill ob-pill-vol"><img src="/skins/volant-coin.webp" alt="" />25&nbsp;volants</span>
+                  <span class="ob-pill ob-pill-vol"><img src="/skins/volant-coin.webp" alt="" />${obR("pill_vol", "25&nbsp;volants")}</span>
                 </div>
               </div>
             </div>
@@ -253,14 +411,14 @@ export async function mount(root) {
           <section class="ob-section" aria-labelledby="ob-sec3-t">
             <div class="ob-sec-head">
               <span class="ob-sec-num">${secN.a2hs}</span>
-              <h2 class="ob-sec-title" id="ob-sec3-t">Ajoute l'appli</h2>
+              <h2 class="ob-sec-title" id="ob-sec3-t">${ob("sec_a2hs", "Ajoute l'appli")}</h2>
             </div>
             <div class="ob-install-head">
               <img class="ob-install-badge" src="/skins/avatars/permigo-badge-icon.png" alt="" />
-              <p class="ob-install-lead"><b>2 gestes, 10 secondes</b> — tes rappels et tes récompenses arrivent ici.</p>
+              <p class="ob-install-lead">${obR("a2hs_lead", "<b>2 gestes, 10 secondes</b> — tes rappels et tes récompenses arrivent ici.")}</p>
             </div>
             <div class="ob-a2hs-steps" id="ob-a2hs-steps"></div>
-            <button class="ob-plat-switch" id="ob-plat-switch" type="button" aria-label="Changer la plateforme des instructions (iPhone / Android)"></button>
+            <button class="ob-plat-switch" id="ob-plat-switch" type="button" aria-label="${ob("a2hs_plat_aria", "Changer la plateforme des instructions (iPhone / Android)")}"></button>
           </section>`
               : ""
           }
@@ -271,13 +429,13 @@ export async function mount(root) {
       <!-- Bouton sticky unique -->
       <div class="ob-dock">
         <button class="ob-cta" id="ob-cta" type="button">
-          C'est parti <span class="ob-arrow" aria-hidden="true">→</span>
+          ${ctaHTML()}
         </button>
       </div>
 
       <!-- Cue de scroll : pousse à découvrir couleur/rappels sous la grille -->
       <div class="ob-cue" id="ob-cue" aria-hidden="true">
-        <span class="ob-cue-txt">Descends choisir ta couleur</span>
+        <span class="ob-cue-txt">${ob("cue", "Descends choisir ta couleur")}</span>
         <span class="ob-cue-arr">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
         </span>
@@ -335,8 +493,10 @@ export async function mount(root) {
 
   let codeState = "empty"; // empty | checking | valid | invalid
   let codeTimer = null;
-  const CODE_HELP_DEFAULT =
-    "Ton moniteur t'a donné un code ? Tape-le pour le rejoindre. Sinon, laisse vide.";
+  const CODE_HELP_DEFAULT = obR(
+    "id_code_help",
+    "Ton moniteur t'a donné un code ? Tape-le pour le rejoindre. Sinon, laisse vide.",
+  );
 
   const identityOk = () => {
     if (!needsIdentity) return true;
@@ -378,7 +538,7 @@ export async function mount(root) {
       }
       codeState = "checking";
       idCodeHelp.className = "ob-micro";
-      idCodeHelp.textContent = "Vérification…";
+      idCodeHelp.textContent = obR("code_checking", "Vérification…");
       updateCta();
       codeTimer = setTimeout(async () => {
         try {
@@ -390,17 +550,28 @@ export async function mount(root) {
           if (error || !info) {
             codeState = "invalid";
             idCodeHelp.className = "ob-micro err";
-            idCodeHelp.textContent =
-              "✗ Code introuvable — revérifie auprès de ton moniteur, ou laisse vide.";
+            idCodeHelp.textContent = obR(
+              "code_invalid",
+              "✗ Code introuvable — revérifie auprès de ton moniteur, ou laisse vide.",
+            );
           } else {
             codeState = "valid";
             idCodeHelp.className = "ob-micro ok";
-            idCodeHelp.textContent = `✓ Tu rejoins ${info.ecole_nom || "ton auto-école"}`;
+            idCodeHelp.textContent = obR(
+              "code_join",
+              "✓ Tu rejoins {ecole}",
+            ).replace(
+              "{ecole}",
+              info.ecole_nom || obR("ecole_fallback", "ton auto-école"),
+            );
           }
         } catch {
           codeState = "invalid";
           idCodeHelp.className = "ob-micro err";
-          idCodeHelp.textContent = "Vérification impossible — réessaie.";
+          idCodeHelp.textContent = obR(
+            "code_err_generic",
+            "Vérification impossible — réessaie.",
+          );
         }
         updateCta();
       }, 400);
@@ -432,8 +603,8 @@ export async function mount(root) {
       console.error("[onboarding] saveIdentity", profErr);
       toast(
         /parent_email_required/i.test(profErr.message || "")
-          ? "Renseigne un email de parent valide."
-          : "Enregistrement impossible — réessaie.",
+          ? obR("toast_parent_required", "Renseigne un email de parent valide.")
+          : obR("toast_save_failed", "Enregistrement impossible — réessaie."),
         "error",
         4000,
       );
@@ -448,7 +619,10 @@ export async function mount(root) {
         // Non bloquant : le compte est créé, le rattachement pourra se refaire.
         console.error("[onboarding] join_moniteur_by_code", joinErr);
         toast(
-          "Rattachement au moniteur impossible pour l'instant — ton compte est quand même prêt.",
+          obR(
+            "toast_join_failed",
+            "Rattachement au moniteur impossible pour l'instant — ton compte est quand même prêt.",
+          ),
           "info",
           4500,
         );
@@ -536,16 +710,30 @@ export async function mount(root) {
       if (granted) {
         haptic("success");
         setSwitch(true);
-        if (note) note.innerHTML = "<b>Rappels activés</b> — à ce soir&nbsp;!";
-        announce("Rappels activés ! Tu recevras 3 questions ce soir.");
+        if (note)
+          note.innerHTML = obR(
+            "notif_on_note",
+            "<b>Rappels activés</b> — à ce soir&nbsp;!",
+          );
+        announce(
+          obR(
+            "notif_on_announce",
+            "Rappels activés ! Tu recevras 3 questions ce soir.",
+          ),
+        );
       } else {
         // Refusé / bloqué : le toggle reflète l'état réel (off).
         setSwitch(false);
         if (note && Notification.permission === "denied") {
-          note.textContent =
-            "Bloquées — active-les dans les réglages si tu changes d'avis.";
+          note.textContent = obR(
+            "notif_denied_note",
+            "Bloquées — active-les dans les réglages si tu changes d'avis.",
+          );
           announce(
-            "Rappels non activés. Tu peux les activer plus tard dans les réglages.",
+            obR(
+              "notif_denied_announce",
+              "Rappels non activés. Tu peux les activer plus tard dans les réglages.",
+            ),
           );
         }
       }
@@ -570,7 +758,7 @@ export async function mount(root) {
 
     const nativeBtn =
       a2hsPlat === "android" && canPromptInstall()
-        ? `<button class="ob-a2hs-install" id="ob-a2hs-install" type="button">Installer l'app en 1 tap</button>`
+        ? `<button class="ob-a2hs-install" id="ob-a2hs-install" type="button">${ob("a2hs_install", "Installer l'app en 1 tap")}</button>`
         : "";
 
     stepsEl.innerHTML = `${nativeBtn}${a2hsStepsHTML(a2hsPlat)}`;
@@ -578,14 +766,16 @@ export async function mount(root) {
     const sw = root.querySelector("#ob-plat-switch");
     if (sw) {
       sw.textContent =
-        a2hsPlat === "ios" ? "Tu es sur Android ?" : "Tu es sur iPhone ?";
+        a2hsPlat === "ios"
+          ? obR("plat_android", "Tu es sur Android ?")
+          : obR("plat_iphone", "Tu es sur iPhone ?");
     }
 
     const ib = root.querySelector("#ob-a2hs-install");
     if (ib) {
       ib.addEventListener("click", async () => {
         ib.disabled = true;
-        ib.textContent = "Installation…";
+        ib.textContent = obR("a2hs_installing", "Installation…");
         try {
           const outcome = await promptInstall();
           track("a2hs.install_prompt", { outcome, source: "onboarding" });
@@ -597,7 +787,7 @@ export async function mount(root) {
           /* best-effort */
         }
         ib.disabled = false;
-        ib.textContent = "Installer l'app en 1 tap";
+        ib.textContent = obR("a2hs_install", "Installer l'app en 1 tap");
       });
     }
   }
@@ -726,11 +916,11 @@ export async function mount(root) {
         return;
       }
       ctaBtn.disabled = true;
-      ctaBtn.textContent = "Enregistrement…";
+      ctaBtn.textContent = obR("cta_saving", "Enregistrement…");
       const saved = await saveIdentity();
       if (!saved.ok) {
         finishing = false;
-        ctaBtn.innerHTML = `C'est parti <span class="ob-arrow" aria-hidden="true">→</span>`;
+        ctaBtn.innerHTML = ctaHTML();
         updateCta();
         return;
       }
@@ -752,7 +942,7 @@ export async function mount(root) {
     });
 
     ctaBtn.disabled = true;
-    ctaBtn.innerHTML = "C'est parti…";
+    ctaBtn.innerHTML = ob("cta_going", "C'est parti…");
 
     // Sauvegarde profil (avatar + marquage onboarding terminé).
     try {
@@ -775,7 +965,7 @@ export async function mount(root) {
     unlockChest("welcome", {
       xp: 50,
       gemmes: 25,
-      title: "Bienvenue dans PermiGo !",
+      title: obR("chest_title", "Bienvenue dans PermiGo !"),
     }).catch(() => {});
 
     // Sortie vers l'accueil : le chrome n'a pas été monté pendant l'onboarding,

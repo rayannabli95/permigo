@@ -16,9 +16,35 @@
 // ═══════════════════════════════════════════════════════════════
 import { track } from "@/services/analytics.js";
 import { haptic } from "@/utils/haptic.js";
+import { esc } from "@/utils/escape.js";
+import { getLang } from "@/utils/lang.js";
 
 const VIDEO_SRC = "/video/permigo-intro.mp4";
 const POSTER_SRC = "/video/permigo-intro-poster.jpg";
+
+// ─── i18n (coque) — traduction seule, repli FR ───
+const VI_I18N = {
+  en: {
+    dialog_aria: "PermiGo introduction",
+    title: "Let us introduce PermiGo",
+    lead: "One minute to see how we get you ready for every lesson.",
+    ok: "OK, show me",
+    later: "Later",
+    skip_aria: "Skip the video",
+  },
+  ar: {
+    dialog_aria: "تقديم بيرميغو",
+    title: "دعنا نُعرّفك على بيرميغو",
+    lead: "دقيقة واحدة لتكتشف كيف نحضّرك لكل درس من دروسك.",
+    ok: "حسناً، أرِني",
+    later: "لاحقاً",
+    skip_aria: "تخطّي الفيديو",
+  },
+};
+function t(key, fr) {
+  const l = getLang();
+  return esc((l !== "fr" && VI_I18N[l]?.[key]) || fr);
+}
 
 export function mountVideoIntro(root, onDone) {
   let done = false;
@@ -29,9 +55,10 @@ export function mountVideoIntro(root, onDone) {
     if (typeof onDone === "function") onDone();
   };
 
+  const arrow = getLang() === "ar" ? "←" : "→";
   root.innerHTML = `
     ${STYLE}
-    <div class="vi" role="dialog" aria-modal="true" aria-label="Présentation de PermiGo">
+    <div class="vi" role="dialog" aria-modal="true" aria-label="${t("dialog_aria", "Présentation de PermiGo")}">
 
       <!-- ── Étape 1 : carte d'accroche ── -->
       <div class="vi-gate" id="vi-gate">
@@ -39,12 +66,12 @@ export function mountVideoIntro(root, onDone) {
         <div class="vi-mascot-wrap">
           <img class="vi-mascot" src="/skins/mascot-hello.png" alt="" />
         </div>
-        <h1 class="vi-title" tabindex="-1">Laisse-nous te présenter PermiGo</h1>
-        <p class="vi-lead">Une minute pour découvrir comment on prépare chacune de tes leçons.</p>
+        <h1 class="vi-title" tabindex="-1">${t("title", "Laisse-nous te présenter PermiGo")}</h1>
+        <p class="vi-lead">${t("lead", "Une minute pour découvrir comment on prépare chacune de tes leçons.")}</p>
         <button class="vi-ok" id="vi-ok" type="button">
-          OK, montre-moi <span class="vi-ok-arr" aria-hidden="true">→</span>
+          ${t("ok", "OK, montre-moi")} <span class="vi-ok-arr" aria-hidden="true">${arrow}</span>
         </button>
-        <button class="vi-skip-gate" id="vi-skip-gate" type="button">Plus tard</button>
+        <button class="vi-skip-gate" id="vi-skip-gate" type="button">${t("later", "Plus tard")}</button>
       </div>
 
       <!-- ── Étape 2 : lecteur vidéo (masqué au départ) ── -->
@@ -58,7 +85,7 @@ export function mountVideoIntro(root, onDone) {
           preload="auto"
         ></video>
         <div class="vi-loading" id="vi-loading" aria-hidden="true"><i></i><i></i><i></i></div>
-        <button class="vi-close" id="vi-close" type="button" aria-label="Passer la vidéo">
+        <button class="vi-close" id="vi-close" type="button" aria-label="${t("skip_aria", "Passer la vidéo")}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
             <path d="M18 6 6 18M6 6l12 12"/>
           </svg>
