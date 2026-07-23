@@ -785,9 +785,11 @@ function computeEleveProfil() {
   else label = "activité modérée";
 
   const bits = [];
-  if (compPerWeek > 0)
+  // Sous 0,5/sem le chiffre se lit comme un reproche (« ~0.3 » ressemble
+  // même à « –0.3 ») et affaiblit l'éloge — on ne le montre qu'utile.
+  if (compPerWeek >= 0.5)
     bits.push(`~${compPerWeek} compétence${compPerWeek >= 2 ? "s" : ""}/sem`);
-  if (quizPerWeek > 0) bits.push(`~${quizPerWeek} quiz/sem`);
+  if (quizPerWeek > 0) bits.push(`~${Math.round(quizPerWeek)} quiz/sem`);
   const streakBit = _streakEff >= 2 ? ` Série en cours : ${_streakEff} j.` : "";
   const facts = bits.length ? ` : ${bits.join(", ")}.` : ".";
   return { tone: "warm", text: `${prenom} — ${label}${facts}${streakBit}` };
@@ -875,7 +877,11 @@ function _renderEngagementCard() {
     foot.push(
       `${icon("flame", { size: 13, strokeWidth: 2.3 })} Série de ${streak} jours`,
     );
-  if (hour != null) foot.push(`Plutôt actif·ve vers ${hour} h`);
+  // « vers 1 h » (du matin) surprend plus qu'il n'informe → « la nuit ».
+  if (hour != null)
+    foot.push(
+      hour <= 5 ? "Plutôt actif·ve la nuit" : `Plutôt actif·ve vers ${hour} h`,
+    );
   const footHtml = foot.length
     ? `<div class="lr-eng-foot">${foot.join(' <span class="lr-eng-sep">·</span> ')}</div>`
     : "";
