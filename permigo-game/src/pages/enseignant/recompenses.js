@@ -249,7 +249,7 @@ function render(root, me) {
   </div>
 
   <div class="mrw-hd">
-    <div class="mrw-kicker">Ta marque</div>
+    <div class="mrw-kicker">Offert par toi</div>
     <h1>Ta roue de récompenses</h1>
     <p>Les gros lots, c’est <b>toi</b> qui les offres. Ton nom apparaît sur chacun.</p>
   </div>

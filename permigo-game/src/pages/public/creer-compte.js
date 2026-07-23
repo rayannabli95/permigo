@@ -261,7 +261,7 @@ export async function mount(root) {
           <span class="sg-logo-fb" aria-hidden="true"><b>P</b></span>
         </div>
         <h1 class="sg-title">Crée ton compte moniteur</h1>
-        <p class="sg-sub">Ton app de révision à ta marque, prête en 30 secondes.</p>
+        <p class="sg-sub">Des élèves qui arrivent préparés à chaque leçon — ton tableau de bord est prêt en 30 secondes.</p>
         <div style="text-align:center"><span class="sg-role-badge">Moniteur indépendant</span></div>
         ${connectedBanner}
 
