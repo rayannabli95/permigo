@@ -39,7 +39,7 @@ const TOUR_KEY = "pg-tour-moniteur-v1";
 const MONITEUR_TOUR_STEPS = [
   {
     title: "Bienvenue sur PermiGo",
-    text: "Ton livret passe en numérique. Tes élèves voient leur progression en temps réel. Toi, tu sais où en est chacun d’un coup d’œil.",
+    text: "Tes élèves préparent chaque leçon dans l’app. Toi, tu vois qui s’entraîne, qui avance, qui décroche — d’un coup d’œil.",
   },
   {
     sel: "#aj-act-invite",
@@ -48,8 +48,8 @@ const MONITEUR_TOUR_STEPS = [
   },
   {
     sel: "#aj-cta-seance",
-    title: "Valide après la leçon",
-    text: "Coche les compétences réussies. Le livret de ton élève se met à jour aussitôt. Fini le papier.",
+    title: "Ajoute ton regard",
+    text: "Si tu veux, coche ce que tu as vu en leçon. Jamais obligatoire : ton élève certifie lui-même son parcours, ton regard vient en plus.",
   },
   {
     sel: '.bn-tab[data-id="eleves"]',

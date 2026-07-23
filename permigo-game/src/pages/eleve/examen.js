@@ -587,29 +587,27 @@ export const BASE_TOTAL = 24; // C1+C2+C3 (mêmes bases que la readiness moniteu
 // changement de comportement) pour être réutilisable sans dupliquer les
 // seuils. mon-permis.js appelle cette fonction telle quelle pour son
 // étape ③ : la readiness reste gelée, jamais recalculée « à la main ».
-export function buildVerdict({ baseAcquis = 0, solo = false }) {
+// Depuis le pivot 17/07, rattaché ou solo : c'est l'élève qui certifie son
+// parcours. Le paramètre `solo` reste accepté (appelants inchangés) mais ne
+// change plus le texte — « Ton moniteur a validé » était devenu faux.
+export function buildVerdict({ baseAcquis = 0, solo = false } = {}) {
+  void solo;
   const baseRestantes = Math.max(0, BASE_TOTAL - baseAcquis);
   if (baseAcquis >= BASE_TOTAL) {
     return {
       level: "high",
-      text: solo
-        ? `Prêt pour l’examen. Tes ${BASE_TOTAL} compétences de base sont validées.`
-        : `Prêt pour l’examen. Ton moniteur a validé tes ${BASE_TOTAL} compétences de base.`,
+      text: `Prêt·e pour l’examen. Tes ${BASE_TOTAL} compétences de base sont validées.`,
     };
   }
   if (baseAcquis >= 18) {
     return {
       level: "mid",
-      text: solo
-        ? `Bientôt prêt. ${baseRestantes} compétence${baseRestantes > 1 ? "s" : ""} de base à valider.`
-        : `Bientôt prêt. ${baseRestantes} compétence${baseRestantes > 1 ? "s" : ""} de base à faire valider par ton moniteur.`,
+      text: `Bientôt prêt·e. ${baseRestantes} compétence${baseRestantes > 1 ? "s" : ""} de base à valider.`,
     };
   }
   return {
     level: "low",
-    text: solo
-      ? "En préparation. Valide tes compétences au fil de tes révisions."
-      : "En préparation. Tes compétences se valident en leçon avec ton moniteur.",
+    text: "En préparation. Valide tes compétences au fil de tes leçons et de tes révisions.",
   };
 }
 
@@ -627,7 +625,7 @@ export function buildCriteria({ compsCount, streak, avgScore }) {
       label: "Série active",
       sub:
         streak > 0
-          ? `${streak} jours d’affilée`
+          ? `${streak} jour${streak > 1 ? "s" : ""} d’affilée`
           : "Reviens réviser aujourd’hui",
       pass: streak > 0,
       badge: streak > 0 ? `${streak}j` : "0j",
