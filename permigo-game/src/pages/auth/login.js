@@ -15,6 +15,7 @@ import { sb, login, loginWithOtp, verifyOtp } from "@/auth/auth.js";
 import { icon } from "@/utils/icons.js";
 import { toast } from "@/components/common/toast.js";
 import { esc, escAttr } from "@/utils/escape.js";
+import { applyLang } from "@/utils/lang.js";
 
 // Traductions FR des messages d'erreur Supabase Auth (en anglais côté API)
 const AUTH_ERRORS_FR = {
@@ -38,12 +39,173 @@ const AUTH_ERRORS_FR = {
     "Cette adresse email n'est pas enregistrée. Vérifie l'adresse saisie.",
   "Unable to validate email address: invalid format": "Adresse email invalide.",
 };
+// Mêmes clés, versions lisibles EN / AR (i18n coque — l'élève étranger voit la
+// page de connexion AVANT d'avoir un profil, cf. lgLang() plus bas).
+const AUTH_ERRORS_EN = {
+  "Invalid login credentials": "Invalid email or password.",
+  "Email not confirmed": "Email not confirmed — check your inbox.",
+  "User not found": "No account found for this email.",
+  "Invalid OTP": "Invalid or expired code.",
+  "Token has expired or is invalid": "The link expired. Request a new code.",
+  "Signup requires a valid password": "Password required.",
+  "Password should be at least 6 characters":
+    "Password must be at least 6 characters.",
+  "User already registered": "An account already exists for this email.",
+  "Email rate limit exceeded":
+    "Too many attempts — try again in a few minutes.",
+  over_email_send_rate_limit: "Too many codes sent — try again in 60 seconds.",
+  "For security purposes, you can only request this once every 60 seconds":
+    "Wait 60 seconds before requesting a new code.",
+  "Signups not allowed for otp":
+    "This email address is not registered. Check the address you typed.",
+  "Unable to validate email address: invalid format": "Invalid email address.",
+};
+const AUTH_ERRORS_AR = {
+  "Invalid login credentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+  "Email not confirmed": "البريد غير مؤكّد — تحقق من صندوق بريدك.",
+  "User not found": "لا يوجد حساب لهذا البريد الإلكتروني.",
+  "Invalid OTP": "الرمز غير صالح أو منتهي الصلاحية.",
+  "Token has expired or is invalid": "انتهت صلاحية الرابط. اطلب رمزًا جديدًا.",
+  "Signup requires a valid password": "كلمة المرور مطلوبة.",
+  "Password should be at least 6 characters":
+    "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل.",
+  "User already registered": "يوجد حساب مسجّل بهذا البريد الإلكتروني.",
+  "Email rate limit exceeded": "محاولات كثيرة — حاول مجددًا بعد دقائق.",
+  over_email_send_rate_limit: "أُرسلت رموز كثيرة — حاول مجددًا بعد 60 ثانية.",
+  "For security purposes, you can only request this once every 60 seconds":
+    "انتظر 60 ثانية قبل طلب رمز جديد.",
+  "Signups not allowed for otp":
+    "هذا البريد الإلكتروني غير مسجّل. تحقق من العنوان الذي أدخلته.",
+  "Unable to validate email address: invalid format":
+    "عنوان البريد الإلكتروني غير صالح.",
+};
 function translateAuthError(msg) {
   if (!msg) return null;
-  for (const [en, fr] of Object.entries(AUTH_ERRORS_FR)) {
-    if (msg.includes(en)) return fr;
+  const map =
+    lgLang() === "en"
+      ? AUTH_ERRORS_EN
+      : lgLang() === "ar"
+        ? AUTH_ERRORS_AR
+        : AUTH_ERRORS_FR;
+  for (const [en, tr] of Object.entries(map)) {
+    if (msg.includes(en)) return tr;
   }
   return msg; // fallback : message brut Supabase
+}
+
+// ── i18n de la COQUE (page vue AVANT le login → pas de préférence profil) ──
+// Langue affichée : 1) « en »/« ar » en localStorage (permigo_lang — posé par
+// Réglages, l'inscription ou le sélecteur ci-dessous) ; 2) « fr » stocké
+// UNIQUEMENT s'il vient d'un choix explicite (marqueur ci-dessous) — car
+// initLangEarly() au boot écrit déjà « fr » par défaut pour TOUT visiteur ;
+// 3) sinon la langue du NAVIGATEUR (affichage seul, rien n'est persisté tant
+// que le visiteur ne tape pas le sélecteur). Textes REMPLACÉS (pas de FR
+// gardé dessous — réservé au contenu pédagogique).
+const LANG_EXPLICIT_KEY = "permigo_lang_explicit";
+function lgLang() {
+  try {
+    const v = localStorage.getItem("permigo_lang");
+    if (v === "en" || v === "ar") return v;
+    if (v === "fr" && localStorage.getItem(LANG_EXPLICIT_KEY)) return "fr";
+  } catch {
+    /* mode privé */
+  }
+  const nav = (navigator.language || "").toLowerCase();
+  if (nav.startsWith("ar")) return "ar";
+  if (nav.startsWith("en")) return "en";
+  return "fr";
+}
+const LG_I18N = {
+  en: {
+    title: "Welcome back",
+    subtitle: "Student, instructor or manager — back to your space",
+    email: "Email",
+    email_ph: "you@example.com",
+    pwd: "Password",
+    pwd_show: "Show password",
+    pwd_hide: "Hide password",
+    otp_label: "Code received by email",
+    otp_resend: "Resend the code",
+    remember: "Remember me",
+    forgot: "Forgot password?",
+    submit: "Log in",
+    or: "or",
+    google: "Continue with Google",
+    mode_otp: "Get a code by email",
+    mode_pwd: "← Use my password",
+    send_code: "Send the code",
+    verify_code: "Verify the code",
+    foot1: "No account yet?",
+    foot1_link: "Create your instructor account",
+    foot2: "Student with an instructor code?",
+    foot2_link: "Join your instructor",
+    err_email: "Email required",
+    err_pwd: "Password required",
+    err_attempts: "Too many attempts — try again in {t}",
+    err_requests: "Too many requests — try again in {t}",
+    err_bot: "Anti-bot check failed — try again",
+    err_creds: "Invalid credentials",
+    err_send: "Couldn't send the code",
+    err_code: "Invalid code",
+    err_code6: "6-digit code required",
+    email_first: "Enter your email first",
+    code_resent: "New code sent",
+    code_sent: "Code sent — check your inbox",
+    hello: "Hello",
+    g_fail: "Google sign-in failed",
+    g_err: "Google sign-in error",
+    g_off: "Google sign-in isn't enabled yet — use your email for now.",
+    auth_off: "Auth not configured",
+  },
+  ar: {
+    title: "أهلًا بعودتك",
+    subtitle: "طالب، مدرّب أو مدير — عد إلى مساحتك",
+    email: "البريد الإلكتروني",
+    email_ph: "you@example.com",
+    pwd: "كلمة المرور",
+    pwd_show: "إظهار كلمة المرور",
+    pwd_hide: "إخفاء كلمة المرور",
+    otp_label: "الرمز المستلم عبر البريد",
+    otp_resend: "إعادة إرسال الرمز",
+    remember: "تذكّرني",
+    forgot: "نسيت كلمة المرور؟",
+    submit: "تسجيل الدخول",
+    or: "أو",
+    google: "المتابعة عبر Google",
+    mode_otp: "استلام رمز عبر البريد",
+    mode_pwd: "استخدم كلمة مرورك",
+    send_code: "إرسال الرمز",
+    verify_code: "التحقق من الرمز",
+    foot1: "ليس لديك حساب بعد؟",
+    foot1_link: "أنشئ حساب مدرّب",
+    foot2: "طالب لديه رمز مدرّب؟",
+    foot2_link: "انضم إلى مدرّبك",
+    err_email: "البريد الإلكتروني مطلوب",
+    err_pwd: "كلمة المرور مطلوبة",
+    err_attempts: "محاولات كثيرة — حاول مجددًا بعد {t}",
+    err_requests: "طلبات كثيرة — حاول مجددًا بعد {t}",
+    err_bot: "فشل التحقق من أنك لست روبوتًا — حاول مجددًا",
+    err_creds: "بيانات الدخول غير صحيحة",
+    err_send: "تعذّر إرسال الرمز",
+    err_code: "رمز غير صالح",
+    err_code6: "مطلوب رمز من 6 أرقام",
+    email_first: "أدخل بريدك الإلكتروني أولًا",
+    code_resent: "تم إرسال رمز جديد",
+    code_sent: "تم إرسال الرمز — تحقق من بريدك",
+    hello: "مرحبًا",
+    g_fail: "تعذّر تسجيل الدخول عبر Google",
+    g_err: "خطأ في تسجيل الدخول عبر Google",
+    g_off: "تسجيل الدخول عبر Google غير مفعّل بعد — استخدم بريدك حاليًا.",
+    auth_off: "المصادقة غير مهيأة",
+  },
+};
+function lg(key, fr) {
+  const l = lgLang();
+  return (l !== "fr" && LG_I18N[l]?.[key]) || fr;
+}
+// RTL par ATTRIBUT sur les blocs de texte (jamais <html dir> — règle lang.js).
+function lgRtl() {
+  return lgLang() === "ar" ? ' dir="rtl" lang="ar"' : "";
 }
 import {
   checkRateLimit,
@@ -297,6 +459,16 @@ function template() {
         .lg-title{font-size:23px}
         .lg-demo{font-size:11.5px}
       }
+
+      /* Sélecteur de langue — discret, coin haut droit de la carte */
+      .lg-langs{position:absolute;top:12px;right:14px;display:flex;gap:2px;z-index:2}
+      .lg-lang{background:transparent;border:0;cursor:pointer;font-family:inherit;
+        font-size:12px;font-weight:800;letter-spacing:.4px;color:var(--ink-mu);
+        padding:6px 7px;min-width:30px;min-height:32px;border-radius:9px;
+        transition:color .15s ease,background .15s ease}
+      .lg-lang:hover{color:var(--ink-soft)}
+      .lg-lang.on{color:var(--gold);background:rgba(255,206,77,.12)}
+      .lg-lang:focus-visible{outline:3px solid var(--focus);outline-offset:1px}
     </style>
 
     <div class="lg-root">
@@ -306,66 +478,75 @@ function template() {
         <form class="lg-card" id="login-form" autocomplete="on" novalidate>
           ${renderHoneypot()}
 
+          <div class="lg-langs" role="group" aria-label="Langue / Language">
+            ${["fr", "en", "ar"]
+              .map(
+                (l) =>
+                  `<button type="button" class="lg-lang${lgLang() === l ? " on" : ""}" data-lang="${l}" aria-pressed="${lgLang() === l}">${l === "ar" ? "ع" : l.toUpperCase()}</button>`,
+              )
+              .join("")}
+          </div>
+
           <div class="lg-head">
             <div class="lg-emblem">
               <img src="/skins/avatars/permigo-badge-icon.png" alt="PermiGo" loading="eager" draggable="false"
                    onerror="this.style.display='none';this.nextElementSibling.style.display='grid';">
               <span class="lg-emblem-fb" aria-hidden="true"><b>P</b></span>
             </div>
-            <h1 class="lg-title">Content de te revoir</h1>
-            <p class="lg-subtitle">Élève, moniteur ou gérant — retrouve ton espace</p>
+            <h1 class="lg-title"${lgRtl()}>${lg("title", "Content de te revoir")}</h1>
+            <p class="lg-subtitle"${lgRtl()}>${lg("subtitle", "Élève, moniteur ou gérant — retrouve ton espace")}</p>
           </div>
 
           <div class="lg-field" id="lg-email-field">
-            <label for="lg-email">Email</label>
+            <label for="lg-email"${lgRtl()}>${lg("email", "Email")}</label>
             <div class="lg-shell">
               <span class="lg-ico" aria-hidden="true">${ICON_MAIL}</span>
-              <input id="lg-email" type="email" name="email" inputmode="email" required autocomplete="email" placeholder="toi@exemple.fr">
+              <input id="lg-email" type="email" name="email" inputmode="email" required autocomplete="email" placeholder="${lg("email_ph", "toi@exemple.fr")}">
             </div>
           </div>
 
           <div class="lg-field" id="lg-pwd-field">
-            <label for="lg-pwd">Mot de passe</label>
+            <label for="lg-pwd"${lgRtl()}>${lg("pwd", "Mot de passe")}</label>
             <div class="lg-shell">
               <span class="lg-ico" aria-hidden="true">${ICON_LOCK}</span>
               <input id="lg-pwd" type="password" name="password" autocomplete="current-password" placeholder="••••••••">
-              <button type="button" class="lg-eye" id="lg-pw-toggle" aria-label="Afficher le mot de passe" aria-pressed="false">${icon("eye", { size: 20 })}</button>
+              <button type="button" class="lg-eye" id="lg-pw-toggle" aria-label="${lg("pwd_show", "Afficher le mot de passe")}" aria-pressed="false">${icon("eye", { size: 20 })}</button>
             </div>
           </div>
 
           <div class="lg-field" id="lg-otp-field" style="display:none">
-            <label for="lg-otp">Code reçu par email</label>
+            <label for="lg-otp"${lgRtl()}>${lg("otp_label", "Code reçu par email")}</label>
             <div class="lg-shell">
               <span class="lg-ico" aria-hidden="true">${ICON_KEY}</span>
               <input id="lg-otp" class="lg-otp-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" placeholder="123456">
             </div>
-            <button type="button" id="lg-otp-resend" class="lg-link" style="margin:6px auto 0">Renvoyer le code</button>
+            <button type="button" id="lg-otp-resend" class="lg-link" style="margin:6px auto 0"${lgRtl()}>${lg("otp_resend", "Renvoyer le code")}</button>
           </div>
 
           <div class="lg-row" id="lg-row-remember">
             <label class="lg-remember">
               <input type="checkbox" id="lg-remember">
               <span class="lg-box" aria-hidden="true">${ICON_CHECK}</span>
-              <span>Se souvenir de moi</span>
+              <span${lgRtl()}>${lg("remember", "Se souvenir de moi")}</span>
             </label>
-            <button type="button" class="lg-link" id="lg-forgot">Mot de passe oublié ?</button>
+            <button type="button" class="lg-link" id="lg-forgot"${lgRtl()}>${lg("forgot", "Mot de passe oublié ?")}</button>
           </div>
 
-          <button type="submit" class="lg-cta" id="lg-submit">Se connecter</button>
-          <p class="lg-err" id="lg-err" role="alert" aria-live="assertive"></p>
+          <button type="submit" class="lg-cta" id="lg-submit"${lgRtl()}>${lg("submit", "Se connecter")}</button>
+          <p class="lg-err" id="lg-err" role="alert" aria-live="assertive"${lgRtl()}></p>
 
-          <div class="lg-sep">ou</div>
+          <div class="lg-sep">${lg("or", "ou")}</div>
           <!-- Bouton Google OFFICIEL (GIS) : la fenêtre affiche « PermiGo »
                (marque de l'écran de consentement) au lieu de l'URL technique
                Supabase qu'impose le flux par redirection. Rendu en JS ;
                le bouton maison ci-dessous sert de REPLI (script bloqué…). -->
           <div class="lg-gsi" id="lg-gsi"></div>
-          <button type="button" class="lg-oauth" data-oauth="google" aria-label="Continuer avec Google">
+          <button type="button" class="lg-oauth" data-oauth="google" aria-label="${lg("google", "Continuer avec Google")}">
             <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-            Continuer avec Google
+            ${lg("google", "Continuer avec Google")}
           </button>
 
-          <button type="button" class="lg-code-link" id="lg-mode-toggle">Recevoir un code par email</button>
+          <button type="button" class="lg-code-link" id="lg-mode-toggle"${lgRtl()}>${lg("mode_otp", "Recevoir un code par email")}</button>
 
           ${
             import.meta.env.DEV
@@ -383,11 +564,11 @@ function template() {
               : ""
           }
 
-          <p class="lg-foot">
-            Pas encore de compte ? <a href="/#/creer-compte">Crée ton compte moniteur</a>
+          <p class="lg-foot"${lgRtl()}>
+            ${lg("foot1", "Pas encore de compte ?")} <a href="/#/creer-compte">${lg("foot1_link", "Crée ton compte moniteur")}</a>
           </p>
-          <p class="lg-foot">
-            Élève avec un code moniteur ? <a href="/#/rejoindre">Rejoins ton moniteur</a>
+          <p class="lg-foot"${lgRtl()}>
+            ${lg("foot2", "Élève avec un code moniteur ?")} <a href="/#/rejoindre">${lg("foot2_link", "Rejoins ton moniteur")}</a>
           </p>
         </form>
       </main>
@@ -504,20 +685,20 @@ function wire(root) {
       pwdField.style.display = "";
       otpField.style.display = "none";
       rowRemember.style.display = "";
-      submitBtn.textContent = "Se connecter";
-      modeToggle.textContent = "Recevoir un code par email";
+      submitBtn.textContent = lg("submit", "Se connecter");
+      modeToggle.textContent = lg("mode_otp", "Recevoir un code par email");
     } else if (mode === "otp-request") {
       pwdField.style.display = "none";
       otpField.style.display = "none";
       rowRemember.style.display = "none";
-      submitBtn.textContent = "Envoyer le code";
-      modeToggle.textContent = "← Utiliser mon mot de passe";
+      submitBtn.textContent = lg("send_code", "Envoyer le code");
+      modeToggle.textContent = lg("mode_pwd", "← Utiliser mon mot de passe");
     } else if (mode === "otp-verify") {
       pwdField.style.display = "none";
       otpField.style.display = "";
       rowRemember.style.display = "none";
-      submitBtn.textContent = "Vérifier le code";
-      modeToggle.textContent = "← Utiliser mon mot de passe";
+      submitBtn.textContent = lg("verify_code", "Vérifier le code");
+      modeToggle.textContent = lg("mode_pwd", "← Utiliser mon mot de passe");
       setTimeout(() => otpIn.focus(), 100);
     }
   }
@@ -535,13 +716,44 @@ function wire(root) {
     pwToggle.setAttribute("aria-pressed", String(show));
     pwToggle.setAttribute(
       "aria-label",
-      show ? "Masquer le mot de passe" : "Afficher le mot de passe",
+      show
+        ? lg("pwd_hide", "Masquer le mot de passe")
+        : lg("pwd_show", "Afficher le mot de passe"),
     );
+  });
+
+  // Sélecteur de langue (coque avant-login) : choix EXPLICITE → applyLang
+  // (persiste permigo_lang + event) puis re-rendu de la page, saisie conservée.
+  root.querySelectorAll(".lg-lang").forEach((b) => {
+    b.addEventListener("click", () => {
+      const l = b.dataset.lang;
+      if (!l || l === lgLang()) return;
+      const keep = {
+        email: emailIn.value,
+        pwd: pwdIn.value,
+        remember: remember.checked,
+      };
+      try {
+        localStorage.setItem(LANG_EXPLICIT_KEY, "1");
+      } catch {
+        /* mode privé */
+      }
+      applyLang(l);
+      unmount();
+      mount(root);
+      const em = root.querySelector("#lg-email");
+      const pw = root.querySelector("#lg-pwd");
+      const rm = root.querySelector("#lg-remember");
+      if (em && keep.email) em.value = keep.email;
+      if (pw && keep.pwd) pw.value = keep.pwd;
+      if (rm) rm.checked = keep.remember;
+    });
   });
 
   // Forgot password = bascule en mode OTP
   root.querySelector("#lg-forgot").addEventListener("click", () => {
-    if (!emailIn.value.trim()) toast("Saisis ton email d'abord", "info");
+    if (!emailIn.value.trim())
+      toast(lg("email_first", "Saisis ton email d'abord"), "info");
     setMode("otp-request");
   });
 
@@ -554,7 +766,10 @@ function wire(root) {
     }
     const rl = checkRateLimit("otp", email, 3, 5 * 60_000);
     if (!rl.allowed) {
-      errEl.textContent = `Trop de demandes — réessaye dans ${formatWaitTime(rl.wait)}`;
+      errEl.textContent = lg(
+        "err_requests",
+        `Trop de demandes — réessaye dans ${formatWaitTime(rl.wait)}`,
+      ).replace("{t}", formatWaitTime(rl.wait));
       return;
     }
     recordAttempt("otp", email);
@@ -562,8 +777,11 @@ function wire(root) {
       ? await getTurnstileToken("otp")
       : null;
     const r = await loginWithOtp(email, { captchaToken });
-    if (r.ok) toast("Nouveau code envoyé", "success");
-    else errEl.textContent = esc(r.error || "Erreur envoi");
+    if (r.ok) toast(lg("code_resent", "Nouveau code envoyé"), "success");
+    else
+      errEl.textContent = esc(
+        translateAuthError(r.error) || lg("err_send", "Erreur envoi"),
+      );
   });
 
   // ── Bouton Google OFFICIEL (Google Identity Services) ──
@@ -618,7 +836,8 @@ function wire(root) {
           } catch (e) {
             console.error("[login] google id-token", e);
             toast(
-              translateAuthError(e?.message) || "Connexion Google impossible",
+              translateAuthError(e?.message) ||
+                lg("g_fail", "Connexion Google impossible"),
               "error",
               4000,
             );
@@ -632,7 +851,7 @@ function wire(root) {
         text: "continue_with",
         shape: "pill",
         logo_alignment: "left",
-        locale: "fr",
+        locale: lgLang(),
         width: Math.min(gsiBox.clientWidth || 320, 380),
       });
       // Rendu OK (origine autorisée, script chargé) → le repli disparaît.
@@ -646,7 +865,7 @@ function wire(root) {
   // OAuth buttons
   root.querySelectorAll("[data-oauth]").forEach((b) => {
     b.addEventListener("click", async () => {
-      if (!sb) return toast("Auth non configurée", "error");
+      if (!sb) return toast(lg("auth_off", "Auth non configurée"), "error");
       const provider = b.dataset.oauth; // 'google' | 'apple'
       b.disabled = true;
       // skipBrowserRedirect : on récupère l'URL sans quitter la page, pour
@@ -667,7 +886,8 @@ function wire(root) {
       };
       if (error || !data?.url) {
         return softFail(
-          translateAuthError(error?.message) || "Erreur de connexion Google",
+          translateAuthError(error?.message) ||
+            lg("g_err", "Erreur de connexion Google"),
         );
       }
       try {
@@ -675,7 +895,10 @@ function wire(root) {
         const probe = await fetch(data.url, { redirect: "manual" });
         if (probe.status === 400 || probe.status === 404) {
           return softFail(
-            "Connexion Google pas encore activée — utilise ton email en attendant.",
+            lg(
+              "g_off",
+              "Connexion Google pas encore activée — utilise ton email en attendant.",
+            ),
           );
         }
       } catch {
@@ -710,7 +933,7 @@ function wire(root) {
 
     const email = emailIn.value.trim();
     if (!email) {
-      errEl.textContent = "Email requis";
+      errEl.textContent = lg("err_email", "Email requis");
       shake();
       return;
     }
@@ -723,7 +946,10 @@ function wire(root) {
           : "login";
     const rl = checkRateLimit(rlAction, email, 5, 5 * 60_000);
     if (!rl.allowed) {
-      errEl.textContent = `Trop d'essais — réessaye dans ${formatWaitTime(rl.wait)}`;
+      errEl.textContent = lg(
+        "err_attempts",
+        `Trop d'essais — réessaye dans ${formatWaitTime(rl.wait)}`,
+      ).replace("{t}", formatWaitTime(rl.wait));
       shake();
       return;
     }
@@ -737,7 +963,10 @@ function wire(root) {
         ? await getTurnstileToken(rlAction)
         : null;
       if (isTurnstileEnabled() && !captchaToken) {
-        errEl.textContent = "Vérification anti-bot échouée — réessaye";
+        errEl.textContent = lg(
+          "err_bot",
+          "Vérification anti-bot échouée — réessaye",
+        );
         shake();
         return;
       }
@@ -745,7 +974,7 @@ function wire(root) {
       if (mode === "password") {
         const pwd = pwdIn.value;
         if (!pwd) {
-          errEl.textContent = "Mot de passe requis";
+          errEl.textContent = lg("err_pwd", "Mot de passe requis");
           shake();
           return;
         }
@@ -754,7 +983,8 @@ function wire(root) {
         });
         if (!ok) {
           errEl.textContent = esc(
-            translateAuthError(error) || "Identifiants invalides",
+            translateAuthError(error) ||
+              lg("err_creds", "Identifiants invalides"),
           );
           shake();
           return;
@@ -766,30 +996,33 @@ function wire(root) {
         // (ex. compte owner) faisait planter `null.split()` → le login réussissait
         // mais afterLogin() n'était jamais appelé (« rien ne se passe »).
         const greetName = (profile.prenom || profile.nom || "").split(" ")[0];
-        toast(`Bonjour ${esc(greetName)}`.trim(), "success");
+        toast(`${lg("hello", "Bonjour")} ${esc(greetName)}`.trim(), "success");
         afterLogin();
       } else if (mode === "otp-request") {
         const r = await loginWithOtp(email, { captchaToken });
         if (!r.ok) {
           errEl.textContent = esc(
-            translateAuthError(r.error) || "Erreur envoi",
+            translateAuthError(r.error) || lg("err_send", "Erreur envoi"),
           );
           shake();
           return;
         }
-        toast("Code envoyé — vérifie ta boîte mail", "success");
+        toast(
+          lg("code_sent", "Code envoyé — vérifie ta boîte mail"),
+          "success",
+        );
         setMode("otp-verify");
       } else if (mode === "otp-verify") {
         const token = otpIn.value.trim();
         if (!/^\d{6}$/.test(token)) {
-          errEl.textContent = "Code à 6 chiffres requis";
+          errEl.textContent = lg("err_code6", "Code à 6 chiffres requis");
           shake();
           return;
         }
         const r = await verifyOtp(email, token);
         if (!r.ok) {
           errEl.textContent = esc(
-            translateAuthError(r.error) || "Code invalide",
+            translateAuthError(r.error) || lg("err_code", "Code invalide"),
           );
           shake();
           return;
@@ -797,17 +1030,18 @@ function wire(root) {
         resetRateLimit("otp", email);
         resetRateLimit("otp-verify", email);
         toast(
-          `Bonjour ${esc((r.profile.prenom || r.profile.nom || "").split(" ")[0])}`,
+          `${lg("hello", "Bonjour")} ${esc((r.profile.prenom || r.profile.nom || "").split(" ")[0])}`,
           "success",
         );
         afterLogin();
       }
     } finally {
       submitBtn.disabled = false;
-      if (mode === "password") submitBtn.textContent = "Se connecter";
+      if (mode === "password")
+        submitBtn.textContent = lg("submit", "Se connecter");
       else if (mode === "otp-request")
-        submitBtn.textContent = "Envoyer le code";
-      else submitBtn.textContent = "Vérifier le code";
+        submitBtn.textContent = lg("send_code", "Envoyer le code");
+      else submitBtn.textContent = lg("verify_code", "Vérifier le code");
     }
   });
 
