@@ -9,7 +9,7 @@ import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { promptInstallAtValueMoment } from "@/components/common/install-nudge.js";
 import { toast } from "@/components/common/toast.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { icon } from "@/utils/icons.js";
@@ -652,7 +652,7 @@ function ddOptsHtml(list) {
     : list
         .map((e, i) => {
           const sel = e.id === _eleve;
-          return `<button class="vs-dd-opt${sel ? " sel" : ""}" type="button" role="option" aria-selected="${sel}" data-eleve="${esc(e.id)}" style="animation-delay:${Math.min(i, 8) * 28}ms">
+          return `<button class="vs-dd-opt${sel ? " sel" : ""}" type="button" role="option" aria-selected="${sel}" data-eleve="${escAttr(e.id)}" style="animation-delay:${Math.min(i, 8) * 28}ms">
               <span class="vs-dd-av">${renderUserAvatar({ avatar_url: e.avatar_url, prenom: e.prenom, nom: e.nom }, 32)}</span>
               <span class="vs-dd-name">${esc(fmtName(`${e.prenom || ""} ${e.nom || ""}`))}</span>
               ${provenanceBadge(e.provenance)}
@@ -675,7 +675,7 @@ function renderEleveDropdown() {
   const search =
     _eleves.length > 6
       ? `<div class="vs-dd-search"><span class="vs-search-ico">${icon("search", { size: 14, strokeWidth: 2.2 })}</span>
-         <input class="vs-search" id="vs-dd-search" type="search" placeholder="Chercher…" value="${esc(_query)}" autocomplete="off" aria-label="Chercher un élève"></div>`
+         <input class="vs-search" id="vs-dd-search" type="search" placeholder="Chercher…" value="${escAttr(_query)}" autocomplete="off" aria-label="Chercher un élève"></div>`
       : "";
 
   const opts = ddOptsHtml(list);
@@ -756,7 +756,7 @@ function renderComps() {
       .map((sub) => {
         const locked = _acquisSet.has(sub.c);
         const current = locked ? "acquis" : _picked.get(sub.c) || null;
-        return `<button class="vl-row${current ? " on" : ""}${locked ? " locked" : ""}" type="button"${locked ? ' disabled aria-disabled="true"' : ""} data-comp="${esc(sub.c)}">
+        return `<button class="vl-row${current ? " on" : ""}${locked ? " locked" : ""}" type="button"${locked ? ' disabled aria-disabled="true"' : ""} data-comp="${escAttr(sub.c)}">
           <span class="vl-code">${esc(sub.c)}</span>
           <span class="vl-lbl">${esc(sub.n)}</span>
           ${statutPill(current)}
@@ -764,7 +764,7 @@ function renderComps() {
       })
       .join("");
     return `<section class="vl-cat${open ? "" : " closed"}">
-      <button class="vl-cat-hd" type="button" data-cat="${esc(cat.id)}" aria-expanded="${open}">
+      <button class="vl-cat-hd" type="button" data-cat="${escAttr(cat.id)}" aria-expanded="${open}">
         <span class="vl-cn">${esc(cat.id)}</span>
         <span class="vl-nm">${esc(cat.name)}</span>
         <span class="vl-pr"><span class="vl-bar"><i style="width:${p.pct}%"></i></span><span class="vl-ct">${p.evald}/${p.total}</span></span>
@@ -1174,7 +1174,7 @@ function showSessionSuccess(prenom, nNew, totalAcquis, validatedCodes, crText) {
             .map(
               (
                 s,
-              ) => `<button type="button" class="vs-revsugg-chip" data-code="${esc(s.code)}" aria-pressed="${s.checked}">
+              ) => `<button type="button" class="vs-revsugg-chip" data-code="${escAttr(s.code)}" aria-pressed="${s.checked}">
             <span class="vs-revsugg-check">${icon("check", { size: 14, strokeWidth: 3, color: "currentColor" })}</span>
             <span class="vs-revsugg-txt">
               <span class="vs-revsugg-nom">${esc(s.nom)}</span>

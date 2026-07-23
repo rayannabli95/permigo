@@ -7,7 +7,7 @@
 //   - Prochains jalons (série / mondes)
 // ═══════════════════════════════════════════════════════════════
 import { getCurUser } from "@/auth/cur-user.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { icon } from "@/utils/icons.js";
@@ -335,14 +335,14 @@ function renderCard(chest) {
 
   return `
   <div class="mc-card${canOpen ? " mc-can-open" : " mc-opened"}"
-       data-chest-type="${esc(chest.chest_type)}"
-       data-chest-id="${esc(chest.id)}"
-       data-tier="${esc(meta.tier)}"
+       data-chest-type="${escAttr(chest.chest_type)}"
+       data-chest-id="${escAttr(chest.id)}"
+       data-tier="${escAttr(meta.tier)}"
        role="${canOpen ? "button" : "article"}"
        tabindex="${canOpen ? "0" : "-1"}"
        aria-label="${canOpen ? `Ouvrir ${esc(meta.label)}` : `Déjà ouvert : ${esc(meta.label)}`}">
     <div class="mc-thumb" style="background:${grad}">
-      <img src="${meta.image}" alt="${esc(meta.label)}" loading="lazy"
+      <img src="${meta.image}" alt="${escAttr(meta.label)}" loading="lazy"
            onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
            style="width:64px;height:64px;object-fit:contain;filter:drop-shadow(0 4px 12px rgba(0,0,0,.35))">
       <span style="display:none" aria-hidden="true">${_chestMed(chest.chest_type, meta.tier, 56)}</span>

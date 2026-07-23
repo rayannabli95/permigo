@@ -913,7 +913,7 @@ function renderPrets({ prets }) {
         ? `manque : ${esc(e.manque.join(", "))}${nbManque > 3 ? ` + ${nbManque - 3} autres` : ""}`
         : "livret complet";
       return `
-      <div class="st-row" role="button" tabindex="0" data-eleve-id="${esc(e.id)}"
+      <div class="st-row" role="button" tabindex="0" data-eleve-id="${escAttr(e.id)}"
            aria-label="Livret de ${nomAttr(e)} — ${e.acquis} compétence${e.acquis > 1 ? "s" : ""} acquise${e.acquis > 1 ? "s" : ""} sur ${REMC_TOTAL}">
         <div style="flex-shrink:0">${renderUserAvatar(e, 36)}</div>
         <div class="st-row-body">
@@ -946,7 +946,7 @@ function renderSilencieux({ silencieux }) {
       const depuis =
         e.daysAgo != null ? `depuis ${e.daysAgo} j` : "jamais vu sur l'app";
       return `
-      <div class="st-row" role="button" tabindex="0" data-eleve-id="${esc(e.id)}"
+      <div class="st-row" role="button" tabindex="0" data-eleve-id="${escAttr(e.id)}"
            aria-label="Livret de ${nomAttr(e)} — silencieux ${escAttr(depuis)}">
         <div style="flex-shrink:0">${renderUserAvatar(e, 36)}</div>
         <div class="st-row-body"><div class="st-row-nom">${nm}</div></div>
@@ -1006,7 +1006,7 @@ function renderRevisions({
     .map((e) => {
       const nm = nomCourt(e);
       return `
-      <div class="st-row" role="button" tabindex="0" data-eleve-id="${esc(e.id)}"
+      <div class="st-row" role="button" tabindex="0" data-eleve-id="${escAttr(e.id)}"
            aria-label="Livret de ${nomAttr(e)} — ${e.nQuiz} quiz ces 7 derniers jours">
         <div style="flex-shrink:0">${renderUserAvatar(e, 36)}</div>
         <div class="st-row-body"><div class="st-row-nom">${nm}</div></div>

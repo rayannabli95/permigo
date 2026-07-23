@@ -10,7 +10,7 @@
  *   `<div>${renderChest({ worldNum: 1, worldName: '...', opened: false })}</div>`
  */
 
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { icon } from "@/utils/icons.js";
 import { volantImg } from "@/utils/volant.js";
 import { flyVolants } from "@/components/eleve/volant-reward.js";
@@ -113,7 +113,7 @@ export function openChestModal({ worldNum, worldName, onClaim }) {
         <div class="chest-modal-spotlight"></div>
         <div class="chest-modal-burst" aria-hidden="true"></div>
         <div class="chest-modal-img-wrap">
-          <img class="chest-modal-img" src="${chestImage(worldNum)}" alt="${esc(tier.name)}"
+          <img class="chest-modal-img" src="${chestImage(worldNum)}" alt="${escAttr(tier.name)}"
                onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
           <span class="chest-modal-emoji" style="display:none">🎁</span>
         </div>

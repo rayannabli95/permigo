@@ -3,7 +3,7 @@
 // Monté par main.js avant le chrome tant que parental_consent_required
 // est vrai et parental_consent_given_at est null.
 // ═══════════════════════════════════════════════════════════════
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { icon } from "@/utils/icons.js";
 import { track } from "@/services/analytics.js";
 import { logout } from "@/auth/auth.js";
@@ -45,7 +45,7 @@ export function mountConsentBlocked(root, me) {
       ${
         link
           ? `
-        <div class="cb-link-row"><input class="cb-input" id="cb-link" type="text" readonly value="${esc(link)}" /></div>
+        <div class="cb-link-row"><input class="cb-input" id="cb-link" type="text" readonly value="${escAttr(link)}" /></div>
         <button class="cb-btn cb-btn-primary" id="cb-copy" type="button">${icon("copy", { size: 16 })} Copier le lien pour mon parent</button>
       `
           : `<p class="cb-sub">Demande à ton auto-école de relancer la validation.</p>`

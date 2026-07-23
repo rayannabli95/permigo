@@ -786,7 +786,7 @@ async function renderInto(root, _me) {
       avHtml = `<span style="width:36px;height:36px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font:800 13px 'Inter',sans-serif;color:#fff;flex-shrink:0;">${inits}</span>`;
     }
 
-    return `<div class="aj-eleve-card" data-eleve-id="${esc(e.id)}" role="button" tabindex="0" aria-label="Livret de ${nom}">
+    return `<div class="aj-eleve-card" data-eleve-id="${escAttr(e.id)}" role="button" tabindex="0" aria-label="Livret de ${nom}">
       <div class="aj-eleve-av">${avHtml}</div>
       <div class="aj-eleve-body">
         <div class="aj-eleve-nom-row">

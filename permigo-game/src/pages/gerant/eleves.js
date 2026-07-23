@@ -7,7 +7,7 @@
 import { sb } from "@/auth/auth.js";
 import { icon } from "@/utils/icons.js";
 import { getCurUser } from "@/auth/cur-user.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { toast } from "@/components/common/toast.js";
 import { track } from "@/services/analytics.js";
 import { REMC_TOTAL } from "@/data/remc.js";
@@ -426,7 +426,7 @@ function renderCards(eleves) {
         : "Pas encore commencé";
 
       return `
-    <div class="el-card" data-id="${esc(e.id)}">
+    <div class="el-card" data-id="${escAttr(e.id)}">
       <div class="el-av" style="background:${gradient}">${esc(initials)}</div>
       <div class="el-info">
         <div class="el-name">${esc(fullName)}</div>

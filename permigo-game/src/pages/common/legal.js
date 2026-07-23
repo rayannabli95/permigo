@@ -29,11 +29,11 @@ const CONTENT = {
       // ⚠️ TEXTE À FAIRE VALIDER PAR UN JURISTE / DPO avant déploiement large.
       {
         heading: "Mineurs de moins de 15 ans",
-        body: "Conformément à l'article 8 du RGPD et à la loi Informatique et Libertés, l'inscription d'un élève de moins de 15 ans requiert le consentement du ou des titulaires de l'autorité parentale. Tant que ce consentement n'a pas été recueilli, le compte de l'élève reste bloqué. Le parent ou tuteur peut retirer son consentement à tout moment en écrivant à dpo@permigo.fr ; le compte est alors désactivé et les données supprimées ou anonymisées.",
+        body: "Conformément à l'article 8 du RGPD et à la loi Informatique et Libertés, l'inscription d'un élève de moins de 15 ans requiert le consentement du ou des titulaires de l'autorité parentale. Tant que ce consentement n'a pas été recueilli, le compte de l'élève reste bloqué. Le parent ou tuteur peut retirer son consentement à tout moment en écrivant à dpo@permigo.fr ; le compte est alors désactivé, les données privées (email, préférences, messages, notifications) sont supprimées et le profil est anonymisé : le prénom disparaît, les statistiques d'apprentissage deviennent anonymes.",
       },
       {
         heading: "Conservation",
-        body: "Données conservées pendant la durée de l'abonnement + 3 ans. Suppression sur demande à dpo@permigo.fr ou via Paramètres → Supprimer mon compte.",
+        body: "Données conservées pendant la durée de l'abonnement + 3 ans. Suppression via Paramètres → Supprimer mon compte ou sur demande à dpo@permigo.fr : les données privées (email, préférences, messages, notifications) sont supprimées immédiatement et le profil est anonymisé — le prénom disparaît, les statistiques d'apprentissage sont conservées sous forme anonyme. L'effacement du compte de connexion s'obtient auprès de dpo@permigo.fr (traité sous 30 jours).",
       },
       {
         heading: "Vos droits",

@@ -10,7 +10,7 @@
 // Cadrage VALIDATION : « avant sa prochaine validation », jamais de créneau.
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { toast } from "@/components/common/toast.js";
 import { track } from "@/services/analytics.js";
 import { getCurUser } from "@/auth/cur-user.js";
@@ -51,7 +51,7 @@ export function mountCiblerRevision(root, eleveId) {
 
   const opts = FICHES.map(
     (f) =>
-      `<option value="${esc(f.code)}">${esc(f.code)} — ${esc(f.titre)}</option>`,
+      `<option value="${escAttr(f.code)}">${esc(f.code)} — ${esc(f.titre)}</option>`,
   ).join("");
 
   const el = document.createElement("section");

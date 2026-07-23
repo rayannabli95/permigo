@@ -7,7 +7,7 @@ import { sb } from "@/auth/auth.js";
 import { icon } from "@/utils/icons.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { toast } from "@/components/common/toast.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { emptyState } from "@/components/common/empty-state.js";
 
@@ -142,7 +142,7 @@ function renderThreadRow(thread, me) {
   const ts = thread.last_message_at ? relativeTime(thread.last_message_at) : "";
 
   return `
-<div class="msg-thread-row" data-partner="${esc(thread.partner_id)}">
+<div class="msg-thread-row" data-partner="${escAttr(thread.partner_id)}">
   <div class="msg-avatar">${esc(initials)}</div>
   <div class="msg-thread-body">
     <div class="msg-thread-top">

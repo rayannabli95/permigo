@@ -5,7 +5,7 @@
 // Usage : mountDailyQuests(root) — inject avant .streak-pro
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { icon } from "@/utils/icons.js";
 import { ill, illMask } from "@/utils/illustrations.js";
@@ -319,9 +319,9 @@ function renderCard(q) {
         : "";
 
   return `
-    <div class="dq-card ${stCls}" data-quest-id="${esc(String(q.quest_id))}"
+    <div class="dq-card ${stCls}" data-quest-id="${escAttr(String(q.quest_id))}"
          role="${ready ? "button" : "article"}" tabindex="${ready ? "0" : "-1"}"
-         aria-label="${esc(cleanQuestTitle(q.title))}${ready ? " — réclamer la récompense" : ""}">
+         aria-label="${escAttr(cleanQuestTitle(q.title))}${ready ? " — réclamer la récompense" : ""}">
       <div class="dq-ico" style="background:${cat.color}18">
         ${
           cat.img

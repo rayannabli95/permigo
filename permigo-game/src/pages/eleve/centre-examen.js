@@ -7,7 +7,7 @@
 // cartes pièges avec glow, sélecteur chips premium.
 // ═══════════════════════════════════════════════════════════════
 import { getCurUser } from "@/auth/cur-user.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { icon } from "@/utils/icons.js";
 import { track } from "@/services/analytics.js";
 import {
@@ -765,7 +765,7 @@ function renderChips(activeSlug) {
   const chips = listCentres()
     .map(
       (c) =>
-        `<button class="cea-chip${c.slug === activeSlug ? " active" : ""}" data-slug="${esc(c.slug)}" type="button">
+        `<button class="cea-chip${c.slug === activeSlug ? " active" : ""}" data-slug="${escAttr(c.slug)}" type="button">
            ${esc(c.nom)} <span style="opacity:.65;font-weight:600">${esc(c.deptNum)}</span>
          </button>`,
     )
@@ -808,7 +808,7 @@ function renderFiche(c) {
           `<div class="cea-acces-item">${icon(a.ico, { size: 16 })} <span>${esc(a.texte)}</span></div>`,
       )
       .join("")}
-    <a class="cea-maps-btn" href="${esc(mapsUrl(c))}" target="_blank" rel="noopener" data-act="maps">
+    <a class="cea-maps-btn" href="${escAttr(mapsUrl(c))}" target="_blank" rel="noopener" data-act="maps">
       ${icon("compass", { size: 18 })} Ouvrir dans le plan
     </a>
   </div>

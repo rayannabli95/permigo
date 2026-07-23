@@ -7,7 +7,7 @@
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { toast } from "@/components/common/toast.js";
 import { track } from "@/services/analytics.js";
 import { icon } from "@/utils/icons.js";
@@ -743,9 +743,9 @@ function renderDonut(cohorts) {
     const largeArc = seg.pct > 0.5 ? 1 : 0;
 
     if (seg.pct >= 0.99) {
-      svgPaths += `<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${seg.color}" stroke-width="18" data-cohort="${esc(seg.key)}"/>`;
+      svgPaths += `<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${seg.color}" stroke-width="18" data-cohort="${escAttr(seg.key)}"/>`;
     } else {
-      svgPaths += `<path d="M ${x1} ${y1} A ${R} ${R} 0 ${largeArc} 1 ${x2} ${y2}" fill="none" stroke="${esc(seg.color)}" stroke-width="18" stroke-linecap="butt" data-cohort="${esc(seg.key)}" style="cursor:pointer"/>`;
+      svgPaths += `<path d="M ${x1} ${y1} A ${R} ${R} 0 ${largeArc} 1 ${x2} ${y2}" fill="none" stroke="${escAttr(seg.color)}" stroke-width="18" stroke-linecap="butt" data-cohort="${escAttr(seg.key)}" style="cursor:pointer"/>`;
     }
   }
 
@@ -756,7 +756,7 @@ function renderDonut(cohorts) {
     const meta = COHORT_META[key] ?? { label: key, color: MUTED };
     const pct = total > 0 ? Math.round((count / total) * 100) : 0;
     return `
-      <div class="ck-legend-row" data-cohort="${esc(key)}">
+      <div class="ck-legend-row" data-cohort="${escAttr(key)}">
         <div class="ck-legend-dot" style="background:${esc(meta.color)}"></div>
         <div class="ck-legend-label">${esc(meta.label)}</div>
         <div class="ck-legend-val">${count}</div>
@@ -786,7 +786,7 @@ function renderAlert(alert) {
   };
   const c = colors[alert.severity] ?? colors.low;
   return `
-    <div class="ck-alert" data-alert-id="${esc(alert.id ?? "")}" style="--alert-color:${c.color};--alert-rgb:${c.rgb}">
+    <div class="ck-alert" data-alert-id="${escAttr(alert.id ?? "")}" style="--alert-color:${c.color};--alert-rgb:${c.rgb}">
       <div class="ck-alert-ico">${icon(c.icon, { size: 16 })}</div>
       <div class="ck-alert-body">
         <div class="ck-alert-title">${esc(alert.label ?? alert.title ?? alert.message ?? "Alerte")}</div>
@@ -809,7 +809,7 @@ function renderMon(mon, idx, maxVal) {
   const valLabel = nVal > 0 ? `${nVal} valid.` : `${hrs}h`;
 
   return `
-    <div class="ck-mon-row" data-moniteur-id="${esc(mon.id ?? "")}">
+    <div class="ck-mon-row" data-moniteur-id="${escAttr(mon.id ?? "")}">
       <div class="ck-mon-rank">${idx + 1}</div>
       <div class="ck-mon-av">${esc(initials)}</div>
       <div class="ck-mon-info">
@@ -892,7 +892,7 @@ function wire(root, me) {
                     const ini =
                       ((p[0] ?? "") + (n[0] ?? "")).toUpperCase() || "?";
                     const val = e.validations_acquis ?? e.competences ?? 0;
-                    return `<div class="ck-bs-eleve" data-eleve-id="${esc(e.id ?? "")}">
+                    return `<div class="ck-bs-eleve" data-eleve-id="${escAttr(e.id ?? "")}">
                   <div class="ck-bs-av">${esc(ini)}</div>
                   <div class="ck-bs-eleve-name">${esc(p)} ${esc(n)}</div>
                   <div class="ck-bs-eleve-val">${val}/31</div>

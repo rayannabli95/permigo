@@ -6,7 +6,7 @@
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { toast } from "@/components/common/toast.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { REMC, REMC_TOTAL } from "@/data/remc.js";
@@ -1208,7 +1208,7 @@ function renderMonde(cat) {
     cat.subs.length > 0 ? Math.round((acquis / cat.subs.length) * 100) : 0;
 
   return `
-    <div class="lr-monde" role="group" aria-label="${esc(cat.name)} — ${acquis}/${cat.subs.length} acquises">
+    <div class="lr-monde" role="group" aria-label="${escAttr(cat.name)} — ${acquis}/${cat.subs.length} acquises">
       <div class="lr-monde-hd" style="background:${col.bg}; border-color:${col.border};">
         <span class="lr-monde-med">${medallion(...(MONDE_MED[cat.id] || MONDE_MED.C1), { size: 30 })}</span>
         <span class="lr-monde-nm">${esc(cat.name)}</span>
@@ -1247,8 +1247,8 @@ function renderComp(sub) {
 
   const medKey = STATUT_MED[statut];
   return `
-    <div class="lr-comp" data-comp-id="${esc(sub.c)}" data-comp-nom="${esc(sub.n)}"
-         role="button" tabindex="0" aria-label="${esc(sub.n)} — ${selfVal ? "Auto-validée par l'élève, à confirmer" : cfg.label}. Appuyer pour évaluer cette compétence">
+    <div class="lr-comp" data-comp-id="${escAttr(sub.c)}" data-comp-nom="${escAttr(sub.n)}"
+         role="button" tabindex="0" aria-label="${escAttr(sub.n)} — ${selfVal ? "Auto-validée par l'élève, à confirmer" : cfg.label}. Appuyer pour évaluer cette compétence">
       ${medKey ? `<span class="lr-comp-med">${medStatus(medKey, { size: 24 })}</span>` : `<span class="lr-comp-dot" style="background:${cfg.dot}"></span>`}
       <span class="lr-comp-nom">${esc(sub.n)}</span>
       ${badge}
@@ -1380,7 +1380,7 @@ function openSheet(compId, compNom) {
 function renderStatutBtn(statut, ico, lbl) {
   const selected = _sheetStatut === statut;
   return `
-    <button class="lr-statut-btn${selected ? " selected-" + statut : ""}" data-statut="${esc(statut)}">
+    <button class="lr-statut-btn${selected ? " selected-" + statut : ""}" data-statut="${escAttr(statut)}">
       <span class="lr-statut-btn-ico">${ico}</span>
       <span class="lr-statut-btn-lbl">${lbl}</span>
     </button>

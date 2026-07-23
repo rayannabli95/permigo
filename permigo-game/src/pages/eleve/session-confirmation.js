@@ -5,7 +5,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { toast } from "@/components/common/toast.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
@@ -400,7 +400,7 @@ export async function mount(root, sessionId) {
             <div class="sc-hero-av">
               ${
                 mon.avatar_url
-                  ? `<img src="${esc(mon.avatar_url)}" alt="${esc(monPrenom)}" loading="lazy">`
+                  ? `<img src="${escAttr(mon.avatar_url)}" alt="${escAttr(monPrenom)}" loading="lazy">`
                   : esc(initials)
               }
             </div>
@@ -472,7 +472,7 @@ export async function mount(root, sessionId) {
 
     <!-- CTAs sticky -->
     <div class="sc-actions">
-      <button class="sc-btn-confirm" id="sc-confirm-btn" data-session-id="${esc(sessionId)}">
+      <button class="sc-btn-confirm" id="sc-confirm-btn" data-session-id="${escAttr(sessionId)}">
         ${icon("check", { size: 16, strokeWidth: 2.8 })}
         Confirmer ta séance
       </button>

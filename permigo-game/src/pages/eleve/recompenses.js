@@ -41,7 +41,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { haptic } from "@/utils/haptic.js";
 import { getStreak, getMyChests } from "@/utils/game-state.js";
@@ -110,7 +110,7 @@ function byPrestige(a, b) {
 
 function badgeMarkup(def, size) {
   if (def.image) {
-    return `<img src="${esc(def.image)}" alt="" loading="lazy" width="${size}" height="${size}"
+    return `<img src="${escAttr(def.image)}" alt="" loading="lazy" width="${size}" height="${size}"
       onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'"
       style="width:${size}px;height:${size}px;object-fit:contain">
       <span style="display:none">${medallion("trophee", "gold", { size })}</span>`;
@@ -452,7 +452,7 @@ function renderBoutiquePanel(ctx) {
     <a class="rec-gold-card" href="#/boutique" data-track="boutique_vedette">
       <span class="rec-gold-k">Vedette de la boutique</span>
       <div class="rec-star-row">
-        <img class="rec-star-img" src="${esc(vedette.asset_url || "")}" alt="" loading="lazy"
+        <img class="rec-star-img" src="${escAttr(vedette.asset_url || "")}" alt="" loading="lazy"
           onerror="this.style.display='none'">
         <div class="rec-star-txt">
           <div class="rec-star-t">${esc(vedette.name)}</div>
@@ -483,7 +483,7 @@ function renderShopItem(it) {
   return `
   <a class="rec-item" href="#/boutique" data-track="boutique_item">
     <div class="rec-item-vis">
-      <img class="${cover ? "" : "pad"}" src="${esc(it.asset_url || "")}" alt="" loading="lazy" onerror="this.style.display='none'">
+      <img class="${cover ? "" : "pad"}" src="${escAttr(it.asset_url || "")}" alt="" loading="lazy" onerror="this.style.display='none'">
     </div>
     <div class="rec-item-b">
       <div class="rec-item-t">${esc(it.name)}</div>
@@ -545,7 +545,7 @@ function renderCollectionTile(t) {
   <a class="rec-item" href="#/galerie" data-track="collection_item">
     ${t.tag ? `<span class="rec-tag${t.locked ? "" : " gold"}">${esc(t.tag)}</span>` : ""}
     <div class="rec-item-vis${t.locked ? " locked" : ""}">
-      <img class="pad" src="${esc(t.img || "")}" alt="" loading="lazy" onerror="this.style.display='none'">
+      <img class="pad" src="${escAttr(t.img || "")}" alt="" loading="lazy" onerror="this.style.display='none'">
     </div>
     <div class="rec-item-b">
       <div class="rec-item-t">${t.locked ? "???" : esc(t.name)}</div>

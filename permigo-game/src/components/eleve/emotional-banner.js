@@ -10,7 +10,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 
 // ─── Styles ──────────────────────────────────────────────────────
@@ -143,10 +143,10 @@ async function markRead(notifId) {
 function renderBanner(notif, content) {
   const tone = content.tone || "gentle";
   return `
-<div class="eb-banner eb-${esc(tone)}" role="alert" aria-live="polite" data-notif-id="${esc(notif.id)}">
+<div class="eb-banner eb-${esc(tone)}" role="alert" aria-live="polite" data-notif-id="${escAttr(notif.id)}">
   <div class="eb-title">${esc(content.title)}</div>
   <div class="eb-body">${esc(content.body)}</div>
-  ${content.cta ? `<a class="eb-cta" href="${esc(content.route || "#")}" data-cta="1">${esc(content.cta)}</a>` : ""}
+  ${content.cta ? `<a class="eb-cta" href="${escAttr(content.route || "#")}" data-cta="1">${esc(content.cta)}</a>` : ""}
   <button class="eb-close" aria-label="Fermer" data-close="1">✕</button>
   <div class="eb-progress" aria-hidden="true"></div>
 </div>`;

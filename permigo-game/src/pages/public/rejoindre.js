@@ -20,7 +20,7 @@
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { icon } from "@/utils/icons.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { getLang, applyLang } from "@/utils/lang.js";
 
@@ -382,7 +382,7 @@ export async function mount(root) {
           <label class="sg-label" for="sg-code">${sgt("code_label", "Code moniteur")}</label>
           <input class="sg-input sg-code-input" id="sg-code" type="text" autocomplete="off"
             autocorrect="off" autocapitalize="characters" spellcheck="false"
-            maxlength="16" placeholder="PERMIS75" value="${esc(prefillCode)}" />
+            maxlength="16" placeholder="PERMIS75" value="${escAttr(prefillCode)}" />
           <div class="sg-help" id="sg-code-help">${sgt("code_help_default", "Demande-le à ton moniteur.")}</div>
         </div>
 
@@ -866,7 +866,7 @@ function renderConsentPending(root, token) {
         <h1 class="sg-title">${sgtR("consent_title", "Presque&nbsp;! On attend l'accord de ton parent")}</h1>
         <p class="sg-sub">${sgtR("consent_sub", "Comme tu as moins de 15 ans, un parent ou tuteur doit donner son accord avant que tu puisses utiliser PermiGo. Envoie-lui ce lien&nbsp;:")}</p>
         <div class="sg-row">
-          <input class="sg-input" id="sg-consent-link" type="text" readonly value="${esc(link)}" />
+          <input class="sg-input" id="sg-consent-link" type="text" readonly value="${escAttr(link)}" />
         </div>
         <button class="sg-btn" id="sg-copy-link" type="button">${icon("copy", { size: 16 })} ${sgt("consent_copy", "Copier le lien")}</button>
         <p class="sg-sub" style="margin-top:16px;margin-bottom:0">${sgt("consent_sub2", "Tu peux le coller dans WhatsApp ou un SMS à ton parent. Dès qu'il valide, ton compte se débloque.")}</p>

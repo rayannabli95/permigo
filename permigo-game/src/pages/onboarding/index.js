@@ -22,7 +22,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser, setCurUser } from "@/auth/cur-user.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { ASSETS } from "@/utils/assets.js";
 import { haptic } from "@/utils/haptic.js";
@@ -289,7 +289,7 @@ export async function mount(root) {
             <div class="ob-card ob-id-card">
               <div>
                 <label class="ob-id-label" for="ob-id-prenom">${ob("id_prenom", "Prénom")}</label>
-                <input class="ob-id-input" id="ob-id-prenom" type="text" autocomplete="given-name" placeholder="${ob("ph_prenom", "Ton prénom")}" value="${esc(idPrenomPrefill)}">
+                <input class="ob-id-input" id="ob-id-prenom" type="text" autocomplete="given-name" placeholder="${ob("ph_prenom", "Ton prénom")}" value="${escAttr(idPrenomPrefill)}">
               </div>
               <div>
                 <label class="ob-id-label" for="ob-id-nom">${ob("id_nom", "Nom")}</label>
@@ -326,13 +326,13 @@ export async function mount(root) {
                   (url, i) => `
                 <button
                   class="ob-av${url === avatar ? " sel" : ""}"
-                  data-url="${esc(url)}"
+                  data-url="${escAttr(url)}"
                   role="radio"
                   aria-checked="${url === avatar ? "true" : "false"}"
-                  aria-label="${esc(obR("avatar_item_aria", "Avatar {n}").replace("{n}", i + 1))}"
+                  aria-label="${escAttr(obR("avatar_item_aria", "Avatar {n}").replace("{n}", i + 1))}"
                   type="button"
                 >
-                  <img class="ob-av-img" src="${esc(url)}" alt="" loading="lazy" />
+                  <img class="ob-av-img" src="${escAttr(url)}" alt="" loading="lazy" />
                   <span class="ob-av-check" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
                   </span>
@@ -348,10 +348,10 @@ export async function mount(root) {
                 (c) => `
                 <button
                   class="ob-color${c.id === accentId ? " sel" : ""}"
-                  data-accent="${esc(c.id)}"
+                  data-accent="${escAttr(c.id)}"
                   role="radio"
                   aria-checked="${c.id === accentId ? "true" : "false"}"
-                  aria-label="${esc(c.name)}"
+                  aria-label="${escAttr(c.name)}"
                   type="button"
                   style="--sw:${esc(c.a)};--sw-dk:${esc(c.adk)}"
                 >

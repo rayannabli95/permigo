@@ -6,7 +6,7 @@
 import { sb } from "@/auth/auth.js";
 import { toast } from "@/components/common/toast.js";
 import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { icon } from "@/utils/icons.js";
 import { playNotify } from "@/utils/sound.js";
@@ -406,11 +406,11 @@ export function openInviteEleveModal(me) {
           <div class="me-inv-link-email ${r.error ? "err" : ""}">${esc(r.email)}</div>
           ${
             r.link
-              ? `<div class="me-inv-link-input" title="${esc(r.link)}">${esc(r.link)}</div>
+              ? `<div class="me-inv-link-input" title="${escAttr(r.link)}">${esc(r.link)}</div>
                <div class="me-inv-share-row">
-                 <button class="me-inv-act share" type="button" data-link="${esc(r.link)}">Partager</button>
+                 <button class="me-inv-act share" type="button" data-link="${escAttr(r.link)}">Partager</button>
                  <a class="me-inv-act wa" href="https://wa.me/?text=${encodeURIComponent("Voici ton accès à PermiGo pour suivre ta progression au permis 🚗\n" + r.link)}" target="_blank" rel="noopener">WhatsApp</a>
-                 <button class="me-inv-act copy2" type="button" data-link="${esc(r.link)}">Copier</button>
+                 <button class="me-inv-act copy2" type="button" data-link="${escAttr(r.link)}">Copier</button>
                </div>`
               : `<div class="me-inv-err-msg">${esc(r.error || "Erreur inconnue")}</div>`
           }
@@ -512,7 +512,7 @@ function codeFormHtml(prefill) {
     <div class="me-inv-code-form">
       <input class="me-inv-code-input" data-el="code-input" type="text" maxlength="16"
         autocapitalize="characters" autocomplete="off" spellcheck="false"
-        placeholder="PERMIS75" value="${esc(prefill)}" />
+        placeholder="PERMIS75" value="${escAttr(prefill)}" />
       <button class="me-inv-act share" type="button" data-act="code-save">${prefill ? "Enregistrer" : "Créer"}</button>
     </div>
     <div class="me-inv-code-msg" data-el="code-msg"></div>`;

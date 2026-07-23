@@ -13,7 +13,7 @@
 // showUnlockScreen(config) retourne une Promise résolue à la fermeture
 // ('cta' | 'close').
 // ═══════════════════════════════════════════════════════════════
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { playReward } from "@/utils/sound.js";
 
 const STYLE_ID = "unlock-screen-style";
@@ -388,7 +388,7 @@ function renderStat(s) {
   const cls = `cu-stat-v${s.small ? " sm" : ""}`;
   const inner =
     typeof s.countTo === "number"
-      ? `<span class="cu-num" data-countup="${esc(String(s.countTo))}">0</span>${suffix}`
+      ? `<span class="cu-num" data-countup="${escAttr(String(s.countTo))}">0</span>${suffix}`
       : `${esc(String(s.value ?? ""))}${suffix}`;
   return `<div class="cu-stat"><span class="${cls}">${inner}</span><span class="cu-stat-l">${esc(String(s.label ?? ""))}</span></div>`;
 }

@@ -11,7 +11,7 @@
 // reasons : quiz_fails | old_validation | consolidation_due
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { icon } from "@/utils/icons.js";
@@ -173,7 +173,7 @@ export async function mountRevisionCards(root, { eleveId, limit = 3 }) {
           const reasonKey = r.reason || "old_validation";
           const icoName = REASON_ICONS[reasonKey] || "clock";
           return `
-          <div class="rc-card" data-comp-id="${esc(r.competence_id)}" role="button" tabindex="0">
+          <div class="rc-card" data-comp-id="${escAttr(r.competence_id)}" role="button" tabindex="0">
             <div class="rc-dot rc-dot--${esc(reasonKey)}">
               ${icon(icoName, { size: 18, strokeWidth: 2.2 })}
             </div>

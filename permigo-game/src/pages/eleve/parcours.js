@@ -5,7 +5,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { REMC } from "@/data/remc.js";
 import { WORLDS } from "@/data/worlds.js";
@@ -2254,13 +2254,13 @@ function renderChapterView(
       const ctaCard =
         st === "next"
           ? `<div class="prc-cv-current-call"
-              data-comp="${esc(sub.c)}" data-world-idx="${currentIdx}"
+              data-comp="${escAttr(sub.c)}" data-world-idx="${currentIdx}"
               role="button" tabindex="0"
               aria-label="Étape en cours : ${esc(sub.n)} — Continuer">
             <div class="prc-cv-call-kick">★ Étape en cours</div>
             <div class="prc-cv-call-ct">${esc(sub.n)}</div>
             <button class="prc-cv-cta" type="button"
-                    data-comp="${esc(sub.c)}" data-world-idx="${currentIdx}">
+                    data-comp="${escAttr(sub.c)}" data-world-idx="${currentIdx}">
               Continuer
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" stroke="#3a1c00" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
@@ -2272,7 +2272,7 @@ function renderChapterView(
 
       // Le milestone entier est cliquable (sauf locked) via data-comp
       return `<div class="prc-cv-ms ${side}"
-        ${interactive && st !== "next" ? `data-comp="${esc(sub.c)}" data-world-idx="${currentIdx}" role="button" tabindex="0" aria-label="${esc(sub.n)}"` : ""}
+        ${interactive && st !== "next" ? `data-comp="${escAttr(sub.c)}" data-world-idx="${currentIdx}" role="button" tabindex="0" aria-label="${escAttr(sub.n)}"` : ""}
       >
         <div class="prc-cv-node ${nodeClass}"
           ${interactive && st !== "next" ? "" : ""}

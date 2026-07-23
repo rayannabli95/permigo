@@ -6,7 +6,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { toast } from "@/components/common/toast.js";
 import { track } from "@/services/analytics.js";
 import { labelComp } from "@/utils/remc-label.js";
@@ -797,7 +797,7 @@ function render({
             const fullName = esc(e.prenom || e.nom || "—");
             const pct = Math.round((e.acquis / 31) * 100);
             return `
-          <div class="exam-row" data-eleve-id="${esc(e.id)}">
+          <div class="exam-row" data-eleve-id="${escAttr(e.id)}">
             <div class="exam-name">${fullName}</div>
             <div class="exam-prog">
               <div class="exam-prog-bar"><div class="exam-prog-fill" style="width:${pct}%"></div></div>

@@ -7,7 +7,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { toast } from "@/components/common/toast.js";
@@ -215,14 +215,14 @@ function renderWinsCard(wins) {
   const rows = pending
     .map(
       (w) => `
-    <div class="mrw-wins-row" data-row="${esc(w.claim_code)}">
+    <div class="mrw-wins-row" data-row="${escAttr(w.claim_code)}">
       <div class="mrw-wins-ic" aria-hidden="true">${esc(w.lot_icon || "🎁")}</div>
       <div class="mrw-wins-tx">
         <b>${esc(w.lot_label || "Cadeau")}</b>
         <span>Gagné par ${esc(w.eleve || "un élève")}</span>
       </div>
       <span class="mrw-wins-code">${esc(w.claim_code)}</span>
-      <button class="mrw-wins-btn" data-remis="${esc(w.claim_code)}">Remis</button>
+      <button class="mrw-wins-btn" data-remis="${escAttr(w.claim_code)}">Remis</button>
     </div>`,
     )
     .join("");
@@ -347,7 +347,7 @@ function openEditor(root, me, prenom, initiale) {
       <input type="text" id="mrw-lot-name" maxlength="40" placeholder="Ex : café offert, bon carburant…" autocomplete="off">
       <label style="margin-top:12px">Icône</label>
       <div class="mrw-icons" id="mrw-icons">
-        ${ICON_CHOICES.map((ic, k) => `<button type="button" class="mrw-ico-btn ${k === 0 ? "on" : ""}" data-ico="${esc(ic)}">${esc(ic)}</button>`).join("")}
+        ${ICON_CHOICES.map((ic, k) => `<button type="button" class="mrw-ico-btn ${k === 0 ? "on" : ""}" data-ico="${escAttr(ic)}">${esc(ic)}</button>`).join("")}
       </div>
       <div class="mrw-editor-actions">
         <button class="mrw-btn-add" id="mrw-ed-add" disabled>Ajouter</button>
