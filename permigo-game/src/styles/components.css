@@ -120,9 +120,11 @@ body.has-chrome.no-top-chrome #app { padding-top: 0; }
    plus profond sur sombre). ─── */
 @media (min-width: 768px) {
   body {
+    /* Halos assez présents pour lire « décor voulu » — à 12 %/7 % l'écran
+       passait pour du gris plat (audit DA/UX 23/07, vue moniteur desktop). */
     background:
-      radial-gradient(120% 85% at 50% -12%, color-mix(in srgb, var(--a) 12%, transparent), transparent 58%),
-      radial-gradient(90% 60% at 100% 100%, color-mix(in srgb, var(--a) 7%, transparent), transparent 60%),
+      radial-gradient(120% 85% at 50% -12%, color-mix(in srgb, var(--a) 22%, transparent), transparent 62%),
+      radial-gradient(90% 60% at 100% 100%, color-mix(in srgb, var(--a) 14%, transparent), transparent 64%),
       var(--bg3);
     background-attachment: fixed;
   }
@@ -133,8 +135,9 @@ body.has-chrome.no-top-chrome #app { padding-top: 0; }
     min-height: 100dvh;
     box-shadow:
       0 0 0 1px var(--bo),
-      0 40px 90px -30px rgba(11,13,26,.28),
-      0 12px 32px -18px rgba(11,13,26,.16);
+      0 0 80px -12px color-mix(in srgb, var(--a) 26%, transparent),
+      0 40px 90px -30px rgba(11,13,26,.38),
+      0 12px 32px -18px rgba(11,13,26,.2);
   }
   #header-bar,
   #bottom-nav {
