@@ -349,7 +349,12 @@ export async function route(root, me) {
     return;
   }
 
-  const loader = map[routeName] || map.default;
+  // Route inconnue (#/route-bidon) → vraie page « introuvable » plutôt que
+  // l'accueil du rôle rendu sans un mot (déroutant : on croit à un bug).
+  // NB : routeName vaut "default" quand le hash est vide → map.default matche
+  // en direct, le fallback 404 ne concerne QUE les routes inconnues.
+  const loader =
+    map[routeName] || (() => import("@/pages/common/introuvable.js"));
 
   try {
     const mod = await loader();
@@ -426,6 +431,11 @@ async function routePublic(app) {
     m = await import("@/pages/common/legal.js");
   } else if (hash.startsWith("#/login")) {
     m = await import("@/pages/auth/login.js");
+  } else if (hash.replace(/^#\/+/, "").split("?")[0] && hash.startsWith("#/")) {
+    // Route inconnue (#/route-bidon) → vraie page « introuvable » plutôt que
+    // la landing rendue sans un mot. Les hashes sans chemin ("", "#/",
+    // "#/?utm=…", fragments d'auth "#access_token=…") restent sur la landing.
+    m = await import("@/pages/common/introuvable.js");
   } else {
     // Défaut visiteur = page de vente Pass Permis (l'ancienne landing
     // moniteur est supprimée — décision Rayan 16/07/2026).
