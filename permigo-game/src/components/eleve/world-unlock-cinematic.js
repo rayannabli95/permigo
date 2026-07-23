@@ -48,9 +48,13 @@ export function detectAndPlayUnlock({
   onEnter,
 } = {}) {
   const seen = getSeen();
-  const toCelebrate = worldsCompleted.find((n) => !seen.has(n));
-  if (!toCelebrate) return false;
+  const unseen = worldsCompleted.filter((n) => !seen.has(n));
+  if (!unseen.length) return false;
 
+  // Un seul moment de fête : le monde complété le plus récent. Sur un
+  // navigateur neuf avec plusieurs mondes déjà finis, on ne rejoue pas tout
+  // l'historique (une cinématique par visite = effet « app en boucle »).
+  const toCelebrate = Math.max(...unseen);
   const meta = worldsMeta[toCelebrate - 1];
   if (!meta) return false;
 
@@ -59,6 +63,9 @@ export function detectAndPlayUnlock({
     comps: 0,
     days: 0,
   };
+  // Marqués « vus » dès l'affichage — pas au clic : si l'élève navigue sans
+  // cliquer (barre d'onglets), la cinématique ne doit jamais se rejouer.
+  unseen.forEach(markSeen);
   playUnlockCinematic({
     worldNum: toCelebrate,
     worldName: meta.name,
@@ -117,11 +124,11 @@ export function playUnlockCinematic({
       <div class="wuc-stats">
         <div class="wuc-stat" style="--d:1.6s">
           <div class="v">${stats.comps || 0}</div>
-          <div class="l">Compétences</div>
+          <div class="l">${(stats.comps || 0) > 1 ? "Compétences" : "Compétence"}</div>
         </div>
         <div class="wuc-stat" style="--d:1.85s">
-          <div class="v">${stats.days || 0}<small>j</small></div>
-          <div class="l">Jours</div>
+          <div class="v">${stats.days || 0}</div>
+          <div class="l">${(stats.days || 0) > 1 ? "Jours" : "Jour"}</div>
         </div>
       </div>
 
@@ -139,7 +146,7 @@ export function playUnlockCinematic({
           : `
         <button class="wuc-cta wuc-cta-final" id="wuc-cta" type="button">
           <span class="wuc-cta-lbl">${icon("trophy", { size: 18 })} TU AS CONQUIS TOUS LES CHAPITRES</span>
-          <span class="wuc-cta-name">Tu es prêt pour l'examen</span>
+          <span class="wuc-cta-name">Tu es prêt·e pour l'examen</span>
         </button>
       `
       }
@@ -181,7 +188,12 @@ export function playUnlockCinematic({
     });
   }, 1700);
 
+  let closed = false;
   const closeAndEnter = (skipped = false) => {
+    if (closed) return;
+    closed = true;
+    document.removeEventListener("keydown", onKey);
+    window.removeEventListener("hashchange", onHash);
     overlay.classList.add("wuc-closing");
     setTimeout(() => {
       overlay.remove();
@@ -199,12 +211,14 @@ export function playUnlockCinematic({
 
   // ESC pour skip
   const onKey = (e) => {
-    if (e.key === "Escape") {
-      closeAndEnter(true);
-      document.removeEventListener("keydown", onKey);
-    }
+    if (e.key === "Escape") closeAndEnter(true);
   };
   document.addEventListener("keydown", onKey);
+
+  // L'overlay vit sur document.body : sans ça, il survivait aux changements
+  // de route et recouvrait quiz, boutique, réglages… jusqu'au clic.
+  const onHash = () => closeAndEnter(true);
+  window.addEventListener("hashchange", onHash);
 }
 
 let _wucCssInjected = false;
