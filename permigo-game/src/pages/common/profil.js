@@ -1551,9 +1551,11 @@ const STYLE_ARENE = `<style>
 .arn-next-info{flex:1;min-width:0}
 .arn-next-code{font-size:10.5px;font-weight:800;color:var(--tx-mu);letter-spacing:.6px;text-transform:uppercase}
 .arn-next-name{font-family:'Fredoka',sans-serif;font-weight:600;font-size:18px;color:var(--tx);line-height:1.18;margin-top:3px}
-.arn-cta{margin-top:17px;width:100%;border:0;cursor:pointer;font-family:'Fredoka',sans-serif;font-weight:600;font-size:17px;color:#1c3306;padding:15px;border-radius:16px;display:flex;align-items:center;justify-content:center;gap:9px;
-  background:linear-gradient(180deg,var(--gr-rim) 0%,var(--gr) 52%,var(--gr-dk) 100%);box-shadow:0 6px 0 var(--gr-dk),inset 0 1px 0 rgba(255,255,255,.5);transition:transform .08s,box-shadow .08s}
-.arn-cta:active{transform:translateY(4px);box-shadow:0 2px 0 var(--gr-dk),inset 0 1px 0 rgba(255,255,255,.5)}
+.arn-cta{margin-top:17px;width:100%;border:0;cursor:pointer;font-family:'Fredoka',sans-serif;font-weight:600;font-size:17px;color:var(--a-ink);padding:15px;border-radius:16px;display:flex;align-items:center;justify-content:center;gap:9px;
+  /* Accent (tokens), plus le vert en dur : une couleur d'action partout,
+     et l'accent choisi (Réglages ou thème boutique) recolore ce CTA aussi. */
+  background:linear-gradient(180deg,var(--a-lt) 0%,var(--a) 52%,var(--adk) 100%);box-shadow:0 6px 0 var(--adk),inset 0 1px 0 rgba(255,255,255,.5);transition:transform .08s,box-shadow .08s}
+.arn-cta:active{transform:translateY(4px);box-shadow:0 2px 0 var(--adk),inset 0 1px 0 rgba(255,255,255,.5)}
 .arn-cta svg{width:18px;height:18px}
 
 /* réglages */
