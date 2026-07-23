@@ -10,6 +10,7 @@ import { ASSETS } from "@/utils/assets.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { toast } from "@/components/common/toast.js";
 import { esc } from "@/utils/escape.js";
+import { getLang } from "@/utils/lang.js";
 import { track } from "@/services/analytics.js";
 import { lancerQuiz } from "@/services/quiz-engine.js";
 import { findSubComp, findCategory } from "@/data/remc.js";
@@ -27,6 +28,87 @@ import {
   discoveryPillHTML,
   DISCOVERY_PILL_STYLE,
 } from "@/components/eleve/free-tier-wall.js";
+
+// ── i18n de la COQUE (élève non-francophone) ────────────────────
+// Textes d'interface REMPLACÉS dans la langue de l'élève (les QUESTIONS, elles,
+// restent bilingues via quiz-ui/biText : traduction + FR gardé dessous).
+// Dict local (règle coque), repli FR si clé absente. Les noms de compétence /
+// catégorie REMC restent FR (contenu dynamique, traduit à sa source).
+const QP_I18N = {
+  en: {
+    na_t: "Quiz not available",
+    na_p: "Pick a skill from your journey to start a quiz.",
+    na_btn: "Back to my journey",
+    t_daily: "Question of the day",
+    t_post: "Post-validation quiz",
+    t_consol: "48h consolidation",
+    m_q: "questions",
+    m_s: "~30 seconds",
+    start: "Start",
+    later: "Later",
+    no_q: "No questions for this skill yet",
+    save_err: "Couldn't save — try again",
+    locked: "Your instructor hasn't unlocked this skill yet.",
+    almost: "Almost! You need 70% to pass. Try again.",
+    saved: "Quiz saved.",
+    daily_ok: "Well done! Question of the day: done.",
+    daily_ko: "Good try! Come back tomorrow for the next one.",
+    validated: "Skill validated! Keep it up",
+    passed_chain: "Well done! You're on a roll — keep going?",
+    passed: "Well done! Quiz passed.",
+    upcoming_chain:
+      "Upcoming skill — your instructor will work on it with you.",
+    upcoming:
+      "Upcoming skill. Your instructor will work on it with you in a lesson.",
+    retry_chain: "No worries — every question helps you improve. Keep going?",
+    retry:
+      "You're almost there — one more round with your instructor and it's in the bag.",
+    streak_days: "{n} days in a row",
+    cont: "Keep practising",
+    see_parcours: "See my journey",
+    home: "Back home",
+    go: "Here we go…",
+  },
+  ar: {
+    na_t: "الاختبار غير متاح",
+    na_p: "اختر مهارة من مسارك لبدء الاختبار.",
+    na_btn: "العودة إلى المسار",
+    t_daily: "سؤال اليوم",
+    t_post: "اختبار ما بعد الاعتماد",
+    t_consol: "ترسيخ بعد 48 ساعة",
+    m_q: "أسئلة",
+    m_s: "‏~30 ثانية",
+    start: "ابدأ",
+    later: "لاحقًا",
+    no_q: "لا توجد أسئلة لهذه المهارة بعد",
+    save_err: "تعذّر الحفظ — حاول مجددًا",
+    locked: "لم يفتح مدرّبك هذه المهارة بعد.",
+    almost: "اقتربت! تحتاج إلى 70٪ للنجاح. حاول مجددًا.",
+    saved: "تم حفظ الاختبار.",
+    daily_ok: "أحسنت! أنجزت سؤال اليوم.",
+    daily_ko: "محاولة جيدة! عد غدًا للسؤال التالي.",
+    validated: "تم اعتماد المهارة! واصل هكذا",
+    passed_chain: "أحسنت! أنت في أوج حماسك — نتابع؟",
+    passed: "أحسنت! نجحت في الاختبار.",
+    upcoming_chain: "مهارة قادمة — سيتدرّب عليها مدرّبك معك.",
+    upcoming: "مهارة قادمة. سيتدرّب عليها مدرّبك معك في الدرس.",
+    retry_chain: "لا بأس — كل سؤال يجعلك تتقدّم. نواصل؟",
+    retry: "اقتربت — جولة أخيرة مع مدرّبك وستنجح.",
+    streak_days: "{n} أيام متتالية",
+    cont: "واصل المراجعة",
+    see_parcours: "عرض مساري",
+    home: "العودة للرئيسية",
+    go: "هيا بنا…",
+  },
+};
+function qt(key, fr) {
+  const l = getLang();
+  return (l !== "fr" && QP_I18N[l]?.[key]) || fr;
+}
+// RTL par ATTRIBUT sur le bloc de texte (jamais <html dir> — règle lang.js).
+function qtRtl() {
+  return getLang() === "ar" ? ' dir="rtl" lang="ar"' : "";
+}
 
 // Mappe l'icône de catégorie REMC (cat.ico) vers un médaillon 3D premium.
 // [glyphe, rampe] — les 4 mondes ont chacun leur identité visuelle.
@@ -261,10 +343,10 @@ export async function mount(root, params = {}) {
   }
 
   if (!competenceId) {
-    root.innerHTML = `<div style="padding:48px 24px;text-align:center;font-family:'Inter',sans-serif;color:var(--mu2)">
-      <div style="font:700 16px/1.4 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:8px">Quiz non disponible</div>
-      <p style="font-size:14px;margin:0 0 20px">Sélectionne une compétence depuis ton parcours pour démarrer un quiz.</p>
-      <a href="#/parcours" style="display:inline-block;padding:15px 24px;background:var(--a);color: var(--a-ink);border-radius:12px;font:700 14px/1 'Plus Jakarta Sans',sans-serif;text-decoration:none">Retour au parcours</a>
+    root.innerHTML = `<div style="padding:48px 24px;text-align:center;font-family:'Inter',sans-serif;color:var(--mu2)"${qtRtl()}>
+      <div style="font:700 16px/1.4 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:8px">${esc(qt("na_t", "Quiz non disponible"))}</div>
+      <p style="font-size:14px;margin:0 0 20px">${esc(qt("na_p", "Sélectionne une compétence depuis ton parcours pour démarrer un quiz."))}</p>
+      <a href="#/parcours" style="display:inline-block;padding:15px 24px;background:var(--a);color: var(--a-ink);border-radius:12px;font:700 14px/1 'Plus Jakarta Sans',sans-serif;text-decoration:none">${esc(qt("na_btn", "Retour au parcours"))}</a>
     </div>`;
     return;
   }
@@ -291,10 +373,10 @@ export async function mount(root, params = {}) {
     nbQuestions = Math.min(nbQuestions, q.remaining);
   }
   const typeLabel = isDaily
-    ? "Question du jour"
+    ? qt("t_daily", "Question du jour")
     : type === "post_validation"
-      ? "Quiz post-validation"
-      : "Consolidation 48h";
+      ? qt("t_post", "Quiz post-validation")
+      : qt("t_consol", "Consolidation 48h");
 
   track("page.view", {
     page: "eleve_quiz",
@@ -308,16 +390,16 @@ export async function mount(root, params = {}) {
     <div class="qp anim-slide-up">
       <div class="qp-card" id="qp-welcome">
         <img class="qp-mascot" src="/skins/mascot-hello.png" alt="" aria-hidden="true" />
-        <div class="qp-badge">${esc(typeLabel)}</div>
+        <div class="qp-badge"${qtRtl()}>${esc(typeLabel)}</div>
         <div class="qp-cat-row">${cat?.ico ? catMedallion(cat.ico, 28) : ""} <span>${esc(cat?.name || "")}</span></div>
         <h1 class="qp-comp" tabindex="-1">${esc(sub?.n || competenceId)}</h1>
         <div class="qp-meta">
-          <span class="qp-meta-item">${icon("file-text", { size: 14 })} ${nbQuestions} questions</span>
-          <span class="qp-meta-item">${icon("zap", { size: 14 })} ~30 secondes</span>
+          <span class="qp-meta-item"${qtRtl()}>${icon("file-text", { size: 14 })} ${nbQuestions} ${esc(qt("m_q", "questions"))}</span>
+          <span class="qp-meta-item"${qtRtl()}>${icon("zap", { size: 14 })} ${esc(qt("m_s", "~30 secondes"))}</span>
         </div>
         ${gated ? `${DISCOVERY_PILL_STYLE}<div style="margin:0 0 16px">${discoveryPillHTML("quiz")}</div>` : ""}
-        <button class="btn-start" id="btn-start">Commencer</button>
-        <button class="btn-skip" id="btn-skip">Plus tard</button>
+        <button class="btn-start" id="btn-start">${esc(qt("start", "Commencer"))}</button>
+        <button class="btn-skip" id="btn-skip">${esc(qt("later", "Plus tard"))}</button>
       </div>
     </div>
   `;
@@ -353,7 +435,7 @@ export async function mount(root, params = {}) {
     // réactiver pour l'élève).
     if (launched === null) {
       if (startBtn) startBtn.disabled = false;
-      toast("Pas encore de questions sur cette compétence", "info");
+      toast(qt("no_q", "Pas encore de questions sur cette compétence"), "info");
       if (autoStart) location.hash = "#/";
     } else if (gated) {
       // Le quiz est bien lancé : on décompte les questions du quota du jour.
@@ -456,7 +538,7 @@ async function handleComplete(
 
   if (error) {
     console.warn("[quiz] submit_competence_quiz error", error);
-    toast("Erreur lors de la sauvegarde — réessaie", "error");
+    toast(qt("save_err", "Erreur lors de la sauvegarde — réessaie"), "error");
     // Fallback : afficher le résultat quand même
     renderResult(root, {
       score,
@@ -518,7 +600,10 @@ async function handleComplete(
     // encore travaillée), c'est le cas NORMAL — pas de message « bloqué ».
     if (!canChain)
       toast(
-        "Cette compétence n'est pas encore débloquée par ton moniteur.",
+        qt(
+          "locked",
+          "Cette compétence n'est pas encore débloquée par ton moniteur.",
+        ),
         "info",
       );
   } else if (validated) {
@@ -574,7 +659,7 @@ async function handleComplete(
         competenceCode: competenceId,
         scorePct,
         validatedCount: acquiredCount,
-        ctaLabel: "Voir mon parcours",
+        ctaLabel: qt("see_parcours", "Voir mon parcours"),
         source: "quiz",
         onCta: () => {
           location.hash = "#/parcours";
@@ -604,9 +689,12 @@ async function handleComplete(
       });
     }
   } else if (!passed) {
-    toast("Presque ! Il te faut 70% pour valider. Réessaie.", "info");
+    toast(
+      qt("almost", "Presque ! Il te faut 70% pour valider. Réessaie."),
+      "info",
+    );
   } else {
-    toast("Quiz enregistré.", "success");
+    toast(qt("saved", "Quiz enregistré."), "success");
   }
 
   // Victoire élève SANS validation de compétence (quiz réussi mais pas de
@@ -684,29 +772,41 @@ function renderResult(
   let msg;
   if (isDaily) {
     msg = success
-      ? "Bien joué ! Question du jour cochée."
-      : "Bonne tentative ! Reviens demain pour la suivante.";
+      ? qt("daily_ok", "Bien joué ! Question du jour cochée.")
+      : qt("daily_ko", "Bonne tentative ! Reviens demain pour la suivante.");
   } else {
     msg = validated
-      ? "Compétence validée ! Continue comme ça"
+      ? qt("validated", "Compétence validée ! Continue comme ça")
       : passed
         ? canChain
-          ? "Bien joué ! Tu es chaud — on enchaîne ?"
-          : "Bien joué ! Quiz réussi."
+          ? qt("passed_chain", "Bien joué ! Tu es chaud — on enchaîne ?")
+          : qt("passed", "Bien joué ! Quiz réussi.")
         : reason === "no_competence_unlocked"
           ? canChain
-            ? "Compétence à venir — ton moniteur la travaillera avec toi."
-            : "Compétence à venir. Ton moniteur la travaillera avec toi en leçon."
+            ? qt(
+                "upcoming_chain",
+                "Compétence à venir — ton moniteur la travaillera avec toi.",
+              )
+            : qt(
+                "upcoming",
+                "Compétence à venir. Ton moniteur la travaillera avec toi en leçon.",
+              )
           : canChain
-            ? "Pas grave — chaque question te fait progresser. On continue ?"
-            : "Tu y es presque — un dernier tour avec ton moniteur et c'est dans la poche.";
+            ? qt(
+                "retry_chain",
+                "Pas grave — chaque question te fait progresser. On continue ?",
+              )
+            : qt(
+                "retry",
+                "Tu y es presque — un dernier tour avec ton moniteur et c'est dans la poche.",
+              );
   }
 
   // Serie silencieuse sur l'ecran de resultat daily (>= 2 jours = fierté).
   // JAMAIS de mention de perte ou de pression.
   const dailyStreakHtml =
     isDaily && dailyStreakAfter >= 2
-      ? `<div class="qp-daily-streak" role="status"><img class="qp-daily-streak-ico" src="${ASSETS.streakFlame}" alt="" aria-hidden="true" width="16" height="16" />${dailyStreakAfter} jours d'affilée</div>`
+      ? `<div class="qp-daily-streak" role="status"><img class="qp-daily-streak-ico" src="${ASSETS.streakFlame}" alt="" aria-hidden="true" width="16" height="16" /><span${qtRtl()}>${esc(qt("streak_days", `${dailyStreakAfter} jours d'affilée`).replace("{n}", String(dailyStreakAfter)))}</span></div>`
       : "";
 
   // Slot pour le gain Ligue Revision (injecte de facon asynchrone apres render).
@@ -716,21 +816,24 @@ function renderResult(
   // « Voir mon parcours » passe en secondaire.
   // En mode daily: le bouton principal est "Retour accueil" (la boucle est terminee),
   // mais on propose un bouton secondaire "Continue a reviser" pour les motives.
+  const contLbl = esc(qt("cont", "Continue à réviser"));
+  const parcoursLbl = esc(qt("see_parcours", "Voir mon parcours"));
+  const homeLbl = esc(qt("home", "Retour accueil"));
   let continueBtn, parcoursBtn, homeBtn;
   if (isDaily) {
-    continueBtn = `<button class="btn-parcours" id="btn-continue">Continue à réviser</button>`;
+    continueBtn = `<button class="btn-parcours" id="btn-continue">${contLbl}</button>`;
     parcoursBtn = "";
-    homeBtn = `<button class="btn-home" id="btn-home">Retour accueil</button>`;
+    homeBtn = `<button class="btn-home" id="btn-home">${homeLbl}</button>`;
   } else {
     continueBtn = canChain
-      ? `<button class="btn-parcours" id="btn-continue">Continue a reviser</button>`
+      ? `<button class="btn-parcours" id="btn-continue">${contLbl}</button>`
       : "";
     parcoursBtn = canChain
-      ? `<button class="btn-home" id="btn-parcours">Voir mon parcours</button>`
-      : `<button class="btn-parcours" id="btn-parcours">Voir mon parcours</button>`;
+      ? `<button class="btn-home" id="btn-parcours">${parcoursLbl}</button>`
+      : `<button class="btn-parcours" id="btn-parcours">${parcoursLbl}</button>`;
     homeBtn =
       !success && !canChain
-        ? `<button class="btn-home" id="btn-home">Retour accueil</button>`
+        ? `<button class="btn-home" id="btn-home">${homeLbl}</button>`
         : "";
   }
 
@@ -772,7 +875,7 @@ function renderResult(
             <span class="qp-score-pct">${scorePct}%</span>
           </div>
         </div>
-        <p class="qp-result-msg">${esc(msg)}</p>
+        <p class="qp-result-msg"${qtRtl()}>${esc(msg)}</p>
         ${dailyStreakHtml}
         ${theoryGainSlot}
         ${continueBtn}
@@ -806,7 +909,7 @@ function renderResult(
   const contBtn = root.querySelector("#btn-continue");
   contBtn?.addEventListener("click", async () => {
     contBtn.disabled = true;
-    contBtn.textContent = "On y va…";
+    contBtn.textContent = qt("go", "On y va…");
     track("revision_chain.continue", {
       from_competence: competenceId,
       unseen: isUnseen,
