@@ -10,6 +10,8 @@
 // Le choix est mémorisé en localStorage (clé `permigo_cookie_consent`).
 // ═══════════════════════════════════════════════════════════════
 
+import { pushIntroBlocker, popIntroBlocker } from "@/utils/intro-overlays.js";
+
 const KEY = "permigo_cookie_consent";
 const COOKIE_NAME = "pg_consent";
 const COOKIE_DAYS = 365;
@@ -121,6 +123,9 @@ export function mountCookieBanner() {
   document.body.appendChild(root);
   // Réserve l'espace bas (cf. body.ck-open dans STYLE) tant que le bandeau est là.
   document.body.classList.add("ck-open");
+  // Tant que la question cookies n'a pas de réponse, le tuto guidé attend
+  // (canal « bloqueur » : le garde-fou 8 s des popups ne s'applique pas).
+  pushIntroBlocker();
 
   const banner = root.querySelector(".ck-banner");
   requestAnimationFrame(() => banner.classList.add("on"));
@@ -129,6 +134,7 @@ export function mountCookieBanner() {
     setConsent(value);
     banner.classList.remove("on");
     document.body.classList.remove("ck-open");
+    popIntroBlocker(); // consentement répondu → le tuto peut démarrer
     const done = () => root.remove();
     banner.addEventListener("transitionend", done, { once: true });
     setTimeout(done, 500); // fallback si transitionend ne se déclenche pas

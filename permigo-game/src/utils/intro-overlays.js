@@ -16,9 +16,10 @@
 
 let pending = false; // un popup PEUT encore apparaître (phase armée)
 let open = false; // un popup est actuellement à l'écran
+let blockers = 0; // overlays de consentement (bandeau cookies) : bloquants
 const waiters = [];
 
-const settled = () => !pending && !open;
+const settled = () => !pending && !open && blockers === 0;
 
 function flush() {
   if (!settled()) return;
@@ -54,4 +55,19 @@ export function notifyPopupSettled() {
 export function onPopupsSettled(fn) {
   if (settled()) fn();
   else waiters.push(fn);
+}
+
+/**
+ * Bloqueur de consentement (bandeau cookies) — canal séparé des popups :
+ * le garde-fou 8 s ne le lève PAS (une question légale sans réponse ne doit
+ * jamais se retrouver sous le tuto), et le notifyPopupSettled() d'un popup
+ * qui décide de ne pas s'afficher ne le libère pas non plus.
+ */
+export function pushIntroBlocker() {
+  blockers++;
+}
+
+export function popIntroBlocker() {
+  blockers = Math.max(0, blockers - 1);
+  flush();
 }
