@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// Notif Listener — polling notifications toutes les 30s
+// Notif Listener — polling notifications toutes les 60s
 // Lance automatiquement les quiz post-validation ou consolidation
 // Démarrer dans main.js après login : startNotifListener()
 // ═══════════════════════════════════════════════════════════════
@@ -12,7 +12,7 @@ import { burstConfetti } from "@/components/common/confetti.js";
 import { markHasValidated } from "@/services/web-push.js";
 import { playNotify } from "@/utils/sound.js";
 
-const POLL_INTERVAL = 30_000; // 30 secondes
+const POLL_INTERVAL = 60_000; // 60 secondes (allégé : 2× moins de requêtes réseau)
 let _intervalId = null;
 let _quizOpen = false;
 

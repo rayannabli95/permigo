@@ -1185,6 +1185,13 @@ function _ensureObjListener() {
   });
 }
 
+// Démontage (appelé par le router avant de monter la page suivante) : oublie le
+// re-render de la page démontée — le listener global « pg-objectif-changed »
+// ne doit ni rappeler ni retenir en mémoire un DOM déjà retiré.
+export function unmount() {
+  _activeRerender = null;
+}
+
 function renderObjectifCard(item, gemmes, pinned = true) {
   const r = rm(item.rarity);
   const pct = Math.min(100, Math.round((gemmes / item.cost_gemmes) * 100));
