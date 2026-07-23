@@ -306,6 +306,19 @@ function renderMyWins(wins) {
   </section>`;
 }
 
+// Tics audio programmés pendant un spin — module-level pour pouvoir les couper
+// au démontage (sinon les setTimeout continuent de jouer après avoir quitté la page).
+const _tickTimers = [];
+function clearTickTimers() {
+  _tickTimers.forEach(clearTimeout);
+  _tickTimers.length = 0;
+}
+
+// Démontage (appelé par le router avant de monter la page suivante).
+export function unmount() {
+  clearTickTimers();
+}
+
 export async function mount(root) {
   const me = getCurUser();
   // Élève solo : pas de moniteur → pas de « vrais cadeaux » (c'est lui qui
@@ -415,16 +428,7 @@ export async function mount(root) {
   let turns = 0;
   let prevRot = 0;
   let busy = false;
-  const _tickTimers = [];
-  // Si on quitte la page en plein spin, on coupe les tics programmés.
-  window.addEventListener(
-    "hashchange",
-    () => {
-      _tickTimers.forEach(clearTimeout);
-      _tickTimers.length = 0;
-    },
-    { once: true },
-  );
+  clearTickTimers(); // défensif : aucun tic fantôme d'un montage précédent
 
   // Ratchet de roulette : un « tic » chaque fois qu'une frontière de segment
   // (45°) passe sous le pointeur, avec un ralenti calqué sur l'easing du disque

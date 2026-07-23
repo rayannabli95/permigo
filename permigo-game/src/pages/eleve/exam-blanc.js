@@ -74,6 +74,13 @@ function clearExamTimer() {
   }
 }
 
+// Démontage (appelé par le router avant de monter la page suivante) : coupe le
+// chrono 1 s si l'élève quitte la page en plein examen — sinon le setInterval
+// continue de tourner en fond sur un DOM déjà retiré.
+export function unmount() {
+  clearExamTimer();
+}
+
 // Mélange les réponses d'une question (Fisher-Yates) et remappe l'index de la
 // bonne réponse vers sa nouvelle position. Sans ça, `correct` reste fixe dans
 // les données → la bonne réponse tombe toujours à la même place (souvent la 1re).

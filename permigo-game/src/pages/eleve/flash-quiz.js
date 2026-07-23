@@ -79,6 +79,16 @@ function withShuffledOptions(q) {
   };
 }
 
+// Démontage (appelé par le router avant de monter la page suivante) : coupe le
+// tick 250 ms si l'élève quitte la page en plein quiz — sinon le setInterval
+// continue de tourner en fond sur un DOM déjà retiré.
+export function unmount() {
+  if (_timer) {
+    clearInterval(_timer);
+    _timer = null;
+  }
+}
+
 export async function mount(root, flashQuizId) {
   if (_timer) {
     clearInterval(_timer);
