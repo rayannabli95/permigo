@@ -990,7 +990,11 @@ function wire(root, me, prefs) {
           await startCheckout(); // redirige vers Stripe si OK
         } catch (e) {
           console.error("[settings] checkout", e);
-          toast("Paiement indisponible pour le moment.", "error");
+          toast(
+            "Impossible d'ouvrir le paiement. Réessaie ou écris-nous : contact@permigo.fr",
+            "error",
+            6000,
+          );
           subBtn.disabled = false;
           subBtn.textContent = "S'abonner — 9,99 €/mois";
         }

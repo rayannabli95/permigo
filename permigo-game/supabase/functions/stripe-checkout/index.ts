@@ -78,12 +78,34 @@ Deno.serve(async (req) => {
       .maybeSingle();
     customerId = existing?.stripe_customer_id ?? undefined;
 
+    // Les comptes d'avant le passage Stripe en live (15/07/2026) portent un
+    // customer id du mode TEST : checkout.sessions.create en live jetait
+    // « No such customer » → 500 → bouton muet. On vérifie donc que le
+    // customer existe bien dans CE mode avant de le réutiliser.
+    if (customerId) {
+      try {
+        const customer = await stripe.customers.retrieve(customerId);
+        if ((customer as { deleted?: boolean }).deleted) customerId = undefined;
+      } catch (_e) {
+        customerId = undefined; // inconnu dans ce mode → on en recrée un
+      }
+    }
+
     if (!customerId) {
       const customer = await stripe.customers.create({
         email: user.email ?? undefined,
         metadata: { user_id: user.id },
       });
       customerId = customer.id;
+      // Mémorise le nouvel id sur la row existante : sans ça, chaque clic
+      // re-payerait le retrieve raté. (Pas de row → c'est le webhook qui la
+      // créera au paiement, comme avant.)
+      if (existing) {
+        await admin
+          .from("subscriptions")
+          .update({ stripe_customer_id: customerId })
+          .eq("user_id", user.id);
+      }
     }
 
     const origin =
