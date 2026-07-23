@@ -522,7 +522,9 @@ const HUB_STYLE = `<style>
 .hub-play{ flex:0 0 38px; width:38px; height:38px; border-radius:12px; background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,.15)); border:1px solid rgba(255,255,255,.5); display:flex; align-items:center; justify-content:center; box-shadow:inset 0 1px 0 rgba(255,255,255,.7); }
 .hub-rtxt{ flex:1; min-width:0; display:flex; flex-direction:column; }
 .hub-rlab{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:#8a5410; }
-.hub-rttl{ font-family:'Baloo 2',cursive; font-weight:800; font-size:15.5px; color:#5a3406; line-height:1.05; text-shadow:0 1px 0 rgba(255,255,255,.4); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.hub-rttl{ font-family:'Baloo 2',cursive; font-weight:800; font-size:15.5px; color:#5a3406; line-height:1.12; text-shadow:0 1px 0 rgba(255,255,255,.4);
+  /* 2 lignes max au lieu d'une coupure « … » mi-mot sur le CTA principal */
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
 
 .hub-extra{ display:flex; gap:10px; padding:20px 16px 0; }
 .hub-chip{ flex:1; min-width:0; display:flex; align-items:center; gap:9px; cursor:pointer; padding:11px 12px; border-radius:14px;

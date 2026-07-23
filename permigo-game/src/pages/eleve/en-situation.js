@@ -143,7 +143,7 @@ export async function mount(root, param) {
         }</p>
         <div class="sit-hero" aria-hidden="true">${renderSituationScene(demo.scene)}</div>
         <div class="sit-chips">
-          <span class="sit-chip">${medallion("voiture", "blue", { size: 18 })} ${count} situations</span>
+          <span class="sit-chip">${medallion("voiture", "blue", { size: 18 })} Session de ${count}</span>
           <span class="sit-chip">${volantImg(14)} +${VOLANTS_PAR_BONNE} par bonne réponse</span>
         </div>
         <button class="sit-cta" id="sit-start" type="button">${isIntro ? "C’est parti !" : "Jouer"}</button>
