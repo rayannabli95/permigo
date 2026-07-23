@@ -8,6 +8,7 @@ import { esc, escAttr } from "@/utils/escape.js";
 import { icon } from "@/utils/icons.js";
 import { ill } from "@/utils/illustrations.js";
 import { muteButtonHTML } from "@/utils/speech.js";
+import { getLang } from "@/utils/lang.js";
 import {
   quizVisualHTML,
   quizVisualRevealHTML,
@@ -64,6 +65,107 @@ const COACH_HEADS = [
   "Le truc à retenir",
   "Bon à savoir",
 ];
+
+// ── i18n de la COQUE (élève non-francophone) ────────────────────
+// Chaînes d'interface REMPLACÉES dans la langue de l'élève (le FR-gardé-dessous
+// est réservé au contenu pédagogique : énoncés/options/explications via biText).
+// Tableaux ALIGNÉS par index sur PRAISES / COACH_HEADS / RESULT_MSGS ; repli FR.
+const PRAISES_I18N = {
+  en: [
+    "Bullseye!",
+    "You've got this.",
+    "Spot on!",
+    "Perfect reflex.",
+    "Well spotted!",
+    "Exactly right.",
+    "Right on cue!",
+    "Nice one!",
+    "Solid.",
+    "Like a pro.",
+  ],
+  ar: [
+    "إصابة في الهدف!",
+    "أنت متمكّن.",
+    "بالضبط!",
+    "ردّة فعل مثالية.",
+    "ملاحظة ممتازة!",
+    "هذا هو تمامًا.",
+    "من أول مرة!",
+    "أحسنت!",
+    "قويّ.",
+    "كالمحترفين.",
+  ],
+};
+const COACH_HEADS_I18N = {
+  en: [
+    "The right reflex",
+    "Keep in mind",
+    "For next time",
+    "The thing to remember",
+    "Good to know",
+  ],
+  ar: [
+    "ردّة الفعل الصحيحة",
+    "تذكّر هذا",
+    "للمرة القادمة",
+    "ما يجب تذكّره",
+    "من الجيد معرفته",
+  ],
+};
+const RESULT_MSGS_I18N = {
+  en: {
+    perfect: [
+      "Flawless. Seriously?!",
+      "100%. Hats off.",
+      "Zero mistakes — clean.",
+    ],
+    passed: [
+      "Well done, you're moving forward!",
+      "Solid. Keep it up.",
+      "You're improving — it shows.",
+    ],
+    learn: [
+      "Every question teaches you something.",
+      "You remember better after a mistake — it's proven.",
+      "No worries: now you know.",
+    ],
+  },
+  ar: {
+    perfect: ["بلا أخطاء. حقًا؟!", "100٪. أحسنت.", "صفر أخطاء — عمل نظيف."],
+    passed: [
+      "أحسنت، أنت تتقدّم!",
+      "قويّ. واصل هكذا.",
+      "أنت تتحسّن، وهذا واضح.",
+    ],
+    learn: [
+      "كل سؤال يعلّمك شيئًا.",
+      "نتذكّر أفضل بعد الخطأ — هذا مثبت.",
+      "لا بأس: الآن صرت تعرف.",
+    ],
+  },
+};
+const UI_I18N = {
+  en: {
+    q_of: "Question {i} of {n}",
+    streak: "Streak of {n}",
+    why: "Why it's right",
+    cta: "Continue",
+  },
+  ar: {
+    q_of: "السؤال {i} من {n}",
+    streak: "سلسلة من {n}",
+    why: "لماذا هذا صحيح",
+    cta: "متابعة",
+  },
+};
+function qzT(key, fr, lang = getLang()) {
+  return (lang !== "fr" && UI_I18N[lang]?.[key]) || fr;
+}
+// RTL par ATTRIBUT sur le span de texte (jamais <html dir> — règle lang.js).
+function qzRtl(lang = getLang()) {
+  return lang === "ar" ? ' dir="rtl" lang="ar"' : "";
+}
+
 let _lastPraise = -1;
 let _lastCoach = -1;
 
@@ -73,14 +175,19 @@ function pickVaried(pool, last) {
   return i;
 }
 
-export function pickPraise() {
+export function pickPraise(lang = getLang()) {
   _lastPraise = pickVaried(PRAISES, _lastPraise);
-  return PRAISES[_lastPraise];
+  return (
+    (lang !== "fr" && PRAISES_I18N[lang]?.[_lastPraise]) || PRAISES[_lastPraise]
+  );
 }
 
-export function pickCoachHead() {
+export function pickCoachHead(lang = getLang()) {
   _lastCoach = pickVaried(COACH_HEADS, _lastCoach);
-  return COACH_HEADS[_lastCoach];
+  return (
+    (lang !== "fr" && COACH_HEADS_I18N[lang]?.[_lastCoach]) ||
+    COACH_HEADS[_lastCoach]
+  );
 }
 
 // Messages de fin — varient selon le palier
@@ -102,13 +209,11 @@ const RESULT_MSGS = {
   ],
 };
 
-export function pickResultMsg({ perfect, passed }) {
-  const pool = perfect
-    ? RESULT_MSGS.perfect
-    : passed
-      ? RESULT_MSGS.passed
-      : RESULT_MSGS.learn;
-  return pool[Math.floor(Math.random() * pool.length)];
+export function pickResultMsg({ perfect, passed }, lang = getLang()) {
+  const key = perfect ? "perfect" : passed ? "passed" : "learn";
+  const pool = RESULT_MSGS[key];
+  const i = Math.floor(Math.random() * pool.length);
+  return (lang !== "fr" && RESULT_MSGS_I18N[lang]?.[key]?.[i]) || pool[i];
 }
 
 // ─── Rendu ───────────────────────────────────────────────────────
@@ -123,7 +228,11 @@ export function pipsHTML(idx, total) {
   }).join("");
   return `
     <div class="qz-top">
-      <div class="qz-pips" role="progressbar" aria-valuemin="1" aria-valuenow="${idx + 1}" aria-valuemax="${total}" aria-label="Question ${idx + 1} sur ${total}">${pips}</div>
+      <div class="qz-pips" role="progressbar" aria-valuemin="1" aria-valuenow="${idx + 1}" aria-valuemax="${total}" aria-label="${escAttr(
+        qzT("q_of", `Question ${idx + 1} sur ${total}`)
+          .replace("{i}", String(idx + 1))
+          .replace("{n}", String(total)),
+      )}">${pips}</div>
       <span class="qz-count">${idx + 1}/${total}</span>
     </div>`;
 }
@@ -193,11 +302,11 @@ export function applyReveal(container, { chosen, correctIndex }) {
 export function praiseHTML({ streak = 0 } = {}) {
   const flame =
     streak >= 2
-      ? `<span class="qz-streak">${icon("flame", { size: 14, strokeWidth: 2.5 })} Série de ${streak}</span>`
+      ? `<span class="qz-streak">${icon("flame", { size: 14, strokeWidth: 2.5 })} ${esc(qzT("streak", `Série de ${streak}`).replace("{n}", String(streak)))}</span>`
       : "";
   return `
     <div class="qz-praise" role="status">
-      <span class="qz-praise-txt">${esc(pickPraise())}</span>${flame}
+      <span class="qz-praise-txt"${qzRtl()}>${esc(pickPraise())}</span>${flame}
     </div>`;
 }
 
@@ -205,8 +314,8 @@ export function praiseHTML({ streak = 0 } = {}) {
 export function explHTML({ correct, explanation, explanationTr, lang = "fr" }) {
   if (!explanation) return "";
   const head = correct
-    ? `${icon("check-circle", { size: 14, strokeWidth: 2.5 })} Pourquoi c'est juste`
-    : `${icon("lightbulb", { size: 14, strokeWidth: 2.5 })} ${esc(pickCoachHead())}`;
+    ? `${icon("check-circle", { size: 14, strokeWidth: 2.5 })} <span${qzRtl(lang)}>${esc(qzT("why", "Pourquoi c'est juste", lang))}</span>`
+    : `${icon("lightbulb", { size: 14, strokeWidth: 2.5 })} <span${qzRtl(lang)}>${esc(pickCoachHead(lang))}</span>`;
   return `
     <div class="qz-expl ${correct ? "ok" : "soft"}">
       <div class="qz-expl-h">${head}</div>
@@ -218,12 +327,15 @@ export function explHTML({ correct, explanation, explanationTr, lang = "fr" }) {
 export function resultHTML({ score, total, ctaLabel = "Continuer" }) {
   const perfect = score === total;
   const passed = score >= total * 0.6;
+  // Coque traduite : le CTA par défaut « Continuer » suit la langue de l'élève
+  // (un ctaLabel explicite passé par l'appelant est affiché tel quel).
+  const cta = ctaLabel === "Continuer" ? qzT("cta", ctaLabel) : ctaLabel;
   return `
     <div class="qz-result">
       <img class="qz-mascot-result" src="/skins/${passed ? "mascot-celebrate" : "mascot-coach"}.png" alt="" aria-hidden="true" />
       <div class="qz-score${perfect ? " gold" : ""}">${score}<span class="qz-score-sep">/</span>${total}</div>
-      <p class="qz-result-msg">${esc(pickResultMsg({ perfect, passed }))}</p>
-      <button class="qz-cta" type="button">${esc(ctaLabel)}</button>
+      <p class="qz-result-msg"${qzRtl()}>${esc(pickResultMsg({ perfect, passed }))}</p>
+      <button class="qz-cta" type="button">${esc(cta)}</button>
     </div>`;
 }
 

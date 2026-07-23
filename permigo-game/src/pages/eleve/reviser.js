@@ -19,10 +19,75 @@ import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { haptic } from "@/utils/haptic.js";
 import { getStreak } from "@/utils/game-state.js";
+import { getLang } from "@/utils/lang.js";
 import { SITUATIONS } from "@/data/situations-conduite.js";
 import { FICHES } from "@/data/fiches-conduite.js";
 import { isFreeTierUser } from "@/utils/free-tier.js";
 import { discoveryBannerHTML } from "@/components/eleve/free-tier-wall.js";
+
+// i18n de la COQUE (élève non-francophone) : textes REMPLACÉS (pas de FR gardé
+// dessous — ça, c'est pour le contenu pédagogique long). Dict local (règle
+// coque : pas de fichier i18n partagé), repli FR si clé absente. Le titre
+// reprend le libellé de l'onglet nav (« Practice » / « المراجعة »).
+const RV_I18N = {
+  en: {
+    title: "Practice",
+    streak_new: "New streak",
+    streak_days: "{n}-day streak",
+    best: "Best",
+    goal: "Goal",
+    hero_aria: "Play a driving scene",
+    eyebrow: "Real-life scenarios · {n} scenes",
+    fav: "Students' favourite",
+    hero_alt: "A scene from the game: an intersection, one decision to make",
+    hero_title: "One scene, one decision",
+    hero_sub: "3 min, just like the road — not theory.",
+    hero_cta: "Play a scene",
+    rail: "More ways to practise",
+    exam_t: "Mock exam",
+    exam_s: "Just like exam day, scored out of 31",
+    fiches_t: "Revision sheets",
+    fiches_s: "The right moves, not theory",
+    fiches_m: "Sheets",
+    centre_t: "Exam centre",
+    centre_s: "Your centre on exam day",
+    centre_m: "Exam day",
+    centre_v: "View",
+  },
+  ar: {
+    title: "المراجعة",
+    streak_new: "سلسلة جديدة",
+    streak_days: "سلسلة {n} أيام",
+    streak_day: "سلسلة يوم واحد",
+    best: "الأفضل",
+    goal: "الهدف",
+    hero_aria: "العب مشهد قيادة",
+    eyebrow: "مواقف قيادة واقعية · {n} مشهدًا",
+    fav: "المفضّل لدى الطلاب",
+    hero_alt: "مشهد من اللعبة: تقاطع يتطلب قرارًا",
+    hero_title: "مشهد واحد، قرار واحد",
+    hero_sub: "3 دقائق، كما على الطريق — وليس النظري.",
+    hero_cta: "العب مشهدًا",
+    rail: "طرق أخرى للتدرّب",
+    exam_t: "امتحان تجريبي",
+    exam_s: "مثل يوم الامتحان، الدرجة من 31",
+    fiches_t: "بطاقات المراجعة",
+    fiches_s: "الحركات الصحيحة، لا النظري",
+    fiches_m: "بطاقات",
+    centre_t: "مركز الامتحان",
+    centre_s: "مركزك يوم الامتحان",
+    centre_m: "يوم الامتحان",
+    centre_v: "عرض",
+  },
+};
+function rv(key, fr) {
+  const l = getLang();
+  return (l !== "fr" && RV_I18N[l]?.[key]) || fr;
+}
+// RTL par ATTRIBUT sur le bloc de texte (jamais <html dir> — règle lang.js).
+function rvRtl() {
+  return getLang() === "ar" ? ' dir="rtl" lang="ar"' : "";
+}
 
 const LS_READ_KEY = "rvc_read_v1"; // même clé que revision-conduite.js
 const HERO_IMG = "/showcase/eleve-en-situation.png"; // vraie capture du jeu (cadrée sur la scène)
@@ -120,7 +185,7 @@ const STYLE = `<style>
 
 function skeleton() {
   return `${STYLE}<div class="rv4"><div class="rv4-screen">
-    <div class="rv4-top"><h1>Réviser</h1></div>
+    <div class="rv4-top"><h1${rvRtl()}>${rv("title", "Réviser")}</h1></div>
     <div class="rv4-skel hero"></div>
     <div class="rv4-skel row"></div>
     <div class="rv4-skel row"></div>
@@ -136,47 +201,55 @@ function render({
   fichesTotal,
   discovery,
 }) {
+  const R = rvRtl();
   const streakTxt =
-    streak.count > 0 ? `Série ${streak.count} j` : "Nouvelle série";
+    streak.count > 0
+      ? streak.count === 1
+        ? rv("streak_day", rv("streak_days", "Série 1 j").replace("{n}", "1"))
+        : rv("streak_days", `Série ${streak.count} j`).replace(
+            "{n}",
+            String(streak.count),
+          )
+      : rv("streak_new", "Nouvelle série");
   const examMeta =
     examBest != null
-      ? `<small>Record</small>${examBest} %`
-      : `<small>Objectif</small>/31`;
+      ? `<small${R}>${rv("best", "Record")}</small>${examBest} %`
+      : `<small${R}>${rv("goal", "Objectif")}</small>/31`;
 
   const item = (id, badge, title, sub, meta) => `
     <button class="rv4-item" data-go="${id}">
       <span class="rv4-badge"><img src="${badge}" alt="" loading="lazy"></span>
-      <span class="rv4-itx"><h3>${title}</h3><p>${sub}</p></span>
+      <span class="rv4-itx"><h3${R}>${title}</h3><p${R}>${sub}</p></span>
       <span class="rv4-meta">${meta}</span>
     </button>`;
 
   return `${STYLE}<div class="rv4"><div class="rv4-screen">
 
     <div class="rv4-top">
-      <h1>Réviser</h1>
-      <span class="rv4-streak">${SVG.flame}<span>${streakTxt}</span></span>
+      <h1${R}>${rv("title", "Réviser")}</h1>
+      <span class="rv4-streak">${SVG.flame}<span${R}>${streakTxt}</span></span>
     </div>
 
     ${discovery ? discoveryBannerHTML() : ""}
 
-    <button class="rv4-hero" data-go="en-situation" aria-label="Jouer une scène de conduite">
-      <span class="rv4-eyebrow">Mise en situation · ${sceneCount} scènes</span>
+    <button class="rv4-hero" data-go="en-situation" aria-label="${rv("hero_aria", "Jouer une scène de conduite")}">
+      <span class="rv4-eyebrow"${R}>${rv("eyebrow", `Mise en situation · ${sceneCount} scènes`).replace("{n}", String(sceneCount))}</span>
       <span class="rv4-frame">
-        <span class="rv4-pastille"><span class="dot"></span>Le préféré des élèves</span>
-        <img src="${HERO_IMG}" alt="Une scène du jeu En situation : un croisement à décider" loading="eager">
+        <span class="rv4-pastille"><span class="dot"></span><span${R}>${rv("fav", "Le préféré des élèves")}</span></span>
+        <img src="${HERO_IMG}" alt="${rv("hero_alt", "Une scène du jeu En situation : un croisement à décider")}" loading="eager">
       </span>
       <span class="rv4-hbody">
-        <h2 class="rv4-htitle">Une scène, une décision</h2>
-        <p class="rv4-hsub">3 min, comme sur la route — pas du code.</p>
-        <span class="rv4-cta">${SVG.play}Jouer une scène</span>
+        <h2 class="rv4-htitle"${R}>${rv("hero_title", "Une scène, une décision")}</h2>
+        <p class="rv4-hsub"${R}>${rv("hero_sub", "3 min, comme sur la route — pas du code.")}</p>
+        <span class="rv4-cta">${SVG.play}<span${R}>${rv("hero_cta", "Jouer une scène")}</span></span>
       </span>
     </button>
 
     <div class="rv4-rail">
-      <div class="rv4-railhead"><span>Aussi pour s'entraîner</span><div class="rule"></div></div>
-      ${item("exam-conduite", BADGE.exam, "Examen blanc", "Comme le jour J, noté sur 31", examMeta)}
-      ${item("revision-conduite", BADGE.fiche, "Fiches de révision", "Le geste, pas le code", `<small>Fiches</small>${fichesLues} / ${fichesTotal}`)}
-      ${item("centre-examen", BADGE.centre, "Centre d'examen", "Ton centre, le jour J", `<small>Le jour J</small>Voir`)}
+      <div class="rv4-railhead"><span${R}>${rv("rail", "Aussi pour s'entraîner")}</span><div class="rule"></div></div>
+      ${item("exam-conduite", BADGE.exam, rv("exam_t", "Examen blanc"), rv("exam_s", "Comme le jour J, noté sur 31"), examMeta)}
+      ${item("revision-conduite", BADGE.fiche, rv("fiches_t", "Fiches de révision"), rv("fiches_s", "Le geste, pas le code"), `<small${R}>${rv("fiches_m", "Fiches")}</small>${fichesLues} / ${fichesTotal}`)}
+      ${item("centre-examen", BADGE.centre, rv("centre_t", "Centre d'examen"), rv("centre_s", "Ton centre, le jour J"), `<small${R}>${rv("centre_m", "Le jour J")}</small>${rv("centre_v", "Voir")}`)}
     </div>
 
   </div></div>`;
