@@ -13,7 +13,7 @@
 // On garde : avatar + bannière éditables (Supabase Storage), Partager natif.
 // On retire : prestige, XP arc-en-ciel, triple bouton social (filler).
 // ═══════════════════════════════════════════════════════════════
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { icon } from "@/utils/icons.js";
 import { sb } from "@/auth/auth.js";
 import { haptic } from "@/utils/haptic.js";
@@ -241,13 +241,13 @@ export function renderProfileCard({
   while (stats3.length < 3) stats3.push({ label: "—", value: 0 });
 
   const avatarInner = avatarUrl
-    ? `<img src="${esc(avatarUrl)}" alt="${esc(displayName)}" />`
+    ? `<img src="${escAttr(avatarUrl)}" alt="${escAttr(displayName)}" />`
     : esc((initials || "?").toUpperCase());
 
   return `${STYLE}
 <div class="pcc">
   <div class="pcc-card ${variant}">
-    ${bannerUrl ? `<div class="pcc-banner"><img src="${esc(bannerUrl)}" alt="" /></div>` : `<div class="pcc-halo" aria-hidden="true"></div>`}
+    ${bannerUrl ? `<div class="pcc-banner"><img src="${escAttr(bannerUrl)}" alt="" /></div>` : `<div class="pcc-halo" aria-hidden="true"></div>`}
 
     <button class="pcc-share" data-action="share" aria-label="Partager mon profil">
       ${icon("share", { size: 14, strokeWidth: 2.2 })} Partager
@@ -284,7 +284,7 @@ export function renderProfileCard({
         .map(
           (s) => `
         <div class="pcc-stat">
-          <div class="pcc-stat-val" data-target="${esc(String(s.value))}">0</div>
+          <div class="pcc-stat-val" data-target="${escAttr(String(s.value))}">0</div>
           <div class="pcc-stat-lbl">${esc(s.label)}</div>
         </div>`,
         )
@@ -418,7 +418,7 @@ export function mountProfileCard(container, opts) {
             .eq("id", me.id);
           if (error) throw error;
           const avEl = card.querySelector(".pcc-av");
-          avEl.innerHTML = `<img src="${esc(choice)}" alt="" />`;
+          avEl.innerHTML = `<img src="${escAttr(choice)}" alt="" />`;
           haptic("success");
           const { toast } = await import("@/components/common/toast.js");
           toast("Avatar mis à jour ✓", "success", 2500);

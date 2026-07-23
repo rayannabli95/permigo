@@ -7,7 +7,7 @@ import { yesterdayKey } from "@/services/daily-quiz.js";
 import { icon } from "@/utils/icons.js";
 import { volantImg, volantLabel } from "@/utils/volant.js";
 import { getCurUser } from "@/auth/cur-user.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { haptic } from "@/utils/haptic.js";
@@ -519,7 +519,7 @@ function saveSeenSet(keys) {
 // Badge d'un trophée (img 3D + fallback emoji). size = px de l'image.
 function badgeMarkup(def, size, cls = "") {
   if (def.image) {
-    return `<img src="${def.image}" alt="${esc(def.title)}" loading="lazy" class="${cls}"
+    return `<img src="${def.image}" alt="${escAttr(def.title)}" loading="lazy" class="${cls}"
       onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'"
       style="width:${size}px;height:${size}px;object-fit:contain">
       <span style="display:none">${def.emoji}</span>`;
@@ -610,7 +610,7 @@ function renderAll(
       const u = unlockedMap.get(t.key);
       const cssClass = u ? t.rarity : "locked";
       html += `
-        <div class="tr2-card ${cssClass}" data-key="${esc(t.key)}" role="button" tabindex="0"
+        <div class="tr2-card ${cssClass}" data-key="${escAttr(t.key)}" role="button" tabindex="0"
           style="animation:tr2CardIn .4s ${globalIdx * 45}ms cubic-bezier(.34,1.56,.64,1) both">
           ${u && freshKeys.has(t.key) ? `<span class="tr2-new-dot" aria-label="Nouveau trophée">NOUVEAU</span>` : ""}
           ${u ? `<div class="tr2-card-rarity" aria-hidden="true"></div>` : ""}
@@ -694,15 +694,15 @@ function renderFeatured(def, unlockData, stats = { compCount: 0, streak: 0 }) {
       ? `<span class="tr2-feat-spark a" aria-hidden="true"></span><span class="tr2-feat-spark b" aria-hidden="true"></span>`
       : "";
   return `
-    <div class="tr2-feat ${isU ? rar : "locked"}" data-key="${esc(def.key)}" role="button" tabindex="0"
-      aria-label="${esc(def.title)} — ${esc(RARITY_LABEL[rar] || "")}${isU ? ", débloqué" : ", à débloquer"}">
+    <div class="tr2-feat ${isU ? rar : "locked"}" data-key="${escAttr(def.key)}" role="button" tabindex="0"
+      aria-label="${escAttr(def.title)} — ${esc(RARITY_LABEL[rar] || "")}${isU ? ", débloqué" : ", à débloquer"}">
       <div class="tr2-feat-kick"><span class="pin" aria-hidden="true"></span>${esc(kicker)}</div>
       <div class="tr2-feat-stage">
         <span class="tr2-feat-halo" aria-hidden="true"></span>
         ${sparks}
         ${
           def.image
-            ? `<img class="tr2-feat-badge" src="${def.image}" alt="${esc(def.title)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'"><span class="tr2-feat-badge-emoji" style="display:none">${def.emoji}</span>`
+            ? `<img class="tr2-feat-badge" src="${def.image}" alt="${escAttr(def.title)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'"><span class="tr2-feat-badge-emoji" style="display:none">${def.emoji}</span>`
             : `<span class="tr2-feat-badge-emoji">${def.emoji}</span>`
         }
       </div>

@@ -9,7 +9,7 @@ import { icon } from "@/utils/icons.js";
 import { medallion } from "@/utils/medallions.js";
 import { volantImg, volantLabel } from "@/utils/volant.js";
 import { getCurUser } from "@/auth/cur-user.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import {
   CATALOG,
@@ -399,11 +399,11 @@ export async function mount(root) {
   function renderTrophyCard(t, unlocked) {
     const color = t.color || "var(--mu2)";
     const visual = t.image
-      ? `<img src="${esc(t.image)}" alt="${esc(t.nom)}" loading="lazy" />`
+      ? `<img src="${escAttr(t.image)}" alt="${escAttr(t.nom)}" loading="lazy" />`
       : `<span class="gal-emoji">${medallion("trophee", "gold", { size: 48 })}</span>`;
     return `
       <div class="gal-card ${unlocked ? "acquis" : "locked"}" style="--gc:${color}"
-           data-id="${esc(t.id)}" role="button" tabindex="0"
+           data-id="${escAttr(t.id)}" role="button" tabindex="0"
            aria-label="${unlocked ? `Voir le trophée ${esc(t.nom)}` : `Trophée verrouillé : ${esc(t.nom)}`}">
         ${!unlocked ? `<div class="gal-lock-badge" aria-hidden="true">${medallion("cadenas", "slate", { size: 18 })}</div>` : ""}
         <div class="gal-card-visual">${visual}</div>
@@ -451,13 +451,13 @@ export async function mount(root) {
     const rarityColor = RARITY_COLOR[t.rarity] || "var(--mu2)";
     const rarityLabel = RARITY_LABEL[t.rarity] || t.rarity || "";
     const visual = t.image
-      ? `<img src="${esc(t.image)}" alt="${esc(t.nom)}" />`
+      ? `<img src="${escAttr(t.image)}" alt="${escAttr(t.nom)}" />`
       : `<span class="gal-emoji">${medallion("trophee", "gold", { size: 96 })}</span>`;
 
     const overlay = document.createElement("div");
     overlay.className = "gal-modal-bg";
     overlay.innerHTML = `
-      <div class="gal-modal ${unlocked ? "" : "locked"}" style="--gc:${color}" role="dialog" aria-modal="true" aria-label="${esc(t.nom)}">
+      <div class="gal-modal ${unlocked ? "" : "locked"}" style="--gc:${color}" role="dialog" aria-modal="true" aria-label="${escAttr(t.nom)}">
         <button class="gal-modal-close" type="button" aria-label="Fermer">×</button>
         <div class="gal-modal-visual">${visual}</div>
         ${rarityLabel ? `<div class="gal-modal-rarity" style="color:${rarityColor};background:color-mix(in srgb,${rarityColor} 16%,transparent)">${esc(rarityLabel)}</div>` : ""}

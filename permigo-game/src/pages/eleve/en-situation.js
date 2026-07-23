@@ -4,7 +4,7 @@
 // Données : src/data/situations-conduite.js · rendu : situation-scene.js.
 
 import { getCurUser } from "@/auth/cur-user.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { medallion } from "@/utils/medallions.js";
 import {
@@ -213,7 +213,7 @@ export async function mount(root, param) {
         ${s.reponses
           .map(
             (r) => `
-          <button class="sit-card" type="button" data-rep="${esc(r.id)}">
+          <button class="sit-card" type="button" data-rep="${escAttr(r.id)}">
             ${r.ico ? `<span class="sit-card-ico" aria-hidden="true">${repIco(r.ico, 26)}</span>` : ""}
             <span>${sBi(r.label, sScene(s.id)?.r?.[r.id])}</span>
           </button>`,

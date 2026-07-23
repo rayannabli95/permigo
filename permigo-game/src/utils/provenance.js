@@ -12,7 +12,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { toast } from "@/components/common/toast.js";
 import { haptic } from "@/utils/haptic.js";
 import { track } from "@/services/analytics.js";
@@ -186,12 +186,12 @@ export function openProvenanceEditor({ eleveId, prenom, current, onSaved }) {
       <div class="pv-presets" id="pv-presets">
         ${PROV_PRESETS.map(
           (p) =>
-            `<button class="pv-chip" type="button" style="--cc:${p.color}" data-l="${esc(p.label)}" data-c="${p.color}"><span class="pv-cdot"></span>${esc(p.label)}</button>`,
+            `<button class="pv-chip" type="button" style="--cc:${p.color}" data-l="${escAttr(p.label)}" data-c="${p.color}"><span class="pv-cdot"></span>${esc(p.label)}</button>`,
         ).join("")}
       </div>
 
       <div class="pv-l">Nom de la pastille</div>
-      <input class="pv-inp" id="pv-lbl" value="${esc(label)}" maxlength="40" placeholder="Ex : Le Bon Coin, un ami, TikTok…" autocomplete="off">
+      <input class="pv-inp" id="pv-lbl" value="${escAttr(label)}" maxlength="40" placeholder="Ex : Le Bon Coin, un ami, TikTok…" autocomplete="off">
 
       <div class="pv-l">Couleur</div>
       <div class="pv-sw-row" id="pv-sw-row">

@@ -21,7 +21,7 @@
 //  - CTA pulse subtil après 600ms
 //  - Sortie : fade + scale 0.95 200ms
 // ═══════════════════════════════════════════════════════════════
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { ASSETS } from "@/utils/assets.js";
 import { haptic } from "@/utils/haptic.js";
 import { playReward } from "@/utils/sound.js";
@@ -317,7 +317,7 @@ export function showCelebrate(opts = {}) {
     overlay.setAttribute("aria-labelledby", "cs-title-el");
 
     const illoHtml = illustration
-      ? `<img class="cs-illo" src="${esc(illustration)}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'" />
+      ? `<img class="cs-illo" src="${escAttr(illustration)}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'" />
          <div class="cs-fallback-emoji" style="display:none">${esc(fallbackEmoji)}</div>`
       : `<div class="cs-fallback-emoji">${esc(fallbackEmoji)}</div>`;
 

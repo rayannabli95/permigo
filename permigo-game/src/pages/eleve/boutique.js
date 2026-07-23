@@ -8,7 +8,7 @@ import { icon } from "@/utils/icons.js";
 import { medallion } from "@/utils/medallions.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { isSoloEleve } from "@/utils/league-bots.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { toast } from "@/components/common/toast.js";
 import { haptic } from "@/utils/haptic.js";
@@ -671,7 +671,7 @@ export async function mount(root) {
     <div class="bo2-tabs" id="bo2-tabs">
       ${SECTIONS.map(
         (s, i) => `
-        <button class="bo2-tab ${i === 0 ? "active" : ""}" data-jump="${esc(s.key)}" type="button">${esc(s.label)}</button>
+        <button class="bo2-tab ${i === 0 ? "active" : ""}" data-jump="${escAttr(s.key)}" type="button">${esc(s.label)}</button>
       `,
       ).join("")}
     </div>
@@ -963,7 +963,7 @@ function renderHeroCard(item, gemmes) {
   const isLeg = item.rarity === "legendaire";
 
   const objHtml = item.asset_url
-    ? `<img class="bo2-hero-obj" src="${esc(item.asset_url)}" alt="${esc(item.name)}" loading="lazy">`
+    ? `<img class="bo2-hero-obj" src="${escAttr(item.asset_url)}" alt="${escAttr(item.name)}" loading="lazy">`
     : `<span class="bo2-hero-emoji">${_typeMed(item.type, 72)}</span>`;
 
   // Pied droit : à acheter (prix + CTA) / débloqué / équipé
@@ -983,7 +983,7 @@ function renderHeroCard(item, gemmes) {
   }
 
   return `
-    <div class="bo2-hero" data-item-id="${esc(item.id)}" data-rarity="${esc(item.rarity)}" role="button" tabindex="0" aria-label="${esc(item.name)}, ${esc(r.label)}, ${isOwned ? (isEquipped ? "équipé" : "débloqué") : canAfford ? "acheter" : "pas assez de volants"}">
+    <div class="bo2-hero" data-item-id="${escAttr(item.id)}" data-rarity="${escAttr(item.rarity)}" role="button" tabindex="0" aria-label="${escAttr(item.name)}, ${esc(r.label)}, ${isOwned ? (isEquipped ? "équipé" : "débloqué") : canAfford ? "acheter" : "pas assez de volants"}">
       <span class="bo2-hero-tag">${isLeg ? "★ " : ""}${esc(r.label)}</span>
       <span class="bo2-hero-spark s1" aria-hidden="true"></span>
       <span class="bo2-hero-spark s2" aria-hidden="true"></span>
@@ -1052,7 +1052,7 @@ function renderGridCard(item, gemmes, idx) {
 
   const lacking = item.cost_gemmes - gemmes;
   const preview = imgUrl
-    ? `<img src="${esc(imgUrl)}" alt="${esc(item.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` +
+    ? `<img src="${escAttr(imgUrl)}" alt="${escAttr(item.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` +
       `<div class="bo2-card-preview-circle" style="display:none">${_typeMed(item.type, 60)}</div>`
     : `<div class="bo2-card-preview-circle">${_typeMed(item.type, 60)}</div>`;
 
@@ -1075,7 +1075,7 @@ function renderGridCard(item, gemmes, idx) {
   }
 
   return `
-    <div class="bo2-card" data-item-id="${esc(item.id)}" data-rarity="${esc(item.rarity)}"
+    <div class="bo2-card" data-item-id="${escAttr(item.id)}" data-rarity="${escAttr(item.rarity)}"
       style="animation: bo2CardIn .4s ${idx * 60}ms cubic-bezier(.34,1.56,.64,1) both">
       <div class="bo2-card-preview" data-prev>
         <span class="bo2-card-rarity-tag">${esc(r.label)}</span>
@@ -1191,14 +1191,14 @@ function renderObjectifCard(item, gemmes, pinned = true) {
   const lacking = item.cost_gemmes - gemmes;
   const ready = gemmes >= item.cost_gemmes;
   const imgHtml = item.asset_url
-    ? `<img src="${esc(item.asset_url)}" alt="" aria-hidden="true">`
+    ? `<img src="${escAttr(item.asset_url)}" alt="" aria-hidden="true">`
     : `<span aria-hidden="true">${_typeMed(item.type, 44)}</span>`;
   const kickerLabel = `${esc(r.label)} · ${pinned ? "Ton objectif" : "À viser"}`;
   const closeBtn = pinned
     ? `<button class="bo2-obj-x" data-obj-x type="button" aria-label="Retirer l’objectif">×</button>`
     : "";
   return `
-    <div class="bo2-obj" data-item-id="${esc(item.id)}" role="button" tabindex="0" aria-label="Objectif : ${esc(item.name)}, ${ready ? "tu peux l’acheter" : `encore ${lacking} volant${lacking > 1 ? "s" : ""}`}">
+    <div class="bo2-obj" data-item-id="${escAttr(item.id)}" role="button" tabindex="0" aria-label="Objectif : ${esc(item.name)}, ${ready ? "tu peux l’acheter" : `encore ${lacking} volant${lacking > 1 ? "s" : ""}`}">
       ${closeBtn}
       <div class="bo2-obj-thumb" data-prev>${imgHtml}</div>
       <div class="bo2-obj-body">
@@ -1286,7 +1286,7 @@ function showDetailModal(item, gemmes, me, onConfirm, triggerEl) {
 
   const imgUrl = item.asset_url ?? null;
   const halo = imgUrl
-    ? `<img src="${esc(imgUrl)}" alt="${esc(item.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><span class="bo2-fallback" style="display:none">${_typeMed(item.type, 96)}</span>`
+    ? `<img src="${escAttr(imgUrl)}" alt="${escAttr(item.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><span class="bo2-fallback" style="display:none">${_typeMed(item.type, 96)}</span>`
     : `<span class="bo2-fallback">${_typeMed(item.type, 96)}</span>`;
 
   // Try-before-buy : contexte visuel selon le type (#5)
@@ -1412,7 +1412,7 @@ function _renderTryPreview(item, me) {
         <div class="bo2-try-rank-row">
           <div class="bo2-try-rank-num">1</div>
           <div class="bo2-try-rank-avatar">
-            <img src="${esc(item.asset_url)}" alt="" aria-hidden="true">
+            <img src="${escAttr(item.asset_url)}" alt="" aria-hidden="true">
           </div>
           <div class="bo2-try-rank-name">${pseudoEsc}</div>
           <div class="bo2-try-rank-score">1 250 pts</div>
@@ -1427,7 +1427,7 @@ function _renderTryPreview(item, me) {
         <div class="bo2-try-preview-title">Aperçu sur ton permis</div>
         <div class="bo2-try-permis">
           <div class="bo2-try-permis-card">
-            <img src="${esc(item.asset_url)}" alt="" aria-hidden="true">
+            <img src="${escAttr(item.asset_url)}" alt="" aria-hidden="true">
             <div class="bo2-try-permis-badge">${pseudoEsc}</div>
           </div>
         </div>

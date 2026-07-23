@@ -19,7 +19,7 @@
 //   });
 // ═══════════════════════════════════════════════════════════════
 import { volantImg } from "@/utils/volant.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { haptic } from "@/utils/haptic.js";
 import { flyVolants } from "@/components/eleve/volant-reward.js";
 
@@ -153,7 +153,7 @@ export function showPurchaseReveal({ item, balanceBadge, cost, onClose } = {}) {
 
   // Rendu de l'asset (image ou emoji fallback)
   const assetHtml = item?.asset_url
-    ? `<img src="${esc(item.asset_url)}" alt="${esc(item?.name ?? "")}" loading="lazy">`
+    ? `<img src="${escAttr(item.asset_url)}" alt="${escAttr(item?.name ?? "")}" loading="lazy">`
     : `<span class="pr-asset-emoji">${_typeEmoji(item?.type)}</span>`;
 
   const el = document.createElement("div");

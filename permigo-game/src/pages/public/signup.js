@@ -10,7 +10,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { icon } from "@/utils/icons.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 
 const STYLE = `<style>
@@ -409,7 +409,7 @@ function renderForm(root, invitation, token) {
 
         <div class="sg-row">
           <label class="sg-label" for="sg-email">Email</label>
-          <input class="sg-input" id="sg-email" type="email" value="${esc(invitation.email)}" readonly />
+          <input class="sg-input" id="sg-email" type="email" value="${escAttr(invitation.email)}" readonly />
         </div>
 
         <div class="sg-row">
@@ -698,7 +698,7 @@ function renderConsentPending(root, token) {
         <h1 class="sg-title">Presque&nbsp;! On attend l'accord de ton parent</h1>
         <p class="sg-sub">Comme tu as moins de 15 ans, un parent ou tuteur doit donner son accord avant que tu puisses utiliser PermiGo. Envoie-lui ce lien&nbsp;:</p>
         <div class="sg-row">
-          <input class="sg-input" id="sg-consent-link" type="text" readonly value="${esc(link)}" />
+          <input class="sg-input" id="sg-consent-link" type="text" readonly value="${escAttr(link)}" />
         </div>
         <button class="sg-btn" id="sg-copy-link" type="button">${icon("copy", { size: 16 })} Copier le lien</button>
         <p class="sg-sub" style="margin-top:16px;margin-bottom:0">Tu peux le coller dans WhatsApp ou un SMS à ton parent. Dès qu'il valide, ton compte se débloque.</p>

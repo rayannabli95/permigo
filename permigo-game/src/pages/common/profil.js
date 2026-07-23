@@ -14,7 +14,7 @@
 import { sb, logout } from "@/auth/auth.js";
 import { yesterdayKey } from "@/services/daily-quiz.js";
 import { getCurUser, setCurUser } from "@/auth/cur-user.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { mountPermisCard } from "@/components/eleve/permis-card.js";
 import { mountProfileCard } from "@/components/common/profile-card.js";
@@ -1004,8 +1004,8 @@ function _openDeleteSheet(root, me) {
       <div class="prf-sheet-ico" aria-hidden="true">🗑️</div>
       <h2 class="prf-sheet-title" id="prf-delete-title">Supprimer mon compte</h2>
       <p class="prf-sheet-body">
-        La suppression est <strong>immédiate et irréversible</strong> : profil effacé,
-        progression anonymisée (RGPD, art. 17).<br><br>
+        La suppression est <strong>immédiate et irréversible</strong> (RGPD, art. 17).
+        ${pt("delete_sheet_transparency", "Tes données personnelles sont supprimées ou anonymisées : ton prénom, ton email et ta photo disparaissent, tes statistiques deviennent anonymes. Ton compte ne pourra pas être récupéré.")}<br><br>
         Question ou demande par écrit&nbsp;? <a href="mailto:dpo@permigo.fr">dpo@permigo.fr</a>
         (traitée sous 30 jours).
       </p>
@@ -1050,7 +1050,7 @@ function _renderPseudo(username) {
   <div class="prf-pseudo-row">
     <input class="prf-pseudo-input" id="prf-pseudo-input" type="text" inputmode="text"
            placeholder="ex: speedy_lea" maxlength="16" autocomplete="off" spellcheck="false"
-           value="${esc(username || "")}">
+           value="${escAttr(username || "")}">
     <button class="prf-pseudo-save" id="prf-pseudo-save">Enregistrer</button>
   </div>
   <div class="prf-pseudo-err" id="prf-pseudo-err" aria-live="polite"></div>
@@ -1656,6 +1656,8 @@ const PROF_I18N = {
     row_settings_sub: "Theme, language, privacy",
     logout: "Log out",
     delete_account: "Delete my account",
+    delete_sheet_transparency:
+      "Your personal data is deleted or anonymised: your first name, email and photo are removed, and your statistics become anonymous. Your account cannot be recovered.",
     member_since: "Member since",
     modal_title: "Choose your player name",
     modal_close: "Close",
@@ -1702,6 +1704,8 @@ const PROF_I18N = {
     row_settings_sub: "السمة، اللغة، الخصوصية",
     logout: "تسجيل الخروج",
     delete_account: "حذف حسابي",
+    delete_sheet_transparency:
+      "تُحذف بياناتك الشخصية أو تُجعل مجهولة الهوية: يُمحى اسمك وبريدك الإلكتروني وصورتك، وتصبح إحصاءاتك مجهولة. لا يمكن استرجاع حسابك.",
     member_since: "عضو منذ",
     modal_title: "اختر اسم لاعبك",
     modal_close: "إغلاق",
@@ -1901,7 +1905,7 @@ async function mountEleveArene(root, me) {
 
     <div class="arn-body">
       <div class="arn-crest">
-        <div class="arn-crest-disc"><div class="arn-crest-inner">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="" referrerpolicy="no-referrer" />` : esc(initials)}</div></div>
+        <div class="arn-crest-disc"><div class="arn-crest-inner">${avatarUrl ? `<img src="${escAttr(avatarUrl)}" alt="" referrerpolicy="no-referrer" />` : esc(initials)}</div></div>
         <button class="arn-crest-edit" id="arn-edit-avatar" aria-label="${pt("photo_edit", "Changer ma photo")}" title="${pt("photo_edit", "Changer ma photo")}">${icon("image", { size: 14, strokeWidth: 2.2 })}</button>
       </div>
       <div class="arn-meta">
@@ -2035,7 +2039,7 @@ async function mountEleveArene(root, me) {
         <p class="arn-modal-tip">${pt("modal_tip", "C'est le nom que voient les autres élèves au classement de l'arène.")}</p>
         <div class="arn-field" id="arn-field">
           <span class="at">@</span>
-          <input id="arn-input" type="text" maxlength="16" autocomplete="off" spellcheck="false" placeholder="speedy_lea" value="${esc(pseudo)}" />
+          <input id="arn-input" type="text" maxlength="16" autocomplete="off" spellcheck="false" placeholder="speedy_lea" value="${escAttr(pseudo)}" />
         </div>
         <div class="arn-rules">
           <small id="arn-rule">${pt("pseudo_rule", "3 à 16 caractères : lettres, chiffres ou _")}</small>
@@ -2070,7 +2074,7 @@ function _wireEleveArene(root, me, avatarUrl) {
       me.avatar_url = url;
       const inner = root.querySelector(".arn-crest-inner");
       if (inner)
-        inner.innerHTML = `<img src="${esc(url)}" alt="" referrerpolicy="no-referrer" />`;
+        inner.innerHTML = `<img src="${escAttr(url)}" alt="" referrerpolicy="no-referrer" />`;
       haptic("success");
       track("profile.avatar_updated", { user_role: me.role });
       const { toast } = await import("@/components/common/toast.js");
@@ -2540,7 +2544,7 @@ async function mountEnseignantArene(root, me) {
     }
     <div class="enp-id">
       <div class="enp-crest">
-        <div class="enp-crest-disc"><div class="enp-crest-inner">${avatarUrl ? `<img src="${esc(avatarUrl)}" alt="" referrerpolicy="no-referrer" />` : esc(initials)}</div></div>
+        <div class="enp-crest-disc"><div class="enp-crest-inner">${avatarUrl ? `<img src="${escAttr(avatarUrl)}" alt="" referrerpolicy="no-referrer" />` : esc(initials)}</div></div>
         <button class="enp-crest-edit" id="enp-edit-avatar" aria-label="Changer ma photo" title="Changer ma photo">${icon("image", { size: 14, strokeWidth: 2.2 })}</button>
       </div>
       <div class="enp-nm">
@@ -2703,7 +2707,7 @@ async function mountEnseignantArene(root, me) {
       me.avatar_url = url;
       const inner = root.querySelector(".enp-crest-inner");
       if (inner)
-        inner.innerHTML = `<img src="${esc(url)}" alt="" referrerpolicy="no-referrer" />`;
+        inner.innerHTML = `<img src="${escAttr(url)}" alt="" referrerpolicy="no-referrer" />`;
       haptic("success");
       track("profile.avatar_updated", { user_role: me.role });
       const { toast } = await import("@/components/common/toast.js");

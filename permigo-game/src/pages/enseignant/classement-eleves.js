@@ -7,7 +7,7 @@
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { toast } from "@/components/common/toast.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { REMC_TOTAL } from "@/data/remc.js";
@@ -234,7 +234,7 @@ export async function mount(root, mode) {
   }));
 
   const attrsOf = (r) =>
-    `role="button" tabindex="0" data-eleve-id="${esc(String(r.id))}"`;
+    `role="button" tabindex="0" data-eleve-id="${escAttr(String(r.id))}"`;
   const top = mapped.slice(0, 3);
   const rest = mapped.slice(3);
   const hasPodium = top.length >= 3;
@@ -301,7 +301,7 @@ function _hofSection(hof) {
       const nom = esc(
         fmtName([e.prenom, e.nom].filter(Boolean).join(" ")) || "Élève",
       );
-      return `<div class="arn-hof-row clickable" role="button" tabindex="0" data-eleve-id="${esc(String(e.id))}">
+      return `<div class="arn-hof-row clickable" role="button" tabindex="0" data-eleve-id="${escAttr(String(e.id))}">
         <span class="arn-nm">${nom}</span>
         <span class="arn-hof-badge">${medallion("medaille", "gold", { size: 16 })} Permis obtenu</span>
       </div>`;

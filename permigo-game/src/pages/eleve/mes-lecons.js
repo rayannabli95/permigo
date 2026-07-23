@@ -9,7 +9,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { haptic } from "@/utils/haptic.js";
@@ -113,7 +113,7 @@ function renderRow(cr) {
       `<span class="ml-row-chip warn">${medallion("cible", "orange", { size: 14 })}${retrN} à retravailler</span>`,
     );
   return `
-  <button class="ml-row" data-id="${esc(cr.id)}" type="button">
+  <button class="ml-row" data-id="${escAttr(cr.id)}" type="button">
     <div class="ml-row-top">
       <span class="ml-row-ico" aria-hidden="true">${medallion("fiches", "violet", { size: 34 })}</span>
       <div class="ml-row-b">

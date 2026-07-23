@@ -9,7 +9,7 @@
 // la demande atterrit dans Supabase → Rayan la consulte en base.
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 
 const TEL = "06 02 12 53 87";
@@ -120,7 +120,7 @@ const optsHtml = (name, list, multi) =>
   list
     .map(
       (l) =>
-        `<button type="button" class="pro-opt" data-group="${name}" data-multi="${multi ? 1 : 0}" data-val="${esc(l)}">${esc(l)}</button>`,
+        `<button type="button" class="pro-opt" data-group="${name}" data-multi="${multi ? 1 : 0}" data-val="${escAttr(l)}">${esc(l)}</button>`,
     )
     .join("");
 

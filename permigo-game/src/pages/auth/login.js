@@ -14,7 +14,7 @@
 import { sb, login, loginWithOtp, verifyOtp } from "@/auth/auth.js";
 import { icon } from "@/utils/icons.js";
 import { toast } from "@/components/common/toast.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 
 // Traductions FR des messages d'erreur Supabase Auth (en anglais côté API)
 const AUTH_ERRORS_FR = {
@@ -373,7 +373,7 @@ function template() {
           <div class="lg-demos">
             ${DEMO_ACCOUNTS.map(
               (a) => `
-              <button class="lg-demo${a.gold ? " is-gold" : ""}" type="button" data-email="${esc(a.email)}" aria-label="Démo ${esc(a.role)}">
+              <button class="lg-demo${a.gold ? " is-gold" : ""}" type="button" data-email="${escAttr(a.email)}" aria-label="Démo ${esc(a.role)}">
                 <span class="lg-badge" aria-hidden="true">${icon(a.ico, { size: 20 })}</span>
                 ${esc(a.role)}
               </button>

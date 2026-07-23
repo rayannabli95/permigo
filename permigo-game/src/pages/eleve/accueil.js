@@ -1900,8 +1900,8 @@ function renderStreakSos({ streak, streakSt, gemmes, href }) {
       : "";
   return `
   <div class="acc2-sos${crit ? " crit" : ""}" id="acc-sos">
-    <button class="acc2-sos-main" id="sos-go" type="button" data-href="${esc(href || "")}"
-            aria-label="${esc(`${title.replace(/&nbsp;/g, " ")} — ${sub}`)}">
+    <button class="acc2-sos-main" id="sos-go" type="button" data-href="${escAttr(href || "")}"
+            aria-label="${escAttr(`${title.replace(/&nbsp;/g, " ")} — ${sub}`)}">
       <span class="acc2-sos-flame" aria-hidden="true">
         <img src="/skins/permigo-streak-flame-v1.webp" alt="">
       </span>
@@ -2063,7 +2063,7 @@ function render({
           : `<p class="acc2-hero-meta">${at("hero_meta", "Sois prêt·e en 5 min pour ta prochaine heure de conduite.")}</p>`
       }
       <button class="acc2-cta-king"
-              id="action-cta-btn" type="button" data-href="${esc(_heroHref)}">
+              id="action-cta-btn" type="button" data-href="${escAttr(_heroHref)}">
         ${at("cta_king", "Je me prépare")} <span class="acc2-cta-arr" aria-hidden="true">→</span>
       </button>
     </div>
@@ -2252,7 +2252,7 @@ function renderSessionConfirm(session) {
           <div class="acc2-ms-session-sub">${esc(sub)}</div>
         </div>
       </div>
-      <button class="acc2-ms-session-btn" id="confirm-session-btn" data-session-id="${esc(session.session_id)}">
+      <button class="acc2-ms-session-btn" id="confirm-session-btn" data-session-id="${escAttr(session.session_id)}">
         ${icon("check", { size: 16, strokeWidth: 2.8 })}
         ${at("session_confirm", "Confirmer la séance")}
       </button>
@@ -2542,7 +2542,7 @@ function openPrepThemeSheet(root, { prep, prepMondes, prepSuggestions }) {
           .map(
             (s, i) => `
           <button class="prep-sheet-item sug${s.code === prep?.code ? " cur" : ""}"
-                  type="button" data-code="${esc(s.code)}" data-titre="${escAttr(s.titre)}">
+                  type="button" data-code="${escAttr(s.code)}" data-titre="${escAttr(s.titre)}">
             <span class="sug-n" aria-hidden="true">${i + 1}</span>
             <span class="tt">
               <span class="sug-t">${esc(s.titre)}</span>
@@ -2564,7 +2564,7 @@ function openPrepThemeSheet(root, { prep, prepMondes, prepSuggestions }) {
               .map(
                 (f) => `
               <button class="prep-sheet-item${f.code === prep?.code ? " cur" : ""}"
-                      type="button" data-code="${esc(f.code)}" data-titre="${escAttr(f.titre)}">
+                      type="button" data-code="${escAttr(f.code)}" data-titre="${escAttr(f.titre)}">
                 <span class="tt">${esc(f.titre)}</span>
                 ${f.done ? `<span class="ok" aria-label="déjà acquise">✓</span>` : ""}
               </button>`,
@@ -2815,7 +2815,7 @@ async function _loadAndInjectChests(root) {
 
     slot.innerHTML = `
       <div class="acc2-chest-v2" id="acc-chest-teaser" role="button" tabindex="0"
-           aria-label="${esc(label)}">
+           aria-label="${escAttr(label)}">
         <img src="/skins/chests/chest_welcome.png" alt="" aria-hidden="true" loading="lazy">
         <div class="acc2-chest-v2-body">
           <strong class="acc2-chest-v2-title">${esc(label)}</strong>

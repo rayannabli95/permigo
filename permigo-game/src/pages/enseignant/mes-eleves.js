@@ -893,7 +893,7 @@ function renderDrill() {
                 // sinon nom et méta non stylés (les classes .me-ava/.me-info/
                 // .me-name/.me-meta/.me-eleve-chev n'existent pas dans le CSS).
                 return `
-              <div class="me-row" data-eleve-id="${esc(e.eleve_id)}" role="button" tabindex="0">
+              <div class="me-row" data-eleve-id="${escAttr(e.eleve_id)}" role="button" tabindex="0">
                 <div class="me-av" style="flex-shrink:0">${renderUserAvatar({ prenom: e.eleve_prenom, nom: e.eleve_nom }, 36)}</div>
                 <span class="me-nom">${nm}</span>
                 <span class="me-prov-sp"></span>
@@ -956,7 +956,7 @@ function render() {
           class="me-search"
           type="search"
           placeholder="Chercher un élève…"
-          value="${esc(_query)}"
+          value="${escAttr(_query)}"
           autocomplete="off"
           aria-label="Chercher un élève par nom ou prénom"
         />
@@ -1259,7 +1259,7 @@ function renderPipeline() {
       if (list.length === 0) return "";
       return `
         <div class="me-grp" data-grp="${key}">
-          <div class="me-grp-head me-grp-head--${mod}" aria-label="${esc(label)} (${list.length})">
+          <div class="me-grp-head me-grp-head--${mod}" aria-label="${escAttr(label)} (${list.length})">
             <span class="me-grp-dot" style="background:${color}"></span>
             ${esc(label)}
             <span class="me-grp-count">${list.length}</span>
@@ -1321,7 +1321,7 @@ function renderBandRow(eleve, opts = {}) {
   }
 
   return `
-    <div class="me-row" data-eleve-id="${esc(eleve.id)}" role="listitem" tabindex="0"
+    <div class="me-row" data-eleve-id="${escAttr(eleve.id)}" role="listitem" tabindex="0"
          aria-label="Ouvrir le livret de ${fullNom} — ${eleve.acquis}/${eleve.total} competences acquises${eleve.readiness === "recu" ? ", examen reussi" : eleve.readiness === "rate" ? ", examen a repasser" : eleve.readiness === "planifie" ? ", examen prevu" : eleve.readiness === "pret" ? ", pret pour l'examen" : eleve.aRelancer ? ", a relancer" : ""}">
       <div class="me-av" style="flex-shrink:0">${renderUserAvatar({ avatar_url: eleve.avatar_url, prenom: eleve.prenom, nom: eleve.nom }, 36)}</div>
       <span class="me-nom">${fullNom}</span>
@@ -1573,7 +1573,7 @@ function classementBodyHtml(data) {
       const nom = esc(
         fmtName([e.prenom, e.nom].filter(Boolean).join(" ")) || "Élève",
       );
-      return `<div class="me-cl-hof" data-eleve-id="${esc(e.id)}" role="button" tabindex="0">
+      return `<div class="me-cl-hof" data-eleve-id="${escAttr(e.id)}" role="button" tabindex="0">
         ${medallion("medaille", "gold", { size: 34 })}
         <span class="me-cl-hof-t">${nom}</span>
         <span class="me-cl-hof-s">${medallion("couronne", "gold", { size: 16 })} Permis obtenu</span>
@@ -1597,7 +1597,7 @@ function renderClPodium(top3, fmtScore) {
       );
       const size = isFirst ? 46 : 42;
       return `
-      <div class="me-cl-col${isFirst ? " first" : ""}" data-eleve-id="${esc(e.id)}" role="button" tabindex="0">
+      <div class="me-cl-col${isFirst ? " first" : ""}" data-eleve-id="${escAttr(e.id)}" role="button" tabindex="0">
         ${isFirst ? medallion("couronne", "gold", { size: 24 }) : ""}
         <span class="me-cl-crest" style="width:${size}px;height:${size}px">${renderUserAvatar({ avatar_url: e.avatar_url, prenom: e.prenom, nom: e.nom }, size)}</span>
         <span class="me-cl-nom">${nom}</span>
@@ -1614,7 +1614,7 @@ function renderClRow(e, pos, fmtScore) {
   );
   const s = e.streak || 0;
   return `
-    <div class="me-cl-row" data-eleve-id="${esc(e.id)}" role="button" tabindex="0">
+    <div class="me-cl-row" data-eleve-id="${escAttr(e.id)}" role="button" tabindex="0">
       <span class="me-cl-pos">${pos}</span>
       <span class="me-cl-crest" style="width:34px;height:34px">${renderUserAvatar({ avatar_url: e.avatar_url, prenom: e.prenom, nom: e.nom }, 34)}</span>
       <span class="me-cl-rnom">${nom}</span>

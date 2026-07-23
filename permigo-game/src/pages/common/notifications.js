@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { toast } from "@/components/common/toast.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
@@ -482,12 +482,12 @@ async function loadNotifs(root, me) {
       const route = notifRoute(n);
       const actionable = route && route !== "#/";
       html += `
-        <div class="nf2-item-wrap" data-id="${esc(n.id)}">
+        <div class="nf2-item-wrap" data-id="${escAttr(n.id)}">
           <div class="nf2-delete-bg" aria-label="Supprimer">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
             Suppr.
           </div>
-          <div class="nf2-item ${n.read ? "" : "unread"}" data-id="${esc(n.id)}" data-read="${n.read}" data-route="${esc(route)}" role="button" tabindex="0">
+          <div class="nf2-item ${n.read ? "" : "unread"}" data-id="${escAttr(n.id)}" data-read="${n.read}" data-route="${escAttr(route)}" role="button" tabindex="0">
             <div class="nf2-item-ico">${medallion(m.med[0], m.med[1], { size: 32 })}</div>
             <div class="nf2-item-body">
               <div class="nf2-item-eyebrow" style="color:color-mix(in srgb, ${m.color} 50%, var(--ink))">${esc(m.label)} <span class="nf2-when">· ${fmtTime(n.created_at)}</span></div>

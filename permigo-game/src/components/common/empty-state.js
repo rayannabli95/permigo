@@ -4,7 +4,7 @@
 //           compact (illustration 60px + titre court)
 // Animation : scale(0.96→1) cubic-bezier(.34,1.56,.64,1) 350ms
 // ═══════════════════════════════════════════════════════════════
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 
 const SHARED_STYLES = `
 .es-wrap {
@@ -147,7 +147,7 @@ export function renderEmptyState({
   ensureStyles();
 
   const ill = illustration || "/skins/mascot-wait.png";
-  const img = `<img class="es-img" src="${esc(ill)}" alt="" role="presentation" loading="lazy" />`;
+  const img = `<img class="es-img" src="${escAttr(ill)}" alt="" role="presentation" loading="lazy" />`;
 
   const sub =
     !compact && subtitle
@@ -157,7 +157,7 @@ export function renderEmptyState({
         : "";
 
   const cta = ctaLabel
-    ? `<a class="es-cta" href="${esc(ctaHref || "#")}" role="button">${esc(ctaLabel)}</a>`
+    ? `<a class="es-cta" href="${escAttr(ctaHref || "#")}" role="button">${esc(ctaLabel)}</a>`
     : "";
 
   const wrapClass = `es-wrap${compact ? " es-compact" : ""}`;

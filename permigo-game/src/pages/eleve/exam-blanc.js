@@ -148,7 +148,7 @@ const TROPHY_END = {
 function renderTrophy(t, variant) {
   return `
     <div class="exb-trophy ${variant}">
-      <img class="exb-trophy-img" src="${esc(t.img)}" alt="${esc(t.nom)}"
+      <img class="exb-trophy-img" src="${escAttr(t.img)}" alt="${escAttr(t.nom)}"
            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <span class="exb-trophy-emoji" style="display:none">${icon(t.ico, { size: 28 })}</span>
       <span class="exb-trophy-cap">${esc(t.nom)}</span>
@@ -260,7 +260,7 @@ function renderQuestionBody(
           ${muteButtonHTML()}
           <p class="exb-qtext">${examBi(q.enonce, q.tr?.enonce)}</p>
         </div>
-        ${q.image ? `<img class="exb-qimg" src="${esc(q.image)}" alt="Panneau routier à identifier" />` : visualSlot(q.enonce)}
+        ${q.image ? `<img class="exb-qimg" src="${escAttr(q.image)}" alt="Panneau routier à identifier" />` : visualSlot(q.enonce)}
         ${renderChoices(q)}
         <div class="exb-feedback" id="exb-feedback" role="status" aria-live="polite" hidden></div>
       </div>`;
@@ -360,7 +360,7 @@ function renderSelection() {
         .map(
           (w) =>
             `
-        <button class="exb-weak-btn" data-tag="${esc(w.tag)}" data-label="${esc(w.label)}" aria-label="Réviser ${esc(w.label)}">
+        <button class="exb-weak-btn" data-tag="${escAttr(w.tag)}" data-label="${escAttr(w.label)}" aria-label="Réviser ${esc(w.label)}">
           <span class="exb-weak-info">
             <span class="exb-weak-nom">${esc(w.label)}</span>
             <span class="exb-weak-stat">${w.left} à revoir · ${Math.round(w.rate * 100)} % ratées</span>

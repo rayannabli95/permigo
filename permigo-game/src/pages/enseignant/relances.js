@@ -245,7 +245,7 @@ export function renderRelanceCard(e) {
   const pct = Math.min(100, Math.round(35 + ((e.jours - 14) / 16) * 65));
   const msg = defaultMessage(fmtName(e.prenom) || "toi", e.jours, e.id);
   return `
-    <div class="rl-card" data-eleve-id="${esc(e.id)}">
+    <div class="rl-card" data-eleve-id="${escAttr(e.id)}">
       <div class="rl-card-top">
         <div class="rl-av">${renderUserAvatar({ avatar_url: e.avatar_url, prenom: e.prenom, nom: e.nom }, 46)}</div>
         <div class="rl-id">

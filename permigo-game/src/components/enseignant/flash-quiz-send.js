@@ -10,7 +10,7 @@
 // « Devoirs de révision ». Ton pro (Linear/Notion), pas de mascotte.
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { REMC } from "@/data/remc.js";
@@ -36,10 +36,10 @@ export function mountFlashQuizSend(root, eleveId) {
 
   const opts = REMC.map(
     (cat) =>
-      `<optgroup label="${esc(cat.id)} — ${esc(cat.name)}">${cat.subs
+      `<optgroup label="${escAttr(cat.id)} — ${esc(cat.name)}">${cat.subs
         .map(
           (s) =>
-            `<option value="${esc(s.c)}">${esc(s.c)} — ${esc(s.n)}</option>`,
+            `<option value="${escAttr(s.c)}">${esc(s.c)} — ${esc(s.n)}</option>`,
         )
         .join("")}</optgroup>`,
   ).join("");

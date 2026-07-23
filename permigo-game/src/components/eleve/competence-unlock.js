@@ -16,7 +16,7 @@
 import { findSubComp, findCategory } from "@/data/remc.js";
 import { WORLDS } from "@/data/worlds.js";
 import { track } from "@/services/analytics.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { refreshGemmes } from "@/utils/game-state.js";
 import { playReward } from "@/utils/sound.js";
 
@@ -479,12 +479,12 @@ export function showCompetenceUnlock(opts = {}) {
       <div class="cwn-stats">
         ${
           hasScore
-            ? `<div class="cwn-stat s1"><div class="cwn-stat__v"><span data-count="${esc(String(Math.round(scorePct)))}">0</span>%</div><div class="cwn-stat__l">Score</div></div>`
+            ? `<div class="cwn-stat s1"><div class="cwn-stat__v"><span data-count="${escAttr(String(Math.round(scorePct)))}">0</span>%</div><div class="cwn-stat__l">Score</div></div>`
             : ""
         }
         ${
           hasCount
-            ? `<div class="cwn-stat s2"><div class="cwn-stat__v"><span data-count="${esc(String(validatedCount))}">0</span> / ${esc(String(totalComps))}</div><div class="cwn-stat__l">Acquises</div></div>`
+            ? `<div class="cwn-stat s2"><div class="cwn-stat__v"><span data-count="${escAttr(String(validatedCount))}">0</span> / ${esc(String(totalComps))}</div><div class="cwn-stat__l">Acquises</div></div>`
             : ""
         }
       </div>`;
@@ -507,7 +507,7 @@ export function showCompetenceUnlock(opts = {}) {
       <div class="cwn-reward">
         <img src="${VOLANT_SRC}" alt="" onerror="this.classList.add('cwn-broken')" />
         <span class="cwn-coin-fb" aria-hidden="true"></span>
-        <span class="cwn-reward__n">+<span data-count="${esc(String(volantReward))}">0</span></span>
+        <span class="cwn-reward__n">+<span data-count="${escAttr(String(volantReward))}">0</span></span>
         <span class="cwn-reward__l">volants</span>
       </div>`
         : "";

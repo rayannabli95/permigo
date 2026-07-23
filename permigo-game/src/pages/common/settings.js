@@ -5,7 +5,7 @@ import { sb } from "@/auth/auth.js";
 import { icon } from "@/utils/icons.js";
 import { medallion } from "@/utils/medallions.js";
 import { getCurUser } from "@/auth/cur-user.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
 import { toast } from "@/components/common/toast.js";
 import { track } from "@/services/analytics.js";
@@ -98,7 +98,9 @@ const SET_I18N = {
     credits: "Credits & licences",
     danger_group: "Danger zone",
     delete_account: "Delete my account",
-    delete_account_sub: "Irreversible — all your data will be erased",
+    delete_account_sub: "Irreversible — personal data deleted or anonymised",
+    delete_modal_transparency:
+      "Your personal data is deleted or anonymised: your first name, email and photo are removed, and your statistics become anonymous. Your account cannot be recovered.",
     delete: "Delete",
     load_err_title: "Couldn't load your preferences",
     load_err_sub: "Check your connection, then try again.",
@@ -175,7 +177,9 @@ const SET_I18N = {
     credits: "الحقوق والتراخيص",
     danger_group: "منطقة حسّاسة",
     delete_account: "حذف حسابي",
-    delete_account_sub: "لا رجعة فيه — ستُمحى كل بياناتك",
+    delete_account_sub: "لا رجعة فيه — تُحذف بياناتك الشخصية أو تُجعل مجهولة",
+    delete_modal_transparency:
+      "تُحذف بياناتك الشخصية أو تُجعل مجهولة الهوية: يُمحى اسمك وبريدك الإلكتروني وصورتك، وتصبح إحصاءاتك مجهولة. لا يمكن استرجاع حسابك.",
     delete: "حذف",
     load_err_title: "تعذّر تحميل إعداداتك",
     load_err_sub: "تحقّق من اتصالك ثم أعد المحاولة.",
@@ -709,7 +713,7 @@ ${
           </div>
         </div>
         <div class="st-inp-line st-expand">
-          <input class="st-inp" id="inp-prenom" type="text" value="${esc(prefs.prenom)}" maxlength="30" placeholder="${st("account_firstname_ph", "Ton prénom")}" autocomplete="given-name" style="flex:1">
+          <input class="st-inp" id="inp-prenom" type="text" value="${escAttr(prefs.prenom)}" maxlength="30" placeholder="${st("account_firstname_ph", "Ton prénom")}" autocomplete="given-name" style="flex:1">
           <button class="st-save-btn" id="btn-save-prenom">${st("save", "Enregistrer")}</button>
         </div>
       </div>
@@ -767,7 +771,7 @@ ${
           </div>
         </div>
         <div class="st-accent-row st-expand" id="accent-row" role="group" aria-label="${st("accent_aria", "Choisir la couleur d'accent")}">
-          ${ACCENTS.map((p) => `<button class="st-accent-sw" type="button" data-accent="${p.id}" aria-pressed="${getAccent() === p.id}" aria-label="${esc(p.name)}" title="${esc(p.name)}" style="--sw:${p.a}"></button>`).join("")}
+          ${ACCENTS.map((p) => `<button class="st-accent-sw" type="button" data-accent="${p.id}" aria-pressed="${getAccent() === p.id}" aria-label="${escAttr(p.name)}" title="${escAttr(p.name)}" style="--sw:${p.a}"></button>`).join("")}
         </div>
       </div>
       <div class="st-row">
@@ -872,7 +876,7 @@ ${
         <span class="st-ic" aria-hidden="true">${medallion("faute", "red", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
           <div class="st-row-title" style="color:var(--rd-txt)">${st("delete_account", "Supprimer mon compte")}</div>
-          <div class="st-row-sub">${st("delete_account_sub", "Irréversible — toutes tes données seront effacées")}</div>
+          <div class="st-row-sub">${st("delete_account_sub", "Irréversible — données personnelles supprimées ou anonymisées")}</div>
         </div>
         <div class="st-row-action">
           <button class="st-btn-txt danger" id="btn-delete-account">${st("delete", "Supprimer")}</button>
@@ -1276,7 +1280,8 @@ function _showDeleteModal(root, me) {
   <div class="st-modal-handle"></div>
   <div class="st-modal-title" id="del-modal-title">Supprimer mon compte</div>
   <div class="st-modal-body">
-    Cette action est <strong>irréversible</strong>. Toutes tes données (progression, trophées, streak, XP) seront définitivement effacées.
+    Cette action est <strong>irréversible</strong>.
+    ${st("delete_modal_transparency", "Tes données personnelles sont supprimées ou anonymisées : ton prénom, ton email et ta photo disparaissent, tes statistiques deviennent anonymes. Ton compte ne pourra pas être récupéré.")}
     <br><br>Pour confirmer, tape exactement :<br><strong>${CONFIRM_TEXT}</strong>
   </div>
   <div class="st-modal-label">Confirmation</div>

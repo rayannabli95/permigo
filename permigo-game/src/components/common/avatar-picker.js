@@ -11,7 +11,7 @@
 import { ASSETS } from "@/utils/assets.js";
 import { icon } from "@/utils/icons.js";
 import { haptic } from "@/utils/haptic.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 
 /** Sentinelle exportée — utilisée par les consommateurs pour détecter le choix "upload custom" */
 export const AVATAR_PICKER_UPLOAD = "__permigo_upload_custom__";
@@ -161,9 +161,9 @@ export function openAvatarPicker(opts = {}) {
             .map(
               (url, i) => `
             <button class="avpk-opt ${url === opts.currentUrl ? "selected" : ""}"
-                    data-url="${esc(url)}"
+                    data-url="${escAttr(url)}"
                     aria-label="Avatar ${i + 1}">
-              <img src="${esc(url)}" alt="" loading="lazy" />
+              <img src="${escAttr(url)}" alt="" loading="lazy" />
             </button>
           `,
             )
