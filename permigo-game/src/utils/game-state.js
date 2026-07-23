@@ -607,11 +607,38 @@ export function purchaseItem(itemId, cost) {
 }
 
 // ─── Couleurs de thème custom ─────────────────────────────────────
+// Mêmes 4 tokens que utils/accent.js (--a/--adk/--a-lt/--a-ink) : un thème
+// boutique recolore TOUTE l'app, sans reste violet sur les éléments qui
+// utilisent --a-lt ou --a-ink. `ink` = texte posé sur l'accent (contraste AA).
 const THEME_COLORS = {
-  rose: { a: "#ec4899", adk: "#be185d", ap: "rgba(236,72,153,.09)" },
-  vert: { a: "#10b981", adk: "#047857", ap: "rgba(16,185,129,.09)" },
-  cyan: { a: "#0ea5e9", adk: "#0369a1", ap: "rgba(14,165,233,.09)" },
-  rouge: { a: "#ef4444", adk: "#b91c1c", ap: "rgba(239,68,68,.09)" },
+  rose: {
+    a: "#ec4899",
+    adk: "#be185d",
+    lt: "#fb7bb8",
+    ink: "#ffffff",
+    ap: "rgba(236,72,153,.09)",
+  },
+  vert: {
+    a: "#10b981",
+    adk: "#047857",
+    lt: "#34d399",
+    ink: "#04281d",
+    ap: "rgba(16,185,129,.09)",
+  },
+  cyan: {
+    a: "#0ea5e9",
+    adk: "#0369a1",
+    lt: "#38bdf8",
+    ink: "#062c3f",
+    ap: "rgba(14,165,233,.09)",
+  },
+  rouge: {
+    a: "#ef4444",
+    adk: "#b91c1c",
+    lt: "#f87171",
+    ink: "#ffffff",
+    ap: "rgba(239,68,68,.09)",
+  },
 };
 
 export function applyThemeColor(themeId) {
@@ -623,10 +650,14 @@ export function applyThemeColor(themeId) {
   if (c) {
     root.style.setProperty("--a", c.a);
     root.style.setProperty("--adk", c.adk);
+    root.style.setProperty("--a-lt", c.lt);
+    root.style.setProperty("--a-ink", c.ink);
     root.style.setProperty("--ap", c.ap);
   } else {
     root.style.removeProperty("--a");
     root.style.removeProperty("--adk");
+    root.style.removeProperty("--a-lt");
+    root.style.removeProperty("--a-ink");
     root.style.removeProperty("--ap");
   }
 }
