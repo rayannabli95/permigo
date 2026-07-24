@@ -10,6 +10,17 @@
 // Projection 2:1 : Est = bas-droite, Nord = haut-droite.
 
 import { esc, escAttr } from "@/utils/escape.js";
+import { getLang } from "@/utils/lang.js";
+
+// Étiquette « Toi » de la voiture du joueur — traduite AU RENDU (jamais en
+// dur dans les données de scène, cf. quiz-visuals.js MOI.label). EN/AR seuls
+// (le FR reste « Toi », inchangé).
+const MOI_LABEL_I18N = { en: "You", ar: "أنت" };
+function moiLabel(label) {
+  if (label !== "Toi") return label; // seule cette étiquette est traduite
+  const l = getLang();
+  return (l !== "fr" && MOI_LABEL_I18N[l]) || label;
+}
 
 const TW = 46; // demi-largeur écran d'une tuile
 const TH = 24; // demi-hauteur écran d'une tuile
@@ -539,15 +550,16 @@ function vehicleMarkup(v, opts) {
     return out + "</g>";
   };
 
-  // étiquette « Toi »
+  // étiquette « Toi » (traduite au rendu — cf. lang.js, jamais figée en donnée)
   let tag = "";
   if (v.label) {
+    const label = moiLabel(v.label);
     const tp = P(x, y, 1.5);
-    const w = v.label.length * 7.2 + 18;
+    const w = label.length * 7.2 + 18;
     tag = `<g class="sit-tag">
       <path d="M ${f1(tp.x - 5)} ${f1(tp.y + 10)} l 5 6 l 5 -6 Z" fill="#ffcb3d"/>
       <rect x="${f1(tp.x - w / 2)}" y="${f1(tp.y - 9)}" width="${w}" height="20" rx="10" fill="#ffcb3d"/>
-      <text x="${f1(tp.x)}" y="${f1(tp.y + 5.2)}" text-anchor="middle" font-family="'Baloo 2','Fredoka',sans-serif" font-size="12.5" font-weight="800" fill="#3a1d00">${esc(v.label)}</text>
+      <text x="${f1(tp.x)}" y="${f1(tp.y + 5.2)}" text-anchor="middle" font-family="'Baloo 2','Fredoka',sans-serif" font-size="12.5" font-weight="800" fill="#3a1d00">${esc(label)}</text>
     </g>`;
   }
 

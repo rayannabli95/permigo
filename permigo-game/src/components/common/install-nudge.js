@@ -21,6 +21,58 @@ import {
 import { track } from "@/services/analytics.js";
 import { a2hsStepsHTML, A2HS_STYLE } from "@/components/common/a2hs-steps.js";
 import { notifyPopupOpen, notifyPopupSettled } from "@/utils/intro-overlays.js";
+import { getLang } from "@/utils/lang.js";
+
+// ── i18n de la COQUE (élève non-francophone) — dict local (règle coque),
+// repli FR. Composant commun (tous rôles) : le tu/vous FR reste piloté par
+// `tu` ; en/ar n'ont qu'une seule forme (pas de distinction tu/vous).
+const INN_I18N = {
+  en: {
+    title: "Add PermiGo to your Home Screen",
+    sub: "Open the app in one tap, keep your streak 🔥 and get your reminders.",
+    close: "Close",
+    install: "Install the app in 1 tap",
+    installing: "Installing…",
+    later: "Later",
+    never: "Don't ask me again",
+    ios_browser_title: "Open PermiGo in Safari",
+    browser_title: "Open PermiGo in your browser",
+    ios_browser_why:
+      "On iPhone, adding to the Home Screen only works in Safari.",
+    browser_why:
+      "You're inside another app's browser. Open this page in your real browser to install PermiGo.",
+    ios_step:
+      "Paste the link in <b>Safari</b>, then add it to your Home Screen.",
+    step: "Tap the <b>⋯</b> menu, then <b>“Open in browser”</b>.",
+    copy: "Copy the link",
+    copied: "Link copied ✓",
+    select: "Select the link below",
+  },
+  ar: {
+    title: "أضف PermiGo إلى شاشتك الرئيسية",
+    sub: "افتح التطبيق بلمسة واحدة، وحافظ على سلسلتك 🔥 واستلم تذكيراتك.",
+    close: "إغلاق",
+    install: "ثبّت التطبيق بلمسة واحدة",
+    installing: "جارٍ التثبيت…",
+    later: "لاحقًا",
+    never: "لا تعرض علي هذا مجددًا",
+    ios_browser_title: "افتح PermiGo في Safari",
+    browser_title: "افتح PermiGo في متصفحك",
+    ios_browser_why:
+      "على الآيفون، الإضافة إلى الشاشة الرئيسية تعمل فقط في Safari.",
+    browser_why:
+      "أنت داخل متصفح تطبيق آخر. افتح هذه الصفحة في متصفحك الحقيقي لتثبيت PermiGo.",
+    ios_step: "الصق الرابط في <b>Safari</b>، ثم أضِفه إلى الشاشة الرئيسية.",
+    step: "اضغط على القائمة <b>⋯</b>، ثم <b>«فتح في المتصفح»</b>.",
+    copy: "انسخ الرابط",
+    copied: "تم نسخ الرابط ✓",
+    select: "حدّد الرابط أدناه",
+  },
+};
+function it(key, fr) {
+  const l = getLang();
+  return (l !== "fr" && INN_I18N[l]?.[key]) || fr;
+}
 
 const BADGE = "/skins/avatars/permigo-badge-icon.png";
 const LS_NEXT = "permigo-a2hs-next"; // timestamp avant lequel on se tait
@@ -188,6 +240,19 @@ function show(me) {
 
   track("a2hs.nudge_shown", { platform, native, role: me?.role });
 
+  const title = it(
+    "title",
+    tu
+      ? "Mets PermiGo sur ton écran d'accueil"
+      : "Mettez PermiGo sur votre écran d'accueil",
+  );
+  const sub = it(
+    "sub",
+    tu
+      ? "Ouvre l'app d'un geste, garde ta série 🔥 et reçois tes rappels."
+      : "Vos validations à confirmer en 1 tap — comme une vraie app, sans store.",
+  );
+
   const host = document.createElement("div");
   host.innerHTML = `${STYLE}
     <div class="inn-bg" id="inn-bg"></div>
@@ -196,19 +261,19 @@ function show(me) {
       <div class="inn-hd">
         <img class="inn-badge" src="${BADGE}" alt="" aria-hidden="true"/>
         <div>
-          <div class="inn-title" id="inn-title">${tu ? "Mets PermiGo sur ton écran d'accueil" : "Mettez PermiGo sur votre écran d'accueil"}</div>
-          <div class="inn-sub">${tu ? "Ouvre l'app d'un geste, garde ta série 🔥 et reçois tes rappels." : "Vos validations à confirmer en 1 tap — comme une vraie app, sans store."}</div>
+          <div class="inn-title" id="inn-title">${title}</div>
+          <div class="inn-sub">${sub}</div>
         </div>
-        <button class="inn-close" id="inn-close" type="button" aria-label="Fermer">×</button>
+        <button class="inn-close" id="inn-close" type="button" aria-label="${it("close", "Fermer")}">×</button>
       </div>
       ${
         native
-          ? `<button class="inn-install" id="inn-install" type="button">Installer l'app en 1 tap</button>`
+          ? `<button class="inn-install" id="inn-install" type="button">${it("install", "Installer l'app en 1 tap")}</button>`
           : `<div class="inn-steps">${a2hsStepsHTML(platform)}</div>`
       }
       <div class="inn-row">
-        <button class="inn-later" id="inn-later" type="button">Plus tard</button>
-        <button class="inn-never" id="inn-never" type="button">Ne plus me le proposer</button>
+        <button class="inn-later" id="inn-later" type="button">${it("later", "Plus tard")}</button>
+        <button class="inn-never" id="inn-never" type="button">${it("never", "Ne plus me le proposer")}</button>
       </div>
     </div>`;
   document.body.appendChild(host);
@@ -256,7 +321,7 @@ function show(me) {
   host.querySelector("#inn-install")?.addEventListener("click", async () => {
     const btn = host.querySelector("#inn-install");
     btn.disabled = true;
-    btn.textContent = "Installation…";
+    btn.textContent = it("installing", "Installation…");
     const outcome = await promptInstall();
     track("a2hs.nudge_install", { outcome });
     if (outcome === "accepted") {
@@ -286,24 +351,40 @@ function showOpenInBrowser(me, reason) {
 
   const title =
     reason === "ios-browser"
-      ? tu
-        ? "Ouvre PermiGo dans Safari"
-        : "Ouvrez PermiGo dans Safari"
-      : tu
-        ? "Ouvre PermiGo dans ton navigateur"
-        : "Ouvrez PermiGo dans votre navigateur";
+      ? it(
+          "ios_browser_title",
+          tu ? "Ouvre PermiGo dans Safari" : "Ouvrez PermiGo dans Safari",
+        )
+      : it(
+          "browser_title",
+          tu
+            ? "Ouvre PermiGo dans ton navigateur"
+            : "Ouvrez PermiGo dans votre navigateur",
+        );
   const why =
     reason === "ios-browser"
-      ? "Sur iPhone, l'ajout à l'écran d'accueil ne marche que dans Safari."
-      : "Tu es dans le navigateur d'une autre app. Ouvre la page dans ton vrai navigateur pour installer PermiGo.";
+      ? it(
+          "ios_browser_why",
+          "Sur iPhone, l'ajout à l'écran d'accueil ne marche que dans Safari.",
+        )
+      : it(
+          "browser_why",
+          "Tu es dans le navigateur d'une autre app. Ouvre la page dans ton vrai navigateur pour installer PermiGo.",
+        );
   const stepIco =
     reason === "ios-browser"
       ? `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg>`
       : `<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>`;
   const stepTxt =
     reason === "ios-browser"
-      ? `Colle le lien dans <b>Safari</b>, puis ajoute-le à l'écran d'accueil.`
-      : `Touche le menu <b>⋯</b>, puis <b>« Ouvrir dans le navigateur »</b>.`;
+      ? it(
+          "ios_step",
+          `Colle le lien dans <b>Safari</b>, puis ajoute-le à l'écran d'accueil.`,
+        )
+      : it(
+          "step",
+          `Touche le menu <b>⋯</b>, puis <b>« Ouvrir dans le navigateur »</b>.`,
+        );
 
   const host = document.createElement("div");
   host.innerHTML = `${STYLE}
@@ -321,13 +402,13 @@ function showOpenInBrowser(me, reason) {
           <div class="inn-title" id="inn-title">${title}</div>
           <div class="inn-sub">${why}</div>
         </div>
-        <button class="inn-close" id="inn-close" type="button" aria-label="Fermer">×</button>
+        <button class="inn-close" id="inn-close" type="button" aria-label="${it("close", "Fermer")}">×</button>
       </div>
       <div class="inn-oib-step"><span class="inn-oib-ico">${stepIco}</span><span>${stepTxt}</span></div>
-      <button class="inn-install" id="inn-copy" type="button">Copier le lien</button>
+      <button class="inn-install" id="inn-copy" type="button">${it("copy", "Copier le lien")}</button>
       <div class="inn-oib-url" id="inn-url"></div>
       <div class="inn-row">
-        <button class="inn-later" id="inn-later" type="button">Plus tard</button>
+        <button class="inn-later" id="inn-later" type="button">${it("later", "Plus tard")}</button>
       </div>
     </div>`;
   document.body.appendChild(host);
@@ -374,8 +455,8 @@ function showOpenInBrowser(me, reason) {
     }
     track("a2hs.open_in_browser_copy", { reason, ok });
     copyBtn.textContent = ok
-      ? "Lien copié ✓"
-      : "Sélectionne le lien ci-dessous";
+      ? it("copied", "Lien copié ✓")
+      : it("select", "Sélectionne le lien ci-dessous");
     // On laisse la sheet ouverte : l'utilisateur va coller dans son navigateur.
   });
 

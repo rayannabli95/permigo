@@ -59,6 +59,9 @@ import {
 const EXBS_I18N = {
   en: {
     back_aria: "Back",
+    fb_results: "See results →",
+    fb_result: "See result →",
+    fb_bilan: "See summary →",
     trophy_start: "First spark",
     trophy_end: "A month without a miss",
     title: "Your exam journey",
@@ -89,6 +92,9 @@ const EXBS_I18N = {
   },
   ar: {
     back_aria: "رجوع",
+    fb_results: "عرض النتائج →",
+    fb_result: "عرض النتيجة →",
+    fb_bilan: "عرض الحصيلة →",
     trophy_start: "الشرارة الأولى",
     trophy_end: "شهر دون خطأ",
     title: "مسارك للامتحان",
@@ -818,7 +824,7 @@ function startParcours(root, parcours_id) {
     mascot: true,
     colorTrackNode: true,
     feedbackFaute: true,
-    feedbackLast: "Voir les résultats →",
+    feedbackLast: exsT("fb_results", "Voir les résultats →"),
     renderHeader: ({ num, total, idx, answers }) => `
       <div class="exb-quiz-header">
         <button class="exb-quit-btn" id="exb-quit" aria-label="Quitter">×</button>
@@ -1028,7 +1034,7 @@ function startExamenOfficiel(root) {
 
   runExbQuiz(root, questions, {
     chrono: true,
-    feedbackLast: "Voir le résultat →",
+    feedbackLast: exsT("fb_result", "Voir le résultat →"),
     renderHeader: ({ num, total }) => `
       <div class="exb-quiz-header">
         <button class="exb-quit-btn" id="exb-quit" aria-label="Quitter">×</button>
@@ -1194,7 +1200,7 @@ function runRevision(
   track(`${trackName}.started`, { ...trackMeta, total: questions.length });
 
   runExbQuiz(root, questions, {
-    feedbackLast: "Voir le bilan →",
+    feedbackLast: exsT("fb_bilan", "Voir le bilan →"),
     renderHeader: ({ num, total }) => `
       <div class="exb-quiz-header">
         <button class="exb-quit-btn" id="exb-quit" aria-label="Quitter">×</button>
