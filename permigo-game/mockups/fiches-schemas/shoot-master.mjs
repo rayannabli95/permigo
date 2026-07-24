@@ -1,0 +1,12 @@
+import pw from '/Users/macbookm3/Desktop/permigo-v7/permigo-game/node_modules/playwright/index.js';
+const { chromium } = pw;
+const DIR = '/private/tmp/claude-501/-Users-macbookm3-Desktop-permigo-v7/5e14c278-0238-4c01-8093-789b5077043d/scratchpad';
+const browser = await chromium.launch({ args: ['--allow-file-access-from-files'] });
+const page = await browser.newPage({ viewport: { width: 1300, height: 5300 } });
+const errs=[]; page.on('pageerror',e=>errs.push(e.message));
+await page.goto(`file://${DIR}/master.html`, { waitUntil: 'networkidle' });
+await page.waitForTimeout(600);
+const names = { p1:'prio-1-regle', p2:'prio-2-stop', p3:'prio-3-feu', p4:'prio-4-sensunique' };
+for (const id of Object.keys(names)) await page.locator('#'+id).screenshot({ path: `${DIR}/C2f-priorite-droite-${names[id].split('-')[1]}-${names[id].split('-').slice(2).join('-')}.png` });
+if (errs.length) console.log('ERRORS', JSON.stringify(errs));
+await browser.close(); console.log('done');

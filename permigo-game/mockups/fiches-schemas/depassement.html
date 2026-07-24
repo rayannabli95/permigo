@@ -1,0 +1,47 @@
+<meta charset="utf-8">
+<style>body{margin:0;background:#222}svg{display:block;width:1024px;height:1024px}</style>
+<svg id="s" viewBox="0 0 1024 1024"></svg>
+<script>
+const NS='http://www.w3.org/2000/svg';
+const GREEN='#1f9e41',GREEN_DK='#0e5f26',BLUE='#2f6bff',BLUE_DK='#12379e',GREY='#c8ced8',GREY_DK='#7b8291';
+const GRASS='#cADE9F'.toLowerCase(),ROAD='#9599a2',EDGE='#f2efe7',DASH='#f4f5f7';
+function E(n,a,k){const e=document.createElementNS(NS,n);for(const x in a)e.setAttribute(x,a[x]);(k||[]).forEach(c=>e.appendChild(c));return e;}
+const svg=document.getElementById('s');const add=e=>svg.appendChild(e);
+
+// route verticale 2 voies, campagne
+add(E('rect',{x:0,y:0,width:1024,height:1024,fill:'#c9de9f'}));
+const LX=340,RX=684,CX=512;
+add(E('rect',{x:LX,y:0,width:RX-LX,height:1024,fill:ROAD}));
+add(E('line',{x1:LX,y1:0,x2:LX,y2:1024,stroke:EDGE,'stroke-width':6}));
+add(E('line',{x1:RX,y1:0,x2:RX,y2:1024,stroke:EDGE,'stroke-width':6}));
+// axe central pointillé (dépassement autorisé)
+add(E('line',{x1:CX,y1:0,x2:CX,y2:1024,stroke:DASH,'stroke-width':6,'stroke-dasharray':'34 30','stroke-linecap':'round'}));
+
+function car(x,y,rot,color,dark){const W=76,H=140,g=E('g',{transform:`translate(${x} ${y}) rotate(${rot})`});
+  for(const [wx,wy] of [[-W/2-4,-H/2+22],[W/2-6,-H/2+22],[-W/2-4,H/2-46],[W/2-6,H/2-46]]) g.appendChild(E('rect',{x:wx,y:wy,width:12,height:34,rx:5,fill:'#15171c'}));
+  g.appendChild(E('rect',{x:-W/2,y:-H/2,width:W,height:H,rx:24,fill:color,stroke:dark,'stroke-width':5}));
+  g.appendChild(E('rect',{x:-W/2+14,y:-H/2+20,width:W-28,height:28,rx:10,fill:'#dbe6ff'}));
+  g.appendChild(E('rect',{x:-W/2+14,y:H/2-44,width:W-28,height:24,rx:9,fill:'#c2cee6'}));
+  g.appendChild(E('rect',{x:-W/2+16,y:-H/2+54,width:W-32,height:50,rx:9,fill:color,opacity:.5}));add(g);}
+function arrowPath(pts){
+  let d='M '+pts[0][0]+' '+pts[0][1];
+  for(let i=1;i<pts.length;i++){const p=pts[i],pp=pts[i-1];d+=` Q ${pp[0]} ${(pp[1]+p[1])/2} ${(pp[0]+p[0])/2} ${(pp[1]+p[1])/2} T ${p[0]} ${p[1]}`;}
+  // repli simple : polyline lissée par 'round'
+  d='M '+pts.map(p=>p.join(' ')).join(' L ');
+  add(E('path',{d,fill:'none',stroke:GREEN_DK,'stroke-width':30,'stroke-linecap':'round','stroke-linejoin':'round'}));
+  add(E('path',{d,fill:'none',stroke:GREEN,'stroke-width':20,'stroke-linecap':'round','stroke-linejoin':'round'}));
+  const [x1,y1]=pts[pts.length-2],[x2,y2]=pts[pts.length-1],a=Math.atan2(y2-y1,x2-x1),s=42;
+  add(E('path',{d:`M ${x2+Math.cos(a)*10} ${y2+Math.sin(a)*10} L ${x2-Math.cos(a-0.5)*s} ${y2-Math.sin(a-0.5)*s} L ${x2-Math.cos(a+0.5)*s} ${y2-Math.sin(a+0.5)*s} Z`,fill:GREEN,stroke:GREEN_DK,'stroke-width':5,'stroke-linejoin':'round'}));
+}
+function badge(x,y,n){add(E('circle',{cx:x,cy:y,r:38,fill:'#fff',stroke:'#111','stroke-width':6}));
+  const t=E('text',{x,y:y+1,'text-anchor':'middle','dominant-baseline':'central','font-size':50,'font-weight':800,'font-family':'Arial',fill:'#111'});t.textContent=n;add(t);}
+
+const rlane=598, llane=426;   // centre voie droite / voie gauche
+// voiture lente devant, dans ma voie
+car(rlane,440,0,GREY,GREY_DK);
+// trajectoire de dépassement : déboîte, dépasse largement, se rabat
+arrowPath([[rlane,910],[rlane,720],[llane,560],[llane,330],[rlane,190],[rlane,120]]);
+// ma voiture au départ
+car(rlane,880,0,BLUE,BLUE_DK);
+badge(rlane+72,880,1); badge(rlane+72,440,2); badge(rlane+72,150,3);
+</script>

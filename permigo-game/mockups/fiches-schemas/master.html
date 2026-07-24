@@ -1,0 +1,103 @@
+<meta charset="utf-8">
+<style>
+  body { margin: 0; background: #222; }
+  .plate { position: relative; width: 1254px; height: 1254px; }
+  .plate img, .plate svg { position: absolute; inset: 0; width: 1254px; height: 1254px; }
+</style>
+<div class="plate" id="p1"><img src="inter.png"><svg viewBox="0 0 1254 1254"></svg></div>
+<div class="plate" id="p2"><img src="inter.png"><svg viewBox="0 0 1254 1254"></svg></div>
+<div class="plate" id="p3"><img src="inter.png"><svg viewBox="0 0 1254 1254"></svg></div>
+<div class="plate" id="p4"><img src="inter.png"><svg viewBox="0 0 1254 1254"></svg></div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const GREEN='#22a244',GREEN_DK='#12692a',RED='#e23b3b',ORANGE='#f7941d',ORANGE_DK='#b56400';
+const BLUE='#2f6bff',BLUE_DK='#12379e',GREY='#c3c9d4',GREY_DK='#7b8291';
+function E(n,a,kids){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);(kids||[]).forEach(c=>e.appendChild(c));return e;}
+
+// ===== MOTEUR RÉUTILISABLE : un "svg" cible passé à chaque primitive =====
+function mk(svg){
+  const add=e=>{svg.appendChild(e);return e;};
+  const api={};
+  api.car=(x,y,rot,scale,color,dark,blinker)=>{
+    const W=70,H=128,g=E('g',{transform:`translate(${x} ${y}) rotate(${rot}) scale(${scale})`});
+    for(const [wx,wy] of [[-W/2-3,-H/2+20],[W/2-5,-H/2+20],[-W/2-3,H/2-40],[W/2-5,H/2-40]])
+      g.appendChild(E('rect',{x:wx,y:wy,width:11,height:30,rx:5,fill:'#15171c'}));
+    g.appendChild(E('rect',{x:-W/2,y:-H/2,width:W,height:H,rx:22,fill:color,stroke:dark,'stroke-width':4}));
+    g.appendChild(E('rect',{x:-W/2+12,y:-H/2+18,width:W-24,height:26,rx:9,fill:'#dbe6ff',opacity:.9}));
+    g.appendChild(E('rect',{x:-W/2+12,y:H/2-40,width:W-24,height:22,rx:8,fill:'#c2cee6',opacity:.85}));
+    g.appendChild(E('rect',{x:-W/2+14,y:-H/2+50,width:W-28,height:46,rx:8,fill:color,opacity:.5}));
+    add(g);
+    if(blinker){const s=blinker==='left'?-1:1,rad=rot*Math.PI/180,cos=Math.cos(rad),sin=Math.sin(rad);
+      for(const ly of [-H/2+14,H/2-14]){const lx=s*(W/2+4);
+        const px=x+(lx*cos-ly*sin)*scale,py=y+(lx*sin+ly*cos)*scale;
+        add(E('circle',{cx:px,cy:py,r:15*scale,fill:ORANGE,opacity:.4}));
+        add(E('circle',{cx:px,cy:py,r:8*scale,fill:'#ffb347',stroke:ORANGE_DK,'stroke-width':2}));}}
+  };
+  api.arrow=(pts,color,dark,w)=>{w=w||20;const d='M '+pts.map(p=>p.join(' ')).join(' L ');
+    add(E('path',{d,fill:'none',stroke:dark,'stroke-width':w+8,'stroke-linecap':'round','stroke-linejoin':'round',opacity:.85}));
+    add(E('path',{d,fill:'none',stroke:color,'stroke-width':w,'stroke-linecap':'round','stroke-linejoin':'round'}));
+    const [x1,y1]=pts[pts.length-2],[x2,y2]=pts[pts.length-1],a=Math.atan2(y2-y1,x2-x1),s=w*2.1;
+    const tip=[x2+Math.cos(a)*s*0.5,y2+Math.sin(a)*s*0.5];
+    const l=[x2+Math.cos(a+2.5)*s*0.7,y2+Math.sin(a+2.5)*s*0.7],r=[x2+Math.cos(a-2.5)*s*0.7,y2+Math.sin(a-2.5)*s*0.7];
+    add(E('path',{d:`M ${tip[0]} ${tip[1]} L ${l[0]} ${l[1]} L ${x2-Math.cos(a)*s*0.1} ${y2-Math.sin(a)*s*0.1} L ${r[0]} ${r[1]} Z`,fill:color,stroke:dark,'stroke-width':4,'stroke-linejoin':'round'}));
+  };
+  api.stopBar=(x,y,rot,scale)=>{scale=scale||1;
+    add(E('rect',{x:-46,y:-9,width:92,height:18,rx:6,fill:RED,stroke:'#7d1414','stroke-width':3,transform:`translate(${x} ${y}) rotate(${rot}) scale(${scale})`}));};
+  api.signStop=(x,y,sc)=>{sc=sc||1;const g=E('g',{transform:`translate(${x} ${y}) scale(${sc})`}),r=30,pts=[];
+    for(let i=0;i<8;i++){const a=Math.PI/8+i*Math.PI/4;pts.push(`${(r*Math.cos(a)).toFixed(1)},${(r*Math.sin(a)).toFixed(1)}`);}
+    g.appendChild(E('circle',{cx:0,cy:0,r:40,fill:'#fff',opacity:.92}));
+    g.appendChild(E('polygon',{points:pts.join(' '),fill:'#d21f1f',stroke:'#fff','stroke-width':4}));
+    const t=E('text',{x:0,y:1,'text-anchor':'middle','dominant-baseline':'central',fill:'#fff','font-size':16,'font-weight':800,'font-family':'Arial'});t.textContent='STOP';g.appendChild(t);add(g);};
+  api.light=(x,y,active,sc)=>{sc=sc||1;const g=E('g',{transform:`translate(${x} ${y}) scale(${sc})`});
+    g.appendChild(E('circle',{cx:0,cy:0,r:58,fill:'#fff',opacity:.55}));
+    g.appendChild(E('rect',{x:-18,y:-50,width:36,height:100,rx:11,fill:'#23262e',stroke:'#fff','stroke-width':3}));
+    [['red',-30,RED],['orange',0,'#f0a020'],['green',30,GREEN]].forEach(([n,dy,c])=>
+      g.appendChild(E('circle',{cx:0,cy:dy,r:13,fill:n===active?c:'#3a3e48',stroke:n===active?'#fff':'none','stroke-width':2})));add(g);};
+  api.signOneWay=(x,y,dir,sc)=>{sc=sc||1;const s=dir==='right'?1:-1,g=E('g',{transform:`translate(${x} ${y}) scale(${sc})`});
+    g.appendChild(E('rect',{x:-46,y:-26,width:92,height:52,rx:9,fill:'#1b5fbf',stroke:'#fff','stroke-width':5}));
+    g.appendChild(E('line',{x1:-26*s,y1:0,x2:22*s,y2:0,stroke:'#fff','stroke-width':9,'stroke-linecap':'round'}));
+    g.appendChild(E('path',{d:`M ${26*s} 0 L ${8*s} -12 L ${8*s} 12 Z`,fill:'#fff'}));add(g);};
+  api.badge=(x,y,n)=>{add(E('circle',{cx:x,cy:y,r:34,fill:'#fff',stroke:'#111','stroke-width':5}));
+    const t=E('text',{x,y:y+1,'text-anchor':'middle','dominant-baseline':'central','font-size':44,'font-weight':800,'font-family':'-apple-system,Arial',fill:'#111'});t.textContent=n;add(t);};
+  return api;
+}
+const S=id=>document.querySelector('#'+id+' svg');
+
+// ===== 1. LA RÈGLE : rien à droite -> la droite passe, je cède =====
+(()=>{const a=mk(S('p1'));
+  a.car(700,1085,0,1.15,BLUE,BLUE_DK);          // moi (bas)
+  a.stopBar(700,980,0);                          // je cède
+  a.car(1010,360,205,0.62,GREY,GREY_DK);         // vient de ma droite
+  a.arrow([[960,395],[820,455],[700,520],[640,600]],GREEN,GREEN_DK,18);
+  a.badge(770,1085,1); a.badge(1058,300,2);
+})();
+
+// ===== 2. J'AI UN STOP (ou cédez) : je cède même à gauche =====
+(()=>{const a=mk(S('p2'));
+  a.car(700,1085,0,1.15,BLUE,BLUE_DK);
+  a.stopBar(700,980,0);
+  a.signStop(905,960,1.25);                      // mon panneau STOP
+  a.car(250,360,155,0.62,GREY,GREY_DK);          // vient de ma GAUCHE
+  a.arrow([[300,395],[450,455],[600,520],[660,600]],GREEN,GREEN_DK,18);
+  a.badge(985,905,1); a.badge(196,300,2);
+})();
+
+// ===== 3. IL Y A UN FEU : le feu commande (vert je passe) =====
+(()=>{const a=mk(S('p3'));
+  a.car(700,1085,0,1.15,BLUE,BLUE_DK);
+  a.arrow([[700,975],[695,760],[688,560]],GREEN,GREEN_DK,18);   // je passe tout droit
+  a.light(900,880,'green',1.15);                 // mon feu vert
+  a.car(1010,360,205,0.62,GREY,GREY_DK);         // à droite mais...
+  a.stopBar(958,405,205);                         // ...il a rouge, il s'arrête
+  a.badge(770,1085,1); a.badge(1002,795,2);
+})();
+
+// ===== 4. SENS UNIQUE À DROITE QUI SORT : personne ne vient, je passe =====
+(()=>{const a=mk(S('p4'));
+  a.car(700,1085,0,1.15,BLUE,BLUE_DK);
+  a.arrow([[700,975],[695,760],[688,560]],GREEN,GREEN_DK,18);
+  a.signOneWay(1075,300,'right',1.15);           // sens unique qui s'éloigne
+  a.badge(770,1085,1); a.badge(1155,238,2);
+})();
+</script>

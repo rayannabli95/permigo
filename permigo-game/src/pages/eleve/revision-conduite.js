@@ -26,6 +26,7 @@ import {
   resetIfNewDay,
 } from "@/utils/free-tier.js";
 import { mountFreeTierWall } from "@/components/eleve/free-tier-wall.js";
+import { ficheSchemas } from "@/data/fiches-schemas.js";
 import {
   FICHES,
   MONDES,
@@ -346,6 +347,14 @@ const FD_STYLE = `<style>
 .fd-card.done .fd-txt{ color:#4a3712; }
 .fd-txt b{ color:#140f33; font-weight:800; }
 .fd-card.done .fd-txt b{ color:#7a4c0d; }
+
+.fd-schemas{ margin-top:2px; }
+.fd-gal{ display:flex; gap:12px; overflow-x:auto; scroll-snap-type:x mandatory; padding:2px 18px 8px; scrollbar-width:none; }
+.fd-gal::-webkit-scrollbar{ display:none; }
+.fd-shot{ margin:0; flex:0 0 84%; max-width:340px; scroll-snap-align:center; background:#f6f4ff; border:1px solid #e6e2fb;
+  border-radius:16px; overflow:hidden; box-shadow:0 3px 0 rgba(20,12,60,.28), inset 0 1px 0 rgba(255,255,255,.8); }
+.fd-shot img{ display:block; width:100%; aspect-ratio:1/1; object-fit:cover; background:#dfe3ea; }
+.fd-shot figcaption{ padding:9px 12px 11px; font-size:11.5px; line-height:1.35; color:#3d2f7a; font-weight:600; }
 
 .fd-coach-wrap{ margin-top:6px; }
 .fd-coach{ display:grid; gap:9px; padding:0 18px; align-items:stretch; }
@@ -1058,6 +1067,30 @@ export async function mount(root, param) {
 
     const competenceTxt =
       lang !== "fr" && tr?.competence ? tr.competence : f.competence;
+
+    // ── Galerie « En images » : schémas de trajectoire + photos de gestes.
+    // Images sans texte (public/art/fiches/*.webp) ; légendes traduites ici.
+    const shots = ficheSchemas(f.code);
+    const legOf = (s) => esc(s[lang] || s.fr);
+    const schemasHtml = shots.length
+      ? `<div class="fd-schemas">
+          ${seclab(
+            "En images",
+            lang === "en" ? "In pictures" : lang === "ar" ? "بالصور" : null,
+          )}
+          <div class="fd-gal">
+            ${shots
+              .map(
+                (s) => `<figure class="fd-shot">
+              <img src="/art/fiches/${escAttr(s.src)}.webp" alt="" loading="lazy" decoding="async">
+              <figcaption${rtl && s[lang] ? ' dir="rtl" lang="ar"' : ""}>${legOf(s)}</figcaption>
+            </figure>`,
+              )
+              .join("")}
+          </div>
+        </div>`
+      : "";
+
     root.innerHTML = `${FD_STYLE}<div class="fd">
       <div class="fd-hero">
         <div class="fd-topbar">
@@ -1073,6 +1106,8 @@ export async function mount(root, param) {
       </div>
 
       ${introHtml}
+      ${schemasHtml}
+
       ${deckHtml}
 
       ${coachHtml}

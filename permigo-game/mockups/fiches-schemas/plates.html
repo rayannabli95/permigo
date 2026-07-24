@@ -1,0 +1,173 @@
+<meta charset="utf-8">
+<style>
+  body { margin: 0; background: #333; }
+  .plate { position: relative; width: 1254px; height: 1254px; margin: 0 0 20px 0; overflow: hidden; }
+  .plate img, .plate svg { position: absolute; inset: 0; width: 1254px; height: 1254px; }
+</style>
+
+<div class="plate" id="plate-gauche">
+  <img src="base.png">
+  <svg id="svg-gauche" viewBox="0 0 1254 1254"></svg>
+</div>
+
+<div class="plate" id="plate-droite">
+  <img src="base.png">
+  <svg id="svg-droite" viewBox="0 0 1254 1254"></svg>
+</div>
+
+<script>
+const CX = 627, CY = 627;
+const R_BLUE = 334;   // centre voie intérieure (bleue)
+const R_GREEN = 408;  // centre voie extérieure (verte)
+const GREEN = '#2fa848', GREEN_DK = '#166b2c';
+const ORANGE = '#f7941d', ORANGE_DK = '#b56400';
+
+// point sur le cercle — angle en degrés, y vers le bas (0=est, 90=sud, 270=nord)
+function P(deg, r) {
+  const a = deg * Math.PI / 180;
+  return [CX + r * Math.cos(a), CY + r * Math.sin(a)];
+}
+// arc échantillonné de a1 vers a2 (sens anti-horaire visuel = angles décroissants), rayon interpolé
+function arc(a1, a2, r1, r2, step = 6) {
+  const pts = [];
+  const n = Math.max(2, Math.round(Math.abs(a1 - a2) / step));
+  for (let i = 0; i <= n; i++) {
+    const t = i / n;
+    const a = a1 + (a2 - a1) * t;
+    const r = r1 + (r2 - r1) * (t * t * (3 - 2 * t)); // easing douce du rayon
+    pts.push(P(a, r));
+  }
+  return pts;
+}
+// Catmull-Rom -> chemin de Béziers cubiques
+function smoothPath(pts) {
+  if (pts.length < 3) return '';
+  let d = `M ${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[Math.max(0, i - 1)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(pts.length - 1, i + 2)];
+    const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6];
+    const c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
+    d += ` C ${c1[0].toFixed(1)} ${c1[1].toFixed(1)}, ${c2[0].toFixed(1)} ${c2[1].toFixed(1)}, ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}`;
+  }
+  return d;
+}
+function el(name, attrs) {
+  const e = document.createElementNS('http://www.w3.org/2000/svg', name);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+// trace un trajet : sous-trait foncé + trait principal
+function stroke(svg, pts, color, dark, w = 17) {
+  const d = smoothPath(pts);
+  svg.appendChild(el('path', { d, fill: 'none', stroke: dark, 'stroke-width': w + 7, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', opacity: 0.9 }));
+  svg.appendChild(el('path', { d, fill: 'none', stroke: color, 'stroke-width': w, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+}
+// pointe de flèche au bout d'un trajet
+function arrowHead(svg, pts, color, dark, size = 46) {
+  const [x1, y1] = pts[pts.length - 2], [x2, y2] = pts[pts.length - 1];
+  const a = Math.atan2(y2 - y1, x2 - x1);
+  const tip = [x2 + Math.cos(a) * size * 0.7, y2 + Math.sin(a) * size * 0.7];
+  const l = [x2 + Math.cos(a + 2.5) * size * 0.75, y2 + Math.sin(a + 2.5) * size * 0.75];
+  const r = [x2 + Math.cos(a - 2.5) * size * 0.75, y2 + Math.sin(a - 2.5) * size * 0.75];
+  const back = [x2 - Math.cos(a) * size * 0.1, y2 - Math.sin(a) * size * 0.1];
+  const d = `M ${tip[0]} ${tip[1]} L ${l[0]} ${l[1]} L ${back[0]} ${back[1]} L ${r[0]} ${r[1]} Z`;
+  svg.appendChild(el('path', { d, fill: color, stroke: dark, 'stroke-width': 5, 'stroke-linejoin': 'round' }));
+}
+// pastille numérotée
+function badge(svg, x, y, n) {
+  svg.appendChild(el('circle', { cx: x, cy: y, r: 34, fill: '#fff', stroke: '#1a1a1a', 'stroke-width': 5 }));
+  const t = el('text', { x, y: y + 1, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-family': '-apple-system, Arial, sans-serif', 'font-size': 44, 'font-weight': 800, fill: '#111' });
+  t.textContent = n;
+  svg.appendChild(t);
+}
+// voiture vue de dessus, orientée vers le haut, clignotant 'left'|'right'
+function car(svg, x, y, blinker) {
+  const g = el('g', { transform: `translate(${x} ${y})` });
+  const W = 62, H = 112;
+  // roues
+  for (const [wx, wy] of [[-W/2, -H/2+16], [W/2-10, -H/2+16], [-W/2, H/2-34], [W/2-10, H/2-34]])
+    g.appendChild(el('rect', { x: wx, y: wy, width: 10, height: 24, rx: 4, fill: '#1c1c1c' }));
+  // carrosserie
+  g.appendChild(el('rect', { x: -W/2+3, y: -H/2, width: W-6, height: H, rx: 20, fill: '#1e4fd6', stroke: '#0d2b7a', 'stroke-width': 4 }));
+  // pare-brise + lunette
+  g.appendChild(el('rect', { x: -W/2+11, y: -H/2+20, width: W-22, height: 22, rx: 8, fill: '#0e1b3a', opacity: 0.85 }));
+  g.appendChild(el('rect', { x: -W/2+11, y: H/2-34, width: W-22, height: 18, rx: 7, fill: '#0e1b3a', opacity: 0.75 }));
+  // toit
+  g.appendChild(el('rect', { x: -W/2+13, y: -H/2+46, width: W-26, height: 42, rx: 8, fill: '#2f63e8' }));
+  svg.appendChild(g);
+  // clignotant : points orange avant+arrière du côté demandé
+  const bx = x + (blinker === 'left' ? -W/2 - 2 : W/2 + 2);
+  for (const by of [y - H/2 + 8, y + H/2 - 8]) {
+    svg.appendChild(el('circle', { cx: bx, cy: by, r: 13, fill: ORANGE, opacity: 0.45 }));
+    svg.appendChild(el('circle', { cx: bx, cy: by, r: 7, fill: '#ffb347', stroke: ORANGE_DK, 'stroke-width': 2 }));
+  }
+}
+// zone hachurée « angle mort » : secteur orienté
+function blindSpot(svg, x, y, dirDeg, spanDeg = 52, radius = 95) {
+  const id = 'hatch' + Math.round(x + y);
+  const defs = el('defs', {});
+  const pat = el('pattern', { id, width: 12, height: 12, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)' });
+  pat.appendChild(el('rect', { width: 12, height: 12, fill: ORANGE, opacity: 0.18 }));
+  pat.appendChild(el('rect', { width: 5, height: 12, fill: ORANGE, opacity: 0.55 }));
+  defs.appendChild(pat);
+  svg.appendChild(defs);
+  const a1 = (dirDeg - spanDeg / 2) * Math.PI / 180, a2 = (dirDeg + spanDeg / 2) * Math.PI / 180;
+  const p1 = [x + Math.cos(a1) * radius, y + Math.sin(a1) * radius];
+  const p2 = [x + Math.cos(a2) * radius, y + Math.sin(a2) * radius];
+  const d = `M ${x} ${y} L ${p1[0]} ${p1[1]} A ${radius} ${radius} 0 0 1 ${p2[0]} ${p2[1]} Z`;
+  svg.appendChild(el('path', { d, fill: `url(#${id})`, stroke: ORANGE_DK, 'stroke-width': 3, 'stroke-dasharray': '10 7', 'stroke-linejoin': 'round', opacity: 0.95 }));
+}
+
+/* ============ PLANCHE 1 : GAUCHE (3e sortie) + RABATTEMENT ============ */
+{
+  const svg = document.getElementById('svg-gauche');
+  // trajet complet : approche sud -> voie BLEUE intérieure -> (rabattement) -> voie verte -> sortie ouest
+  const approach = [[686, 1250], [686, 1180], [686, 1120]];
+  const merge = arc(82.4, 52, 445, 332);           // entre pile dans l'axe puis prend la voie bleue
+  const blueArc = arc(52, -68, 332, R_BLUE);       // anti-horaire : passe l'est (0°), passe la 1re sortie
+  const rabat = arc(-68, -112, R_BLUE, R_GREEN);   // RABATTEMENT au niveau de la 2e sortie (nord = -90°)
+  const outer = arc(-112, -155, R_GREEN, R_GREEN); // voie verte jusqu'à la sortie ouest
+  const exitW = [[180, 502], [80, 513], [14, 513]];
+  const full = [...approach, ...merge, ...blueArc.slice(1), ...rabat.slice(1), ...outer.slice(1), ...exitW];
+  stroke(svg, full, GREEN, GREEN_DK);
+  arrowHead(svg, full, GREEN, GREEN_DK);
+  // le rabattement seul, par-dessus, en ORANGE avec sa propre pointe
+  const rabatFull = arc(-64, -116, R_BLUE, R_GREEN);
+  stroke(svg, rabatFull, ORANGE, ORANGE_DK, 18);
+  arrowHead(svg, rabatFull, ORANGE, ORANGE_DK, 40);
+  // angle mort DROITE au point de rabattement (en haut, on regarde vers l'extérieur-arrière droit)
+  const bs = P(272, 350);
+  blindSpot(svg, bs[0], bs[1], -55);
+  svg.appendChild(el('circle', { cx: bs[0], cy: bs[1], r: 9, fill: '#ffb347', stroke: ORANGE_DK, 'stroke-width': 3 }));
+  // voiture à l'entrée, clignotant GAUCHE
+  car(svg, 686, 1160, 'left');
+  // pastilles : 1 entrée (cligno gauche) · 2 rabattement (cligno droite + angle mort droite) · 3 sortie
+  badge(svg, 774, 1160, 1);
+  badge(svg, 840, 248, 2);
+  badge(svg, 148, 435, 3);
+}
+
+/* ============ PLANCHE 2 : DROITE + TOUT DROIT (voie verte) ============ */
+{
+  const svg = document.getElementById('svg-droite');
+  // trajet principal : approche sud -> voie VERTE extérieure -> sortie nord (tout droit)
+  const approach = [[686, 1250], [686, 1180], [686, 1120]];
+  const merge = arc(82.4, 58, 445, R_GREEN);
+  const mainArc = arc(58, -62, R_GREEN, R_GREEN);  // anti-horaire : passe la sortie est, continue vers le nord
+  const exitN = [[760, 165], [700, 80], [676, 10]];
+  const main = [...approach, ...merge, ...mainArc.slice(1), ...exitN];
+  // embranchement : sortie DROITE (1re sortie, est) — dessiné SOUS le trajet principal
+  const spurArc = arc(46, 16, R_GREEN, 418);
+  const spur = [...spurArc, [1075, 665], [1150, 610], [1240, 602]];
+  stroke(svg, spur, GREEN, GREEN_DK);
+  arrowHead(svg, spur, GREEN, GREEN_DK);
+  stroke(svg, main, GREEN, GREEN_DK);
+  arrowHead(svg, main, GREEN, GREEN_DK);
+  // voiture à l'entrée, clignotant DROITE
+  car(svg, 686, 1160, 'right');
+  // pastilles : 1 entrée (cligno droite) · 2 sortie droite · 3 tout droit
+  badge(svg, 598, 1160, 1);
+  badge(svg, 1145, 528, 2);
+  badge(svg, 762, 90, 3);
+}
+</script>

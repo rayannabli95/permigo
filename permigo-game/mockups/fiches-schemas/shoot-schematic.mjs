@@ -1,0 +1,12 @@
+import pw from '/Users/macbookm3/Desktop/permigo-v7/permigo-game/node_modules/playwright/index.js';
+const {chromium}=pw;
+const DIR='/private/tmp/claude-501/-Users-macbookm3-Desktop-permigo-v7/5e14c278-0238-4c01-8093-789b5077043d/scratchpad';
+const b=await chromium.launch();
+const p=await b.newPage({viewport:{width:1080,height:4300}});
+const errs=[];p.on('pageerror',e=>errs.push(e.message));
+await p.goto('file://'+DIR+'/schematic.html',{waitUntil:'networkidle'});
+await p.waitForTimeout(400);
+const map={s1:'1-regle',s2:'2-stop',s3:'3-feu',s4:'4-sensunique'};
+for(const id of Object.keys(map)) await p.locator('#'+id).screenshot({path:`${DIR}/SCH-${map[id]}.png`});
+if(errs.length)console.log('ERR',errs);
+await b.close();console.log('done');
