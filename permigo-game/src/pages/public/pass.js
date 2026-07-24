@@ -825,11 +825,11 @@ function hashQuery() {
 function getLang() {
   const stored = localStorage.getItem("pv_lang");
   if (stored === "fr" || stored === "en" || stored === "ar") return stored;
+  const p = hashQuery().get("lang");
+  if (p === "fr" || p === "en" || p === "ar") return p;
   const appStored = localStorage.getItem("permigo_lang");
   if (appStored === "fr" || appStored === "en" || appStored === "ar")
     return appStored;
-  const p = hashQuery().get("lang");
-  if (p === "fr" || p === "en" || p === "ar") return p;
   const browserLang = (navigator.language || "fr").toLowerCase();
   if (browserLang.startsWith("fr")) return "fr";
   if (browserLang.startsWith("ar")) return "ar";
