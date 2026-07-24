@@ -19,8 +19,87 @@ import { haptic } from "@/utils/haptic.js";
 import { setupReveals } from "@/utils/reveal-on-scroll.js";
 import { navigate } from "@/router.js";
 import { getFiche } from "@/data/fiches-conduite.js";
+import { getLang } from "@/utils/lang.js";
 
 const CENTRES_PREMIUM_LOCKED = false;
+
+// ── i18n de la COQUE (les données propres à chaque centre restent dans
+// data/centres-examen.js). Dict local, repli FR systématique.
+const I18N = {
+  en: {
+    difficulty: "Difficulty",
+    other_centres: "More centres coming soon",
+    access_title: "Access and address",
+    open_map: "Open in Maps",
+    traps_title: "Pitfalls at {name}",
+    revise_title: "Revise your driving for {name}",
+    revise_intro: "The actions that make a difference in this area.",
+    revise_link: "Revise →",
+    revise_aria: "Revise the pitfalls at {name}",
+    revise_btn: "🎯 Revise the pitfalls at {name}",
+    targeted_quiz: "Targeted quiz · 15 questions",
+    advice_title: "Our advice",
+    faq_title: "Frequently asked questions",
+    info_note:
+      "This information may change. Check the exact address on your official exam notice.",
+    locked_title: "Centre guide — {name}",
+    locked_sub:
+      "Difficulty, route pitfalls, advice and FAQs for your exam centre. Unlock the guides with PermiGo+.",
+    route_pitfalls: "Route pitfalls",
+    targeted_advice: "Targeted advice",
+    centre_faq: "Centre FAQ",
+    unlock: "Unlock PermiGo+",
+    page_title: "Your exam centre",
+    page_subtitle: "Know the area before exam day",
+    centre_guide: "Centre guide",
+    login: "Log in to view your centre.",
+  },
+  ar: {
+    difficulty: "الصعوبة",
+    other_centres: "مراكز أخرى قريبًا",
+    access_title: "الوصول والعنوان",
+    open_map: "فتح في الخرائط",
+    traps_title: "مطبّات مركز {name}",
+    revise_title: "راجع قيادتك استعدادًا لمركز {name}",
+    revise_intro: "التصرفات التي تصنع الفارق في هذه المنطقة.",
+    revise_link: "راجع ←",
+    revise_aria: "راجع مطبّات مركز {name}",
+    revise_btn: "🎯 راجع مطبّات مركز {name}",
+    targeted_quiz: "اختبار موجّه · 15 سؤالًا",
+    advice_title: "نصائحنا",
+    faq_title: "الأسئلة الشائعة",
+    info_note:
+      "قد تتغيّر هذه المعلومات. تحقّق من العنوان الدقيق في استدعائك الرسمي للامتحان.",
+    locked_title: "بطاقة المركز — {name}",
+    locked_sub:
+      "الصعوبة ومطبّات المسار والنصائح والأسئلة الشائعة لمركز امتحانك. افتح البطاقات مع PermiGo+.",
+    route_pitfalls: "مطبّات المسار",
+    targeted_advice: "نصائح موجّهة",
+    centre_faq: "أسئلة المركز",
+    unlock: "فتح PermiGo+",
+    page_title: "مركز امتحانك",
+    page_subtitle: "تعرّف إلى المكان قبل يوم الامتحان",
+    centre_guide: "بطاقة المركز",
+    login: "سجّل الدخول لعرض مركزك.",
+  },
+};
+function t(key, fr) {
+  const lang = getLang();
+  return (lang !== "fr" && I18N[lang]?.[key]) || fr;
+}
+function rtl(html) {
+  return getLang() === "ar" ? `<span dir="rtl">${html}</span>` : html;
+}
+function txt(key, fr) {
+  return rtl(esc(t(key, fr)));
+}
+function format(key, fr, values) {
+  let value = t(key, fr);
+  Object.entries(values).forEach(([name, replacement]) => {
+    value = value.replace(`{${name}}`, replacement);
+  });
+  return value;
+}
 
 // Pont « centre → révision conduite » : relie les quizTags d'un centre aux
 // fiches de révision de CONDUITE correspondantes (codes REMC).
@@ -749,7 +828,7 @@ function diffGauge(n, label, colCss) {
   ).join("");
   return `
   <div class="cea-diff-wrap">
-    <span class="cea-diff-label">Difficulté</span>
+    <span class="cea-diff-label">${txt("difficulty", "Difficulté")}</span>
     <div class="cea-diff-gauge" style="--cea-diff-color:${colCss}">${segs}</div>
     <span class="cea-diff-val">${n}/5</span>
   </div>`;
@@ -770,7 +849,7 @@ function renderChips(activeSlug) {
          </button>`,
     )
     .join("");
-  const soon = `<span class="cea-chip soon">${icon("plus", { size: 13 })} Autres centres bientôt</span>`;
+  const soon = `<span class="cea-chip soon">${icon("plus", { size: 13 })} ${txt("other_centres", "Autres centres bientôt")}</span>`;
   return `<div class="cea-chips-wrap"><div class="cea-chips">${chips}${soon}</div></div>`;
 }
 
@@ -800,7 +879,7 @@ function renderFiche(c) {
 
   <!-- ACCÈS -->
   <div class="cea-section reveal">
-    <h2 class="cea-section-tit">${icon("map-pin", { size: 17 })} Accès et adresse</h2>
+    <h2 class="cea-section-tit">${icon("map-pin", { size: 17 })} ${txt("access_title", "Accès et adresse")}</h2>
     <div class="cea-addr-row">${icon("map-pin", { size: 17 })} ${esc(c.adresse)}</div>
     ${c.acces
       .map(
@@ -809,13 +888,13 @@ function renderFiche(c) {
       )
       .join("")}
     <a class="cea-maps-btn" href="${escAttr(mapsUrl(c))}" target="_blank" rel="noopener" data-act="maps">
-      ${icon("compass", { size: 18 })} Ouvrir dans le plan
+      ${icon("compass", { size: 18 })} ${txt("open_map", "Ouvrir dans le plan")}
     </a>
   </div>
 
   <!-- PIÈGES -->
   <div class="cea-section reveal">
-    <h2 class="cea-section-tit">${icon("alert-triangle", { size: 17 })} Les pièges à ${esc(c.nom)}</h2>
+    <h2 class="cea-section-tit">${icon("alert-triangle", { size: 17 })} ${rtl(esc(format("traps_title", "Les pièges à {name}", { name: c.nom })))}</h2>
     <div class="cea-pieges-list">
       ${c.pieges
         .map(
@@ -836,12 +915,12 @@ function renderFiche(c) {
   ${
     centreFiches(c).length
       ? `<div class="cea-section reveal">
-    <h2 class="cea-section-tit">${icon("car", { size: 17 })} Révise ta conduite pour ${esc(c.nom)}</h2>
-    <p class="cea-rev-intro">Les gestes qui font la différence sur ce secteur.</p>
+    <h2 class="cea-section-tit">${icon("car", { size: 17 })} ${rtl(esc(format("revise_title", "Révise ta conduite pour {name}", { name: c.nom })))}</h2>
+    <p class="cea-rev-intro">${txt("revise_intro", "Les gestes qui font la différence sur ce secteur.")}</p>
     ${centreFiches(c)
       .map(
         (f) =>
-          `<a class="cea-rev-row" href="#/revision-conduite/${esc(f.code)}"><span class="cea-rev-t">${esc(f.titre)}</span><span class="cea-rev-go">Réviser →</span></a>`,
+          `<a class="cea-rev-row" href="#/revision-conduite/${escAttr(f.code)}"><span class="cea-rev-t">${esc(f.titre)}</span><span class="cea-rev-go">${txt("revise_link", "Réviser →")}</span></a>`,
       )
       .join("")}
   </div>`
@@ -853,17 +932,17 @@ function renderFiche(c) {
     c.quizTags?.length
       ? `<div class="cea-revise-wrap reveal">
     <button class="cea-revise-btn" id="cea-revise" type="button"
-      aria-label="Réviser les pièges de ${esc(c.nom)}">
-      🎯 Révise les pièges de ${esc(c.nom)}
+      aria-label="${escAttr(format("revise_aria", "Réviser les pièges de {name}", { name: c.nom }))}">
+      ${rtl(esc(format("revise_btn", "🎯 Révise les pièges de {name}", { name: c.nom })))}
     </button>
-    <p class="cea-revise-sub">Quiz ciblé · 15 questions</p>
+    <p class="cea-revise-sub">${txt("targeted_quiz", "Quiz ciblé · 15 questions")}</p>
   </div>`
       : ""
   }
 
   <!-- CONSEILS -->
   <div class="cea-section reveal">
-    <h2 class="cea-section-tit">${icon("target", { size: 17 })} Nos conseils</h2>
+    <h2 class="cea-section-tit">${icon("target", { size: 17 })} ${txt("advice_title", "Nos conseils")}</h2>
     ${c.conseils
       .map(
         (t) => `<div class="cea-tip">
@@ -876,7 +955,7 @@ function renderFiche(c) {
 
   <!-- FAQ -->
   <div class="cea-section reveal">
-    <h2 class="cea-section-tit">${icon("message-circle", { size: 17 })} Questions fréquentes</h2>
+    <h2 class="cea-section-tit">${icon("message-circle", { size: 17 })} ${txt("faq_title", "Questions fréquentes")}</h2>
     ${c.faq
       .map(
         (f, idx) => `
@@ -893,7 +972,7 @@ function renderFiche(c) {
       .join("")}
   </div>
 
-  <p class="cea-note">Ces infos peuvent changer. Vérifie l’adresse exacte sur ta convocation officielle.</p>`;
+  <p class="cea-note">${txt("info_note", "Ces infos peuvent changer. Vérifie l’adresse exacte sur ta convocation officielle.")}</p>`;
 }
 
 // ─── Écran verrou premium ────────────────────────────────────
@@ -905,15 +984,15 @@ function renderLocked(c) {
         ${icon("lock", { size: 28 })}
         <span class="cea-lock-badge">${icon("sparkle", { size: 10 })}</span>
       </div>
-      <div class="cea-lock-tit">Fiche centre — ${esc(c.nom)}</div>
-      <p class="cea-lock-sub">Difficulté, pièges du parcours, conseils et FAQ de ton centre d’examen. Débloque les fiches avec PermiGo+.</p>
+      <div class="cea-lock-tit">${rtl(esc(format("locked_title", "Fiche centre — {name}", { name: c.nom })))}</div>
+      <p class="cea-lock-sub">${txt("locked_sub", "Difficulté, pièges du parcours, conseils et FAQ de ton centre d’examen. Débloque les fiches avec PermiGo+.")}</p>
       <div class="cea-lock-perks">
-        <span class="cea-lock-perk">${icon("alert-triangle", { size: 13 })} Pièges du parcours</span>
-        <span class="cea-lock-perk">${icon("target", { size: 13 })} Conseils ciblés</span>
-        <span class="cea-lock-perk">${icon("message-circle", { size: 13 })} FAQ du centre</span>
+        <span class="cea-lock-perk">${icon("alert-triangle", { size: 13 })} ${txt("route_pitfalls", "Pièges du parcours")}</span>
+        <span class="cea-lock-perk">${icon("target", { size: 13 })} ${txt("targeted_advice", "Conseils ciblés")}</span>
+        <span class="cea-lock-perk">${icon("message-circle", { size: 13 })} ${txt("centre_faq", "FAQ du centre")}</span>
       </div>
       <button class="cea-lock-cta" id="cea-unlock" type="button">
-        ${icon("sparkle", { size: 18 })} Débloquer PermiGo+
+        ${icon("sparkle", { size: 18 })} ${txt("unlock", "Débloquer PermiGo+")}
       </button>
     </div>
   </div>`;
@@ -930,9 +1009,9 @@ function template(activeSlug) {
   <div class="cea-hd">
     <div class="cea-hd-ico">${icon("map", { size: 22 })}</div>
     <div>
-      <div class="cea-hd-tit">Ton centre d’examen</div>
-      <div class="cea-hd-sub">Connais le terrain avant le jour J</div>
-      <div class="cea-badge-premium">${icon("map-pin", { size: 10 })} Fiche centre</div>
+      <div class="cea-hd-tit">${txt("page_title", "Ton centre d’examen")}</div>
+      <div class="cea-hd-sub">${txt("page_subtitle", "Connais le terrain avant le jour J")}</div>
+      <div class="cea-badge-premium">${icon("map-pin", { size: 10 })} ${txt("centre_guide", "Fiche centre")}</div>
     </div>
   </div>
 
@@ -950,7 +1029,7 @@ function skeleton() {
 <div class="cea">
   <div class="cea-hd">
     <div class="cea-hd-ico">${icon("map", { size: 22 })}</div>
-    <div><div class="cea-hd-tit">Ton centre d’examen</div></div>
+    <div><div class="cea-hd-tit">${txt("page_title", "Ton centre d’examen")}</div></div>
   </div>
   <div class="cea-chips-wrap"><div class="cea-chips" style="gap:8px">
     ${[120, 100, 90].map((w) => `<div class="cea-skel-block" style="width:${w}px;height:44px;border-radius:999px;flex-shrink:0;margin:0"></div>`).join("")}
@@ -1024,8 +1103,7 @@ function wireAccordion(root, activeSlug) {
 export async function mount(root, param) {
   const me = getCurUser();
   if (!me) {
-    root.innerHTML =
-      "<p style='padding:24px;color:var(--mu)'>Connecte-toi pour voir ton centre.</p>";
+    root.innerHTML = `<p style="padding:24px;color:var(--mu)">${txt("login", "Connecte-toi pour voir ton centre.")}</p>`;
     return;
   }
 

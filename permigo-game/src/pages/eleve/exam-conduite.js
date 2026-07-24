@@ -9,7 +9,7 @@
 // Ligue Révision : 1 ligne quiz_attempts (type 'exam_blanc', ref_id
 // 'exam-conduite') à la fin → +4, comme l'ancien examen blanc.
 // ═══════════════════════════════════════════════════════════════
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { navigate } from "@/router.js";
 import { track } from "@/services/analytics.js";
 import { haptic, tapHaptic } from "@/utils/haptic.js";
@@ -20,6 +20,7 @@ import { openShareRecap } from "@/components/eleve/share-recap.js";
 import { icon } from "@/utils/icons.js";
 import { medallion } from "@/utils/medallions.js";
 import { recordAnswer } from "@/utils/weak-points.js";
+import { getLang } from "@/utils/lang.js";
 import {
   PHASES,
   FAMILLES,
@@ -28,6 +29,130 @@ import {
   SEUIL,
   scoreExam,
 } from "@/data/exam-conduite-phases.js";
+
+// ── i18n de la COQUE. Les phases et questions sont traduites dans
+// data/exam-conduite-phases.js. Dict local, repli FR systématique.
+const I18N = {
+  en: {
+    quit_aria: "Quit",
+    confirm_quit: "Quit the mock test?",
+    title: "Mock driving test",
+    intro_sub:
+      "8 phases, just like the real test. For each situation, choose the right action.",
+    scored: "Scored out of {total}",
+    pass_from: "Pass from {threshold}",
+    serious_fault: "1 serious fault = failed",
+    training_note:
+      "This is practice, not your real score. On exam day, the examiner marks you out of {total}. Here, you simply see where you stand.",
+    start: "Start",
+    phase_progress: "PHASE {n} · {total}",
+    start_phase: "Start the phase",
+    eliminatory_feedback: "⛔ Eliminatory fault",
+    correct_feedback: "Well spotted",
+    reflex_feedback: "The right reflex",
+    see_verdict: "See the verdict",
+    my_summary: "My summary",
+    next: "Next",
+    question_progress: "{title} · phase {n} of {total}",
+    above_threshold: "Above {threshold}",
+    below_threshold: "Below the {threshold} threshold",
+    bonus: "Bonus: {bonus}",
+    skills_detail: "Breakdown by skill",
+    weak_solo:
+      "Your weak point: {label}. This is where you can gain the most points. Work on it again in your next session.",
+    weak_instructor:
+      "Your weak point: {label}. This is where you can gain the most points. Show it to your instructor for your next lesson.",
+    clean_solo: "Nothing to work on, that was solid. Keep it up.",
+    clean_instructor:
+      "Nothing to work on, that was solid. Show this score to your instructor.",
+    real_score_note:
+      "This is practice. Your real score out of {total} is given by the examiner.",
+    share_score: "Share my score",
+    back_revisions: "Back to revision",
+    share_kicker: "Mock driving test",
+    share_above: "Above the {threshold} threshold",
+    share_progress: "{score} points, you're improving",
+    eliminatory_title: "Eliminatory fault",
+    eliminatory_sub:
+      "In the real test, one is enough to fail, whatever your number of points. That is why we stop here.",
+    eliminatory_note:
+      "This is practice, precisely so you can spot it before exam day. Read the correction just above, then try again.",
+    retry: "Try again",
+  },
+  ar: {
+    quit_aria: "خروج",
+    confirm_quit: "الخروج من الامتحان التجريبي؟",
+    title: "امتحان قيادة تجريبي",
+    intro_sub:
+      "8 مراحل مثل الامتحان الحقيقي. اختر التصرف الصحيح في كل موقف.",
+    scored: "التنقيط من {total}",
+    pass_from: "النجاح من {threshold}",
+    serious_fault: "خطأ خطير واحد = رسوب",
+    training_note:
+      "هذا تدريب وليس درجتك الحقيقية. يوم الامتحان، يمنحك المفتش درجة من {total}. هنا ترى فقط مستواك الحالي.",
+    start: "ابدأ",
+    phase_progress: "المرحلة {n} · {total}",
+    start_phase: "ابدأ المرحلة",
+    eliminatory_feedback: "⛔ خطأ إقصائي",
+    correct_feedback: "أحسنت الملاحظة",
+    reflex_feedback: "التصرف الصحيح",
+    see_verdict: "عرض النتيجة",
+    my_summary: "حصيلتي",
+    next: "التالي",
+    question_progress: "{title} · المرحلة {n} من {total}",
+    above_threshold: "فوق {threshold}",
+    below_threshold: "تحت عتبة {threshold}",
+    bonus: "النقاط الإضافية: {bonus}",
+    skills_detail: "التفصيل حسب المهارة",
+    weak_solo:
+      "نقطة ضعفك: {label}. هنا يمكنك كسب أكبر عدد من النقاط. راجعها في جلستك القادمة.",
+    weak_instructor:
+      "نقطة ضعفك: {label}. هنا يمكنك كسب أكبر عدد من النقاط. اعرضها على مدرّبك في الدرس القادم.",
+    clean_solo: "لا شيء يحتاج إلى مراجعة، أداء ممتاز. واصل هكذا.",
+    clean_instructor:
+      "لا شيء يحتاج إلى مراجعة، أداء ممتاز. اعرض هذه الدرجة على مدرّبك.",
+    real_score_note:
+      "هذا تدريب. درجتك الحقيقية من {total} يمنحها لك المفتش.",
+    share_score: "شارك درجتي",
+    back_revisions: "العودة إلى المراجعات",
+    share_kicker: "امتحان قيادة تجريبي",
+    share_above: "فوق عتبة {threshold}",
+    share_progress: "{score} نقطة، أنت تتقدّم",
+    eliminatory_title: "خطأ إقصائي",
+    eliminatory_sub:
+      "في الامتحان الحقيقي، يكفي خطأ واحد للرسوب مهما كان عدد نقاطك. لذلك نتوقف هنا.",
+    eliminatory_note:
+      "هذا تدريب لتكتشف الخطأ قبل يوم الامتحان. أعد قراءة التصحيح أعلاه ثم حاول مجددًا.",
+    retry: "أعد المحاولة",
+  },
+};
+function t(key, fr) {
+  const lang = getLang();
+  return (lang !== "fr" && I18N[lang]?.[key]) || fr;
+}
+function format(key, fr, values = {}) {
+  let value = t(key, fr);
+  Object.entries(values).forEach(([name, replacement]) => {
+    value = value.replace(`{${name}}`, replacement);
+  });
+  return value;
+}
+function rtl(html) {
+  return getLang() === "ar" ? `<span dir="rtl">${html}</span>` : html;
+}
+function txt(key, fr, values) {
+  return rtl(esc(format(key, fr, values)));
+}
+function richTxt(key, fr, values = {}) {
+  let html = esc(t(key, fr));
+  Object.entries(values).forEach(([name, safeHtml]) => {
+    html = html.replace(`{${name}}`, safeHtml);
+  });
+  return rtl(html);
+}
+function dataTxt(value) {
+  return rtl(esc(value));
+}
 
 // Emoji de phase (data/exam-conduite-phases.js) → médaillon 3D premium.
 // On ne touche jamais la donnée : on traduit l'emoji au rendu (fallback route).
@@ -195,14 +320,18 @@ export async function mount(root) {
 
   function topBar(label, onX = "abandon") {
     return `<div class="exc2-top">
-      <button class="exc2-x" data-x aria-label="Quitter">${icon("x", { size: 18, strokeWidth: 2.4 })}</button>
+      <button class="exc2-x" data-x aria-label="${escAttr(t("quit_aria", "Quitter"))}">${icon("x", { size: 18, strokeWidth: 2.4 })}</button>
       <div class="exc2-pips">${pips()}</div>
     </div>`;
   }
 
   function wireX(confirmAbandon = true) {
     root.querySelector("[data-x]")?.addEventListener("click", () => {
-      if (!confirmAbandon || confirm("Quitter l’examen blanc ?")) leave();
+      if (
+        !confirmAbandon ||
+        confirm(t("confirm_quit", "Quitter l’examen blanc ?"))
+      )
+        leave();
     });
   }
 
@@ -219,16 +348,16 @@ export async function mount(root) {
       ${topBar()}
       <div class="exc2-mid exc2-center">
         <div class="exc2-e">${medallion("drapeau", "gold", { size: 64, glow: true })}</div>
-        <div class="exc2-h">Examen blanc de conduite</div>
-        <p class="exc2-sub">8 phases, comme le vrai examen. À chaque situation, choisis la bonne action.</p>
+        <div class="exc2-h">${txt("title", "Examen blanc de conduite")}</div>
+        <p class="exc2-sub">${txt("intro_sub", "8 phases, comme le vrai examen. À chaque situation, choisis la bonne action.")}</p>
         <div class="exc2-chips">
-          <span class="exc2-chip">Noté / ${TOTAL}</span>
-          <span class="exc2-chip">Reçu dès ${SEUIL}</span>
-          <span class="exc2-chip">1 faute grave = échec</span>
+          <span class="exc2-chip">${txt("scored", "Noté / {total}", { total: TOTAL })}</span>
+          <span class="exc2-chip">${txt("pass_from", "Reçu dès {threshold}", { threshold: SEUIL })}</span>
+          <span class="exc2-chip">${txt("serious_fault", "1 faute grave = échec")}</span>
         </div>
-        <p class="exc2-note">C’est un entraînement, pas ta vraie note. Le jour J, c’est l’inspecteur qui note sur ${TOTAL}. Ici, tu vois juste où tu en es.</p>
+        <p class="exc2-note">${txt("training_note", "C’est un entraînement, pas ta vraie note. Le jour J, c’est l’inspecteur qui note sur {total}. Ici, tu vois juste où tu en es.", { total: TOTAL })}</p>
       </div>
-      <button class="exc2-go" data-start>Commencer</button>
+      <button class="exc2-go" data-start>${txt("start", "Commencer")}</button>
     </div>`;
     wireX(false);
     root.querySelector("[data-start]").addEventListener("click", () => {
@@ -245,12 +374,12 @@ export async function mount(root) {
     root.innerHTML = `${STYLE}<div class="exc2">
       ${topBar()}
       <div class="exc2-mid exc2-center">
-        <div class="exc2-pk">PHASE ${p.n} · ${phases.length}</div>
+        <div class="exc2-pk">${txt("phase_progress", "PHASE {n} · {total}", { n: p.n, total: phases.length })}</div>
         <div class="exc2-e">${phaseMed(p.emoji, 56)}</div>
-        <div class="exc2-h">${esc(p.titre)}</div>
-        <p class="exc2-sub">${esc(p.sous)}</p>
+        <div class="exc2-h">${dataTxt(p.titre)}</div>
+        <p class="exc2-sub">${dataTxt(p.sous)}</p>
       </div>
-      <button class="exc2-go" data-go>Commencer la phase</button>
+      <button class="exc2-go" data-go>${txt("start_phase", "Commencer la phase")}</button>
     </div>`;
     wireX();
     root.querySelector("[data-go]").addEventListener("click", () => {
@@ -277,7 +406,7 @@ export async function mount(root) {
           else cls = "dim";
         }
         return `<button class="exc2-opt ${cls}" data-i="${i}" ${answered ? "disabled" : ""}>
-          <span class="exc2-opt-k">${KEYS[i] || "•"}</span><span>${esc(o)}</span>
+          <span class="exc2-opt-k">${KEYS[i] || "•"}</span><span>${dataTxt(o)}</span>
         </button>`;
       })
       .join("");
@@ -287,27 +416,27 @@ export async function mount(root) {
       const good = picked === it.correct;
       const cls = isElim ? "elimfb" : good ? "win" : "soft";
       const head = isElim
-        ? "⛔ Faute éliminatoire"
+        ? t("eliminatory_feedback", "⛔ Faute éliminatoire")
         : good
-          ? "Bien vu"
-          : "Le bon réflexe";
+          ? t("correct_feedback", "Bien vu")
+          : t("reflex_feedback", "Le bon réflexe");
       const nextLabel = isElim
-        ? "Voir le verdict"
+        ? t("see_verdict", "Voir le verdict")
         : pi === phases.length - 1 && ii === p.items.length - 1
-          ? "Mon bilan"
-          : "Suivant";
+          ? t("my_summary", "Mon bilan")
+          : t("next", "Suivant");
       fb = `<div class="exc2-fb ${cls}">
-          <div class="exc2-fb-h">${head}</div>
-          <div class="exc2-fb-t">${esc(it.why)}</div>
+          <div class="exc2-fb-h">${dataTxt(head)}</div>
+          <div class="exc2-fb-t">${dataTxt(it.why)}</div>
         </div>
-        <button class="exc2-go" data-next>${nextLabel}</button>`;
+        <button class="exc2-go" data-next>${dataTxt(nextLabel)}</button>`;
     }
 
     root.innerHTML = `${STYLE}<div class="exc2">
       ${topBar()}
       <div class="exc2-mid">
-        <div class="exc2-qn">${esc(phases[pi].titre)} · phase ${p.n} sur ${phases.length}</div>
-        <div class="exc2-q">${esc(it.q)}</div>
+        <div class="exc2-qn">${txt("question_progress", "{title} · phase {n} sur {total}", { title: phases[pi].titre, n: p.n, total: phases.length })}</div>
+        <div class="exc2-q">${dataTxt(it.q)}</div>
         <div class="exc2-opts">${opts}</div>
         ${fb}
       </div>
@@ -390,7 +519,7 @@ export async function mount(root) {
         const weak = r.weak === key;
         const pct = Math.round((got / f.max) * 100);
         return `<div class="exc2-fam ${weak ? "weak" : ""}">
-          <div class="exc2-fam-row ${weak ? "weak" : ""}"><span>${esc(f.label)}</span><b>${got}/${f.max}</b></div>
+          <div class="exc2-fam-row ${weak ? "weak" : ""}"><span>${dataTxt(f.label)}</span><b>${got}/${f.max}</b></div>
           <div class="exc2-fam-bar"><i style="width:${pct}%"></i></div>
         </div>`;
       })
@@ -403,31 +532,50 @@ export async function mount(root) {
       <div class="exc2-mid">
         <div class="exc2-center">
           <div class="exc2-score"><span data-count>0</span><span class="exc2-score-sep">/</span>${TOTAL}</div>
-          <div class="exc2-verdict ${r.passed ? "ok" : "ko"}">${r.passed ? `Au-dessus de ${SEUIL}` : `Sous le seuil de ${SEUIL}`}</div>
-          <p class="exc2-note">Bonus : ${esc(bonusTxt)}</p>
+          <div class="exc2-verdict ${r.passed ? "ok" : "ko"}">${r.passed ? txt("above_threshold", "Au-dessus de {threshold}", { threshold: SEUIL }) : txt("below_threshold", "Sous le seuil de {threshold}", { threshold: SEUIL })}</div>
+          <p class="exc2-note">${txt("bonus", "Bonus : {bonus}", { bonus: bonusTxt })}</p>
         </div>
         <div class="exc2-fams">
-          <div class="exc2-fam-h">Le détail par compétence</div>
+          <div class="exc2-fam-h">${txt("skills_detail", "Le détail par compétence")}</div>
           ${fams}
         </div>
         ${
           r.weak
-            ? `<div class="exc2-weakmsg">Ton point faible : <b>${esc(FAMILLES[r.weak].label)}</b>. C’est là que tu gagnes le plus de points.${isSoloEleve(getCurUser()) ? " Retravaille-le à ta prochaine session." : " Montre-le à ton moniteur pour la prochaine leçon."}</div>`
-            : `<div class="exc2-weakmsg">Rien à retravailler, c’est propre.${isSoloEleve(getCurUser()) ? " Continue comme ça." : " Montre ce score à ton moniteur."}</div>`
+            ? `<div class="exc2-weakmsg">${richTxt(
+                isSoloEleve(getCurUser())
+                  ? "weak_solo"
+                  : "weak_instructor",
+                isSoloEleve(getCurUser())
+                  ? "Ton point faible : {label}. C’est là que tu gagnes le plus de points. Retravaille-le à ta prochaine session."
+                  : "Ton point faible : {label}. C’est là que tu gagnes le plus de points. Montre-le à ton moniteur pour la prochaine leçon.",
+                { label: `<b>${esc(FAMILLES[r.weak].label)}</b>` },
+              )}</div>`
+            : `<div class="exc2-weakmsg">${txt(
+                isSoloEleve(getCurUser())
+                  ? "clean_solo"
+                  : "clean_instructor",
+                isSoloEleve(getCurUser())
+                  ? "Rien à retravailler, c’est propre. Continue comme ça."
+                  : "Rien à retravailler, c’est propre. Montre ce score à ton moniteur.",
+              )}</div>`
         }
-        <p class="exc2-note">C’est un entraînement. Ta vraie note sur ${TOTAL}, c’est l’inspecteur qui la donne.</p>
+        <p class="exc2-note">${txt("real_score_note", "C’est un entraînement. Ta vraie note sur {total}, c’est l’inspecteur qui la donne.", { total: TOTAL })}</p>
       </div>
-      <button class="exc2-go" data-share><span class="exc2-go-ico">${medallion("megaphone", "blue", { size: 22 })}</span>Partager mon score</button>
-      <button class="exc2-ghost" data-done>Retour aux révisions</button>
+      <button class="exc2-go" data-share><span class="exc2-go-ico">${medallion("megaphone", "blue", { size: 22 })}</span>${txt("share_score", "Partager mon score")}</button>
+      <button class="exc2-ghost" data-done>${txt("back_revisions", "Retour aux révisions")}</button>
     </div>`;
     root.querySelector("[data-done]").addEventListener("click", leave);
     root.querySelector("[data-share]").addEventListener("click", () => {
       openShareRecap({
-        kicker: "Examen blanc de conduite",
+        kicker: t("share_kicker", "Examen blanc de conduite"),
         big: `${r.note}/${TOTAL}`,
         sub: r.passed
-          ? `Au-dessus du seuil de ${SEUIL}`
-          : `${r.note} points, ça progresse`,
+          ? format("share_above", "Au-dessus du seuil de {threshold}", {
+              threshold: SEUIL,
+            })
+          : format("share_progress", "{score} points, ça progresse", {
+              score: r.note,
+            }),
       });
     });
     countUp(r.note);
@@ -438,12 +586,12 @@ export async function mount(root) {
     root.innerHTML = `${STYLE}<div class="exc2">
       <div class="exc2-mid exc2-center">
         <div class="exc2-e">${medallion("panneau", "red", { size: 64, glow: true })}</div>
-        <div class="exc2-h">Faute éliminatoire</div>
-        <p class="exc2-sub">Dans la réalité, une seule suffit à recaler, quel que soit ton nombre de points. C’est pour ça qu’on s’arrête ici.</p>
-        <p class="exc2-note">C’est un entraînement, justement pour la repérer avant le jour J. Relis la correction juste au-dessus, puis retente.</p>
+        <div class="exc2-h">${txt("eliminatory_title", "Faute éliminatoire")}</div>
+        <p class="exc2-sub">${txt("eliminatory_sub", "Dans la réalité, une seule suffit à recaler, quel que soit ton nombre de points. C’est pour ça qu’on s’arrête ici.")}</p>
+        <p class="exc2-note">${txt("eliminatory_note", "C’est un entraînement, justement pour la repérer avant le jour J. Relis la correction juste au-dessus, puis retente.")}</p>
       </div>
-      <button class="exc2-go" data-retry>Recommencer</button>
-      <button class="exc2-ghost" data-done>Retour aux révisions</button>
+      <button class="exc2-go" data-retry>${txt("retry", "Recommencer")}</button>
+      <button class="exc2-ghost" data-done>${txt("back_revisions", "Retour aux révisions")}</button>
     </div>`;
     root.querySelector("[data-retry]").addEventListener("click", () => {
       answers.length = 0;
