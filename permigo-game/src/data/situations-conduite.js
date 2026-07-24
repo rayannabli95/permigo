@@ -2191,6 +2191,116 @@ export const SITUATIONS = [
     focus: { veh: "velo" },
     okAnim: [{ veh: "velo" }, { veh: "moi", delai: 350 }],
   },
+  {
+    id: "sens-interdit-gps-ville",
+    theme: "signalisation",
+    difficulte: 1,
+    alt: "Rue barrée par un panneau sens interdit.",
+    scene: {
+      kind: "croisement",
+      signal: { type: "sens-interdit", branch: "S" },
+      vehicules: [
+        { id: "moi", at: "S", d: 1.9, couleur: "joueur", label: "Toi" },
+      ],
+    },
+    question:
+      "En ville, le GPS t'envoie dans une rue signalée sens interdit. Que fais-tu ?",
+    mode: "cartes",
+    reponses: [
+      { id: "autre", label: "Je prends un autre itinéraire" },
+      { id: "lentement", label: "J'entre très lentement", ico: "🐢" },
+      { id: "vide", label: "J'entre si personne n'arrive en face" },
+    ],
+    bonne: "autre",
+    explication:
+      "Le panneau sens interdit ferme la rue dans ta direction. Même si le GPS insiste ou que la voie semble vide, tu n'y entres pas.",
+    okAnim: [{ veh: "moi", clign: "droit" }],
+  },
+  {
+    id: "sens-interdit-bretelle",
+    theme: "signalisation",
+    difficulte: 2,
+    alt: "Bretelle d'autoroute barrée par un panneau sens interdit.",
+    scene: {
+      kind: "insertion",
+      signal: { type: "sens-interdit", branch: "S" },
+      vehicules: [
+        { id: "moi", bretelle: 0.35, couleur: "joueur", label: "Toi" },
+      ],
+    },
+    question:
+      "À l'entrée de cette bretelle, un panneau sens interdit te fait face. Que fais-tu ?",
+    mode: "cartes",
+    reponses: [
+      { id: "renonce", label: "Je n'entre pas et je cherche un autre accès" },
+      { id: "quelques-metres", label: "J'avance de quelques mètres au pas" },
+      { id: "gps", label: "Je continue si le GPS confirme" },
+    ],
+    bonne: "renonce",
+    explication:
+      "Un sens interdit sur une bretelle signale que tu la prends dans le mauvais sens. Tu n'avances pas, même sur quelques mètres, et tu changes d'itinéraire.",
+    okAnim: [],
+  },
+  {
+    id: "pluie-autoroute-110",
+    theme: "autoroute",
+    difficulte: 1,
+    alt: "Autoroute sous la pluie. Ta voiture suit une voiture grise sur la voie de droite.",
+    scene: {
+      kind: "autoroute",
+      meteo: "pluie",
+      vehicules: [
+        { id: "lead", at: "S", d: 1.2, lane: 0.05, couleur: "gris" },
+        {
+          id: "moi",
+          at: "S",
+          d: 2.4,
+          lane: 0.05,
+          couleur: "joueur",
+          label: "Toi",
+        },
+      ],
+    },
+    question:
+      "Il pleut sur une autoroute normalement limitée à 130. En leçon, quelle vitesse maximale ?",
+    mode: "cartes",
+    reponses: [
+      { id: "cent-dix", label: "110 km/h" },
+      { id: "cent-trente", label: "130 km/h" },
+      { id: "cent", label: "100 km/h" },
+    ],
+    bonne: "cent-dix",
+    explication:
+      "Sous la pluie, une autoroute normalement à 130 est limitée à 110 km/h. C'est aussi ta limite d'élève conducteur, même par temps sec.",
+    okAnim: [{ veh: "lead" }, { veh: "moi", delai: 250 }],
+  },
+  {
+    id: "nuit-campagne-feux-croisement",
+    theme: "signalisation",
+    difficulte: 1,
+    alt: "Route de campagne de nuit. Une voiture rouge arrive en face de la tienne.",
+    scene: {
+      kind: "route",
+      nuit: true,
+      vehicules: [
+        { id: "moi", at: "S", d: 2.4, couleur: "joueur", label: "Toi" },
+        { id: "face", at: "N", d: 2.2, couleur: "rouge" },
+      ],
+    },
+    question:
+      "De nuit sur une route de campagne non éclairée, une voiture arrive en face. Quels feux utilises-tu ?",
+    mode: "cartes",
+    reponses: [
+      { id: "croisement", label: "Les feux de croisement" },
+      { id: "route", label: "Les feux de route" },
+      { id: "position", label: "Les feux de position seuls" },
+    ],
+    bonne: "croisement",
+    explication:
+      "Tu passes assez tôt en feux de croisement pour ne pas éblouir le conducteur qui arrive. Les feux de position seuls ne suffisent pas pour rouler.",
+    focus: { veh: "face" },
+    okAnim: [{ veh: "face" }, { veh: "moi", delai: 300 }],
+  },
 ];
 
 /**

@@ -334,7 +334,7 @@ function tree(x, y, big = false) {
 
 // ── panneaux, feux, piéton (billboards) ────────────────────────
 
-function signAt(branch, type, d = 1.35) {
+function signAt(branch, type, d = 1.35, val) {
   const [ux, uy] = BRANCH_IN[branch];
   const sx = uy,
     sy = -ux;
@@ -359,6 +359,14 @@ function signAt(branch, type, d = 1.35) {
       <polygon points="-1.5,-45.5 3.5,-43.4 -0.6,-40.6" fill="#fff"/>
       <polygon points="6.2,-32.4 3.2,-28 1.6,-33.2 " fill="#fff"/>
       <polygon points="-5.5,-31.6 -7.3,-36.6 -2.6,-34.4" fill="#fff"/>`;
+  } else if (type === "sens-interdit") {
+    head = `<circle cx="0" cy="-37" r="12.5" fill="#e02b2b" stroke="#fff" stroke-width="1.8"/>
+      <rect x="-7.6" y="-39.5" width="15.2" height="5" rx="1.2" fill="#fff"/>`;
+  } else if (type === "limite") {
+    const n = val != null ? String(val) : "";
+    const fs = n.length >= 3 ? 8.4 : 10.6;
+    head = `<circle cx="0" cy="-37" r="12.5" fill="#fff" stroke="#e02b2b" stroke-width="3.2"/>
+      <text x="0" y="${(-37 + fs * 0.35).toFixed(1)}" text-anchor="middle" font-family="Inter,sans-serif" font-size="${fs}" font-weight="800" fill="#1a1d2e">${n}</text>`;
   }
   return {
     sy: base.y,
@@ -388,6 +396,47 @@ function feuAt(branch, etat = "orange") {
     ${lamp(-39, etat === "vert", "#4caf50", "#25402a")}
   </g>`,
   };
+}
+
+/** Calque NUIT : teinte bleu nuit + lune + étoiles (par-dessus toute la scène). */
+function nightMarkup() {
+  const stars = [
+    [-268, -196],
+    [-186, -212],
+    [-92, -184],
+    [58, -206],
+    [156, -190],
+    [-306, -128],
+    [292, -142],
+    [212, -204],
+  ]
+    .map(
+      ([x, y]) =>
+        `<circle cx="${x}" cy="${y}" r="1.7" fill="#fff" opacity=".75"/>`,
+    )
+    .join("");
+  return `<g class="sit-night" pointer-events="none">
+    <rect x="-352" y="-248" width="704" height="452" fill="#0a1030" opacity=".44"/>
+    ${stars}
+    <circle cx="252" cy="-192" r="30" fill="#f2f0d4" opacity=".12"/>
+    <circle cx="252" cy="-192" r="20" fill="#f4f1d8" opacity=".92"/>
+  </g>`;
+}
+
+/** Calque PLUIE : voile bleu-gris + stries diagonales (déterministe, pas de Math.random). */
+function rainMarkup() {
+  let lines = "";
+  for (let i = 0; i < 24; i++) {
+    const x = -338 + i * 29 + (i % 3) * 8;
+    const y = -232 + ((i * 61) % 344);
+    const len = 15 + (i % 4) * 5;
+    const op = (0.26 + (i % 3) * 0.09).toFixed(2);
+    lines += `<line x1="${x}" y1="${y}" x2="${(x - len * 0.32).toFixed(1)}" y2="${y + len}" stroke="#d2e6f5" stroke-width="1.5" opacity="${op}"/>`;
+  }
+  return `<g class="sit-rain" pointer-events="none">
+    <rect x="-352" y="-248" width="704" height="452" fill="#5b7d99" opacity=".13"/>
+    ${lines}
+  </g>`;
 }
 
 function pietonMarkup(scene) {
@@ -811,6 +860,7 @@ export function renderSituationScene(scene, opts = {}) {
         scene.signal.branch || "S",
         scene.signal.type,
         kind === "giratoire" ? 2.3 : 1.35,
+        scene.signal.val,
       ),
     );
   }
@@ -825,6 +875,8 @@ export function renderSituationScene(scene, opts = {}) {
     ${ground}
     <g clip-path="url(#sit-ground-clip)">${roads}</g>
     ${objects.map((x) => x.svg).join("")}
+    ${scene.meteo === "pluie" ? rainMarkup() : ""}
+    ${scene.nuit ? nightMarkup() : ""}
     <g class="sit-fx"></g>
   </svg>`;
 }
