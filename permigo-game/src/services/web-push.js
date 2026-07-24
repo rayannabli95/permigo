@@ -144,7 +144,6 @@ export async function maybeSendStreakRiskNotif() {
 /**
  * Crée (ou retrouve) la PushSubscription VAPID et l'envoie à Supabase.
  * Nécessite VITE_VAPID_PUBLIC_KEY en .env + table push_subscriptions.
- * TODO(Cowork): cf. .telemetry/push-spec.md pour le schéma attendu.
  */
 async function _ensureSubscription() {
   if (!("serviceWorker" in navigator)) return;
@@ -190,7 +189,6 @@ async function _saveSub(sub) {
     String.fromCharCode(...new Uint8Array(sub.getKey("p256dh"))),
   );
   const auth = btoa(String.fromCharCode(...new Uint8Array(sub.getKey("auth"))));
-  // TODO(Cowork): table push_subscriptions doit exister — cf. .telemetry/push-spec.md
   const { error } = await sb.from("push_subscriptions").upsert(
     {
       user_id: me.id,
