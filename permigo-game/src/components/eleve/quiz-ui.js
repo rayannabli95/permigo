@@ -323,6 +323,15 @@ export function explHTML({ correct, explanation, explanationTr, lang = "fr" }) {
     </div>`;
 }
 
+// Mascottes détourées (public/art/mascotte/*.webp). Mapping état → slug ; l'anim
+// (pop d'entrée + flottement) est déjà gérée par .qz-mascot / .qz-mascot-result.
+const QZ_MASCOT = {
+  think: "reflexion-quiz",
+  celebrate: "bonne-reponse",
+  coach: "mauvaise-reponse",
+};
+const mascotSrc = (slug) => `/art/mascotte/mascot-${slug}.webp`;
+
 // Écran de résultat (corps) — gros score Fredoka + mascotte + message varié
 export function resultHTML({ score, total, ctaLabel = "Continuer" }) {
   const perfect = score === total;
@@ -332,7 +341,7 @@ export function resultHTML({ score, total, ctaLabel = "Continuer" }) {
   const cta = ctaLabel === "Continuer" ? qzT("cta", ctaLabel) : ctaLabel;
   return `
     <div class="qz-result">
-      <img class="qz-mascot-result" src="/skins/${passed ? "mascot-celebrate" : "mascot-coach"}.png" alt="" aria-hidden="true" />
+      <img class="qz-mascot-result" src="${mascotSrc(perfect ? "quiz-parfait" : passed ? "quiz-reussi" : "mauvaise-reponse")}" alt="" aria-hidden="true" onerror="this.style.display='none'" />
       <div class="qz-score${perfect ? " gold" : ""}">${score}<span class="qz-score-sep">/</span>${total}</div>
       <p class="qz-result-msg"${qzRtl()}>${esc(pickResultMsg({ perfect, passed }))}</p>
       <button class="qz-cta" type="button">${esc(cta)}</button>
@@ -341,14 +350,14 @@ export function resultHTML({ score, total, ctaLabel = "Continuer" }) {
 
 // Mascotte d'angle (état pensif/célébration/coach)
 export function mascotHTML(state = "think") {
-  return `<img class="qz-mascot" src="/skins/mascot-${esc(state)}.png" alt="" aria-hidden="true" />`;
+  return `<img class="qz-mascot" src="${mascotSrc(QZ_MASCOT[state] || esc(state))}" alt="" aria-hidden="true" onerror="this.style.display='none'" />`;
 }
 
 export function setMascot(container, state) {
   const img = container.querySelector(".qz-mascot");
   if (!img) return;
   // Swap src only if actually different (avoids spurious reflow)
-  const next = `/skins/mascot-${state}.png`;
+  const next = mascotSrc(QZ_MASCOT[state] || state);
   if (img.src.endsWith(next.replace(/^\//, ""))) return;
   img.src = next;
   // Micro-pop on state change: remove + force reflow + re-add so the
