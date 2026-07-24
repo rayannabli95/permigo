@@ -61,9 +61,9 @@ Mode Codex conseillé : **Auto** (workspace-write) — tu codes/builds seul, tu 
 ## État au 24/07/2026 (snapshot — à rafraîchir)
 **En prod aujourd'hui** : traduction arabe page Pass · desktop moniteur 2 colonnes · fix « chunks périmés » du router · gros lot i18n EN/AR (accueil, récompenses, classement, exam, notifs). Moniteur = observation, fiche élève en lecture seule.
 
-**Décisions produit ouvertes** (attendent Rayan) :
-- Après certif d'une compétence, le hero accueil doit-il **auto-avancer** au thème suivant, ou **garder** le thème + bouton « Leçon suivante » ? (penché vers : auto-avance par défaut, consolidation reste dispo en 1 tap).
-- Assets mascotte à fond **opaque** (rectangle) vs **transparent** : cartes encadrées, ou détourage ?
+**Décisions produit tranchées (24/07)** :
+- Après certif : le hero accueil **AUTO-AVANCE** au thème suivant (on efface le thème par défaut au moment de la certif). « Consolider » reste dispo en 1 tap dans « changer de thème ». (Lane Claude.)
+- Mascottes à fond opaque (`coffre`, `competence-debloquee`, `quiz-parfait`) : **détourage** (enlever le fond) — pas de cartes encadrées.
 
 **Chantiers en cours** :
 - **Mascotte** : optimisation des images (Codex, Lot 0) → puis branchement animé sur ~20 écrans (Claude choréographie 1 référence, Codex réplique).
