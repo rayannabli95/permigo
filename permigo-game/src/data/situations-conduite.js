@@ -54,6 +54,8 @@ export const THEME_LABELS = {
   autoroute: "Autoroute",
   cycliste: "Cyclistes",
   partage: "Partage de la route",
+  vitesse: "Vitesse",
+  signalisation: "Signalisation",
 };
 
 // Thème du jeu → thèmes « Mes fautes » (TAG_LABELS de utils/weak-points.js).
@@ -72,6 +74,8 @@ export const THEME_WEAK_TAGS = {
   autoroute: ["vitesse", "signalisation"],
   cycliste: ["cycliste"],
   partage: ["courtoisie", "priorite"],
+  vitesse: ["vitesse", "signalisation"],
+  signalisation: ["signalisation"],
 };
 
 export const SITUATIONS = [
@@ -1939,6 +1943,117 @@ export const SITUATIONS = [
       { veh: "v2", delai: 250 },
       { veh: "moi", delai: 1100, clign: "gauche" },
     ],
+  },
+
+  // ── Vitesse et signalisation (nouveau lot 1) ─────────────────
+  {
+    id: "vitesse-ville-panneau-30",
+    theme: "vitesse",
+    difficulte: 1,
+    alt: "Rue droite. Un bus roule devant ta voiture.",
+    scene: {
+      kind: "route",
+      vehicules: [
+        { id: "bus", at: "S", d: 1.0, lane: 0.72, type: "bus" },
+        {
+          id: "moi",
+          at: "S",
+          d: 2.7,
+          lane: 0.1,
+          couleur: "joueur",
+          label: "Toi",
+        },
+      ],
+    },
+    question:
+      "En ville, un panneau limite cette rue à 30 km/h. Quelle vitesse maximale ?",
+    mode: "cartes",
+    reponses: [
+      { id: "trente", label: "30 km/h" },
+      { id: "cinquante", label: "50 km/h, comme partout en ville" },
+      { id: "quarante", label: "40 km/h si la rue est dégagée" },
+    ],
+    bonne: "trente",
+    explication:
+      "Le panneau 30 s'applique dès son emplacement : 30 km/h est un maximum, même si la rue est dégagée. Tu ralentis encore si les conditions l'exigent.",
+    okAnim: [{ veh: "bus" }, { veh: "moi", delai: 300 }],
+  },
+  {
+    id: "vitesse-campagne-panneau-70",
+    theme: "vitesse",
+    difficulte: 1,
+    alt: "Route droite bordée d'arbres. Ta voiture circule seule.",
+    scene: {
+      kind: "route",
+      vehicules: [
+        { id: "moi", at: "S", d: 2.2, couleur: "joueur", label: "Toi" },
+      ],
+    },
+    question:
+      "Sur cette route de campagne, un panneau indique 70. Jusqu'à quelle vitesse peux-tu rouler ?",
+    mode: "cartes",
+    reponses: [
+      { id: "soixante-dix", label: "70 km/h maximum" },
+      { id: "quatre-vingts", label: "80 km/h, la limite habituelle" },
+      { id: "quatre-vingt-dix", label: "90 km/h si la route est vide" },
+    ],
+    bonne: "soixante-dix",
+    explication:
+      "La limitation indiquée par le panneau prime sur la limite générale : ici, tu ne dépasses pas 70 km/h. C'est un plafond, pas une vitesse à atteindre.",
+    okAnim: [{ veh: "moi" }],
+  },
+  {
+    id: "sens-interdit-gps-ville",
+    theme: "signalisation",
+    difficulte: 1,
+    alt: "Ta voiture arrive à un croisement dégagé.",
+    scene: {
+      kind: "croisement",
+      vehicules: [
+        { id: "moi", at: "S", d: 1.9, couleur: "joueur", label: "Toi" },
+      ],
+    },
+    question:
+      "En ville, le GPS t'envoie dans une rue signalée sens interdit. Que fais-tu ?",
+    mode: "cartes",
+    reponses: [
+      { id: "autre", label: "Je prends un autre itinéraire" },
+      { id: "lentement", label: "J'entre très lentement", ico: "🐢" },
+      { id: "vide", label: "J'entre si personne n'arrive en face" },
+    ],
+    bonne: "autre",
+    explication:
+      "Le panneau sens interdit ferme la rue dans ta direction. Même si le GPS insiste ou que la voie semble vide, tu n'y entres pas.",
+    okAnim: [{ veh: "moi", clign: "droit" }],
+  },
+  {
+    id: "sens-interdit-bretelle",
+    theme: "signalisation",
+    difficulte: 2,
+    alt: "Ta voiture approche de l'autoroute sur une bretelle.",
+    scene: {
+      kind: "insertion",
+      vehicules: [
+        {
+          id: "moi",
+          bretelle: 0.35,
+          couleur: "joueur",
+          label: "Toi",
+        },
+      ],
+    },
+    question:
+      "À l'entrée de cette bretelle, un panneau sens interdit te fait face. Que fais-tu ?",
+    mode: "cartes",
+    reponses: [
+      { id: "renonce", label: "Je n'entre pas et je cherche un autre accès" },
+      { id: "quelques-metres", label: "J'avance de quelques mètres au pas" },
+      { id: "gps", label: "Je continue si le GPS confirme" },
+    ],
+    bonne: "renonce",
+    explication:
+      "Un sens interdit sur une bretelle signale que tu la prends dans le mauvais sens. Tu n'avances pas, même sur quelques mètres, et tu changes d'itinéraire.",
+    okAnim: [],
   },
 ];
 
