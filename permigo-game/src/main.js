@@ -5,7 +5,11 @@ import "./styles/main.css";
 import { restoreSession, sb } from "@/auth/auth.js";
 import { setupAuthListener } from "@/auth/auth-listener.js";
 import { getCurUser } from "@/auth/cur-user.js";
-import { route } from "@/router.js";
+import {
+  route,
+  reloadOnceOnChunkError,
+  clearChunkReloadGuard,
+} from "@/router.js";
 import { accessGateFor } from "@/auth/route-guards.js";
 import { track } from "@/services/analytics.js";
 import { startNotifListener } from "@/services/notif-listener.js";
@@ -216,6 +220,7 @@ async function boot() {
     else setTimeout(prefetch, 2500);
   } catch (e) {
     console.error("[boot]", e);
+    if (reloadOnceOnChunkError(e)) throw e;
     track("app.crashed", { error: e?.message });
     app.innerHTML = `
       <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100dvh;gap:14px;padding:32px;text-align:center;background:var(--bg);color:var(--ink)">
@@ -227,13 +232,17 @@ async function boot() {
         </button>
       </div>
     `;
+    throw e;
   }
 }
 
 // Le listener auth est branché APRÈS le boot (évite le deadlock sur getSession
 // au démarrage) : il resynchronise l'app quand la session change pendant qu'elle
 // est ouverte (login/logout dans un autre onglet, changement de compte).
-boot().finally(() => setupAuthListener(sb));
+boot()
+  .then(() => clearChunkReloadGuard())
+  .catch(() => {})
+  .finally(() => setupAuthListener(sb));
 
 // Bandeau cookies (RGPD) — affiché tant qu'aucun choix n'est mémorisé,
 // indépendamment de l'état d'authentification.

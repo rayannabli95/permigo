@@ -5,6 +5,33 @@ import { phPageview } from "@/services/posthog.js";
 import { accessGateFor } from "@/auth/route-guards.js";
 import { isFreeTierUser, isDiscoveryAllowedRoute } from "@/utils/free-tier.js";
 
+const CHUNK_RELOAD_KEY = "pg-chunk-reloaded";
+const CHUNK_ERROR_RE =
+  /Failed to fetch dynamically imported module|Loading chunk|ChunkLoadError|Importing a module script failed|error loading dynamically imported module/i;
+
+export function reloadOnceOnChunkError(error) {
+  if (!CHUNK_ERROR_RE.test(error?.message || "")) return false;
+
+  try {
+    if (sessionStorage.getItem(CHUNK_RELOAD_KEY)) return false;
+    sessionStorage.setItem(CHUNK_RELOAD_KEY, "1");
+  } catch {
+    // Sans sessionStorage, impossible de garantir l'absence de boucle.
+    return false;
+  }
+
+  window.location.reload();
+  return true;
+}
+
+export function clearChunkReloadGuard() {
+  try {
+    sessionStorage.removeItem(CHUNK_RELOAD_KEY);
+  } catch {
+    // sessionStorage peut être indisponible en navigation privée stricte.
+  }
+}
+
 // Direction de navigation → transition d'écran directionnelle (sensation « feed »).
 const _navStack = [];
 function _navDir(hash) {
@@ -316,6 +343,7 @@ export async function route(root, me) {
     await _unmountCurrent();
     await gate(root, me);
     _currentMod = null; // la page-mur se gère seule (pas d'unmount router)
+    clearChunkReloadGuard();
     return;
   }
 
@@ -346,6 +374,7 @@ export async function route(root, me) {
     _currentMod = null; // le mur se gère seul (pas d'unmount router)
     _playEnter(root, dir);
     _setPageTitle(root, routeName);
+    clearChunkReloadGuard();
     return;
   }
 
@@ -372,24 +401,10 @@ export async function route(root, me) {
     heading.setAttribute("tabindex", "-1");
     heading.focus({ preventScroll: false });
     _setPageTitle(root, routeName);
+    clearChunkReloadGuard();
   } catch (e) {
     console.error("[router]", e);
-    // Stale chunk après deploy : le hash JS a changé, l'index.html cached
-    // référence un module qui n'existe plus → on force le reload
-    // ⚠️ Chaque navigateur a SON message : Chrome « Failed to fetch dynamically
-    // imported module », Safari « Importing a module script failed. », Firefox
-    // « error loading dynamically imported module ». Sans les 3, pas d'auto-reload
-    // sur iOS (PWA restée ouverte pendant un deploy) → écran mort.
-    const isStaleChunk =
-      /Failed to fetch dynamically imported module|Loading chunk|ChunkLoadError|Importing a module script failed|error loading dynamically imported module/i.test(
-        e?.message || "",
-      );
-    if (isStaleChunk && !sessionStorage.getItem("reloaded_once")) {
-      sessionStorage.setItem("reloaded_once", "1");
-      window.location.reload();
-      return;
-    }
-    sessionStorage.removeItem("reloaded_once");
+    if (reloadOnceOnChunkError(e)) return;
     root.innerHTML = `<div class="err" style="padding:32px;text-align:center;color:#64748b">
       <p>Cette page n'a pas pu être chargée.</p>
       <button onclick="location.reload()" style="margin-top:12px;padding:12px 24px;border:0;background:#6366f1;color:#fff;border-radius:12px;cursor:pointer">Recharger</button>
@@ -446,19 +461,31 @@ async function routePublic(app) {
   await _unmountCurrent();
   await m.mount?.(app, arg);
   _currentMod = m;
+  clearChunkReloadGuard();
 }
 
 window.addEventListener("hashchange", () => {
-  import("@/auth/cur-user.js").then(({ getCurUser }) => {
-    const me = getCurUser();
-    if (me) {
-      route(document.getElementById("app"), me);
-      phPageview(); // hash-router SPA : PostHog ne détecte pas les hashchanges seul
-    } else {
-      // Visiteur déconnecté → route vers la page publique correspondant au hash
-      routePublic(document.getElementById("app"));
-    }
-  });
+  import("@/auth/cur-user.js")
+    .then(({ getCurUser }) => {
+      const me = getCurUser();
+      if (me) {
+        route(document.getElementById("app"), me).catch((e) => {
+          console.error("[router:hashchange]", e);
+          reloadOnceOnChunkError(e);
+        });
+        phPageview(); // hash-router SPA : PostHog ne détecte pas les hashchanges seul
+      } else {
+        // Visiteur déconnecté → route vers la page publique correspondant au hash
+        routePublic(document.getElementById("app")).catch((e) => {
+          console.error("[router:public]", e);
+          reloadOnceOnChunkError(e);
+        });
+      }
+    })
+    .catch((e) => {
+      console.error("[router:hashchange]", e);
+      reloadOnceOnChunkError(e);
+    });
 });
 
 export function navigate(path) {
