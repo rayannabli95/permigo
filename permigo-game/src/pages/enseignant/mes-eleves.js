@@ -934,6 +934,7 @@ function render() {
     ${STYLE}${RL_STYLE}
     <div class="me-page anim-slide-up">
 
+      <div class="me-control-col">
       <!-- Hero « Pupitre » -->
       <div class="me-hero">
         <div class="me-hero-content">
@@ -978,7 +979,10 @@ function render() {
         <button class="me-seg-btn ${_sort === "engagement" ? "on" : ""}" data-sort="engagement" type="button" aria-pressed="${_sort === "engagement"}">Engagement</button>
       </div>
       </div><!-- /.me-control -->
+      </div><!-- /.me-body -->
+      </div><!-- /.me-control-col -->
 
+      <div class="me-body me-list-body">
       <div class="me-list-col">
       <div class="me-panel${_tab === "liste" ? " on" : ""}" data-panel="liste" id="me-panel-liste">
         <div class="me-pipeline" id="me-pipeline">
