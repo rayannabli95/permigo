@@ -19,9 +19,51 @@ import { track } from "@/services/analytics.js";
 import { esc, escAttr } from "@/utils/escape.js";
 import { refreshGemmes } from "@/utils/game-state.js";
 import { playReward } from "@/utils/sound.js";
+import { getLang } from "@/utils/lang.js";
 
 const STYLE_ID = "cwn-style";
 const FONTS_ID = "cwn-fonts";
+
+// ── i18n de la COQUE de la célébration (EN/AR). Dict LOCAL, repli FR.
+// Le nom de la compétence (contenu REMC) reste en français. RTL : par
+// <span dir="rtl"> autour du texte arabe affiché uniquement.
+const CWN_I18N = {
+  en: {
+    aria: "Skill done: {name}",
+    close: "Close",
+    kicker: "Skill done",
+    stat_score: "Score",
+    stat_done: "Done",
+    permis: "Virtual licence",
+    volants: "Steering wheels",
+    continue: "Continue",
+  },
+  ar: {
+    aria: "مهارة مكتملة: {name}",
+    close: "إغلاق",
+    kicker: "مهارة مكتملة",
+    stat_score: "النتيجة",
+    stat_done: "المكتملة",
+    permis: "الرخصة الافتراضية",
+    volants: "مقود",
+    continue: "متابعة",
+  },
+};
+function cwnTR(key, fr, vars) {
+  const l = getLang();
+  let s = (l !== "fr" && CWN_I18N[l]?.[key]) || fr;
+  if (vars)
+    for (const [k, v] of Object.entries(vars))
+      s = s.split(`{${k}}`).join(String(v));
+  return s;
+}
+function cwnD(key, fr, vars) {
+  const l = getLang();
+  const out = esc(cwnTR(key, fr, vars));
+  return l === "ar" && CWN_I18N.ar?.[key]
+    ? `<span dir="rtl">${out}</span>`
+    : out;
+}
 
 /** Volants crédités à chaque compétence validée. */
 export const COMPETENCE_VOLANT_REWARD = 25;
@@ -391,7 +433,9 @@ export function showCompetenceUnlock(opts = {}) {
     validatedCount,
     totalComps = 31,
     volantReward = COMPETENCE_VOLANT_REWARD,
-    ctaLabel = "Continuer",
+    // Défaut traduit (EN/AR) ; un label custom passé par l'appelant est
+    // affiché tel quel (il vient d'un écran qui gère sa propre langue).
+    ctaLabel = cwnTR("continue", "Continuer"),
     source = null,
     onCta,
     onClose,
@@ -468,7 +512,10 @@ export function showCompetenceUnlock(opts = {}) {
     ov.className = "cwn-ov";
     ov.setAttribute("role", "dialog");
     ov.setAttribute("aria-modal", "true");
-    ov.setAttribute("aria-label", `Compétence acquise : ${name}`);
+    ov.setAttribute(
+      "aria-label",
+      cwnTR("aria", `Compétence acquise : ${name}`, { name }),
+    );
 
     const subHtml =
       catId || worldNom
@@ -479,12 +526,12 @@ export function showCompetenceUnlock(opts = {}) {
       <div class="cwn-stats">
         ${
           hasScore
-            ? `<div class="cwn-stat s1"><div class="cwn-stat__v"><span data-count="${escAttr(String(Math.round(scorePct)))}">0</span>%</div><div class="cwn-stat__l">Score</div></div>`
+            ? `<div class="cwn-stat s1"><div class="cwn-stat__v"><span data-count="${escAttr(String(Math.round(scorePct)))}">0</span>%</div><div class="cwn-stat__l">${cwnD("stat_score", "Score")}</div></div>`
             : ""
         }
         ${
           hasCount
-            ? `<div class="cwn-stat s2"><div class="cwn-stat__v"><span data-count="${escAttr(String(validatedCount))}">0</span> / ${esc(String(totalComps))}</div><div class="cwn-stat__l">Acquises</div></div>`
+            ? `<div class="cwn-stat s2"><div class="cwn-stat__v"><span data-count="${escAttr(String(validatedCount))}">0</span> / ${esc(String(totalComps))}</div><div class="cwn-stat__l">${cwnD("stat_done", "Acquises")}</div></div>`
             : ""
         }
       </div>`;
@@ -494,7 +541,7 @@ export function showCompetenceUnlock(opts = {}) {
         ? `
       <div class="cwn-permis">
         <div class="cwn-permis__top">
-          <span class="cwn-permis__l">${CARD_SVG} Permis virtuel</span>
+          <span class="cwn-permis__l">${CARD_SVG} ${cwnD("permis", "Permis virtuel")}</span>
           <span class="cwn-permis__pct"><span data-count="${permisPct}">0</span>%</span>
         </div>
         <div class="cwn-permis__track"><div class="cwn-permis__fill" data-pct="${permisPct}"></div></div>
@@ -508,7 +555,7 @@ export function showCompetenceUnlock(opts = {}) {
         <img src="${VOLANT_SRC}" alt="" onerror="this.classList.add('cwn-broken')" />
         <span class="cwn-coin-fb" aria-hidden="true"></span>
         <span class="cwn-reward__n">+<span data-count="${escAttr(String(volantReward))}">0</span></span>
-        <span class="cwn-reward__l">volants</span>
+        <span class="cwn-reward__l">${cwnD("volants", "volants")}</span>
       </div>`
         : "";
 
@@ -519,7 +566,7 @@ export function showCompetenceUnlock(opts = {}) {
       <div class="cwn-vignette" aria-hidden="true"></div>
       <div class="cwn-confetti" aria-hidden="true"></div>
 
-      <button class="cwn-close" type="button" aria-label="Fermer">×</button>
+      <button class="cwn-close" type="button" aria-label="${escAttr(cwnTR("close", "Fermer"))}">×</button>
 
       <main class="cwn-stage">
         <div class="cwn-brand">
@@ -529,7 +576,7 @@ export function showCompetenceUnlock(opts = {}) {
 
         <div class="cwn-kicker">
           <span class="cwn-tick" aria-hidden="true">${TICK_SVG}</span>
-          <span>Compétence acquise</span>
+          <span>${cwnD("kicker", "Compétence acquise")}</span>
         </div>
 
         <div class="cwn-focal" aria-hidden="true">

@@ -24,6 +24,52 @@ import { esc } from "@/utils/escape.js";
 import { icon } from "@/utils/icons.js";
 import { burstConfetti } from "@/components/common/confetti.js";
 import { playFanfare } from "@/utils/sound.js";
+import { getLang } from "@/utils/lang.js";
+
+// ── i18n de la COQUE de la cinématique (EN/AR). Dict LOCAL, repli FR.
+// Le NOM du monde (contenu REMC) reste en français. RTL : par
+// <span dir="rtl"> autour du texte arabe affiché uniquement (app LTR).
+const WUC_I18N = {
+  en: {
+    tag: "CHAPTER {n} COMPLETE",
+    sub: "You conquered this world",
+    stat_comp_one: "Skill",
+    stat_comp_many: "Skills",
+    stat_day_one: "Day",
+    stat_day_many: "Days",
+    cta_enter: "ENTER CHAPTER {n}",
+    cta_final: "YOU CONQUERED EVERY CHAPTER",
+    cta_final_sub: "You're ready for the exam",
+    skip: "Skip",
+  },
+  ar: {
+    tag: "اكتمل الفصل {n}",
+    sub: "لقد فتحت هذا العالم",
+    stat_comp_one: "مهارة",
+    stat_comp_many: "مهارات",
+    stat_day_one: "يوم",
+    stat_day_many: "أيام",
+    cta_enter: "ادخل الفصل {n}",
+    cta_final: "أكملت كل الفصول",
+    cta_final_sub: "أنت جاهز للامتحان",
+    skip: "تخطٍّ",
+  },
+};
+function wucTR(key, fr, vars) {
+  const l = getLang();
+  let s = (l !== "fr" && WUC_I18N[l]?.[key]) || fr;
+  if (vars)
+    for (const [k, v] of Object.entries(vars))
+      s = s.split(`{${k}}`).join(String(v));
+  return s;
+}
+function wucD(key, fr, vars) {
+  const l = getLang();
+  const out = esc(wucTR(key, fr, vars));
+  return l === "ar" && WUC_I18N.ar?.[key]
+    ? `<span dir="rtl">${out.replace(/\d+/g, (m) => `<span dir="ltr">${m}</span>`)}</span>`
+    : out;
+}
 
 const LS_KEY = "pg-unlock-seen";
 
@@ -117,18 +163,18 @@ export function playUnlockCinematic({
     </div>
 
     <div class="wuc-content" role="dialog" aria-modal="true" aria-labelledby="wuc-title">
-      <div class="wuc-tag">CHAPITRE ${worldNum} TERMINÉ</div>
+      <div class="wuc-tag">${wucD("tag", `CHAPITRE ${worldNum} TERMINÉ`, { n: worldNum })}</div>
       <h1 class="wuc-title" id="wuc-title">${esc(worldName)}</h1>
-      <div class="wuc-sub">Tu as conquis ce monde</div>
+      <div class="wuc-sub">${wucD("sub", "Tu as conquis ce monde")}</div>
 
       <div class="wuc-stats">
         <div class="wuc-stat" style="--d:1.6s">
           <div class="v">${stats.comps || 0}</div>
-          <div class="l">${(stats.comps || 0) > 1 ? "Compétences" : "Compétence"}</div>
+          <div class="l">${(stats.comps || 0) > 1 ? wucD("stat_comp_many", "Compétences") : wucD("stat_comp_one", "Compétence")}</div>
         </div>
         <div class="wuc-stat" style="--d:1.85s">
           <div class="v">${stats.days || 0}</div>
-          <div class="l">${(stats.days || 0) > 1 ? "Jours" : "Jour"}</div>
+          <div class="l">${(stats.days || 0) > 1 ? wucD("stat_day_many", "Jours") : wucD("stat_day_one", "Jour")}</div>
         </div>
       </div>
 
@@ -137,7 +183,7 @@ export function playUnlockCinematic({
           ? `
         <button class="wuc-cta" id="wuc-cta" type="button">
           <span class="wuc-cta-top">
-            <span class="wuc-cta-lbl">ENTRER DANS LE CHAPITRE ${nextWorldNum}</span>
+            <span class="wuc-cta-lbl">${wucD("cta_enter", `ENTRER DANS LE CHAPITRE ${nextWorldNum}`, { n: nextWorldNum })}</span>
             <span class="wuc-cta-arrow">→</span>
           </span>
           <span class="wuc-cta-name">${esc(nextWorldName || "")}</span>
@@ -145,13 +191,13 @@ export function playUnlockCinematic({
       `
           : `
         <button class="wuc-cta wuc-cta-final" id="wuc-cta" type="button">
-          <span class="wuc-cta-lbl">${icon("trophy", { size: 18 })} TU AS CONQUIS TOUS LES CHAPITRES</span>
-          <span class="wuc-cta-name">Tu es prêt·e pour l'examen</span>
+          <span class="wuc-cta-lbl">${icon("trophy", { size: 18 })} ${wucD("cta_final", "TU AS CONQUIS TOUS LES CHAPITRES")}</span>
+          <span class="wuc-cta-name">${wucD("cta_final_sub", "Tu es prêt·e pour l'examen")}</span>
         </button>
       `
       }
 
-      <button class="wuc-skip" id="wuc-skip" type="button" aria-label="Passer">Passer</button>
+      <button class="wuc-skip" id="wuc-skip" type="button" aria-label="${esc(wucTR("skip", "Passer"))}">${wucD("skip", "Passer")}</button>
 
       <!-- Signature PermiGo en haut, discrète -->
       <div class="wuc-brand" aria-hidden="true">

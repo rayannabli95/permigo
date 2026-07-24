@@ -34,9 +34,125 @@ import { findSubComp, findCategory } from "@/data/remc.js";
 import { getFiche } from "@/data/fiches-conduite.js";
 import { burstConfetti } from "@/components/common/confetti.js";
 import { refreshGemmes } from "@/utils/game-state.js";
+import { getLang } from "@/utils/lang.js";
 
 const NB_QUESTIONS = 5; // plus que le quiz-récap (3) : la note ≥80% doit avoir du sens
 const SEUIL = 80;
+
+// ── i18n de la COQUE « certifier une compétence » (EN/AR) — le cœur du
+// pivot (« Tu te sens prêt·e ? »). Dict LOCAL, repli FR intégral. Le CONTENU
+// (nom de compétence, étapes de la fiche) reste en français. RTL : par
+// <span dir="rtl"> autour du texte arabe affiché uniquement (app LTR).
+const VS_I18N = {
+  en: {
+    back: "Back",
+    kick: "Self-certification",
+    loading: "Loading…",
+    nf_title: "Skill not found",
+    nf_body: "This skill doesn't exist. Go back to your journey to pick one.",
+    comp_fallback: "Skill",
+    blocked:
+      "Your instructor already validated this skill — nothing to do here.",
+    hero_p:
+      "Your instructor validated it in a lesson, or you already own this move? Prove it in 2 steps.",
+    already_t: "Already certified",
+    already_s: "Quiz passed at {p}% on {date}.",
+    step1_t: "Re-read the method",
+    step1_s: "A quick reminder of what you need to know.",
+    fiche_link: "See the full sheet (fiche)",
+    step2_t: "The validation quiz",
+    step2_s: "{n} questions · you need at least {s}% to validate.",
+    cta_retry: "Retake the quiz",
+    cta_start: "Start the validation quiz",
+    hint: "Be honest with yourself — this quiz never replaces a real driving lesson.",
+    toast_noq: "No questions on this skill yet — try again later.",
+    toast_nopressure: "No pressure — come back when you feel it.",
+    toast_valerr: "Something went wrong while validating — try again.",
+    toast_neterr: "Network error — try again.",
+    ok_kick: "Certified by you",
+    ok_title: "Skill certified!",
+    ok_p: "“{n}” is now done in your journey.",
+    ok_score: "Quiz passed at {p}%",
+    ok_volants: "+{n} Steering wheels (volants)",
+    ok_cta: "Find this skill in My licence",
+    fail_kick: "Not yet",
+    fail_title: "Almost!",
+    fail_p:
+      "{p}% on “{n}” — you need {s}% to validate. Re-read the sheet and try again.",
+    fail_retry: "Re-read the sheet and retry",
+    fail_back: "Back to the journey",
+    cf_kick: "Quiz passed at {p}%",
+    cf_title: "Do you feel ready to move on?",
+    cf_p: "By certifying “{n}”, you confirm this move is done in a real lesson. Your instructor can see your certifications.",
+    cf_yes: "Yes, I certify",
+    cf_no: "Not yet",
+  },
+  ar: {
+    back: "رجوع",
+    kick: "مصادقة ذاتية",
+    loading: "جارٍ التحميل…",
+    nf_title: "المهارة غير موجودة",
+    nf_body: "هذه المهارة غير موجودة. عد إلى مسارك لاختيار واحدة.",
+    comp_fallback: "مهارة",
+    blocked: "سبق أن صادق مدرّبك على هذه المهارة — لا شيء تفعله هنا.",
+    hero_p:
+      "صادق عليها مدرّبك في درس، أو أنت تتقن هذه الحركة أصلًا؟ أثبت ذلك في خطوتين.",
+    already_t: "مُصادَق عليها سابقًا",
+    already_s: "نجحت في الاختبار بنسبة {p}% بتاريخ {date}.",
+    step1_t: "أعد قراءة الطريقة",
+    step1_s: "تذكير سريع بما يجب أن تتقنه.",
+    fiche_link: "اعرض البطاقة الكاملة (fiche)",
+    step2_t: "اختبار المصادقة",
+    step2_s: "{n} أسئلة · تحتاج إلى {s}% على الأقل للمصادقة.",
+    cta_retry: "أعد الاختبار",
+    cta_start: "ابدأ اختبار المصادقة",
+    hint: "كن صادقًا مع نفسك — هذا الاختبار لا يعوّض درس قيادة حقيقيًا.",
+    toast_noq: "لا أسئلة على هذه المهارة بعد — أعد المحاولة لاحقًا.",
+    toast_nopressure: "لا ضغط — عد متى شعرت بالجاهزية.",
+    toast_valerr: "حدث خطأ أثناء المصادقة — أعد المحاولة.",
+    toast_neterr: "خطأ في الشبكة — أعد المحاولة.",
+    ok_kick: "صادقت عليها بنفسك",
+    ok_title: "تمت المصادقة على المهارة!",
+    ok_p: "«{n}» أصبحت الآن مكتملة في مسارك.",
+    ok_score: "نجحت في الاختبار بنسبة {p}%",
+    ok_volants: "+{n} مقود (volants)",
+    ok_cta: "اعثر على هذه المهارة في رخصتي",
+    fail_kick: "ليس بعد",
+    fail_title: "اقتربت!",
+    fail_p:
+      "{p}% في «{n}» — تحتاج إلى {s}% للمصادقة. أعد قراءة البطاقة وحاول مجددًا.",
+    fail_retry: "أعد قراءة البطاقة وحاول مجددًا",
+    fail_back: "العودة إلى المسار",
+    cf_kick: "نجحت في الاختبار بنسبة {p}%",
+    cf_title: "هل تشعر أنك جاهز للانتقال إلى ما بعدها؟",
+    cf_p: "بمصادقتك على «{n}» تؤكد أن هذه الحركة أُنجزت في درس حقيقي. يمكن لمدرّبك رؤية مصادقاتك.",
+    cf_yes: "نعم، أصادق",
+    cf_no: "ليس بعد",
+  },
+};
+function vsTR(key, fr, vars) {
+  const l = getLang();
+  let s = (l !== "fr" && VS_I18N[l]?.[key]) || fr;
+  if (vars)
+    for (const [k, v] of Object.entries(vars))
+      s = s.split(`{${k}}`).join(String(v));
+  return s;
+}
+function vsT(key, fr, vars) {
+  return esc(vsTR(key, fr, vars));
+}
+function vsRtl(escaped) {
+  const s = escaped.replace(
+    /\d+(?:\s*\/\s*\d+)?(?:\s*%)?/g,
+    (m) => `<span dir="ltr">${m}</span>`,
+  );
+  return `<span dir="rtl">${s}</span>`;
+}
+function vsD(key, fr, vars) {
+  const l = getLang();
+  const out = esc(vsTR(key, fr, vars));
+  return l === "ar" && VS_I18N.ar?.[key] ? vsRtl(out) : out;
+}
 
 const STYLE = `<style>
 .vs { max-width: 480px; margin: 0 auto; padding: 0 16px calc(110px + env(safe-area-inset-bottom));
@@ -131,13 +247,13 @@ function catMedallion(ico, size = 40) {
 
 function topBar(title) {
   return `<div class="vs-top">
-      <button class="vs-back" aria-label="Retour">←</button>
-      <div><p class="vs-kick">Validation autonome</p><h1 class="vs-h1" tabindex="-1">${esc(title)}</h1></div>
+      <button class="vs-back" aria-label="${vsT("back", "Retour")}">←</button>
+      <div><p class="vs-kick">${vsD("kick", "Validation autonome")}</p><h1 class="vs-h1" tabindex="-1">${esc(title)}</h1></div>
     </div>`;
 }
 
 function skeleton() {
-  return `${STYLE}<div class="vs">${topBar("Chargement…")}</div>`;
+  return `${STYLE}<div class="vs">${topBar(vsTR("loading", "Chargement…"))}</div>`;
 }
 
 function wireBack(root) {
@@ -148,20 +264,20 @@ function wireBack(root) {
 
 function notFoundScreen() {
   return `${STYLE}<div class="vs">
-    ${topBar("Compétence introuvable")}
+    ${topBar(vsTR("nf_title", "Compétence introuvable"))}
     <div class="vs-card vs-warn">
       ${icon("alert-circle", { size: 20 })}
-      <p>Cette compétence n'existe pas. Retourne à ton parcours pour en choisir une.</p>
+      <p>${vsD("nf_body", "Cette compétence n'existe pas. Retourne à ton parcours pour en choisir une.")}</p>
     </div>
   </div>`;
 }
 
 function blockedScreen(sub) {
   return `${STYLE}<div class="vs">
-    ${topBar(sub?.n || "Compétence")}
+    ${topBar(sub?.n || vsTR("comp_fallback", "Compétence"))}
     <div class="vs-card vs-warn">
       ${icon("alert-circle", { size: 20 })}
-      <p>Ton moniteur a déjà validé cette compétence — rien à faire ici.</p>
+      <p>${vsD("blocked", "Ton moniteur a déjà validé cette compétence — rien à faire ici.")}</p>
     </div>
   </div>`;
 }
@@ -173,12 +289,18 @@ function introScreen(sub, cat, already) {
     ? `<ul class="vs-fiche-list">${steps.map((s, i) => `<li><b>${String(i + 1).padStart(2, "0")}</b>${esc(s.replace(/^.{2,26}? [—–] /, ""))}</li>`).join("")}</ul>`
     : "";
 
+  const alreadyDate = already
+    ? new Date(already.validated_at).toLocaleDateString(
+        { fr: "fr-FR", en: "en-GB", ar: "ar" }[getLang()] || "fr-FR",
+        { day: "numeric", month: "long" },
+      )
+    : "";
   const alreadyBanner = already
     ? `<div class="vs-card vs-already">
         <div>${medallion("check", "violet", { size: 40 })}</div>
         <div class="vs-already-tx">
-          <b>Déjà certifiée</b>
-          <span>Quiz réussi à ${Math.round(already.score)}% le ${new Date(already.validated_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}.</span>
+          <b>${vsD("already_t", "Déjà certifiée")}</b>
+          <span>${vsD("already_s", `Quiz réussi à ${Math.round(already.score)}% le ${alreadyDate}.`, { p: Math.round(already.score), date: alreadyDate })}</span>
         </div>
       </div>`
     : "";
@@ -190,7 +312,7 @@ function introScreen(sub, cat, already) {
       <div class="vs-hero-med">${catMedallion(cat?.ico, 56)}</div>
       <p class="vs-hero-cat">${esc(cat?.name || "")}</p>
       <h2 class="vs-hero-ttl">${esc(sub.n)}</h2>
-      <p class="vs-hero-p">Ton moniteur te l'a validée en leçon, ou tu maîtrises déjà ce geste ? Prouve-le en 2 étapes.</p>
+      <p class="vs-hero-p">${vsD("hero_p", "Ton moniteur te l'a validée en leçon, ou tu maîtrises déjà ce geste ? Prouve-le en 2 étapes.")}</p>
     </div>
 
     ${alreadyBanner}
@@ -199,46 +321,46 @@ function introScreen(sub, cat, already) {
       <div class="vs-step">
         <div class="vs-step-n">1</div>
         <div class="vs-step-tx">
-          <b>Relis la méthode</b>
-          <span>Un rappel rapide de ce qu'il faut maîtriser.</span>
+          <b>${vsD("step1_t", "Relis la méthode")}</b>
+          <span>${vsD("step1_s", "Un rappel rapide de ce qu'il faut maîtriser.")}</span>
           <div class="vs-step-fiche">${ficheList}</div>
-          <a class="vs-fiche-link" href="#/revision-conduite/${esc(sub.c)}">${icon("book", { size: 14 })} Voir la fiche complète</a>
+          <a class="vs-fiche-link" href="#/revision-conduite/${esc(sub.c)}">${icon("book", { size: 14 })} ${vsD("fiche_link", "Voir la fiche complète")}</a>
         </div>
       </div>
       <div class="vs-step">
         <div class="vs-step-n">2</div>
         <div class="vs-step-tx">
-          <b>Le quiz de validation</b>
-          <span>${NB_QUESTIONS} questions · il te faut au moins ${SEUIL}% pour valider.</span>
+          <b>${vsD("step2_t", "Le quiz de validation")}</b>
+          <span>${vsD("step2_s", `${NB_QUESTIONS} questions · il te faut au moins ${SEUIL}% pour valider.`, { n: NB_QUESTIONS, s: SEUIL })}</span>
         </div>
       </div>
     </div>
 
-    <button class="vs-cta" id="vs-start-quiz" type="button">${icon("zap", { size: 18 })} ${already ? "Repasser le quiz" : "Commencer le quiz de validation"}</button>
-    <p class="vs-hint">Sois honnête avec toi-même — ce quiz ne remplace pas une vraie leçon de conduite.</p>
+    <button class="vs-cta" id="vs-start-quiz" type="button">${icon("zap", { size: 18 })} ${already ? vsD("cta_retry", "Repasser le quiz") : vsD("cta_start", "Commencer le quiz de validation")}</button>
+    <p class="vs-hint">${vsD("hint", "Sois honnête avec toi-même — ce quiz ne remplace pas une vraie leçon de conduite.")}</p>
   </div>`;
 }
 
 function successScreen(sub, scorePct, volants = 0) {
   return `${STYLE}<div class="vsr anim-slide-up">
     <div class="vsr-med">${medallion("check", "violet", { size: 96 })}</div>
-    <span class="vsr-kick">${icon("shield", { size: 13 })} Certifiée par toi</span>
-    <h1 class="vsr-ttl">Compétence certifiée !</h1>
-    <p class="vsr-p">« ${esc(sub.n)} » est maintenant acquise dans ton parcours.</p>
-    <p class="vsr-score">Quiz réussi à ${scorePct}%</p>
-    ${volants > 0 ? `<span class="vsr-volants"><img src="/skins/volant-coin.webp" alt=""> +${volants} volants</span>` : ""}
-    <button class="vsr-cta" id="vs-cta-parcours" type="button" data-comp="${escAttr(sub.c)}">Retrouve cette compétence dans Mon permis</button>
+    <span class="vsr-kick">${icon("shield", { size: 13 })} ${vsD("ok_kick", "Certifiée par toi")}</span>
+    <h1 class="vsr-ttl">${vsD("ok_title", "Compétence certifiée !")}</h1>
+    <p class="vsr-p">${vsD("ok_p", `« ${sub.n} » est maintenant acquise dans ton parcours.`, { n: sub.n })}</p>
+    <p class="vsr-score">${vsD("ok_score", `Quiz réussi à ${scorePct}%`, { p: scorePct })}</p>
+    ${volants > 0 ? `<span class="vsr-volants"><img src="/skins/volant-coin.webp" alt=""> ${vsD("ok_volants", `+${volants} volants`, { n: volants })}</span>` : ""}
+    <button class="vsr-cta" id="vs-cta-parcours" type="button" data-comp="${escAttr(sub.c)}">${vsD("ok_cta", "Retrouve cette compétence dans Mon permis")}</button>
   </div>`;
 }
 
 function failScreen(sub, scorePct) {
   return `${STYLE}<div class="vsr fail anim-slide-up">
     <div class="vsr-med">${medallion("faute", "orange", { size: 96 })}</div>
-    <span class="vsr-kick">${icon("x", { size: 13 })} Pas encore</span>
-    <h1 class="vsr-ttl">Presque !</h1>
-    <p class="vsr-p">${scorePct}% sur « ${esc(sub.n)} » — il te faut ${SEUIL}% pour valider. Relis la fiche et retente.</p>
-    <button class="vsr-cta" id="vs-retry" type="button">Relire la fiche et retenter</button>
-    <button class="vsr-ghost" id="vs-cta-parcours" type="button">Retour au parcours</button>
+    <span class="vsr-kick">${icon("x", { size: 13 })} ${vsD("fail_kick", "Pas encore")}</span>
+    <h1 class="vsr-ttl">${vsD("fail_title", "Presque !")}</h1>
+    <p class="vsr-p">${vsD("fail_p", `${scorePct}% sur « ${sub.n} » — il te faut ${SEUIL}% pour valider. Relis la fiche et retente.`, { p: scorePct, n: sub.n, s: SEUIL })}</p>
+    <button class="vsr-cta" id="vs-retry" type="button">${vsD("fail_retry", "Relire la fiche et retenter")}</button>
+    <button class="vsr-ghost" id="vs-cta-parcours" type="button">${vsD("fail_back", "Retour au parcours")}</button>
   </div>`;
 }
 
@@ -316,7 +438,10 @@ function wireIntro(root, me, compId, sub, cat) {
     if (launched === null) {
       if (btn) btn.disabled = false;
       toast(
-        "Pas encore de questions sur cette compétence — réessaie plus tard.",
+        vsTR(
+          "toast_noq",
+          "Pas encore de questions sur cette compétence — réessaie plus tard.",
+        ),
         "info",
       );
     }
@@ -375,7 +500,10 @@ async function handleComplete(
   });
   root.querySelector("#vs-not-yet")?.addEventListener("click", () => {
     track("valider_seul.not_yet", { competence_id: compId });
-    toast("Aucune pression — reviens quand tu le sens.", "info");
+    toast(
+      vsTR("toast_nopressure", "Aucune pression — reviens quand tu le sens."),
+      "info",
+    );
     navigate("#/parcours");
   });
 }
@@ -383,11 +511,11 @@ async function handleComplete(
 function confirmScreen(sub, scorePct) {
   return `${STYLE}<div class="vsr anim-slide-up">
     <div class="vsr-med">${medallion("check", "violet", { size: 96 })}</div>
-    <span class="vsr-kick">${icon("check", { size: 13 })} Quiz réussi à ${scorePct}%</span>
-    <h1 class="vsr-ttl">Tu te sens prêt·e à passer à la suite ?</h1>
-    <p class="vsr-p">En certifiant « ${esc(sub.n)} », tu confirmes que ce geste est acquis en vraie leçon. Ton enseignant peut voir tes certifications.</p>
-    <button class="vsr-cta" id="vs-certify" type="button">Oui, je certifie ${icon("shield", { size: 16 })}</button>
-    <button class="vsr-ghost" id="vs-not-yet" type="button">Pas encore</button>
+    <span class="vsr-kick">${icon("check", { size: 13 })} ${vsD("cf_kick", `Quiz réussi à ${scorePct}%`, { p: scorePct })}</span>
+    <h1 class="vsr-ttl">${vsD("cf_title", "Tu te sens prêt·e à passer à la suite ?")}</h1>
+    <p class="vsr-p">${vsD("cf_p", `En certifiant « ${sub.n} », tu confirmes que ce geste est acquis en vraie leçon. Ton enseignant peut voir tes certifications.`, { n: sub.n })}</p>
+    <button class="vsr-cta" id="vs-certify" type="button">${vsD("cf_yes", "Oui, je certifie")} ${icon("shield", { size: 16 })}</button>
+    <button class="vsr-ghost" id="vs-not-yet" type="button">${vsD("cf_no", "Pas encore")}</button>
   </div>`;
 }
 
@@ -404,7 +532,10 @@ async function certify(root, me, compId, sub, cat, scorePct, answers) {
         "[valider-seul] self_validate_competence",
         error || data?.error,
       );
-      toast("Erreur lors de la validation — réessaie.", "error");
+      toast(
+        vsTR("toast_valerr", "Erreur lors de la validation — réessaie."),
+        "error",
+      );
       root.innerHTML = failScreen(sub, scorePct);
       wireResult(root, me, compId, sub, cat);
       return;
@@ -446,7 +577,7 @@ async function certify(root, me, compId, sub, cat, scorePct, answers) {
     wireResult(root, me, compId, sub, cat);
   } catch (e) {
     console.warn("[valider-seul] self_validate_competence", e);
-    toast("Erreur réseau — réessaie.", "error");
+    toast(vsTR("toast_neterr", "Erreur réseau — réessaie."), "error");
     root.innerHTML = failScreen(sub, scorePct);
     wireResult(root, me, compId, sub, cat);
   }
