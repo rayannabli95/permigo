@@ -40,18 +40,18 @@
     "slug": "mascot-coffre.webp",
     "width": 768,
     "height": 768,
-    "hasAlpha": false,
+    "hasAlpha": true,
     "kb_before": 1507.8,
-    "kb_after": 47.8
+    "kb_after": 58
   },
   {
     "original": "Compétence débloquée PermiGo  comme s’il venait de franchir une étape importante. Un éclair violet apparaît derrière lui pour symboliser le déblocage d’une nouvelle compétence et l’élan vers la suite du parcours. .png",
     "slug": "mascot-competence-debloquee.webp",
     "width": 768,
     "height": 768,
-    "hasAlpha": false,
+    "hasAlpha": true,
     "kb_before": 1406.7,
-    "kb_after": 39.3
+    "kb_after": 43.1
   },
   {
     "original": "Lecture d’une fiche  PermiGo est assis calmement au sol avec de petites lunettes rondes. Il tient une fiche de révision entre ses mains et suit attentivement une ligne avec son doigt.png",
@@ -76,9 +76,9 @@
     "slug": "mascot-quiz-parfait.webp",
     "width": 768,
     "height": 768,
-    "hasAlpha": false,
+    "hasAlpha": true,
     "kb_before": 1361.8,
-    "kb_after": 41.7
+    "kb_after": 40.9
   },
   {
     "original": "Quiz réussi  PermiGo soulève fièrement un trophée doré. À utiliser après la réussite d’un quiz..png",
