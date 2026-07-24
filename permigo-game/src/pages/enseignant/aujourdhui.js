@@ -385,6 +385,94 @@ const STYLE = `<style>
       transition: none !important;
     }
   }
+
+  /* ── Header salutation enrichi ── */
+  .aj-hi-greet { font: 800 22px/1.15 'Fredoka', 'Plus Jakarta Sans', sans-serif; color: #1a1c2e; letter-spacing: -.01em; }
+  .aj-hi-greet .aj-hi-name { display: inline; font: inherit; color: #4f46e5; margin: 0; }
+  .aj-hi-sub { font: 600 13px/1.4 'Inter', sans-serif; color: #5a6188; margin-top: 3px; }
+
+  /* ── Avatar initiales (fallback) ── */
+  .aj-av-ini { border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; flex-shrink: 0; font-family: 'Inter', sans-serif; }
+
+  /* ── Colonnes densité carte élève (visibles en desktop) ── */
+  .aj-eleve-pct, .aj-eleve-act { display: none; }
+  .aj-eleve-pct { font: 800 15px/1 'Fredoka', 'Plus Jakarta Sans', sans-serif; color: #3a3f63; font-variant-numeric: tabular-nums; }
+  .aj-eleve-pct small { font-size: 10px; font-weight: 700; color: #8a90ad; margin-left: 1px; }
+  .aj-eleve-act { font: 600 11.5px/1.2 'Inter', sans-serif; color: #8a90ad; white-space: nowrap; }
+
+  /* ── Radar de relance : panneau vivant (qui décroche) ── */
+  .aj-radar { background: #fff; border: 1px solid #e6e9f7; border-radius: 16px; margin: 0 16px 14px; box-shadow: 0 6px 16px -10px rgba(60,50,130,.3); cursor: pointer; overflow: hidden; -webkit-tap-highlight-color: transparent; transition: transform .12s ease; }
+  .aj-radar:active { transform: scale(.99); }
+  .aj-radar-hd { display: flex; align-items: center; gap: 12px; padding: 14px 15px; }
+  .aj-radar-ic, .aj-radar-chev, .aj-radar-av { flex-shrink: 0; display: flex; }
+  .aj-radar-chev { color: #646a8c; }
+  .aj-radar-tx { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .aj-radar-t { font: 800 14.5px/1.15 'Manrope', 'Plus Jakarta Sans', sans-serif; color: #1a1c2e; }
+  .aj-radar-s { font: 600 12px/1.4 'Inter', sans-serif; color: #5a6188; margin-top: 2px; }
+  .aj-radar-list { border-top: 1px solid #eef0f8; padding: 4px 8px 8px; }
+  .aj-radar-row { display: flex; align-items: center; gap: 10px; padding: 8px 7px; }
+  .aj-radar-row + .aj-radar-row { border-top: 1px solid #f4f5fb; }
+  .aj-radar-nm { flex: 1; min-width: 0; font: 700 13px/1.2 'Inter', sans-serif; color: #2d3050; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .aj-radar-j { flex-shrink: 0; font: 700 11.5px/1 'Inter', sans-serif; color: #b45309; background: #fef3c7; padding: 4px 8px; border-radius: 999px; }
+
+  /* ── Tuile : icône médaillon (unifiée) ── */
+  .aj-ft-ic { flex-shrink: 0; display: flex; }
+
+  /* Les enveloppes main/rail sont transparentes en mobile (display:contents) →
+     le contenu s'empile exactement comme avant. Elles ne deviennent des
+     colonnes qu'en desktop. */
+  .aj-main, .aj-rail { display: contents; }
+
+  /* ── Desktop (≥1024px) : 2 colonnes. Gauche = héros + roster (ce qu'on
+     scanne) ; rail droite (collant) = radar + tuiles + inviter (les actions).
+     Le cadre app est élargi par enseignant-arcade.css. ── */
+  @media (min-width: 1024px) {
+    .aj-page {
+      max-width: 1000px;
+      padding: 4px 26px calc(96px + env(safe-area-inset-bottom, 0px));
+      display: grid;
+      grid-template-columns: minmax(0, 1.62fr) minmax(0, 1fr);
+      column-gap: 26px;
+      align-items: start;
+      align-content: start;
+      min-height: 0;
+    }
+    .aj-hi { grid-column: 1 / -1; padding: 18px 2px 6px; }
+    .aj-hi-greet { font-size: 30px; }
+    .aj-hi-sub { font-size: 14px; margin-top: 5px; }
+    .aj-main {
+      grid-column: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .aj-rail {
+      grid-column: 2;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      align-self: stretch;
+    }
+    /* héros : marge colonne + contraste de l'eyebrow */
+    .aj-hero { margin: 0 0 6px; }
+    .aj-hero-label { color: rgba(255, 255, 255, .82); letter-spacing: .13em; }
+    .aj-sec-header { padding: 10px 2px 12px; }
+    /* cartes élève en ligne-tableau (densité pro) : avatar · nom+barre · % · activité · état */
+    .aj-eleve-card {
+      margin: 0 0 10px;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto auto auto;
+      align-items: center;
+      gap: 18px;
+      padding: 12px 18px;
+    }
+    .aj-eleve-pct, .aj-eleve-act { display: block; }
+    .aj-eleve-act { text-align: right; min-width: 62px; }
+    .aj-main > p { margin: 0 0 12px !important; }
+    /* rail : radar plein largeur, « Inviter » ancré en bas de la colonne */
+    #aj-radar { margin: 0 !important; }
+    .aj-foot { padding: 0; }
+    .aj-invite-wrap { padding: 0; margin-top: auto; }
+  }
 </style>`;
 
 // ─── Helpers ──────────────────────────────────────────────────────
@@ -586,7 +674,6 @@ async function renderInto(root, _me) {
   const totalValsCount = totalValsRes?.count ?? 0;
   const moniteurState = getMoniteurState(totalValsCount);
 
-
   // Élèves que j'ai validé + qui me sont attitrés
   const { data: elevesValides } = await fetchAllRows(() =>
     sb.from("validations").select("eleve_id").eq("validated_by", _me.id),
@@ -661,7 +748,7 @@ async function renderInto(root, _me) {
       if (aInactif !== bInactif) return aInactif ? -1 : 1;
       return (b.acquis || 0) - (a.acquis || 0);
     })
-    .slice(0, 3);
+    .slice(0, 6);
 
   // ─── Hero HTML ────────────────────────────────────────────────
   const prenomEsc = prenom ? esc(fmtName(prenom)) : "";
@@ -676,6 +763,21 @@ async function renderInto(root, _me) {
     return !la || la < sevenDaysAgo;
   }).length;
 
+  // Décrocheurs pour le « Radar de relance » (rail droit vivant) : les inactifs,
+  // les plus longs d'abord, top 4.
+  const decrocheurs = elevesEnFormation
+    .map((e) => {
+      const la = elevesMap[e.id]?.last_active_at || "";
+      return {
+        e,
+        la,
+        jours: la ? Math.round((Date.now() - new Date(la)) / 86400000) : null,
+      };
+    })
+    .filter((x) => !x.la || x.la < sevenDaysAgo)
+    .sort((a, b) => (b.jours ?? 99999) - (a.jours ?? 99999))
+    .slice(0, 4);
+
   // Sous-titre court : il partage la ligne avec le trophée → on garde une
   // seule métrique (l'activité). « à relancer » vit dans la tuile + le radar,
   // les reçus dans l'en-tête « Tes élèves · N reçus ».
@@ -688,6 +790,18 @@ async function renderInto(root, _me) {
     : "";
 
   // ─── Roster élèves ────────────────────────────────────────────
+  function activityLabel(iso) {
+    if (!iso) return "jamais vu";
+    const j = Math.round((Date.now() - new Date(iso)) / 86400000);
+    if (j <= 0) return "aujourd’hui";
+    if (j === 1) return "hier";
+    return `il y a ${j} j`;
+  }
+  function miniAvatar(e, size) {
+    if (e.avatar_url)
+      return `<img src="${escAttr(e.avatar_url)}" alt="" width="${size}" height="${size}" style="border-radius:50%;object-fit:cover;flex-shrink:0;" loading="lazy">`;
+    return `<span class="aj-av-ini" style="width:${size}px;height:${size}px;background:${avatarColor(e.id)};font-size:${Math.round(size * 0.36)}px">${esc(initiales(e.prenom, e.nom))}</span>`;
+  }
   function renderRosterCard(e) {
     // escAttr (pas esc) : `nom` sert AUSSI dans aria-label ci-dessous ; esc
     // n'encode pas les guillemets → injection d'attribut via un nom d'élève
@@ -719,18 +833,8 @@ async function renderInto(root, _me) {
       barColor = "#d97706";
     }
 
-    // Avatar : vrai URL si dispo, sinon initiales
-    let avHtml;
-    if (e.avatar_url) {
-      avHtml = `<img src="${escAttr(e.avatar_url)}" alt="" width="36" height="36" style="border-radius:50%;object-fit:cover;flex-shrink:0;" loading="lazy">`;
-    } else {
-      const color = avatarColor(e.id);
-      const inits = esc(initiales(e.prenom, e.nom));
-      avHtml = `<span style="width:36px;height:36px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font:800 13px 'Inter',sans-serif;color:#fff;flex-shrink:0;">${inits}</span>`;
-    }
-
     return `<div class="aj-eleve-card" data-eleve-id="${escAttr(e.id)}" role="button" tabindex="0" aria-label="Livret de ${nom}">
-      <div class="aj-eleve-av">${avHtml}</div>
+      <div class="aj-eleve-av">${miniAvatar(e, 38)}</div>
       <div class="aj-eleve-body">
         <div class="aj-eleve-nom-row">
           <span class="aj-eleve-nom">${nom}</span>
@@ -740,6 +844,8 @@ async function renderInto(root, _me) {
           <span class="aj-eleve-bar-fill" style="width:${pct}%;background:${barColor}"></span>
         </div>
       </div>
+      <span class="aj-eleve-pct">${pct}<small>%</small></span>
+      <span class="aj-eleve-act">${esc(activityLabel(lastActive))}</span>
       <span class="aj-pill ${pillClass}">${esc(pillText)}</span>
     </div>`;
   }
@@ -751,9 +857,11 @@ async function renderInto(root, _me) {
 
       <!-- Salutation -->
       <div class="aj-hi">
-        Bonjour
-        ${prenomEsc ? `<span class="aj-hi-name">${prenomEsc}</span>` : '<span class="aj-hi-name">Moniteur</span>'}
+        <div class="aj-hi-greet">Bonjour <span class="aj-hi-name">${prenomEsc || "Moniteur"}</span></div>
+        <div class="aj-hi-sub">${heroEmpty ? "Invite ton premier élève pour commencer" : `${nbElevesActifs} élève${nbElevesActifs > 1 ? "s" : ""} suivi${nbElevesActifs > 1 ? "s" : ""}${nbDecroche > 0 ? " · " + nbDecroche + " à relancer" : ""}`}</div>
       </div>
+
+      <div class="aj-main">
 
       <!-- Hero validations du jour -->
       <div class="aj-hero">
@@ -773,19 +881,9 @@ async function renderInto(root, _me) {
         >
       </div>
 
-      <!-- Radar de relance -->
-      <button id="aj-radar" type="button" style="display:flex;align-items:center;gap:12px;width:calc(100% - 32px);margin:0 16px 14px;padding:14px 15px;background:#fff;border:1px solid #e6e9f7;border-radius:16px;box-shadow:0 6px 16px -10px rgba(60,50,130,.3);cursor:pointer;text-align:left;-webkit-tap-highlight-color:transparent;">
-        <span style="flex-shrink:0;display:flex;">${medallion("cible", "indigo", { size: 36 })}</span>
-        <span style="flex:1;min-width:0;">
-          <span style="display:block;font:800 14.5px/1.15 'Manrope','Plus Jakarta Sans',sans-serif;color:#1a1c2e;">Radar de relance</span>
-          <span style="display:block;font:600 12px/1.5 'Inter',sans-serif;color:#5a6188;margin-top:2px;">Relance en 1 tap tes élèves qui ne révisent plus</span>
-        </span>
-        <span style="flex-shrink:0;color:#646a8c;">${icon("chevron-right", { size: 20, strokeWidth: 2.4 })}</span>
-      </button>
-
       <!-- Tes élèves -->
       <div class="aj-sec-header">
-        <span class="aj-sec-title">Tes élèves${nbPrets > 0 ? " · " + nbPrets + " prêt" + (nbPrets > 1 ? "s" : "") : ""}${nbRecus > 0 ? " · " + nbRecus + " reçu" + (nbRecus > 1 ? "s" : "") : ""}</span>
+        <span class="aj-sec-title">Tes élèves <small>· à relancer en tête</small></span>
         <button class="aj-sec-link" id="aj-voir-tout" type="button">Tout voir</button>
       </div>
 
@@ -796,22 +894,49 @@ async function renderInto(root, _me) {
           </p>`
           : roster.map(renderRosterCard).join("")
       }
+      </div><!-- /aj-main -->
 
+      <div class="aj-rail">
+
+      <!-- Radar de relance (panneau vivant : qui décroche, en 1 coup d'œil) -->
+      <div class="aj-radar" id="aj-radar" role="button" tabindex="0" aria-label="Radar de relance">
+        <div class="aj-radar-hd">
+          <span class="aj-radar-ic">${medallion("cible", "indigo", { size: 34 })}</span>
+          <span class="aj-radar-tx">
+            <span class="aj-radar-t">Radar de relance</span>
+            <span class="aj-radar-s">${nbDecroche > 0 ? `${nbDecroche} décroche${nbDecroche > 1 ? "nt" : ""} — relance en 1 tap` : "Personne ne décroche 👌"}</span>
+          </span>
+          <span class="aj-radar-chev">${icon("chevron-right", { size: 20, strokeWidth: 2.4 })}</span>
+        </div>
+        ${
+          decrocheurs.length
+            ? `<div class="aj-radar-list">${decrocheurs
+                .map(
+                  (d) => `<div class="aj-radar-row">
+                    <span class="aj-radar-av">${miniAvatar(d.e, 30)}</span>
+                    <span class="aj-radar-nm">${esc(fmtName([d.e.prenom, d.e.nom].filter(Boolean).join(" ")) || "—")}</span>
+                    <span class="aj-radar-j">${d.jours ? d.jours + " j" : "jamais"}</span>
+                  </div>`,
+                )
+                .join("")}</div>`
+            : ""
+        }
+      </div>
 
       <!-- Footer 2 tuiles -->
       <div class="aj-foot">
         <div class="aj-ft">
-          <img src="/skins/badge-3d-06.webp" alt="" loading="lazy" width="32" height="32">
+          <span class="aj-ft-ic">${medallion("cone", "orange", { size: 30 })}</span>
           <div>
             <div class="aj-ft-val">${nbElevesActifs > 0 ? nbDecroche : "—"}</div>
             <div class="aj-ft-lbl">à relancer</div>
           </div>
         </div>
         <div class="aj-ft">
-          <img src="/skins/couronne.png" alt="" loading="lazy" width="32" height="32">
+          <span class="aj-ft-ic">${medallion("trophee", "gold", { size: 30 })}</span>
           <div>
             <div class="aj-ft-val">${nbRecus}</div>
-            <div class="aj-ft-lbl">${nbRecus > 1 ? "reçus 🎉" : "reçu"}</div>
+            <div class="aj-ft-lbl">${nbRecus > 1 ? "reçus" : "reçu"}</div>
           </div>
         </div>
       </div>
@@ -822,6 +947,7 @@ async function renderInto(root, _me) {
           + Inviter un élève
         </button>
       </div>
+      </div><!-- /aj-rail -->
 
     </div>
   `;

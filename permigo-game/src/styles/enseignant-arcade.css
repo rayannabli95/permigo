@@ -225,3 +225,24 @@
   display: inline-block;
   vertical-align: middle;
 }
+
+/* ════════════════════════════════════════════════════════════════
+   DESKTOP « CADRE ENRICHI » (≥ 1024 px) — le moniteur est un persona PC
+   (écran de démo B2B). On élargit la « fenêtre » app posée au centre et on
+   laisse chaque page passer en 2 colonnes. Scopé [data-role="enseignant"] →
+   zéro impact côté élève. Le cadrage mobile (< 1024 px) reste intact.
+   ════════════════════════════════════════════════════════════════ */
+@media (min-width: 1024px) {
+  /* La colonne app passe de 480 → 1000 px (override du cap global) */
+  body[data-role="enseignant"].has-chrome #app {
+    max-width: 1000px;
+  }
+  /* Le header fixe suit la même largeur (il reste centré) */
+  body[data-role="enseignant"] #header-bar {
+    max-width: 1000px !important;
+    width: 1000px !important;
+  }
+  /* La nav du bas reste une pastille centrée (480px) : elle flotte sous la
+     colonne large comme une barre d'onglets posée — pas de barre pleine. */
+}
+
