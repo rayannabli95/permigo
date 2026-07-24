@@ -16,8 +16,67 @@ import { haptic } from "@/utils/haptic.js";
 import { icon } from "@/utils/icons.js";
 import { medallion } from "@/utils/medallions.js";
 import { emptyState } from "@/components/common/empty-state.js";
+import { getLang } from "@/utils/lang.js";
 
 const PAGE_SIZE = 100; // historique élève réaliste ≪ 1000 (pas de pagination PostgREST à gérer)
+
+// ── i18n de la coque (EN/AR), avec repli français intégral.
+const ML_I18N = {
+  en: {
+    back: "Back",
+    title: "My lessons",
+    validated_one: "{n} validated",
+    validated_many: "{n} validated",
+    to_rework: "{n} to work on",
+    unread: "Unread",
+    unavailable: "“My lessons” unavailable.",
+    connection_retry: "Check your connection, then try again.",
+    retry: "Try again",
+    empty_title: "No lesson report yet",
+    empty_body:
+      "Your instructor will send you a report after your next lesson.",
+  },
+  ar: {
+    back: "رجوع",
+    title: "دروسي",
+    validated_one: "تم التحقق من {n}",
+    validated_many: "تم التحقق من {n}",
+    to_rework: "{n} تحتاج إلى مراجعة",
+    unread: "غير مقروء",
+    unavailable: "«دروسي» غير متاحة.",
+    connection_retry: "تحقّق من اتصالك، ثم أعد المحاولة.",
+    retry: "أعد المحاولة",
+    empty_title: "لا يوجد تقرير درس حتى الآن",
+    empty_body: "سيرسل لك مدرّبك تقريرًا بعد درسك القادم.",
+  },
+};
+
+function t(key, fr, vars) {
+  const lang = getLang();
+  let value = (lang !== "fr" && ML_I18N[lang]?.[key]) || fr;
+  if (vars)
+    for (const [name, replacement] of Object.entries(vars))
+      value = value.split(`{${name}}`).join(String(replacement));
+  return value;
+}
+
+function td(key, fr, vars) {
+  const value = esc(t(key, fr, vars));
+  return getLang() === "ar" && ML_I18N.ar[key]
+    ? `<span dir="rtl">${value}</span>`
+    : value;
+}
+
+function displayText(value) {
+  const escaped = esc(value);
+  return getLang() === "ar"
+    ? `<span dir="rtl">${escaped}</span>`
+    : escaped;
+}
+
+function dateLocale() {
+  return { fr: "fr-FR", en: "en-GB", ar: "ar" }[getLang()] || "fr-FR";
+}
 
 // ─── CSS scoped ────────────────────────────────────────────────
 const STYLE = `<style>
@@ -69,13 +128,13 @@ const STYLE = `<style>
 @media (prefers-reduced-motion: reduce) { .ml-skel-row { animation: none; } }
 </style>`;
 
-// ─── Format date FR (même logique que compte-rendu.js — parse LOCAL,
+// ─── Format date localisé (même logique que compte-rendu.js — parse LOCAL,
 // un DATE SQL yyyy-mm-dd lu en UTC décalerait d'un jour) ──────────
-function fmtDateFR(iso) {
+function fmtDate(iso) {
   if (!iso) return "";
   const [y, m, d] = String(iso).slice(0, 10).split("-").map(Number);
   const dt = y && m && d ? new Date(y, m - 1, d) : new Date(iso);
-  return dt.toLocaleDateString("fr-FR", {
+  return dt.toLocaleDateString(dateLocale(), {
     weekday: "short",
     day: "numeric",
     month: "long",
@@ -88,10 +147,10 @@ function renderSkeleton() {
   return `${STYLE}
 <div class="ml anim-slide-up">
   <div class="ml-hd">
-    <button class="ml-back" id="ml-back-skel" aria-label="Retour">
+    <button class="ml-back" id="ml-back-skel" aria-label="${escAttr(t("back", "Retour"))}">
       ${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}
     </button>
-    <div class="ml-hd-title">Mes leçons</div>
+    <div class="ml-hd-title">${td("title", "Mes leçons")}</div>
   </div>
   <div class="ml-list">
     ${Array.from({ length: 5 }, () => `<div class="ml-skel-row"></div>`).join("")}
@@ -106,21 +165,21 @@ function renderRow(cr) {
   const chips = [];
   if (acquisN > 0)
     chips.push(
-      `<span class="ml-row-chip ok">${medallion("check", "green", { size: 14 })}${acquisN} validée${acquisN > 1 ? "s" : ""}</span>`,
+      `<span class="ml-row-chip ok">${medallion("check", "green", { size: 14 })}${td(acquisN > 1 ? "validated_many" : "validated_one", `${acquisN} validée${acquisN > 1 ? "s" : ""}`, { n: acquisN })}</span>`,
     );
   if (retrN > 0)
     chips.push(
-      `<span class="ml-row-chip warn">${medallion("cible", "orange", { size: 14 })}${retrN} à retravailler</span>`,
+      `<span class="ml-row-chip warn">${medallion("cible", "orange", { size: 14 })}${td("to_rework", `${retrN} à retravailler`, { n: retrN })}</span>`,
     );
   return `
   <button class="ml-row" data-id="${escAttr(cr.id)}" type="button">
     <div class="ml-row-top">
       <span class="ml-row-ico" aria-hidden="true">${medallion("fiches", "violet", { size: 34 })}</span>
       <div class="ml-row-b">
-        <div class="ml-row-date">${esc(fmtDateFR(cr.session_date || cr.created_at))}</div>
+        <div class="ml-row-date">${displayText(fmtDate(cr.session_date || cr.created_at))}</div>
         ${chips.length ? `<div class="ml-row-chips">${chips.join("")}</div>` : ""}
       </div>
-      ${!cr.read_at ? `<span class="ml-row-new" aria-label="Non lu"></span>` : ""}
+      ${!cr.read_at ? `<span class="ml-row-new" aria-label="${escAttr(t("unread", "Non lu"))}"></span>` : ""}
       <span class="ml-row-go" aria-hidden="true">${icon("chevron-right", { size: 18 })}</span>
     </div>
   </button>`;
@@ -169,12 +228,12 @@ export async function mount(root) {
     root.innerHTML = `${STYLE}
 <div class="ml anim-slide-up">
   <div class="ml-hd">
-    <button class="ml-back" id="ml-back" aria-label="Retour">${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}</button>
-    <div class="ml-hd-title">Mes leçons</div>
+    <button class="ml-back" id="ml-back" aria-label="${escAttr(t("back", "Retour"))}">${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}</button>
+    <div class="ml-hd-title">${td("title", "Mes leçons")}</div>
   </div>
   <div style="padding:48px 24px;text-align:center;color:var(--mu3)">
-    <p style="font:600 15px/1.5 'Inter',sans-serif">« Mes leçons » indisponible.<br>Vérifie ta connexion, puis réessaie.</p>
-    <button id="ml-retry" style="margin-top:14px;padding:12px 24px;border:0;background:var(--a);color:var(--a-ink);border-radius:12px;cursor:pointer">Réessayer</button>
+    <p style="font:600 15px/1.5 'Inter',sans-serif">${td("unavailable", "« Mes leçons » indisponible.")}<br>${td("connection_retry", "Vérifie ta connexion, puis réessaie.")}</p>
+    <button id="ml-retry" style="margin-top:14px;padding:12px 24px;border:0;background:var(--a);color:var(--a-ink);border-radius:12px;cursor:pointer">${td("retry", "Réessayer")}</button>
   </div>
 </div>`;
     root
@@ -190,15 +249,18 @@ export async function mount(root) {
     ? `<div class="ml-list">${rows.map(renderRow).join("")}</div>`
     : `<div class="ml-list">${emptyState({
         image: "/skins/empty-states/empty_notifications.png",
-        title: "Aucun compte-rendu pour l'instant",
-        body: "Ton moniteur t'enverra un compte-rendu après ta prochaine leçon.",
+        title: t("empty_title", "Aucun compte-rendu pour l'instant"),
+        body: t(
+          "empty_body",
+          "Ton moniteur t'enverra un compte-rendu après ta prochaine leçon.",
+        ),
       })}</div>`;
 
   root.innerHTML = `${STYLE}
 <div class="ml anim-slide-up">
   <div class="ml-hd">
-    <button class="ml-back" id="ml-back" aria-label="Retour">${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}</button>
-    <div class="ml-hd-title">Mes leçons</div>
+    <button class="ml-back" id="ml-back" aria-label="${escAttr(t("back", "Retour"))}">${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}</button>
+    <div class="ml-hd-title">${td("title", "Mes leçons")}</div>
     ${rows.length ? `<span class="ml-hd-count">${rows.length}</span>` : ""}
   </div>
   ${listHtml}

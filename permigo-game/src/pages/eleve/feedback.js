@@ -5,12 +5,88 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { icon } from "@/utils/icons.js";
 import { medallion } from "@/utils/medallions.js";
 import { findSubComp } from "@/data/remc.js";
+import { getLang } from "@/utils/lang.js";
+
+// ── i18n de la coque (EN/AR), avec repli français intégral.
+// Les commentaires du moniteur et les libellés REMC restent à leur source.
+const FB_I18N = {
+  en: {
+    back: "Back",
+    title: "Instructor feedback",
+    ago_minutes: "{n} min ago",
+    ago_hours: "{n}h ago",
+    yesterday: "yesterday",
+    ago_days: "{n}d ago",
+    duration_minutes: "{n} min",
+    duration_hours: "{n}h",
+    duration_hours_minutes: "{h}h{m}",
+    driving_with_you: "of driving with you",
+    skill_validated: "Skill validated:",
+    confirmed: "Confirmed",
+    refused: "Declined",
+    pending: "Pending",
+    unavailable_title: "“Feedback” unavailable",
+    connection_retry: "Check your connection, then try again.",
+    retry: "Try again",
+    empty:
+      "No feedback yet. Your instructors will leave some after your lessons.",
+    load_more: "Show more",
+  },
+  ar: {
+    back: "رجوع",
+    title: "ملاحظات المدرّبين",
+    ago_minutes: "منذ {n} د",
+    ago_hours: "منذ {n} س",
+    yesterday: "أمس",
+    ago_days: "منذ {n} ي",
+    duration_minutes: "{n} د",
+    duration_hours: "{n} س",
+    duration_hours_minutes: "{h} س و{m} د",
+    driving_with_you: "من القيادة معك",
+    skill_validated: "تم التحقق من المهارة:",
+    confirmed: "مؤكدة",
+    refused: "مرفوضة",
+    pending: "قيد الانتظار",
+    unavailable_title: "«الملاحظات» غير متاحة",
+    connection_retry: "تحقّق من اتصالك، ثم أعد المحاولة.",
+    retry: "أعد المحاولة",
+    empty: "لا توجد ملاحظات حتى الآن. سيترك مدرّبوك ملاحظاتهم بعد دروسك.",
+    load_more: "عرض المزيد",
+  },
+};
+
+function t(key, fr, vars) {
+  const lang = getLang();
+  let value = (lang !== "fr" && FB_I18N[lang]?.[key]) || fr;
+  if (vars)
+    for (const [name, replacement] of Object.entries(vars))
+      value = value.split(`{${name}}`).join(String(replacement));
+  return value;
+}
+
+function td(key, fr, vars) {
+  const value = esc(t(key, fr, vars));
+  return getLang() === "ar" && FB_I18N.ar[key]
+    ? `<span dir="rtl">${value}</span>`
+    : value;
+}
+
+function displayText(value) {
+  const escaped = esc(value);
+  return getLang() === "ar"
+    ? `<span dir="rtl">${escaped}</span>`
+    : escaped;
+}
+
+function dateLocale() {
+  return { fr: "fr-FR", en: "en-GB", ar: "ar" }[getLang()] || "fr-FR";
+}
 
 // "C2f" → "Intersections, ronds-points" (fallback : code brut)
 function compLabel(compId) {
@@ -176,13 +252,13 @@ function relTime(ts) {
   if (!ts) return "";
   const diff = Date.now() - new Date(ts).getTime();
   const min = Math.floor(diff / 60000);
-  if (min < 60) return `il y a ${min}min`;
+  if (min < 60) return t("ago_minutes", `il y a ${min}min`, { n: min });
   const h = Math.floor(min / 60);
-  if (h < 24) return `il y a ${h}h`;
+  if (h < 24) return t("ago_hours", `il y a ${h}h`, { n: h });
   const d = Math.floor(h / 24);
-  if (d === 1) return "hier";
-  if (d < 7) return `il y a ${d}j`;
-  return new Date(ts).toLocaleDateString("fr-FR", {
+  if (d === 1) return t("yesterday", "hier");
+  if (d < 7) return t("ago_days", `il y a ${d}j`, { n: d });
+  return new Date(ts).toLocaleDateString(dateLocale(), {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -192,7 +268,9 @@ function fmtMin(m) {
   if (!m) return "";
   const h = Math.floor(m / 60),
     r = m % 60;
-  return h === 0 ? `${r}min` : r === 0 ? `${h}h` : `${h}h${r}`;
+  if (h === 0) return t("duration_minutes", `${r}min`, { n: r });
+  if (r === 0) return t("duration_hours", `${h}h`, { n: h });
+  return t("duration_hours_minutes", `${h}h${r}`, { h, m: r });
 }
 
 function renderCard(evt) {
@@ -206,8 +284,8 @@ function renderCard(evt) {
     ? medallion("horloge", "blue", { size: 24 })
     : medallion("check", "green", { size: 24 });
   const desc = isSession
-    ? `<strong>${fmtMin(evt.duration_minutes)}</strong> de conduite avec toi`
-    : `Compétence validée : <strong>${esc(compLabel(evt.competence_id))}</strong>`;
+    ? `<strong>${displayText(fmtMin(evt.duration_minutes))}</strong> ${td("driving_with_you", "de conduite avec toi")}`
+    : `${td("skill_validated", "Compétence validée :")} <strong>${esc(compLabel(evt.competence_id))}</strong>`;
 
   const statusLine =
     isSession && evt.confirmation_status
@@ -215,10 +293,10 @@ function renderCard(evt) {
     <div class="fb-extra-row" style="color:${evt.confirmation_status === "confirmed" ? "var(--grd)" : "var(--mu2)"}">
       ${
         evt.confirmation_status === "confirmed"
-          ? `${medallion("check", "green", { size: 14 })} Confirmée`
+          ? `${medallion("check", "green", { size: 14 })} ${td("confirmed", "Confirmée")}`
           : evt.confirmation_status === "refused"
-            ? `${medallion("faute", "red", { size: 14 })} Refusée`
-            : "En attente"
+            ? `${medallion("faute", "red", { size: 14 })} ${td("refused", "Refusée")}`
+            : td("pending", "En attente")
       }
     </div>`
       : "";
@@ -229,7 +307,7 @@ function renderCard(evt) {
       <div class="fb-av" style="background:${gradFor(nameKey)}">${esc(inits.toUpperCase() || "?")}</div>
       <div class="fb-meta">
         <div class="fb-author">${esc(evt.moniteur_prenom || "")} ${esc(evt.moniteur_nom || "")}</div>
-        <div class="fb-time">${relTime(evt.ts)}</div>
+        <div class="fb-time">${displayText(relTime(evt.ts))}</div>
       </div>
       <div class="fb-badge ${badgeCls}">${badgeIco}</div>
     </div>
@@ -239,8 +317,8 @@ function renderCard(evt) {
     </div>
     <div class="fb-card-extra">
       <div class="fb-extra">
-        <div class="fb-extra-row">${icon("calendar", { size: 12, color: "var(--mu2)", strokeWidth: 2 })} ${new Date(evt.ts).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}</div>
-        ${isSession ? `<div class="fb-extra-row">${icon("clock", { size: 12, color: "var(--mu2)", strokeWidth: 2 })} ${fmtMin(evt.duration_minutes)}</div>` : ""}
+        <div class="fb-extra-row">${icon("calendar", { size: 12, color: "var(--mu2)", strokeWidth: 2 })} ${displayText(new Date(evt.ts).toLocaleDateString(dateLocale(), { weekday: "long", day: "numeric", month: "long" }))}</div>
+        ${isSession ? `<div class="fb-extra-row">${icon("clock", { size: 12, color: "var(--mu2)", strokeWidth: 2 })} ${displayText(fmtMin(evt.duration_minutes))}</div>` : ""}
         ${statusLine}
       </div>
     </div>
@@ -260,8 +338,8 @@ export async function mount(root) {
     ${STYLE}
     <div class="fb-page anim-slide-up">
       <div class="fb-hd">
-        <button class="fb-back" aria-label="Retour" id="fb-back">${icon("arrow-left", { size: 18, strokeWidth: 2.2 })}</button>
-        <h1 class="fb-h1">Retours moniteurs</h1>
+        <button class="fb-back" aria-label="${escAttr(t("back", "Retour"))}" id="fb-back">${icon("arrow-left", { size: 18, strokeWidth: 2.2 })}</button>
+        <h1 class="fb-h1">${td("title", "Retours moniteurs")}</h1>
       </div>
       <div class="fb-list">
         <div class="fb-skel-card"></div>
@@ -302,9 +380,9 @@ export async function mount(root) {
       const list = root.querySelector(".fb-list"); // 1er chargement : on tue le skeleton
       if (list) {
         list.innerHTML = `<div class="fb-empty"><div class="fb-empty-ico">${icon("alert-circle", { size: 30 })}</div>
-          <strong>« Retours » indisponible</strong><br>
-          Vérifie ta connexion, puis réessaie.<br>
-          <button class="fb-load-more" id="fb-retry" style="margin-top:12px">Réessayer</button></div>`;
+          <strong>${td("unavailable_title", "« Retours » indisponible")}</strong><br>
+          ${td("connection_retry", "Vérifie ta connexion, puis réessaie.")}<br>
+          <button class="fb-load-more" id="fb-retry" style="margin-top:12px">${td("retry", "Réessayer")}</button></div>`;
         root.querySelector("#fb-retry")?.addEventListener("click", () => {
           offset = 0;
           allEvents = [];
@@ -327,7 +405,7 @@ export async function mount(root) {
           `
           <div class="fb-empty">
             <div class="fb-empty-ico">${icon("message-circle", { size: 30 })}</div>
-            Aucun retour pour l’instant. Tes moniteurs en laisseront après tes leçons.
+            ${td("empty", "Aucun retour pour l’instant. Tes moniteurs en laisseront après tes leçons.")}
           </div>
         `,
         );
@@ -351,7 +429,7 @@ export async function mount(root) {
         "beforeend",
         `
         <button class="fb-load-more" id="fb-load-btn">
-          ${icon("refresh", { size: 15, strokeWidth: 2.2 })} Voir plus
+          ${icon("refresh", { size: 15, strokeWidth: 2.2 })} ${td("load_more", "Voir plus")}
         </button>
       `,
       );
