@@ -4,7 +4,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { toast } from "@/components/common/toast.js";
 import { navigate } from "@/router.js";
@@ -12,6 +12,71 @@ import { labelComp } from "@/utils/remc-label.js";
 import { REMC_TOTAL } from "@/data/remc.js";
 import { icon } from "@/utils/icons.js";
 import { medStatus } from "@/utils/medallions.js";
+import { getLang } from "@/utils/lang.js";
+
+// ── i18n de la coque (EN/AR), avec repli français intégral.
+// Les libellés REMC et la note du moniteur restent dans leur langue source.
+const CR_I18N = {
+  en: {
+    back: "Back",
+    title: "Lesson report",
+    validated: "Validated",
+    to_rework: "To work on",
+    in_progress: "In progress",
+    instructor_note: "A note from your instructor",
+    from_instructor: "From your instructor",
+    last_lesson: "Your latest lesson",
+    progress: "Your progress",
+    view_route: "View my licence journey",
+    back_home: "Back home",
+    not_found: "Lesson report not found",
+    unavailable:
+      "Lesson report unavailable. Check your connection, then try again.",
+  },
+  ar: {
+    back: "رجوع",
+    title: "تقرير الدرس",
+    validated: "تم التحقق",
+    to_rework: "تحتاج إلى مراجعة",
+    in_progress: "قيد التقدم",
+    instructor_note: "كلمة من مدرّبك",
+    from_instructor: "من مدرّبك",
+    last_lesson: "درسك الأخير",
+    progress: "تقدّمك",
+    view_route: "عرض مسار رخصتي",
+    back_home: "العودة إلى الرئيسية",
+    not_found: "تعذّر العثور على تقرير الدرس",
+    unavailable:
+      "تقرير الدرس غير متاح. تحقّق من اتصالك، ثم أعد المحاولة.",
+  },
+};
+
+function t(key, fr, vars) {
+  const lang = getLang();
+  let value = (lang !== "fr" && CR_I18N[lang]?.[key]) || fr;
+  if (vars)
+    for (const [name, replacement] of Object.entries(vars))
+      value = value.split(`{${name}}`).join(String(replacement));
+  return value;
+}
+
+function td(key, fr, vars) {
+  const value = esc(t(key, fr, vars));
+  return getLang() === "ar" && CR_I18N.ar[key]
+    ? `<span dir="rtl">${value}</span>`
+    : value;
+}
+
+function displayText(value) {
+  const escaped = esc(value);
+  return getLang() === "ar"
+    ? `<span dir="rtl">${escaped}</span>`
+    : escaped;
+}
+
+function dateLocale() {
+  return { fr: "fr-FR", en: "en-GB", ar: "ar" }[getLang()] || "fr-FR";
+}
 
 // ─── CSS scoped ────────────────────────────────────────────────
 const STYLE = `<style>
@@ -203,10 +268,10 @@ function renderSkeleton() {
   return `${STYLE}
 <div class="cr anim-slide-up">
   <div class="cr-hd">
-    <button class="cr-back" id="cr-back-skel" aria-label="Retour">
+    <button class="cr-back" id="cr-back-skel" aria-label="${escAttr(t("back", "Retour"))}">
       ${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}
     </button>
-    <div class="cr-hd-title">Compte-rendu</div>
+    <div class="cr-hd-title">${td("title", "Compte-rendu")}</div>
   </div>
   <div style="margin:16px;display:flex;flex-direction:column;gap:12px">
     <div class="cr-skel" style="height:108px"></div>
@@ -217,14 +282,14 @@ function renderSkeleton() {
 </div>`;
 }
 
-// ─── Format date FR ────────────────────────────────────────────
-function fmtDateFR(iso) {
+// ─── Format date selon la langue ───────────────────────────────
+function fmtDate(iso) {
   if (!iso) return "";
   // session_date est un DATE SQL (yyyy-mm-dd) : on le parse en LOCAL (et non
   // via new Date(iso) qui le lirait en UTC → décalage possible d'un jour).
   const [y, m, d] = String(iso).slice(0, 10).split("-").map(Number);
   const dt = y && m && d ? new Date(y, m - 1, d) : new Date(iso);
-  return dt.toLocaleDateString("fr-FR", {
+  return dt.toLocaleDateString(dateLocale(), {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -234,7 +299,7 @@ function fmtDateFR(iso) {
 
 // ─── Render ────────────────────────────────────────────────────
 function renderPage(cr) {
-  const dateStr = fmtDateFR(cr.session_date);
+  const dateStr = fmtDate(cr.session_date);
   const total = cr.total_acquis ?? 0;
   const pct = REMC_TOTAL > 0 ? Math.round((total / REMC_TOTAL) * 100) : 0;
 
@@ -259,28 +324,28 @@ function renderPage(cr) {
 
   const acquisHtml = acquis.length
     ? `<div class="cr-section">
-        <div class="cr-section-title">Validé</div>
+        <div class="cr-section-title">${td("validated", "Validé")}</div>
         <div class="cr-comp-list">${acquis.map((c) => compItem(c, "acquis")).join("")}</div>
       </div>`
     : "";
 
   const retrHtml = retravailler.length
     ? `<div class="cr-section">
-        <div class="cr-section-title">À retravailler</div>
+        <div class="cr-section-title">${td("to_rework", "À retravailler")}</div>
         <div class="cr-comp-list">${retravailler.map((c) => compItem(c, "a_retravailler")).join("")}</div>
       </div>`
     : "";
 
   const enCoursHtml = enCours.length
     ? `<div class="cr-section">
-        <div class="cr-section-title">En cours</div>
+        <div class="cr-section-title">${td("in_progress", "En cours")}</div>
         <div class="cr-comp-list">${enCours.map((c) => compItem(c, "en_cours")).join("")}</div>
       </div>`
     : "";
 
   const noteHtml = cr.note
     ? `<div class="cr-note">
-        <div class="cr-note-label">Le mot de ton moniteur</div>
+        <div class="cr-note-label">${td("instructor_note", "Le mot de ton moniteur")}</div>
         <div class="cr-note-body">${esc(cr.note)}</div>
       </div>`
     : "";
@@ -288,21 +353,21 @@ function renderPage(cr) {
   return `${STYLE}
 <div class="cr anim-slide-up">
   <div class="cr-hd">
-    <button class="cr-back" id="cr-back" aria-label="Retour">
+    <button class="cr-back" id="cr-back" aria-label="${escAttr(t("back", "Retour"))}">
       ${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}
     </button>
-    <div class="cr-hd-title">Compte-rendu</div>
+    <div class="cr-hd-title">${td("title", "Compte-rendu")}</div>
   </div>
 
   <div class="cr-hero">
-    <div class="cr-hero-kicker">De ton moniteur</div>
-    <h1 class="cr-hero-title">Ta dernière leçon</h1>
-    <p class="cr-hero-sub">${esc(dateStr)}</p>
+    <div class="cr-hero-kicker">${td("from_instructor", "De ton moniteur")}</div>
+    <h1 class="cr-hero-title">${td("last_lesson", "Ta dernière leçon")}</h1>
+    <p class="cr-hero-sub">${displayText(dateStr)}</p>
   </div>
 
   <div class="cr-prog">
     <div class="cr-prog-row">
-      <span class="cr-prog-label">Ta progression</span>
+      <span class="cr-prog-label">${td("progress", "Ta progression")}</span>
       <span class="cr-prog-count">${esc(String(total))} / ${esc(String(REMC_TOTAL))}</span>
     </div>
     <div class="cr-prog-track">
@@ -316,10 +381,10 @@ function renderPage(cr) {
   ${noteHtml}
 
   <button class="cr-cta-primary" id="cr-cta-parcours" type="button">
-    Voir mon itinéraire ${icon("arrow-right", { size: 18, strokeWidth: 2.5 })}
+    ${td("view_route", "Voir mon itinéraire")} ${icon("arrow-right", { size: 18, strokeWidth: 2.5 })}
   </button>
   <button class="cr-cta-secondary" id="cr-cta-retour" type="button">
-    Retour à l’accueil
+    ${td("back_home", "Retour à l’accueil")}
   </button>
 </div>`;
 }
@@ -355,7 +420,7 @@ export async function mount(root, id) {
     ?.addEventListener("click", () => navigate("#/"));
 
   if (!id) {
-    toast("Compte-rendu introuvable", "error");
+    toast(t("not_found", "Compte-rendu introuvable"), "error");
     navigate("#/mon-permis");
     return;
   }
@@ -369,7 +434,10 @@ export async function mount(root, id) {
 
   if (error || !data) {
     toast(
-      "Compte-rendu indisponible. Vérifie ta connexion, puis réessaie.",
+      t(
+        "unavailable",
+        "Compte-rendu indisponible. Vérifie ta connexion, puis réessaie.",
+      ),
       "error",
     );
     navigate("#/mon-permis");
