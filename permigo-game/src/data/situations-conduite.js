@@ -2070,7 +2070,7 @@ export const SITUATIONS = [
       ],
     },
     question:
-      "Tu arrives au bout d'une intersection en T sans panneau. Une voiture vient de droite. Qui passe ?",
+      "Tu arrives au bout d'une route, à un carrefour en T sans panneau. Une voiture vient de droite. Qui passe ?",
     mode: "cible",
     reponses: [
       { id: "v1", veh: "v1", label: "La voiture bleue" },
@@ -2156,6 +2156,136 @@ export const SITUATIONS = [
       "La pluie ne change pas la priorité : le camion vient de ta droite, il passe d'abord. Tu ralentis tôt, car la chaussée mouillée allonge ton freinage.",
     focus: { veh: "camion" },
     okAnim: [{ veh: "camion" }, { veh: "moi", delai: 1200 }],
+  },
+
+  // ── Nuit et pluie, ville et campagne (nouveau lot 3) ─────────
+  {
+    id: "pluie-autoroute-110",
+    theme: "autoroute",
+    difficulte: 1,
+    alt: "Autoroute à deux voies. Ta voiture suit une voiture grise sur la voie de droite.",
+    scene: {
+      kind: "autoroute",
+      vehicules: [
+        { id: "lead", at: "S", d: 1.2, lane: 0.05, couleur: "gris" },
+        {
+          id: "moi",
+          at: "S",
+          d: 2.4,
+          lane: 0.05,
+          couleur: "joueur",
+          label: "Toi",
+        },
+      ],
+    },
+    question:
+      "Il pleut sur une autoroute normalement limitée à 130. En leçon, quelle vitesse maximale ?",
+    mode: "cartes",
+    reponses: [
+      { id: "cent-dix", label: "110 km/h" },
+      { id: "cent-trente", label: "130 km/h" },
+      { id: "cent", label: "100 km/h" },
+    ],
+    bonne: "cent-dix",
+    explication:
+      "Sous la pluie, une autoroute normalement à 130 est limitée à 110 km/h. C'est aussi ta limite d'élève conducteur, même par temps sec.",
+    okAnim: [{ veh: "lead" }, { veh: "moi", delai: 250 }],
+  },
+  {
+    id: "pluie-ville-distance-bus",
+    theme: "distance",
+    difficulte: 2,
+    alt: "Rue droite. Ta voiture suit un bus de près.",
+    scene: {
+      kind: "route",
+      vehicules: [
+        { id: "bus", at: "S", d: 1.0, lane: 0.72, type: "bus" },
+        {
+          id: "moi",
+          at: "S",
+          d: 2.7,
+          lane: 0.1,
+          couleur: "joueur",
+          label: "Toi",
+        },
+      ],
+    },
+    question:
+      "Sous une forte pluie en ville, tu suis ce bus de trop près. Que fais-tu ?",
+    mode: "cartes",
+    reponses: [
+      {
+        id: "marge",
+        label: "Je ralentis et j'augmente ma distance",
+        ico: "🐢",
+      },
+      {
+        id: "cinquante",
+        label: "Je reste à 50 km/h sans changer l'écart",
+      },
+      { id: "colle", label: "Je me rapproche pour mieux voir devant" },
+    ],
+    bonne: "marge",
+    explication:
+      "Sur chaussée mouillée, tu réduis ta vitesse et tu gardes plus de marge pour pouvoir t'arrêter si le bus freine. Une limitation reste un maximum, jamais une allure imposée.",
+    focus: { veh: "bus" },
+    okAnim: [{ veh: "bus" }, { veh: "moi", delai: 350 }],
+  },
+  {
+    id: "nuit-campagne-feux-croisement",
+    theme: "signalisation",
+    difficulte: 1,
+    alt: "Route à double sens. Une voiture rouge arrive en face de la tienne.",
+    scene: {
+      kind: "route",
+      vehicules: [
+        { id: "moi", at: "S", d: 2.4, couleur: "joueur", label: "Toi" },
+        { id: "face", at: "N", d: 2.2, couleur: "rouge" },
+      ],
+    },
+    question:
+      "De nuit sur une route de campagne non éclairée, une voiture arrive en face. Quels feux utilises-tu ?",
+    mode: "cartes",
+    reponses: [
+      { id: "croisement", label: "Les feux de croisement" },
+      { id: "route", label: "Les feux de route" },
+      { id: "position", label: "Les feux de position seuls" },
+    ],
+    bonne: "croisement",
+    explication:
+      "Tu passes assez tôt en feux de croisement pour ne pas éblouir le conducteur qui arrive. Les feux de position seuls ne suffisent pas pour rouler.",
+    focus: { veh: "face" },
+    okAnim: [{ veh: "face" }, { veh: "moi", delai: 300 }],
+  },
+  {
+    id: "nuit-ville-cycliste",
+    theme: "cycliste",
+    difficulte: 2,
+    alt: "Rue droite. Un cycliste roule devant ta voiture, sur le bord droit de la voie.",
+    scene: {
+      kind: "route",
+      vehicules: [
+        { id: "velo", at: "S", d: 0.9, lane: 0.62, type: "velo" },
+        { id: "moi", at: "S", d: 2.1, couleur: "joueur", label: "Toi" },
+      ],
+    },
+    question:
+      "De nuit en ville, tu rattrapes ce cycliste mais tu n'as pas 1 m pour le dépasser. Que fais-tu ?",
+    mode: "cartes",
+    reponses: [
+      {
+        id: "attends",
+        label: "Je reste derrière et j'attends d'avoir la place",
+        ico: "🐢",
+      },
+      { id: "frole", label: "Je passe doucement à 50 cm" },
+      { id: "phares", label: "Je mets les feux de route et je double" },
+    ],
+    bonne: "attends",
+    explication:
+      "En ville, tu laisses au moins 1 m pour dépasser un cycliste. Si tu ne l'as pas, tu restes derrière — la nuit ne justifie jamais de le frôler.",
+    focus: { veh: "velo" },
+    okAnim: [{ veh: "velo" }, { veh: "moi", delai: 350 }],
   },
 ];
 
