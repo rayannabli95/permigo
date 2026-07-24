@@ -124,6 +124,43 @@ const ACC_I18N = {
     fq_aria: "Flash quiz from your instructor, answer now",
     fq_title: "Flash quiz from your instructor",
     fq_sub: "3 questions · answer now",
+    tour_welcome_t: "Welcome 👋",
+    tour_welcome_x: "Quick tour. Skip any time.",
+    tour_flame_t: "Your flame 🔥",
+    tour_flame_x:
+      "Come back every day. Your streak grows and earns you steering wheels.",
+    tour_lesson_t: "Your next lesson",
+    tour_lesson_x:
+      "Get ready for every driving hour here. 5 minutes is enough.",
+    tour_map_t: "Your licence map",
+    tour_map_x: "31 skills to validate to earn your licence.",
+    tour_rewards_t: "Your rewards",
+    tour_rewards_x:
+      "The wheel, the shop, your trophies and your league — all in one place.",
+    hint_reviser: "Find this lesson any time in “Practice” 📚",
+    err_t: "“Home” is unavailable",
+    err_s: "Check your connection, then try again.",
+    err_retry: "Try again",
+    reason_weak: "🎯 Based on your recent mistakes",
+    reason_next: "📍 Next on your route",
+    reason_consol: "🔁 Achieved — worth consolidating",
+    freeze_wait: "⏳ Freezing…",
+    freeze_need: "You need 50 steering wheels to freeze your streak.",
+    freeze_ok_toast: "Streak frozen for 24 h.",
+    freeze_ok_btn: "✓ Streak frozen",
+    freeze_fail: "The freeze failed. Try again.",
+    debrief_keep_toast: "Consolidating — that's how you improve 💪",
+    debrief_new_toast: "New lesson to prepare: {t}",
+    sheet_aria: "Choose your next lesson's topic",
+    sheet_h: "What's your next lesson?",
+    sheet_s: "PermiGo picked your next 3 — your call.",
+    sheet_more_q: "Another topic in mind?",
+    sheet_more_u: "Full list",
+    sheet_monde: "World",
+    sheet_done_aria: "already achieved",
+    unit_min: "min",
+    heat_quiz_one: "quiz",
+    heat_quiz_many: "quizzes",
   },
   ar: {
     install_t: "ثبّت بيرميغو على هاتفك",
@@ -153,7 +190,7 @@ const ACC_I18N = {
     sos_sub_crit: "بسرعة — اختبار واحد ينقذها.",
     sos_sub_risk: "أنجز اختبار اليوم للحفاظ عليها.",
     sos_freeze: "تجميد · 50",
-    sos_freeze_aria: "تجميد سلسلتي مقابل 50 نقطة",
+    sos_freeze_aria: "تجميد سلسلتي مقابل 50 مقودًا",
     day_sing: "يوم",
     day_plur: "أيام",
     sitday_aria: "مشهد اليوم: {q} — العب «في موقف»",
@@ -194,60 +231,144 @@ const ACC_I18N = {
     fq_aria: "اختبار سريع من مدرّبك، أجب الآن",
     fq_title: "اختبار سريع من مدرّبك",
     fq_sub: "3 أسئلة · أجب الآن",
+    tour_welcome_t: "أهلاً بك 👋",
+    tour_welcome_x: "جولة سريعة. تجاوزها متى شئت.",
+    tour_flame_t: "شعلتك 🔥",
+    tour_flame_x: "عُد كل يوم. سلسلتك تكبر وتكسبك مقودات.",
+    tour_lesson_t: "درسك القادم",
+    tour_lesson_x: "استعدّ هنا لكل ساعة قيادة. 5 دقائق تكفي.",
+    tour_map_t: "خريطة رخصتك",
+    tour_map_x: "31 مهارة عليك إتقانها لنيل رخصتك.",
+    tour_rewards_t: "مكافآتك",
+    tour_rewards_x: "العجلة والمتجر وكؤوسك ودوريك — كلها هنا.",
+    hint_reviser: "تجد هذا الدرس متى شئت في «المراجعة» 📚",
+    err_t: "«الرئيسية» غير متاحة",
+    err_s: "تحقّق من اتصالك ثم أعد المحاولة.",
+    err_retry: "إعادة المحاولة",
+    reason_weak: "🎯 بناءً على أخطائك الأخيرة",
+    reason_next: "📍 التالي في مسارك",
+    reason_consol: "🔁 مكتسبة — للترسيخ",
+    freeze_wait: "⏳ جارٍ التجميد…",
+    freeze_need: "تحتاج 50 مقودًا لتجميد سلسلتك.",
+    freeze_ok_toast: "جُمّدت السلسلة لمدة 24 ساعة.",
+    freeze_ok_btn: "✓ جُمّدت السلسلة",
+    freeze_fail: "فشل التجميد. أعد المحاولة.",
+    debrief_keep_toast: "نرسّخ المهارة — هكذا نتقدّم 💪",
+    debrief_new_toast: "درس جديد للتحضير: {t}",
+    sheet_aria: "اختر موضوع درسك القادم",
+    sheet_h: "ما موضوع درسك القادم؟",
+    sheet_s: "اختار لك بيرميغو 3 مواضيع — القرار لك.",
+    sheet_more_q: "موضوع آخر في بالك؟",
+    sheet_more_u: "القائمة الكاملة",
+    sheet_monde: "عالم",
+    sheet_done_aria: "مكتسبة بالفعل",
+    unit_min: "د",
+    heat_quiz_one: "اختبار",
+    heat_quiz_many: "اختبارات",
   },
 };
 function atR(key, fr) {
   const l = getLang();
   return (l !== "fr" && ACC_I18N[l]?.[key]) || fr;
 }
+// Isole un fragment HTML (déjà échappé) en RTL quand la langue est l'arabe :
+// sans ça, la ponctuation finale saute en début de ligne dans la page LTR
+// (audit 23/07). L'app reste LTR — RTL par span uniquement (cf. lang.js).
+function _rtl(html) {
+  return getLang() === "ar" ? `<span dir="rtl">${html}</span>` : html;
+}
 function at(key, fr) {
-  return esc(atR(key, fr));
+  return _rtl(esc(atR(key, fr)));
 }
 // Mot « jour/jours » traduit selon le nombre (pluriel simple).
 function atDay(n) {
   return atR(n > 1 ? "day_plur" : "day_sing", n > 1 ? "jours" : "jour");
 }
-// Titre de fiche du hero : contenu DYNAMIQUE (pas de la coque). On le laisse en
-// français — il est traduit sur l'écran Réviser (fiche). Importer les 31 titres
-// obligerait à charger le chunk fiches-i18n (~69 ko gzip) sur l'ACCUEIL pour une
-// seule ligne : pas rentable. (Passthrough : garde les sites d'appel simples.)
-function ficheTitre(_code, fr) {
-  return fr;
+// Locale d'affichage des dates (mois écrits dans la langue choisie).
+function atLoc() {
+  const l = getLang();
+  return l === "en" ? "en-GB" : l === "ar" ? "ar" : "fr-FR";
+}
+// Noms des 4 mondes (feuille « changer de thème ») — libellés de coque.
+const MONDE_I18N = {
+  en: {
+    1: "Vehicle handling",
+    2: "Traffic",
+    3: "Difficult conditions",
+    4: "Independent driving",
+  },
+  ar: {
+    1: "التحكم في المركبة",
+    2: "السير في الطريق",
+    3: "الظروف الصعبة",
+    4: "القيادة المستقلة",
+  },
+};
+function mondeNom(n, fr) {
+  const l = getLang();
+  return (l !== "fr" && MONDE_I18N[l]?.[n]) || fr;
+}
+// Titres de fiches + scène du jour : contenu DYNAMIQUE. Décision Rayan 23/07
+// (« plus un mot de FR dans la coque ») : en 'en'/'ar' on charge les chunks
+// fiches-i18n / situations-i18n À LA DEMANDE dans mount() — les élèves FR ne
+// paient jamais ces ~70 ko (la décision bundle de #538 reste vraie pour eux).
+let _ficheI18nMod = null;
+let _situI18nMod = null;
+function ficheTitre(code, fr) {
+  const l = getLang();
+  if (l === "fr") return fr;
+  return _ficheI18nMod?.ficheTr?.(code, l)?.titre || fr;
 }
 
 // Tour guidé élève — 1× à la première arrivée sur l'accueil (l'onboarding
 // plein écran est déjà passé : main.js le monte AVANT cette page).
 const TOUR_KEY = "pg-tour-eleve-v1";
-const ELEVE_TOUR_STEPS = [
-  {
-    title: "Bienvenue 👋",
-    text: "Visite express. Passe quand tu veux.",
-  },
-  {
-    sel: "#streak-badge-btn",
-    title: "Ta flamme 🔥",
-    text: "Reviens chaque jour. Ta série monte et te rapporte des volants.",
-  },
-  {
-    sel: "#action-cta-btn",
-    title: "Ta prochaine leçon",
-    text: "Prépare chaque heure de conduite ici. 5 minutes suffisent.",
-  },
-  {
-    // 2026-07-16 : l'onglet « Mon permis » ré-ouvre directement le
-    // parcours (data-id="parcours") — le sélecteur suit.
-    sel: '.bn-tab[data-id="parcours"]',
-    title: "Ta carte du permis",
-    // Copie neutre : vaut pour l'élève rattaché ET l'élève solo (validation
-    // autonome) — le tableau est défini au niveau module, pas de flag ici.
-    text: "31 compétences à valider pour décrocher ton permis.",
-  },
-  {
-    sel: '.bn-tab[data-id="recompenses"]',
-    title: "Tes récompenses",
-    text: "La roue, la boutique, tes trophées et ta ligue — tout est là.",
-  },
-];
+// Étapes évaluées À L'APPEL (fonction, pas const) : les libellés suivent la
+// langue courante (getLang() via atR) au moment où le tour démarre.
+function eleveTourSteps() {
+  return [
+    {
+      title: atR("tour_welcome_t", "Bienvenue 👋"),
+      text: atR("tour_welcome_x", "Visite express. Passe quand tu veux."),
+    },
+    {
+      sel: "#streak-badge-btn",
+      title: atR("tour_flame_t", "Ta flamme 🔥"),
+      text: atR(
+        "tour_flame_x",
+        "Reviens chaque jour. Ta série monte et te rapporte des volants.",
+      ),
+    },
+    {
+      sel: "#action-cta-btn",
+      title: atR("tour_lesson_t", "Ta prochaine leçon"),
+      text: atR(
+        "tour_lesson_x",
+        "Prépare chaque heure de conduite ici. 5 minutes suffisent.",
+      ),
+    },
+    {
+      // 2026-07-16 : l'onglet « Mon permis » ré-ouvre directement le
+      // parcours (data-id="parcours") — le sélecteur suit.
+      sel: '.bn-tab[data-id="parcours"]',
+      title: atR("tour_map_t", "Ta carte du permis"),
+      // Copie neutre : vaut pour l'élève rattaché ET l'élève solo (validation
+      // autonome).
+      text: atR(
+        "tour_map_x",
+        "31 compétences à valider pour décrocher ton permis.",
+      ),
+    },
+    {
+      sel: '.bn-tab[data-id="recompenses"]',
+      title: atR("tour_rewards_t", "Tes récompenses"),
+      text: atR(
+        "tour_rewards_x",
+        "La roue, la boutique, tes trophées et ta ligue — tout est là.",
+      ),
+    },
+  ];
+}
 
 function maybeStartEleveTour() {
   try {
@@ -263,7 +384,7 @@ function maybeStartEleveTour() {
       // (le hero « prépare ta leçon » est toujours rendu). Garanti en DOM avant ce timeout.
       if (!document.querySelector("#action-cta-btn")) return;
       track("eleve.tour.start");
-      startTour(ELEVE_TOUR_STEPS, {
+      startTour(eleveTourSteps(), {
         onDone: () => {
           try {
             localStorage.setItem(TOUR_KEY, "1");
@@ -1498,6 +1619,17 @@ export async function mount(root) {
   root.innerHTML = SKELETON;
 
   try {
+    // Langue ≠ fr : titres de fiches + scène du jour affichés dans la langue
+    // choisie → chunks i18n chargés ICI seulement (jamais pour les élèves FR).
+    if (getLang() !== "fr") {
+      const [fm, sm] = await Promise.allSettled([
+        import("@/data/fiches-i18n.js"),
+        import("@/data/situations-i18n.js"),
+      ]);
+      if (fm.status === "fulfilled") _ficheI18nMod = fm.value;
+      if (sm.status === "fulfilled") _situI18nMod = sm.value;
+    }
+
     // Core fetches en parallèle
     const [profileRes, streakRes, validRes, notifRes, attemptsRes, selfValRes] =
       await Promise.allSettled([
@@ -1657,10 +1789,10 @@ export async function mount(root) {
         code: c,
         titre: getFiche(c).titre,
         reason: targeted.includes(c)
-          ? "🎯 D'après tes fautes récentes"
+          ? atR("reason_weak", "🎯 D'après tes fautes récentes")
           : !validated.has(c)
-            ? "📍 La suite de ton parcours"
-            : "🔁 Acquise — pour consolider",
+            ? atR("reason_next", "📍 La suite de ton parcours")
+            : atR("reason_consol", "🔁 Acquise — pour consolider"),
       }));
 
       let code = null;
@@ -1736,7 +1868,13 @@ export async function mount(root) {
         Date.now() - cyc.startedAt < PREP_DEBRIEF_AFTER_MS
       ) {
         savePrepCycle({ ...cyc, hinted: true });
-        toast("Retrouve ce cours quand tu veux dans « Réviser » 📚", "info");
+        toast(
+          atR(
+            "hint_reviser",
+            "Retrouve ce cours quand tu veux dans « Réviser » 📚",
+          ),
+          "info",
+        );
         const tab = document.querySelector('.bn-tab[data-id="reviser"]');
         if (tab) {
           tab.classList.add("prep-pulse");
@@ -1839,9 +1977,9 @@ export async function mount(root) {
   } catch (e) {
     console.error("[accueil] mount failed", e);
     root.innerHTML = `<div style="padding:60px 24px;text-align:center;color:var(--mu3);font-family:'Inter',sans-serif">
-      <div style="font:800 18px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:8px">« Accueil » indisponible</div>
-      <p style="font-size:14px;line-height:1.5;margin:0 0 20px">Vérifie ta connexion, puis réessaie.</p>
-      <button id="acc-reload" style="padding:12px 24px;border:0;background:var(--a);color: var(--a-ink);border-radius:12px;font:700 14px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">Réessayer</button>
+      <div style="font:800 18px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:8px">${at("err_t", "« Accueil » indisponible")}</div>
+      <p style="font-size:14px;line-height:1.5;margin:0 0 20px">${at("err_s", "Vérifie ta connexion, puis réessaie.")}</p>
+      <button id="acc-reload" style="padding:12px 24px;border:0;background:var(--a);color: var(--a-ink);border-radius:12px;font:700 14px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">${at("err_retry", "Réessayer")}</button>
     </div>`;
     root
       .querySelector("#acc-reload")
@@ -1906,8 +2044,8 @@ function renderStreakSos({ streak, streakSt, gemmes, href }) {
         <img src="/skins/permigo-streak-flame-v1.webp" alt="">
       </span>
       <span class="acc2-sos-txt">
-        <span class="acc2-sos-title">${title}</span>
-        <span class="acc2-sos-sub">${sub}</span>
+        <span class="acc2-sos-title">${_rtl(title)}</span>
+        <span class="acc2-sos-sub">${_rtl(sub)}</span>
       </span>
       <span class="acc2-sos-arr" aria-hidden="true">→</span>
     </button>
@@ -1933,6 +2071,16 @@ function render({
   const prenom = profile.prenom || me.prenom || "Toi";
   const _sit = situationDuJour();
   const _sitVues = getScenesVues(me.id).size;
+  // Scène du jour dans la langue choisie (chunk situations-i18n chargé par
+  // mount() quand lang ≠ fr) — repli FR si la traduction manque.
+  const _lang = getLang();
+  const _sitTr =
+    _lang !== "fr" ? _situI18nMod?.SITU_I18N?.[_sit.id]?.[_lang] || null : null;
+  const _sitQ = _sitTr?.q || _sit.question;
+  const _sitTheme =
+    (_lang !== "fr" && _situI18nMod?.THEME_I18N?.[_lang]?.[_sit.theme]) ||
+    THEME_LABELS[_sit.theme] ||
+    atR("sitday_theme_fallback", "Code de la route");
 
   // Bandeau d'installation — visible TANT QUE l'app n'est pas installée
   // (sur iPhone, installer = la seule façon d'avoir les notifs). Il disparaît
@@ -1994,9 +2142,9 @@ function render({
     Date.now() - _prepCycle.startedAt > PREP_DEBRIEF_AFTER_MS;
   const debriefCard = _debriefDue
     ? `
-  <section class="acc2-debrief" id="acc-debrief" aria-label="Revenons sur ta leçon">
+  <section class="acc2-debrief" id="acc-debrief" aria-label="${escAttr(atR("debrief_k", "Revenons sur ta leçon"))}">
     <p class="acc2-debrief-k">🚗 ${at("debrief_k", "Revenons sur ta leçon")}</p>
-    <p class="acc2-debrief-t">${esc(atR("debrief_t", "Tu as revu « {t} » avec ton enseignant ?").replace("{t}", ficheTitre(prep.code, prep.titre)))}</p>
+    <p class="acc2-debrief-t">${_rtl(esc(atR("debrief_t", "Tu as revu « {t} » avec ton enseignant ?").replace("{t}", ficheTitre(prep.code, prep.titre))))}</p>
     <p class="acc2-debrief-s">${at("debrief_s", "Certaines compétences demandent plusieurs leçons — c'est normal. On continue ensemble.")}</p>
     <div class="acc2-debrief-row">
       <button class="acc2-debrief-btn keep" id="debrief-keep" type="button">${at("debrief_keep", "Je consolide encore")}</button>
@@ -2055,7 +2203,7 @@ function render({
               aria-label="${escAttr(atR("prep_pill_aria", "Thème de ta prochaine leçon : {t} — appuie pour changer").replace("{t}", ficheTitre(prep.code, prep.titre)))}">
               <span class="acc2-prep-pill-ic" aria-hidden="true">🎯</span>
               <span class="acc2-prep-pill-tl">
-                <b id="prep-theme-name">${esc(ficheTitre(prep.code, prep.titre))}</b>
+                <b id="prep-theme-name">${_rtl(esc(ficheTitre(prep.code, prep.titre)))}</b>
                 <span>${at("prep_pill_sub", "Choisi pour ta prochaine heure")}</span>
               </span>
               <span class="acc2-prep-chev" aria-hidden="true">›</span>
@@ -2098,24 +2246,24 @@ function render({
     .acc2-sitday-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#ffcb3d,#ff9b1e)}
   </style>
   <button class="acc2-sitday" id="acc-sit-day" type="button"
-          aria-label="${escAttr(atR("sitday_aria", "Scène du jour : {q} — jouer à En situation").replace("{q}", _sit.question))}">
-    <span class="acc2-sitday-k">${at("sitday_k", "Scène du jour")} <span class="th">${esc(THEME_LABELS[_sit.theme] || atR("sitday_theme_fallback", "Code de la route"))}</span></span>
+          aria-label="${escAttr(atR("sitday_aria", "Scène du jour : {q} — jouer à En situation").replace("{q}", _sitQ))}">
+    <span class="acc2-sitday-k">${at("sitday_k", "Scène du jour")} <span class="th">${_rtl(esc(_sitTheme))}</span></span>
     <span class="acc2-sitday-row">
-      <span class="acc2-sitday-q">${esc(_sit.question)}</span>
+      <span class="acc2-sitday-q">${_rtl(esc(_sitQ))}</span>
       <span class="acc2-sitday-btn" aria-hidden="true">${at("sitday_btn", "Je décide →")}</span>
     </span>
     <span class="acc2-sitday-scene" aria-hidden="true">${renderSituationScene(_sit.scene)}</span>
-    <span class="acc2-sitday-m">${
+    <span class="acc2-sitday-m">${_rtl(
       _sitVues > 0
         ? atR("sitday_collec", "Ta collection : {c} scènes vues").replace(
             "{c}",
-            `<b>${_sitVues} / ${SITUATIONS.length}</b>`,
+            `<b dir="ltr">${_sitVues} / ${SITUATIONS.length}</b>`,
           )
         : atR(
             "sitday_daily",
             "Une scène différente chaque jour · {n} situations",
-          ).replace("{n}", SITUATIONS.length)
-    }</span>
+          ).replace("{n}", SITUATIONS.length),
+    )}</span>
     ${
       _sitVues > 0
         ? `<span class="acc2-sitday-bar" aria-hidden="true"><i style="width:${Math.round((_sitVues / SITUATIONS.length) * 100)}%"></i></span>`
@@ -2150,16 +2298,18 @@ function render({
               )
           : totalValidated >= 31
             ? at("permis_sub_done", "Toutes les compétences acquises. Bravo !")
-            : esc(
-                atR(
-                  "permis_sub_left",
-                  "Plus que {n} compétence{s} avant l’examen",
-                )
-                  .replace("{n}", 31 - totalValidated)
-                  .replace(
-                    "{s}",
-                    31 - totalValidated > 1 && getLang() !== "ar" ? "s" : "",
-                  ),
+            : _rtl(
+                esc(
+                  atR(
+                    "permis_sub_left",
+                    "Plus que {n} compétence{s} avant l’examen",
+                  )
+                    .replace("{n}", 31 - totalValidated)
+                    .replace(
+                      "{s}",
+                      31 - totalValidated > 1 && getLang() !== "ar" ? "s" : "",
+                    ),
+                ),
               )
       }</span>
     </div>
@@ -2190,23 +2340,27 @@ function render({
   <div class="bs-handle"></div>
   <div class="bs-hd">
     <div class="bs-hd-title">${at("bs_title", "Ta série de révision")}</div>
-    <div class="bs-hd-sub">${esc(
-      atR("bs_record", "Record : {r} {jr} · En cours : {c}")
-        .replace("{r}", streak.longest_streak)
-        .replace("{jr}", atDay(streak.longest_streak))
-        .replace("{c}", streak.current_streak),
+    <div class="bs-hd-sub">${_rtl(
+      esc(
+        atR("bs_record", "Record : {r} {jr} · En cours : {c}")
+          .replace("{r}", streak.longest_streak)
+          .replace("{jr}", atDay(streak.longest_streak))
+          .replace("{c}", streak.current_streak),
+      ),
     )}</div>
   </div>
   <div class="bs-hmap-wrap">
     <div class="bs-hmap-head">
       <span class="bs-hmap-title">${at("bs_mymonth", "Mon mois")}</span>
-      <span class="bs-hmap-sub">${esc(
-        atR("bs_active", "{n} jour{s} actif{s}")
-          .replace("{n}", activityDays.totalActive)
-          .replace(
-            /\{s\}/g,
-            activityDays.totalActive > 1 && getLang() !== "ar" ? "s" : "",
-          ),
+      <span class="bs-hmap-sub">${_rtl(
+        esc(
+          atR("bs_active", "{n} jour{s} actif{s}")
+            .replace("{n}", activityDays.totalActive)
+            .replace(
+              /\{s\}/g,
+              activityDays.totalActive > 1 && getLang() !== "ar" ? "s" : "",
+            ),
+        ),
       )}</span>
     </div>
     ${renderHeatmap({ activeDates: activityDays.activeDates, activityLevels: activityDays.levels, activityDetails: activityDays.details, weeks: 5, title: "" })}
@@ -2231,14 +2385,14 @@ function renderSessionConfirm(session) {
     session.moniteur_prenom ?? atR("session_moniteur_fallback", "Ton moniteur");
   const initials = prenom.slice(0, 2).toUpperCase();
   const dateStr = session.session_date
-    ? new Date(session.session_date).toLocaleDateString("fr-FR", {
+    ? new Date(session.session_date).toLocaleDateString(atLoc(), {
         weekday: "short",
         day: "numeric",
         month: "long",
       })
     : atR("session_recent", "Récemment");
   const durStr = session.duration_minutes
-    ? `${session.duration_minutes} min`
+    ? `${session.duration_minutes} ${atR("unit_min", "min")}`
     : "";
   const sub = [dateStr, durStr].filter(Boolean).join(" · ");
 
@@ -2248,7 +2402,7 @@ function renderSessionConfirm(session) {
       <div class="acc2-ms-session-top">
         <div class="acc2-ms-session-av">${esc(initials)}</div>
         <div class="acc2-ms-session-info">
-          <div class="acc2-ms-session-title">${esc(atR("session_title", "{name} a enregistré une séance").replace("{name}", prenom))}</div>
+          <div class="acc2-ms-session-title">${_rtl(esc(atR("session_title", "{name} a enregistré une séance").replace("{name}", prenom)))}</div>
           <div class="acc2-ms-session-sub">${esc(sub)}</div>
         </div>
       </div>
@@ -2357,11 +2511,14 @@ function wire(
     if (!btn || btn.disabled) return;
     const prev = btn.innerHTML;
     btn.disabled = true;
-    btn.textContent = "⏳ Gel en cours…";
+    btn.textContent = atR("freeze_wait", "⏳ Gel en cours…");
     try {
       const { data, error } = await sb.rpc("use_streak_freeze");
       if (error || data?.error) {
-        toast("Il te faut 50 volants pour geler ta série.", "error");
+        toast(
+          atR("freeze_need", "Il te faut 50 volants pour geler ta série."),
+          "error",
+        );
         setTimeout(() => {
           btn.disabled = false;
           btn.innerHTML = prev;
@@ -2369,11 +2526,11 @@ function wire(
         return;
       }
       track("streak.freeze_used", {});
-      toast("Série gelée pour 24 h.", "success");
-      btn.textContent = "✓ Série gelée"; // évite de laisser "⏳ Gel en cours…" figé
+      toast(atR("freeze_ok_toast", "Série gelée pour 24 h."), "success");
+      btn.textContent = atR("freeze_ok_btn", "✓ Série gelée"); // évite de laisser le libellé d'attente figé
       onDone?.();
     } catch {
-      toast("Le gel a échoué. Réessaie.", "error");
+      toast(atR("freeze_fail", "Le gel a échoué. Réessaie."), "error");
       btn.disabled = false;
       btn.innerHTML = prev;
     }
@@ -2471,7 +2628,13 @@ function wire(
     const cyc = loadPrepCycle();
     if (cyc) savePrepCycle({ ...cyc, answered: true });
     _closeDebrief();
-    toast("On consolide — c'est comme ça qu'on progresse 💪", "success");
+    toast(
+      atR(
+        "debrief_keep_toast",
+        "On consolide — c'est comme ça qu'on progresse 💪",
+      ),
+      "success",
+    );
   });
   root.querySelector("#debrief-next")?.addEventListener("click", () => {
     haptic("select");
@@ -2493,14 +2656,20 @@ function wire(
         answered: false,
       });
       const nm = root.querySelector("#prep-theme-name");
-      if (nm) nm.textContent = next.titre;
+      if (nm) nm.innerHTML = _rtl(esc(ficheTitre(next.code, next.titre)));
       const cta = root.querySelector("#action-cta-btn");
       if (cta) cta.dataset.href = prepHrefFor(next.code, 0);
       if (prep) {
         prep.code = next.code;
         prep.titre = next.titre;
       }
-      toast(`Nouvelle leçon à préparer : ${next.titre}`, "success");
+      toast(
+        atR("debrief_new_toast", "Nouvelle leçon à préparer : {t}").replace(
+          "{t}",
+          ficheTitre(next.code, next.titre),
+        ),
+        "success",
+      );
     } else {
       const cyc = loadPrepCycle();
       if (cyc) savePrepCycle({ ...cyc, answered: true });
@@ -2533,40 +2702,40 @@ function openPrepThemeSheet(root, { prep, prepMondes, prepSuggestions }) {
   ov.className = "prep-sheet-ov";
   ov.innerHTML = `
     <div class="prep-sheet" role="dialog" aria-modal="true"
-         aria-label="Choisir le thème de ta prochaine leçon" tabindex="-1">
+         aria-label="${escAttr(atR("sheet_aria", "Choisir le thème de ta prochaine leçon"))}" tabindex="-1">
       <div class="prep-sheet-grab" aria-hidden="true"></div>
-      <h2 class="prep-sheet-h">Ta prochaine leçon, c'est quoi ?</h2>
-      <p class="prep-sheet-s">PermiGo a ciblé tes 3 prochaines — à toi de choisir.</p>
+      <h2 class="prep-sheet-h">${at("sheet_h", "Ta prochaine leçon, c'est quoi ?")}</h2>
+      <p class="prep-sheet-s">${at("sheet_s", "PermiGo a ciblé tes 3 prochaines — à toi de choisir.")}</p>
       <div class="prep-sheet-list">
         ${prepSuggestions
           .map(
             (s, i) => `
           <button class="prep-sheet-item sug${s.code === prep?.code ? " cur" : ""}"
-                  type="button" data-code="${escAttr(s.code)}" data-titre="${escAttr(s.titre)}">
+                  type="button" data-code="${escAttr(s.code)}" data-titre="${escAttr(ficheTitre(s.code, s.titre))}">
             <span class="sug-n" aria-hidden="true">${i + 1}</span>
             <span class="tt">
-              <span class="sug-t">${esc(s.titre)}</span>
-              <span class="sug-r">${esc(s.reason)}</span>
+              <span class="sug-t">${_rtl(esc(ficheTitre(s.code, s.titre)))}</span>
+              <span class="sug-r">${_rtl(esc(s.reason))}</span>
             </span>
             <span class="sug-go" aria-hidden="true">→</span>
           </button>`,
           )
           .join("")}
         <button class="prep-sheet-more" id="prep-more-btn" type="button">
-          Un autre thème en tête ? <u>Toute la liste</u>
+          ${at("sheet_more_q", "Un autre thème en tête ?")} <u>${at("sheet_more_u", "Toute la liste")}</u>
         </button>
         <div class="prep-sheet-all" hidden>
           ${prepMondes
             .map(
               (m) => `
-            <div class="prep-sheet-monde">Monde ${m.n} · ${esc(m.nom)}</div>
+            <div class="prep-sheet-monde">${at("sheet_monde", "Monde")} ${m.n} · ${_rtl(esc(mondeNom(m.n, m.nom)))}</div>
             ${m.fiches
               .map(
                 (f) => `
               <button class="prep-sheet-item${f.code === prep?.code ? " cur" : ""}"
-                      type="button" data-code="${escAttr(f.code)}" data-titre="${escAttr(f.titre)}">
-                <span class="tt">${esc(f.titre)}</span>
-                ${f.done ? `<span class="ok" aria-label="déjà acquise">✓</span>` : ""}
+                      type="button" data-code="${escAttr(f.code)}" data-titre="${escAttr(ficheTitre(f.code, f.titre))}">
+                <span class="tt">${_rtl(esc(ficheTitre(f.code, f.titre)))}</span>
+                ${f.done ? `<span class="ok" aria-label="${escAttr(atR("sheet_done_aria", "déjà acquise"))}">✓</span>` : ""}
               </button>`,
               )
               .join("")}`,
@@ -2615,7 +2784,7 @@ function openPrepThemeSheet(root, { prep, prepMondes, prepSuggestions }) {
       });
       // Mise à jour du hero en place (nom du thème dans la pastille)
       const nm = root.querySelector("#prep-theme-name");
-      if (nm) nm.textContent = titre;
+      if (nm) nm.innerHTML = _rtl(esc(titre));
       const cta = root.querySelector("#action-cta-btn");
       if (cta) cta.dataset.href = prepHrefFor(code, 0);
       if (prep) {
@@ -2764,7 +2933,7 @@ async function _loadAndInjectCompteRendu(root, me) {
         <div class="acc2-cr-ico" aria-hidden="true">${medallion("fiches", "violet", { size: 38 })}</div>
         <div class="acc2-cr-txt">
           <div class="acc2-cr-t">${at("cr_t", "Ton moniteur t’a envoyé un compte-rendu")}</div>
-          <div class="acc2-cr-s">${esc(_crApercu(cr))}</div>
+          <div class="acc2-cr-s">${_rtl(esc(_crApercu(cr)))}</div>
         </div>
         <div class="acc2-cr-cta" aria-hidden="true">
           <span>${at("cr_cta", "Le lire")}</span>
@@ -2818,7 +2987,7 @@ async function _loadAndInjectChests(root) {
            aria-label="${escAttr(label)}">
         <img src="/skins/chests/chest_welcome.png" alt="" aria-hidden="true" loading="lazy">
         <div class="acc2-chest-v2-body">
-          <strong class="acc2-chest-v2-title">${esc(label)}</strong>
+          <strong class="acc2-chest-v2-title">${_rtl(esc(label))}</strong>
           <span class="acc2-chest-v2-sub">${at("chest_sub", "Réclame ta récompense du jour.")}</span>
         </div>
         <span class="acc2-chest-v2-arr" aria-hidden="true">›</span>
@@ -2963,8 +3132,10 @@ function buildActivityData(attempts, streak) {
   for (const [k, v] of Object.entries(counts)) {
     levels[k] = v >= 4 ? 4 : v >= 3 ? 3 : v >= 2 ? 2 : 1;
     const dt = new Date(k + "T12:00:00");
+    const _qWord =
+      v > 1 ? atR("heat_quiz_many", "quiz") : atR("heat_quiz_one", "quiz");
     details[k] =
-      `${dt.toLocaleDateString("fr-FR", { day: "numeric", month: "long" })} — ${v} quiz${v > 1 ? "s" : ""}`;
+      `${dt.toLocaleDateString(atLoc(), { day: "numeric", month: "long" })} — ${v} ${_qWord}${v > 1 && getLang() === "fr" ? "s" : ""}`;
   }
   const days7 = [];
   for (let i = 6; i >= 0; i--) {

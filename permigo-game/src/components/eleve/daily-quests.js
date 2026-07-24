@@ -13,8 +13,55 @@ import { toast } from "@/components/common/toast.js";
 import { playStar } from "@/utils/sound.js";
 import { flyVolants } from "@/components/eleve/volant-reward.js";
 import { refreshGemmes } from "@/utils/game-state.js";
+import { getLang } from "@/utils/lang.js";
 
 const STYLE_ID = "daily-quests-style";
+
+// ── i18n de la COQUE (EN/AR) — dict local, repli FR (règle coque validée 3×).
+// Les titres de quêtes arrivent de la DB en FR, mais c'est un enum FERMÉ de
+// quest_id → on traduit PAR ID, repli sur le titre DB nettoyé si id inconnu.
+const DQ_I18N = {
+  en: {
+    title: "Today's quests",
+    count: "{n} to claim",
+    claim: "Claim",
+    done: "Done",
+    claim_aria: " — claim the reward",
+    missing: "Quest not found.",
+    pop_ok: "Quest complete ✓",
+    pop_volants: "+{n} steering wheels",
+    quest_login: "Log in today",
+    quest_validate_1: "Validate 1 skill",
+    quest_quiz_1: "Pass 1 quiz",
+    quest_quiz_3: "Pass 3 quizzes",
+    quest_streak_keep: "Keep your streak",
+    quest_quiz_perfect: "Get 1 perfect quiz",
+  },
+  ar: {
+    title: "مهام اليوم",
+    count: "{n} للاستلام",
+    claim: "استلام",
+    done: "تم",
+    claim_aria: " — استلم المكافأة",
+    missing: "المهمة غير موجودة.",
+    pop_ok: "أُنجزت المهمة ✓",
+    pop_volants: "+{n} مقود",
+    quest_login: "سجّل الدخول اليوم",
+    quest_validate_1: "أتقِن مهارة واحدة",
+    quest_quiz_1: "انجح في اختبار واحد",
+    quest_quiz_3: "انجح في 3 اختبارات",
+    quest_streak_keep: "حافظ على سلسلتك",
+    quest_quiz_perfect: "حقّق اختبارًا بعلامة كاملة",
+  },
+};
+function dqt(key, fr) {
+  const l = getLang();
+  return (l !== "fr" && DQ_I18N[l]?.[key]) || fr;
+}
+// Isolation RTL par span (l'app reste LTR — cf. utils/lang.js).
+function dqRtl(html) {
+  return getLang() === "ar" ? `<span dir="rtl">${html}</span>` : html;
+}
 
 // Nettoie un libellé de quête venu de la DB : retire le suffixe technique
 // « (≥70%) » / « (70 %) » en fin de titre — du jargon qui ne parle pas à
@@ -23,6 +70,11 @@ export function cleanQuestTitle(title) {
   return String(title ?? "")
     .replace(/\s*\([^)]*%\)\s*$/u, "")
     .trim();
+}
+
+// Titre affiché : traduction par quest_id (enum fermé), repli titre DB nettoyé.
+function questTitle(q) {
+  return dqt(q.quest_id, cleanQuestTitle(q.title));
 }
 
 // img/mask = illustration PNG (éclair/badge/cahier) ; ico = icône SVG classique
@@ -200,7 +252,7 @@ export async function mountDailyQuests(root, { prefetchedQuests } = {}) {
           p_quest_id: questId,
         });
         if (error || data?.error) {
-          toast("Quête introuvable.", "error");
+          toast(dqt("missing", "Quête introuvable."), "error");
           delete card.dataset.claiming;
           return;
         }
@@ -224,7 +276,9 @@ export async function mountDailyQuests(root, { prefetchedQuests } = {}) {
         const pop = document.createElement("div");
         pop.className = "dq-xp-pop";
         pop.textContent =
-          gemGained > 0 ? `+${gemGained} volants` : "Quête validée ✓";
+          gemGained > 0
+            ? dqt("pop_volants", "+{n} volants").replace("{n}", gemGained)
+            : dqt("pop_ok", "Quête validée ✓");
         pop.style.cssText = `left:${rect.left + rect.width / 2}px;top:${rect.top}px`;
         document.body.appendChild(pop);
         setTimeout(() => pop.remove(), 800);
@@ -241,7 +295,11 @@ export async function mountDailyQuests(root, { prefetchedQuests } = {}) {
           const left = [...section.querySelectorAll(".dq-card--ready")].filter(
             (c) => c !== card,
           ).length;
-          if (left > 0) countEl.textContent = `${left} à réclamer`;
+          if (left > 0)
+            countEl.textContent = dqt("count", "{n} à réclamer").replace(
+              "{n}",
+              left,
+            );
           else countEl.remove();
         }
 
@@ -276,9 +334,9 @@ function renderSection(quests) {
     <div class="dq-hd">
       <div class="dq-title">
         ${ill("eclair", { size: 18 })}
-        Quêtes du jour
+        ${dqRtl(esc(dqt("title", "Quêtes du jour")))}
       </div>
-      ${readyCount > 0 ? `<span class="dq-count">${readyCount} à réclamer</span>` : ""}
+      ${readyCount > 0 ? `<span class="dq-count">${dqRtl(esc(dqt("count", "{n} à réclamer").replace("{n}", readyCount)))}</span>` : ""}
     </div>
     <div class="dq-list">
       ${quests.map(renderCard).join("")}
@@ -311,9 +369,9 @@ function renderCard(q) {
 
   // Rail droit : réclamer (état prêt) · récompense à gagner (en cours) · fait
   const right = done
-    ? `<span class="dq-done">${ill("coche", { size: 14 })} Fait</span>`
+    ? `<span class="dq-done">${ill("coche", { size: 14 })} ${dqRtl(esc(dqt("done", "Fait")))}</span>`
     : ready
-      ? `<span class="dq-claim">Réclamer</span>`
+      ? `<span class="dq-claim">${dqRtl(esc(dqt("claim", "Réclamer")))}</span>`
       : q.reward_gemmes > 0
         ? `<span class="dq-reward"><img src="/skins/volant-coin.webp" alt="" aria-hidden="true">+${q.reward_gemmes}</span>`
         : "";
@@ -321,7 +379,7 @@ function renderCard(q) {
   return `
     <div class="dq-card ${stCls}" data-quest-id="${escAttr(String(q.quest_id))}"
          role="${ready ? "button" : "article"}" tabindex="${ready ? "0" : "-1"}"
-         aria-label="${escAttr(cleanQuestTitle(q.title))}${ready ? " — réclamer la récompense" : ""}">
+         aria-label="${escAttr(questTitle(q))}${ready ? escAttr(dqt("claim_aria", " — réclamer la récompense")) : ""}">
       <div class="dq-ico" style="background:${cat.color}18">
         ${
           cat.img
@@ -332,7 +390,7 @@ function renderCard(q) {
         }
       </div>
       <div class="dq-body">
-        <div class="dq-name">${esc(cleanQuestTitle(q.title))}</div>
+        <div class="dq-name">${dqRtl(esc(questTitle(q)))}</div>
         <div class="dq-track">
           <div class="dq-fill" style="width:${pct}%;background:${fillClr}"></div>
         </div>

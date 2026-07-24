@@ -11,11 +11,74 @@ import { track } from "@/services/analytics.js";
 import { icon } from "@/utils/icons.js";
 import { navigate } from "@/router.js";
 import { findSubComp } from "@/data/remc.js";
+import { getLang } from "@/utils/lang.js";
 
-// "C2f" → "Intersections, ronds-points" (fallback : code brut)
+// ── i18n de la COQUE (EN/AR) — dict local, repli FR (règle coque validée 3×).
+const FF_I18N = {
+  en: {
+    title_one: "Feedback from your instructor",
+    title_many: "Feedback from your instructors",
+    with: "With {name}",
+    count_one: "1 update",
+    count_many: "{n} updates",
+    see_all: "See all",
+    see_all_aria: "See the full feed",
+    pill_session: "Session",
+    pill_valid: "Validated ✓",
+    driving: "{d} of driving",
+    st_confirmed: "✓ confirmed",
+    st_refused: "declined",
+    st_pending: "pending",
+    today: "today",
+    yesterday: "yesterday",
+    days_ago: "{d}d ago",
+  },
+  ar: {
+    title_one: "ملاحظات مدرّبك",
+    title_many: "ملاحظات مدرّبيك",
+    with: "مع {name}",
+    count_one: "ملاحظة واحدة",
+    count_many: "{n} ملاحظات",
+    see_all: "عرض الكل",
+    see_all_aria: "عرض كل الملاحظات",
+    pill_session: "حصة",
+    pill_valid: "مكتسبة ✓",
+    driving: "{d} من القيادة",
+    st_confirmed: "✓ مؤكّدة",
+    st_refused: "مرفوضة",
+    st_pending: "قيد الانتظار",
+    today: "اليوم",
+    yesterday: "أمس",
+    days_ago: "قبل {d} أيام",
+    two_days_ago: "قبل يومين",
+  },
+};
+function fft(key, fr) {
+  const l = getLang();
+  return (l !== "fr" && FF_I18N[l]?.[key]) || fr;
+}
+// Isolation RTL par span (l'app reste LTR — cf. utils/lang.js).
+function ffRtl(html) {
+  return getLang() === "ar" ? `<span dir="rtl">${html}</span>` : html;
+}
+// Locale des dates courtes.
+function ffLoc() {
+  const l = getLang();
+  return l === "en" ? "en-GB" : l === "ar" ? "ar" : "fr-FR";
+}
+
+// Noms de compétences (contenu) dans la langue choisie : chunk fiches-i18n
+// chargé À LA DEMANDE au mount quand lang ≠ fr (jamais pour les élèves FR).
+let _ffFicheI18n = null;
+
+// "C2f" → "Intersections, ronds-points" (fallback : code brut).
+// En 'en'/'ar' : titre de la fiche correspondante (même code REMC), repli FR.
 function compLabel(compId) {
   const sub = findSubComp(compId);
-  return sub ? sub.n : compId || "—";
+  const fr = sub ? sub.n : compId || "—";
+  const l = getLang();
+  if (l === "fr") return fr;
+  return _ffFicheI18n?.ficheTr?.(compId, l)?.titre || fr;
 }
 
 const STYLE_ID = "feedback-feed-style";
@@ -165,10 +228,13 @@ function relDate(ts) {
   if (!ts) return "";
   const diff = Date.now() - new Date(ts).getTime();
   const d = Math.floor(diff / 86400000);
-  if (d <= 0) return "aujourd'hui";
-  if (d === 1) return "hier";
-  if (d < 7) return `il y a ${d}j`;
-  return new Date(ts).toLocaleDateString("fr-FR", {
+  if (d <= 0) return fft("today", "aujourd'hui");
+  if (d === 1) return fft("yesterday", "hier");
+  if (d < 7) {
+    if (getLang() === "ar" && d === 2) return FF_I18N.ar.two_days_ago;
+    return fft("days_ago", "il y a {d}j").replace("{d}", d);
+  }
+  return new Date(ts).toLocaleDateString(ffLoc(), {
     day: "numeric",
     month: "short",
   });
@@ -193,19 +259,26 @@ function renderItem(evt, showAuthor) {
     : icon("check", { size: 15, strokeWidth: 3 });
 
   const line = isSession
-    ? `<strong>${esc(fmtDuration(evt.duration_minutes))} de conduite</strong>
-       <span class="fft-pill ses">Séance</span>`
-    : `<strong>${esc(compLabel(evt.competence_id))}</strong>
-       <span class="fft-pill val">Validé ✓</span>`;
+    ? `<strong>${ffRtl(
+        esc(
+          fft("driving", "{d} de conduite").replace(
+            "{d}",
+            fmtDuration(evt.duration_minutes),
+          ),
+        ),
+      )}</strong>
+       <span class="fft-pill ses">${ffRtl(esc(fft("pill_session", "Séance")))}</span>`
+    : `<strong>${ffRtl(esc(compLabel(evt.competence_id)))}</strong>
+       <span class="fft-pill val">${ffRtl(esc(fft("pill_valid", "Validé ✓")))}</span>`;
 
   // Méta : statut (séance) + date + auteur si plusieurs moniteurs
   const statusBit =
     isSession && evt.confirmation_status === "confirmed"
-      ? `<span class="ok">✓ confirmée</span><span>·</span>`
+      ? `<span class="ok">${ffRtl(esc(fft("st_confirmed", "✓ confirmée")))}</span><span>·</span>`
       : isSession && evt.confirmation_status === "refused"
-        ? `<span>refusée</span><span>·</span>`
+        ? `<span>${ffRtl(esc(fft("st_refused", "refusée")))}</span><span>·</span>`
         : isSession && evt.confirmation_status
-          ? `<span>en attente</span><span>·</span>`
+          ? `<span>${ffRtl(esc(fft("st_pending", "en attente")))}</span><span>·</span>`
           : "";
   const authorBit = showAuthor
     ? `<span>·</span><span>${esc(fullName(evt))}</span>`
@@ -233,6 +306,15 @@ export async function mountFeedbackFeed(
 ) {
   ensureStyle();
 
+  // Langue ≠ fr : noms de compétences traduits (chunk chargé à la demande).
+  if (getLang() !== "fr" && !_ffFicheI18n) {
+    try {
+      _ffFicheI18n = await import("@/data/fiches-i18n.js");
+    } catch {
+      /* repli FR */
+    }
+  }
+
   let events = [];
   try {
     const { data } = await sb.rpc("get_eleve_feedback_feed", {
@@ -253,11 +335,13 @@ export async function mountFeedbackFeed(
   const names = [...new Set(events.map(fullName).filter(Boolean))];
   const singleMoniteur = names.length === 1 ? names[0] : null;
   const title = singleMoniteur
-    ? "Retours de ton moniteur"
-    : "Retours de tes moniteurs";
+    ? fft("title_one", "Retours de ton moniteur")
+    : fft("title_many", "Retours de tes moniteurs");
 
   const countLabel =
-    events.length === 1 ? "1 retour" : `${events.length} retours`;
+    events.length === 1
+      ? fft("count_one", "1 retour")
+      : fft("count_many", "{n} retours").replace("{n}", events.length);
 
   const wrap = document.createElement("div");
   wrap.className = "fft-section";
@@ -270,16 +354,16 @@ export async function mountFeedbackFeed(
           <div>
             <div class="fft-title">
               <span class="fft-title-ico">${icon("message-circle", { size: 16, strokeWidth: 2.2 })}</span>
-              ${esc(title)}
+              ${ffRtl(esc(title))}
             </div>
-            ${singleMoniteur ? `<div class="fft-sub">Avec ${esc(singleMoniteur)}</div>` : ""}
+            ${singleMoniteur ? `<div class="fft-sub">${ffRtl(esc(fft("with", "Avec {name}").replace("{name}", singleMoniteur)))}</div>` : ""}
           </div>
-          <span class="fft-count">${esc(countLabel)}</span>
+          <span class="fft-count">${ffRtl(esc(countLabel))}</span>
         </div>
         <span class="fft-chevron">${icon("chevron-down", { size: 16, strokeWidth: 2.2 })}</span>
       </button>
-      <button class="fft-all" id="ff-see-all" aria-label="Voir tout le fil">
-        Tout voir ${icon("chevron-right", { size: 13, strokeWidth: 2.5 })}
+      <button class="fft-all" id="ff-see-all" aria-label="${esc(fft("see_all_aria", "Voir tout le fil"))}">
+        ${ffRtl(esc(fft("see_all", "Tout voir")))} ${icon("chevron-right", { size: 13, strokeWidth: 2.5 })}
       </button>
     </div>
     <div class="fft-timeline-wrap" id="ff-timeline-wrap">
