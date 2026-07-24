@@ -16,23 +16,104 @@
 import { sb } from "@/auth/auth.js";
 import { toast } from "@/components/common/toast.js";
 import { icon } from "@/utils/icons.js";
+import { esc, escAttr } from "@/utils/escape.js";
+import { getLang } from "@/utils/lang.js";
 
 const MIN_LEN = 8;
 
 const ICON_LOCK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>`;
 
-const AUTH_ERRORS_FR = {
-  "Password should be at least":
-    "Le mot de passe doit contenir au moins 8 caractères.",
-  "New password should be different from the old password":
-    "Choisis un mot de passe différent de l'ancien.",
-  "should be different": "Choisis un mot de passe différent de l'ancien.",
-  "Auth session missing": "Lien expiré — reconnecte-toi.",
+const I18N = {
+  fr: {
+    title: "Nouveau mot de passe",
+    subtitle:
+      "Choisis un mot de passe pour sécuriser ton compte. C'est lui que tu utiliseras pour te connecter.",
+    new_password: "Nouveau mot de passe",
+    show_password: "Afficher le mot de passe",
+    hide_password: "Masquer le mot de passe",
+    min_chars: "{n} caractères minimum",
+    confirm: "Confirmer",
+    save: "Enregistrer",
+    later: "Plus tard",
+    session_expired: "Lien expiré — reconnecte-toi",
+    err_generic: "Une erreur est survenue. Réessaie.",
+    err_min: "Le mot de passe doit contenir au moins {n} caractères.",
+    err_mismatch: "Les deux mots de passe ne correspondent pas.",
+    success: "Mot de passe mis à jour ✓",
+    auth_password_short:
+      "Le mot de passe doit contenir au moins 8 caractères.",
+    auth_password_same: "Choisis un mot de passe différent de l'ancien.",
+    auth_session_missing: "Lien expiré — reconnecte-toi.",
+  },
+  en: {
+    title: "New password",
+    subtitle:
+      "Choose a password to secure your account. You'll use it to log in.",
+    new_password: "New password",
+    show_password: "Show password",
+    hide_password: "Hide password",
+    min_chars: "{n} characters minimum",
+    confirm: "Confirm",
+    save: "Save",
+    later: "Later",
+    session_expired: "Link expired — log in again",
+    err_generic: "Something went wrong. Try again.",
+    err_min: "Password must be at least {n} characters.",
+    err_mismatch: "The two passwords don't match.",
+    success: "Password updated ✓",
+    auth_password_short: "Password must be at least 8 characters.",
+    auth_password_same: "Choose a password different from your old one.",
+    auth_session_missing: "Link expired — log in again.",
+  },
+  ar: {
+    title: "كلمة مرور جديدة",
+    subtitle:
+      "اختر كلمة مرور لتأمين حسابك. ستستخدمها لتسجيل الدخول.",
+    new_password: "كلمة المرور الجديدة",
+    show_password: "إظهار كلمة المرور",
+    hide_password: "إخفاء كلمة المرور",
+    min_chars: "{n} أحرف على الأقل",
+    confirm: "تأكيد",
+    save: "حفظ",
+    later: "لاحقًا",
+    session_expired: "انتهت صلاحية الرابط — سجّل الدخول مجددًا",
+    err_generic: "حدث خطأ. حاول مجددًا.",
+    err_min: "يجب أن تتكون كلمة المرور من {n} أحرف على الأقل.",
+    err_mismatch: "كلمتا المرور غير متطابقتين.",
+    success: "تم تحديث كلمة المرور ✓",
+    auth_password_short:
+      "يجب أن تتكون كلمة المرور من 8 أحرف على الأقل.",
+    auth_password_same: "اختر كلمة مرور مختلفة عن القديمة.",
+    auth_session_missing: "انتهت صلاحية الرابط — سجّل الدخول مجددًا.",
+  },
 };
+
+function t(key, frFallback) {
+  const lang = getLang();
+  return I18N[lang]?.[key] ?? I18N.fr[key] ?? frFallback;
+}
+
+function text(key, frFallback) {
+  const value = esc(t(key, frFallback));
+  return getLang() === "ar" ? `<span dir="rtl">${value}</span>` : value;
+}
+
+function attr(key, frFallback) {
+  return escAttr(t(key, frFallback));
+}
+
+const AUTH_ERROR_KEYS = {
+  "Password should be at least": "auth_password_short",
+  "New password should be different from the old password":
+    "auth_password_same",
+  "should be different": "auth_password_same",
+  "Auth session missing": "auth_session_missing",
+};
+
 function translateErr(msg) {
-  if (!msg) return "Une erreur est survenue. Réessaie.";
-  for (const [en, fr] of Object.entries(AUTH_ERRORS_FR)) {
-    if (msg.includes(en)) return fr;
+  if (!msg) return t("err_generic", "Une erreur est survenue. Réessaie.");
+  for (const [source, key] of Object.entries(AUTH_ERROR_KEYS)) {
+    if (msg.includes(source)) return t(key, I18N.fr[key]);
   }
   return msg;
 }
@@ -47,7 +128,7 @@ export async function mount(root) {
     session = null;
   }
   if (!session) {
-    toast("Lien expiré — reconnecte-toi", "error");
+    toast(t("session_expired", "Lien expiré — reconnecte-toi"), "error");
     window.location.href = window.location.origin + "/#/login";
     return;
   }
@@ -93,34 +174,34 @@ function template() {
       <div class="np-content">
         <div class="np-badge">${ICON_LOCK}</div>
         <div class="np-card">
-          <h2>Nouveau mot de passe</h2>
-          <p class="np-sub">Choisis un mot de passe pour sécuriser ton compte. C'est lui que tu utiliseras pour te connecter.</p>
+          <h2>${text("title", "Nouveau mot de passe")}</h2>
+          <p class="np-sub">${text("subtitle", "Choisis un mot de passe pour sécuriser ton compte. C'est lui que tu utiliseras pour te connecter.")}</p>
 
           <form id="np-form" novalidate>
             <div class="np-field">
-              <label for="np-pwd">Nouveau mot de passe</label>
+              <label for="np-pwd">${text("new_password", "Nouveau mot de passe")}</label>
               <div class="np-wrap">
                 ${ICON_LOCK}
                 <input id="np-pwd" type="password" autocomplete="new-password" minlength="${MIN_LEN}" placeholder="••••••••">
-                <button type="button" class="np-eye" id="np-eye-1" aria-label="Afficher le mot de passe">${icon("eye", { size: 18 })}</button>
+                <button type="button" class="np-eye" id="np-eye-1" aria-label="${attr("show_password", "Afficher le mot de passe")}">${icon("eye", { size: 18 })}</button>
               </div>
-              <p class="np-hint">${MIN_LEN} caractères minimum</p>
+              <p class="np-hint">${text("min_chars", `${MIN_LEN} caractères minimum`).replace("{n}", String(MIN_LEN))}</p>
             </div>
 
             <div class="np-field" style="margin-top:14px">
-              <label for="np-confirm">Confirmer</label>
+              <label for="np-confirm">${text("confirm", "Confirmer")}</label>
               <div class="np-wrap">
                 ${ICON_LOCK}
                 <input id="np-confirm" type="password" autocomplete="new-password" placeholder="••••••••">
-                <button type="button" class="np-eye" id="np-eye-2" aria-label="Afficher le mot de passe">${icon("eye", { size: 18 })}</button>
+                <button type="button" class="np-eye" id="np-eye-2" aria-label="${attr("show_password", "Afficher le mot de passe")}">${icon("eye", { size: 18 })}</button>
               </div>
             </div>
 
-            <button type="submit" class="np-cta" id="np-submit" style="margin-top:18px">Enregistrer</button>
+            <button type="submit" class="np-cta" id="np-submit" style="margin-top:18px">${text("save", "Enregistrer")}</button>
             <p class="np-err" id="np-err"></p>
           </form>
 
-          <button type="button" class="np-later" id="np-later">Plus tard</button>
+          <button type="button" class="np-later" id="np-later">${text("later", "Plus tard")}</button>
         </div>
       </div>
     </div>
@@ -146,6 +227,12 @@ function wire(root) {
         input.type === "password"
           ? icon("eye", { size: 18 })
           : icon("eye-off", { size: 18 });
+      btn.setAttribute(
+        "aria-label",
+        input.type === "password"
+          ? t("show_password", "Afficher le mot de passe")
+          : t("hide_password", "Masquer le mot de passe"),
+      );
     });
   }
 
@@ -160,12 +247,18 @@ function wire(root) {
     const p1 = pwd.value;
     const p2 = confirm.value;
     if (p1.length < MIN_LEN) {
-      errEl.textContent = `Le mot de passe doit contenir au moins ${MIN_LEN} caractères.`;
+      errEl.textContent = t(
+        "err_min",
+        `Le mot de passe doit contenir au moins ${MIN_LEN} caractères.`,
+      ).replace("{n}", String(MIN_LEN));
       pwd.focus();
       return;
     }
     if (p1 !== p2) {
-      errEl.textContent = "Les deux mots de passe ne correspondent pas.";
+      errEl.textContent = t(
+        "err_mismatch",
+        "Les deux mots de passe ne correspondent pas.",
+      );
       confirm.focus();
       return;
     }
@@ -177,10 +270,10 @@ function wire(root) {
       if (error) {
         errEl.textContent = translateErr(error.message);
         submit.disabled = false;
-        submit.textContent = "Enregistrer";
+        submit.textContent = t("save", "Enregistrer");
         return;
       }
-      toast("Mot de passe mis à jour ✓", "success", 3000);
+      toast(t("success", "Mot de passe mis à jour ✓"), "success", 3000);
       // Reload propre vers l'accueil : repart sur une session saine, sans le
       // hash/params de récupération (évite tout re-déclenchement au reload).
       setTimeout(() => {
@@ -189,7 +282,7 @@ function wire(root) {
     } catch (err) {
       errEl.textContent = translateErr(err?.message);
       submit.disabled = false;
-      submit.textContent = "Enregistrer";
+      submit.textContent = t("save", "Enregistrer");
     }
   });
 }
