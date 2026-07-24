@@ -5,7 +5,6 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
-import { toast } from "@/components/common/toast.js";
 import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
@@ -13,11 +12,9 @@ import { REMC, REMC_TOTAL } from "@/data/remc.js";
 import { icon } from "@/utils/icons.js";
 import { STATUT_CFG } from "@/utils/statut-label.js";
 import { theoryLeague, computeTheoryScore } from "@/utils/theory-league.js";
-import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
 import { mountCiblerRevision } from "@/components/enseignant/cibler-revision.js";
 import { mountFlashQuizSend } from "@/components/enseignant/flash-quiz-send.js";
 import { illus } from "@/components/enseignant/illus.js";
-import { haptic } from "@/utils/haptic.js";
 import { medallion, medStatus } from "@/utils/medallions.js";
 
 // Médaillon d'identité par catégorie REMC (en-tête de groupe C1→C4).
@@ -234,13 +231,10 @@ const STYLE = `<style>
     gap: 13px;
     padding: 16px 18px;
     border-bottom: 1px solid var(--bo2);
-    cursor: pointer;
     transition: background .12s ease;
     min-height: 62px;
   }
   .lr-comp:last-child { border-bottom: none; }
-  .lr-comp:hover { background: var(--bg); }
-  .lr-comp:active { background: var(--bg2); }
 
   .lr-comp-dot {
     width: 10px; height: 10px;
@@ -264,7 +258,6 @@ const STYLE = `<style>
     white-space: nowrap;
     flex-shrink: 0;
   }
-  .lr-comp-chev { color: var(--bo4); font-size: 14px; flex-shrink: 0; }
   /* Auto-validée (élève arrivé en solo, quiz ≥80 % avant rattachement) —
      badge INFO uniquement : ne compte dans aucune stat moniteur. */
   .lr-comp-auto {
@@ -286,244 +279,6 @@ const STYLE = `<style>
   .lr-bilan-btn:hover { background: rgba(255,255,255,.2); }
   .lr-bilan-btn:active { transform: scale(.97); }
   .lr-bilan-btn:focus-visible { outline: 2px solid #f59e0b; outline-offset: 2px; }
-
-  /* ─── Bottom sheet overlay ────────────────────────────────── */
-  /* z-index 350 : au-dessus du FAB enseignant (#bn-seance-fab, 310) et de
-     la bottom-nav (300), sinon le « + » flottant recouvre « Enregistrer ». */
-  .lr-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 350;
-    background: rgba(10,13,26,.45);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    display: flex;
-    align-items: flex-end;
-    animation: lr-overlay-in .2s ease;
-  }
-  @keyframes lr-overlay-in {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-  }
-  /* Sheet ouverte → on masque le FAB « + » (même parti pris que body:has(.vs)
-     sur log-session) : il flottait par-dessus le bouton « Enregistrer ». */
-  body:has(.lr-overlay) #bn-seance-fab { display: none !important; }
-  .lr-sheet {
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto;
-    background: var(--su);
-    border-radius: 24px 24px 0 0;
-    padding: 0 0 max(24px, env(safe-area-inset-bottom));
-    box-shadow: 0 -10px 40px rgba(10,13,26,.15);
-    animation: lr-sheet-in .28s cubic-bezier(.33,1,.68,1) forwards;
-    max-height: 92dvh;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    transform: translateY(100%);
-  }
-  @keyframes lr-sheet-in {
-    from { transform: translateY(100%); }
-    to   { transform: translateY(0); }
-  }
-
-  .lr-sheet-hd {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 20px 24px 16px;
-    border-bottom: 1px solid var(--bo2);
-    position: sticky;
-    top: 0;
-    background: var(--su);
-    z-index: 2;
-  }
-  .lr-sheet-title {
-    font: 700 17px/1.3 var(--ens-display, 'Fredoka'), sans-serif;
-    color: var(--ink);
-    margin: 0;
-    flex: 1;
-    letter-spacing: -0.022em;
-  }
-  .lr-sheet-close {
-    width: 44px; height: 44px;
-    border-radius: 50%;
-    border: 1px solid var(--bo);
-    background: var(--bg);
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer;
-    font-size: 16px;
-    color: var(--mu);
-    flex-shrink: 0;
-    transition: border-color .15s ease, color .15s ease;
-  }
-  .lr-sheet-close:hover { border-color: var(--a); color: var(--a-txt); }
-
-  .lr-sheet-body { padding: 24px; display: flex; flex-direction: column; gap: 20px; }
-
-  /* Boutons statut */
-  .lr-statut-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-  }
-  .lr-statut-btn {
-    padding: 14px 8px;
-    border-radius: var(--r);
-    border: 1.5px solid var(--bo);
-    background: var(--bg);
-    cursor: pointer;
-    text-align: center;
-    transition: border-color .15s ease, background .15s ease, color .15s ease, transform .15s ease;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-  }
-  .lr-statut-btn:hover { border-color: var(--a); background: var(--su); }
-  .lr-statut-btn:active { transform: scale(.98); }
-  .lr-statut-btn.selected-acquis {
-    border-color: var(--gr);
-    background: rgba(16,185,129,.08);
-  }
-  .lr-statut-btn.selected-en_cours {
-    border-color: var(--am);
-    background: rgba(245,158,11,.08);
-  }
-  .lr-statut-btn.selected-a_retravailler {
-    border-color: var(--rd);
-    background: rgba(239,68,68,.08);
-  }
-  .lr-statut-btn-ico { font-size: 20px; line-height: 1; }
-  .lr-statut-btn-lbl {
-    font: 600 12px/1.3 var(--ens-body, 'Inter'), sans-serif;
-    color: var(--ink);
-  }
-
-  /* Note */
-  .lr-note-label {
-    font: 700 11px/1 var(--ens-body, 'Inter'), sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 0.09em;
-    color: var(--mu2);
-    margin: 0 0 8px;
-    display: block;
-  }
-  .lr-note {
-    width: 100%;
-    padding: 14px;
-    background: var(--bg);
-    border: 1px solid var(--bo);
-    border-radius: var(--ens-r, var(--r));
-    font: 500 14px/1.5 var(--ens-body, 'Inter'), sans-serif;
-    color: var(--ink);
-    resize: vertical;
-    min-height: 80px;
-    max-height: 200px;
-    outline: none;
-    transition: border-color .15s ease, background .15s ease;
-    box-sizing: border-box;
-  }
-  .lr-note::placeholder { color: var(--mu2); }
-  .lr-note:focus {
-    border-color: var(--ens-go, var(--a));
-    background: var(--su);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ens-go, var(--a)) 12%, transparent);
-  }
-  .lr-note-count {
-    font: 500 11px/1 var(--ens-body, 'Inter'), sans-serif;
-    color: var(--mu2);
-    text-align: right;
-    margin-top: 4px;
-  }
-
-  /* Bouton valider — arcade: fond ens-go + effet 3D */
-  .lr-btn-save {
-    width: 100%;
-    padding: 16px;
-    background: var(--ens-go, var(--a));
-    border: none;
-    border-radius: var(--ens-r, var(--r));
-    color: #fff;
-    font: 800 15px/1 var(--ens-display, 'Fredoka'), sans-serif;
-    cursor: pointer;
-    transition: transform .12s cubic-bezier(.23,1,.32,1), box-shadow .12s cubic-bezier(.23,1,.32,1);
-    min-height: 52px;
-    letter-spacing: -0.01em;
-    box-shadow: 0 4px 0 0 color-mix(in srgb, var(--ens-go, var(--a)) 60%, #000);
-  }
-  .lr-btn-save:disabled {
-    opacity: .45;
-    cursor: not-allowed;
-    box-shadow: none;
-  }
-  .lr-btn-save:not(:disabled):hover { opacity: .92; }
-  .lr-btn-save:not(:disabled):active {
-    transform: translateY(3px) scale(.98);
-    box-shadow: 0 1px 0 0 color-mix(in srgb, var(--ens-go, var(--a)) 60%, #000);
-  }
-  @media (prefers-reduced-motion: reduce) { .lr-btn-save:not(:disabled):active { transform: none; } }
-
-  /* Skeleton */
-  .lr-skel { display: flex; flex-direction: column; gap: 12px; padding: 16px; }
-  .lr-skel-hd { height: 100px; background: linear-gradient(90deg,var(--bg2) 0%,var(--bo) 50%,var(--bg2) 100%); background-size: 200% 100%; border-radius: var(--r-xl); animation: lr-pulse 1.4s ease-in-out infinite; }
-  .lr-skel-bloc { height: 220px; background: linear-gradient(90deg,var(--bg2) 0%,var(--bo) 50%,var(--bg2) 100%); background-size: 200% 100%; border-radius: var(--r-xl); animation: lr-pulse 1.4s ease-in-out infinite; animation-delay: .1s; }
-  @keyframes lr-pulse { from { background-position: 200% 0; } to { background-position: -200% 0; } }
-
-  /* Message erreur */
-  .lr-err {
-    padding: 60px 20px;
-    text-align: center;
-    color: var(--mu2);
-    font: 500 14px/1.6 var(--ens-body, 'Inter'), sans-serif;
-  }
-  .lr-err-ico { display: flex; justify-content: center; margin-bottom: 16px; }
-
-  /* État succès après validation acquise — referme la boucle de valeur.
-     Sobre (pas de confetti) : on PROUVE que l'élève vient d'avancer. */
-  .lr-success {
-    padding: 28px 24px calc(24px + env(safe-area-inset-bottom, 0px));
-    text-align: center;
-    display: flex; flex-direction: column; align-items: center;
-  }
-  .lr-success-check {
-    width: 60px; height: 60px; border-radius: 50%;
-    background: var(--grp);
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 16px;
-    animation: lr-pop .42s cubic-bezier(.34,1.56,.64,1) both;
-  }
-  @keyframes lr-pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-  .lr-success-comp {
-    font: 600 13px/1.3 var(--ens-body, 'Inter'), sans-serif; color: var(--mu);
-    margin-bottom: 6px;
-  }
-  .lr-success-title {
-    font: 800 20px/1.2 var(--ens-display, 'Fredoka'), sans-serif; color: var(--ink);
-    letter-spacing: -.01em; margin-bottom: 18px;
-  }
-  .lr-success-bar {
-    width: 100%; height: 8px; background: var(--bo);
-    border-radius: 99px; overflow: hidden; margin-bottom: 10px;
-  }
-  .lr-success-fill {
-    height: 100%; border-radius: 99px;
-    background: linear-gradient(90deg, var(--ens-go, var(--a)), color-mix(in srgb, var(--ens-go, var(--a)) 70%, #fff));
-    box-shadow: 0 0 10px color-mix(in srgb, var(--ens-go, var(--a)) 55%, transparent);
-    transition: width .8s .1s cubic-bezier(.2,.7,.3,1);
-  }
-  .lr-success-meta {
-    font: 600 13px/1 var(--ens-body, 'Inter'), sans-serif; color: var(--ink); margin-bottom: 6px;
-  }
-  .lr-success-meta b { font-weight: 800; color: var(--ens-go, var(--adk)); }
-  .lr-success-note {
-    font: 500 13px/1.45 var(--ens-body, 'Inter'), sans-serif; color: var(--mu2); margin-bottom: 22px;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .lr-success-check { animation: none; }
-    .lr-success-fill { transition: none; }
-  }
 
   /* ── Bloc « Engagement » (vue vautour : régularité, quiz, fiches lues) ── */
   .lr-eng {
@@ -593,9 +348,6 @@ let _quizAttempts = []; // quiz_attempts (avec completed_at) — pour l'analyse 
 let _streakEff = 0; // streak RÉEL (vivant seulement si actif aujourd'hui/hier)
 let _theory = null; // { score, nComp, nExams } — ligue Révision (autonomie élève)
 let _engagement = null; // vue « vautour » : activité/régularité/fiches lues (RPC serveur)
-let _sheetComp = null; // { c, n } la comp ouverte dans le sheet
-let _sheetStatut = null;
-let _sheetNote = "";
 
 // ─── Entry point ──────────────────────────────────────────────────
 export async function mount(root, eleveId) {
@@ -1253,12 +1005,10 @@ function renderComp(sub) {
 
   const medKey = STATUT_MED[statut];
   return `
-    <div class="lr-comp" data-comp-id="${escAttr(sub.c)}" data-comp-nom="${escAttr(sub.n)}"
-         role="button" tabindex="0" aria-label="${escAttr(sub.n)} — ${selfVal ? "Auto-validée par l'élève, à confirmer" : cfg.label}. Appuyer pour évaluer cette compétence">
+    <div class="lr-comp">
       ${medKey ? `<span class="lr-comp-med">${medStatus(medKey, { size: 24 })}</span>` : `<span class="lr-comp-dot" style="background:${cfg.dot}"></span>`}
       <span class="lr-comp-nom">${esc(sub.n)}</span>
       ${badge}
-      <span class="lr-comp-chev" aria-hidden="true">›</span>
     </div>
   `;
 }
@@ -1274,243 +1024,5 @@ function wireMain() {
   _root.querySelector("#lr-bilan-btn")?.addEventListener("click", () => {
     track("livret.bilan.open", { eleve_id: _eleveId });
     navigate(`#/bilan/${_eleveId}`);
-  });
-
-  // Clic sur sous-compétence → ouvrir sheet
-  _root.querySelectorAll(".lr-comp[data-comp-id]").forEach((el) => {
-    const handler = () => openSheet(el.dataset.compId, el.dataset.compNom);
-    el.addEventListener("click", handler);
-    el.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") handler();
-    });
-  });
-}
-
-// ─── Bottom sheet ─────────────────────────────────────────────────
-function openSheet(compId, compNom) {
-  haptic("impact");
-  _sheetComp = { c: compId, n: compNom };
-  const existing = _validationsMap[compId];
-  _sheetStatut = existing?.statut || null;
-  _sheetNote = existing?.note || "";
-
-  const overlay = document.createElement("div");
-  overlay.className = "lr-overlay";
-  overlay.setAttribute("role", "dialog");
-  overlay.setAttribute("aria-modal", "true");
-  overlay.setAttribute("aria-label", `Évaluer ${compNom}`);
-
-  overlay.innerHTML = `
-    <div class="lr-sheet">
-      <div class="lr-sheet-hd">
-        <h2 class="lr-sheet-title">${esc(compNom)}</h2>
-        <button class="lr-sheet-close" aria-label="Fermer">${icon("x", { size: 16, strokeWidth: 2.4 })}</button>
-      </div>
-      <div class="lr-sheet-body">
-        <div>
-          <label class="lr-note-label">Évaluer cette compétence</label>
-          <div class="lr-statut-grid">
-            ${renderStatutBtn("acquis", icon("check-circle", { size: 16, strokeWidth: 2.2, color: "var(--grd)" }), "Acquis")}
-            ${renderStatutBtn("en_cours", icon("refresh-cw", { size: 16, strokeWidth: 2.2, color: "var(--amk)" }), "En cours")}
-            ${renderStatutBtn("a_retravailler", icon("alert-triangle", { size: 16, strokeWidth: 2.2, color: "var(--rdk)" }), "À retravailler")}
-          </div>
-        </div>
-        <div>
-          <label class="lr-note-label" for="lr-note-ta">Observations (optionnel)</label>
-          <textarea
-            id="lr-note-ta"
-            class="lr-note"
-            maxlength="280"
-            placeholder="Ce que tu as constaté en séance…"
-            rows="3"
-          >${esc(_sheetNote)}</textarea>
-          <div class="lr-note-count">${_sheetNote.length}/280</div>
-        </div>
-        <button class="lr-btn-save" ${_sheetStatut ? "" : "disabled"}>
-          ${_sheetStatut ? "Enregistrer" : "Choisis un statut pour valider"}
-        </button>
-      </div>
-    </div>
-  `;
-
-  document.body.appendChild(overlay);
-
-  // Fermer en cliquant l'overlay
-  overlay.addEventListener("click", (e) => {
-    if (e.target === overlay) closeSheet(overlay);
-  });
-  overlay
-    .querySelector(".lr-sheet-close")
-    .addEventListener("click", () => closeSheet(overlay));
-  enableSheetSwipe(
-    overlay.querySelector(".lr-sheet"),
-    () => closeSheet(overlay),
-    { overlay },
-  );
-
-  // Boutons statut
-  overlay.querySelectorAll(".lr-statut-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      _sheetStatut = btn.dataset.statut;
-      overlay
-        .querySelectorAll(".lr-statut-btn")
-        .forEach(
-          (b) =>
-            (b.className = `lr-statut-btn${b.dataset.statut === _sheetStatut ? " selected-" + _sheetStatut : ""}`),
-        );
-      const saveBtn = overlay.querySelector(".lr-btn-save");
-      saveBtn.disabled = false;
-      saveBtn.textContent = "Enregistrer";
-    });
-  });
-
-  // Note textarea
-  const ta = overlay.querySelector(".lr-note");
-  const counter = overlay.querySelector(".lr-note-count");
-  if (!ta || !counter) return;
-  ta.addEventListener("input", () => {
-    _sheetNote = ta.value.slice(0, 280);
-    ta.value = _sheetNote;
-    counter.textContent = `${_sheetNote.length}/280`;
-  });
-
-  // Valider
-  overlay
-    .querySelector(".lr-btn-save")
-    .addEventListener("click", () => doSave(overlay));
-
-  // Focus trap initial
-  requestAnimationFrame(() => ta.focus());
-}
-
-function renderStatutBtn(statut, ico, lbl) {
-  const selected = _sheetStatut === statut;
-  return `
-    <button class="lr-statut-btn${selected ? " selected-" + statut : ""}" data-statut="${escAttr(statut)}">
-      <span class="lr-statut-btn-ico">${ico}</span>
-      <span class="lr-statut-btn-lbl">${lbl}</span>
-    </button>
-  `;
-}
-
-function closeSheet(overlay) {
-  overlay.style.animation = "lr-overlay-in .18s ease reverse";
-  setTimeout(() => overlay.remove(), 180);
-}
-
-async function doSave(overlay) {
-  if (!_sheetComp || !_sheetStatut) return;
-
-  const btn = overlay.querySelector(".lr-btn-save");
-  btn.disabled = true;
-  btn.textContent = "Enregistrement…";
-
-  const note = _sheetNote.trim() || null;
-  let saveError = null;
-
-  if (_sheetStatut === "acquis") {
-    // « Acquis » passe par validate_session (SECURITY DEFINER) : il écrit la
-    // validation ET notifie l'élève côté serveur (comp_acquise). L'INSERT
-    // notif direct du client était bloqué par la RLS notifications_insert
-    // (WITH CHECK user_id = get_my_id() → un moniteur ne peut pas notifier
-    // un autre user). Aucun effet de bord : validate_session n'écrit pas
-    // dans sessions_moniteur.
-    const { data, error } = await sb.rpc("validate_session", {
-      p_eleve_id: _eleveId,
-      p_session_date: new Date().toISOString().slice(0, 10),
-      p_note: note,
-      p_acquis: [_sheetComp.c],
-    });
-    saveError = error || (data?.error ? new Error(data.error) : null);
-  } else {
-    // « En cours » / « à retravailler » : via set_competence_status
-    // (SECURITY DEFINER). Il autorise la RÉTROGRADATION d'un acquis (correction,
-    // ce que validate_session interdit) ET, pour « à retravailler », crée
-    // automatiquement un devoir + notifie l'élève (compte-rendu d'1 compétence).
-    let crText = null;
-    if (_sheetStatut === "a_retravailler") {
-      const prenom = _eleveProfil?.prenom || "Ton élève";
-      crText =
-        `Compte-rendu — ${prenom}\n\nÀ retravailler : ${_sheetComp.n}` +
-        (note ? `\n\nNote du moniteur : ${note}` : "");
-    }
-    const { data, error } = await sb.rpc("set_competence_status", {
-      p_eleve_id: _eleveId,
-      p_competence_id: _sheetComp.c,
-      p_statut: _sheetStatut,
-      p_note: note,
-      p_compte_rendu: crText,
-    });
-    saveError = error || (data?.error ? new Error(data.error) : null);
-  }
-
-  if (saveError) {
-    console.error("[livret-remc] save failed", saveError);
-    toast("Enregistrement impossible. Réessaie.", "error");
-    btn.disabled = false;
-    btn.textContent = "Enregistrer";
-    return;
-  }
-
-  track("competence.evaluated", {
-    competence_id: _sheetComp.c,
-    eleve_id: _eleveId,
-    statut: _sheetStatut,
-    auto_ecole_id: _me.auto_ecole_id,
-  });
-
-  // Mettre à jour le state local
-  _validationsMap[_sheetComp.c] = { statut: _sheetStatut, note: _sheetNote }; // note = note_enseignant mapped locally
-
-  // Acquis = moment de valeur : on PROUVE l'avancée de l'élève dans le sheet.
-  // Autres statuts (en cours / à retravailler) = pas de célébration, toast neutre.
-  if (_sheetStatut === "acquis") {
-    haptic("validate");
-    showSuccessState(overlay);
-  } else {
-    haptic("confirm");
-    toast("Évaluation enregistrée.", "success");
-    closeSheet(overlay);
-    render();
-  }
-}
-
-// État succès : referme la boucle « je valide → l'élève avance → il le voit ».
-function showSuccessState(overlay) {
-  const acquisCount = Object.values(_validationsMap).filter(
-    (v) => v.statut === "acquis",
-  ).length;
-  const pct = REMC_TOTAL > 0 ? Math.round((acquisCount / REMC_TOTAL) * 100) : 0;
-  const prenom = esc(_eleveProfil?.prenom || "Ton élève");
-  const complete = acquisCount >= REMC_TOTAL;
-
-  const sheet = overlay.querySelector(".lr-sheet");
-  if (!sheet) {
-    closeSheet(overlay);
-    render();
-    return;
-  }
-
-  sheet.innerHTML = `
-    <div class="lr-success">
-      <div class="lr-success-check">${icon("check", { size: 32, strokeWidth: 3, color: "var(--grd)" })}</div>
-      <div class="lr-success-comp">${esc(_sheetComp.n)} — validée</div>
-      <div class="lr-success-title">${complete ? `${prenom} a tout validé` : `${prenom} a progressé`}</div>
-      <div class="lr-success-bar"><div class="lr-success-fill" style="width:0%"></div></div>
-      <div class="lr-success-meta"><b>${acquisCount}/${REMC_TOTAL}</b> compétences validées · ${pct}%</div>
-      <div class="lr-success-note">${complete ? `Les 31 compétences sont validées.` : `${prenom} voit sa progression dans son appli.`}</div>
-      <button class="lr-btn-save" id="lr-success-continue" type="button">Continuer</button>
-    </div>
-  `;
-
-  // Anime la barre vers la progression réelle (l'avancée se voit)
-  const fill = sheet.querySelector(".lr-success-fill");
-  requestAnimationFrame(() => {
-    if (fill) fill.style.width = pct + "%";
-  });
-
-  sheet.querySelector("#lr-success-continue")?.addEventListener("click", () => {
-    closeSheet(overlay);
-    render();
   });
 }
