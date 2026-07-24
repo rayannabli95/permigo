@@ -434,7 +434,7 @@ export function mountProfileCard(container, opts) {
       const url = await uploadAndSet(me.id, file, "avatar");
       if (url) {
         const avEl = card.querySelector(".pcc-av");
-        avEl.innerHTML = `<img src="${url}" alt="" />`;
+        avEl.innerHTML = `<img src="${escAttr(url)}" alt="" />`;
         haptic("success");
         const { toast } = await import("@/components/common/toast.js");
         toast("Photo mise à jour ✓", "success", 2500);
@@ -463,13 +463,13 @@ export function mountProfileCard(container, opts) {
         if (!bnEl) {
           cardEl.insertAdjacentHTML(
             "afterbegin",
-            `<div class="pcc-banner"><img src="${url}" alt="" /></div>`,
+            `<div class="pcc-banner"><img src="${escAttr(url)}" alt="" /></div>`,
           );
           cardEl.querySelector(".pcc-halo")?.remove();
         } else {
           const img = bnEl.querySelector("img");
           if (img) img.src = url;
-          else bnEl.innerHTML = `<img src="${url}" alt="" />`;
+          else bnEl.innerHTML = `<img src="${escAttr(url)}" alt="" />`;
         }
         haptic("success");
         const { toast } = await import("@/components/common/toast.js");
