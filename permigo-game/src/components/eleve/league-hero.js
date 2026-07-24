@@ -11,7 +11,7 @@
 // Carte toujours sombre (skin Arène) ; or réservé au rang.
 // Données : lignes leaderboard { rang, display_name, score, is_me, avatar }.
 // ═══════════════════════════════════════════════════════════════
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { icon } from "@/utils/icons.js";
 import { navigate } from "@/router.js";
 import { track } from "@/services/analytics.js";
@@ -144,7 +144,7 @@ function renderHero(models, solo) {
 
   return `<div class="lgh-eyebrow">${lgRtl(esc(lgt("eyebrow", "Ta ligue")))}</div>
   <div class="lgh" role="button" tabindex="0"
-       aria-label="${esc(lgt("aria", "Ta ligue de la semaine — {st} — voir le classement").replace("{st}", ariaSt))}">
+       aria-label="${escAttr(lgt("aria", "Ta ligue de la semaine — {st} — voir le classement").replace("{st}", ariaSt))}">
     <span class="lgh-glow lgh-glow-a" aria-hidden="true"></span>
     <span class="lgh-glow lgh-glow-b" aria-hidden="true"></span>
 

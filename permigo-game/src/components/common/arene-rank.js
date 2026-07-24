@@ -11,7 +11,7 @@
 //   arenePodium(top3, { fmtScore }) · areneRow({...}) · areneMeRow({...})
 //   arenePaliers({ items, doneCount, targetIdx, title, goal })
 // ═══════════════════════════════════════════════════════════════
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { getLang } from "@/utils/lang.js";
 // i18n coque (EN/AR), repli FR.
 function arYou() { const l = getLang(); return l === "en" ? "You" : l === "ar" ? "أنت" : "Toi"; }
@@ -320,7 +320,7 @@ export function areneMeRow(
   mine,
   { fmtScore, palier = "", meLabel = arYou() } = {},
 ) {
-  return `<div class="arn-merow" aria-label="${esc(arMyRank(String(mine.rang)))}">
+  return `<div class="arn-merow" aria-label="${escAttr(arMyRank(String(mine.rang)))}">
     <span class="arn-rk">#${mine.rang}</span>
     <span class="arn-av">${renderUserAvatar({ avatar_url: mine.avatar, prenom: mine.display_name }, 42)}</span>
     <span class="arn-nm">${meLabel} · ${esc(mine.display_name)}${palier ? `<span class="pal">${esc(palier)}</span>` : ""}</span>

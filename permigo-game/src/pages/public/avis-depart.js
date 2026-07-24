@@ -8,6 +8,7 @@ import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { track } from "@/services/analytics.js";
 import { openBillingPortal } from "@/services/billing.js";
+import { escAttr } from "@/utils/escape.js";
 
 const REASONS = [
   ["lent", "C'est trop lent / ça rame"],
@@ -153,7 +154,7 @@ export async function mount(root) {
       <textarea id="cf-details" maxlength="2000" placeholder="Ce qui t'a manqué, ce qui t'a saoulé, ce qu'on doit changer…"></textarea>
 
       <label class="cf-lbl" for="cf-email">Ton email ${me ? "" : "(pour te répondre / te rembourser)"}</label>
-      <input type="email" id="cf-email" maxlength="200" placeholder="ton@email.fr" value="${me?.email ? me.email.replace(/"/g, "&quot;") : ""}">
+      <input type="email" id="cf-email" maxlength="200" placeholder="ton@email.fr" value="${escAttr(me?.email || "")}">
 
       <button class="cf-send" id="cf-send" type="button">Envoyer</button>
       <p class="cf-err" id="cf-err">L'envoi n'a pas marché. Réessaie dans quelques secondes.</p>
