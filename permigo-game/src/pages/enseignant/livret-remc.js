@@ -12,8 +12,6 @@ import { REMC, REMC_TOTAL } from "@/data/remc.js";
 import { icon } from "@/utils/icons.js";
 import { STATUT_CFG } from "@/utils/statut-label.js";
 import { theoryLeague, computeTheoryScore } from "@/utils/theory-league.js";
-import { mountCiblerRevision } from "@/components/enseignant/cibler-revision.js";
-import { mountFlashQuizSend } from "@/components/enseignant/flash-quiz-send.js";
 import { illus } from "@/components/enseignant/illus.js";
 import { medallion, medStatus } from "@/utils/medallions.js";
 
@@ -726,12 +724,6 @@ function render() {
 
   wireMain();
   _loadFeedSection();
-  // Couche 2 : bloc « cibler une révision conduite » — ré-injecté à chaque
-  // render (idempotent) pour qu'il survive aux re-renders post-validation.
-  mountCiblerRevision(_root, _eleveId);
-  // Quiz éclair : défi 3 questions / 5 min envoyé à l'élève (même règle
-  // d'idempotence que ci-dessus).
-  mountFlashQuizSend(_root, _eleveId);
 }
 
 async function _loadFeedSection() {
