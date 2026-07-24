@@ -2055,6 +2055,108 @@ export const SITUATIONS = [
       "Un sens interdit sur une bretelle signale que tu la prends dans le mauvais sens. Tu n'avances pas, même sur quelques mètres, et tu changes d'itinéraire.",
     okAnim: [],
   },
+
+  // ── Intersections en T et priorité (nouveau lot 2) ───────────
+  {
+    id: "intersection-t-prio-droite",
+    theme: "priorite-droite",
+    difficulte: 1,
+    alt: "Croisement sans panneau ni feu. Une voiture bleue arrive par ta droite.",
+    scene: {
+      kind: "croisement",
+      vehicules: [
+        { id: "moi", at: "S", d: 1.9, couleur: "joueur", label: "Toi" },
+        { id: "v1", at: "E", d: 1.75, couleur: "bleu" },
+      ],
+    },
+    question:
+      "Tu arrives au bout d'une intersection en T sans panneau. Une voiture vient de droite. Qui passe ?",
+    mode: "cible",
+    reponses: [
+      { id: "v1", veh: "v1", label: "La voiture bleue" },
+      { id: "moi", veh: "moi", label: "Toi" },
+    ],
+    bonne: "v1",
+    explication:
+      "La forme en T ne crée aucune priorité. Sans panneau ni feu, la priorité à droite s'applique : la voiture bleue passe d'abord.",
+    focus: { veh: "v1" },
+    okAnim: [{ veh: "v1" }, { veh: "moi", delai: 950 }],
+  },
+  {
+    id: "intersection-t-vehicule-gauche",
+    theme: "priorite-droite",
+    difficulte: 2,
+    alt: "Croisement sans panneau ni feu. Une voiture rouge arrive par ta gauche.",
+    scene: {
+      kind: "croisement",
+      vehicules: [
+        { id: "moi", at: "S", d: 1.9, couleur: "joueur", label: "Toi" },
+        { id: "v1", at: "W", d: 1.75, couleur: "rouge" },
+      ],
+    },
+    question:
+      "À une intersection en T sans panneau, une voiture vient de ta gauche. Qui passe ?",
+    mode: "cible",
+    reponses: [
+      { id: "moi", veh: "moi", label: "Toi" },
+      { id: "v1", veh: "v1", label: "La voiture rouge" },
+    ],
+    bonne: "moi",
+    explication:
+      "Une route qui continue tout droit n'est pas prioritaire par sa forme. La voiture vient de ta gauche : tu es à sa droite, donc tu passes d'abord.",
+    focus: { veh: "moi" },
+    okAnim: [{ veh: "moi" }, { veh: "v1", delai: 950 }],
+  },
+  {
+    id: "intersection-t-cycliste-droite",
+    theme: "priorite-droite",
+    difficulte: 2,
+    alt: "Croisement sans panneau ni feu. Un cycliste arrive par ta droite.",
+    scene: {
+      kind: "croisement",
+      vehicules: [
+        { id: "moi", at: "S", d: 1.9, couleur: "joueur", label: "Toi" },
+        { id: "velo", at: "E", d: 1.6, type: "velo" },
+      ],
+    },
+    question:
+      "À une intersection en T sans signalisation, un cycliste vient de ta droite. Qui passe ?",
+    mode: "cible",
+    reponses: [
+      { id: "velo", veh: "velo", label: "Le cycliste" },
+      { id: "moi", veh: "moi", label: "Toi" },
+    ],
+    bonne: "velo",
+    explication:
+      "La priorité à droite vaut aussi dans une intersection en T et pour un vélo. Le cycliste arrive de ta droite : tu le laisses passer.",
+    focus: { veh: "velo" },
+    okAnim: [{ veh: "velo" }, { veh: "moi", delai: 1100 }],
+  },
+  {
+    id: "prio-droite-pluie-camion",
+    theme: "priorite-droite",
+    difficulte: 2,
+    alt: "Croisement sans panneau ni feu. Un camion arrive par ta droite.",
+    scene: {
+      kind: "croisement",
+      vehicules: [
+        { id: "moi", at: "S", d: 2.2, couleur: "joueur", label: "Toi" },
+        { id: "camion", at: "E", d: 2.0, type: "camion" },
+      ],
+    },
+    question:
+      "Sous la pluie, ce camion arrive à ta droite au croisement sans panneau. Qui passe ?",
+    mode: "cible",
+    reponses: [
+      { id: "camion", veh: "camion", label: "Le camion" },
+      { id: "moi", veh: "moi", label: "Toi" },
+    ],
+    bonne: "camion",
+    explication:
+      "La pluie ne change pas la priorité : le camion vient de ta droite, il passe d'abord. Tu ralentis tôt, car la chaussée mouillée allonge ton freinage.",
+    focus: { veh: "camion" },
+    okAnim: [{ veh: "camion" }, { veh: "moi", delai: 1200 }],
+  },
 ];
 
 /**
