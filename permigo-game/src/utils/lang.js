@@ -39,6 +39,16 @@ export function applyLang(lang) {
   const l = isLang(lang) ? lang : "fr";
   try {
     document.documentElement.setAttribute("lang", l);
+    // Le skip-link (index.html) est statique, hors du système de modules :
+    // on le traduit ici, au boot (initLangEarly) ET à chaque bascule.
+    const sl = document.querySelector(".skip-link");
+    if (sl)
+      sl.textContent =
+        l === "en"
+          ? "Skip to main content"
+          : l === "ar"
+            ? "تخطَّ إلى المحتوى الرئيسي"
+            : "Aller au contenu principal";
   } catch {
     /* SSR / indispo */
   }

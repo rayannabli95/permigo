@@ -11,6 +11,14 @@
 // ═══════════════════════════════════════════════════════════════
 
 import { pushIntroBlocker, popIntroBlocker } from "@/utils/intro-overlays.js";
+import { getLang } from "@/utils/lang.js";
+
+// i18n coque (EN/AR), repli FR.
+const CK_I18N = {
+  en: { aria: "Cookie preferences", title: "Cookies & privacy", txt: "We use the strict minimum to sign you in, plus internal audience measurement (no ads, no third-party trackers) to improve the app.", privacy: "Privacy policy", essential: "Essential only", accept: "Accept all" },
+  ar: { aria: "تفضيلات ملفات تعريف الارتباط", title: "ملفات تعريف الارتباط والخصوصية", txt: "نستخدم الحد الأدنى الضروري لتسجيل دخولك، إضافةً إلى قياس داخلي للجمهور (بلا إعلانات ولا متتبّعات خارجية) لتحسين التطبيق.", privacy: "سياسة الخصوصية", essential: "الضروري فقط", accept: "قبول الكل" },
+};
+function ckt(k, fr) { const l = getLang(); return (l !== "fr" && CK_I18N[l]?.[k]) || fr; }
 
 const KEY = "permigo_cookie_consent";
 const COOKIE_NAME = "pg_consent";
@@ -108,16 +116,15 @@ export function mountCookieBanner() {
   const root = document.createElement("div");
   root.id = "ck-banner-root";
   root.innerHTML = `${STYLE}
-    <div class="ck-banner" role="dialog" aria-label="Préférences cookies" aria-live="polite">
-      <div class="ck-ttl">Cookies & confidentialité</div>
+    <div class="ck-banner" role="dialog" aria-label="${ckt("aria", "Préférences cookies")}" aria-live="polite" dir="${getLang() === "ar" ? "rtl" : "ltr"}">
+      <div class="ck-ttl">${ckt("title", "Cookies & confidentialité")}</div>
       <p class="ck-txt">
-        On utilise le strict nécessaire pour te connecter, plus une mesure d'audience
-        interne (sans pub ni tracker tiers) pour améliorer l'app.
-        <a href="#/legal/privacy">Politique de confidentialité</a>
+        ${ckt("txt", "On utilise le strict nécessaire pour te connecter, plus une mesure d\u0027audience interne (sans pub ni tracker tiers) pour améliorer l\u0027app.")}
+        <a href="#/legal/privacy">${ckt("privacy", "Politique de confidentialité")}</a>
       </p>
       <div class="ck-row">
-        <button class="ck-btn ck-btn-refuse" id="ck-essential" type="button">Essentiels uniquement</button>
-        <button class="ck-btn ck-btn-accept" id="ck-all" type="button">Tout accepter</button>
+        <button class="ck-btn ck-btn-refuse" id="ck-essential" type="button">${ckt("essential", "Essentiels uniquement")}</button>
+        <button class="ck-btn ck-btn-accept" id="ck-all" type="button">${ckt("accept", "Tout accepter")}</button>
       </div>
     </div>`;
   document.body.appendChild(root);
