@@ -1,0 +1,353 @@
+[
+  {
+    "original": " Mauvaise réponse PermiGo regarde une petite fiche incorrecte avec surprise, puis cherche à comprendre calmement.png",
+    "slug": "mascot-mauvaise-reponse.webp",
+    "width": 512,
+    "height": 768,
+    "hasAlpha": true,
+    "kb_before": 2198.6,
+    "kb_after": 38.9
+  },
+  {
+    "original": "01 - Démarrage de l’application  PermiGo arrive en courant vers l’utilisateur avec un immense sourire et une main levée pour lui dire bonjour. Cette scène apparaît à l’ouverture de l’application pour accueilir.png",
+    "slug": "mascot-demarrage-application.webp",
+    "width": 512,
+    "height": 768,
+    "hasAlpha": true,
+    "kb_before": 2243.1,
+    "kb_after": 50.8
+  },
+  {
+    "original": "13 - Fiche comprise  PermiGo tient ses fiches, lève le pouce et sourit sous une ampoule lumineuse. À utiliser quand l’élève termine une fiche et confirme qu’il a compris..png",
+    "slug": "mascot-fiche-comprise.webp",
+    "width": 512,
+    "height": 768,
+    "hasAlpha": true,
+    "kb_before": 2261,
+    "kb_after": 47.2
+  },
+  {
+    "original": "Bonne réponse  PermiGo surgit vers l’utilisateur en tendant son poing pour un check de victoire. Il porte une couronne, fait un clin d’œil et affiche un immense sourire, entouré d’une aura lumineuse et d’effets de célébration. .png",
+    "slug": "mascot-bonne-reponse.webp",
+    "width": 512,
+    "height": 768,
+    "hasAlpha": true,
+    "kb_before": 2315.5,
+    "kb_after": 77
+  },
+  {
+    "original": "Coffre ouvert  PermiGo vient d’ouvrir un coffre rempli de gemmes v Cette illustration apparaît lorsqu’un élève ouvre un coffre ou reçoit une récompense importante afin de rendre chaque gain spectaculaire et motivant..png",
+    "slug": "mascot-coffre.webp",
+    "width": 768,
+    "height": 768,
+    "hasAlpha": false,
+    "kb_before": 1507.8,
+    "kb_after": 47.8
+  },
+  {
+    "original": "Compétence débloquée PermiGo  comme s’il venait de franchir une étape importante. Un éclair violet apparaît derrière lui pour symboliser le déblocage d’une nouvelle compétence et l’élan vers la suite du parcours. .png",
+    "slug": "mascot-competence-debloquee.webp",
+    "width": 768,
+    "height": 768,
+    "hasAlpha": false,
+    "kb_before": 1406.7,
+    "kb_after": 39.3
+  },
+  {
+    "original": "Lecture d’une fiche  PermiGo est assis calmement au sol avec de petites lunettes rondes. Il tient une fiche de révision entre ses mains et suit attentivement une ligne avec son doigt.png",
+    "slug": "mascot-lecture-fiche.webp",
+    "width": 768,
+    "height": 768,
+    "hasAlpha": true,
+    "kb_before": 1553.1,
+    "kb_after": 75.6
+  },
+  {
+    "original": "Nouveau monde PermiGo traverse un portail lumineux violet avec un grand sourire, le poing levé et un regard rempli d’enthousiasme. Des particules lumineuses s’échappent du portail pour donner l’impression qu’une nouvelle aventure commence..png",
+    "slug": "mascot-nouveau-monde.webp",
+    "width": 512,
+    "height": 768,
+    "hasAlpha": true,
+    "kb_before": 2449.4,
+    "kb_after": 75
+  },
+  {
+    "original": "Quiz parfait  PermiGo saute de joie en lançant sa casquette dans les airs, le poing levé, avec un immense sourire et un clin d’œil. Des confettis et des étoiles l’entourent pour accentuer la célébration..png",
+    "slug": "mascot-quiz-parfait.webp",
+    "width": 768,
+    "height": 768,
+    "hasAlpha": false,
+    "kb_before": 1361.8,
+    "kb_after": 41.7
+  },
+  {
+    "original": "Quiz réussi  PermiGo soulève fièrement un trophée doré. À utiliser après la réussite d’un quiz..png",
+    "slug": "mascot-quiz-reussi.webp",
+    "width": 512,
+    "height": 768,
+    "hasAlpha": true,
+    "kb_before": 2244.5,
+    "kb_after": 66.8
+  },
+  {
+    "original": "Streak 30 jours  PermiGo est installé sur un immense trône doré, les jambes croisées, avec une grande couronne et un sceptre lumineux. Il affiche un air royal, fier.png",
+    "slug": "mascot-streak-30.webp",
+    "width": 512,
+    "height": 768,
+    "hasAlpha": true,
+    "kb_before": 2442.4,
+    "kb_after": 78.9
+  },
+  {
+    "original": "Streak 7 jours  PermiGo porte une couronne dorée beaucoup trop grande pour lui et brandit une flamme violette avec un air extrêmement fier. Il regarde directement l’utilisateur avec un clin d’œil et un grand sourire.png",
+    "slug": "mascot-streak-7.webp",
+    "width": 512,
+    "height": 768,
+    "hasAlpha": true,
+    "kb_before": 2187.5,
+    "kb_after": 56.9
+  },
+  {
+    "original": "skins/logo mascot qui attend la prochaine validation .png",
+    "slug": "mascot-attente-validation.webp",
+    "width": 400,
+    "height": 600,
+    "hasAlpha": true,
+    "kb_before": 175.4,
+    "kb_after": 42.3
+  },
+  {
+    "original": "skins/mascot-celebrate.png",
+    "slug": "mascot-celebration.webp",
+    "width": 600,
+    "height": 400,
+    "hasAlpha": true,
+    "kb_before": 162.4,
+    "kb_after": 42.8
+  },
+  {
+    "original": "skins/mascot-hello-remastered.png",
+    "slug": "mascot-bonjour-remasterise.webp",
+    "width": 600,
+    "height": 400,
+    "hasAlpha": true,
+    "kb_before": 139.8,
+    "kb_after": 34.9
+  },
+  {
+    "original": "skins/mascot-pointe du doigt.png",
+    "slug": "mascot-pointe-du-doigt.webp",
+    "width": 600,
+    "height": 400,
+    "hasAlpha": true,
+    "kb_before": 141.2,
+    "kb_after": 34.9
+  },
+  {
+    "original": "skins/mascot-reflexion quizz.png",
+    "slug": "mascot-reflexion-quiz.webp",
+    "width": 600,
+    "height": 400,
+    "hasAlpha": true,
+    "kb_before": 147.4,
+    "kb_after": 35.1
+  },
+  {
+    "original": "photo de profil1.png",
+    "slug": "avatar-01.webp",
+    "width": 256,
+    "height": 256,
+    "hasAlpha": false,
+    "kb_before": 1907,
+    "kb_after": 6.4
+  },
+  {
+    "original": "photo de profil2.png",
+    "slug": "avatar-02.webp",
+    "width": 256,
+    "height": 256,
+    "hasAlpha": false,
+    "kb_before": 1863.8,
+    "kb_after": 6.8
+  },
+  {
+    "original": "photo de profil3.png",
+    "slug": "avatar-03.webp",
+    "width": 256,
+    "height": 256,
+    "hasAlpha": false,
+    "kb_before": 1849.6,
+    "kb_after": 6.8
+  },
+  {
+    "original": "photo de profil4.png",
+    "slug": "avatar-04.webp",
+    "width": 256,
+    "height": 256,
+    "hasAlpha": false,
+    "kb_before": 1779.5,
+    "kb_after": 6.6
+  },
+  {
+    "original": "photo de profil5.png",
+    "slug": "avatar-05.webp",
+    "width": 256,
+    "height": 256,
+    "hasAlpha": false,
+    "kb_before": 1940.1,
+    "kb_after": 6.3
+  },
+  {
+    "original": "photo de profil6.png",
+    "slug": "avatar-06.webp",
+    "width": 256,
+    "height": 256,
+    "hasAlpha": false,
+    "kb_before": 1871,
+    "kb_after": 7.2
+  },
+  {
+    "original": "photo de profil7.png",
+    "slug": "avatar-07.webp",
+    "width": 256,
+    "height": 256,
+    "hasAlpha": false,
+    "kb_before": 1786.4,
+    "kb_after": 6.2
+  },
+  {
+    "original": "photo de profil8.PNG",
+    "slug": "avatar-08.webp",
+    "width": 256,
+    "height": 256,
+    "hasAlpha": false,
+    "kb_before": 1863.7,
+    "kb_after": 6.4
+  },
+  {
+    "original": "skins/avatars/car-citadine.png",
+    "slug": "avatar-09.webp",
+    "width": 256,
+    "height": 256,
+    "hasAlpha": false,
+    "kb_before": 1552.9,
+    "kb_after": 9.6
+  },
+  {
+    "original": "skins/avatars/car-sportive.png",
+    "slug": "avatar-10.webp",
+    "width": 256,
+    "height": 256,
+    "hasAlpha": false,
+    "kb_before": 1559.2,
+    "kb_after": 8.9
+  },
+  {
+    "original": "skins/avatars/car-supercar.png",
+    "slug": "avatar-11.webp",
+    "width": 256,
+    "height": 256,
+    "hasAlpha": false,
+    "kb_before": 1712.1,
+    "kb_after": 7.4
+  },
+  {
+    "original": "skins/avatars/car-suv.png",
+    "slug": "avatar-12.webp",
+    "width": 256,
+    "height": 256,
+    "hasAlpha": false,
+    "kb_before": 1612,
+    "kb_after": 8.8
+  },
+  {
+    "original": "skins/avatars/legend.png",
+    "slug": "avatar-13.webp",
+    "width": 171,
+    "height": 256,
+    "hasAlpha": true,
+    "kb_before": 173.7,
+    "kb_after": 11.4
+  },
+  {
+    "original": "skins/avatars/mage.png",
+    "slug": "avatar-14.webp",
+    "width": 171,
+    "height": 256,
+    "hasAlpha": true,
+    "kb_before": 207.1,
+    "kb_after": 13.9
+  },
+  {
+    "original": "skins/avatars/pilot.png",
+    "slug": "avatar-15.webp",
+    "width": 171,
+    "height": 256,
+    "hasAlpha": true,
+    "kb_before": 175.7,
+    "kb_after": 11.4
+  },
+  {
+    "original": "skins/avatars/skin1.png",
+    "slug": "avatar-16.webp",
+    "width": 256,
+    "height": 256,
+    "hasAlpha": false,
+    "kb_before": 282.4,
+    "kb_after": 5
+  },
+  {
+    "original": "skins/avatars/skin2.png",
+    "slug": "avatar-17.webp",
+    "width": 256,
+    "height": 256,
+    "hasAlpha": false,
+    "kb_before": 304.1,
+    "kb_after": 5.1
+  },
+  {
+    "original": "skins/avatars/skin3.png",
+    "slug": "avatar-18.webp",
+    "width": 256,
+    "height": 256,
+    "hasAlpha": false,
+    "kb_before": 280.7,
+    "kb_after": 5.2
+  },
+  {
+    "original": "skins/avatars/skin4.png",
+    "slug": "avatar-19.webp",
+    "width": 205,
+    "height": 256,
+    "hasAlpha": false,
+    "kb_before": 240.3,
+    "kb_after": 4.2
+  },
+  {
+    "original": "skins/avatars/skin5.png",
+    "slug": "avatar-20.webp",
+    "width": 256,
+    "height": 171,
+    "hasAlpha": false,
+    "kb_before": 168.2,
+    "kb_after": 3
+  },
+  {
+    "original": "skins/avatars/skin6.png",
+    "slug": "avatar-21.webp",
+    "width": 256,
+    "height": 171,
+    "hasAlpha": false,
+    "kb_before": 177.1,
+    "kb_after": 3.3
+  },
+  {
+    "original": "skins/avatars/warrior.png",
+    "slug": "avatar-22.webp",
+    "width": 256,
+    "height": 256,
+    "hasAlpha": true,
+    "kb_before": 268.5,
+    "kb_after": 16.2
+  }
+]
