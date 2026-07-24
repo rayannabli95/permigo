@@ -38,7 +38,6 @@ export async function login(email, password, opts = {}) {
   if (!sb) return { ok: false, error: "Supabase non configuré" };
 
   const cleanEmail = email.trim().toLowerCase();
-  console.log("[auth] login() appelé pour", cleanEmail);
 
   const payload = { email: cleanEmail, password };
   if (opts.captchaToken) payload.options = { captchaToken: opts.captchaToken };
