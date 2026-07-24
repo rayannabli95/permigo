@@ -10,7 +10,6 @@ import { getCurUser } from "@/auth/cur-user.js";
 import { esc, escAttr } from "@/utils/escape.js";
 import { toast } from "@/components/common/toast.js";
 import { track } from "@/services/analytics.js";
-import { navigate } from "@/router.js";
 import { icon } from "@/utils/icons.js";
 import { haptic } from "@/utils/haptic.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";

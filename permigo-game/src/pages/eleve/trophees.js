@@ -13,7 +13,7 @@ import { navigate } from "@/router.js";
 import { haptic } from "@/utils/haptic.js";
 import { toast } from "@/components/common/toast.js";
 import { openBottomSheet } from "@/components/common/bottom-sheet.js";
-import { CATALOG, RARITY_META, shortProgress } from "@/data/achievements.js";
+import { CATALOG, shortProgress } from "@/data/achievements.js";
 import { recompensesTabs } from "@/components/eleve/recompenses-tabs.js";
 import { getLang } from "@/utils/lang.js";
 import {

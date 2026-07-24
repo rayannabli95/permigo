@@ -28,7 +28,6 @@ import { volantImg, volantLabel } from "@/utils/volant.js";
 import { haptic } from "@/utils/haptic.js";
 import {
   isPushEnabled,
-  requestPushPermission,
   optOutPush,
   optInPush,
 } from "@/services/web-push.js";

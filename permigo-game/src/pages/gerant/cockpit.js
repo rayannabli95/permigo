@@ -8,7 +8,6 @@ import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
 import { esc, escAttr } from "@/utils/escape.js";
-import { toast } from "@/components/common/toast.js";
 import { track } from "@/services/analytics.js";
 import { icon } from "@/utils/icons.js";
 import { navigate } from "@/router.js";
