@@ -1,25 +1,29 @@
-import { CalculateMetadataFunction, Composition } from "remotion";
-
-type Props = {};
-
-const calculateMetadata: CalculateMetadataFunction<Props> = () => {
-  return {};
-};
+import { Composition } from "remotion";
+import { PermiGoTikTok, TOTAL_FRAMES } from "./PermiGoTikTok";
+import { PermiGoPro, PRO_TOTAL_FRAMES } from "./PermiGoPro";
+import { TenCompositions } from "./PermiGo10s";
+import { VIDEO } from "./theme";
 
 export const MyComposition = () => {
   return (
-    <Composition
-      id="MyComp"
-      component={MyComponent}
-      durationInFrames={60}
-      fps={30}
-      width={1280}
-      height={720}
-      calculateMetadata={calculateMetadata}
-    />
+    <>
+      <Composition
+        id="PermiGoTikTok"
+        component={PermiGoTikTok}
+        durationInFrames={TOTAL_FRAMES}
+        fps={VIDEO.fps}
+        width={VIDEO.width}
+        height={VIDEO.height}
+      />
+      <Composition
+        id="PermiGoPro"
+        component={PermiGoPro}
+        durationInFrames={PRO_TOTAL_FRAMES}
+        fps={VIDEO.fps}
+        width={VIDEO.width}
+        height={VIDEO.height}
+      />
+      <TenCompositions />
+    </>
   );
-};
-
-export const MyComponent: React.FC<Props> = () => {
-  return null;
 };
