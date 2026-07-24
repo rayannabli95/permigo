@@ -124,18 +124,13 @@ const TABS = {
     // Ligue en une seule page statut/fierté. `parcours` = ancienne route hub
     // (parcours-pro.js, retiré) qui atterrit maintenant sur mon-blason.js —
     // gardée en match pour que l'onglet s'allume aussi sur les vieux liens.
-    // `parcours-complet`/`trophees-moniteur`/`ligue-semaine` restent de VRAIES
-    // sous-pages satellites du même onglet (pas fusionnées).
+    // `parcours-complet`/`trophees-moniteur` restent de VRAIES sous-pages
+    // satellites du même onglet (pas fusionnées).
     {
       id: "mon-blason",
       label: "Mon blason",
       ico: "trophy",
-      match: [
-        "parcours",
-        "parcours-complet",
-        "trophees-moniteur",
-        "ligue-semaine",
-      ],
+      match: ["parcours", "parcours-complet", "trophees-moniteur"],
     },
     { id: "insights", label: "Stats", ico: "chart" },
   ],
