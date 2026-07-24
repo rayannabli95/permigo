@@ -26,6 +26,63 @@ import { ASSETS } from "@/utils/assets.js";
 import { haptic } from "@/utils/haptic.js";
 import { playReward } from "@/utils/sound.js";
 import { track } from "@/services/analytics.js";
+import { getLang } from "@/utils/lang.js";
+
+// ── i18n des 4 célébrations pré-réglées + défauts (EN/AR). Dict LOCAL,
+// repli FR. Résolu au moment de l'AFFICHAGE (showCelebrate), jamais au
+// chargement du module (la langue peut changer en cours de session). Un
+// appelant qui passe ses propres textes est affiché tel quel.
+const CS_I18N = {
+  en: {
+    close: "Close",
+    default_title: "Well done!",
+    default_cta: "Continue",
+    firstValidation_title: "First skill!",
+    firstValidation_subtitle:
+      "Your adventure has officially begun. The road is long but beautiful.",
+    firstValidation_cta: "Continue the journey",
+    tenComps_title: "A third of the way",
+    tenComps_subtitle:
+      "10 skills validated out of 31. You're getting ahead — keep the pace.",
+    tenComps_cta: "Onwards",
+    readyExam_title: "Ready for the exam",
+    readyExam_subtitle:
+      "28 skills done. You can take your exam whenever you want.",
+    readyExam_cta: "See my card",
+    permisEarned_title: "Virtual licence earned",
+    permisEarned_subtitle:
+      "All 31 skills validated. Well done — the road is yours.",
+    permisEarned_cta: "Share my victory",
+  },
+  ar: {
+    close: "إغلاق",
+    default_title: "أحسنت!",
+    default_cta: "متابعة",
+    firstValidation_title: "أول مهارة!",
+    firstValidation_subtitle: "بدأت مغامرتك رسميًا. الطريق طويل لكنه جميل.",
+    firstValidation_cta: "واصل المسار",
+    tenComps_title: "ثلث الطريق",
+    tenComps_subtitle:
+      "10 مهارات مُصادَق عليها من 31. أنت تتقدّم — حافظ على الوتيرة.",
+    tenComps_cta: "إلى الأمام",
+    readyExam_title: "جاهز للامتحان",
+    readyExam_subtitle: "28 مهارة مكتملة. يمكنك اجتياز امتحانك متى شئت.",
+    readyExam_cta: "اعرض بطاقتي",
+    permisEarned_title: "حصلت على الرخصة الافتراضية",
+    permisEarned_subtitle:
+      "المهارات الـ31 كلها مُصادَق عليها. أحسنت — الطريق لك.",
+    permisEarned_cta: "شارك انتصاري",
+  },
+};
+function csTR(key, fr) {
+  const l = getLang();
+  return (l !== "fr" && CS_I18N[l]?.[key]) || fr;
+}
+// Texte affiché : RTL par <span dir="rtl"> en arabe (l'app reste LTR).
+function csD(txt) {
+  const out = esc(txt);
+  return getLang() === "ar" ? `<span dir="rtl">${out}</span>` : out;
+}
 
 const STYLE_ID = "celebrate-screen-style";
 const STYLE = `
@@ -193,6 +250,7 @@ const STYLE = `
  */
 export const CELEBRATE_PRESETS = {
   firstValidation: {
+    presetKey: "firstValidation",
     illustration: "/skins/trophy-first-validation.webp",
     fallbackEmoji: "🎉",
     title: "Première compétence !",
@@ -202,6 +260,7 @@ export const CELEBRATE_PRESETS = {
     trackKey: "celebrate.first_validation",
   },
   tenComps: {
+    presetKey: "tenComps",
     illustration: "/skins/trophy-10-comps.webp",
     fallbackEmoji: "🏔️",
     title: "Tiers du chemin",
@@ -211,6 +270,7 @@ export const CELEBRATE_PRESETS = {
     trackKey: "celebrate.ten_comps",
   },
   readyExam: {
+    presetKey: "readyExam",
     illustration: "/skins/badge-3d-ultimate.webp",
     fallbackEmoji: "🎯",
     title: "Prêt pour l’examen",
@@ -220,6 +280,7 @@ export const CELEBRATE_PRESETS = {
     trackKey: "celebrate.ready_exam",
   },
   permisEarned: {
+    presetKey: "permisEarned",
     illustration: "/skins/trophy-permis-virtuel.webp",
     fallbackEmoji: "👑",
     title: "Permis virtuel obtenu",
@@ -293,13 +354,24 @@ export function showCelebrate(opts = {}) {
   const {
     illustration,
     fallbackEmoji = "🎉",
-    title = "Bravo !",
-    subtitle = "",
-    ctaLabel = "Continuer",
     onCta,
     onClose,
     trackKey,
+    presetKey,
   } = opts;
+
+  // i18n : un pré-réglage connu (presetKey) est traduit ici, au moment de
+  // l'affichage ; les défauts aussi. Un texte custom passé par l'appelant
+  // reste tel quel (l'écran appelant gère sa propre langue).
+  const title = presetKey
+    ? csTR(`${presetKey}_title`, opts.title ?? "Bravo !")
+    : (opts.title ?? csTR("default_title", "Bravo !"));
+  const subtitle = presetKey
+    ? csTR(`${presetKey}_subtitle`, opts.subtitle ?? "")
+    : (opts.subtitle ?? "");
+  const ctaLabel = presetKey
+    ? csTR(`${presetKey}_cta`, opts.ctaLabel ?? "Continuer")
+    : (opts.ctaLabel ?? csTR("default_cta", "Continuer"));
 
   if (trackKey) {
     try {
@@ -322,12 +394,12 @@ export function showCelebrate(opts = {}) {
       : `<div class="cs-fallback-emoji">${esc(fallbackEmoji)}</div>`;
 
     overlay.innerHTML = `
-      <button class="cs-close" type="button" aria-label="Fermer">×</button>
+      <button class="cs-close" type="button" aria-label="${escAttr(csTR("close", "Fermer"))}">×</button>
       <div class="cs-card">
         ${illoHtml}
-        <h1 class="cs-title" id="cs-title-el">${esc(title)}</h1>
-        ${subtitle ? `<p class="cs-subtitle">${esc(subtitle)}</p>` : ""}
-        <button class="cs-cta" type="button">${esc(ctaLabel)}</button>
+        <h1 class="cs-title" id="cs-title-el">${csD(title)}</h1>
+        ${subtitle ? `<p class="cs-subtitle">${csD(subtitle)}</p>` : ""}
+        <button class="cs-cta" type="button">${csD(ctaLabel)}</button>
       </div>
     `;
 

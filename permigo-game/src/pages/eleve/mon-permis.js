@@ -48,8 +48,196 @@ import { haptic } from "@/utils/haptic.js";
 import { icon } from "@/utils/icons.js";
 import { medallion } from "@/utils/medallions.js";
 import { REMC_TOTAL } from "@/data/remc.js";
+import { getLang } from "@/utils/lang.js";
 
 const CHEVRON = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>`;
+
+// ── i18n de la COQUE « Mon permis » (EN/AR) — élèves non-francophones.
+// Dict LOCAL au composant (règle coque validée : pas de fichier partagé →
+// zéro collision multi-session), repli FR intégral. Le CONTENU pédagogique
+// (titres de chapitres REMC, note du moniteur) reste en français — il est
+// traduit à SA source quand un pattern existe. RTL : uniquement par <span
+// dir="rtl"> autour du texte arabe affiché (l'app reste LTR), avec îlots
+// dir="ltr" pour les nombres/« n / m » (ordre visuel stable).
+const MP_I18N = {
+  en: {
+    title: "My licence",
+    chip_followed: "Coached by {name}",
+    chip_sub: "· validated in lessons",
+    hero_kick: "The road to the real licence",
+    hero_of: "out of {t}",
+    hero_lbl: "skills validated",
+    hero_sub_solo: "On your own, at your pace — this is your real progress.",
+    hero_sub_monit:
+      "By your instructor, in real lessons — this is your real progress.",
+    hero_aria: "{n} skills out of {t}",
+    hero_chap: "Current chapter:",
+    hero_all_done: "All chapters validated",
+    s1_title: "My skills",
+    s1_sub: "the 4 chapters of the Permis B (the French driving licence)",
+    s1_err: "“My skills” is unavailable. Check your connection and try again.",
+    retry: "Try again",
+    lbl_done: "done",
+    lbl_locked: "upcoming",
+    lbl_progress: "in progress",
+    h_driving: "{h} h of driving",
+    lesson_one: "lesson",
+    lesson_many: "lessons",
+    with_name: "with {name}",
+    renvoi_t: "Want to train? Head to Practice.",
+    renvoi_s:
+      "Here you see your validated progress — training happens in Practice.",
+    s2_title: "My lessons",
+    s2_sub: "your instructor's lesson reports",
+    cr_lesson_of: "Lesson of {date}",
+    cr_new: "New",
+    cr_valid_one: "{n} validated",
+    cr_valid_many: "{n} validated",
+    cr_rework: "{n} to work on",
+    cr_empty:
+      "Your instructor hasn't sent you a lesson report (compte-rendu) yet.",
+    cr_all: "All my lessons",
+    cr_count_one: "{n} report",
+    cr_count_many: "{n} reports",
+    cr_none: "No report yet",
+    s3_title: "The exam",
+    s3_sub: "get ready for the big day here",
+    s3_err: "“The exam” is unavailable. Check your connection and try again.",
+    exam_nodate: "Add your exam date to start the countdown.",
+    exam_choose: "Pick my date",
+    exam_save: "Save",
+    exam_passed_b: "Done",
+    exam_passed_t: "Your exam is behind you",
+    exam_passed_s: "Good luck with the results.",
+    exam_change: "Change the date",
+    exam_soon: "Your exam is coming up",
+    exam_edit: "Edit the date",
+    day_one: "day",
+    day_many: "days",
+    prep_h: "Your preparation",
+    centre_t: "Your exam centre",
+    centre_s: "Difficulty, route traps, on-site tips",
+    verdict_high: "Ready for the exam. Your {t} core skills are validated.",
+    verdict_mid: "Almost ready. {n} core skill{s} left to validate.",
+    verdict_low:
+      "In preparation. Validate your skills lesson after lesson, revision after revision.",
+    crit_parcours: "Progress above 50%",
+    crit_parcours_sub: "{n} skills validated out of 31",
+    crit_streak: "Active streak",
+    crit_streak_days: "{n} day{s} in a row",
+    crit_streak_none: "Come back and revise today",
+    crit_quiz: "Quiz score above 70%",
+    crit_quiz_avg: "Average: {n}%",
+    crit_quiz_none: "No quiz recorded",
+    crit_rev: "Revision done",
+    crit_rev_yes: "Revision sheets consulted",
+    crit_rev_no: "Check your revision sheets",
+    badge_day: "{n}d",
+  },
+  ar: {
+    title: "رخصتي",
+    chip_followed: "يتابعك {name}",
+    chip_sub: "· يُصادَق عليها في الدروس",
+    hero_kick: "الطريق إلى الرخصة الحقيقية",
+    hero_of: "من {t}",
+    hero_lbl: "مهارة مُصادَق عليها",
+    hero_sub_solo: "بشكل مستقل وعلى وتيرتك — هذا تقدّمك الحقيقي.",
+    hero_sub_monit: "من مدرّبك أثناء الدروس الحقيقية — هذا تقدّمك الحقيقي.",
+    hero_aria: "{n} مهارة من {t}",
+    hero_chap: "الفصل الحالي:",
+    hero_all_done: "اكتملت جميع الفصول",
+    s1_title: "مهاراتي",
+    s1_sub: "الفصول الأربعة لرخصة القيادة الفرنسية (Permis B)",
+    s1_err: "تعذّر تحميل «مهاراتي». تحقّق من اتصالك ثم أعد المحاولة.",
+    retry: "أعد المحاولة",
+    lbl_done: "مكتمل",
+    lbl_locked: "لاحقًا",
+    lbl_progress: "جارٍ",
+    h_driving: "{h} ساعة قيادة",
+    lesson_one: "درس",
+    lesson_many: "دروس",
+    with_name: "مع {name}",
+    renvoi_t: "تريد التدرّب؟ توجّه إلى المراجعة.",
+    renvoi_s: "هنا تقدّمك المُصادَق عليه — التدريب يكون في قسم المراجعة.",
+    s2_title: "دروسي",
+    s2_sub: "تقارير مدرّبك عن الدروس",
+    cr_lesson_of: "درس يوم {date}",
+    cr_new: "جديد",
+    cr_valid_one: "{n} مُصادَق عليها",
+    cr_valid_many: "{n} مُصادَق عليها",
+    cr_rework: "{n} تحتاج مراجعة",
+    cr_empty: "لم يرسل لك مدرّبك بعد أيّ تقرير درس (compte-rendu).",
+    cr_all: "كل دروسي",
+    cr_count_one: "تقرير واحد",
+    cr_count_many: "{n} تقارير",
+    cr_none: "لا تقارير حتى الآن",
+    s3_title: "الامتحان",
+    s3_sub: "الاستعداد ليوم الامتحان يبدأ هنا",
+    s3_err: "تعذّر تحميل «الامتحان». تحقّق من اتصالك ثم أعد المحاولة.",
+    exam_nodate: "أضف تاريخ امتحانك لبدء العدّ التنازلي.",
+    exam_choose: "اختيار التاريخ",
+    exam_save: "حفظ",
+    exam_passed_b: "انتهى",
+    exam_passed_t: "امتحانك أصبح خلفك",
+    exam_passed_s: "حظًا موفقًا في النتائج.",
+    exam_change: "تغيير التاريخ",
+    exam_soon: "امتحانك يقترب",
+    exam_edit: "تعديل التاريخ",
+    day_one: "يوم",
+    day_many: "أيام",
+    prep_h: "استعدادك",
+    centre_t: "مركز امتحانك",
+    centre_s: "الصعوبة، مطبّات المسار، نصائح في الموقع",
+    verdict_high: "جاهز للامتحان. مهاراتك الأساسية الـ{t} مُصادَق عليها.",
+    verdict_mid: "قريبًا تكون جاهزًا. بقيت {n} مهارة أساسية للمصادقة.",
+    verdict_low: "في طور الاستعداد. صادق على مهاراتك درسًا بعد درس.",
+    crit_parcours: "تقدّم فوق 50%",
+    crit_parcours_sub: "{n} مهارة مُصادَق عليها من 31",
+    crit_streak: "سلسلة نشطة",
+    crit_streak_days: "{n} يوم على التوالي",
+    crit_streak_none: "عد وراجع اليوم",
+    crit_quiz: "نتيجة الاختبارات فوق 70%",
+    crit_quiz_avg: "المعدل: {n}%",
+    crit_quiz_none: "لا اختبار مسجّل",
+    crit_rev: "المراجعة منجزة",
+    crit_rev_yes: "بطاقات المراجعة مُطالَعة",
+    crit_rev_no: "طالع بطاقات المراجعة",
+    badge_day: "{n}ي",
+  },
+};
+
+// Traduit-ou-français (brut, pour interpolation / attributs SANS esc)
+function mpTR(key, fr, vars) {
+  const l = getLang();
+  let s = (l !== "fr" && MP_I18N[l]?.[key]) || fr;
+  if (vars)
+    for (const [k, v] of Object.entries(vars))
+      s = s.split(`{${k}}`).join(String(v));
+  return s;
+}
+// Version échappée — sûre en texte ET en attribut
+function mpT(key, fr, vars) {
+  return esc(mpTR(key, fr, vars));
+}
+// Texte AFFICHÉ : en arabe, enveloppe <span dir="rtl"> + îlots LTR pour les
+// nombres (« 3 / 8 », « 80% ») afin que la ponctuation/les chiffres gardent
+// un ordre visuel correct. Jamais utilisé dans un attribut.
+function mpRtl(escaped) {
+  const s = escaped.replace(
+    /\d+(?:\s*\/\s*\d+)?(?:\s*%)?/g,
+    (m) => `<span dir="ltr">${m}</span>`,
+  );
+  return `<span dir="rtl">${s}</span>`;
+}
+function mpD(key, fr, vars) {
+  const l = getLang();
+  const out = esc(mpTR(key, fr, vars));
+  return l === "ar" && MP_I18N.ar?.[key] ? mpRtl(out) : out;
+}
+// Chaîne DÉJÀ échappée, assemblée dynamiquement : RTL seulement en arabe.
+function mpDyn(escaped) {
+  return getLang() === "ar" ? mpRtl(escaped) : escaped;
+}
 
 function ordinalOrPlural(n, singular, plural) {
   return n > 1 ? plural : singular;
@@ -299,7 +487,7 @@ const STYLE = `<style>
 // ─── Skeleton ─────────────────────────────────────────────────
 function skeleton() {
   return `${STYLE}<div class="mp">
-    <h1 class="mp-title" tabindex="-1">Mon permis</h1>
+    <h1 class="mp-title" tabindex="-1">${mpD("title", "Mon permis")}</h1>
     <div class="mp-skel" style="height:170px;margin-bottom:20px"></div>
     <div class="mp-skel" style="height:220px;margin-bottom:20px"></div>
     <div class="mp-skel" style="height:140px;margin-bottom:20px"></div>
@@ -317,7 +505,8 @@ function fmtDateFR(iso) {
   if (!iso) return "";
   const [y, m, d] = String(iso).slice(0, 10).split("-").map(Number);
   const dt = y && m && d ? new Date(y, m - 1, d) : new Date(iso);
-  return dt.toLocaleDateString("fr-FR", {
+  const locale = { fr: "fr-FR", en: "en-GB", ar: "ar" }[getLang()] || "fr-FR";
+  return dt.toLocaleDateString(locale, {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -339,27 +528,29 @@ function renderChip(moniteurPrenom) {
   const initial = (moniteurPrenom[0] || "?").toUpperCase();
   return `<div class="mp-monit">
     <span class="mp-mavatar" aria-hidden="true">${esc(initial)}</span>
-    <b>Suivi par ${esc(moniteurPrenom)}</b><i>· validé en leçon</i>
+    <b>${mpD("chip_followed", `Suivi par ${moniteurPrenom}`, { name: moniteurPrenom })}</b><i>${mpD("chip_sub", "· validé en leçon")}</i>
   </div>`;
 }
 
 // ─── Hero — permis virtuel ─────────────────────────────────────
 function renderHero({ totalAcquis, currentTitre, allDone, solo }) {
   const pct = REMC_TOTAL > 0 ? Math.round((totalAcquis / REMC_TOTAL) * 100) : 0;
-  const chapLabel = allDone ? "Tous les chapitres validés" : currentTitre || "";
+  const chapLabel = allDone
+    ? mpTR("hero_all_done", "Tous les chapitres validés")
+    : currentTitre || "";
   return `<section class="mp-hero">
-    <span class="mp-hero-k">La route vers le vrai permis</span>
+    <span class="mp-hero-k">${mpD("hero_kick", "La route vers le vrai permis")}</span>
     <div class="mp-hero-row">
       <div class="mp-hero-txt">
-        <div class="mp-hero-t">${totalAcquis} <small>sur ${REMC_TOTAL}</small></div>
-        <div class="mp-hero-lbl">compétences validées</div>
-        <div class="mp-hero-s">${solo ? "En autonomie, à ton rythme — c'est ta vraie progression." : "Par ton moniteur, en leçon — c'est ta vraie progression."}</div>
+        <div class="mp-hero-t">${totalAcquis} <small>${mpD("hero_of", `sur ${REMC_TOTAL}`, { t: REMC_TOTAL })}</small></div>
+        <div class="mp-hero-lbl">${mpD("hero_lbl", "compétences validées")}</div>
+        <div class="mp-hero-s">${solo ? mpD("hero_sub_solo", "En autonomie, à ton rythme — c'est ta vraie progression.") : mpD("hero_sub_monit", "Par ton moniteur, en leçon — c'est ta vraie progression.")}</div>
       </div>
       <span class="mp-hero-med" aria-hidden="true">${medallion("trophee", "gold", { size: 68 })}</span>
     </div>
-    <div class="mp-hero-track" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100" aria-label="${totalAcquis} compétences sur ${REMC_TOTAL}"><i style="width:${pct}%"></i></div>
+    <div class="mp-hero-track" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100" aria-label="${mpT("hero_aria", `${totalAcquis} compétences sur ${REMC_TOTAL}`, { n: totalAcquis, t: REMC_TOTAL })}"><i style="width:${pct}%"></i></div>
     <div class="mp-hero-foot">
-      <span>Chapitre en cours : <b>${esc(chapLabel)}</b></span>
+      <span>${mpD("hero_chap", "Chapitre en cours :")} <b>${esc(chapLabel)}</b></span>
       <span>${pct}&nbsp;%</span>
     </div>
   </section>`;
@@ -376,10 +567,10 @@ function renderStep1({
   if (step1Failed) {
     return `<section class="mp-step" id="mp-step-comps">
       <span class="mp-step-num" aria-hidden="true">1</span>
-      <div class="mp-step-h"><h2 class="mp-step-t">Mes compétences</h2></div>
+      <div class="mp-step-h"><h2 class="mp-step-t">${mpD("s1_title", "Mes compétences")}</h2></div>
       <div class="mp-err">
-        <p>« Mes compétences » indisponible. Vérifie ta connexion, puis réessaie.</p>
-        <button id="mp-retry-1" type="button">Réessayer</button>
+        <p>${mpD("s1_err", "« Mes compétences » indisponible. Vérifie ta connexion, puis réessaie.")}</p>
+        <button id="mp-retry-1" type="button">${mpD("retry", "Réessayer")}</button>
       </div>
     </section>`;
   }
@@ -395,42 +586,45 @@ function renderStep1({
       const pct = ws.total ? Math.round((ws.done / ws.total) * 100) : 0;
       const lbl =
         ws.status === "complete"
-          ? "acquis"
+          ? mpTR("lbl_done", "acquis")
           : ws.status === "locked"
-            ? "à venir"
-            : "en cours";
+            ? mpTR("lbl_locked", "à venir")
+            : mpTR("lbl_progress", "en cours");
       const titre = ws.world?.titre || "";
-      return `<button class="mp-comp ${cls}" type="button" data-chap="${ws.idx}" aria-label="${escAttr(titre)} — ${ws.done} sur ${ws.total} ${lbl}">
+      return `<button class="mp-comp ${cls}" type="button" data-chap="${ws.idx}" aria-label="${escAttr(titre)} — ${ws.done} sur ${ws.total} ${escAttr(lbl)}">
         ${chapMedallion(ws.status)}
         <div class="mp-comp-b">
           <div class="mp-comp-t">${esc(titre)}</div>
           <div class="mp-comp-bar" aria-hidden="true"><i style="width:${pct}%"></i></div>
         </div>
-        <div class="mp-comp-n"><b>${ws.done}/${ws.total}</b><span>${lbl}</span></div>
+        <div class="mp-comp-n"><b>${ws.done}/${ws.total}</b><span>${esc(lbl)}</span></div>
       </button>`;
     })
     .join("");
 
+  const lessonWord =
+    nbLecons > 1 ? mpTR("lesson_many", "leçons") : mpTR("lesson_one", "leçon");
+  const hstatTxt = `${nbLecons} ${lessonWord}${moniteurPrenom ? ` ${mpTR("with_name", `avec ${moniteurPrenom}`, { name: moniteurPrenom })}` : ""}`;
   const hstatHtml =
     nbLecons > 0
       ? `<div class="mp-hstat">
           ${medallion("horloge", "violet", { size: 30 })}
-          <p><b>${esc(fmtHeures(totalMin))} h de conduite</b> · ${nbLecons} leçon${nbLecons > 1 ? "s" : ""}${moniteurPrenom ? ` avec ${esc(moniteurPrenom)}` : ""}</p>
+          <p><b>${getLang() === "ar" ? mpRtl(esc(mpTR("h_driving", `${fmtHeures(totalMin)} h de conduite`, { h: fmtHeures(totalMin) }))) : esc(mpTR("h_driving", `${fmtHeures(totalMin)} h de conduite`, { h: fmtHeures(totalMin) }))}</b> · ${getLang() === "ar" ? mpRtl(esc(hstatTxt)) : esc(hstatTxt)}</p>
         </div>`
       : "";
 
   return `<section class="mp-step" id="mp-step-comps">
     <span class="mp-step-num" aria-hidden="true">1</span>
     <div class="mp-step-h">
-      <h2 class="mp-step-t">Mes compétences</h2>
-      <span class="mp-step-s">les 4 chapitres du permis B</span>
+      <h2 class="mp-step-t">${mpD("s1_title", "Mes compétences")}</h2>
+      <span class="mp-step-s">${mpD("s1_sub", "les 4 chapitres du permis B")}</span>
     </div>
     <div class="mp-comps">${compsHtml}</div>
     ${hstatHtml}
     <button class="mp-renvoi" id="mp-btn-reviser" type="button">
       ${medallion("eclair", "gold", { size: 28 })}
-      <p>Envie de t'entraîner ? Direction Réviser.
-        <i>Ici, c'est ta progression validée — l'entraînement se passe dans Réviser.</i></p>
+      <p>${mpD("renvoi_t", "Envie de t'entraîner ? Direction Réviser.")}
+        <i>${mpD("renvoi_s", "Ici, c'est ta progression validée — l'entraînement se passe dans Réviser.")}</i></p>
       ${CHEVRON}
     </button>
   </section>`;
@@ -445,42 +639,46 @@ function renderStep2({ lastCR, crCount }) {
     const chips = [];
     if (acquisN > 0)
       chips.push(
-        `<span class="mp-cr-chip ok">${medallion("check", "green", { size: 15 })}${acquisN} validée${acquisN > 1 ? "s" : ""}</span>`,
+        `<span class="mp-cr-chip ok">${medallion("check", "green", { size: 15 })}${mpD(acquisN > 1 ? "cr_valid_many" : "cr_valid_one", `${acquisN} validée${acquisN > 1 ? "s" : ""}`, { n: acquisN })}</span>`,
       );
     if (retrN > 0)
       chips.push(
-        `<span class="mp-cr-chip warn">${medallion("cible", "orange", { size: 15 })}${retrN} à retravailler</span>`,
+        `<span class="mp-cr-chip warn">${medallion("cible", "orange", { size: 15 })}${mpD("cr_rework", `${retrN} à retravailler`, { n: retrN })}</span>`,
       );
     const noteHtml = lastCR.note
       ? `<div class="mp-cr-note">« ${esc(lastCR.note)} »</div>`
       : "";
     crHtml = `<button class="mp-cr" id="mp-cr-open" type="button" data-id="${escAttr(lastCR.id)}">
       <div class="mp-cr-top">
-        <span class="mp-cr-date">Leçon du ${esc(fmtDateFR(lastCR.session_date || lastCR.created_at))}</span>
-        ${!lastCR.read_at ? `<span class="mp-cr-new">Nouveau</span>` : ""}
+        <span class="mp-cr-date">${mpD("cr_lesson_of", `Leçon du ${fmtDateFR(lastCR.session_date || lastCR.created_at)}`, { date: fmtDateFR(lastCR.session_date || lastCR.created_at) })}</span>
+        ${!lastCR.read_at ? `<span class="mp-cr-new">${mpD("cr_new", "Nouveau")}</span>` : ""}
       </div>
       ${chips.length ? `<div class="mp-cr-chips">${chips.join("")}</div>` : ""}
       ${noteHtml}
     </button>`;
   } else {
-    crHtml = `<div class="mp-cr-empty"><p>Ton moniteur ne t'a pas encore envoyé de compte-rendu de leçon.</p></div>`;
+    crHtml = `<div class="mp-cr-empty"><p>${mpD("cr_empty", "Ton moniteur ne t'a pas encore envoyé de compte-rendu de leçon.")}</p></div>`;
   }
 
   const totalTxt =
     crCount > 0
-      ? `${crCount} compte${ordinalOrPlural(crCount, "", "s")}-rendu${ordinalOrPlural(crCount, "", "s")}`
-      : "Aucun compte-rendu pour l'instant";
+      ? mpTR(
+          crCount > 1 ? "cr_count_many" : "cr_count_one",
+          `${crCount} compte${ordinalOrPlural(crCount, "", "s")}-rendu${ordinalOrPlural(crCount, "", "s")}`,
+          { n: crCount },
+        )
+      : mpTR("cr_none", "Aucun compte-rendu pour l'instant");
 
   return `<section class="mp-step" id="mp-step-lecons">
     <span class="mp-step-num" aria-hidden="true">2</span>
     <div class="mp-step-h">
-      <h2 class="mp-step-t">Mes leçons</h2>
-      <span class="mp-step-s">les comptes-rendus de ton moniteur</span>
+      <h2 class="mp-step-t">${mpD("s2_title", "Mes leçons")}</h2>
+      <span class="mp-step-s">${mpD("s2_sub", "les comptes-rendus de ton moniteur")}</span>
     </div>
     ${crHtml}
     <button class="mp-linkrow" id="mp-btn-toutes-lecons" type="button">
       ${medallion("livret", "violet", { size: 28 })}
-      <p>Toutes mes leçons <i>${esc(totalTxt)}</i></p>
+      <p>${mpD("cr_all", "Toutes mes leçons")} <i>${mpDyn(esc(totalTxt))}</i></p>
       ${CHEVRON}
     </button>
   </section>`;
@@ -496,38 +694,40 @@ const READINESS_ICON = {
 function renderExamCountdown(examDate, examMod) {
   if (!examDate) {
     return `<div class="mp-exam-nodate">
-      <p>Ajoute ta date d'examen pour lancer le compte à rebours.</p>
-      <button class="mp-exam-edit" id="mp-exam-choose" type="button">${icon("calendar", { size: 14 })} Choisir ma date</button>
+      <p>${mpD("exam_nodate", "Ajoute ta date d'examen pour lancer le compte à rebours.")}</p>
+      <button class="mp-exam-edit" id="mp-exam-choose" type="button">${icon("calendar", { size: 14 })} ${mpD("exam_choose", "Choisir ma date")}</button>
       <div class="mp-exam-date-wrap" id="mp-exam-date-wrap">
         <input type="date" class="mp-exam-date-input" id="mp-exam-date-input" />
-        <button class="mp-exam-date-save" id="mp-exam-date-save" type="button">Enregistrer</button>
+        <button class="mp-exam-date-save" id="mp-exam-date-save" type="button">${mpD("exam_save", "Enregistrer")}</button>
       </div>
     </div>`;
   }
   const cd = examMod.countdown(examDate);
   if (cd.passed) {
     return `<div class="mp-exam-top">
-      <div class="mp-exam-cd"><b>${icon("check-circle", { size: 26, color: "var(--gr-txt)" })}</b><span>Passé</span></div>
+      <div class="mp-exam-cd"><b>${icon("check-circle", { size: 26, color: "var(--gr-txt)" })}</b><span>${mpD("exam_passed_b", "Passé")}</span></div>
       <div class="mp-exam-tb">
-        <div class="mp-exam-t">Ton examen est passé</div>
-        <div class="mp-exam-d">Bonne chance pour les résultats.</div>
-        <button class="mp-exam-edit" id="mp-exam-choose" type="button">${icon("calendar", { size: 14 })} Changer la date</button>
+        <div class="mp-exam-t">${mpD("exam_passed_t", "Ton examen est passé")}</div>
+        <div class="mp-exam-d">${mpD("exam_passed_s", "Bonne chance pour les résultats.")}</div>
+        <button class="mp-exam-edit" id="mp-exam-choose" type="button">${icon("calendar", { size: 14 })} ${mpD("exam_change", "Changer la date")}</button>
         <div class="mp-exam-date-wrap" id="mp-exam-date-wrap">
           <input type="date" class="mp-exam-date-input" id="mp-exam-date-input" value="${examDate.toISOString().slice(0, 10)}" />
-          <button class="mp-exam-date-save" id="mp-exam-date-save" type="button">Enregistrer</button>
+          <button class="mp-exam-date-save" id="mp-exam-date-save" type="button">${mpD("exam_save", "Enregistrer")}</button>
         </div>
       </div>
     </div>`;
   }
+  const dayWord =
+    cd.days > 1 ? mpTR("day_many", "jours") : mpTR("day_one", "jour");
   return `<div class="mp-exam-top">
-    <div class="mp-exam-cd" aria-hidden="true"><b>${cd.days}</b><span>jour${cd.days > 1 ? "s" : ""}</span></div>
+    <div class="mp-exam-cd" aria-hidden="true"><b>${cd.days}</b><span>${esc(dayWord)}</span></div>
     <div class="mp-exam-tb">
-      <div class="mp-exam-t">Ton examen approche</div>
-      <div class="mp-exam-d">${esc(examMod.fmtDate(examDate))}</div>
-      <button class="mp-exam-edit" id="mp-exam-choose" type="button">${icon("calendar", { size: 14 })} Modifier la date</button>
+      <div class="mp-exam-t">${mpD("exam_soon", "Ton examen approche")}</div>
+      <div class="mp-exam-d">${mpDyn(esc(getLang() === "fr" ? examMod.fmtDate(examDate) : examDate.toLocaleDateString({ en: "en-GB", ar: "ar" }[getLang()] || "fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })))}</div>
+      <button class="mp-exam-edit" id="mp-exam-choose" type="button">${icon("calendar", { size: 14 })} ${mpD("exam_edit", "Modifier la date")}</button>
       <div class="mp-exam-date-wrap" id="mp-exam-date-wrap">
         <input type="date" class="mp-exam-date-input" id="mp-exam-date-input" value="${examDate.toISOString().slice(0, 10)}" />
-        <button class="mp-exam-date-save" id="mp-exam-date-save" type="button">Enregistrer</button>
+        <button class="mp-exam-date-save" id="mp-exam-date-save" type="button">${mpD("exam_save", "Enregistrer")}</button>
       </div>
     </div>
   </div>`;
@@ -537,27 +737,75 @@ function renderStep3({ examMod, examData, examDate, solo = false, num = 3 }) {
   if (!examMod || examData?.loadFailed) {
     return `<section class="mp-step" id="mp-step-exam">
       <span class="mp-step-num" aria-hidden="true">${num}</span>
-      <div class="mp-step-h"><h2 class="mp-step-t">L'examen</h2></div>
+      <div class="mp-step-h"><h2 class="mp-step-t">${mpD("s3_title", "L'examen")}</h2></div>
       <div class="mp-err">
-        <p>« L'examen » indisponible. Vérifie ta connexion, puis réessaie.</p>
-        <button id="mp-retry-3" type="button">Réessayer</button>
+        <p>${mpD("s3_err", "« L'examen » indisponible. Vérifie ta connexion, puis réessaie.")}</p>
+        <button id="mp-retry-3" type="button">${mpD("retry", "Réessayer")}</button>
       </div>
     </section>`;
   }
 
   const verdict = examMod.buildVerdict({ ...examData, solo });
+  // i18n : le verdict vient d'examen.js (source UNIQUE des seuils — on ne
+  // recalcule rien). En EN/AR on re-formule seulement le libellé à partir du
+  // niveau + des mêmes données (baseAcquis / BASE_TOTAL exportés).
+  if (getLang() !== "fr") {
+    const baseTotal = examMod.BASE_TOTAL ?? 24;
+    const baseRestantes = Math.max(0, baseTotal - (examData.baseAcquis ?? 0));
+    verdict.text =
+      verdict.level === "high"
+        ? mpTR("verdict_high", verdict.text, { t: baseTotal })
+        : verdict.level === "mid"
+          ? mpTR("verdict_mid", verdict.text, {
+              n: baseRestantes,
+              s: baseRestantes > 1 ? "s" : "",
+            })
+          : mpTR("verdict_low", verdict.text);
+  }
   const verdictHtml = `<div class="mp-verdict ${verdict.level}" role="status">
     ${icon(READINESS_ICON[verdict.level], { size: 18 })}
-    <span>${esc(verdict.text)}</span>
+    <span>${mpDyn(esc(verdict.text))}</span>
   </div>`;
 
-  const criteria = examMod.buildCriteria(examData);
+  // i18n : mêmes critères qu'examen.js (buildCriteria = source des seuils),
+  // seuls les LIBELLÉS sont re-formulés en EN/AR depuis les mêmes données.
+  const criteria = examMod.buildCriteria(examData).map((c, i) => {
+    if (getLang() === "fr") return c;
+    const { compsCount = 0, streak = 0, avgScore = null } = examData;
+    const copy = { ...c };
+    if (i === 0) {
+      copy.label = mpTR("crit_parcours", c.label);
+      copy.sub = mpTR("crit_parcours_sub", c.sub, { n: compsCount });
+    } else if (i === 1) {
+      copy.label = mpTR("crit_streak", c.label);
+      copy.sub =
+        streak > 0
+          ? mpTR("crit_streak_days", c.sub, {
+              n: streak,
+              s: streak > 1 ? "s" : "",
+            })
+          : mpTR("crit_streak_none", c.sub);
+      copy.badge = mpTR("badge_day", c.badge, { n: streak > 0 ? streak : 0 });
+    } else if (i === 2) {
+      copy.label = mpTR("crit_quiz", c.label);
+      copy.sub =
+        avgScore !== null
+          ? mpTR("crit_quiz_avg", c.sub, { n: avgScore })
+          : mpTR("crit_quiz_none", c.sub);
+    } else if (i === 3) {
+      copy.label = mpTR("crit_rev", c.label);
+      copy.sub = c.pass
+        ? mpTR("crit_rev_yes", c.sub)
+        : mpTR("crit_rev_no", c.sub);
+    }
+    return copy;
+  });
   const critHtml = criteria
     .map((c) => {
       const cls = c.neutral ? "neutral" : c.pass ? "pass" : "fail";
       return `<div class="mp-crit ${cls}">
         <span aria-hidden="true">${c.ico}</span>
-        <p>${esc(c.label)} <i>${esc(c.sub)}</i></p>
+        <p>${mpDyn(esc(c.label))} <i>${mpDyn(esc(c.sub))}</i></p>
         <span class="mp-crit-b">${esc(c.badge)}</span>
       </div>`;
     })
@@ -566,15 +814,15 @@ function renderStep3({ examMod, examData, examDate, solo = false, num = 3 }) {
   return `<section class="mp-step" id="mp-step-exam">
     <span class="mp-step-num" aria-hidden="true">${num}</span>
     <div class="mp-step-h">
-      <h2 class="mp-step-t">L'examen</h2>
-      <span class="mp-step-s">le jour J se prépare ici</span>
+      <h2 class="mp-step-t">${mpD("s3_title", "L'examen")}</h2>
+      <span class="mp-step-s">${mpD("s3_sub", "le jour J se prépare ici")}</span>
     </div>
 
     <div class="mp-exam">
       <div id="mp-exam-countdown-body">${renderExamCountdown(examDate, examMod)}</div>
       ${verdictHtml}
       <div class="mp-prep">
-        <div class="mp-prep-h">Ta préparation</div>
+        <div class="mp-prep-h">${mpD("prep_h", "Ta préparation")}</div>
         ${critHtml}
       </div>
     </div>
@@ -582,8 +830,8 @@ function renderStep3({ examMod, examData, examDate, solo = false, num = 3 }) {
     <a class="mp-centre" id="mp-centre-link" href="#/centre-examen">
       ${medallion("carte", "blue", { size: 38 })}
       <div class="mp-centre-b">
-        <div class="mp-centre-t">Ton centre d'examen</div>
-        <div class="mp-centre-s">Difficulté, pièges du parcours, conseils sur place</div>
+        <div class="mp-centre-t">${mpD("centre_t", "Ton centre d'examen")}</div>
+        <div class="mp-centre-s">${mpD("centre_s", "Difficulté, pièges du parcours, conseils sur place")}</div>
       </div>
       ${CHEVRON}
     </a>
@@ -792,7 +1040,7 @@ export async function mount(root) {
   const solo = isSoloEleve(me);
   root.innerHTML = `${STYLE}
   <div class="mp anim-slide-up">
-    <h1 class="mp-title" tabindex="-1">Mon permis</h1>
+    <h1 class="mp-title" tabindex="-1">${mpD("title", "Mon permis")}</h1>
     ${renderChip(moniteurPrenom)}
     ${step1Failed ? "" : renderHero({ totalAcquis, currentTitre, allDone, solo })}
     <div class="mp-tl">

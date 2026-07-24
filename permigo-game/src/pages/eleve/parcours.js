@@ -28,6 +28,175 @@ import {
   getMyChests,
   markChestOpened,
 } from "@/utils/game-state.js";
+import { getLang } from "@/utils/lang.js";
+
+// ── i18n de la COQUE du parcours (EN/AR) — élèves non-francophones.
+// Dict LOCAL (règle coque : pas de fichier partagé), repli FR intégral. Le
+// CONTENU pédagogique (titres de chapitres/compétences REMC, résumé, conseil
+// du coach) reste en français — traduit à SA source, pas ici. RTL : par
+// <span dir="rtl"> autour du texte arabe affiché uniquement (app LTR).
+const PRC_I18N = {
+  en: {
+    page_title: "My journey",
+    page_sub: "31 skills · Permis B (French licence)",
+    loading: "Loading…",
+    err_1: "“My journey” is unavailable.",
+    err_2: "Check your connection and try again.",
+    retry: "Try again",
+    fresh_unlock: "Just unlocked: {name}",
+    chip_chap: "Chapter {n} of {t}",
+    suivi: "Overview",
+    suivi_aria: "My overview — validated skills, lessons, exam",
+    prog_chap: "Chapter progress",
+    jalons_word: "milestones",
+    aria_jalons: "{d} milestones out of {t} done",
+    gate_one: "Validate 1 more skill from the previous chapter",
+    gate_many: "Validate {n} more skills from the previous chapter",
+    route_h2: "Your route",
+    step_one: "1 step",
+    step_many: "{n} steps",
+    ms_done: "● Done",
+    ms_locked: "To unlock",
+    ms_next: "In progress",
+    ms_todo: "Up next",
+    call_kick: "★ Current step",
+    aria_current: "Current step: {name} — Continue",
+    continue: "Continue",
+    boss_won_kick: "★ Boss defeated",
+    boss_kick: "Chapter boss",
+    boss_won_sub: "Chapter certified — your reward is here",
+    boss_remain_one: "Only 1 skill left to validate to defeat it",
+    boss_remain_many: "Only {n} skills left to validate to defeat it",
+    boss_all: "All validated — reward incoming",
+    next_locked_aria: "Chapter {n} locked: {t}",
+    next_locked_kick: "Chapter {n} · Locked",
+    next_locked_sub: "Beat the boss of “{name}” to open it",
+    next_open_aria: "Go to chapter {n}: {t}",
+    next_open_kick: "Next chapter · Unlocked",
+    chapnav_aria: "Journey chapters",
+    chap_n: "Chapter {n}",
+    chap_shown: " — shown",
+    themesw_aria: "Display: light or dark",
+    theme_dark: "Dark",
+    theme_light: "Light",
+    exam_t: "Prepare your exam",
+    exam_s: "Your countdown and where you stand",
+    exam_aria: "See My licence — your exam",
+    main_aria: "Your journey — chapter view",
+    close: "Close",
+    fiche_chap: "CHAPTER {n} · {name}",
+    st_certified: "Certified by you",
+    st_validated: "Validated",
+    st_validated_by: "Validated by {name}",
+    st_validated_monit: "Validated by your instructor",
+    st_ready: "Ready to certify",
+    st_next: "Step {n} of {t} · to prepare",
+    st_locked: "Not accessible yet",
+    st_todo: "Step {n} of {t} · up next",
+    coach: "Coach's tip",
+    btn_prepare: "Get ready",
+    btn_revoir: "Review in 2 min",
+    btn_certifier: "Certify this skill",
+    btn_cert2: "Already done in a lesson? Certify it",
+    btn_fiche: "Review the sheet",
+    locked_note: "Validate the previous skills to unlock this one.",
+  },
+  ar: {
+    page_title: "مساري",
+    page_sub: "31 مهارة · رخصة القيادة الفرنسية (Permis B)",
+    loading: "جارٍ التحميل…",
+    err_1: "تعذّر تحميل «مساري».",
+    err_2: "تحقّق من اتصالك ثم أعد المحاولة.",
+    retry: "أعد المحاولة",
+    fresh_unlock: "فتحت للتو: {name}",
+    chip_chap: "الفصل {n} من {t}",
+    suivi: "الملخّص",
+    suivi_aria: "ملخّصي — المهارات المُصادَق عليها، الدروس، الامتحان",
+    prog_chap: "تقدّم الفصل",
+    jalons_word: "محطة",
+    aria_jalons: "{d} محطة من {t} مكتملة",
+    gate_one: "صادق على مهارة إضافية واحدة من الفصل السابق",
+    gate_many: "صادق على {n} مهارات إضافية من الفصل السابق",
+    route_h2: "طريقك",
+    step_one: "خطوة واحدة",
+    step_many: "{n} خطوات",
+    ms_done: "● مكتمل",
+    ms_locked: "للفتح لاحقًا",
+    ms_next: "جارٍ",
+    ms_todo: "لاحقًا",
+    call_kick: "★ الخطوة الحالية",
+    aria_current: "الخطوة الحالية: {name} — متابعة",
+    continue: "متابعة",
+    boss_won_kick: "★ هُزم الزعيم",
+    boss_kick: "زعيم الفصل",
+    boss_won_sub: "الفصل مُصادَق عليه — مكافأتك هنا",
+    boss_remain_one: "بقيت مهارة واحدة للمصادقة لهزيمته",
+    boss_remain_many: "بقيت {n} مهارات للمصادقة لهزيمته",
+    boss_all: "اكتملت كلها — المكافأة وشيكة",
+    next_locked_aria: "الفصل {n} مقفل: {t}",
+    next_locked_kick: "الفصل {n} · مقفل",
+    next_locked_sub: "اهزم زعيم «{name}» لفتحه",
+    next_open_aria: "اذهب إلى الفصل {n}: {t}",
+    next_open_kick: "الفصل التالي · مفتوح",
+    chapnav_aria: "فصول المسار",
+    chap_n: "الفصل {n}",
+    chap_shown: " — معروض",
+    themesw_aria: "العرض: فاتح أو داكن",
+    theme_dark: "داكن",
+    theme_light: "فاتح",
+    exam_t: "استعدّ لامتحانك",
+    exam_s: "عدّك التنازلي وأين وصلت",
+    exam_aria: "اعرض رخصتي — امتحانك",
+    main_aria: "مسارك — عرض الفصل",
+    close: "إغلاق",
+    fiche_chap: "الفصل {n} · {name}",
+    st_certified: "صادقت عليها بنفسك",
+    st_validated: "مُصادَق عليها",
+    st_validated_by: "صادَق عليها {name}",
+    st_validated_monit: "صادَق عليها مدرّبك",
+    st_ready: "جاهزة للمصادقة",
+    st_next: "الخطوة {n} من {t} · للتحضير",
+    st_locked: "غير متاحة بعد",
+    st_todo: "الخطوة {n} من {t} · لاحقًا",
+    coach: "نصيحة المدرّب",
+    btn_prepare: "أستعدّ",
+    btn_revoir: "مراجعة في دقيقتين",
+    btn_certifier: "المصادقة على هذه المهارة",
+    btn_cert2: "سبق أن تدرّبت عليها في درس؟ صادق عليها",
+    btn_fiche: "مراجعة البطاقة",
+    locked_note: "صادق على المهارات السابقة لفتح هذه المهارة.",
+  },
+};
+// Traduit-ou-français (brut — interpolation / attributs sans esc)
+function prcTR(key, fr, vars) {
+  const l = getLang();
+  let s = (l !== "fr" && PRC_I18N[l]?.[key]) || fr;
+  if (vars)
+    for (const [k, v] of Object.entries(vars))
+      s = s.split(`{${k}}`).join(String(v));
+  return s;
+}
+// Version échappée — sûre en texte ET en attribut
+function prcT(key, fr, vars) {
+  return esc(prcTR(key, fr, vars));
+}
+// Texte AFFICHÉ : en arabe, <span dir="rtl"> + îlots LTR pour les nombres
+// (« 3 / 8 », « 80% »). Jamais dans un attribut.
+function prcRtl(escaped) {
+  const s = escaped.replace(
+    /\d+(?:\s*\/\s*\d+)?(?:\s*%)?/g,
+    (m) => `<span dir="ltr">${m}</span>`,
+  );
+  return `<span dir="rtl">${s}</span>`;
+}
+function prcD(key, fr, vars) {
+  const l = getLang();
+  const out = esc(prcTR(key, fr, vars));
+  return l === "ar" && PRC_I18N.ar?.[key] ? prcRtl(out) : out;
+}
+function prcDyn(escaped) {
+  return getLang() === "ar" ? prcRtl(escaped) : escaped;
+}
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -1545,7 +1714,7 @@ export async function mount(root) {
 
   track("page.view", { page: "eleve_parcours" });
 
-  root.innerHTML = `${STYLE}<div class="prc"><div class="prc-hd"><div><div class="prc-title">Mon parcours</div><div class="prc-subtitle">31 compétences · Permis B</div></div></div><div style="padding:32px;text-align:center;color:var(--mu2)">Chargement…</div></div>`;
+  root.innerHTML = `${STYLE}<div class="prc"><div class="prc-hd"><div><div class="prc-title">${prcD("page_title", "Mon parcours")}</div><div class="prc-subtitle">${prcD("page_sub", "31 compétences · Permis B")}</div></div></div><div style="padding:32px;text-align:center;color:var(--mu2)">${prcD("loading", "Chargement…")}</div></div>`;
 
   const { data: valData, error: valErr } = await sb
     .from("validations")
@@ -1554,11 +1723,11 @@ export async function mount(root) {
     )
     .eq("eleve_id", me.id);
   if (valErr) {
-    root.innerHTML = `${STYLE}<div class="prc"><div class="prc-hd"><div><div class="prc-title">Mon parcours</div></div></div>
+    root.innerHTML = `${STYLE}<div class="prc"><div class="prc-hd"><div><div class="prc-title">${prcD("page_title", "Mon parcours")}</div></div></div>
       <div style="padding:48px 24px;text-align:center;color:var(--mu3)">
         <div style="font-size:40px;margin-bottom:12px">${icon("alert-circle", { size: 30 })}</div>
-        <p style="font:600 15px/1.5 'Inter',sans-serif">« Mon parcours » indisponible.<br>Vérifie ta connexion, puis réessaie.</p>
-        <button id="prc-retry" style="margin-top:14px;padding:12px 24px;border:0;background:var(--a);color:var(--a-ink);border-radius:12px;cursor:pointer">Réessayer</button>
+        <p style="font:600 15px/1.5 'Inter',sans-serif">${prcD("err_1", "« Mon parcours » indisponible.")}<br>${prcD("err_2", "Vérifie ta connexion, puis réessaie.")}</p>
+        <button id="prc-retry" style="margin-top:14px;padding:12px 24px;border:0;background:var(--a);color:var(--a-ink);border-radius:12px;cursor:pointer">${prcD("retry", "Réessayer")}</button>
       </div></div>`;
     root
       .querySelector("#prc-retry")
@@ -1982,7 +2151,7 @@ function spawnArrow(node, compId) {
         .fresh-arrow, .fa-arrow { animation: none !important; }
       }
     </style>
-    <div class="fa-bubble">Tu viens de débloquer : ${esc(resolveCompName(compId))}</div>
+    <div class="fa-bubble">${prcD("fresh_unlock", `Tu viens de débloquer : ${resolveCompName(compId)}`, { name: resolveCompName(compId) })}</div>
     <svg class="fa-arrow" viewBox="0 0 24 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <path d="M12 0 L12 32" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
       <path d="M3 24 L12 36 L21 24" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
@@ -2156,13 +2325,13 @@ function renderChapterView(
         </svg>
         <div class="prc-cv-world-meta">
           <div class="prc-cv-meta-top">
-            <span class="prc-cv-chip"><span class="dot" aria-hidden="true"></span>Chapitre ${currentIdx + 1} sur ${worldStates.length}</span>
+            <span class="prc-cv-chip"><span class="dot" aria-hidden="true"></span>${prcD("chip_chap", `Chapitre ${currentIdx + 1} sur ${worldStates.length}`, { n: currentIdx + 1, t: worldStates.length })}</span>
             <!-- Mode condensé (hub mon-permis) gardé en OPTION : l'onglet
                  « Mon permis » ouvre désormais le parcours en direct
                  (décision Rayan 2026-07-16), ce bouton donne le résumé. -->
-            <a class="prc-cv-suivi" href="#/mon-permis" aria-label="Mon suivi — compétences validées, leçons, examen">
+            <a class="prc-cv-suivi" href="#/mon-permis" aria-label="${prcT("suivi_aria", "Mon suivi — compétences validées, leçons, examen")}">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="3.5" cy="6" r="1.6" fill="currentColor"/><circle cx="3.5" cy="12" r="1.6" fill="currentColor"/><circle cx="3.5" cy="18" r="1.6" fill="currentColor"/></svg>
-              <span>Suivi</span>
+              <span>${prcD("suivi", "Suivi")}</span>
             </a>
           </div>
           <h1 class="prc-cv-world-title">${esc(chapTitle)}</h1>
@@ -2170,12 +2339,12 @@ function renderChapterView(
         </div>
         <div class="prc-cv-world-prog">
           <div class="prc-cv-wp-top">
-            <span>Progression du chapitre</span>
-            <b>${ws.done} / ${ws.total} jalons</b>
+            <span>${prcD("prog_chap", "Progression du chapitre")}</span>
+            <b>${prcDyn(`${ws.done} / ${ws.total} ${prcT("jalons_word", "jalons")}`)}</b>
           </div>
           <div class="prc-cv-wp-bar"
                role="progressbar" aria-valuenow="${chapPct}" aria-valuemin="0" aria-valuemax="100"
-               aria-label="${ws.done} jalons sur ${ws.total} acquis">
+               aria-label="${prcT("aria_jalons", `${ws.done} jalons sur ${ws.total} acquis`, { d: ws.done, t: ws.total })}"
             <div class="prc-cv-wp-fill" style="width:${chapPct}%"></div>
           </div>
         </div>
@@ -2195,7 +2364,7 @@ function renderChapterView(
         </div>
         <div>
           <div class="prc-cv-gate-g1">${esc(chapTitle)}</div>
-          <div class="prc-cv-gate-g2">Valide encore <strong style="color:#cdbff5">${need} compétence${need > 1 ? "s" : ""}</strong> du chapitre précédent</div>
+          <div class="prc-cv-gate-g2">${getLang() === "fr" ? `Valide encore <strong style="color:#cdbff5">${need} compétence${need > 1 ? "s" : ""}</strong> du chapitre précédent` : prcD(need > 1 ? "gate_many" : "gate_one", "", { n: need })}</div>
         </div>
       </div>`;
   } else {
@@ -2240,12 +2409,12 @@ function renderChapterView(
 
       const metaText =
         st === "done" || st === "a_valider"
-          ? `<span class="prc-cv-tag-done">● Terminé</span>`
+          ? `<span class="prc-cv-tag-done">${prcD("ms_done", "● Terminé")}</span>`
           : st === "locked"
-            ? "À débloquer"
+            ? prcD("ms_locked", "À débloquer")
             : st === "next"
-              ? "En cours"
-              : "À venir";
+              ? prcD("ms_next", "En cours")
+              : prcD("ms_todo", "À venir");
 
       const labelClass =
         st === "locked" ? "prc-cv-ms-label locked" : "prc-cv-ms-label";
@@ -2256,12 +2425,12 @@ function renderChapterView(
           ? `<div class="prc-cv-current-call"
               data-comp="${escAttr(sub.c)}" data-world-idx="${currentIdx}"
               role="button" tabindex="0"
-              aria-label="Étape en cours : ${esc(sub.n)} — Continuer">
-            <div class="prc-cv-call-kick">★ Étape en cours</div>
+              aria-label="${prcT("aria_current", `Étape en cours : ${sub.n} — Continuer`, { name: sub.n })}">
+            <div class="prc-cv-call-kick">${prcD("call_kick", "★ Étape en cours")}</div>
             <div class="prc-cv-call-ct">${esc(sub.n)}</div>
             <button class="prc-cv-cta" type="button"
                     data-comp="${escAttr(sub.c)}" data-world-idx="${currentIdx}">
-              Continuer
+              ${prcD("continue", "Continuer")}
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" stroke="#3a1c00" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
           </div>`
@@ -2300,14 +2469,18 @@ function renderChapterView(
           ${bossWon ? "" : `<span class="prc-cv-boss-lock has-med" aria-hidden="true">${medallion("cadenas", "slate", { size: 30 })}</span>`}
         </div>
         <div class="prc-cv-boss-card ${bossWon ? "won" : "wait"}">
-          <div class="prc-cv-boss-kick">${bossWon ? "★ Boss vaincu" : "Boss du chapitre"}</div>
+          <div class="prc-cv-boss-kick">${bossWon ? prcD("boss_won_kick", "★ Boss vaincu") : prcD("boss_kick", "Boss du chapitre")}</div>
           <div class="prc-cv-boss-ttl">${esc(chapTitle)}</div>
           <div class="prc-cv-boss-sub">${
             bossWon
-              ? "Chapitre maîtrisé — ta récompense est là"
+              ? prcD("boss_won_sub", "Chapitre certifié — ta récompense est là")
               : bossRemain > 0
-                ? `Plus que ${bossRemain} compétence${bossRemain > 1 ? "s" : ""} à valider pour le vaincre`
-                : "Toutes acquises — récompense imminente"
+                ? prcD(
+                    bossRemain > 1 ? "boss_remain_many" : "boss_remain_one",
+                    `Plus que ${bossRemain} compétence${bossRemain > 1 ? "s" : ""} à valider pour le vaincre`,
+                    { n: bossRemain },
+                  )
+                : prcD("boss_all", "Toutes acquises — récompense imminente")
           }</div>
         </div>
       </div>`;
@@ -2324,8 +2497,8 @@ function renderChapterView(
 
     routeHTML = `
       <div class="prc-cv-route-head">
-        <h2>Ton itinéraire</h2>
-        <div class="prc-cv-step-count">${ws.total} étape${ws.total > 1 ? "s" : ""}</div>
+        <h2>${prcD("route_h2", "Ton itinéraire")}</h2>
+        <div class="prc-cv-step-count">${prcD(ws.total > 1 ? "step_many" : "step_one", `${ws.total} étape${ws.total > 1 ? "s" : ""}`, { n: ws.total })}</div>
       </div>
       <div class="prc-cv-route">
         ${renderWorldSigns(currentIdx)}
@@ -2349,23 +2522,23 @@ function renderChapterView(
     const nextLocked = nextWs.status === "locked";
     gateHTML = nextLocked
       ? `
-      <div class="prc-cv-next locked" aria-label="Chapitre ${nextNum} verrouillé : ${esc(nextTitle)}">
+      <div class="prc-cv-next locked" aria-label="${prcT("next_locked_aria", `Chapitre ${nextNum} verrouillé : ${nextTitle}`, { n: nextNum, t: nextTitle })}">
         <div class="prc-cv-next-badge locked has-med" aria-hidden="true">
           ${medallion("cadenas", "slate", { size: 50, shape: "tile" })}
         </div>
         <div class="prc-cv-next-txt">
-          <div class="prc-cv-next-kick">Chapitre ${nextNum} · Verrouillé</div>
+          <div class="prc-cv-next-kick">${prcD("next_locked_kick", `Chapitre ${nextNum} · Verrouillé`, { n: nextNum })}</div>
           <div class="prc-cv-next-ttl">${esc(nextTitle)}</div>
-          <div class="prc-cv-next-sub">Bats le boss de « ${esc(world.nom ?? chapTitle)} » pour l’ouvrir</div>
+          <div class="prc-cv-next-sub">${prcD("next_locked_sub", `Bats le boss de « ${world.nom ?? chapTitle} » pour l’ouvrir`, { name: world.nom ?? chapTitle })}</div>
         </div>
       </div>`
       : `
       <button class="prc-cv-next open" type="button"
               data-chap="${currentIdx + 1}"
-              aria-label="Aller au chapitre ${nextNum} : ${esc(nextTitle)}">
+              aria-label="${prcT("next_open_aria", `Aller au chapitre ${nextNum} : ${nextTitle}`, { n: nextNum, t: nextTitle })}">
         <div class="prc-cv-next-badge open" aria-hidden="true">${nextNum}</div>
         <div class="prc-cv-next-txt">
-          <div class="prc-cv-next-kick">Chapitre suivant · Débloqué</div>
+          <div class="prc-cv-next-kick">${prcD("next_open_kick", "Chapitre suivant · Débloqué")}</div>
           <div class="prc-cv-next-ttl">${esc(nextTitle)}</div>
         </div>
         <div class="prc-cv-next-go" aria-hidden="true">
@@ -2385,7 +2558,7 @@ function renderChapterView(
   const isLightNow =
     (localStorage.getItem("permigo_parcours_theme") ?? "dark") === "light";
   const chapNav = `
-    <div class="prc-cv-chapnav" role="tablist" aria-label="Chapitres du parcours">
+    <div class="prc-cv-chapnav" role="tablist" aria-label="${prcT("chapnav_aria", "Chapitres du parcours")}">
       ${worldStates
         .map((w, i) => {
           const isCur = i === currentIdx;
@@ -2402,13 +2575,13 @@ function renderChapterView(
               : w.status === "locked"
                 ? ICO_LK
                 : `${i + 1}`;
-          return `<button class="prc-cv-cn ${cls}" data-chap="${i}" type="button" role="tab" aria-selected="${isCur}" aria-label="Chapitre ${i + 1}${isCur ? " — affiché" : ""}">${inner}</button>`;
+          return `<button class="prc-cv-cn ${cls}" data-chap="${i}" type="button" role="tab" aria-selected="${isCur}" aria-label="${prcT("chap_n", `Chapitre ${i + 1}`, { n: i + 1 })}${isCur ? prcT("chap_shown", " — affiché") : ""}">${inner}</button>`;
         })
         .join("")}
     </div>
-    <div class="prc-cv-themesw" role="group" aria-label="Affichage : clair ou sombre">
-      <button class="prc-cv-th-btn ${isLightNow ? "" : "on"}" data-prc-theme="dark" type="button" aria-pressed="${!isLightNow}">${ICO_MOON}<span>Sombre</span></button>
-      <button class="prc-cv-th-btn ${isLightNow ? "on" : ""}" data-prc-theme="light" type="button" aria-pressed="${isLightNow}">${ICO_SUN}<span>Clair</span></button>
+    <div class="prc-cv-themesw" role="group" aria-label="${prcT("themesw_aria", "Affichage : clair ou sombre")}">
+      <button class="prc-cv-th-btn ${isLightNow ? "" : "on"}" data-prc-theme="dark" type="button" aria-pressed="${!isLightNow}">${ICO_MOON}<span>${prcD("theme_dark", "Sombre")}</span></button>
+      <button class="prc-cv-th-btn ${isLightNow ? "on" : ""}" data-prc-theme="light" type="button" aria-pressed="${isLightNow}">${ICO_SUN}<span>${prcD("theme_light", "Clair")}</span></button>
     </div>`;
 
   // ── Coffre du chapitre : la récompense, débloquée quand le boss tombe ──
@@ -2422,7 +2595,7 @@ function renderChapterView(
         })}</div>`
       : "";
 
-  return `<div class="prc-cv" role="main" aria-label="Ton parcours — vue chapitre">
+  return `<div class="prc-cv" role="main" aria-label="${prcT("main_aria", "Ton parcours — vue chapitre")}">
   <div class="prc-cv-screen">
     <div class="prc-cv-topbar">
       ${chapNav}
@@ -2436,11 +2609,11 @@ function renderChapterView(
          vers l'étape ③ « L'examen » du hub (?scroll=exam), pas directement
          vers l'ancienne page #/examen autonome (qui reste joignable en
          direct/deep-link, cf. router.js). -->
-    <a href="#/mon-permis?scroll=exam" class="prc-cv-exam" aria-label="Voir Mon permis — ton examen">
+    <a href="#/mon-permis?scroll=exam" class="prc-cv-exam" aria-label="${prcT("exam_aria", "Voir Mon permis — ton examen")}">
       <span class="prc-cv-exam-ic" aria-hidden="true">🎓</span>
       <span class="prc-cv-exam-tx">
-        <b>Prépare ton examen</b>
-        <small>Ton compte à rebours et où tu en es</small>
+        <b>${prcD("exam_t", "Prépare ton examen")}</b>
+        <small>${prcD("exam_s", "Ton compte à rebours et où tu en es")}</small>
       </span>
       <span class="prc-cv-exam-go" aria-hidden="true">→</span>
     </a>
@@ -2652,27 +2825,40 @@ function openFiche(root, compId, ws, validatedMap, pendingMap, hasMoniteur) {
   // « acquis / maîtrisé / échec ». Date courte quand elle existe.
   const fmtShort = (iso) =>
     iso
-      ? new Date(iso).toLocaleDateString("fr-FR", {
-          day: "numeric",
-          month: "short",
-        })
+      ? new Date(iso).toLocaleDateString(
+          { fr: "fr-FR", en: "en-GB", ar: "ar" }[getLang()] || "fr-FR",
+          {
+            day: "numeric",
+            month: "short",
+          },
+        )
       : null;
   const stateLine = (() => {
     if (st === "done") {
       const d = fmtShort(val?.validated_at);
+      const dSuffix = d ? ` · ${d}` : "";
       if (val?.source === "auto")
-        return `Certifiée par toi${d ? ` · ${d}` : ""}`;
-      const who = val?.teacherName
-        ? ` par ${val.teacherName}`
+        return `${prcTR("st_certified", "Certifiée par toi")}${dSuffix}`;
+      const base = val?.teacherName
+        ? prcTR("st_validated_by", `Validée par ${val.teacherName}`, {
+            name: val.teacherName,
+          })
         : hasMoniteur
-          ? " par ton moniteur"
-          : "";
-      return `Validée${who}${d ? ` · ${d}` : ""}`;
+          ? prcTR("st_validated_monit", "Validée par ton moniteur")
+          : prcTR("st_validated", "Validée");
+      return `${base}${dSuffix}`;
     }
-    if (st === "a_valider") return "Prête à certifier";
-    if (st === "next") return `Étape ${compNum} sur ${total} · à préparer`;
-    if (st === "locked") return "Pas encore accessible";
-    return `Étape ${compNum} sur ${total} · à venir`; // todo
+    if (st === "a_valider") return prcTR("st_ready", "Prête à certifier");
+    if (st === "next")
+      return prcTR("st_next", `Étape ${compNum} sur ${total} · à préparer`, {
+        n: compNum,
+        t: total,
+      });
+    if (st === "locked") return prcTR("st_locked", "Pas encore accessible");
+    return prcTR("st_todo", `Étape ${compNum} sur ${total} · à venir`, {
+      n: compNum,
+      t: total,
+    }); // todo
   })();
 
   // Conseil du coach — SORTI de l'accordéon replié (demande Rayan 22/07) :
@@ -2687,7 +2873,7 @@ function openFiche(root, compId, ws, validatedMap, pendingMap, hasMoniteur) {
         <span class="fiche-tip-zoom" aria-hidden="true">${TIP_ZOOM}</span>
         <span class="fiche-tip-ico">${icon("zap", { size: 16 })}</span>
         <span class="fiche-tip-body">
-          <span class="fiche-tip-label">Conseil du coach</span>
+          <span class="fiche-tip-label">${prcD("coach", "Conseil du coach")}</span>
           <span class="fiche-tip-text">${esc(tipTxt)}</span>
         </span>
       </button>`
@@ -2710,23 +2896,23 @@ function openFiche(root, compId, ws, validatedMap, pendingMap, hasMoniteur) {
   // (re-quiz #/quiz/…) est retiré — plus de cul-de-sac ni de doublon.
   const btnPrepare = `
     <a href="#/revision-conduite/${esc(compId)}" role="button" class="fiche-quiz-cta v">
-      Je me prépare ${icon("arrow-right", { size: 17 })}
+      ${prcD("btn_prepare", "Je me prépare")} ${icon("arrow-right", { size: 17 })}
     </a>`;
   const btnRevoir = `
     <a href="#/revision-conduite/${esc(compId)}" role="button" class="fiche-quiz-cta">
-      ${icon("refresh", { size: 16 })} Revoir en 2 min
+      ${icon("refresh", { size: 16 })} ${prcD("btn_revoir", "Revoir en 2 min")}
     </a>`;
   const btnCertifierMain = `
     <a href="#/valider-seul/${esc(compId)}" role="button" class="fiche-quiz-cta v">
-      ${icon("shield", { size: 16 })} Certifier cette compétence
+      ${icon("shield", { size: 16 })} ${prcD("btn_certifier", "Certifier cette compétence")}
     </a>`;
   const btnCertifierSecond = `
     <a href="#/valider-seul/${esc(compId)}" role="button" class="fiche-self-cta">
-      ${icon("shield", { size: 15 })} Déjà vue en leçon ? Certifie-la
+      ${icon("shield", { size: 15 })} ${prcD("btn_cert2", "Déjà vue en leçon ? Certifie-la")}
     </a>`;
   const btnRevoirFiche = `
     <a href="#/revision-conduite/${esc(compId)}" role="button" class="fiche-self-cta">
-      ${icon("book-open", { size: 15 })} Revoir la fiche
+      ${icon("book-open", { size: 15 })} ${prcD("btn_fiche", "Revoir la fiche")}
     </a>`;
 
   // Boutons par état — « 1 principal + 1 secondaire max ».
@@ -2737,7 +2923,7 @@ function openFiche(root, compId, ws, validatedMap, pendingMap, hasMoniteur) {
       return `
         <p class="fiche-locked-note">
           ${icon("lock", { size: 15 })}
-          <span>Valide les compétences précédentes pour débloquer celle-ci.</span>
+          <span>${prcD("locked_note", "Valide les compétences précédentes pour débloquer celle-ci.")}</span>
         </p>`;
     }
     if (st === "done") return btnRevoir; // un seul bouton
@@ -2750,15 +2936,15 @@ function openFiche(root, compId, ws, validatedMap, pendingMap, hasMoniteur) {
     document.getElementById("bsheet-body");
   body.innerHTML = `
     <div class="fiche-hero" style="--wc:${meta.color}">
-      <button class="fiche-close" type="button" aria-label="Fermer">×</button>
-      <div class="fiche-badge-cat">CHAPITRE ${meta.num} · ${esc(world.nom).toUpperCase()}</div>
+      <button class="fiche-close" type="button" aria-label="${prcT("close", "Fermer")}">×</button>
+      <div class="fiche-badge-cat">${prcD("fiche_chap", `CHAPITRE ${meta.num} · ${(world.nom ?? "").toUpperCase()}`, { n: meta.num, name: (world.nom ?? "").toUpperCase() })}</div>
       <div class="fiche-circle has-med ${st === "done" ? "done" : ""}">
         ${stIcon}
       </div>
       <h3 id="bsheet-title">${esc(sub.n)}</h3>
       <div class="fiche-state ${st}">
         <span class="fiche-state-dot" aria-hidden="true"></span>
-        <span class="fiche-state-txt">${esc(stateLine)}</span>
+        <span class="fiche-state-txt">${prcDyn(esc(stateLine))}</span>
       </div>
     </div>
     <div class="fiche-body">
@@ -2779,7 +2965,7 @@ function openFiche(root, compId, ws, validatedMap, pendingMap, hasMoniteur) {
   body.querySelector(".fiche-tip")?.addEventListener("click", () => {
     haptic("select");
     openCoachSheet({
-      title: "Conseil du coach",
+      title: prcTR("coach", "Conseil du coach"),
       fr: tipTxt,
       icon: icon("zap", { size: 22 }),
     });
