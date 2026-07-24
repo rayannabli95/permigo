@@ -11,6 +11,212 @@ import { icon } from "@/utils/icons.js";
 import { medallion } from "@/utils/medallions.js";
 import { haptic } from "@/utils/haptic.js";
 import { hideHeader } from "@/utils/nav.js";
+import { getLang } from "@/utils/lang.js";
+
+// ── i18n de la COQUE des notifications (EN/AR). Dict LOCAL, repli FR. ──
+// Le CONTENU des notifs est généré en FR côté serveur (table notifications).
+// On le RE-TRADUIT AU RENDU à partir du TYPE + data structurée (les chiffres,
+// codes, prénoms restent interpolés). Les types au texte 100 % LIBRE (relance,
+// emotional_nudge, emotional_recap — variantes serveur) ne sont PAS remappables
+// → repli FR (le vrai fix serait serveur, hors périmètre). Les types moniteur
+// (student_at_risk, session_confirmed…) restent FR aussi (coque = élève).
+const NF_I18N = {
+  en: {
+    title: "Notifications",
+    mark_all: "All read",
+    back: "Back",
+    empty_title: "No notifications",
+    empty_body: "You're all caught up! Check back later.",
+    empty_cta: "← Back to home",
+    load_err_title: "Loading error",
+    load_err_sub: "Check your connection and try again.",
+    load_err_toast: "Couldn't load notifications",
+    update_err: "Update error",
+    delete: "Delete",
+    refreshing: "Refreshing…",
+    unread_one: "1 unread",
+    unread_many: "{n} unread",
+    g_today: "Today",
+    g_yesterday: "Yesterday",
+    g_week: "This week",
+    g_older: "Older",
+    labels: {
+      Récompense: "Reward",
+      Trophée: "Trophy",
+      "Trophée débloqué": "Trophy unlocked",
+      "Compétence validée": "Skill validated",
+      "Séance à confirmer": "Session to confirm",
+      Séance: "Session",
+      "Séance confirmée": "Session confirmed",
+      "Ta série": "Your streak",
+      Quiz: "Quiz",
+      Message: "Message",
+      Rappel: "Reminder",
+      Encouragement: "Encouragement",
+      "Ta progression": "Your progress",
+      "Élève à relancer": "Student to nudge",
+      "Quiz flash": "Flash quiz",
+      "Ta semaine": "Your week",
+      "Bilan du mois": "Monthly report",
+      "Compte-rendu": "Lesson report",
+      Info: "Info",
+    },
+    consolidation_title: "Consolidation quiz 🧠",
+    consolidation_body: "Time to consolidate your skill — 2 quick questions!",
+    flash_title: "⚡ Flash quiz from your instructor",
+    flash_body: "You have 5 minutes to answer 3 questions",
+    streak_title: "🔥 Your streak is waiting",
+    streak_body: "Don't lose your {n}-day streak! A quick session is enough.",
+    session_conf_title: "Confirm your session with {name}",
+    comp_title: "Skill validated ✅",
+    comp_body: "{code} — validated by your instructor",
+    pvq_title: "New skill to validate!",
+    pvq_suffix: "Take the quiz in 30 sec",
+    cr_title: "Your lesson report 📋",
+    cr_body_one: "1 skill validated by your instructor",
+    cr_body_many: "{n} skills validated by your instructor",
+  },
+  ar: {
+    title: "الإشعارات",
+    mark_all: "تعليم الكل كمقروء",
+    back: "رجوع",
+    empty_title: "لا إشعارات",
+    empty_body: "أنت على اطّلاع! عُد لاحقًا.",
+    empty_cta: "← العودة للرئيسية",
+    load_err_title: "خطأ في التحميل",
+    load_err_sub: "تحقّق من اتصالك وأعد المحاولة.",
+    load_err_toast: "تعذّر تحميل الإشعارات",
+    update_err: "خطأ في التحديث",
+    delete: "حذف",
+    refreshing: "جارٍ التحديث…",
+    unread_one: "غير مقروء",
+    unread_many: "{n} غير مقروء",
+    g_today: "اليوم",
+    g_yesterday: "أمس",
+    g_week: "هذا الأسبوع",
+    g_older: "أقدم",
+    labels: {
+      Récompense: "مكافأة",
+      Trophée: "كأس",
+      "Trophée débloqué": "كأس مفتوح",
+      "Compétence validée": "مهارة مُثبتة",
+      "Séance à confirmer": "حصة للتأكيد",
+      Séance: "حصة",
+      "Séance confirmée": "حصة مؤكّدة",
+      "Ta série": "سلسلتك",
+      Quiz: "اختبار",
+      Message: "رسالة",
+      Rappel: "تذكير",
+      Encouragement: "تشجيع",
+      "Ta progression": "تقدّمك",
+      "Élève à relancer": "طالب للمتابعة",
+      "Quiz flash": "اختبار خاطف",
+      "Ta semaine": "أسبوعك",
+      "Bilan du mois": "حصيلة الشهر",
+      "Compte-rendu": "تقرير الدرس",
+      Info: "معلومة",
+    },
+    consolidation_title: "اختبار ترسيخ 🧠",
+    consolidation_body: "حان وقت ترسيخ مهارتك — سؤالان سريعان!",
+    flash_title: "⚡ اختبار خاطف من مدرّبك",
+    flash_body: "لديك 5 دقائق للإجابة عن 3 أسئلة",
+    streak_title: "🔥 سلسلتك تنتظرك",
+    streak_body: "لا تفقد سلسلتك ({n} أيام)! حصة سريعة تكفي.",
+    session_conf_title: "أكّد حصتك مع {name}",
+    comp_title: "مهارة مُثبتة ✅",
+    comp_body: "{code} — أثبتها مدرّبك",
+    pvq_title: "مهارة جديدة للتثبيت!",
+    pvq_suffix: "أنجز الاختبار في 30 ثانية",
+    cr_title: "تقرير درسك 📋",
+    cr_body_one: "مهارة واحدة أثبتها مدرّبك",
+    cr_body_many: "{n} مهارات أثبتها مدرّبك",
+  },
+};
+function nt(key, fr) {
+  const l = getLang();
+  return (l !== "fr" && NF_I18N[l]?.[key]) || fr;
+}
+function nfLabel(fr) {
+  const l = getLang();
+  return (l !== "fr" && NF_I18N[l]?.labels?.[fr]) || fr;
+}
+function nfRtl(html) {
+  return getLang() === "ar" ? `<span dir="rtl">${html}</span>` : html;
+}
+// Re-traduit le title/body d'une notif au rendu (type + data). Repli FR pour
+// les langues fr, les types moniteur et les textes 100 % libres.
+function notifContent(n) {
+  if (getLang() === "fr") return { title: n.title, body: n.body };
+  const d = n.data || {};
+  const num = (s) => (String(s ?? "").match(/\d+/) || [])[0];
+  switch (n.type) {
+    case "consolidation_quiz":
+      return {
+        title: nt("consolidation_title", n.title),
+        body: nt("consolidation_body", n.body),
+      };
+    case "flash_quiz":
+      return {
+        title: nt("flash_title", n.title),
+        body: nt("flash_body", n.body),
+      };
+    case "streak_risk":
+    case "streak_at_risk": {
+      const s = d.current_streak ?? num(n.body);
+      return {
+        title: nt("streak_title", n.title),
+        body: s != null ? nt("streak_body", n.body).replace("{n}", s) : n.body,
+      };
+    }
+    case "session_confirmation": {
+      const name = d.moniteur_prenom || "";
+      return {
+        title: nt("session_conf_title", n.title)
+          .replace("{name}", name)
+          .replace(/\s+$/, ""),
+        body: n.body,
+      };
+    }
+    case "comp_acquise": {
+      const code =
+        d.competence_id ||
+        (String(n.body || "").match(/^C\d[a-z]/) || [])[0] ||
+        "";
+      return {
+        title: nt("comp_title", n.title),
+        body: code ? nt("comp_body", n.body).replace("{code}", code) : n.body,
+      };
+    }
+    case "post_validation_quiz": {
+      // body = "{nom de compétence} — Fais le quiz en 30 sec" : le nom (contenu)
+      // reste tel quel, on ne traduit que le suffixe de coque.
+      const name = String(n.body || "")
+        .split("—")[0]
+        .trim();
+      return {
+        title: nt("pvq_title", n.title),
+        body: name
+          ? `${name} — ${nt("pvq_suffix", "Fais le quiz en 30 sec")}`
+          : n.body,
+      };
+    }
+    case "compte_rendu": {
+      const c = num(n.body);
+      return {
+        title: nt("cr_title", n.title),
+        body:
+          c == null
+            ? n.body
+            : c === "1"
+              ? nt("cr_body_one", n.body)
+              : nt("cr_body_many", n.body).replace("{n}", c),
+      };
+    }
+    default:
+      // relance / emotional_nudge / emotional_recap / types moniteur → FR
+      return { title: n.title, body: n.body };
+  }
+}
 import { emptyState } from "@/components/common/empty-state.js";
 
 // ─── Deep-link resolver ───────────────────────────────────────
@@ -223,7 +429,8 @@ function fmtTime(iso) {
   if (min < 60) return `il y a ${min} min`;
   const h = Math.floor(min / 60);
   if (h < 24) return `il y a ${h}h`;
-  return d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+  const _loc = getLang() === "en" ? "en-GB" : getLang() === "ar" ? "ar" : "fr-FR";
+  return d.toLocaleDateString(_loc, { day: "numeric", month: "short" });
 }
 
 // ─── CSS ──────────────────────────────────────────────────────
@@ -395,14 +602,14 @@ export async function mount(root, me) {
   root.innerHTML = `${STYLE}
 <div class="nf2 anim-slide-up" id="nf2-root">
   <div class="nf2-hd">
-    <button class="nf2-back" id="nf2-back" aria-label="Retour">
+    <button class="nf2-back" id="nf2-back" aria-label="${escAttr(nt("back", "Retour"))}">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
-    <div class="nf2-title">Notifications</div>
+    <div class="nf2-title">${nfRtl(esc(nt("title", "Notifications")))}</div>
     <span class="nf2-unread-badge" id="nf2-badge" style="display:none"></span>
-    <button class="nf2-mark-all" id="nf2-mark-all" disabled>Tout lu</button>
+    <button class="nf2-mark-all" id="nf2-mark-all" disabled>${esc(nt("mark_all", "Tout lu"))}</button>
   </div>
-  <div class="nf2-ptr" id="nf2-ptr"><div class="nf2-ptr-ico"></div> Actualisation…</div>
+  <div class="nf2-ptr" id="nf2-ptr"><div class="nf2-ptr-ico"></div> ${esc(nt("refreshing", "Actualisation…"))}</div>
   <div id="nf2-content" style="min-height:200px">
     ${skelRows(5)}
   </div>
@@ -429,8 +636,11 @@ async function loadNotifs(root, me) {
     .limit(60);
 
   if (error) {
-    toast("Impossible de charger les notifications", "error");
-    content.innerHTML = `<div class="nf2-empty"><div class="nf2-empty-ico">${icon("alert-triangle", { size: 28 })}</div><div class="nf2-empty-title">Erreur de chargement</div><div class="nf2-empty-sub">Vérifie ta connexion et réessaie.</div></div>`;
+    toast(
+      nt("load_err_toast", "Impossible de charger les notifications"),
+      "error",
+    );
+    content.innerHTML = `<div class="nf2-empty"><div class="nf2-empty-ico">${icon("alert-triangle", { size: 28 })}</div><div class="nf2-empty-title">${esc(nt("load_err_title", "Erreur de chargement"))}</div><div class="nf2-empty-sub">${esc(nt("load_err_sub", "Vérifie ta connexion et réessaie."))}</div></div>`;
     return;
   }
 
@@ -443,7 +653,10 @@ async function loadNotifs(root, me) {
     badge.style.display = unreadCount > 0 ? "" : "none";
     badge.textContent =
       unreadCount > 0
-        ? `${unreadCount} non lue${unreadCount > 1 ? "s" : ""}`
+        ? (unreadCount > 1
+            ? nt("unread_many", "{n} non lues")
+            : nt("unread_one", "{n} non lue")
+          ).replace("{n}", unreadCount)
         : "";
   }
 
@@ -452,11 +665,11 @@ async function loadNotifs(root, me) {
   if (markAll) markAll.disabled = unreadCount === 0;
 
   if (notifs.length === 0) {
-    const cta = `<button class="nf2-empty-cta" id="nf2-back-home">← Retour à l'accueil</button>`;
+    const cta = `<button class="nf2-empty-cta" id="nf2-back-home">${esc(nt("empty_cta", "← Retour à l'accueil"))}</button>`;
     content.innerHTML = emptyState({
       image: "/skins/empty-states/empty_notifications.png",
-      title: "Aucune notification",
-      body: "Tu es à jour ! Reviens plus tard.",
+      title: nt("empty_title", "Aucune notification"),
+      body: nt("empty_body", "Tu es à jour ! Reviens plus tard."),
       cta,
     });
     root
@@ -476,23 +689,24 @@ async function loadNotifs(root, me) {
   let html = "";
   for (const { key, label } of groupDefs) {
     if (!groups[key].length) continue;
-    html += `<div class="nf2-group-label">${label}</div><div class="nf2-list">`;
+    html += `<div class="nf2-group-label">${nfRtl(esc(nt("g_" + key, label)))}</div><div class="nf2-list">`;
     for (const n of groups[key]) {
       const m = typeMeta(n.type);
+      const c = notifContent(n);
       const route = notifRoute(n);
       const actionable = route && route !== "#/";
       html += `
         <div class="nf2-item-wrap" data-id="${escAttr(n.id)}">
           <div class="nf2-delete-bg" aria-label="Supprimer">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-            Suppr.
+            ${esc(nt("delete", "Suppr."))}
           </div>
           <div class="nf2-item ${n.read ? "" : "unread"}" data-id="${escAttr(n.id)}" data-read="${n.read}" data-route="${escAttr(route)}" role="button" tabindex="0">
             <div class="nf2-item-ico">${medallion(m.med[0], m.med[1], { size: 32 })}</div>
             <div class="nf2-item-body">
-              <div class="nf2-item-eyebrow" style="color:color-mix(in srgb, ${m.color} 50%, var(--ink))">${esc(m.label)} <span class="nf2-when">· ${fmtTime(n.created_at)}</span></div>
-              <div class="nf2-item-title">${esc(n.title)}</div>
-              ${n.body ? `<div class="nf2-item-desc">${esc(n.body)}</div>` : ""}
+              <div class="nf2-item-eyebrow" style="color:color-mix(in srgb, ${m.color} 50%, var(--ink))">${nfRtl(esc(nfLabel(m.label)))} <span class="nf2-when">· ${fmtTime(n.created_at)}</span></div>
+              <div class="nf2-item-title">${nfRtl(esc(c.title))}</div>
+              ${c.body ? `<div class="nf2-item-desc">${nfRtl(esc(c.body))}</div>` : ""}
             </div>
             ${actionable ? `<div class="nf2-item-go"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>` : ""}
           </div>
@@ -515,7 +729,10 @@ function wireItems(root, me, initialUnread) {
       badge.style.display = unreadCount > 0 ? "" : "none";
       badge.textContent =
         unreadCount > 0
-          ? `${unreadCount} non lue${unreadCount > 1 ? "s" : ""}`
+          ? (unreadCount > 1
+              ? nt("unread_many", "{n} non lues")
+              : nt("unread_one", "{n} non lue")
+            ).replace("{n}", unreadCount)
           : "";
     }
     const markAll = root.querySelector("#nf2-mark-all");
@@ -559,9 +776,9 @@ function wireItems(root, me, initialUnread) {
       markAllBtn.textContent = "…";
       const { error } = await sb.rpc("mark_all_notifs_read");
       if (error) {
-        toast("Erreur de mise à jour", "error");
+        toast(nt("update_err", "Erreur de mise à jour"), "error");
         markAllBtn.disabled = false;
-        markAllBtn.textContent = "Tout lu";
+        markAllBtn.textContent = nt("mark_all", "Tout lu");
         return;
       }
       root.querySelectorAll(".nf2-item.unread").forEach((el) => {
@@ -570,7 +787,7 @@ function wireItems(root, me, initialUnread) {
       });
       unreadCount = 0;
       updateBadge();
-      markAllBtn.textContent = "Tout lu";
+      markAllBtn.textContent = nt("mark_all", "Tout lu");
       toast("Toutes les notifications lues", "success", 2000);
       track("notifications.mark_all_read", {});
     });
