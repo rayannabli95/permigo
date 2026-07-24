@@ -42,6 +42,102 @@ import {
 } from "@/utils/free-tier.js";
 import { mountFreeTierWall } from "@/components/eleve/free-tier-wall.js";
 
+// ── i18n de la COQUE (élève non-francophone) — écran d'INTRO + RÉCAP
+// seulement. Le contenu des scènes (question/réponses/explication) est déjà
+// traduit via SITU_I18N/THEME_I18N/SITU_UI (importés ci-dessus) — on n'y
+// touche pas. Dict local (règle coque), repli FR si clé absente.
+const SI_I18N = {
+  en: {
+    skip: "Skip",
+    quit: "Quit game",
+    kicker_intro: "Before you start",
+    kicker_game: "Mini-game",
+    h1_intro: "Scenario challenge",
+    h1_game: "In Situation",
+    sub_intro: "One scene, one decision. Show your road instincts.",
+    sub_game: "One scene, one decision. Apply the rules of the road.",
+    session_of: "Session of {n}",
+    per_correct: "+{n} per correct answer",
+    cta_intro: "Let’s go!",
+    cta_game: "Play",
+    done: "Done",
+    title_perfect: "Flawless, well done!",
+    title_half: "You’ve already got the eye for it",
+    title_welcome: "Welcome aboard!",
+    sub_welcome: "Your journey and welcome chest are waiting for you.",
+    ready_next: "Ready for what’s next",
+    enter_cta: "Enter PermiGo",
+    round_done: "Round complete",
+    title_flawless: "Flawless!",
+    title_good: "Well done!",
+    title_keep: "Getting there, keep going!",
+    sub_flawless: "You read the road like a pro.",
+    sub_good: "A few more reflexes and you’ll have it locked in.",
+    sub_keep: "Every mistake you catch here is one less on the real road.",
+    cap_max: "Today’s reward maxed out — come back tomorrow",
+    zero_next: "0 {word} — next one’s the one",
+    cap_note: "Daily cap reached. Your {word} refill tomorrow.",
+    collection: "Collection · {a}/{b} scenes seen",
+    to_review: "To review",
+    nothing_review: "Nothing to review. You got every rule right.",
+    replay: "Play again",
+    back_home: "Back home",
+  },
+  ar: {
+    skip: "تخطّي",
+    quit: "الخروج من اللعبة",
+    kicker_intro: "قبل البدء",
+    kicker_game: "لعبة مصغّرة",
+    h1_intro: "تحدي الموقف",
+    h1_game: "في موقف",
+    sub_intro: "مشهد واحد، قرار واحد. أظهر حسّك في القيادة.",
+    sub_game: "مشهد واحد، قرار واحد. طبّق قانون السير.",
+    session_of: "جلسة من {n}",
+    per_correct: "+{n} لكل إجابة صحيحة",
+    cta_intro: "هيا بنا!",
+    cta_game: "العب",
+    done: "انتهى",
+    title_perfect: "بدون خطأ، أحسنت!",
+    title_half: "لديك بالفعل حسّ جيد",
+    title_welcome: "مرحبًا بك معنا!",
+    sub_welcome: "مسارك وصندوق الترحيب في انتظارك.",
+    ready_next: "جاهز لما يأتي",
+    enter_cta: "ادخل إلى PermiGo",
+    round_done: "انتهت الجولة",
+    title_flawless: "بدون خطأ!",
+    title_good: "أحسنت!",
+    title_keep: "الأمور تتحسن، واصل!",
+    sub_flawless: "تقرأ الطريق كالمحترفين.",
+    sub_good: "بضعة ردود أفعال أخرى وستتقنها تمامًا.",
+    sub_keep: "كل خطأ تتعرّف عليه هنا هو خطأ أقل في درسك الحقيقي.",
+    cap_max: "بلغت مكافأة اليوم حدّها الأقصى — عد غدًا",
+    zero_next: "0 {word} — المحاولة القادمة ستكون الصحيحة",
+    cap_note: "بلغت السقف اليومي. تتجدد {word} غدًا.",
+    collection: "المجموعة · {a}/{b} مشهد تمت مشاهدته",
+    to_review: "للمراجعة",
+    nothing_review: "لا شيء للمراجعة. أجبت عن كل القواعد بشكل صحيح.",
+    replay: "العب مجددًا",
+    back_home: "العودة إلى الرئيسية",
+  },
+};
+function sit(key, fr) {
+  const l = getLang();
+  return (l !== "fr" && SI_I18N[l]?.[key]) || fr;
+}
+// RTL par ATTRIBUT sur le bloc de texte (jamais <html dir> — règle lang.js).
+function sitRtl() {
+  return getLang() === "ar" ? ' dir="rtl" lang="ar"' : "";
+}
+// Mot « volant(s) » traduit (jamais « gems »). utils/volant.js reste FR (fichier
+// partagé, hors scope de cette tâche) : on ne traduit QUE l'affichage élève ici.
+function sitVolantWord(n) {
+  const l = getLang();
+  if (l === "en")
+    return Math.abs(Number(n)) <= 1 ? "steering wheel" : "steering wheels";
+  if (l === "ar") return "مقود";
+  return volantLabel(n);
+}
+
 // Emoji d'action des réponses (data/situations-conduite.js) → mini-médaillon 3D.
 // On ne touche pas la donnée : on traduit l'emoji au rendu. Emoji inconnu →
 // on garde l'emoji brut (jamais de trou).
@@ -131,22 +227,28 @@ export async function mount(root, param) {
     const count = isIntro ? INTRO_SIZE : ROUND_SIZE;
     stage.innerHTML = `
       <div class="sit-top">
-        <button class="sit-x" id="sit-quit" type="button" aria-label="${isIntro ? "Passer" : "Quitter le jeu"}">✕</button>
+        <button class="sit-x" id="sit-quit" type="button" aria-label="${esc(isIntro ? sit("skip", "Passer") : sit("quit", "Quitter le jeu"))}">✕</button>
       </div>
       <div class="sit-intro">
-        <div class="sit-kicker">${isIntro ? "Avant de démarrer" : "Mini-jeu"}</div>
-        <h1 class="sit-h1">${isIntro ? "Mise en situation" : "En situation"}</h1>
-        <p class="sit-sub">${
+        <div class="sit-kicker"${sitRtl()}>${esc(isIntro ? sit("kicker_intro", "Avant de démarrer") : sit("kicker_game", "Mini-jeu"))}</div>
+        <h1 class="sit-h1"${sitRtl()}>${esc(isIntro ? sit("h1_intro", "Mise en situation") : sit("h1_game", "En situation"))}</h1>
+        <p class="sit-sub"${sitRtl()}>${esc(
           isIntro
-            ? "Une scène, une décision. Montre ton flair pour la route."
-            : "Une scène, une décision. Applique le code de la route."
-        }</p>
+            ? sit(
+                "sub_intro",
+                "Une scène, une décision. Montre ton flair pour la route.",
+              )
+            : sit(
+                "sub_game",
+                "Une scène, une décision. Applique le code de la route.",
+              ),
+        )}</p>
         <div class="sit-hero" aria-hidden="true">${renderSituationScene(demo.scene)}</div>
         <div class="sit-chips">
-          <span class="sit-chip">${medallion("voiture", "blue", { size: 18 })} Session de ${count}</span>
-          <span class="sit-chip">${volantImg(14)} +${VOLANTS_PAR_BONNE} par bonne réponse</span>
+          <span class="sit-chip"${sitRtl()}>${medallion("voiture", "blue", { size: 18 })} ${esc(sit("session_of", `Session de ${count}`).replace("{n}", String(count)))}</span>
+          <span class="sit-chip"${sitRtl()}>${volantImg(14)} ${esc(sit("per_correct", `+${VOLANTS_PAR_BONNE} par bonne réponse`).replace("{n}", String(VOLANTS_PAR_BONNE)))}</span>
         </div>
-        <button class="sit-cta" id="sit-start" type="button">${isIntro ? "C’est parti !" : "Jouer"}</button>
+        <button class="sit-cta" id="sit-start" type="button"${sitRtl()}>${esc(isIntro ? sit("cta_intro", "C’est parti !") : sit("cta_game", "Jouer"))}</button>
       </div>`;
     stage.querySelector("#sit-quit").addEventListener("click", quit);
     stage.querySelector("#sit-start").addEventListener("click", () => {
@@ -372,27 +474,27 @@ export async function mount(root, param) {
     if (isIntro) {
       const introTitre =
         pct === 100
-          ? "Sans faute, bravo !"
+          ? sit("title_perfect", "Sans faute, bravo !")
           : pct >= 50
-            ? "Tu as déjà l’œil"
-            : "Bienvenue à bord !";
+            ? sit("title_half", "Tu as déjà l’œil")
+            : sit("title_welcome", "Bienvenue à bord !");
       stage.innerHTML = `
         <div class="sit-top">
-          <button class="sit-x" id="sit-quit" type="button" aria-label="Passer">✕</button>
+          <button class="sit-x" id="sit-quit" type="button" aria-label="${esc(sit('skip', 'Passer'))}">✕</button>
         </div>
         <div class="sit-recap">
-          <div class="sit-kicker">Terminé</div>
+          <div class="sit-kicker"${sitRtl()}>${esc(sit("done", "Terminé"))}</div>
           <div class="sit-score" id="sit-score">${bonnes}<span>/${total}</span></div>
-          <h2 class="sit-h1 sit-h1-sm" tabindex="-1">${introTitre}</h2>
-          <p class="sit-sub">Ton parcours et ton coffre de bienvenue t’attendent.</p>
-          <div class="sit-gain" id="sit-gain">
+          <h2 class="sit-h1 sit-h1-sm" tabindex="-1"${sitRtl()}>${esc(introTitre)}</h2>
+          <p class="sit-sub"${sitRtl()}>${esc(sit("sub_welcome", "Ton parcours et ton coffre de bienvenue t’attendent."))}</p>
+          <div class="sit-gain" id="sit-gain"${sitRtl()}>
             ${
               credites > 0
-                ? `${volantImg(20, { drop: true })} <b>+${credites}</b>&nbsp;${volantLabel(credites)}`
-                : `${volantImg(20)} Prêt pour la suite`
+                ? `${volantImg(20, { drop: true })} <b>+${credites}</b>&nbsp;${esc(sitVolantWord(credites))}`
+                : `${volantImg(20)} ${esc(sit("ready_next", "Prêt pour la suite"))}`
             }
           </div>
-          <button class="sit-cta" id="sit-enter" type="button">Entrer dans PermiGo <span aria-hidden="true">→</span></button>
+          <button class="sit-cta" id="sit-enter" type="button"${sitRtl()}>${esc(sit("enter_cta", "Entrer dans PermiGo"))} <span aria-hidden="true">→</span></button>
         </div>`;
       stage.querySelector(".sit-h1-sm")?.focus({ preventScroll: true });
       stage.querySelector("#sit-quit").addEventListener("click", exitIntro);
@@ -419,48 +521,48 @@ export async function mount(root, param) {
 
     const titre =
       pct === 100
-        ? "Sans faute !"
+        ? sit("title_flawless", "Sans faute !")
         : pct >= 60
-          ? "Bien joué !"
-          : "Ça rentre, continue !";
+          ? sit("title_good", "Bien joué !")
+          : sit("title_keep", "Ça rentre, continue !");
     const sousTitre =
       pct === 100
-        ? "Tu lis la route comme un chef."
+        ? sit("sub_flawless", "Tu lis la route comme un chef.")
         : pct >= 60
-          ? "Encore quelques réflexes et c’est du solide."
-          : "Chaque erreur vue ici, c’est une erreur en moins en vraie leçon.";
+          ? sit("sub_good", "Encore quelques réflexes et c’est du solide.")
+          : sit("sub_keep", "Chaque erreur vue ici, c’est une erreur en moins en vraie leçon.");
 
     stage.innerHTML = `
       <div class="sit-top">
-        <button class="sit-x" id="sit-quit" type="button" aria-label="Quitter le jeu">✕</button>
+        <button class="sit-x" id="sit-quit" type="button" aria-label="${esc(sit('quit', 'Quitter le jeu'))}">✕</button>
       </div>
       <div class="sit-recap">
-        <div class="sit-kicker">Manche terminée</div>
+        <div class="sit-kicker"${sitRtl()}>${esc(sit("round_done", "Manche terminée"))}</div>
         <div class="sit-score" id="sit-score">${bonnes}<span>/${total}</span></div>
-        <h2 class="sit-h1 sit-h1-sm" tabindex="-1">${titre}</h2>
-        <p class="sit-sub">${sousTitre}</p>
-        <div class="sit-gain" id="sit-gain">
+        <h2 class="sit-h1 sit-h1-sm" tabindex="-1"${sitRtl()}>${esc(titre)}</h2>
+        <p class="sit-sub"${sitRtl()}>${esc(sousTitre)}</p>
+        <div class="sit-gain" id="sit-gain"${sitRtl()}>
           ${
             credites > 0
-              ? `${volantImg(20, { drop: true })} <b>+${credites}</b>&nbsp;${volantLabel(credites)}`
+              ? `${volantImg(20, { drop: true })} <b>+${credites}</b>&nbsp;${esc(sitVolantWord(credites))}`
               : gagnes > 0 && plafonne
-                ? `${volantImg(20)} Récompense du jour au max — reviens demain`
-                : `${volantImg(20)} 0 volant — la prochaine est la bonne`
+                ? `${volantImg(20)} ${esc(sit("cap_max", "Récompense du jour au max — reviens demain"))}`
+                : `${volantImg(20)} ${esc(sit("zero_next", "0 volant — la prochaine est la bonne").replace("{word}", sitVolantWord(0)))}`
           }
         </div>
         ${
           plafonne && credites > 0
-            ? `<p class="sit-cap">Plafond du jour atteint. Les volants reviennent demain.</p>`
+            ? `<p class="sit-cap"${sitRtl()}>${esc(sit("cap_note", "Plafond du jour atteint. Les volants reviennent demain.").replace("{word}", sitVolantWord(2)))}</p>`
             : ""
         }
         <div class="sit-coll">
-          <div class="sit-coll-t">Collection · ${vues.size}/${SITUATIONS.length} scènes vues</div>
+          <div class="sit-coll-t"${sitRtl()}>${esc(sit("collection", "Collection · {a}/{b} scènes vues").replace("{a}", String(vues.size)).replace("{b}", String(SITUATIONS.length)))}</div>
           <div class="sit-coll-bar"><i style="width:${collPct}%"></i></div>
         </div>
         ${
           manquees.length
             ? `<div class="sit-revoir">
-                 <div class="sit-revoir-t">À revoir</div>
+                 <div class="sit-revoir-t"${sitRtl()}>${esc(sit("to_review", "À revoir"))}</div>
                  ${manquees
                    .map(
                      (m) => `
@@ -471,12 +573,12 @@ export async function mount(root, param) {
                    )
                    .join("")}
                </div>`
-            : `<div class="sit-revoir"><div class="sit-revoir-item sit-revoir-clean">
-                 Rien à revoir. Toutes les règles sont passées.
+            : `<div class="sit-revoir"><div class="sit-revoir-item sit-revoir-clean"${sitRtl()}>
+                 ${esc(sit("nothing_review", "Rien à revoir. Toutes les règles sont passées."))}
                </div></div>`
         }
-        <button class="sit-cta" id="sit-again" type="button">Rejouer</button>
-        <button class="sit-ghost" id="sit-home" type="button">Retour à l’accueil</button>
+        <button class="sit-cta" id="sit-again" type="button"${sitRtl()}>${esc(sit("replay", "Rejouer"))}</button>
+        <button class="sit-ghost" id="sit-home" type="button"${sitRtl()}>${esc(sit("back_home", "Retour à l’accueil"))}</button>
       </div>`;
 
     stage.querySelector(".sit-h1-sm")?.focus({ preventScroll: true });

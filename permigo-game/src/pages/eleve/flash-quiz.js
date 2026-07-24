@@ -31,6 +31,45 @@ import {
 import { wireQuestionSpeech, stopSpeaking } from "@/utils/speech.js";
 import { getLang } from "@/utils/lang.js";
 
+// ── i18n de la COQUE (élève non-francophone) ────────────────────
+// Textes d'interface REMPLACÉS dans la langue de l'élève (les QUESTIONS,
+// elles, restent bilingues via quiz-ui/biText : traduction + FR gardé
+// dessous). Dict local (règle coque), repli FR si clé absente.
+const FQ_I18N = {
+  en: {
+    loading: "Loading…",
+    tag: "Flash quiz",
+    sending: "Sending…",
+    back_home: "Back home",
+    not_found: "This flash quiz can't be found.",
+    already_answered: "You've already answered this flash quiz.",
+    expired: "Too late — this flash quiz has expired.",
+    no_questions: "Questions unavailable. Try again later.",
+    unavailable: "Quiz unavailable. Check your connection, then try again.",
+    time_up: "Time's up — this flash quiz has expired.",
+  },
+  ar: {
+    loading: "جارٍ التحميل…",
+    tag: "اختبار خاطف",
+    sending: "جارٍ الإرسال…",
+    back_home: "العودة للرئيسية",
+    not_found: "تعذّر العثور على هذا الاختبار الخاطف.",
+    already_answered: "لقد أجبت بالفعل على هذا الاختبار الخاطف.",
+    expired: "فات الأوان — انتهت صلاحية هذا الاختبار الخاطف.",
+    no_questions: "الأسئلة غير متاحة. حاول مرة أخرى لاحقًا.",
+    unavailable: "الاختبار غير متاح. تحقّق من اتصالك، ثم أعد المحاولة.",
+    time_up: "انتهى الوقت — انتهت صلاحية الاختبار الخاطف.",
+  },
+};
+function fqt(key, fr) {
+  const l = getLang();
+  return (l !== "fr" && FQ_I18N[l]?.[key]) || fr;
+}
+// RTL par ATTRIBUT sur le bloc de texte (jamais <html dir> — règle lang.js).
+function fqRtl() {
+  return getLang() === "ar" ? ' dir="rtl" lang="ar"' : "";
+}
+
 let _timer = null;
 
 function fmtClock(ms) {
@@ -102,7 +141,7 @@ export async function mount(root, flashQuizId) {
   }
 
   track("page.view", { page: "eleve_flash_quiz" });
-  root.innerHTML = `${STYLE}<div class="fqz"><div class="fqz-card"><div class="fqz-load">Chargement…</div></div></div>`;
+  root.innerHTML = `${STYLE}<div class="fqz"><div class="fqz-card"><div class="fqz-load"${fqRtl()}>${esc(fqt("loading", "Chargement…"))}</div></div></div>`;
 
   try {
     // RLS : seul sent_to (l'élève) peut lire sa ligne
@@ -115,11 +154,20 @@ export async function mount(root, flashQuizId) {
       .maybeSingle();
 
     if (error || !quiz)
-      return renderClosed(root, "Ce quiz éclair est introuvable.");
+      return renderClosed(
+        root,
+        fqt("not_found", "Ce quiz éclair est introuvable."),
+      );
     if (quiz.responded_at)
-      return renderClosed(root, "Tu as déjà répondu à ce quiz éclair.");
+      return renderClosed(
+        root,
+        fqt("already_answered", "Tu as déjà répondu à ce quiz éclair."),
+      );
     if (new Date(quiz.expires_at).getTime() <= Date.now()) {
-      return renderClosed(root, "Trop tard — ce quiz éclair est expiré.");
+      return renderClosed(
+        root,
+        fqt("expired", "Trop tard — ce quiz éclair est expiré."),
+      );
     }
 
     // Charge les questions (ordre = question_ids)
@@ -142,7 +190,10 @@ export async function mount(root, flashQuizId) {
       .map(withShuffledOptions);
 
     if (pool.length === 0)
-      return renderClosed(root, "Questions indisponibles. Réessaie plus tard.");
+      return renderClosed(
+        root,
+        fqt("no_questions", "Questions indisponibles. Réessaie plus tard."),
+      );
 
     track("flash_quiz.started", {
       flash_quiz_id: quiz.id,
@@ -153,7 +204,10 @@ export async function mount(root, flashQuizId) {
     console.error("[flash-quiz] mount failed", e);
     renderClosed(
       root,
-      "Quiz indisponible. Vérifie ta connexion, puis réessaie.",
+      fqt(
+        "unavailable",
+        "Quiz indisponible. Vérifie ta connexion, puis réessaie.",
+      ),
     );
   }
 }
@@ -168,7 +222,7 @@ function runQuiz(root, { quiz, pool, lang = "fr" }) {
   root.innerHTML = `${STYLE}
     <div class="fqz">
       <div class="fqz-top">
-        <div class="fqz-tag">${medallion("eclair", "gold", { size: 20 })} Quiz éclair</div>
+        <div class="fqz-tag">${medallion("eclair", "gold", { size: 20 })} <span${fqRtl()}>${esc(fqt("tag", "Quiz éclair"))}</span></div>
         <div class="fqz-clock" id="fqz-clock">5:00</div>
       </div>
       <div class="fqz-card">
@@ -195,7 +249,10 @@ function runQuiz(root, { quiz, pool, lang = "fr" }) {
       clearInterval(_timer);
       _timer = null;
       stopSpeaking();
-      renderClosed(root, "Temps écoulé — le quiz éclair est expiré.");
+      renderClosed(
+        root,
+        fqt("time_up", "Temps écoulé — le quiz éclair est expiré."),
+      );
     }
   }
   if (_timer) clearInterval(_timer);
@@ -272,7 +329,7 @@ function runQuiz(root, { quiz, pool, lang = "fr" }) {
       clearInterval(_timer);
       _timer = null;
     }
-    bodyEl.innerHTML = `<div class="fqz-load">Envoi…</div>`;
+    bodyEl.innerHTML = `<div class="fqz-load"${fqRtl()}>${esc(fqt("sending", "Envoi…"))}</div>`;
     let score3 = score,
       total = pool.length;
     try {
@@ -291,7 +348,7 @@ function runQuiz(root, { quiz, pool, lang = "fr" }) {
         if (/expired/i.test(error.message || "")) {
           return renderClosed(
             root,
-            "Temps écoulé — le quiz éclair est expiré.",
+            fqt("time_up", "Temps écoulé — le quiz éclair est expiré."),
           );
         }
       }
@@ -331,8 +388,8 @@ function renderClosed(root, message) {
       <div class="fqz-card">
         <div class="fqz-closed">
           <div class="fqz-closed-ico">${medallion("horloge", "violet", { size: 56, glow: true })}</div>
-          <p>${esc(message)}</p>
-          <button class="qz-cta" id="fqz-back" type="button">Retour à l'accueil</button>
+          <p${fqRtl()}>${esc(message)}</p>
+          <button class="qz-cta" id="fqz-back" type="button">${esc(fqt("back_home", "Retour à l'accueil"))}</button>
         </div>
       </div>
     </div>`;
