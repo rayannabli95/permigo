@@ -423,6 +423,17 @@ async function certify(root, me, compId, sub, cat, scorePct, answers) {
       score_pct: scorePct,
     });
 
+    // La compétence certifiée ne doit plus rester le « thème à préparer » du
+    // hero accueil (PREP_THEME_KEY = "pg-prep-theme", cf. accueil.js) — sinon
+    // « Je me prépare » resservirait la même fiche. On l'efface pour que le
+    // hero avance à la prochaine compétence non acquise.
+    try {
+      if (localStorage.getItem("pg-prep-theme") === compId)
+        localStorage.removeItem("pg-prep-theme");
+    } catch {
+      /* stockage indispo → le hero se recalcule de toute façon */
+    }
+
     // +25 volants — même récompense qu'une validation moniteur (parité solo).
     // Claim SERVEUR idempotent : 1 seule fois par compétence, repasser le
     // quiz ne re-crédite pas. Best-effort : un refus (migration pas encore

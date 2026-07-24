@@ -511,6 +511,32 @@ export async function mount(root, param) {
     focuses = [];
   }
 
+  // Compétences DÉJÀ acquises (moniteur ou auto-certif) — pour ne pas
+  // reproposer « certifie pour passer à la suite » sur une compétence déjà
+  // validée. Lecture seule, non bloquante (hors-ligne → Set vide : la certif
+  // reste joignable et valider-seul gère lui-même le cas « déjà certifiée »).
+  let validatedCodes = new Set();
+  try {
+    const me = getCurUser();
+    if (me) {
+      const [valRes, selfRes] = await Promise.all([
+        sb
+          .from("validations")
+          .select("competence_id")
+          .eq("eleve_id", me.id)
+          .eq("statut", "acquis"),
+        sb
+          .from("self_validations")
+          .select("competence_id")
+          .eq("eleve_id", me.id),
+      ]);
+      for (const r of valRes.data || []) validatedCodes.add(r.competence_id);
+      for (const r of selfRes.data || []) validatedCodes.add(r.competence_id);
+    }
+  } catch {
+    validatedCodes = new Set();
+  }
+
   async function markFocusDone(id) {
     try {
       await sb.rpc("mark_revision_focus_done", { p_id: id });
@@ -1091,9 +1117,83 @@ export async function mount(root, param) {
           focuses = focuses.filter((x) => x.id !== fid);
           markFocusDone(fid);
         }
+        // Boucle du pivot 17/07 : Préparer → (Conduire) → passer à la suite OU
+        // consolider. Quiz de révision réussi (≥70 %) sur une compétence pas
+        // encore acquise → on propose la CERTIFICATION (valider-seul, corrigée
+        // 100 % serveur) pour que le parcours AVANCE enfin — sans ça, le hero
+        // « Je me prépare » resservait les 3 mêmes fiches à l'infini. « Je
+        // consolide encore » reste un choix aussi valorisé (2-3 leçons sur un
+        // même geste = normal, jamais un échec).
+        const scorePct = total > 0 ? Math.round((good / total) * 100) : 0;
+        if (scorePct >= 70 && code && !validatedCodes.has(code)) {
+          renderCertifyBridge(code, scorePct);
+          return;
+        }
         view = "home";
         render();
       },
+    });
+  }
+
+  // Pont « passer à la suite » — affiché après un quiz de révision réussi sur
+  // une compétence non encore acquise. Réutilise le circuit sécurisé existant
+  // (#/valider-seul → self_validate_competence, corrigé serveur, +25 volants).
+  function renderCertifyBridge(cCode, scorePct) {
+    const f = getFiche(cCode);
+    const titre = f ? f.titre : "cette compétence";
+    root.innerHTML = `<style>
+      .rvc-cb{position:relative;min-height:calc(100dvh - 60px);
+        padding:34px 22px calc(120px + env(safe-area-inset-bottom));
+        display:flex;flex-direction:column;align-items:center;justify-content:center;
+        text-align:center;color:#f2f0fa;font-family:'Inter',sans-serif;
+        background:
+          radial-gradient(120% 55% at 50% -5%,rgba(255,190,70,.14) 0%,transparent 55%),
+          radial-gradient(120% 60% at 50% 22%,rgba(110,70,220,.26) 0%,transparent 62%),
+          linear-gradient(180deg,#181241 0%,#0f0d24 58%,#0b0a1c 100%);}
+      .rvc-cb-med{width:92px;height:92px;margin-bottom:16px;
+        animation:rvcPop .5s cubic-bezier(.34,1.56,.64,1) both;}
+      @keyframes rvcPop{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+      .rvc-cb-kick{display:inline-flex;align-items:center;gap:6px;
+        font:800 11px/1 'Inter',sans-serif;letter-spacing:.12em;text-transform:uppercase;
+        color:#ffd76e;background:rgba(255,210,74,.12);border:1px solid rgba(255,210,74,.3);
+        padding:6px 14px;border-radius:99px;margin-bottom:14px;}
+      .rvc-cb-ttl{font:800 24px/1.2 'Baloo 2',cursive;margin:0 0 10px;
+        background:linear-gradient(180deg,#ffe9b0,#f5b73d);
+        -webkit-background-clip:text;background-clip:text;color:transparent;}
+      .rvc-cb-p{font:500 14px/1.55 'Inter',sans-serif;color:#cabfef;margin:0;max-width:330px;}
+      .rvc-cb-cta{width:100%;max-width:340px;margin-top:26px;padding:16px;border:0;
+        border-radius:14px;cursor:pointer;font:800 15px/1 'Plus Jakarta Sans',sans-serif;
+        color:#4a2500;background:linear-gradient(180deg,#ffd76e,#f0a93f);
+        box-shadow:0 6px 0 #b46a10,0 12px 22px rgba(0,0,0,.4);}
+      .rvc-cb-cta:active{transform:translateY(3px);box-shadow:0 3px 0 #b46a10,0 7px 14px rgba(0,0,0,.4);}
+      .rvc-cb-ghost{width:100%;max-width:340px;margin-top:12px;padding:14px;
+        border:1.5px solid rgba(255,255,255,.35);background:transparent;color:#fff;
+        border-radius:14px;cursor:pointer;font:700 13.5px/1 'Plus Jakarta Sans',sans-serif;}
+      .rvc-cb-ghost:active{transform:scale(.98);}
+      @media (prefers-reduced-motion:reduce){.rvc-cb-med{animation:none}}
+    </style>
+    <div class="rvc-cb">
+      <div class="rvc-cb-med">${medallion("check", "violet", { size: 92 })}</div>
+      <span class="rvc-cb-kick">Quiz réussi à ${scorePct}%</span>
+      <h1 class="rvc-cb-ttl">Prêt·e à passer à la suite ?</h1>
+      <p class="rvc-cb-p">Si tu as déjà travaillé « ${esc(titre)} » en leçon avec ton enseignant, certifie-la pour débloquer la suite. Sinon, continue à la consolider en conduite — revenir sur un geste plusieurs fois, c'est normal.</p>
+      <button class="rvc-cb-cta" id="rvc-certify" type="button">Certifier — passer à la suite →</button>
+      <button class="rvc-cb-ghost" id="rvc-consolidate" type="button">Je consolide encore en conduite</button>
+    </div>`;
+    track("revision_conduite_certif_offer", {
+      code: cCode,
+      score_pct: scorePct,
+    });
+    root.querySelector("#rvc-certify")?.addEventListener("click", () => {
+      haptic("select");
+      track("revision_conduite_certif_go", { code: cCode });
+      navigate(`#/valider-seul/${cCode}`);
+    });
+    root.querySelector("#rvc-consolidate")?.addEventListener("click", () => {
+      haptic("tap");
+      track("revision_conduite_consolidate", { code: cCode });
+      view = "home";
+      render();
     });
   }
 
