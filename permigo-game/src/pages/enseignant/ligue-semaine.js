@@ -324,17 +324,6 @@ function _render(root, rows, scope) {
     }
   }
 
-  // Motivation CTA (vert arcade)
-  const motiv =
-    prevLeague && ptsToNext > 0
-      ? `<div class="ls-w-motivation">
-        <div class="ls-w-motivation-title">Plus que ${ptsToNext} validation${ptsToNext > 1 ? "s" : ""} pour passer en Ligue ${esc(prevLeague.name)}</div>
-        <div class="ls-w-motivation-sub">Chaque compétence validée avec un élève compte pour un point cette semaine.</div>
-        <button class="ls-w-motivation-cta" id="ls-seance-cta">
-          ${icon("plus", { size: 16, strokeWidth: 2.5 })} Enregistrer une séance
-        </button>
-      </div>`
-      : "";
 
   root.innerHTML = `${STYLE}
 <div class="ls-w anim-slide-up">
@@ -348,16 +337,11 @@ function _render(root, rows, scope) {
 ${hero}
 ${scopeBar}
 <div class="ls-w-list">${listHtml}</div>
-${motiv}
 </div>`;
 
   root.querySelector("#ls-back")?.addEventListener("click", () => {
     haptic("tap");
     navigate("#/mon-blason");
-  });
-  root.querySelector("#ls-seance-cta")?.addEventListener("click", () => {
-    haptic("impact");
-    navigate("#/log-session");
   });
   root.querySelectorAll(".ls-w-scope button").forEach((b) => {
     b.addEventListener("click", () => {

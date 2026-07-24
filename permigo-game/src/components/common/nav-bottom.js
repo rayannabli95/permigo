@@ -265,64 +265,6 @@ const STYLE = `
   }
   @keyframes bnDotPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.25); } }
   @media (prefers-reduced-motion: reduce) { .bn-dot { animation: none; } }
-
-  /* ── FAB flottant "Séance" (enseignant seulement) ── */
-  @keyframes bnFabIn {
-    from { opacity: 0; transform: scale(.85) translateY(6px); }
-    to   { opacity: 1; transform: scale(1)   translateY(0);   }
-  }
-  /* Masqué sur la page validation : on y EST déjà (le FAB recouvrait le
-     bouton « Enregistrer la séance »). Idem quand un footer CTA est présent. */
-  body:has(.vs) #bn-seance-fab { display: none; }
-  /* Quand le FAB est visible, le contenu doit pouvoir défiler AU-DESSUS de
-     lui (sinon il recouvre la dernière carte des listes — mes-élèves, radar). */
-  body.has-chrome:has(#bn-seance-fab) #app {
-    padding-bottom: calc(148px + env(safe-area-inset-bottom, 0px));
-  }
-  #bn-seance-fab {
-    position: fixed;
-    right: 20px;
-    bottom: calc(76px + env(safe-area-inset-bottom, 0px));
-    z-index: 310;
-    width: 56px; height: 56px;
-    border-radius: 50%;
-    /* Vert plastique : visible en clair ET en nuit (var(--ink) s'inversait en
-       blanc en dark → « + » blanc invisible sur cercle blanc). */
-    background: linear-gradient(to bottom, var(--a-lt) 0%, var(--a) 48%, var(--adk) 100%);
-    color: var(--a-ink);
-    border: none; padding: 0;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    -webkit-tap-highlight-color: transparent;
-    box-shadow:
-      0 8px 20px -6px color-mix(in srgb, var(--adk) 50%, transparent),
-      0 3px 8px -2px rgba(10,13,26,.2),
-      inset 0 1.5px 0 0 rgba(255,255,255,.28);
-    animation: bnFabIn .3s var(--ease-spring) both;
-    transition: transform .15s var(--ease-spring), box-shadow .15s ease;
-  }
-  #bn-seance-fab:active {
-    transform: scale(.9);
-    box-shadow: 0 4px 12px -4px rgba(10,13,26,.5), inset 0 0 0 1px rgba(255,255,255,.12);
-  }
-  @media (hover: hover) and (pointer: fine) {
-    #bn-seance-fab:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 24px -8px rgba(10,13,26,.6), inset 0 0 0 1px rgba(255,255,255,.12);
-    }
-  }
-  #bn-seance-fab:focus-visible {
-    outline: 2px solid var(--a);
-    outline-offset: 3px;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    #bn-seance-fab { animation: none !important; transition: none !important; }
-  }
-
-  /* FAB haut = 76+56=132px du bas — on pousse #app pour que rien ne se cache dessous */
-  body.has-enseignant-fab #app {
-    padding-bottom: calc(140px + env(safe-area-inset-bottom, 0px));
-  }
 `;
 
 // Rôle courant (pour la reconstruction sur changement de langue) + garde
@@ -367,8 +309,6 @@ export function mountBottomNav(role) {
     return;
   }
   existing?.remove();
-  document.getElementById("bn-seance-fab")?.remove();
-  document.body.classList.remove("has-enseignant-fab");
 
   const tabs = TABS[role] || TABS.eleve;
   // Traduction des libellés — élève uniquement (voir NAV_I18N).
@@ -430,29 +370,12 @@ export function mountBottomNav(role) {
     });
   });
 
-  // FAB flottant "Séance" — monté uniquement pour les enseignants
-  if (role === "enseignant") {
-    const fab = document.createElement("button");
-    fab.id = "bn-seance-fab";
-    fab.type = "button";
-    fab.setAttribute("aria-label", "Enregistrer une séance");
-    fab.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
-    fab.addEventListener("click", () => {
-      haptic("select");
-      location.hash = "#/log-session";
-    });
-    document.body.appendChild(fab);
-    document.body.classList.add("has-enseignant-fab");
-  }
-
   window.addEventListener("hashchange", _updateActive);
   window.addEventListener("resize", _onResize);
 }
 
 export function unmountBottomNav() {
   document.querySelector("#bottom-nav")?.remove();
-  document.getElementById("bn-seance-fab")?.remove();
-  document.body.classList.remove("has-enseignant-fab");
   window.removeEventListener("hashchange", _updateActive);
   window.removeEventListener("resize", _onResize);
 }

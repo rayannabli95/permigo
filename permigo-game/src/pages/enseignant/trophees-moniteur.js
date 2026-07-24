@@ -308,20 +308,13 @@ function _render(root, d, openKey = null) {
       <div class="tr2-grid">${list.map((t) => _cardHtml(t)).join("")}</div>`;
   }
 
-  const cta =
-    d.totalVals === 0
-      ? `<div class="tr2-cta">
-          <div class="tr2-cta-txt">Valide une séance pour débloquer ton premier trophée.</div>
-          <button class="tr2-cta-btn" id="tr2-start">Valider une séance</button>
-        </div>`
-      : "";
 
   // Empty state si aucune donnée significative
   const emptyState =
     d.totalVals === 0
       ? `<div class="tr2-empty">
           ${medallion("route", "indigo", { size: 56 })}
-          <p class="tr2-empty-sub">Valide ta première compétence pour débloquer tes jalons.</p>
+          <p class="tr2-empty-sub">Tes jalons se débloquent à mesure que tes élèves progressent.</p>
         </div>`
       : "";
 
@@ -344,16 +337,11 @@ function _render(root, d, openKey = null) {
       </div>
     </div>
   </div>
-  ${cta}
   ${emptyState}
   ${gridHtml}
 </div>`;
 
   _wireBack(root);
-  root
-    .querySelector("#tr2-start")
-    ?.addEventListener("click", () => navigate("#/log-session"));
-
   root.querySelectorAll(".tr2-card").forEach((el) => {
     el.addEventListener("click", () => {
       haptic("impact");
