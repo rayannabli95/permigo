@@ -49,6 +49,7 @@ import { icon } from "@/utils/icons.js";
 import { medallion } from "@/utils/medallions.js";
 import { REMC_TOTAL } from "@/data/remc.js";
 import { getLang } from "@/utils/lang.js";
+import { worldTr } from "@/data/worlds-i18n.js";
 
 const CHEVRON = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>`;
 
@@ -244,7 +245,17 @@ function ordinalOrPlural(n, singular, plural) {
 }
 
 // ─── STYLE (scopé .mp-*, tokens theme-aware — jamais --surface/--border/--muted) ──
+// ── Nom de chapitre : FR + traduction en petit italique (en/ar), repli FR ──
+function mpNameBi(fr, tr) {
+  const f = esc(fr ?? "");
+  const l = getLang();
+  if (l === "fr" || !tr || tr === fr) return f;
+  const t = l === "ar" ? `<span dir="rtl">${esc(tr)}</span>` : esc(tr);
+  return `${f}<span class="mp-comp-tr">${t}</span>`;
+}
+
 const STYLE = `<style>
+.mp-comp-tr { display:block; font-size:.8em; font-style:italic; font-weight:500; opacity:.72; margin-top:1px; line-height:1.2; }
 .mp {
   --gold-1:#ffe9a8; --gold-2:#ffd24a; --gold-3:#ff9c1c; --gold-deep:#c87d12; --gold-ink:#7a5510;
   max-width: 480px; margin: 0 auto; padding: 14px 15px 32px;
@@ -594,7 +605,7 @@ function renderStep1({
       return `<button class="mp-comp ${cls}" type="button" data-chap="${ws.idx}" aria-label="${escAttr(titre)} — ${ws.done} sur ${ws.total} ${escAttr(lbl)}">
         ${chapMedallion(ws.status)}
         <div class="mp-comp-b">
-          <div class="mp-comp-t">${esc(titre)}</div>
+          <div class="mp-comp-t">${mpNameBi(titre, worldTr(ws.world?.id, getLang())?.titre)}</div>
           <div class="mp-comp-bar" aria-hidden="true"><i style="width:${pct}%"></i></div>
         </div>
         <div class="mp-comp-n"><b>${ws.done}/${ws.total}</b><span>${esc(lbl)}</span></div>
