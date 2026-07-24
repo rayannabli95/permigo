@@ -547,6 +547,10 @@ async function certify(root, me, compId, sub, cat, scorePct, answers) {
       wireResult(root, me, compId, sub, cat);
       return;
     }
+    try {
+      if (localStorage.getItem("pg-prep-theme") === compId)
+        localStorage.removeItem("pg-prep-theme");
+    } catch {}
     haptic("success");
     burstConfetti({ count: 120, power: 18 });
     track("valider_seul.validated", {
