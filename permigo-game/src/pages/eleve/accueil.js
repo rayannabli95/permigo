@@ -32,7 +32,6 @@ import {
 import { renderSituationScene } from "@/components/eleve/situation-scene.js";
 import { getScenesVues } from "@/utils/situations-vues.js";
 import { getMyChests } from "@/utils/game-state.js";
-import { mountFeedbackFeed } from "@/components/eleve/feedback-feed.js";
 import { mountDailyQuests } from "@/components/eleve/daily-quests.js";
 import { toast } from "@/components/common/toast.js";
 import { navigate } from "@/router.js";
@@ -1933,17 +1932,9 @@ export async function mount(root) {
           )
           .catch(() => {});
       }
-      // Remonté AU-DESSUS de la section premium : les retours du moniteur sont la preuve
-      // d'autorité de l'élève, ils ne doivent pas finir tout en bas de page.
-      Promise.resolve()
-        .then(() =>
-          mountFeedbackFeed(accDiv, {
-            eleveId: me.id,
-            limit: 5,
-            anchorEl: accDiv.querySelector("#acc-cr-slot"),
-          }),
-        )
-        .catch(() => {});
+      // « Retours de ton moniteur » retiré (pivot : le moniteur n'émet plus de
+      // validations/retours — décision Rayan 24/07). Le compte-rendu de leçon,
+      // lui, reste (slot #acc-cr-top-slot sous le hero).
     }
 
     // Leaderboard async
@@ -2220,8 +2211,7 @@ function render({
   </section>
 
   <!-- Compte-rendu du moniteur (injecté async) — juste sous le hero, au-dessus
-       du fold : c'est la porte d'entrée la plus fiable vers le retour du
-       moniteur (voir #acc-cr-slot plus bas, réservé à l'ancre du feed avis). -->
+       du fold : c'est la porte d'entrée la plus fiable vers le retour du moniteur. -->
   <div id="acc-cr-top-slot"></div>
   ${debriefCard}
   ${consolCard}
@@ -2324,10 +2314,6 @@ function render({
   <!-- Note : l'entraînement (examen blanc, révision conduite, en situation,
        centre d'examen) vit dans les onglets « Réviser » et « Mon permis ».
        L'accueil ne garde ici que ce qui vient du moniteur + les coffres. -->
-
-  <!-- Ancre pour mountFeedbackFeed (le contenu compte-rendu vit désormais
-       dans #acc-cr-top-slot, juste sous le hero — ne pas y injecter le CR). -->
-  <div id="acc-cr-slot"></div>
 
   <!-- Slot coffre (injecté async par _loadAndInjectChests) -->
   <div id="acc-chest-slot"></div>
