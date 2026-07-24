@@ -5,7 +5,112 @@
 
 import { sb } from "@/auth/auth.js";
 import { toast } from "@/components/common/toast.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
+import { getLang } from "@/utils/lang.js";
+
+const I18N = {
+  fr: {
+    title: "Créer un compte",
+    email: "Email",
+    email_ph: "vous@exemple.fr",
+    password: "Mot de passe",
+    confirm: "Confirmer le mot de passe",
+    school: "École (optionnel)",
+    school_ph: "Nom de votre auto-école",
+    submit: "S'inscrire",
+    already: "Déjà inscrit ?",
+    login: "Se connecter",
+    err_email: "Email requis",
+    err_password: "Mot de passe requis",
+    err_password_short:
+      "Le mot de passe doit contenir au moins 6 caractères",
+    err_mismatch: "Les mots de passe ne correspondent pas",
+    err_signup: "Erreur lors de l'inscription",
+    err_generic: "Erreur inscription",
+    success: "Inscription réussie — vérifie ta boîte mail",
+    auth_registered: "Un compte existe déjà pour cet email.",
+    auth_invalid_email: "Adresse email invalide.",
+    auth_password_short:
+      "Le mot de passe doit contenir au moins 6 caractères.",
+    auth_rate_limit:
+      "Trop de tentatives — réessaie dans quelques minutes.",
+  },
+  en: {
+    title: "Create an account",
+    email: "Email",
+    email_ph: "you@example.com",
+    password: "Password",
+    confirm: "Confirm password",
+    school: "Driving school (optional)",
+    school_ph: "Name of your driving school",
+    submit: "Sign up",
+    already: "Already registered?",
+    login: "Log in",
+    err_email: "Email required",
+    err_password: "Password required",
+    err_password_short: "Password must be at least 6 characters",
+    err_mismatch: "Passwords don't match",
+    err_signup: "Sign-up failed",
+    err_generic: "Sign-up error",
+    success: "Account created — check your inbox",
+    auth_registered: "An account already exists for this email.",
+    auth_invalid_email: "Invalid email address.",
+    auth_password_short: "Password must be at least 6 characters.",
+    auth_rate_limit: "Too many attempts — try again in a few minutes.",
+  },
+  ar: {
+    title: "إنشاء حساب",
+    email: "البريد الإلكتروني",
+    email_ph: "you@example.com",
+    password: "كلمة المرور",
+    confirm: "تأكيد كلمة المرور",
+    school: "مدرسة تعليم القيادة (اختياري)",
+    school_ph: "اسم مدرسة تعليم القيادة",
+    submit: "إنشاء الحساب",
+    already: "لديك حساب بالفعل؟",
+    login: "تسجيل الدخول",
+    err_email: "البريد الإلكتروني مطلوب",
+    err_password: "كلمة المرور مطلوبة",
+    err_password_short: "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل",
+    err_mismatch: "كلمتا المرور غير متطابقتين",
+    err_signup: "تعذّر إنشاء الحساب",
+    err_generic: "حدث خطأ أثناء إنشاء الحساب",
+    success: "تم إنشاء الحساب — تحقق من صندوق بريدك",
+    auth_registered: "يوجد حساب مسجّل بهذا البريد الإلكتروني.",
+    auth_invalid_email: "عنوان البريد الإلكتروني غير صالح.",
+    auth_password_short: "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل.",
+    auth_rate_limit: "محاولات كثيرة — حاول مجددًا بعد دقائق.",
+  },
+};
+
+function t(key, frFallback) {
+  const lang = getLang();
+  return I18N[lang]?.[key] ?? I18N.fr[key] ?? frFallback;
+}
+
+function text(key, frFallback) {
+  const value = esc(t(key, frFallback));
+  return getLang() === "ar" ? `<span dir="rtl">${value}</span>` : value;
+}
+
+function attr(key, frFallback) {
+  return escAttr(t(key, frFallback));
+}
+
+const AUTH_ERROR_KEYS = {
+  "User already registered": "auth_registered",
+  "Unable to validate email address: invalid format": "auth_invalid_email",
+  "Password should be at least": "auth_password_short",
+  "Email rate limit exceeded": "auth_rate_limit",
+};
+
+function translateAuthError(message) {
+  if (!message) return null;
+  for (const [source, key] of Object.entries(AUTH_ERROR_KEYS)) {
+    if (message.includes(source)) return t(key, I18N.fr[key]);
+  }
+  return message;
+}
 
 export function mount(root) {
   root.innerHTML = template();
@@ -44,43 +149,43 @@ function template() {
 
       <div class="su-content">
         <div class="su-card">
-          <h2>Créer un compte</h2>
+          <h2>${text("title", "Créer un compte")}</h2>
 
           <form id="signup-form" novalidate>
             <div class="su-field">
-              <label for="su-email">Email</label>
+              <label for="su-email">${text("email", "Email")}</label>
               <div class="su-input-wrap">
-                <input id="su-email" type="email" name="email" required autocomplete="email" placeholder="vous@exemple.fr">
+                <input id="su-email" type="email" name="email" required autocomplete="email" placeholder="${attr("email_ph", "vous@exemple.fr")}">
               </div>
             </div>
 
             <div class="su-field">
-              <label for="su-password">Mot de passe</label>
+              <label for="su-password">${text("password", "Mot de passe")}</label>
               <div class="su-input-wrap">
                 <input id="su-password" type="password" name="password" required autocomplete="new-password" placeholder="••••••••">
               </div>
             </div>
 
             <div class="su-field">
-              <label for="su-confirm">Confirmer le mot de passe</label>
+              <label for="su-confirm">${text("confirm", "Confirmer le mot de passe")}</label>
               <div class="su-input-wrap">
                 <input id="su-confirm" type="password" name="confirm" required autocomplete="new-password" placeholder="••••••••">
               </div>
             </div>
 
             <div class="su-field">
-              <label for="su-school">École (optionnel)</label>
+              <label for="su-school">${text("school", "École (optionnel)")}</label>
               <div class="su-input-wrap">
-                <input id="su-school" type="text" name="school" autocomplete="off" placeholder="Nom de votre auto-école">
+                <input id="su-school" type="text" name="school" autocomplete="off" placeholder="${attr("school_ph", "Nom de votre auto-école")}">
               </div>
             </div>
 
-            <button type="submit" class="su-cta" id="su-submit">S'inscrire</button>
+            <button type="submit" class="su-cta" id="su-submit">${text("submit", "S'inscrire")}</button>
             <p class="su-err" id="su-err"></p>
           </form>
 
           <div class="su-foot">
-            Déjà inscrit ? <a href="#/login">Se connecter</a>
+            ${text("already", "Déjà inscrit ?")} <a href="#/login">${text("login", "Se connecter")}</a>
           </div>
         </div>
       </div>
@@ -107,19 +212,25 @@ function wire(root) {
     const school = schoolIn.value.trim();
 
     if (!email) {
-      errEl.textContent = "Email requis";
+      errEl.textContent = t("err_email", "Email requis");
       return;
     }
     if (!password) {
-      errEl.textContent = "Mot de passe requis";
+      errEl.textContent = t("err_password", "Mot de passe requis");
       return;
     }
     if (password.length < 6) {
-      errEl.textContent = "Le mot de passe doit contenir au moins 6 caractères";
+      errEl.textContent = t(
+        "err_password_short",
+        "Le mot de passe doit contenir au moins 6 caractères",
+      );
       return;
     }
     if (password !== confirm) {
-      errEl.textContent = "Les mots de passe ne correspondent pas";
+      errEl.textContent = t(
+        "err_mismatch",
+        "Les mots de passe ne correspondent pas",
+      );
       return;
     }
 
@@ -134,21 +245,28 @@ function wire(root) {
 
       if (error) {
         errEl.textContent = esc(
-          error.message || "Erreur lors de l'inscription",
+          translateAuthError(error.message) ||
+            t("err_signup", "Erreur lors de l'inscription"),
         );
         submitBtn.disabled = false;
-        submitBtn.textContent = "S'inscrire";
+        submitBtn.textContent = t("submit", "S'inscrire");
         return;
       }
 
-      toast("Inscription réussie — vérifie ta boîte mail", "success");
+      toast(
+        t("success", "Inscription réussie — vérifie ta boîte mail"),
+        "success",
+      );
       setTimeout(() => {
         window.location.hash = "#/login";
       }, 1000);
     } catch (err) {
-      errEl.textContent = esc(err.message || "Erreur inscription");
+      errEl.textContent = esc(
+        translateAuthError(err.message) ||
+          t("err_generic", "Erreur inscription"),
+      );
       submitBtn.disabled = false;
-      submitBtn.textContent = "S'inscrire";
+      submitBtn.textContent = t("submit", "S'inscrire");
     }
   });
 }
