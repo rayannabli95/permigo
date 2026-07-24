@@ -12,6 +12,8 @@
  * activityLevels : optional map { 'YYYY-MM-DD': 1|2|3|4 } pour intensité (1=light, 4=darkest)
  */
 
+import { getLang } from "@/utils/lang.js";
+
 const DAYS_FR = ["L", "M", "M", "J", "V", "S", "D"];
 const MONTHS_FR = [
   "Janv.",
@@ -28,6 +30,68 @@ const MONTHS_FR = [
   "Déc.",
 ];
 
+// ── i18n de la COQUE (EN/AR) — dict local, repli FR (règle coque validée 3×).
+const HM_I18N = {
+  en: {
+    days: ["M", "T", "W", "T", "F", "S", "S"],
+    months: [
+      "Jan.",
+      "Feb.",
+      "Mar.",
+      "Apr.",
+      "May",
+      "Jun.",
+      "Jul.",
+      "Aug.",
+      "Sep.",
+      "Oct.",
+      "Nov.",
+      "Dec.",
+    ],
+    title: "My activity",
+    stats: "<b>{t}</b> active days · <b>{w}</b> this week",
+    less: "Less",
+    more: "More",
+    scroll_aria: "Activity history, scrolls horizontally",
+    active_aria: " — active",
+  },
+  ar: {
+    days: ["إث", "ثل", "أر", "خم", "جم", "سب", "أح"],
+    months: [
+      "ينا",
+      "فبر",
+      "مار",
+      "أبر",
+      "ماي",
+      "يون",
+      "يول",
+      "أغس",
+      "سبت",
+      "أكت",
+      "نوف",
+      "ديس",
+    ],
+    title: "نشاطي",
+    stats: "<b>{t}</b> يوم نشط · <b>{w}</b> هذا الأسبوع",
+    less: "أقل",
+    more: "أكثر",
+    scroll_aria: "سجل النشاط، تمرير أفقي",
+    active_aria: " — نشط",
+  },
+};
+function hmt(key, fr) {
+  const l = getLang();
+  return (l !== "fr" && HM_I18N[l]?.[key]) || fr;
+}
+// Isolation RTL par span (l'app reste LTR — cf. utils/lang.js).
+function hmRtl(html) {
+  return getLang() === "ar" ? `<span dir="rtl">${html}</span>` : html;
+}
+function hmLoc() {
+  const l = getLang();
+  return l === "en" ? "en-GB" : l === "ar" ? "ar" : "fr-FR";
+}
+
 function dateKey(d) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
@@ -37,8 +101,12 @@ export function renderHeatmap({
   activityLevels = null,
   activityDetails = {},
   weeks = 14,
-  title = "Mon activité",
+  title = null,
 } = {}) {
+  // Titre par défaut traduit ("" explicite = pas de titre, cf. accueil).
+  const _title = title == null ? hmt("title", "Mon activité") : title;
+  const _days = hmt("days", DAYS_FR);
+  const _months = hmt("months", MONTHS_FR);
   const active = new Set(activeDates);
   const levels = activityLevels || {};
   const today = new Date();
@@ -78,7 +146,7 @@ export function renderHeatmap({
         level,
         isToday,
         detail,
-        dateLabel: cellDate.toLocaleDateString("fr-FR", {
+        dateLabel: cellDate.toLocaleDateString(hmLoc(), {
           day: "numeric",
           month: "long",
         }),
@@ -88,7 +156,7 @@ export function renderHeatmap({
       if (day === 0 && cellDate.getMonth() !== lastMonth) {
         monthsLabels.push({
           weekIdx: w,
-          monthName: MONTHS_FR[cellDate.getMonth()],
+          monthName: _months[cellDate.getMonth()],
         });
         lastMonth = cellDate.getMonth();
       }
@@ -105,12 +173,16 @@ export function renderHeatmap({
   return `
     <div class="hmap">
       <div class="hmap-head">
-        <div class="hmap-title">${title}</div>
+        <div class="hmap-title">${hmRtl(_title)}</div>
         <div class="hmap-stats">
-          <span><b>${totalActive}</b> jours actifs · <b>${last7Active}</b> cette semaine</span>
+          <span>${hmRtl(
+            hmt("stats", "<b>{t}</b> jours actifs · <b>{w}</b> cette semaine")
+              .replace("{t}", totalActive)
+              .replace("{w}", last7Active),
+          )}</span>
         </div>
       </div>
-      <div class="hmap-scroll" tabindex="0" role="region" aria-label="Historique d'activité, défilement horizontal">
+      <div class="hmap-scroll" tabindex="0" role="region" aria-label="${hmt("scroll_aria", "Historique d'activité, défilement horizontal")}">
         <div class="hmap-months">
           ${monthsLabels.map((m) => `<span style="grid-column-start:${m.weekIdx + 2}">${m.monthName}</span>`).join("")}
         </div>
@@ -118,7 +190,7 @@ export function renderHeatmap({
           ${grid
             .map(
               (row, dayIdx) => `
-            <div class="hmap-daylbl" style="grid-row:${dayIdx + 1}">${dayIdx % 2 === 1 ? DAYS_FR[dayIdx] : ""}</div>
+            <div class="hmap-daylbl" style="grid-row:${dayIdx + 1}">${dayIdx % 2 === 1 ? _days[dayIdx] : ""}</div>
             ${row
               .map(
                 (cell, weekIdx) => `
@@ -128,7 +200,7 @@ export function renderHeatmap({
                    data-key="${cell.key}"
                    data-label="${cell.dateLabel}"
                    data-detail="${cell.detail ? encodeURIComponent(cell.detail) : ""}"
-                   aria-label="${cell.dateLabel}${cell.isActive ? " — actif" : ""}"></div>
+                   aria-label="${cell.dateLabel}${cell.isActive ? hmt("active_aria", " — actif") : ""}"></div>
             `,
               )
               .join("")}
@@ -138,13 +210,13 @@ export function renderHeatmap({
         </div>
       </div>
       <div class="hmap-legend">
-        <span>Moins</span>
+        <span>${hmRtl(hmt("less", "Moins"))}</span>
         <span class="hmap-lcell lv-0"></span>
         <span class="hmap-lcell lv-1"></span>
         <span class="hmap-lcell lv-2"></span>
         <span class="hmap-lcell lv-3"></span>
         <span class="hmap-lcell lv-4"></span>
-        <span>Plus</span>
+        <span>${hmRtl(hmt("more", "Plus"))}</span>
       </div>
     </div>
   `;

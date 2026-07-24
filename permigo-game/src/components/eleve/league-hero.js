@@ -16,6 +16,71 @@ import { icon } from "@/utils/icons.js";
 import { navigate } from "@/router.js";
 import { track } from "@/services/analytics.js";
 import { msToNextMonday, fmtCountdown } from "@/utils/league-shared.js";
+import { getLang } from "@/utils/lang.js";
+
+// ── i18n de la COQUE (EN/AR) — dict local, repli FR (règle coque validée 3×).
+const LGH_I18N = {
+  en: {
+    eyebrow: "Your league",
+    season: "Season ends · ",
+    place: "Your rank",
+    school: "Your school",
+    solo: "PermiGo learners",
+    of_students: "{org} · {n} learner{s}",
+    aria: "Your league this week — {st} — see the leaderboard",
+    aria_rank: "you're {r} of {n}",
+    aria_empty: "no points yet this week",
+    invite:
+      "Answer questions this week — every right answer puts you in the race.",
+    top: "You're in the lead — keep your spot",
+    gap: "Only <b>{g} {u}</b> to overtake {w}",
+    first_place: "1st place",
+    pt: "pt",
+    pts: "pts",
+  },
+  ar: {
+    eyebrow: "دوريك",
+    season: "نهاية الموسم · ",
+    place: "مركزك",
+    school: "مدرستك",
+    solo: "طلاب بيرميغو",
+    of_students: "{org} · {n} طالبًا",
+    aria: "دوريك هذا الأسبوع — {st} — عرض الترتيب",
+    aria_rank: "أنت في المركز {r} من أصل {n}",
+    aria_empty: "لا نقاط بعد هذا الأسبوع",
+    invite: "أجب عن أسئلة هذا الأسبوع — كل إجابة صحيحة تُدخلك السباق.",
+    top: "أنت في الصدارة — حافظ على مركزك",
+    gap: "تفصلك <b>{g} {u}</b> عن تجاوز {w}",
+    first_place: "المركز الأول",
+    pt: "نقطة",
+    pts: "نقاط",
+  },
+};
+function lgt(key, fr) {
+  const l = getLang();
+  return (l !== "fr" && LGH_I18N[l]?.[key]) || fr;
+}
+// Isolation RTL par span (l'app reste LTR — cf. utils/lang.js).
+function lgRtl(html) {
+  return getLang() === "ar" ? `<span dir="rtl">${html}</span>` : html;
+}
+// Compte à rebours localisé (fmtCountdown écrit « 2j 5h » en FR).
+function lgCountdown(ms) {
+  const l = getLang();
+  if (l === "fr") return fmtCountdown(ms);
+  const s = Math.floor(ms / 1000);
+  const d = Math.floor(s / 86400);
+  const h = Math.floor((s % 86400) / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  if (l === "ar") {
+    if (d > 0) return `${d} يوم ${h} س`;
+    if (h > 0) return `${h} س ${m} د`;
+    return `${m} د`;
+  }
+  if (d > 0) return `${d}d ${h}h`;
+  if (h > 0) return `${h}h ${m}min`;
+  return `${m}min`;
+}
 
 // Vue-modèle d'une ligue à partir des lignes de classement.
 function buildModel(rows) {
@@ -35,16 +100,23 @@ function buildModel(rows) {
 // UNE ligne d'objectif — jamais culpabilisante, toujours « voilà comment monter ».
 function nudgeLine(m) {
   if (!m.classed) {
-    return `<div class="lgh-nudge lgh-nudge-invite">Réponds à des questions cette semaine — chaque bonne réponse te fait entrer dans la course.</div>`;
+    return `<div class="lgh-nudge lgh-nudge-invite">${lgRtl(esc(lgt("invite", "Réponds à des questions cette semaine — chaque bonne réponse te fait entrer dans la course.")))}</div>`;
   }
   if (m.mine.rang === 1) {
-    return `<div class="lgh-nudge"><span class="lgh-up" aria-hidden="true">👑</span> Tu es en tête — garde ta place</div>`;
+    return `<div class="lgh-nudge"><span class="lgh-up" aria-hidden="true">👑</span> ${lgRtl(esc(lgt("top", "Tu es en tête — garde ta place")))}</div>`;
   }
   if (m.above) {
-    const unit = m.gap > 1 ? "pts" : "pt";
+    const unit = m.gap > 1 ? lgt("pts", "pts") : lgt("pt", "pt");
     const who =
-      m.mine.rang - 1 === 1 ? "la 1ʳᵉ place" : esc(m.above.display_name || "");
-    return `<div class="lgh-nudge"><span class="lgh-up" aria-hidden="true">▲</span> Plus que <b>${m.gap} ${unit}</b> pour passer ${who}</div>`;
+      m.mine.rang - 1 === 1
+        ? esc(lgt("first_place", "la 1ʳᵉ place"))
+        : esc(m.above.display_name || "");
+    return `<div class="lgh-nudge"><span class="lgh-up" aria-hidden="true">▲</span> ${lgRtl(
+      lgt("gap", "Plus que <b>{g} {u}</b> pour passer {w}")
+        .replace("{g}", m.gap)
+        .replace("{u}", esc(unit))
+        .replace("{w}", who),
+    )}</div>`;
   }
   return "";
 }
@@ -54,26 +126,37 @@ function renderHero(models, solo) {
   const rankBig = m.classed
     ? `<span class="lgh-hash">#</span>${m.mine.rang}`
     : "—";
-  const org = solo ? "Élèves PermiGo" : "Ton école";
+  const org = solo ? lgt("solo", "Élèves PermiGo") : lgt("school", "Ton école");
+  const lang = getLang();
   const ofTxt = m.classed
-    ? `${org} · ${m.total} élève${m.total > 1 ? "s" : ""}`
+    ? lang === "fr"
+      ? `${org} · ${m.total} élève${m.total > 1 ? "s" : ""}`
+      : lgt("of_students", "{org} · {n} élèves")
+          .replace("{org}", org)
+          .replace("{n}", m.total)
+          .replace("{s}", m.total > 1 ? "s" : "")
     : org;
+  const ariaSt = m.classed
+    ? lgt("aria_rank", "tu es {r}ᵉ sur {n}")
+        .replace("{r}", m.mine.rang)
+        .replace("{n}", m.total)
+    : lgt("aria_empty", "pas encore de points cette semaine");
 
-  return `<div class="lgh-eyebrow">Ta ligue</div>
+  return `<div class="lgh-eyebrow">${lgRtl(esc(lgt("eyebrow", "Ta ligue")))}</div>
   <div class="lgh" role="button" tabindex="0"
-       aria-label="Ta ligue de la semaine — ${m.classed ? `tu es ${m.mine.rang}ᵉ sur ${m.total}` : "pas encore de points cette semaine"} — voir le classement">
+       aria-label="${esc(lgt("aria", "Ta ligue de la semaine — {st} — voir le classement").replace("{st}", ariaSt))}">
     <span class="lgh-glow lgh-glow-a" aria-hidden="true"></span>
     <span class="lgh-glow lgh-glow-b" aria-hidden="true"></span>
 
     <div class="lgh-head">
-      <span class="lgh-season">${icon("clock", { size: 12, strokeWidth: 2.6 })} Fin de saison · <b>${esc(fmtCountdown(msToNextMonday()))}</b></span>
+      <span class="lgh-season">${icon("clock", { size: 12, strokeWidth: 2.6 })} ${lgRtl(`${esc(lgt("season", "Fin de saison · "))}<b>${esc(lgCountdown(msToNextMonday()))}</b>`)}</span>
     </div>
 
     <div class="lgh-core">
       <span class="lgh-rank-big${m.classed ? "" : " is-empty"}">${rankBig}</span>
       <div class="lgh-mid">
-        <span class="lgh-lbl">Ta place</span>
-        <span class="lgh-of">${esc(ofTxt)}</span>
+        <span class="lgh-lbl">${lgRtl(esc(lgt("place", "Ta place")))}</span>
+        <span class="lgh-of">${lgRtl(esc(ofTxt))}</span>
       </div>
       <span class="lgh-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h13M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
     </div>
