@@ -75,6 +75,26 @@ export const THEME_WEAK_TAGS = {
 };
 
 export const SITUATIONS = [
+  // ─────────────────────────────────────────────────────────────
+  // CE QUE LE MOTEUR DE SCÈNE SAIT DESSINER (renderSituationScene)
+  // ⚠️ N'écris JAMAIS dans une question un élément que le moteur ne dessine pas.
+  //
+  // scene.kind : "route" | "croisement" | "autoroute" | "insertion" | "giratoire"
+  // véhicule   : { id, at, d, lane?, type?, couleur?, label? }
+  //   at      : "S" | "N" | "E" | "W"  (d'où il entre)
+  //   d       : distance au centre (plus grand = plus loin en arrière)
+  //   lane    : position latérale 0→1
+  //   type    : voiture (défaut) | "moto" | "velo" | "bus" | "camion"
+  //   couleur : "joueur" | "bleu" | "rouge" | "jaune" | "gris"
+  // piéton     : scene.pieton = { engage: true|false }
+  // panneau/feu: scene.signal = { type, branch, etat? }
+  //   type    : "stop" | "cede" | "prio" | "giratoire" | "feu"
+  //   feu     : + etat "rouge"|"orange"|"vert"
+  //
+  // ❌ LE MOTEUR NE SAIT PAS (interdit d'y faire référence dans une question) :
+  //   panneau de vitesse (30/50/70) · sens interdit · la NUIT · la PLUIE/brouillard/neige
+  // → Ajouter une de ces capacités = chantier moteur (Claude), pas une scène.
+  // ─────────────────────────────────────────────────────────────
   // ── Giratoire ────────────────────────────────────────────────
   {
     id: "giratoire-entree",
@@ -1939,6 +1959,237 @@ export const SITUATIONS = [
       { veh: "v2", delai: 250 },
       { veh: "moi", delai: 1100, clign: "gauche" },
     ],
+  },
+
+  // ── Vitesse (nouveau lot 1) ──────────────────────────────────
+  {
+    id: "vitesse-ville-panneau-30",
+    theme: "vitesse",
+    difficulte: 1,
+    alt: "Rue droite. Un bus roule devant ta voiture.",
+    scene: {
+      kind: "route",
+      vehicules: [
+        { id: "bus", at: "S", d: 1.0, lane: 0.72, type: "bus" },
+        {
+          id: "moi",
+          at: "S",
+          d: 2.7,
+          lane: 0.1,
+          couleur: "joueur",
+          label: "Toi",
+        },
+      ],
+    },
+    question:
+      "Dans cette rue en ville, la vitesse est limitée à 30 km/h. Quelle vitesse maximale ?",
+    mode: "cartes",
+    reponses: [
+      { id: "trente", label: "30 km/h" },
+      { id: "cinquante", label: "50 km/h, comme partout en ville" },
+      { id: "quarante", label: "40 km/h si la rue est dégagée" },
+    ],
+    bonne: "trente",
+    explication:
+      "La limite de 30 km/h s'applique dans toute la rue : c'est un maximum, même si la rue est dégagée. Tu ralentis encore si les conditions l'exigent.",
+    okAnim: [{ veh: "bus" }, { veh: "moi", delai: 300 }],
+  },
+  {
+    id: "vitesse-campagne-panneau-70",
+    theme: "vitesse",
+    difficulte: 1,
+    alt: "Route droite bordée d'arbres. Ta voiture circule seule.",
+    scene: {
+      kind: "route",
+      vehicules: [
+        { id: "moi", at: "S", d: 2.2, couleur: "joueur", label: "Toi" },
+      ],
+    },
+    question:
+      "Sur cette route de campagne, la vitesse est limitée à 70 km/h. Jusqu'à quelle vitesse peux-tu rouler ?",
+    mode: "cartes",
+    reponses: [
+      { id: "soixante-dix", label: "70 km/h maximum" },
+      { id: "quatre-vingts", label: "80 km/h, la limite habituelle" },
+      { id: "quatre-vingt-dix", label: "90 km/h si la route est vide" },
+    ],
+    bonne: "soixante-dix",
+    explication:
+      "La limitation de 70 km/h prime sur la limite générale : ici, tu ne dépasses pas 70 km/h. C'est un plafond, pas une vitesse à atteindre.",
+    okAnim: [{ veh: "moi" }],
+  },
+
+  // ── Intersections en T et priorité (nouveau lot 2) ───────────
+  {
+    id: "intersection-t-prio-droite",
+    theme: "priorite-droite",
+    difficulte: 1,
+    alt: "Croisement sans panneau ni feu. Une voiture bleue arrive par ta droite.",
+    scene: {
+      kind: "croisement",
+      vehicules: [
+        { id: "moi", at: "S", d: 1.9, couleur: "joueur", label: "Toi" },
+        { id: "v1", at: "E", d: 1.75, couleur: "bleu" },
+      ],
+    },
+    question:
+      "Tu arrives au bout d'une route, à un carrefour en T sans panneau. Une voiture vient de droite. Qui passe ?",
+    mode: "cible",
+    reponses: [
+      { id: "v1", veh: "v1", label: "La voiture bleue" },
+      { id: "moi", veh: "moi", label: "Toi" },
+    ],
+    bonne: "v1",
+    explication:
+      "La forme en T ne crée aucune priorité. Sans panneau ni feu, la priorité à droite s'applique : la voiture bleue passe d'abord.",
+    focus: { veh: "v1" },
+    okAnim: [{ veh: "v1" }, { veh: "moi", delai: 950 }],
+  },
+  {
+    id: "intersection-t-vehicule-gauche",
+    theme: "priorite-droite",
+    difficulte: 2,
+    alt: "Croisement sans panneau ni feu. Une voiture rouge arrive par ta gauche.",
+    scene: {
+      kind: "croisement",
+      vehicules: [
+        { id: "moi", at: "S", d: 1.9, couleur: "joueur", label: "Toi" },
+        { id: "v1", at: "W", d: 1.75, couleur: "rouge" },
+      ],
+    },
+    question:
+      "À une intersection en T sans panneau, une voiture vient de ta gauche. Qui passe ?",
+    mode: "cible",
+    reponses: [
+      { id: "moi", veh: "moi", label: "Toi" },
+      { id: "v1", veh: "v1", label: "La voiture rouge" },
+    ],
+    bonne: "moi",
+    explication:
+      "Une route qui continue tout droit n'est pas prioritaire par sa forme. La voiture vient de ta gauche : tu es à sa droite, donc tu passes d'abord.",
+    focus: { veh: "moi" },
+    okAnim: [{ veh: "moi" }, { veh: "v1", delai: 950 }],
+  },
+  {
+    id: "intersection-t-cycliste-droite",
+    theme: "priorite-droite",
+    difficulte: 2,
+    alt: "Croisement sans panneau ni feu. Un cycliste arrive par ta droite.",
+    scene: {
+      kind: "croisement",
+      vehicules: [
+        { id: "moi", at: "S", d: 1.9, couleur: "joueur", label: "Toi" },
+        { id: "velo", at: "E", d: 1.6, type: "velo" },
+      ],
+    },
+    question:
+      "À une intersection en T sans signalisation, un cycliste vient de ta droite. Qui passe ?",
+    mode: "cible",
+    reponses: [
+      { id: "velo", veh: "velo", label: "Le cycliste" },
+      { id: "moi", veh: "moi", label: "Toi" },
+    ],
+    bonne: "velo",
+    explication:
+      "La priorité à droite vaut aussi dans une intersection en T et pour un vélo. Le cycliste arrive de ta droite : tu le laisses passer.",
+    focus: { veh: "velo" },
+    okAnim: [{ veh: "velo" }, { veh: "moi", delai: 1100 }],
+  },
+  {
+    id: "prio-droite-pluie-camion",
+    theme: "priorite-droite",
+    difficulte: 2,
+    alt: "Croisement sans panneau ni feu. Un camion arrive par ta droite.",
+    scene: {
+      kind: "croisement",
+      vehicules: [
+        { id: "moi", at: "S", d: 2.2, couleur: "joueur", label: "Toi" },
+        { id: "camion", at: "E", d: 2.0, type: "camion" },
+      ],
+    },
+    question:
+      "Ce camion arrive à ta droite au croisement sans panneau. Qui passe ?",
+    mode: "cible",
+    reponses: [
+      { id: "camion", veh: "camion", label: "Le camion" },
+      { id: "moi", veh: "moi", label: "Toi" },
+    ],
+    bonne: "camion",
+    explication:
+      "Le camion vient de ta droite : il passe d'abord. Tu ralentis tôt pour lui céder le passage.",
+    focus: { veh: "camion" },
+    okAnim: [{ veh: "camion" }, { veh: "moi", delai: 1200 }],
+  },
+
+  // ── Distance et cycliste (nouveau lot 3) ─────────────────────
+  {
+    id: "pluie-ville-distance-bus",
+    theme: "distance",
+    difficulte: 2,
+    alt: "Rue droite. Ta voiture suit un bus de près.",
+    scene: {
+      kind: "route",
+      vehicules: [
+        { id: "bus", at: "S", d: 1.0, lane: 0.72, type: "bus" },
+        {
+          id: "moi",
+          at: "S",
+          d: 2.7,
+          lane: 0.1,
+          couleur: "joueur",
+          label: "Toi",
+        },
+      ],
+    },
+    question: "En ville, tu suis ce bus de trop près. Que fais-tu ?",
+    mode: "cartes",
+    reponses: [
+      {
+        id: "marge",
+        label: "Je ralentis et j'augmente ma distance",
+        ico: "🐢",
+      },
+      {
+        id: "cinquante",
+        label: "Je reste à 50 km/h sans changer l'écart",
+      },
+      { id: "colle", label: "Je me rapproche pour mieux voir devant" },
+    ],
+    bonne: "marge",
+    explication:
+      "Tu ralentis et tu gardes plus de marge pour pouvoir t'arrêter si le bus freine. Une limitation reste un maximum, jamais une allure imposée.",
+    focus: { veh: "bus" },
+    okAnim: [{ veh: "bus" }, { veh: "moi", delai: 350 }],
+  },
+  {
+    id: "nuit-ville-cycliste",
+    theme: "cycliste",
+    difficulte: 2,
+    alt: "Rue droite. Un cycliste roule devant ta voiture, sur le bord droit de la voie.",
+    scene: {
+      kind: "route",
+      vehicules: [
+        { id: "velo", at: "S", d: 0.9, lane: 0.62, type: "velo" },
+        { id: "moi", at: "S", d: 2.1, couleur: "joueur", label: "Toi" },
+      ],
+    },
+    question:
+      "En ville, tu rattrapes ce cycliste mais tu n'as pas 1 m pour le dépasser. Que fais-tu ?",
+    mode: "cartes",
+    reponses: [
+      {
+        id: "attends",
+        label: "Je reste derrière et j'attends d'avoir la place",
+        ico: "🐢",
+      },
+      { id: "frole", label: "Je passe doucement à 50 cm" },
+      { id: "phares", label: "Je mets les feux de route et je double" },
+    ],
+    bonne: "attends",
+    explication:
+      "En ville, tu laisses au moins 1 m pour dépasser un cycliste. Si tu ne l'as pas, tu restes derrière et tu ne le frôles jamais.",
+    focus: { veh: "velo" },
+    okAnim: [{ veh: "velo" }, { veh: "moi", delai: 350 }],
   },
 ];
 
