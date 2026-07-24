@@ -47,11 +47,6 @@ const MONITEUR_TOUR_STEPS = [
     text: "Invite un élève. Il reçoit un lien, crée son compte en 1 minute et t’est rattaché tout seul. C’est le point de départ.",
   },
   {
-    sel: "#aj-cta-seance",
-    title: "Ajoute ton regard",
-    text: "Si tu veux, coche ce que tu as vu en leçon. Jamais obligatoire : ton élève certifie lui-même son parcours, ton regard vient en plus.",
-  },
-  {
     sel: '.bn-tab[data-id="eleves"]',
     title: "Suis tes élèves",
     text: "Retrouve chaque élève, son livret et sa progression. Ceux à relancer remontent tout seuls.",
@@ -89,11 +84,6 @@ function maybeStartMoniteurTour() {
 
 // ─── CSS ──────────────────────────────────────────────────────────
 const STYLE = `<style>
-  /* ── Reset local ── */
-  /* Le FAB « séance » global (#bn-seance-fab) fait doublon avec le gros
-     bouton « Valider une séance » de cette page ET chevauche le footer →
-     on le masque ICI seulement (il reste sur les autres pages moniteur). */
-  #bn-seance-fab { display: none !important; }
   .aj-page {
     padding: 0 0 calc(84px + env(safe-area-inset-bottom, 0px));
     max-width: 600px;
@@ -305,32 +295,6 @@ const STYLE = `<style>
   .aj-pill-warn { background: #fef3c7; color: #b45309; }
   .aj-pill-go   { background: #eae8ff; color: #4f46e5; }
 
-  /* ── Bouton 3D « Valider une séance » ── */
-  .aj-cta-wrap { padding: 6px 16px 0; }
-  .aj-cta {
-    width: 100%;
-    border: none;
-    border-radius: 16px;
-    padding: 16px;
-    min-height: 54px;
-    font: 800 15px/1 'Inter', sans-serif;
-    color: #fff;
-    background: linear-gradient(180deg, #5b54ff, #4f46e5);
-    box-shadow: 0 6px 0 #3a32c4;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    transition: transform .12s ease, box-shadow .12s ease;
-    letter-spacing: -.01em;
-  }
-  .aj-cta:active {
-    transform: translateY(5px);
-    box-shadow: 0 1px 0 #3a32c4;
-  }
-  .aj-cta:focus-visible {
-    outline: 3px solid #c7c4ff;
-    outline-offset: 3px;
-  }
-
   /* ── Footer 2 tuiles ── */
   .aj-foot {
     display: flex;
@@ -417,7 +381,7 @@ const STYLE = `<style>
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .aj-hero, .aj-cta, .aj-eleve-card {
+    .aj-hero, .aj-eleve-card {
       animation: none !important;
       transition: none !important;
     }
@@ -629,11 +593,6 @@ async function renderInto(root, _me) {
   const totalValsCount = totalValsRes?.count ?? 0;
   const moniteurState = getMoniteurState(totalValsCount);
 
-  // KPI hero
-  const todayCount = todayValsRes?.count ?? 0;
-  const yesterdayCount = yesterdayValsRes?.count ?? 0;
-  const deltaVsHier = todayCount - yesterdayCount;
-
   // Ma ligue
   const leagueRows = leagueRes?.data || [];
   const myLeagueRow = leagueRows.find((r) => r.is_me) || null;
@@ -719,21 +678,24 @@ async function renderInto(root, _me) {
 
   // ─── Hero HTML ────────────────────────────────────────────────
   const prenomEsc = prenom ? esc(fmtName(prenom)) : "";
-  const deltaHtml =
-    deltaVsHier !== 0
-      ? `<b>${deltaVsHier > 0 ? "+" + deltaVsHier : deltaVsHier}</b> vs hier`
-      : "pareil qu’hier";
+  // Hero « observation » (pivot : le moniteur observe, il ne valide plus —
+  // l'élève s'auto-certifie). On montre l'état de ses élèves.
+  const nbActifs7j = elevesEnFormation.filter((e) => {
+    const la = elevesMap[e.id]?.last_active_at || "";
+    return la && la >= sevenDaysAgo;
+  }).length;
+  const nbDecroche = elevesEnFormation.filter((e) => {
+    const la = elevesMap[e.id]?.last_active_at || "";
+    return !la || la < sevenDaysAgo;
+  }).length;
 
-  // Flamme PNG pour le record
-  const flammeHtml = `<img src="/skins/permigo-streak-flame-v1.webp" alt="" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;display:inline-block;margin-right:2px;filter:drop-shadow(0 1px 3px rgba(255,150,0,.5))">`;
-
-  // À 0 validation : pas de célébration à vide. Trophée en sourdine +
-  // message d'amorçage vers le CTA, au lieu d'un « 0 » triomphal avec
-  // « record à battre » et « pareil qu'hier ».
-  const heroEmpty = todayCount === 0;
+  // Sous-titre court : il partage la ligne avec le trophée → on garde une
+  // seule métrique (l'activité). « à relancer » vit dans la tuile + le radar,
+  // les reçus dans l'en-tête « Tes élèves · N reçus ».
+  const heroEmpty = nbElevesActifs === 0;
   const heroSubHtml = heroEmpty
-    ? `<b>Valide ta première compétence du jour</b> avec « Valider une séance »`
-    : `${deltaHtml} &nbsp;·&nbsp; record ${flammeHtml} à battre`;
+    ? `<b>Invite ton premier élève</b>`
+    : `<b>${nbActifs7j}</b> actif${nbActifs7j > 1 ? "s" : ""} cette semaine`;
   const trophyMutedStyle = heroEmpty
     ? ' style="opacity:.4;filter:grayscale(.75) drop-shadow(0 14px 20px rgba(40,20,90,.3));animation:none"'
     : "";
@@ -758,7 +720,7 @@ async function renderInto(root, _me) {
 
     // Statut + couleur barre
     let pillClass = "aj-pill-go";
-    let pillText = `${REMC_TOTAL - e.acquis} à valider`;
+    let pillText = "En préparation";
     let barColor = "#4f46e5";
 
     if (isPretExam(e.acquisSet)) {
@@ -821,8 +783,8 @@ async function renderInto(root, _me) {
       <div class="aj-hero">
         <div class="aj-hero-halo"${heroEmpty ? ' style="opacity:.3"' : ""}></div>
         <div class="aj-hero-content">
-          <div class="aj-hero-label">Tes validations du jour</div>
-          <div class="aj-hero-big">${todayCount}<span class="aj-hero-big-unit">compétence${todayCount > 1 ? "s" : ""}</span></div>
+          <div class="aj-hero-label">Prêts pour l’examen</div>
+          <div class="aj-hero-big">${heroEmpty ? "—" : nbPrets}<span class="aj-hero-big-unit">${heroEmpty ? "aucun élève" : "sur " + nbElevesActifs + " élève" + (nbElevesActifs > 1 ? "s" : "")}</span></div>
           <div class="aj-hero-sub">${heroSubHtml}</div>
           ${topBadgeHtml}
         </div>
@@ -860,20 +822,14 @@ async function renderInto(root, _me) {
           : roster.map(renderRosterCard).join("")
       }
 
-      <!-- Bouton 3D Valider une séance -->
-      <div class="aj-cta-wrap">
-        <button class="aj-cta" id="aj-cta-seance" type="button">
-          Valider une séance
-        </button>
-      </div>
 
       <!-- Footer 2 tuiles -->
       <div class="aj-foot">
         <div class="aj-ft">
           <img src="/skins/badge-3d-06.webp" alt="" loading="lazy" width="32" height="32">
           <div>
-            <div class="aj-ft-val">${nbElevesActifs > 0 ? nbPrets : "—"}</div>
-            <div class="aj-ft-lbl">${nbPrets >= 2 ? "élèves prêts" : "élève prêt"}</div>
+            <div class="aj-ft-val">${nbElevesActifs > 0 ? nbDecroche : "—"}</div>
+            <div class="aj-ft-lbl">à relancer</div>
           </div>
         </div>
         <div class="aj-ft">
@@ -896,12 +852,6 @@ async function renderInto(root, _me) {
   `;
 
   // ─── Listeners ────────────────────────────────────────────────
-  // Bouton Valider une séance
-  root.querySelector("#aj-cta-seance")?.addEventListener("click", () => {
-    haptic("impact");
-    track("aujourdhui.cta_seance.clicked");
-    navigate("#/log-session");
-  });
 
   // Voir tout les élèves
   root.querySelector("#aj-voir-tout")?.addEventListener("click", () => {

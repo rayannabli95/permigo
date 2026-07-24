@@ -1651,7 +1651,7 @@ function wireClassementPanel(panel) {
 }
 
 async function wireRows() {
-  const { attachSwipe, attachLongPress } = await import("@/utils/gestures.js");
+  const { attachLongPress } = await import("@/utils/gestures.js");
 
   _root.querySelectorAll(".me-row[data-eleve-id]").forEach((row) => {
     const id = row.dataset.eleveId;
@@ -1665,28 +1665,6 @@ async function wireRows() {
     row.addEventListener("click", handler);
     row.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") handler();
-    });
-
-    // ── Swipe right = validation rapide ──
-    row.style.transition =
-      "transform .25s cubic-bezier(.2,.7,.3,1), background .15s";
-    attachSwipe(row, {
-      threshold: 80,
-      follow: (dx) => {
-        const clamped = Math.max(0, Math.min(100, dx));
-        row.style.transform = `translateX(${clamped}px)`;
-        row.style.background =
-          dx > 30 ? "color-mix(in srgb, var(--a) 6%, transparent)" : "";
-      },
-      onSwipeRight: () => {
-        haptic("select");
-        track("eleve.swipe_validate", { eleve_id: id });
-        navigate(`#/log-session?eleveId=${id}`);
-      },
-      onEnd: () => {
-        row.style.transform = "";
-        row.style.background = "";
-      },
     });
 
     // ── Bouton « ⋯ » visible → menu rapide (n'ouvre PAS le livret) ──
@@ -1816,9 +1794,6 @@ function openQuickMenu(eleveId, anchorRow) {
              </button>`
           : ""
       }
-      <button class="me-qm-item" data-action="valider">
-        <span class="me-qm-ico">${icon("check", { size: 14, strokeWidth: 2.5 })}</span> Enregistrer une séance
-      </button>
       <button class="me-qm-item" data-action="livret">
         <span class="me-qm-ico">${icon("arrow-right", { size: 14, strokeWidth: 2.5 })}</span> Ouvrir le livret de compétences
       </button>
@@ -1864,8 +1839,7 @@ function openQuickMenu(eleveId, anchorRow) {
     btn.addEventListener("click", () => {
       const action = btn.dataset.action;
       close();
-      if (action === "valider") navigate(`#/log-session?eleveId=${eleveId}`);
-      else if (action === "livret") navigate(`#/livret/${eleveId}`);
+      if (action === "livret") navigate(`#/livret/${eleveId}`);
       else if (action === "provenance" && eleve)
         openProvenanceEditor({
           eleveId,
