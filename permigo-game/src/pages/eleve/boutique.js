@@ -25,6 +25,210 @@ import { openBottomSheet } from "@/components/common/bottom-sheet.js";
 import { volantImg } from "@/utils/volant.js";
 import { bumpVolantPill } from "@/components/eleve/volant-reward.js";
 import { showPurchaseReveal } from "@/components/eleve/purchase-reveal.js";
+import { getLang } from "@/utils/lang.js";
+import {
+  itemName,
+  itemDesc,
+  rarityLabel,
+  volantWord,
+} from "@/data/rewards-i18n.js";
+
+// ── i18n de la COQUE (EN/AR) — dict local (convention coque, cf. profil #555).
+// bt(key, fr) = traduit-ou-français esc() intégré (sûr texte + attribut) ;
+// btR = brut (toasts, textContent, interpolation). Noms/descriptions d'objets :
+// data/rewards-i18n.js (catalogue prod mappé par id, fallback FR serveur).
+// En 'fr' ou clé absente → FR inchangé.
+const BO_I18N = {
+  en: {
+    sec_voitures: "Cars",
+    sec_voitures_sub: "Your car on the leaderboard",
+    sec_persos: "Characters",
+    sec_persos_sub: "Your avatar next to your name",
+    sec_fonds: "Licence backgrounds",
+    sec_fonds_sub: "Your virtual licence card",
+    roue_aria: "Open the Wheel",
+    roue_t: "The Wheel",
+    roue_s_solo: "Skins, titles and <b>rewards</b> to unlock.",
+    roue_s: "Skins, titles and <b>real big prizes</b> from your instructor.",
+    roue_go: "Free spin!",
+    hd_title: "Shop",
+    hd_small: "Your style on the leaderboard",
+    balance_lab: "Your balance:",
+    sr_volants: "steering wheels",
+    unavailable: "“Shop” unavailable",
+    check_conn: "Check your connection, then try again.",
+    vedette: "Star of the day",
+    vedette_sub: "The piece to aim for",
+    selection: "✦ Selection",
+    note: "Skins are 100% cosmetic: style, never an advantage.",
+    obj_removed: "Objective removed",
+    obj_set: "Objective set — earn steering wheels by revising!",
+    buy_fail: "Purchase failed. Try again.",
+    not_enough: "Not enough steering wheels",
+    already_owned: "Already in your inventory",
+    buy: "Buy",
+    see: "View",
+    can_afford: "You can buy it!",
+    equipped: "✓ Equipped",
+    equipped_short: "Equipped",
+    tap_equip: "Tap to equip",
+    aria_equipped: "equipped",
+    aria_unlocked: "unlocked",
+    aria_buy: "buy",
+    aria_not_enough: "not enough steering wheels",
+    hero_sub_default: "Your signature on the leaderboard",
+    intro_x: "Got it",
+    intro_title: "Your car, your signature",
+    intro_1: "It shows next to your name on the leaderboard",
+    intro_2: "Unlock skins with your steering wheels",
+    intro_3: "Tap a skin to equip it in 1 tap",
+    ribbon: "Legend.",
+    owned_lab: "Owned",
+    equip_btn: "Equip",
+    unlocked_badge: "Unlocked",
+    obj_kick_pin: "Your goal",
+    obj_kick_aim: "To aim for",
+    obj_reached: "Goal reached!",
+    obj_touch: "— tap to get it",
+    obj_earn: "Earned by <b>revising</b>",
+    obj_aria: "Goal:",
+    obj_can_buy: "you can buy it",
+    obj_x: "Remove the objective",
+    daily_kick: "Reward for revising",
+    daily_title: "Earn steering wheels every day",
+    daily_sub:
+      "Every finished revision session credits your balance. <b>No shortcuts.</b>",
+    daily_cta: "Revise",
+    price: "Price",
+    equipped_remove: "✓ Equipped — remove",
+    obj_on: "✓ This is your goal",
+    obj_off: "🎯 Set as goal",
+    close: "Close",
+    try_rank: "Your skin on the leaderboard",
+    try_permis: "Preview on your licence",
+    me_fallback: "You",
+  },
+  ar: {
+    sec_voitures: "السيارات",
+    sec_voitures_sub: "سيارتك في التصنيف",
+    sec_persos: "الشخصيات",
+    sec_persos_sub: "صورتك الرمزية بجانب اسمك",
+    sec_fonds: "خلفيات الرخصة",
+    sec_fonds_sub: "بطاقة رخصتك الافتراضية",
+    roue_aria: "افتح العجلة",
+    roue_t: "العجلة",
+    roue_s_solo: "أشكال وألقاب و<b>مكافآت</b> للفتح.",
+    roue_s: "أشكال وألقاب و<b>جوائز كبرى حقيقية</b> من مدرّبك.",
+    roue_go: "دورة مجانية!",
+    hd_title: "المتجر",
+    hd_small: "أسلوبك في التصنيف",
+    balance_lab: "رصيدك:",
+    sr_volants: "مقود",
+    unavailable: "«المتجر» غير متاح",
+    check_conn: "تحقّق من اتصالك ثم أعد المحاولة.",
+    vedette: "نجم اليوم",
+    vedette_sub: "القطعة المنشودة",
+    selection: "✦ مختارات",
+    note: "الأشكال تجميلية 100% : أناقة فقط، لا أفضلية أبدًا.",
+    obj_removed: "أُزيل الهدف",
+    obj_set: "حُدّد الهدف — اربح مقاود بالمراجعة!",
+    buy_fail: "تعذّر الشراء. أعد المحاولة.",
+    not_enough: "لا مقاود كافية",
+    already_owned: "موجود في مخزونك بالفعل",
+    buy: "اشترِ",
+    see: "عرض",
+    can_afford: "يمكنك شراؤه!",
+    equipped: "✓ مُجهَّز",
+    equipped_short: "مُجهَّز",
+    tap_equip: "المس للتجهيز",
+    aria_equipped: "مُجهَّز",
+    aria_unlocked: "مفتوح",
+    aria_buy: "اشترِ",
+    aria_not_enough: "لا مقاود كافية",
+    hero_sub_default: "توقيعك في التصنيف",
+    intro_x: "فهمت",
+    intro_title: "سيارتك، توقيعك",
+    intro_1: "تظهر بجانب اسمك في التصنيف",
+    intro_2: "افتح الأشكال بمقاودك",
+    intro_3: "المس شكلًا لتجهيزه بلمسة واحدة",
+    ribbon: "أسطوري",
+    owned_lab: "مِلكك",
+    equip_btn: "جهّز",
+    unlocked_badge: "مفتوح",
+    obj_kick_pin: "هدفك",
+    obj_kick_aim: "للطموح",
+    obj_reached: "تحقّق الهدف!",
+    obj_touch: "— المس للحصول عليه",
+    obj_earn: "يُربح <b>بالمراجعة</b>",
+    obj_aria: "الهدف:",
+    obj_can_buy: "يمكنك شراؤه",
+    obj_x: "أزل الهدف",
+    daily_kick: "مكافأة بالمراجعة",
+    daily_title: "اربح مقاود كل يوم",
+    daily_sub: "كل جلسة مراجعة مكتملة تُضاف إلى رصيدك. <b>لا اختصارات.</b>",
+    daily_cta: "راجع",
+    price: "السعر",
+    equipped_remove: "✓ مُجهَّز — أزِل",
+    obj_on: "✓ هذا هدفك",
+    obj_off: "🎯 حدّده هدفًا",
+    close: "إغلاق",
+    try_rank: "شكلك في التصنيف",
+    try_permis: "معاينة على رخصتك",
+    me_fallback: "أنت",
+  },
+};
+function btR(key, fr) {
+  const l = getLang();
+  return (l !== "fr" && BO_I18N[l]?.[key]) || fr;
+}
+function bt(key, fr) {
+  return esc(btR(key, fr));
+}
+// Texte traduit (éventuellement avec <b> maison) posé en HTML : span RTL en
+// arabe pour garder la ponctuation du bon côté. Jamais en attribut.
+function brtl(html) {
+  return getLang() === "ar" ? `<span dir="rtl">${html}</span>` : html;
+}
+// « Encore N volants » (barre de progression) — ordre des mots par langue.
+function stillVolants(n) {
+  const l = getLang();
+  if (l === "en") return `${n} ${volantWord(n, "en")} to go`;
+  if (l === "ar") return `بقي ${n} مقود`;
+  return `Encore ${n} volant${n > 1 ? "s" : ""}`;
+}
+// Toast équiper/retirer — ordre des mots par langue (nom traduit).
+function equipToast(item, on) {
+  const l = getLang();
+  const name = itemName(item.id, item.name, l);
+  if (l === "en") return on ? `${name} equipped ✓` : `${name} removed`;
+  if (l === "ar") return on ? `جُهّز ${name} ✓` : `أُزيل ${name}`;
+  return on ? `${esc(item.name)} équipé ✓` : `${esc(item.name)} retiré`;
+}
+
+// ── Nom/description/rareté traduits (rewards-i18n, repli FR serveur) ──
+function iName(item) {
+  return itemName(item.id, item.name, getLang());
+}
+function iDesc(item) {
+  return itemDesc(item.id, item.description, getLang());
+}
+function rLabel(item) {
+  return rarityLabel(item.rarity, rm(item.rarity).label, getLang());
+}
+// Lignes de solde du modal — ordre des mots + pluriel par langue.
+function afterBuyLine(n) {
+  const l = getLang();
+  if (l === "en")
+    return `<strong>${n}</strong> ${volantWord(n, "en")} left after buying`;
+  if (l === "ar") return `يتبقّى لك <strong>${n}</strong> مقود بعد الشراء`;
+  return `Il te restera <strong>${n}</strong> volant${n <= 1 ? "" : "s"} après l’achat`;
+}
+function missingLine(n) {
+  const l = getLang();
+  if (l === "en") return `You’re missing ${n} ${volantWord(n, "en")}`;
+  if (l === "ar") return `ينقصك ${n} مقود`;
+  return `Il te manque ${n} volant${n > 1 ? "s" : ""}`;
+}
 
 // Sections de la boutique. Voiture vs Personnage = distinction par asset_url
 // (les voitures ont '/car-' dans l'URL ; tout le reste des avatars = perso).
@@ -646,32 +850,32 @@ export async function mount(root) {
 </style>
 <div class="bo2 anim-slide-up">
   ${recompensesTabs("boutique")}
-  <a class="bo2-roue" href="#/roue" aria-label="Ouvrir la Roue">
+  <a class="bo2-roue" href="#/roue" aria-label="${bt("roue_aria", "Ouvrir la Roue")}">
     <span class="bo2-roue-w" aria-hidden="true"></span>
     <span class="bo2-roue-tx">
-      <span class="bo2-roue-t">La Roue</span>
-      <span class="bo2-roue-s">${isSoloEleve(getCurUser()) ? "Skins, titres et des <b>récompenses</b> à débloquer." : `Skins, titres et des <b>gros lots réels</b> de ton moniteur.`}</span>
+      <span class="bo2-roue-t">${bt("roue_t", "La Roue")}</span>
+      <span class="bo2-roue-s">${isSoloEleve(getCurUser()) ? brtl(btR("roue_s_solo", "Skins, titres et des <b>récompenses</b> à débloquer.")) : brtl(btR("roue_s", `Skins, titres et des <b>gros lots réels</b> de ton moniteur.`))}</span>
     </span>
-    <span class="bo2-roue-go">Tour gratuit !</span>
+    <span class="bo2-roue-go">${bt("roue_go", "Tour gratuit !")}</span>
   </a>
   <div class="bo2-hd">
     <div class="bo2-hd-row">
-      <h1 class="bo2-hd-title" tabindex="-1">Boutique<small>Ton style au classement</small></h1>
+      <h1 class="bo2-hd-title" tabindex="-1">${bt("hd_title", "Boutique")}<small>${bt("hd_small", "Ton style au classement")}</small></h1>
       <div class="bo2-gems"
            id="bo2-gems-badge"
            data-volant-balance
            role="status"
            aria-live="polite"
-           aria-label="Ton solde : … volants">
+           aria-label="${bt("balance_lab", "Ton solde :")} … ${bt("sr_volants", "volants")}">
         <span class="bo2-gems-ico">${volantImg(24)}</span>
         <span class="bo2-gems-val" id="bo2-gems-val" data-volant-count>…</span>
-        <span class="bo2-gems-sr">volants</span>
+        <span class="bo2-gems-sr">${bt("sr_volants", "volants")}</span>
       </div>
     </div>
     <div class="bo2-tabs" id="bo2-tabs">
       ${SECTIONS.map(
         (s, i) => `
-        <button class="bo2-tab ${i === 0 ? "active" : ""}" data-jump="${escAttr(s.key)}" type="button">${esc(s.label)}</button>
+        <button class="bo2-tab ${i === 0 ? "active" : ""}" data-jump="${escAttr(s.key)}" type="button">${bt(`sec_${s.key}`, s.label)}</button>
       `,
       ).join("")}
     </div>
@@ -770,12 +974,12 @@ export async function mount(root) {
       unequipItem(item.type);
       setEquippedAsset(item.type, null);
       syncAvatarUrlToProfile(item.type, null);
-      toast(`${esc(item.name)} retiré`, "info");
+      toast(equipToast(item, false), "info");
     } else {
       equipItem(item.type, item.id);
       setEquippedAsset(item.type, item.asset_url || null);
       syncAvatarUrlToProfile(item.type, item.asset_url || null);
-      toast(`${esc(item.name)} équipé ✓`, "success");
+      toast(equipToast(item, true), "success");
     }
     // Mute seulement la carte concernée (pas de re-render global)
     _muteCard(root, item);
@@ -835,7 +1039,7 @@ export async function mount(root) {
     const content = root.querySelector("#bo2-content");
     if (!content) return;
     if (catalogFailed) {
-      content.innerHTML = `<div class="bo2-empty"><div class="bo2-empty-ico">${medallion("panneau", "orange", { size: 48 })}</div><div class="bo2-empty-t">« Boutique » indisponible</div><div class="bo2-empty-d">Vérifie ta connexion, puis réessaie.</div></div>`;
+      content.innerHTML = `<div class="bo2-empty"><div class="bo2-empty-ico">${medallion("panneau", "orange", { size: 48 })}</div><div class="bo2-empty-t">${brtl(bt("unavailable", "« Boutique » indisponible"))}</div><div class="bo2-empty-d">${brtl(bt("check_conn", "Vérifie ta connexion, puis réessaie."))}</div></div>`;
       return;
     }
 
@@ -860,14 +1064,14 @@ export async function mount(root) {
       : "";
 
     const vedetteHtml = vedette
-      ? `<div class="bo2-sec"><div class="bo2-sec-block"><div class="bo2-sec-title">Vedette du jour</div><div class="bo2-sec-sub">La pièce à viser</div></div><span class="bo2-sec-count">✦ Sélection</span></div>${renderHeroCard(vedette, gemmes)}`
+      ? `<div class="bo2-sec"><div class="bo2-sec-block"><div class="bo2-sec-title">${bt("vedette", "Vedette du jour")}</div><div class="bo2-sec-sub">${bt("vedette_sub", "La pièce à viser")}</div></div><span class="bo2-sec-count">${bt("selection", "✦ Sélection")}</span></div>${renderHeroCard(vedette, gemmes)}`
       : "";
 
     const sectionsHtml = cats
       .map(
         (c) => `
       <div class="bo2-sec" id="bo2-sec-${esc(c.key)}">
-        <div class="bo2-sec-block"><div class="bo2-sec-title">${esc(c.label)}</div><div class="bo2-sec-sub">${esc(c.sub)}</div></div>
+        <div class="bo2-sec-block"><div class="bo2-sec-title">${bt(`sec_${c.key}`, c.label)}</div><div class="bo2-sec-sub">${bt(`sec_${c.key}_sub`, c.sub)}</div></div>
         <span class="bo2-sec-count">${c.items.length}</span>
       </div>
       <div class="bo2-row">${c.items.map((it, idx) => renderGridCard(it, gemmes, idx)).join("")}</div>`,
@@ -880,7 +1084,7 @@ export async function mount(root) {
       ${vedetteHtml}
       ${sectionsHtml}
       ${renderDailyCard()}
-      <div class="bo2-note">Les skins sont 100 % cosmétiques : du style, jamais d’avantage.</div>`;
+      <div class="bo2-note">${brtl(bt("note", "Les skins sont 100 % cosmétiques : du style, jamais d’avantage."))}</div>`;
 
     wireGrid(content);
     wireIntro(content);
@@ -899,7 +1103,7 @@ export async function mount(root) {
         e.stopPropagation();
         haptic("tap");
         setObjectif(null);
-        toast("Objectif retiré", "info");
+        toast(btR("obj_removed", "Objectif retiré"), "info");
         renderAll();
       });
       const activateObj = () => {
@@ -947,7 +1151,9 @@ function _updateGemsBadge(root, balance) {
   if (badge) {
     badge.setAttribute(
       "aria-label",
-      `Ton solde : ${balance} volant${balance <= 1 ? "" : "s"}`,
+      getLang() === "fr"
+        ? `Ton solde : ${balance} volant${balance <= 1 ? "" : "s"}`
+        : `${btR("balance_lab", "Ton solde :")} ${balance} ${volantWord(balance, getLang())}`,
     );
   }
 }
@@ -963,7 +1169,7 @@ function renderHeroCard(item, gemmes) {
   const isLeg = item.rarity === "legendaire";
 
   const objHtml = item.asset_url
-    ? `<img class="bo2-hero-obj" src="${escAttr(item.asset_url)}" alt="${escAttr(item.name)}" loading="lazy">`
+    ? `<img class="bo2-hero-obj" src="${escAttr(item.asset_url)}" alt="${escAttr(iName(item))}" loading="lazy">`
     : `<span class="bo2-hero-emoji">${_typeMed(item.type, 72)}</span>`;
 
   // Pied droit : à acheter (prix + CTA) / débloqué / équipé
@@ -972,19 +1178,19 @@ function renderHeroCard(item, gemmes) {
   if (!isOwned) {
     footRight = `<div class="bo2-hero-buy">
         <div class="bo2-hero-price">${volantImg(20)} <b>${item.cost_gemmes}</b></div>
-        <button class="bo2-hero-cta" tabindex="-1">${canAfford ? "Acheter" : "Voir"}</button>
+        <button class="bo2-hero-cta" tabindex="-1">${canAfford ? bt("buy", "Acheter") : bt("see", "Voir")}</button>
       </div>`;
     progHtml = `<div class="bo2-hero-prog-wrap">
-        <div class="bo2-hero-prog-label">${canAfford ? "Tu peux l’acheter !" : `Encore ${lacking} volant${lacking > 1 ? "s" : ""}`}</div>
+        <div class="bo2-hero-prog-label">${canAfford ? bt("can_afford", "Tu peux l’acheter !") : esc(stillVolants(lacking))}</div>
         <div class="bo2-hero-prog-track"><div class="bo2-hero-prog-bar" style="width:${pct}%"></div></div>
       </div>`;
   } else {
-    footRight = `<div class="bo2-hero-buy"><div class="bo2-hero-owned">${isEquipped ? "✓ Équipé" : "Touche pour équiper"}</div></div>`;
+    footRight = `<div class="bo2-hero-buy"><div class="bo2-hero-owned">${isEquipped ? bt("equipped", "✓ Équipé") : bt("tap_equip", "Touche pour équiper")}</div></div>`;
   }
 
   return `
-    <div class="bo2-hero" data-item-id="${escAttr(item.id)}" data-rarity="${escAttr(item.rarity)}" role="button" tabindex="0" aria-label="${escAttr(item.name)}, ${esc(r.label)}, ${isOwned ? (isEquipped ? "équipé" : "débloqué") : canAfford ? "acheter" : "pas assez de volants"}">
-      <span class="bo2-hero-tag">${isLeg ? "★ " : ""}${esc(r.label)}</span>
+    <div class="bo2-hero" data-item-id="${escAttr(item.id)}" data-rarity="${escAttr(item.rarity)}" role="button" tabindex="0" aria-label="${escAttr(iName(item))}, ${escAttr(rLabel(item))}, ${isOwned ? (isEquipped ? btR("aria_equipped", "équipé") : btR("aria_unlocked", "débloqué")) : canAfford ? btR("aria_buy", "acheter") : btR("aria_not_enough", "pas assez de volants")}">
+      <span class="bo2-hero-tag">${isLeg ? "★ " : ""}${esc(rLabel(item))}</span>
       <span class="bo2-hero-spark s1" aria-hidden="true"></span>
       <span class="bo2-hero-spark s2" aria-hidden="true"></span>
       <div class="bo2-hero-stage" data-prev>
@@ -993,8 +1199,8 @@ function renderHeroCard(item, gemmes) {
       </div>
       <div class="bo2-hero-foot">
         <div class="bo2-hero-body">
-          <div class="bo2-hero-name">${esc(item.name)}</div>
-          <div class="bo2-hero-sub"><span class="lab">${esc(r.label)}</span>${item.description ? esc(item.description) : "Ta signature au classement"}</div>
+          <div class="bo2-hero-name">${brtl(esc(iName(item)))}</div>
+          <div class="bo2-hero-sub"><span class="lab">${esc(rLabel(item))}</span>${item.description ? brtl(esc(iDesc(item))) : brtl(bt("hero_sub_default", "Ta signature au classement"))}</div>
           ${progHtml}
         </div>
         ${footRight}
@@ -1015,14 +1221,14 @@ function renderIntro() {
   if (introSeen()) return "";
   return `
     <div class="bo2-intro" id="bo2-intro">
-      <button class="bo2-intro-x" id="bo2-intro-x" type="button" aria-label="J’ai compris">×</button>
+      <button class="bo2-intro-x" id="bo2-intro-x" type="button" aria-label="${escAttr(btR("intro_x", "J’ai compris"))}">×</button>
       <div class="bo2-intro-ico" style="background:transparent;box-shadow:none">${medallion("voiture", "blue", { size: 40 })}</div>
       <div class="bo2-intro-body">
-        <div class="bo2-intro-title">Ta voiture, ta signature</div>
+        <div class="bo2-intro-title">${brtl(bt("intro_title", "Ta voiture, ta signature"))}</div>
         <div class="bo2-intro-steps">
-          <span>${icon("users", { size: 13 })} Elle s’affiche à côté de ton nom au classement</span>
-          <span>${volantImg(14)} Débloque des skins avec tes volants</span>
-          <span>${icon("check", { size: 13, strokeWidth: 3 })} Touche un skin pour l’équiper en 1 tap</span>
+          <span>${icon("users", { size: 13 })} ${brtl(bt("intro_1", "Elle s’affiche à côté de ton nom au classement"))}</span>
+          <span>${volantImg(14)} ${brtl(bt("intro_2", "Débloque des skins avec tes volants"))}</span>
+          <span>${icon("check", { size: 13, strokeWidth: 3 })} ${brtl(bt("intro_3", "Touche un skin pour l’équiper en 1 tap"))}</span>
         </div>
       </div>
     </div>`;
@@ -1052,13 +1258,13 @@ function renderGridCard(item, gemmes, idx) {
 
   const lacking = item.cost_gemmes - gemmes;
   const preview = imgUrl
-    ? `<img src="${escAttr(imgUrl)}" alt="${escAttr(item.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` +
+    ? `<img src="${escAttr(imgUrl)}" alt="${escAttr(iName(item))}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` +
       `<div class="bo2-card-preview-circle" style="display:none">${_typeMed(item.type, 60)}</div>`
     : `<div class="bo2-card-preview-circle">${_typeMed(item.type, 60)}</div>`;
 
   const legendaryRibbon =
     item.rarity === "legendaire"
-      ? `<div class="bo2-legendary-ribbon" aria-hidden="true"><span>Légend.</span></div>`
+      ? `<div class="bo2-legendary-ribbon" aria-hidden="true"><span>${bt("ribbon", "Légend.")}</span></div>`
       : "";
   const legendarySheen =
     item.rarity === "legendaire"
@@ -1068,23 +1274,23 @@ function renderGridCard(item, gemmes, idx) {
   let footer;
   if (item.owned) {
     footer = isEquipped
-      ? `<span class="bo2-owned-txt" style="flex:1">${icon("check", { size: 13, strokeWidth: 3 })} Équipé</span>`
-      : `<span class="bo2-price-cell" style="color:var(--g-mute);font:700 11.5px/1 'Plus Jakarta Sans',sans-serif">Possédé</span><button class="bo2-price-btn bo2-equip-cta">Équiper</button>`;
+      ? `<span class="bo2-owned-txt" style="flex:1">${icon("check", { size: 13, strokeWidth: 3 })} ${bt("equipped_short", "Équipé")}</span>`
+      : `<span class="bo2-price-cell" style="color:var(--g-mute);font:700 11.5px/1 'Plus Jakarta Sans',sans-serif">${bt("owned_lab", "Possédé")}</span><button class="bo2-price-btn bo2-equip-cta">${bt("equip_btn", "Équiper")}</button>`;
   } else {
-    footer = `<span class="bo2-price-cell">${volantImg(16)} <b>${item.cost_gemmes}</b></span><button class="bo2-price-btn ${canAfford ? "" : "cant-afford"}" ${!canAfford ? "disabled" : ""}>${canAfford ? "Acheter" : `−${lacking}`}</button>`;
+    footer = `<span class="bo2-price-cell">${volantImg(16)} <b>${item.cost_gemmes}</b></span><button class="bo2-price-btn ${canAfford ? "" : "cant-afford"}" ${!canAfford ? "disabled" : ""}>${canAfford ? bt("buy", "Acheter") : `−${lacking}`}</button>`;
   }
 
   return `
     <div class="bo2-card" data-item-id="${escAttr(item.id)}" data-rarity="${escAttr(item.rarity)}"
       style="animation: bo2CardIn .4s ${idx * 60}ms cubic-bezier(.34,1.56,.64,1) both">
       <div class="bo2-card-preview" data-prev>
-        <span class="bo2-card-rarity-tag">${esc(r.label)}</span>
+        <span class="bo2-card-rarity-tag">${esc(rLabel(item))}</span>
         ${legendaryRibbon}${legendarySheen}
         ${preview}
-        ${item.owned ? `<div class="bo2-card-owned-badge">Débloqué</div>` : ""}
+        ${item.owned ? `<div class="bo2-card-owned-badge">${bt("unlocked_badge", "Débloqué")}</div>` : ""}
       </div>
       <div class="bo2-card-info">
-        <div class="bo2-card-name">${esc(item.name)}</div>
+        <div class="bo2-card-name">${brtl(esc(iName(item)))}</div>
         <div class="bo2-card-footer">${footer}</div>
       </div>
     </div>`;
@@ -1200,20 +1406,20 @@ function renderObjectifCard(item, gemmes, pinned = true) {
   const imgHtml = item.asset_url
     ? `<img src="${escAttr(item.asset_url)}" alt="" aria-hidden="true">`
     : `<span aria-hidden="true">${_typeMed(item.type, 44)}</span>`;
-  const kickerLabel = `${esc(r.label)} · ${pinned ? "Ton objectif" : "À viser"}`;
+  const kickerLabel = `${esc(rLabel(item))} · ${pinned ? btR("obj_kick_pin", "Ton objectif") : btR("obj_kick_aim", "À viser")}`;
   const closeBtn = pinned
-    ? `<button class="bo2-obj-x" data-obj-x type="button" aria-label="Retirer l’objectif">×</button>`
+    ? `<button class="bo2-obj-x" data-obj-x type="button" aria-label="${escAttr(btR("obj_x", "Retirer l’objectif"))}">×</button>`
     : "";
   return `
-    <div class="bo2-obj" data-item-id="${escAttr(item.id)}" role="button" tabindex="0" aria-label="Objectif : ${esc(item.name)}, ${ready ? "tu peux l’acheter" : `encore ${lacking} volant${lacking > 1 ? "s" : ""}`}">
+    <div class="bo2-obj" data-item-id="${escAttr(item.id)}" role="button" tabindex="0" aria-label="${escAttr(btR("obj_aria", "Objectif :"))} ${escAttr(iName(item))}, ${ready ? escAttr(btR("obj_can_buy", "tu peux l’acheter")) : escAttr(stillVolants(lacking))}">
       ${closeBtn}
       <div class="bo2-obj-thumb" data-prev>${imgHtml}</div>
       <div class="bo2-obj-body">
         <div class="bo2-obj-kick"><span class="dot"></span>${kickerLabel}</div>
-        <div class="bo2-obj-name">${ready ? "Objectif atteint !" : `Encore ${lacking} volant${lacking > 1 ? "s" : ""}`}</div>
+        <div class="bo2-obj-name">${ready ? brtl(bt("obj_reached", "Objectif atteint !")) : brtl(esc(stillVolants(lacking)))}</div>
         <div class="bo2-obj-bar"><i style="width:${pct}%"></i></div>
         <div class="bo2-obj-meta">
-          <span class="left">${ready ? `<b>${esc(item.name)}</b> — touche pour l’avoir` : "Gagné en <b>révisant</b>"}</span>
+          <span class="left">${ready ? `<b>${esc(iName(item))}</b> ${btR("obj_touch", "— touche pour l’avoir")}` : btR("obj_earn", "Gagné en <b>révisant</b>")}</span>
           <span class="nums">${gemmes} / ${item.cost_gemmes}</span>
         </div>
       </div>
@@ -1225,11 +1431,11 @@ function renderDailyCard() {
     <div class="bo2-daily">
       <div class="bo2-daily-ico">${volantImg(34)}</div>
       <div class="bo2-daily-body">
-        <div class="bo2-daily-kick">Récompense en révisant</div>
-        <div class="bo2-daily-title">Gagne des volants chaque jour</div>
-        <div class="bo2-daily-sub">Chaque session de révision terminée crédite ton solde. <b>Pas de raccourci.</b></div>
+        <div class="bo2-daily-kick">${bt("daily_kick", "Récompense en révisant")}</div>
+        <div class="bo2-daily-title">${brtl(bt("daily_title", "Gagne des volants chaque jour"))}</div>
+        <div class="bo2-daily-sub">${brtl(btR("daily_sub", "Chaque session de révision terminée crédite ton solde. <b>Pas de raccourci.</b>"))}</div>
       </div>
-      <button class="bo2-daily-cta" type="button" data-go-revise>Réviser</button>
+      <button class="bo2-daily-cta" type="button" data-go-revise>${bt("daily_cta", "Réviser")}</button>
     </div>`;
 }
 
@@ -1254,9 +1460,9 @@ function _muteCard(root, item) {
   const footer = card.querySelector(".bo2-card-footer");
   if (!footer) return;
   if (isEquipped) {
-    footer.innerHTML = `<div class="bo2-owned-txt">${icon("check", { size: 13, strokeWidth: 3 })} Équipé</div>`;
+    footer.innerHTML = `<div class="bo2-owned-txt">${icon("check", { size: 13, strokeWidth: 3 })} ${bt("equipped_short", "Équipé")}</div>`;
   } else {
-    footer.innerHTML = `<button class="bo2-price-btn bo2-equip-cta">Équiper</button>`;
+    footer.innerHTML = `<button class="bo2-price-btn bo2-equip-cta">${bt("equip_btn", "Équiper")}</button>`;
     // Re-wire le bouton équiper
     footer.querySelector(".bo2-equip-cta")?.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -1273,12 +1479,12 @@ function toggleEquipLocal(item, root) {
     unequipItem(item.type);
     setEquippedAsset(item.type, null);
     syncAvatarUrlToProfile(item.type, null);
-    toast(`${esc(item.name)} retiré`, "info");
+    toast(equipToast(item, false), "info");
   } else {
     equipItem(item.type, item.id);
     setEquippedAsset(item.type, item.asset_url || null);
     syncAvatarUrlToProfile(item.type, item.asset_url || null);
-    toast(`${esc(item.name)} équipé ✓`, "success");
+    toast(equipToast(item, true), "success");
   }
   _muteCard(root, item);
 }
@@ -1303,20 +1509,20 @@ function showDetailModal(item, gemmes, me, onConfirm, triggerEl) {
   const priceBlock = item.owned
     ? ""
     : `<div class="bo2-modal-price">
-        <span class="bo2-modal-price-label">Prix</span>
+        <span class="bo2-modal-price-label">${bt("price", "Prix")}</span>
         <span class="bo2-modal-price-amount">${volantImg(16)} ${item.cost_gemmes}</span>
       </div>`;
 
   let cta,
     balanceLine = "";
   if (item.owned) {
-    cta = `<button class="bo2-modal-cta equip" id="bo2-cta">${isEquipped ? "✓ Équipé — retirer" : "Équiper"}</button>`;
+    cta = `<button class="bo2-modal-cta equip" id="bo2-cta">${isEquipped ? bt("equipped_remove", "✓ Équipé — retirer") : bt("equip_btn", "Équiper")}</button>`;
   } else if (canAfford) {
-    cta = `<button class="bo2-modal-cta buy" id="bo2-cta">Acheter — ${item.cost_gemmes} ${volantImg(14)}</button>`;
-    balanceLine = `<div class="bo2-modal-balance">Il te restera <strong>${afterBalance}</strong> volant${afterBalance <= 1 ? "" : "s"} après l’achat</div>`;
+    cta = `<button class="bo2-modal-cta buy" id="bo2-cta">${bt("buy", "Acheter")} — ${item.cost_gemmes} ${volantImg(14)}</button>`;
+    balanceLine = `<div class="bo2-modal-balance">${brtl(afterBuyLine(afterBalance))}</div>`;
   } else {
-    cta = `<button class="bo2-modal-cta locked" id="bo2-cta" disabled>${icon("lock", { size: 14 })} Pas assez de volants</button>`;
-    balanceLine = `<div class="bo2-modal-balance" style="color:#f87171">Il te manque ${item.cost_gemmes - gemmes} volant${item.cost_gemmes - gemmes > 1 ? "s" : ""}</div>`;
+    cta = `<button class="bo2-modal-cta locked" id="bo2-cta" disabled>${icon("lock", { size: 14 })} ${bt("not_enough", "Pas assez de volants")}</button>`;
+    balanceLine = `<div class="bo2-modal-balance" style="color:#f87171">${brtl(missingLine(item.cost_gemmes - gemmes))}</div>`;
   }
 
   const isLegendary = item.rarity === "legendaire";
@@ -1331,16 +1537,16 @@ function showDetailModal(item, gemmes, me, onConfirm, triggerEl) {
         </div>
       </div>
       <div class="bo2-modal-body">
-        <div class="bo2-modal-pill" style="background:${esc(r.c)};color:${item.rarity === "legendaire" ? "#5e430f" : "#fff"}" id="bo2-modal-title">${esc(r.label)}</div>
-        <div class="bo2-modal-name">${esc(item.name)}</div>
-        ${item.description ? `<div class="bo2-modal-desc">${esc(item.description)}</div>` : ""}
+        <div class="bo2-modal-pill" style="background:${esc(r.c)};color:${item.rarity === "legendaire" ? "#5e430f" : "#fff"}" id="bo2-modal-title">${esc(rLabel(item))}</div>
+        <div class="bo2-modal-name">${brtl(esc(iName(item)))}</div>
+        ${item.description ? `<div class="bo2-modal-desc">${brtl(esc(iDesc(item)))}</div>` : ""}
       </div>
       ${tryPreview}
       ${priceBlock}
       ${balanceLine}
       ${cta}
-      ${item.owned ? "" : `<button class="bo2-modal-obj ${getObjectif() === item.id ? "on" : ""}" id="bo2-obj-toggle" type="button">${getObjectif() === item.id ? "✓ C’est ton objectif" : "🎯 Définir comme objectif"}</button>`}
-      <button class="bo2-modal-cancel" id="bo2-modal-cancel">Fermer</button>
+      ${item.owned ? "" : `<button class="bo2-modal-obj ${getObjectif() === item.id ? "on" : ""}" id="bo2-obj-toggle" type="button">${getObjectif() === item.id ? btR("obj_on", "✓ C’est ton objectif") : btR("obj_off", "🎯 Définir comme objectif")}</button>`}
+      <button class="bo2-modal-cancel" id="bo2-modal-cancel">${bt("close", "Fermer")}</button>
     </div>`;
 
   const { overlay, close } = openBottomSheet({
@@ -1362,14 +1568,14 @@ function showDetailModal(item, gemmes, me, onConfirm, triggerEl) {
     if (b) {
       b.classList.toggle("on", nowOn);
       b.textContent = nowOn
-        ? "✓ C’est ton objectif"
-        : "🎯 Définir comme objectif";
+        ? btR("obj_on", "✓ C’est ton objectif")
+        : btR("obj_off", "🎯 Définir comme objectif");
     }
     haptic("tap");
     toast(
       nowOn
-        ? "Objectif défini — gagne des volants en révisant !"
-        : "Objectif retiré",
+        ? btR("obj_set", "Objectif défini — gagne des volants en révisant !")
+        : btR("obj_removed", "Objectif retiré"),
       nowOn ? "success" : "info",
     );
     window.dispatchEvent(new CustomEvent("pg-objectif-changed"));
@@ -1385,12 +1591,12 @@ function showDetailModal(item, gemmes, me, onConfirm, triggerEl) {
           unequipItem(item.type);
           setEquippedAsset(item.type, null);
           syncAvatarUrlToProfile(item.type, null);
-          toast(`${esc(item.name)} retiré`, "info");
+          toast(equipToast(item, false), "info");
         } else {
           equipItem(item.type, item.id);
           setEquippedAsset(item.type, item.asset_url || null);
           syncAvatarUrlToProfile(item.type, item.asset_url || null);
-          toast(`${esc(item.name)} équipé ✓`, "success");
+          toast(equipToast(item, true), "success");
         }
         overlay.remove();
         window.dispatchEvent(
@@ -1409,13 +1615,15 @@ function showDetailModal(item, gemmes, me, onConfirm, triggerEl) {
 // ─── Try-before-buy : contexte visuel par type (#5) ───────────
 function _renderTryPreview(item, me) {
   if (!item.asset_url) return "";
-  const pseudoEsc = esc(me?.display_name || me?.email?.split("@")[0] || "Toi");
+  const pseudoEsc = esc(
+    me?.display_name || me?.email?.split("@")[0] || btR("me_fallback", "Toi"),
+  );
 
   if (item.type === "avatar") {
     // Fausse ligne de classement avec le skin équipé
     return `
       <div class="bo2-try-preview">
-        <div class="bo2-try-preview-title">Ton skin dans le classement</div>
+        <div class="bo2-try-preview-title">${brtl(bt("try_rank", "Ton skin dans le classement"))}</div>
         <div class="bo2-try-rank-row">
           <div class="bo2-try-rank-num">1</div>
           <div class="bo2-try-rank-avatar">
@@ -1431,7 +1639,7 @@ function _renderTryPreview(item, me) {
     // Mini permis virtuel avec ce fond appliqué
     return `
       <div class="bo2-try-preview">
-        <div class="bo2-try-preview-title">Aperçu sur ton permis</div>
+        <div class="bo2-try-preview-title">${brtl(bt("try_permis", "Aperçu sur ton permis"))}</div>
         <div class="bo2-try-permis">
           <div class="bo2-try-permis-card">
             <img src="${escAttr(item.asset_url)}" alt="" aria-hidden="true">
@@ -1451,7 +1659,7 @@ async function doPurchase(item) {
       p_item_id: item.id,
     });
     if (error) {
-      toast("Achat impossible. Réessaie.", "error");
+      toast(btR("buy_fail", "Achat impossible. Réessaie."), "error");
       return null;
     }
     if (data?.error === "insufficient_gemmes") {
@@ -1459,11 +1667,11 @@ async function doPurchase(item) {
       return null;
     }
     if (data?.error === "already_owned") {
-      toast("Déjà dans ton inventaire", "info");
+      toast(btR("already_owned", "Déjà dans ton inventaire"), "info");
       return null;
     }
     if (data?.error) {
-      toast("Achat impossible. Réessaie.", "error");
+      toast(btR("buy_fail", "Achat impossible. Réessaie."), "error");
       return null;
     }
     haptic("success");
@@ -1484,7 +1692,7 @@ async function doPurchase(item) {
     return data;
   } catch (e) {
     console.error("[boutique] purchase", e);
-    toast("Achat impossible. Réessaie.", "error");
+    toast(btR("buy_fail", "Achat impossible. Réessaie."), "error");
     return null;
   }
 }

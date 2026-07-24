@@ -5,6 +5,7 @@
 // une variante sombre pour l'Arène (classement).
 // ═══════════════════════════════════════════════════════════════
 import { navigate } from "@/router.js";
+import { getLang } from "@/utils/lang.js";
 
 const ROOMS = [
   { id: "boutique", label: "Boutique", route: "/boutique" },
@@ -12,6 +13,27 @@ const ROOMS = [
   { id: "trophees", label: "Trophées", route: "/trophees" },
   { id: "classement", label: "Ligue", route: "/classement" },
 ];
+
+// i18n du bandeau (EN/AR) — composant 100 % élève (les 4 salles sont des
+// routes élève), pas de scope rôle nécessaire. Évalué à chaque appel de
+// recompensesTabs() (les pages re-montent à chaque navigation → toujours à
+// jour ; pas besoin d'écouter permigo:lang-changed ici).
+const RCT_I18N = {
+  en: {
+    boutique: "Shop",
+    galerie: "Collection",
+    trophees: "Trophies",
+    classement: "League",
+    aria: "Rewards rooms",
+  },
+  ar: {
+    boutique: "المتجر",
+    galerie: "المجموعة",
+    trophees: "الكؤوس",
+    classement: "الدوري",
+    aria: "غرف المكافآت",
+  },
+};
 
 // Câblage par délégation (une seule fois) : les 4 pages n'ont qu'à insérer
 // le HTML, aucun wire à ajouter chez elles.
@@ -51,10 +73,10 @@ export function recompensesTabs(active, { dark = false } = {}) {
 .rct--dark .rct-tab { color: rgba(255,255,255,.65); }
 .rct--dark .rct-tab.on { background: rgba(255,255,255,.16); color: #fff; box-shadow: none; }
 </style>
-<div class="rct${dark ? " rct--dark" : ""}" role="tablist" aria-label="Salles Récompenses">
+<div class="rct${dark ? " rct--dark" : ""}" role="tablist" aria-label="${(getLang() !== "fr" && RCT_I18N[getLang()]?.aria) || "Salles Récompenses"}">
   ${ROOMS.map(
     (r) =>
-      `<button class="rct-tab${r.id === active ? " on" : ""}" role="tab" aria-selected="${r.id === active}" data-rct="${r.route}">${r.label}</button>`,
+      `<button class="rct-tab${r.id === active ? " on" : ""}" role="tab" aria-selected="${r.id === active}" data-rct="${r.route}">${(getLang() !== "fr" && RCT_I18N[getLang()]?.[r.id]) || r.label}</button>`,
   ).join("")}
 </div>`;
 }
