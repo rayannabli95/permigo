@@ -20,3 +20,6 @@ test-results/
 *.png
 !permigo-game/public/**/*.png
 !permigo-game/src/**/*.png
+
+# Sources médias lourdes (assets exportés uniquement)
+/DOCUMENT:IMAGES:SONS/
