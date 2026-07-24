@@ -314,6 +314,148 @@ const STR = {
     successCta: "Open PermiGo",
     successCtaSolo: "Create my account — instant access",
   },
+  ar: {
+    login: "تسجيل الدخول",
+    langBtn: "FR",
+    kicker: "عرض الإطلاق*",
+    h1: `حضِّر كل درس <br><em>قبل أن تركب السيارة.</em>`,
+    lead: `التطبيق الوحيد الذي يدرّبك على <strong>القيادة</strong> بين الدروس — وليس مجرّد تطبيق آخر لاختبار الكود.`,
+    tTitle: `الهدف: رخصة القيادة<br>في 90 يوماً`,
+    tSub: "قيادة · ألعاب مصغّرة · محاكاة الامتحان",
+    tBoardLbl: "الصعود",
+    tBoard: "يوليو 2026",
+    tDureeLbl: "المدة",
+    tDuree: "3 أشهر",
+    tOffre: "سعر استثنائي",
+    tStrike: "€29.97",
+    tPrice: "€24.99",
+    cta: `احجز مقعدي · <s>€29.97</s> €24.99`,
+    ctaNote: `دفع آمن عبر Stripe · <b>مضمون أو استرداد أموالك — 3 أيام</b><br><small>*سعر الإطلاق — سيرتفع بعد انتهاء هذا العرض.</small>`,
+    bulle: "تم التحقق من 3 مهارات!",
+    bulleSub: "هذا الأسبوع",
+    secCode: `الحصول على الرخصة يتطلّب <em>أكثر</em> من مجرّد القيادة.`,
+    secCodeSub: "يدرّبك PermiGo على كل ما يهمّ يوم الامتحان:",
+    situTitle: "ألعاب «على الطريق» المصغّرة",
+    situTxt:
+      "مشهد واحد، قرار واحد: من يمرّ أولاً؟ أولوية المرور، المسافات، الاندماج — كما خلف المقود.",
+    situAlt:
+      "لعبة مصغّرة على الطريق: مفترق طرق، أنت تقرّر من يمرّ أولاً",
+    centreTitle: "مركز امتحانك، مفصّلاً",
+    centreTxt:
+      "الصعوبة، الوصول، سمعة الممتحنين والفخاخ المعروفة في المسار — مركزاً تلو الآخر.",
+    centreAlt: "بطاقة مركز امتحان Cergy: الصعوبة 3/5، الوصول، فخاخ المسار",
+    feats: [
+      {
+        mask: "cahier",
+        t: "كل درس مُحضَّر مسبقاً",
+        d: "الركن، الطريق السريع، الدوّارات: بطاقة واضحة قبل أن تركب السيارة.",
+      },
+      {
+        img: "/skins/badge-medaille.png",
+        t: "محاكاة امتحان القيادة",
+        d: "تُقيَّم بنفس معايير الممتحن. يوم الامتحان، لا مفاجآت.",
+      },
+      {
+        img: "/skins/volant-coin.webp",
+        t: "وستشعر برغبة في العودة",
+        d: "سلاسل أيام، دوريات، مكافآت. واختبار الكود مُضمَّن أيضاً.",
+      },
+    ],
+    nonFranco: {
+      title: "لغتك الفرنسية ضعيفة؟ نحن معك.",
+      txt: "الامتحان بالفرنسية — لذلك يدرّبك التطبيق بفرنسية قصيرة وبسيطة: الكلمات نفسها التي ستحتاجها يوم الامتحان. الألعاب المصغّرة بصرية أولاً. ونجيب على رسائلك، خطوة بخطوة.",
+    },
+    mathsRows: [
+      ["ساعة قيادة واحدة", "€55"],
+      ["متوسط ميزانية الرخصة (فرنسا)", "€1,800"],
+      ["PermiGo، شهرياً", "€9.99"],
+    ],
+    mathsNote: "درس غير مُحضَّر = €55 ضائعة.",
+    mathsSrc: "المصادر: UFC-Que Choisir (ميزانية الرخصة) · Sécurité routière",
+    secPass: "ثلاث تذاكر، هدف واحد",
+    secPassSub:
+      "المحتوى نفسه في كل الباقات. كلما التزمت مدةً أطول، دفعت أقل: 3 أشهر بالاشتراك الشهري = €29.97.",
+    passes: {
+      mensuel: {
+        name: "التذكرة الشهرية",
+        desc: "امتحانك الشهر المقبل؟ ممتاز. ألغِ بنقرة واحدة.",
+        price: "€9.99",
+        per: "/شهر",
+        btn: "ابدأ",
+      },
+      pass3: {
+        tag: "الأكثر اختياراً",
+        name: "التذكرة الذهبية · 3 أشهر",
+        desc: "من 2 إلى 4 أشهر هي المدة الحقيقية للتحضير للرخصة. دفعة واحدة، والسعر ثابت.",
+        strike: "€29.97",
+        price: "€24.99",
+        eco: "−17%",
+        btn: "احجز",
+      },
+      pass6: {
+        name: "البلاتينية · 6 أشهر",
+        desc: "القيادة المرافَقة أو تحضير أطول، دون أي ضغط.",
+        strike: "€59.94",
+        price: "€39.99",
+        eco: "−33%",
+        btn: "احجز",
+      },
+    },
+    err: "تعذّر بدء الدفع. يُرجى المحاولة مرة أخرى.",
+    btnWait: "جارٍ فتح صفحة الدفع…",
+    stampTag: "مضمون",
+    stampT: "مضمون أو استرداد أموالك — تجربة 3 أيام",
+    stampD:
+      "جرّب كل شيء لمدة 3 أيام. غير مقتنع؟ تُستردّ أموالك. بعد ذلك، يُلغى الاشتراك الشهري في أي وقت، بنقرة واحدة.",
+    secProof: "التدرّب المنتظم يؤتي ثماره",
+    proofA: "القيادة المرافَقة (تدرّب منتظم)",
+    proofAVal: "74.7%",
+    proofAW: 74.7,
+    proofB: "المسار التقليدي",
+    proofBVal: "56.8%",
+    proofBW: 56.8,
+    proofSrc: "حصيلة امتحانات رخصة القيادة الفرنسية 2022 — Sécurité routière.",
+    secFaq: "الأسئلة الشائعة",
+    faq: [
+      [
+        "هل هذا تطبيق لاختبار الكود؟",
+        "لا. اختبار الكود مُضمَّن (اختبارات قصيرة، امتحانات تجريبية)، لكن الفرق الحقيقي: نحن ندرّبك على <strong>القيادة</strong> — ألعاب مصغّرة، بطاقات الدروس، محاكاة الامتحان، أدلّة مراكز الامتحان.",
+      ],
+      [
+        "هل التطبيق باللغة العربية؟",
+        "هذه الصفحة نعم. أمّا التطبيق نفسه فهو <strong>بفرنسية بسيطة</strong> — وذلك عن قصد: امتحانك سيكون بالفرنسية، والتدرّب على الكلمات نفسها التي ستسمعها يوم الامتحان هو ما يساعدك على النجاح. الألعاب المصغّرة بصرية أولاً، لذا تكفي فرنسية أساسية.",
+      ],
+      [
+        "ماذا يتوقّع الممتحن يوم الامتحان؟",
+        "<strong>قيادة مستقلّة ومسؤولة وآمنة</strong>: معرفة الكود، التحكّم في السيارة، احترام القواعد، توقّع المخاطر والتكيّف مع محيطك. سلوكك مهمّ أيضاً: ابقَ هادئاً وواثقاً، وقرّر في الوقت المناسب. هذا بالضبط ما يدرّبك عليه PermiGo — مع محاكاة الامتحان.",
+      ],
+      [
+        "هل يعمل مع مدرسة تعليم القيادة التي أتدرّب فيها؟",
+        "نعم. احتفظ بدروسك — يعمل PermiGo في ما بينها. وإذا كان مدرّبك يستخدم PermiGo، يتزامن تقدّمك معه.",
+      ],
+      [
+        "هل يمكنني الإلغاء أو استرداد أموالي؟",
+        `أول 3 أيام: <strong>مضمون أو استرداد أموالك</strong>. بعد ذلك، يُلغى الاشتراك الشهري في أي وقت بنقرة واحدة (التذكرتان الذهبية والبلاتينية دفعة واحدة فقط). هل ستغادر؟ <a href="#/avis-depart">أخبرنا بالسبب هنا</a> — هذا يساعدنا على التحسّن.`,
+      ],
+    ],
+    foot: `دفع آمن عبر Stripe · مضمون أو استرداد أموالك — 3 أيام<br><a href="#/legal">الإشعارات القانونية</a> · مدرّب قيادة مستقل؟ <a href="#/creer-compte">أنشئ مساحتك</a>`,
+    stickyName: "التذكرة الذهبية · 3 أشهر",
+    stickyPrice: "€24.99 · تجربة 3 أيام",
+    stickyBtn: "احجز مقعدي",
+    cancelNote:
+      "تمّ إلغاء الدفع — لم يُخصم أي مبلغ. تذكرتك في انتظارك أدناه. 👇",
+    successT: "مرحباً بك على متن الرحلة! 🚀",
+    successIntro: (label) =>
+      `تمّ حجز ${label}. سيصلك إيصالك وفاتورتك عبر البريد الإلكتروني.`,
+    successSteps: [
+      "<b>أنشئ حسابك الآن</b> — دقيقتان، بنفس البريد الإلكتروني المستخدَم في الدفع ← وصول فوري.",
+      "<b>ثبّت التطبيق على هاتفك</b> لتصلك تذكيرات المراجعة: آيفون ← Safari ← مشاركة ← «إضافة إلى الشاشة الرئيسية». أندرويد ← Chrome ← قائمة ⋮ ← «تثبيت التطبيق».",
+      "<b>تحتاج مساعدة؟</b> راسلنا — سنرافقك خطوة بخطوة.",
+    ],
+    successGuarantee: "وبالطبع: مضمون أو استرداد أموالك خلال 3 أيام.",
+    successCta: "افتح PermiGo",
+    successCtaSolo: "أنشئ حسابي — وصول فوري",
+  },
 };
 
 const PLAN_LABELS = {
@@ -326,6 +468,11 @@ const PLAN_LABELS = {
     mensuel: "Monthly Ticket",
     pass3: "Gold Ticket · 3 months",
     pass6: "Platinum Ticket · 6 months",
+  },
+  ar: {
+    mensuel: "التذكرة الشهرية",
+    pass3: "التذكرة الذهبية · 3 أشهر",
+    pass6: "التذكرة البلاتينية · 6 أشهر",
   },
 };
 
@@ -677,12 +824,16 @@ function hashQuery() {
 /** Langue : choix mémorisé > ?lang= > langue du navigateur. */
 function getLang() {
   const stored = localStorage.getItem("pv_lang");
-  if (stored === "fr" || stored === "en") return stored;
+  if (stored === "fr" || stored === "en" || stored === "ar") return stored;
+  const appStored = localStorage.getItem("permigo_lang");
+  if (appStored === "fr" || appStored === "en" || appStored === "ar")
+    return appStored;
   const p = hashQuery().get("lang");
-  if (p === "fr" || p === "en") return p;
-  return (navigator.language || "fr").toLowerCase().startsWith("fr")
-    ? "fr"
-    : "en";
+  if (p === "fr" || p === "en" || p === "ar") return p;
+  const browserLang = (navigator.language || "fr").toLowerCase();
+  if (browserLang.startsWith("fr")) return "fr";
+  if (browserLang.startsWith("ar")) return "ar";
+  return "en";
 }
 
 /** Le billet d'or. stamped = billet validé (écran de succès). */
@@ -731,7 +882,7 @@ export async function mount(root) {
     track("pass.checkout_success", { plan: planParam || "?" });
     const label = PLAN_LABELS[lang][planParam] || "Pass Permis";
     root.innerHTML = `${STYLE}
-      <div class="pv">
+      <div class="pv" dir="${lang === "ar" ? "rtl" : "ltr"}">
         <header class="pv-nav">
           <a class="pv-logo" href="#/pass" aria-label="PermiGo"><img src="${LOGO}" alt="PermiGo"></a>
         </header>
@@ -757,7 +908,7 @@ export async function mount(root) {
 
   const P = L.passes;
   root.innerHTML = `${STYLE}
-  <div class="pv">
+  <div class="pv" dir="${lang === "ar" ? "rtl" : "ltr"}">
 
     <header class="pv-nav">
       <a class="pv-logo" href="#/" aria-label="PermiGo"><img src="${LOGO}" alt="PermiGo"></a>
@@ -765,6 +916,7 @@ export async function mount(root) {
         <div class="pv-lang-seg" role="group" aria-label="Langue / Language">
           <button class="pv-lang-opt${lang === "fr" ? " on" : ""}" data-lang="fr" type="button" aria-pressed="${lang === "fr"}">FR</button>
           <button class="pv-lang-opt${lang === "en" ? " on" : ""}" data-lang="en" type="button" aria-pressed="${lang === "en"}">EN</button>
+          <button class="pv-lang-opt${lang === "ar" ? " on" : ""}" data-lang="ar" type="button" aria-pressed="${lang === "ar"}">AR</button>
         </div>
         ${me ? "" : `<button class="pv-login" id="pv-login" type="button">${L.login}</button>`}
       </div>
