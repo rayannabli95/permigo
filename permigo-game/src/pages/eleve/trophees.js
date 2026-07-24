@@ -5,7 +5,7 @@
 import { sb } from "@/auth/auth.js";
 import { yesterdayKey } from "@/services/daily-quiz.js";
 import { icon } from "@/utils/icons.js";
-import { volantImg, volantLabel } from "@/utils/volant.js";
+import { volantImg } from "@/utils/volant.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
@@ -15,6 +15,16 @@ import { toast } from "@/components/common/toast.js";
 import { openBottomSheet } from "@/components/common/bottom-sheet.js";
 import { CATALOG, RARITY_META, shortProgress } from "@/data/achievements.js";
 import { recompensesTabs } from "@/components/eleve/recompenses-tabs.js";
+import { getLang } from "@/utils/lang.js";
+import {
+  trophyTitle,
+  trophyBody,
+  trophyGroup,
+  trophyGoal,
+  rarityLabel,
+  volantWord,
+  dateLocale,
+} from "@/data/rewards-i18n.js";
 
 // Ordre de prestige (pour élire le trophée vedette)
 const RARITY_RANK = { commun: 0, rare: 1, epique: 2, legendaire: 3 };
@@ -25,6 +35,111 @@ const RARITY_LABEL = {
   epique: "Épique",
   legendaire: "Légendaire",
 };
+
+// ── i18n de la COQUE (EN/AR) — dict local au composant (convention coque,
+// cf. profil.js #555). tt(key, fr) = traduit-ou-français esc() intégré (sûr
+// en texte ET attribut) ; ttR = brut (toasts / interpolation). En 'fr' ou clé
+// absente → FR inchangé. Les NOMS/descriptions de trophées viennent de
+// data/rewards-i18n.js (mêmes titres que le profil — même clé, même texte).
+const TRO_I18N = {
+  en: {
+    title: "My trophies",
+    loading: "Loading…",
+    galerie_aria: "Open your rewards gallery",
+    galerie_t: "Your gallery",
+    galerie_s: "Your unlocked outfits and badges",
+    hint_zero: "Validate skills to earn your first trophy.",
+    hint_left_one: "left",
+    hint_left_many: "left",
+    hint_journey: "of the journey",
+    new_badge: "NEW",
+    new_aria: "New trophy",
+    unavailable: "“Trophies” unavailable",
+    check_conn: "Check your connection, then try again.",
+    kicker_leg: "Your legendary trophy",
+    kicker_best: "Your best trophy",
+    kicker_first: "Your first trophy",
+    sub_unlocked_on: "Unlocked on",
+    sub_unlocked: "Unlocked. Well done!",
+    goal: "Goal:",
+    aria_unlocked: ", unlocked",
+    aria_locked: ", to unlock",
+    locked_chip: "Locked",
+    to_unlock: "to unlock",
+    social_many: "You're among the most advanced students in your school.",
+    social_first: "Keep going to unlock more trophies.",
+    share: "Share",
+    share_aria: "Share this trophy",
+    close: "Close",
+    goto: "See my journey →",
+    share_title: "My PermiGo trophy",
+    copied: "Text copied",
+  },
+  ar: {
+    title: "كؤوسي",
+    loading: "جارٍ التحميل…",
+    galerie_aria: "افتح معرض مكافآتك",
+    galerie_t: "معرضك",
+    galerie_s: "أزياؤك وشاراتك المفتوحة",
+    hint_zero: "تحقّق من مهارات لتنال كأسك الأولى.",
+    hint_left_one: "متبقية",
+    hint_left_many: "متبقية",
+    hint_journey: "من المسار",
+    new_badge: "جديد",
+    new_aria: "كأس جديدة",
+    unavailable: "«الكؤوس» غير متاحة",
+    check_conn: "تحقّق من اتصالك ثم أعد المحاولة.",
+    kicker_leg: "كأسك الأسطورية",
+    kicker_best: "أفضل كؤوسك",
+    kicker_first: "كأسك الأولى",
+    sub_unlocked_on: "فُتحت في",
+    sub_unlocked: "فُتحت. أحسنت!",
+    goal: "الهدف:",
+    aria_unlocked: "، مفتوحة",
+    aria_locked: "، للفتح",
+    locked_chip: "مقفلة",
+    to_unlock: "عند الفتح",
+    social_many: "أنت من أكثر الطلاب تقدّمًا في مدرستك.",
+    social_first: "واصل لفتح المزيد من الكؤوس.",
+    share: "مشاركة",
+    share_aria: "شارك هذه الكأس",
+    close: "إغلاق",
+    goto: "عرض مساري ←",
+    share_title: "كأسي في PermiGo",
+    copied: "تم نسخ النص",
+  },
+};
+function ttR(key, fr) {
+  const l = getLang();
+  return (l !== "fr" && TRO_I18N[l]?.[key]) || fr;
+}
+function tt(key, fr) {
+  return esc(ttR(key, fr));
+}
+// Texte traduit posé dans le HTML : en arabe on l'enveloppe dans un span RTL
+// (sinon la ponctuation finale saute en début de ligne). Jamais en attribut.
+function ttD(key, fr) {
+  const v = tt(key, fr);
+  return getLang() === "ar" ? `<span dir="rtl">${v}</span>` : v;
+}
+// Wrap RTL d'un texte déjà traduit/échappé (titres de trophées, objectifs).
+function rtl(html) {
+  return getLang() === "ar" ? `<span dir="rtl">${html}</span>` : html;
+}
+// Rareté traduite (chips) — fallback = libellés FR locaux.
+function rar(rarity) {
+  return esc(rarityLabel(rarity, RARITY_LABEL[rarity] || "", getLang()));
+}
+// Nom/description/objectif traduits d'un trophée (fallback FR).
+function trTitle(def) {
+  return trophyTitle(def.key, def.title, getLang());
+}
+function trBody(def) {
+  return trophyBody(def.key, def.body, getLang());
+}
+function trGoal(key, stats) {
+  return trophyGoal(key, stats, getLang()) ?? shortProgress(key, stats);
+}
 
 // ─── CSS — SALLE DES TROPHÉES (arène nuit-violet + or) ─────────
 const STYLE = `<style>
@@ -412,20 +527,20 @@ export async function mount(root, openKey = null) {
   <div class="tr2-hero">
     <div class="tr2-hero-inner">
       <div class="tr2-hero-top">
-        <h1 class="tr2-hero-title" tabindex="-1">Mes trophées</h1>
+        <h1 class="tr2-hero-title" tabindex="-1">${tt("title", "Mes trophées")}</h1>
         <div class="tr2-hero-count" id="tr2-count">— / ${CATALOG.length}</div>
       </div>
       <div class="tr2-progress-wrap">
         <div class="tr2-progress-bar"><div class="tr2-progress-fill" id="tr2-fill" style="width:0%"></div></div>
-        <div class="tr2-progress-hint" id="tr2-hint">Chargement en cours…</div>
+        <div class="tr2-progress-hint" id="tr2-hint">${tt("loading", "Chargement en cours…")}</div>
       </div>
     </div>
   </div>
-  <a class="tr2-galerie" href="#/galerie" aria-label="Ouvrir ta galerie de récompenses">
+  <a class="tr2-galerie" href="#/galerie" aria-label="${tt("galerie_aria", "Ouvrir ta galerie de récompenses")}">
     <span class="tr2-galerie-ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>
     <span class="tr2-galerie-tx">
-      <span class="tr2-galerie-t">Ta galerie</span>
-      <span class="tr2-galerie-s">Tes tenues et badges débloqués</span>
+      <span class="tr2-galerie-t">${tt("galerie_t", "Ta galerie")}</span>
+      <span class="tr2-galerie-s">${ttD("galerie_s", "Tes tenues et badges débloqués")}</span>
     </span>
     <span class="tr2-galerie-arrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
   </a>
@@ -483,12 +598,12 @@ export async function mount(root, openKey = null) {
     renderAll(root, achRes.value?.data ?? [], stats, openKey);
   } catch (e) {
     console.error("[trophees]", e);
-    toast("« Trophées » indisponible", "error");
+    toast(ttR("unavailable", "« Trophées » indisponible"), "error");
     root.querySelector("#tr2-body").innerHTML = `
       <div style="text-align:center;padding:56px 24px;color:var(--ar-mu)">
         <div style="margin-bottom:12px;color:var(--ar-gold2)">${icon("trophy", { size: 44 })}</div>
-        <div style="font:800 16px/1.3 'Baloo 2',cursive;color:#fff;margin-bottom:6px">« Trophées » indisponible</div>
-        <div style="font:500 13px/1.5 'Inter',sans-serif">Vérifie ta connexion, puis réessaie.</div>
+        <div style="font:800 16px/1.3 'Baloo 2',cursive;color:#fff;margin-bottom:6px">${ttD("unavailable", "« Trophées » indisponible")}</div>
+        <div style="font:500 13px/1.5 'Inter',sans-serif">${ttD("check_conn", "Vérifie ta connexion, puis réessaie.")}</div>
       </div>`;
   }
 }
@@ -519,7 +634,7 @@ function saveSeenSet(keys) {
 // Badge d'un trophée (img 3D + fallback emoji). size = px de l'image.
 function badgeMarkup(def, size, cls = "") {
   if (def.image) {
-    return `<img src="${def.image}" alt="${escAttr(def.title)}" loading="lazy" class="${cls}"
+    return `<img src="${def.image}" alt="${escAttr(trTitle(def))}" loading="lazy" class="${cls}"
       onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'"
       style="width:${size}px;height:${size}px;object-fit:contain">
       <span style="display:none">${def.emoji}</span>`;
@@ -565,10 +680,16 @@ function renderAll(
       if (fill) fill.style.width = pct + "%";
     });
   }
+  const _left = CATALOG.length - unlockedCount;
   root.querySelector("#tr2-hint").textContent =
     unlockedCount === 0
-      ? "Valide des compétences pour décrocher ton premier trophée."
-      : `${pct}% du parcours · ${CATALOG.length - unlockedCount} restant${CATALOG.length - unlockedCount > 1 ? "s" : ""}`;
+      ? ttR(
+          "hint_zero",
+          "Valide des compétences pour décrocher ton premier trophée.",
+        )
+      : getLang() === "fr"
+        ? `${pct}% du parcours · ${_left} restant${_left > 1 ? "s" : ""}`
+        : `${pct}% ${ttR("hint_journey", "du parcours")} · ${_left} ${ttR(_left > 1 ? "hint_left_many" : "hint_left_one", "restant")}`;
 
   // Add entry keyframe
   if (!document.head.querySelector("#tr2-kf")) {
@@ -605,18 +726,18 @@ function renderAll(
   let html = featuredHtml;
   let globalIdx = 0;
   for (const [group, items] of Object.entries(groups)) {
-    html += `<div class="tr2-group-label">${esc(group)}</div><div class="tr2-grid">`;
+    html += `<div class="tr2-group-label">${esc(trophyGroup(group, getLang()))}</div><div class="tr2-grid">`;
     for (const t of items) {
       const u = unlockedMap.get(t.key);
       const cssClass = u ? t.rarity : "locked";
       html += `
         <div class="tr2-card ${cssClass}" data-key="${escAttr(t.key)}" role="button" tabindex="0"
           style="animation:tr2CardIn .4s ${globalIdx * 45}ms cubic-bezier(.34,1.56,.64,1) both">
-          ${u && freshKeys.has(t.key) ? `<span class="tr2-new-dot" aria-label="Nouveau trophée">NOUVEAU</span>` : ""}
+          ${u && freshKeys.has(t.key) ? `<span class="tr2-new-dot" aria-label="${tt("new_aria", "Nouveau trophée")}">${tt("new_badge", "NOUVEAU")}</span>` : ""}
           ${u ? `<div class="tr2-card-rarity" aria-hidden="true"></div>` : ""}
           <div class="tr2-card-emoji">${badgeMarkup(t, 64)}</div>
-          <div class="tr2-card-name">${u ? esc(t.title) : "???"}</div>
-          ${!u ? `<div class="tr2-card-mystery">${esc(shortProgress(t.key, stats))}</div>` : ""}
+          <div class="tr2-card-name">${u ? rtl(esc(trTitle(t))) : "???"}</div>
+          ${!u ? `<div class="tr2-card-mystery">${rtl(esc(trGoal(t.key, stats)))}</div>` : ""}
         </div>`;
       globalIdx++;
     }
@@ -675,63 +796,79 @@ function renderAll(
 // ─── Trophée vedette ──────────────────────────────────────────
 function renderFeatured(def, unlockData, stats = { compCount: 0, streak: 0 }) {
   const isU = !!unlockData;
-  const rar = def.rarity;
+  const rar2 = def.rarity;
   const kicker = isU
-    ? rar === "legendaire"
-      ? "Ton trophée légendaire"
-      : "Ton meilleur trophée"
-    : "Ton premier trophée";
+    ? rar2 === "legendaire"
+      ? ttR("kicker_leg", "Ton trophée légendaire")
+      : ttR("kicker_best", "Ton meilleur trophée")
+    : ttR("kicker_first", "Ton premier trophée");
   let sub;
   if (isU && unlockData.unlocked_at) {
-    sub = `Débloqué le ${new Date(unlockData.unlocked_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}`;
+    const _d = new Date(unlockData.unlocked_at).toLocaleDateString(
+      dateLocale(getLang()),
+      { day: "numeric", month: "long" },
+    );
+    sub =
+      getLang() === "fr"
+        ? `Débloqué le ${_d}`
+        : `${ttR("sub_unlocked_on", "Débloqué le")} ${_d}`;
   } else if (isU) {
-    sub = "Débloqué. Bien joué !";
+    sub = ttR("sub_unlocked", "Débloqué. Bien joué !");
   } else {
-    sub = `Objectif : ${shortProgress(def.key, stats)}`;
+    sub =
+      getLang() === "fr"
+        ? `Objectif : ${shortProgress(def.key, stats)}`
+        : `${ttR("goal", "Objectif :")} ${trGoal(def.key, stats)}`;
   }
   const sparks =
-    isU && (rar === "legendaire" || rar === "epique")
+    isU && (rar2 === "legendaire" || rar2 === "epique")
       ? `<span class="tr2-feat-spark a" aria-hidden="true"></span><span class="tr2-feat-spark b" aria-hidden="true"></span>`
       : "";
   return `
-    <div class="tr2-feat ${isU ? rar : "locked"}" data-key="${escAttr(def.key)}" role="button" tabindex="0"
-      aria-label="${escAttr(def.title)} — ${esc(RARITY_LABEL[rar] || "")}${isU ? ", débloqué" : ", à débloquer"}">
+    <div class="tr2-feat ${isU ? rar2 : "locked"}" data-key="${escAttr(def.key)}" role="button" tabindex="0"
+      aria-label="${escAttr(trTitle(def))} — ${rar(rar2)}${isU ? tt("aria_unlocked", ", débloqué") : tt("aria_locked", ", à débloquer")}">
       <div class="tr2-feat-kick"><span class="pin" aria-hidden="true"></span>${esc(kicker)}</div>
       <div class="tr2-feat-stage">
         <span class="tr2-feat-halo" aria-hidden="true"></span>
         ${sparks}
         ${
           def.image
-            ? `<img class="tr2-feat-badge" src="${def.image}" alt="${escAttr(def.title)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'"><span class="tr2-feat-badge-emoji" style="display:none">${def.emoji}</span>`
+            ? `<img class="tr2-feat-badge" src="${def.image}" alt="${escAttr(trTitle(def))}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'"><span class="tr2-feat-badge-emoji" style="display:none">${def.emoji}</span>`
             : `<span class="tr2-feat-badge-emoji">${def.emoji}</span>`
         }
       </div>
       <div class="tr2-feat-foot">
         <div>
-          <div class="tr2-feat-name">${isU ? esc(def.title) : "???"}</div>
-          <div class="tr2-feat-sub">${esc(sub)}</div>
+          <div class="tr2-feat-name">${isU ? rtl(esc(trTitle(def))) : "???"}</div>
+          <div class="tr2-feat-sub">${rtl(esc(sub))}</div>
         </div>
-        <span class="tr2-feat-chip">${esc(RARITY_LABEL[rar] || "")}</span>
+        <span class="tr2-feat-chip">${rar(rar2)}</span>
       </div>
     </div>`;
 }
 
 // ─── Modal ────────────────────────────────────────────────────
 function showModal(def, unlockData, totalUnlocked) {
-  const rar = def.rarity;
+  const rarity = def.rarity;
   const isUnlocked = !!unlockData;
-  const rcVar = `var(--rc-${rar})`;
+  const rcVar = `var(--rc-${rarity})`;
   const dateStr = unlockData?.unlocked_at
-    ? new Date(unlockData.unlocked_at).toLocaleDateString("fr-FR", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      })
+    ? new Date(unlockData.unlocked_at).toLocaleDateString(
+        dateLocale(getLang()),
+        {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        },
+      )
     : null;
 
   const sparks = isUnlocked
     ? `<span class="tr2-modal-spark s1" aria-hidden="true"></span><span class="tr2-modal-spark s2" aria-hidden="true"></span><span class="tr2-modal-spark s3" aria-hidden="true"></span>`
     : "";
+
+  // Ligne « +N volants » — wording monnaie traduit (jamais "gems").
+  const volChip = `+${def.gemmes} ${volantImg(13)} ${esc(volantWord(def.gemmes, getLang()))}`;
 
   const html = isUnlocked
     ? `
@@ -740,24 +877,27 @@ function showModal(def, unlockData, totalUnlocked) {
         <div class="tr2-modal-handle"></div>
         ${sparks}
         <div class="tr2-modal-emoji">${badgeMarkup(def, 130)}</div>
-        <div class="tr2-rarity-chip ${rar}">${esc(RARITY_LABEL[rar] || "")}</div>
+        <div class="tr2-rarity-chip ${rarity}">${rar(rarity)}</div>
       </div>
       <div class="tr2-modal-body">
-        <h2 class="tr2-modal-title">${esc(def.title)}</h2>
-        <div class="tr2-modal-desc">${esc(def.body)}</div>
+        <h2 class="tr2-modal-title">${rtl(esc(trTitle(def)))}</h2>
+        <div class="tr2-modal-desc">${rtl(esc(trBody(def)))}</div>
         <div class="tr2-modal-meta">
-          <div class="tr2-modal-chip gems">+${def.gemmes} ${volantImg(13)} ${volantLabel(def.gemmes)}</div>
+          <div class="tr2-modal-chip gems">${volChip}</div>
           ${dateStr ? `<div class="tr2-modal-chip date">${icon("calendar", { size: 13 })} ${esc(dateStr)}</div>` : ""}
         </div>
         <div class="tr2-modal-social">${
           totalUnlocked > 1
-            ? `Tu fais partie des élèves les plus avancés de ton école.`
-            : "Continue pour débloquer d’autres trophées."
+            ? ttD(
+                "social_many",
+                `Tu fais partie des élèves les plus avancés de ton école.`,
+              )
+            : ttD("social_first", "Continue pour débloquer d’autres trophées.")
         }</div>
       </div>
       <div class="tr2-modal-actions">
-        <button class="tr2-modal-share" id="tr2-share-btn" aria-label="Partager ce trophée"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg><span>Partager</span></button>
-        <button class="tr2-modal-close" id="tr2-close-btn">Fermer</button>
+        <button class="tr2-modal-share" id="tr2-share-btn" aria-label="${tt("share_aria", "Partager ce trophée")}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg><span>${tt("share", "Partager")}</span></button>
+        <button class="tr2-modal-close" id="tr2-close-btn">${tt("close", "Fermer")}</button>
       </div>
     </div>
   `
@@ -766,20 +906,20 @@ function showModal(def, unlockData, totalUnlocked) {
       <div class="tr2-modal-glow">
         <div class="tr2-modal-handle"></div>
         <div class="tr2-modal-emoji locked">${badgeMarkup(def, 130)}</div>
-        <div class="tr2-rarity-chip locked">${icon("lock", { size: 13 })} Verrouillé</div>
+        <div class="tr2-rarity-chip locked">${icon("lock", { size: 13 })} ${tt("locked_chip", "Verrouillé")}</div>
       </div>
       <div class="tr2-modal-body">
-        <h2 class="tr2-modal-title">${esc(def.title)}</h2>
-        <div class="tr2-modal-desc">${esc(def.body)}</div>
+        <h2 class="tr2-modal-title">${rtl(esc(trTitle(def)))}</h2>
+        <div class="tr2-modal-desc">${rtl(esc(trBody(def)))}</div>
         <div class="tr2-modal-meta">
-          <div class="tr2-modal-chip gems">+${def.gemmes} ${volantImg(13)} ${volantLabel(def.gemmes)} à débloquer</div>
-          <div class="tr2-modal-chip date">${esc(RARITY_LABEL[rar] || "")}</div>
+          <div class="tr2-modal-chip gems">${volChip} ${tt("to_unlock", "à débloquer")}</div>
+          <div class="tr2-modal-chip date">${rar(rarity)}</div>
         </div>
-        <div class="tr2-modal-social">Objectif : ${esc(shortProgress(def.key))}</div>
+        <div class="tr2-modal-social">${rtl(`${tt("goal", "Objectif :")} ${esc(trGoal(def.key))}`)}</div>
       </div>
       <div class="tr2-modal-actions">
-        <button class="tr2-modal-share goto" id="tr2-goto-btn">Voir mon parcours →</button>
-        <button class="tr2-modal-close" id="tr2-close-btn">Fermer</button>
+        <button class="tr2-modal-share goto" id="tr2-goto-btn">${tt("goto", "Voir mon parcours →")}</button>
+        <button class="tr2-modal-close" id="tr2-close-btn">${tt("close", "Fermer")}</button>
       </div>
     </div>
   `;
@@ -798,11 +938,17 @@ function showModal(def, unlockData, totalUnlocked) {
     overlay
       .querySelector("#tr2-share-btn")
       ?.addEventListener("click", async () => {
-        const text = `J’ai débloqué « ${def.title} » sur PermiGo !`;
+        const l = getLang();
+        const text =
+          l === "en"
+            ? `I unlocked “${trTitle(def)}” on PermiGo!`
+            : l === "ar"
+              ? `فتحت «${trTitle(def)}» في PermiGo!`
+              : `J’ai débloqué « ${def.title} » sur PermiGo !`;
         if (navigator.share) {
           try {
             await navigator.share({
-              title: "Mon trophée PermiGo",
+              title: ttR("share_title", "Mon trophée PermiGo"),
               text,
               url: window.location.origin,
             });
@@ -812,7 +958,7 @@ function showModal(def, unlockData, totalUnlocked) {
         } else {
           try {
             await navigator.clipboard.writeText(text);
-            toast("Texte copié", "success");
+            toast(ttR("copied", "Texte copié"), "success");
           } catch {
             /* unavailable */
           }

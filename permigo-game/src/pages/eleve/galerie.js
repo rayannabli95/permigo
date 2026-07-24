@@ -7,7 +7,7 @@ import { sb } from "@/auth/auth.js";
 import { yesterdayKey } from "@/services/daily-quiz.js";
 import { icon } from "@/utils/icons.js";
 import { medallion } from "@/utils/medallions.js";
-import { volantImg, volantLabel } from "@/utils/volant.js";
+import { volantImg } from "@/utils/volant.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
@@ -19,10 +19,97 @@ import {
 } from "@/data/achievements.js";
 import { ASSETS } from "@/utils/assets.js";
 import { recompensesTabs } from "@/components/eleve/recompenses-tabs.js";
+import { getLang } from "@/utils/lang.js";
+import {
+  trophyTitle,
+  trophyBody,
+  trophyGoal,
+  rarityLabel,
+  volantWord,
+} from "@/data/rewards-i18n.js";
 
 const RARITY_LABEL = Object.fromEntries(
   Object.entries(RARITY_META).map(([k, v]) => [k, v.label]),
 );
+
+// ── i18n de la COQUE (EN/AR) — dict local (convention coque, cf. profil #555).
+// gt(key, fr) = traduit-ou-français avec esc() intégré ; gtR = brut (toasts).
+// Noms/descriptions de trophées : data/rewards-i18n.js (mêmes titres que le
+// profil). En 'fr' ou clé absente → FR inchangé.
+const GAL_I18N = {
+  en: {
+    title: "My collection",
+    sub_all: "Everything you can unlock.",
+    loading: "Loading…",
+    conn_unstable: "Unstable connection — counters unavailable",
+    unlocked_hd: "Unlocked",
+    locked_hd: "To unlock",
+    empty_hint:
+      "No trophy unlocked yet — validate your first skill to get started!",
+    see_troph: "See the trophy",
+    locked_troph: "Locked trophy:",
+    locked_meta: "Locked",
+    permis_hd: "Licence card backgrounds",
+    tier_mesh: "Mesh",
+    tier_route: "Road",
+    tier_holographic: "Holographic",
+    cond_start: "Available from the start",
+    cond_10: "10 skills validated",
+    cond_20: "20 skills validated",
+    acquis: "Owned",
+    comp_word: "skills",
+    close: "Close",
+    unlocked_state: "Unlocked",
+    locked_state: "Locked",
+    tab_troph: "Trophies",
+    tab_permis: "Backgrounds",
+    reward_sing: "reward unlocked out of",
+    reward_plur: "rewards unlocked out of",
+  },
+  ar: {
+    title: "مجموعتي",
+    sub_all: "كل ما يمكنك فتحه.",
+    loading: "جارٍ التحميل…",
+    conn_unstable: "اتصال غير مستقر — العدادات غير متاحة",
+    unlocked_hd: "مفتوحة",
+    locked_hd: "للفتح",
+    empty_hint: "لا كؤوس مفتوحة بعد — تحقّق من مهارتك الأولى للبدء!",
+    see_troph: "عرض الكأس",
+    locked_troph: "كأس مقفلة:",
+    locked_meta: "مقفلة",
+    permis_hd: "خلفيات بطاقة الرخصة",
+    tier_mesh: "شبكي",
+    tier_route: "الطريق",
+    tier_holographic: "هولوغرافي",
+    cond_start: "متاحة منذ البداية",
+    cond_10: "10 مهارات مُتحقّقة",
+    cond_20: "20 مهارة مُتحقّقة",
+    acquis: "مِلكك",
+    comp_word: "مهارات",
+    close: "إغلاق",
+    unlocked_state: "مفتوحة",
+    locked_state: "مقفلة",
+    tab_troph: "الكؤوس",
+    tab_permis: "الخلفيات",
+    reward_sing: "مكافأة مفتوحة من أصل",
+    reward_plur: "مكافآت مفتوحة من أصل",
+  },
+};
+function gtR(key, fr) {
+  const l = getLang();
+  return (l !== "fr" && GAL_I18N[l]?.[key]) || fr;
+}
+function gt(key, fr) {
+  return esc(gtR(key, fr));
+}
+// Texte traduit posé en HTML : span RTL en arabe (ponctuation au bon endroit).
+function gtD(key, fr) {
+  const v = gt(key, fr);
+  return getLang() === "ar" ? `<span dir="rtl">${v}</span>` : v;
+}
+function grtl(html) {
+  return getLang() === "ar" ? `<span dir="rtl">${html}</span>` : html;
+}
 
 const STYLE = `<style>
 .gal {
@@ -262,10 +349,10 @@ export async function mount(root) {
   root.innerHTML = `${STYLE}<div class="gal">
     ${recompensesTabs("galerie")}
     <div class="gal-hd">
-      <h1 class="gal-title">Ma collection</h1>
-      <p class="gal-sub">Tout ce que tu peux débloquer.</p>
+      <h1 class="gal-title">${gt("title", "Ma collection")}</h1>
+      <p class="gal-sub">${gtD("sub_all", "Tout ce que tu peux débloquer.")}</p>
     </div>
-    <div style="padding:24px;text-align:center;color:var(--mu2)">Chargement…</div>
+    <div style="padding:24px;text-align:center;color:var(--mu2)">${gt("loading", "Chargement…")}</div>
   </div>`;
 
   // Source de vérité : succès réellement débloqués (table achievements_unlocked)
@@ -312,23 +399,29 @@ export async function mount(root) {
     console.warn("[galerie] fetch failed", e);
     import("@/components/common/toast.js")
       .then(({ toast }) =>
-        toast("Connexion instable — compteurs indisponibles", "info"),
+        toast(
+          gtR("conn_unstable", "Connexion instable — compteurs indisponibles"),
+          "info",
+        ),
       )
       .catch(() => {});
   }
 
   const progressStats = { compCount: validatedCount, streak: currentStreak };
+  const _lang = getLang();
   const trophees = CATALOG.map((c) => ({
     id: c.key,
     image: c.image,
     ico: c.emoji,
-    nom: c.title,
-    desc: c.body,
+    nom: trophyTitle(c.key, c.title, _lang),
+    desc: trophyBody(c.key, c.body, _lang),
     rarity: c.rarity,
     xp: c.xp,
     gemmes: c.gemmes,
     color: RARITY_COLOR[c.rarity] || "var(--mu2)",
-    objectif: shortProgress(c.key, progressStats),
+    objectif:
+      trophyGoal(c.key, progressStats, _lang) ??
+      shortProgress(c.key, progressStats),
     unlocked: unlockedMap.has(c.key),
   }));
   const unlockedTrophies = trophees.filter((t) => t.unlocked).length;
@@ -339,24 +432,24 @@ export async function mount(root) {
       key: "mesh",
       min: 0,
       max: 9,
-      nom: "Mesh",
-      cond: "Disponible dès le départ",
+      nom: gtR("tier_mesh", "Mesh"),
+      cond: gtR("cond_start", "Disponible dès le départ"),
       img: ASSETS.permisBg.mesh,
     },
     {
       key: "route",
       min: 10,
       max: 19,
-      nom: "Route",
-      cond: "10 compétences acquises",
+      nom: gtR("tier_route", "Route"),
+      cond: gtR("cond_10", "10 compétences acquises"),
       img: ASSETS.permisBg.route,
     },
     {
       key: "holographic",
       min: 20,
       max: 31,
-      nom: "Holographique",
-      cond: "20 compétences acquises",
+      nom: gtR("tier_holographic", "Holographique"),
+      cond: gtR("cond_20", "20 compétences acquises"),
       img: ASSETS.permisBg.holographic,
     },
   ].map((t) => ({ ...t, unlocked: validatedCount >= t.min }));
@@ -369,7 +462,7 @@ export async function mount(root) {
     const locked = trophees.filter((t) => !t.unlocked);
     return `
       <div class="gal-section-hd">
-        <span class="gal-section-title">Débloqués</span>
+        <span class="gal-section-title">${gt("unlocked_hd", "Débloqués")}</span>
         <span class="gal-section-count">${unlocked.length}/${trophees.length}</span>
       </div>
       <div class="gal-grid">
@@ -380,7 +473,7 @@ export async function mount(root) {
           ? `
         <div class="gal-empty-hint">
           <div class="gal-empty-hint-emoji">${medallion("trophee", "gold", { size: 44 })}</div>
-          <div class="gal-empty-hint-txt">Aucun trophée débloqué pour l'instant — valide ta première compétence pour commencer !</div>
+          <div class="gal-empty-hint-txt">${gtD("empty_hint", "Aucun trophée débloqué pour l'instant — valide ta première compétence pour commencer !")}</div>
         </div>
       `
           : ""
@@ -388,7 +481,7 @@ export async function mount(root) {
       ${
         locked.length > 0
           ? `
-        <div class="gal-section-hd" style="margin-top:8px"><span class="gal-section-title">À débloquer</span></div>
+        <div class="gal-section-hd" style="margin-top:8px"><span class="gal-section-title">${gt("locked_hd", "À débloquer")}</span></div>
         <div class="gal-grid">${locked.map((t) => renderTrophyCard(t, false)).join("")}</div>
       `
           : ""
@@ -404,11 +497,11 @@ export async function mount(root) {
     return `
       <div class="gal-card ${unlocked ? "acquis" : "locked"}" style="--gc:${color}"
            data-id="${escAttr(t.id)}" role="button" tabindex="0"
-           aria-label="${unlocked ? `Voir le trophée ${esc(t.nom)}` : `Trophée verrouillé : ${esc(t.nom)}`}">
+           aria-label="${unlocked ? `${gt("see_troph", "Voir le trophée")} ${esc(t.nom)}` : `${gt("locked_troph", "Trophée verrouillé :")} ${esc(t.nom)}`}">
         ${!unlocked ? `<div class="gal-lock-badge" aria-hidden="true">${medallion("cadenas", "slate", { size: 18 })}</div>` : ""}
         <div class="gal-card-visual">${visual}</div>
-        <div class="gal-card-nom">${esc(t.nom)}</div>
-        ${unlocked ? "" : `<div class="gal-card-meta">${esc(t.objectif || "Verrouillé")}</div>`}
+        <div class="gal-card-nom">${grtl(esc(t.nom))}</div>
+        ${unlocked ? "" : `<div class="gal-card-meta">${grtl(esc(t.objectif || gtR("locked_meta", "Verrouillé")))}</div>`}
       </div>
     `;
   }
@@ -416,7 +509,7 @@ export async function mount(root) {
   function renderPermisTiers() {
     return `
       <div class="gal-section-hd">
-        <span class="gal-section-title">Fonds carte permis</span>
+        <span class="gal-section-title">${gt("permis_hd", "Fonds carte permis")}</span>
         <span class="gal-section-count">${unlockedPermisBg}/${permisTiers.length}</span>
       </div>
       <div class="gal-permis-grid">
@@ -426,14 +519,14 @@ export async function mount(root) {
           <div class="gal-permis-card ${t.unlocked ? "acquis" : "locked"}">
             <div class="gal-permis-preview" style="background-image:url('${esc(t.img)}')"></div>
             <div class="gal-permis-info">
-              <div class="gal-permis-nom">${esc(t.nom)}</div>
-              <div class="gal-permis-cond">${esc(t.cond)}</div>
+              <div class="gal-permis-nom">${grtl(esc(t.nom))}</div>
+              <div class="gal-permis-cond">${grtl(esc(t.cond))}</div>
             </div>
             <div class="gal-permis-status">
               ${
                 t.unlocked
-                  ? `<span style="font:700 10px/1 'Inter',sans-serif;color:var(--grdk);background:rgba(16,185,129,.12);padding:5px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:.06em">Acquis</span>`
-                  : `<span style="font:700 10px/1 'Inter',sans-serif;color:var(--mu2);background:var(--bg3);padding:5px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:.06em">${icon("lock", { size: 11 })} ${esc(`${t.min}`)} comp</span>`
+                  ? `<span style="font:700 10px/1 'Inter',sans-serif;color:var(--grdk);background:rgba(16,185,129,.12);padding:5px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:.06em">${gt("acquis", "Acquis")}</span>`
+                  : `<span style="font:700 10px/1 'Inter',sans-serif;color:var(--mu2);background:var(--bg3);padding:5px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:.06em">${icon("lock", { size: 11 })} ${esc(`${t.min}`)} ${gt("comp_word", "comp")}</span>`
               }
             </div>
           </div>
@@ -449,7 +542,11 @@ export async function mount(root) {
     if (document.querySelector(".gal-modal-bg")) return;
     const color = t.color || "var(--mu2)";
     const rarityColor = RARITY_COLOR[t.rarity] || "var(--mu2)";
-    const rarityLabel = RARITY_LABEL[t.rarity] || t.rarity || "";
+    const rarityTxt = rarityLabel(
+      t.rarity,
+      RARITY_LABEL[t.rarity] || t.rarity || "",
+      getLang(),
+    );
     const visual = t.image
       ? `<img src="${escAttr(t.image)}" alt="${escAttr(t.nom)}" />`
       : `<span class="gal-emoji">${medallion("trophee", "gold", { size: 96 })}</span>`;
@@ -458,14 +555,14 @@ export async function mount(root) {
     overlay.className = "gal-modal-bg";
     overlay.innerHTML = `
       <div class="gal-modal ${unlocked ? "" : "locked"}" style="--gc:${color}" role="dialog" aria-modal="true" aria-label="${escAttr(t.nom)}">
-        <button class="gal-modal-close" type="button" aria-label="Fermer">×</button>
+        <button class="gal-modal-close" type="button" aria-label="${gt("close", "Fermer")}">×</button>
         <div class="gal-modal-visual">${visual}</div>
-        ${rarityLabel ? `<div class="gal-modal-rarity" style="color:${rarityColor};background:color-mix(in srgb,${rarityColor} 16%,transparent)">${esc(rarityLabel)}</div>` : ""}
-        <div class="gal-modal-nom">${esc(t.nom)}</div>
-        <div class="gal-modal-desc">${esc(t.desc || "")}</div>
+        ${rarityTxt ? `<div class="gal-modal-rarity" style="color:${rarityColor};background:color-mix(in srgb,${rarityColor} 16%,transparent)">${esc(rarityTxt)}</div>` : ""}
+        <div class="gal-modal-nom">${grtl(esc(t.nom))}</div>
+        <div class="gal-modal-desc">${grtl(esc(t.desc || ""))}</div>
         <div class="gal-modal-foot">
-          ${t.gemmes ? `<span class="gal-modal-xp" style="color:var(--gr);background:rgba(16,185,129,.1)">+${t.gemmes} ${volantImg(13)} ${volantLabel(t.gemmes)}</span>` : ""}
-          <span class="gal-modal-state ${unlocked ? "on" : "off"}">${unlocked ? `${medallion("check", "green", { size: 16 })} Débloqué` : t.objectif ? esc(t.objectif) : `${medallion("cadenas", "slate", { size: 16 })} Verrouillé`}</span>
+          ${t.gemmes ? `<span class="gal-modal-xp" style="color:var(--gr);background:rgba(16,185,129,.1)">+${t.gemmes} ${volantImg(13)} ${esc(volantWord(t.gemmes, getLang()))}</span>` : ""}
+          <span class="gal-modal-state ${unlocked ? "on" : "off"}">${unlocked ? `${medallion("check", "green", { size: 16 })} ${gt("unlocked_state", "Débloqué")}` : t.objectif ? grtl(esc(t.objectif)) : `${medallion("cadenas", "slate", { size: 16 })} ${gt("locked_state", "Verrouillé")}`}</span>
         </div>
       </div>`;
     document.body.appendChild(overlay);
@@ -491,12 +588,21 @@ export async function mount(root) {
       <div class="gal anim-slide-up">
         ${recompensesTabs("galerie")}
         <div class="gal-hd">
-          <h1 class="gal-title">Ma collection</h1>
-          <p class="gal-sub">${unlockedTrophies + unlockedPermisBg} récompense${unlockedTrophies + unlockedPermisBg > 1 ? "s" : ""} débloquée${unlockedTrophies + unlockedPermisBg > 1 ? "s" : ""} sur ${trophees.length + permisTiers.length}.</p>
+          <h1 class="gal-title">${gt("title", "Ma collection")}</h1>
+          <p class="gal-sub">${(() => {
+            const n = unlockedTrophies + unlockedPermisBg;
+            const m = trophees.length + permisTiers.length;
+            const plur = n > 1;
+            const txt =
+              getLang() === "fr"
+                ? `${n} récompense${plur ? "s" : ""} débloquée${plur ? "s" : ""} sur ${m}.`
+                : `${n} ${gtR(plur ? "reward_plur" : "reward_sing", "récompense débloquée sur")} ${m}.`;
+            return grtl(esc(txt));
+          })()}</p>
         </div>
         <div class="gal-tabs" role="tablist">
-          <button class="gal-tab ${activeTab === "trophees" ? "active" : ""}" data-tab="trophees" role="tab" aria-selected="${activeTab === "trophees"}">Trophées</button>
-          <button class="gal-tab ${activeTab === "permis" ? "active" : ""}" data-tab="permis" role="tab" aria-selected="${activeTab === "permis"}">Fonds permis</button>
+          <button class="gal-tab ${activeTab === "trophees" ? "active" : ""}" data-tab="trophees" role="tab" aria-selected="${activeTab === "trophees"}">${gt("tab_troph", "Trophées")}</button>
+          <button class="gal-tab ${activeTab === "permis" ? "active" : ""}" data-tab="permis" role="tab" aria-selected="${activeTab === "permis"}">${gt("tab_permis", "Fonds permis")}</button>
         </div>
         <div id="gal-content">
           ${activeTab === "trophees" ? renderTrophees() : renderPermisTiers()}

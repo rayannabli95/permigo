@@ -18,6 +18,46 @@ import { markChestOpened } from "@/utils/game-state.js";
 import { burstConfetti } from "@/components/common/confetti.js";
 import { playWhoosh, playUnlock, playGold, playCoin } from "@/utils/sound.js";
 import { lootToast } from "@/components/eleve/loot-toast.js";
+import { getLang } from "@/utils/lang.js";
+
+// ── i18n de la COQUE des coffres (EN/AR). Dict LOCAL, repli FR. « volants »
+// → "steering wheels" / « مقود ». Les noms de tiers/labels sont de la coque.
+const CH_I18N = {
+  en: {
+    opened: "✓ Opened",
+    volants: "steering wheels",
+    world: "World",
+    claim: "CLAIM THE REWARDS",
+    aria_opened_suffix: "already opened",
+    aria_open_prefix: "Open the",
+    t1: "BRONZE CHEST",
+    t2: "SILVER CHEST",
+    t3: "GOLD CHEST",
+    t4: "LEGENDARY CHEST",
+  },
+  ar: {
+    opened: "✓ مفتوح",
+    volants: "مقود",
+    world: "العالم",
+    claim: "استلم المكافآت",
+    aria_opened_suffix: "مفتوح بالفعل",
+    aria_open_prefix: "افتح",
+    t1: "صندوق برونزي",
+    t2: "صندوق فضّي",
+    t3: "صندوق ذهبي",
+    t4: "صندوق أسطوري",
+  },
+};
+function chT(key, fr) {
+  const l = getLang();
+  return (l !== "fr" && CH_I18N[l]?.[key]) || fr;
+}
+// Nom de tier traduit (repli sur TIERS[worldNum].name).
+function tierName(worldNum) {
+  const key = { 1: "t1", 2: "t2", 3: "t3", 4: "t4" }[worldNum];
+  const fr = (TIERS[worldNum] || TIERS[1]).name;
+  return chT(key || "t1", fr);
+}
 
 // 4 mondes = 4 tiers de coffres avec leur identité visuelle
 const TIERS = {
@@ -70,7 +110,7 @@ export function renderChest({ worldNum, worldName, opened = false }) {
   return `
     <div class="chest-card ${opened ? "opened" : "unlocked"}"
          data-chest-world="${worldNum}" role="button" tabindex="0"
-         aria-label="${opened ? `${tier.name} déjà ouvert` : `Ouvrir le ${tier.name}`}"
+         aria-label="${opened ? `${tierName(worldNum)} ${chT("aria_opened_suffix", "déjà ouvert")}` : `${chT("aria_open_prefix", "Ouvrir le")} ${tierName(worldNum)}`}"
          style="--ch-1:${tier.primary};--ch-2:${tier.secondary};--ch-3:${tier.accent};--ch-gem:${tier.gem}">
       ${!opened ? '<div class="chest-rays" aria-hidden="true"></div>' : ""}
       <div class="chest-halo" aria-hidden="true"></div>
@@ -80,9 +120,9 @@ export function renderChest({ worldNum, worldName, opened = false }) {
         <span class="chest-icon-emoji" style="display:none">🎁</span>
       </div>
       <div class="chest-label">
-        <div class="chest-tier">${opened ? "✓ OUVERT" : tier.name}</div>
+        <div class="chest-tier">${opened ? chT("opened", "✓ OUVERT") : tierName(worldNum)}</div>
         <div class="chest-name">${esc(worldName)}</div>
-        ${!opened ? `<div class="chest-cta">${volantImg(13)} +${tier.gemmes} volants</div>` : ""}
+        ${!opened ? `<div class="chest-cta">${volantImg(13)} +${tier.gemmes} ${chT("volants", "volants")}</div>` : ""}
       </div>
     </div>
   `;
@@ -113,15 +153,15 @@ export function openChestModal({ worldNum, worldName, onClaim }) {
         <div class="chest-modal-spotlight"></div>
         <div class="chest-modal-burst" aria-hidden="true"></div>
         <div class="chest-modal-img-wrap">
-          <img class="chest-modal-img" src="${chestImage(worldNum)}" alt="${escAttr(tier.name)}"
+          <img class="chest-modal-img" src="${chestImage(worldNum)}" alt="${escAttr(tierName(worldNum))}"
                onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
           <span class="chest-modal-emoji" style="display:none">🎁</span>
         </div>
       </div>
-      <h2 class="chest-modal-title" id="chest-modal-title">${tier.name}</h2>
-      <div class="chest-modal-sub">Monde ${worldNum} · ${esc(worldName)}</div>
+      <h2 class="chest-modal-title" id="chest-modal-title">${tierName(worldNum)}</h2>
+      <div class="chest-modal-sub">${chT("world", "Monde")} ${worldNum} · ${esc(worldName)}</div>
       <div class="chest-rewards" id="chest-rewards"></div>
-      <button class="chest-modal-close" id="chest-modal-close" type="button">RÉCLAMER LES RÉCOMPENSES</button>
+      <button class="chest-modal-close" id="chest-modal-close" type="button">${chT("claim", "RÉCLAMER LES RÉCOMPENSES")}</button>
     </div>
   `;
   document.body.appendChild(modal);
@@ -172,7 +212,7 @@ export function openChestModal({ worldNum, worldName, onClaim }) {
       const list = [
         {
           icon: volantImg(20),
-          label: `+${tier.gemmes} volants`,
+          label: `+${tier.gemmes} ${chT("volants", "volants")}`,
           delay: 200,
         },
         {

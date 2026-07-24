@@ -18,6 +18,103 @@ import { toast } from "@/components/common/toast.js";
 import { getMyChests, openChest } from "@/utils/game-state.js";
 import { playCoin } from "@/utils/sound.js";
 import { openChestModal, ensureChestStyles } from "@/components/eleve/chest.js";
+import { getLang } from "@/utils/lang.js";
+import { volantWord, dateLocale } from "@/data/rewards-i18n.js";
+
+// ── i18n de la COQUE (EN/AR) — dict local (convention coque, cf. profil #555).
+// ct(key, fr) = traduit-ou-français esc() intégré ; ctR = brut (toasts,
+// textContent). Les libellés de coffres (CHEST_META, données locales) sont
+// traduits AU RENDU via `chest` ci-dessous — la DB (rewards jsonb serveur)
+// n'est jamais touchée. En 'fr' ou clé absente → FR inchangé.
+const MC_I18N = {
+  en: {
+    title: "My chests",
+    back: "Back",
+    to_open: "To open",
+    opened_hd: "Already opened",
+    today: "today",
+    yesterday: "yesterday",
+    won: "Won",
+    opened: "Opened",
+    opened_today: "Opened today",
+    open_btn: "Open",
+    open_chest_aria: "Open the chest",
+    open_aria: "Open",
+    already_aria: "Already opened:",
+    unavailable: "“Chests” unavailable.",
+    check_conn: "Check your connection, then try again.",
+    retry: "Try again",
+    none: "No chest yet.",
+    none_sub: "Finish a world or keep your streak going.",
+    open_fail: "The chest couldn’t open. Try again.",
+    toast_open_mid: "opened!",
+    world_n: "World",
+    chest_world_1: "World 1 — Safety",
+    chest_world_2: "World 2 — Manoeuvres",
+    chest_world_3: "World 3 — Driving",
+    chest_world_4: "World 4 — Mastery",
+    chest_streak_7: "7-day streak",
+    chest_streak_14: "14-day streak",
+    chest_streak_30: "30-day streak",
+    chest_perfect_quiz: "Perfect quiz",
+    chest_welcome: "Welcome chest",
+    wname_1: "Safety",
+    wname_2: "Manoeuvres",
+    wname_3: "Driving",
+    wname_4: "Mastery",
+  },
+  ar: {
+    title: "صناديقي",
+    back: "رجوع",
+    to_open: "للفتح",
+    opened_hd: "فُتحت سابقًا",
+    today: "اليوم",
+    yesterday: "أمس",
+    won: "رُبح",
+    opened: "فُتح",
+    opened_today: "فُتح اليوم",
+    open_btn: "افتح",
+    open_chest_aria: "افتح الصندوق",
+    open_aria: "افتح",
+    already_aria: "فُتح سابقًا:",
+    unavailable: "«الصناديق» غير متاحة.",
+    check_conn: "تحقّق من اتصالك ثم أعد المحاولة.",
+    retry: "أعد المحاولة",
+    none: "لا صناديق حاليًا.",
+    none_sub: "أنهِ عالمًا أو حافظ على سلسلتك.",
+    open_fail: "تعذّر فتح الصندوق. أعد المحاولة.",
+    toast_open_mid: "فُتح!",
+    world_n: "العالم",
+    chest_world_1: "العالم 1 — السلامة",
+    chest_world_2: "العالم 2 — المناورات",
+    chest_world_3: "العالم 3 — القيادة",
+    chest_world_4: "العالم 4 — الإتقان",
+    chest_streak_7: "سلسلة 7 أيام",
+    chest_streak_14: "سلسلة 14 يومًا",
+    chest_streak_30: "سلسلة 30 يومًا",
+    chest_perfect_quiz: "اختبار كامل العلامة",
+    chest_welcome: "صندوق الترحيب",
+    wname_1: "السلامة",
+    wname_2: "المناورات",
+    wname_3: "القيادة",
+    wname_4: "الإتقان",
+  },
+};
+function ctR(key, fr) {
+  const l = getLang();
+  return (l !== "fr" && MC_I18N[l]?.[key]) || fr;
+}
+function ct(key, fr) {
+  return esc(ctR(key, fr));
+}
+// Libellé traduit d'un coffre (fallback = label FR de CHEST_META).
+function chestLabel(chestType, frLabel) {
+  return ctR(`chest_${chestType}`, frLabel);
+}
+// Texte traduit posé en HTML : span RTL en arabe (ponctuation au bon endroit).
+function crtl(html) {
+  return getLang() === "ar" ? `<span dir="rtl">${html}</span>` : html;
+}
 
 // ─── Metadata par type de coffre ─────────────────────────────────
 const CHEST_META = {
@@ -308,12 +405,18 @@ const STYLE = `<style>
 
 function relTime(ts) {
   if (!ts) return "";
+  const l = getLang();
   const diff = Date.now() - new Date(ts).getTime();
   const d = Math.floor(diff / 86400000);
-  if (d === 0) return "aujourd’hui";
-  if (d === 1) return "hier";
-  if (d < 7) return `il y a ${d} j`;
-  return new Date(ts).toLocaleDateString("fr-FR", {
+  if (d === 0) return ctR("today", "aujourd’hui");
+  if (d === 1) return ctR("yesterday", "hier");
+  if (d < 7)
+    return l === "en"
+      ? `${d} d ago`
+      : l === "ar"
+        ? `قبل ${d} أيام`
+        : `il y a ${d} j`;
+  return new Date(ts).toLocaleDateString(dateLocale(l), {
     day: "numeric",
     month: "short",
   });
@@ -332,6 +435,7 @@ function renderCard(chest) {
   const rew = chest.rewards || {};
   const xp = rew.xp || meta.xp;
   const gemmes = rew.gemmes || meta.gemmes;
+  const label = chestLabel(chest.chest_type, meta.label);
 
   return `
   <div class="mc-card${canOpen ? " mc-can-open" : " mc-opened"}"
@@ -340,28 +444,28 @@ function renderCard(chest) {
        data-tier="${escAttr(meta.tier)}"
        role="${canOpen ? "button" : "article"}"
        tabindex="${canOpen ? "0" : "-1"}"
-       aria-label="${canOpen ? `Ouvrir ${esc(meta.label)}` : `Déjà ouvert : ${esc(meta.label)}`}">
+       aria-label="${canOpen ? `${ct("open_aria", "Ouvrir")} ${esc(label)}` : `${ct("already_aria", "Déjà ouvert :")} ${esc(label)}`}">
     <div class="mc-thumb" style="background:${grad}">
-      <img src="${meta.image}" alt="${escAttr(meta.label)}" loading="lazy"
+      <img src="${meta.image}" alt="${escAttr(label)}" loading="lazy"
            onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
            style="width:64px;height:64px;object-fit:contain;filter:drop-shadow(0 4px 12px rgba(0,0,0,.35))">
       <span style="display:none" aria-hidden="true">${_chestMed(chest.chest_type, meta.tier, 56)}</span>
       <div class="mc-icon-glow" style="background:${grad}"></div>
     </div>
     <div class="mc-info">
-      <div class="mc-label">${esc(meta.label)}</div>
-      <div class="mc-sub">${canOpen ? "Gagné " + relTime(chest.unlocked_at) : "Ouvert " + relTime(chest.opened_at)}</div>
+      <div class="mc-label">${crtl(esc(label))}</div>
+      <div class="mc-sub">${crtl(canOpen ? `${ct("won", "Gagné")} ${esc(relTime(chest.unlocked_at))}` : `${ct("opened", "Ouvert")} ${esc(relTime(chest.opened_at))}`)}</div>
       ${
         canOpen
           ? `<div class="mc-rewards">
-        <span class="mc-rew-chip">${volantImg(13)} +${gemmes} volants</span>
+        <span class="mc-rew-chip">${volantImg(13)} +${gemmes} ${esc(volantWord(gemmes, getLang()))}</span>
       </div>`
           : ""
       }
     </div>
     ${
       canOpen
-        ? `<button class="mc-open-btn" aria-label="Ouvrir le coffre">Ouvrir</button>`
+        ? `<button class="mc-open-btn" aria-label="${ct("open_chest_aria", "Ouvrir le coffre")}">${ct("open_btn", "Ouvrir")}</button>`
         : ""
     }
   </div>`;
@@ -377,8 +481,8 @@ export async function mount(root) {
     ${STYLE}
     <div class="mc-page anim-slide-up">
       <div class="mc-hd">
-        <button class="mc-back" aria-label="Retour" id="mc-back">${icon("arrow-left", { size: 18 })}</button>
-        <h1 class="mc-h1">Mes coffres</h1>
+        <button class="mc-back" aria-label="${ct("back", "Retour")}" id="mc-back">${icon("arrow-left", { size: 18 })}</button>
+        <h1 class="mc-h1">${ct("title", "Mes coffres")}</h1>
       </div>
       <div class="mc-list">
         <div class="mc-skel"></div>
@@ -415,21 +519,21 @@ export async function mount(root) {
   let html = "";
 
   if (toOpen.length > 0) {
-    html += `<div class="mc-section">À ouvrir (${toOpen.length})</div>`;
+    html += `<div class="mc-section">${ct("to_open", "À ouvrir")} (${toOpen.length})</div>`;
     html += `<div class="mc-list">${toOpen.map(renderCard).join("")}</div>`;
   }
 
   if (opened.length > 0) {
     // Le compteur vit dans l'en-tête (remplace les coches identiques par carte)
-    html += `<div class="mc-section">Déjà ouverts (${opened.length})</div>`;
+    html += `<div class="mc-section">${ct("opened_hd", "Déjà ouverts")} (${opened.length})</div>`;
     html += `<div class="mc-list">${opened.map(renderCard).join("")}</div>`;
   }
 
   if (chests.length === 0) {
     html = loadFailed
-      ? `<div class="mc-empty"><div class="mc-empty-ico">${medallion("panneau", "orange", { size: 52 })}</div>« Coffres » indisponible.<br>Vérifie ta connexion, puis réessaie.<br>
-         <button class="mc-open-btn" id="mc-retry" style="margin-top:12px">Réessayer</button></div>`
-      : `<div class="mc-empty"><div class="mc-empty-ico">${medallion("coffre", "slate", { size: 52 })}</div>Aucun coffre pour l’instant.<br>Termine un monde ou tiens ta série.</div>`;
+      ? `<div class="mc-empty"><div class="mc-empty-ico">${medallion("panneau", "orange", { size: 52 })}</div>${crtl(ct("unavailable", "« Coffres » indisponible."))}<br>${crtl(ct("check_conn", "Vérifie ta connexion, puis réessaie."))}<br>
+         <button class="mc-open-btn" id="mc-retry" style="margin-top:12px">${ct("retry", "Réessayer")}</button></div>`
+      : `<div class="mc-empty"><div class="mc-empty-ico">${medallion("coffre", "slate", { size: 52 })}</div>${crtl(ct("none", "Aucun coffre pour l’instant."))}<br>${crtl(ct("none_sub", "Termine un monde ou tiens ta série."))}</div>`;
   }
 
   // Replace skeleton with real content
@@ -452,7 +556,7 @@ export async function mount(root) {
         card.tabIndex = -1;
         card.querySelector(".mc-open-btn")?.remove();
         const sub = card.querySelector(".mc-sub");
-        if (sub) sub.textContent = "Ouvert aujourd’hui";
+        if (sub) sub.textContent = ctR("opened_today", "Ouvert aujourd’hui");
         card.querySelector(".mc-rewards")?.remove();
       };
 
@@ -467,21 +571,21 @@ export async function mount(root) {
             fromList.remove();
             sectionHdr?.remove();
           } else {
-            sectionHdr.textContent = `À ouvrir (${fromList.children.length})`;
+            sectionHdr.textContent = `${ctR("to_open", "À ouvrir")} (${fromList.children.length})`;
           }
         }
 
         // Find or create the "Déjà ouverts" section
         let openedList = null;
         page.querySelectorAll(".mc-section").forEach((hdr) => {
-          if (hdr.textContent.startsWith("Déjà ouverts")) {
+          if (hdr.textContent.startsWith(ctR("opened_hd", "Déjà ouverts"))) {
             openedList = hdr.nextElementSibling;
           }
         });
         if (!openedList) {
           const hdr = Object.assign(document.createElement("div"), {
             className: "mc-section",
-            textContent: "Déjà ouverts",
+            textContent: ctR("opened_hd", "Déjà ouverts"),
           });
           openedList = Object.assign(document.createElement("div"), {
             className: "mc-list",
@@ -493,7 +597,7 @@ export async function mount(root) {
         // Le compteur de l'en-tête suit le nombre de coffres ouverts
         const openedHdr = openedList.previousElementSibling;
         if (openedHdr?.classList?.contains("mc-section"))
-          openedHdr.textContent = `Déjà ouverts (${openedList.children.length})`;
+          openedHdr.textContent = `${ctR("opened_hd", "Déjà ouverts")} (${openedList.children.length})`;
       };
 
       // Persiste l'ouverture en DB + met à jour l'UI
@@ -508,7 +612,16 @@ export async function mount(root) {
             // { ok, data } et le RPC open_chest expose data.gemmes_added
             // (result.gemmes n'a jamais existé), fallback sur la méta locale.
             const gemsWon = result.data?.gemmes_added ?? meta.gemmes ?? 0;
-            toast(`${meta.label} ouvert ! +${gemsWon} volants`, "success");
+            const _l = getLang();
+            const _lab = chestLabel(chestType, meta.label);
+            toast(
+              _l === "en"
+                ? `${_lab} opened! +${gemsWon} ${volantWord(gemsWon, _l)}`
+                : _l === "ar"
+                  ? `${_lab} فُتح! +${gemsWon} مقود`
+                  : `${meta.label} ouvert ! +${gemsWon} volants`,
+              "success",
+            );
             // Jetons dorés vers le HUD (coffres non-monde)
             if (gemsWon > 0) flyVolants(gemsWon, { from: card });
           }
@@ -518,7 +631,7 @@ export async function mount(root) {
         } else {
           console.error("[mes-coffres] openChest error:", result.error);
           toast(
-            result.error || "Le coffre n’a pas pu s’ouvrir. Réessaie.",
+            result.error || ctR("open_fail", "Le coffre n’a pas pu s’ouvrir. Réessaie."),
             "error",
           );
         }
@@ -530,14 +643,15 @@ export async function mount(root) {
         const worldNum = parseInt(worldMatch[1], 10);
         const WORLD_NAMES = [
           "",
-          "Sécurité",
-          "Manœuvres",
-          "Conduite",
-          "Maîtrise",
+          ctR("wname_1", "Sécurité"),
+          ctR("wname_2", "Manœuvres"),
+          ctR("wname_3", "Conduite"),
+          ctR("wname_4", "Maîtrise"),
         ];
         openChestModal({
           worldNum,
-          worldName: WORLD_NAMES[worldNum] || `Monde ${worldNum}`,
+          worldName:
+            WORLD_NAMES[worldNum] || `${ctR("world_n", "Monde")} ${worldNum}`,
           onClaim: () => persistOpen(true), // l'anim affiche déjà les récompenses
         });
         return;
@@ -552,7 +666,7 @@ export async function mount(root) {
       await persistOpen(false);
       if (btn && card.classList.contains("mc-can-open")) {
         btn.disabled = false;
-        btn.textContent = "Ouvrir";
+        btn.textContent = ctR("open_btn", "Ouvrir");
       }
     };
 

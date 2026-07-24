@@ -53,6 +53,147 @@ import {
   mountLeagueHero,
   LEAGUE_HERO_CSS,
 } from "@/components/eleve/league-hero.js";
+import { getLang } from "@/utils/lang.js";
+import {
+  trophyTitle,
+  trophyBody,
+  itemName,
+  rarityLabel,
+} from "@/data/rewards-i18n.js";
+
+// ── i18n de la COQUE (EN/AR) — dict local (convention coque, cf. profil #555).
+// rt(key, fr) = traduit-ou-français esc() intégré ; rtR = brut (interpolation).
+// Noms de trophées / objets boutique : data/rewards-i18n.js (mêmes textes que
+// le profil et la boutique). En 'fr' ou clé absente → FR inchangé.
+const REC_I18N = {
+  en: {
+    title: "Rewards",
+    serie_lab: "Streak:",
+    day_sing: "day",
+    day_plur: "days",
+    kicker_big: "The Wheel · real big prizes",
+    kicker: "The Wheel",
+    t_spin_html: "Your <em>free spin</em> is waiting",
+    t_back: "Come back tomorrow to play again",
+    sub_std: "Steering wheels, avatars and titles to win every day.",
+    sub_big_head: "Avatars, backgrounds, titles… and sometimes a",
+    sub_big_gift: "real gift",
+    sub_big_from: "from",
+    cta_spin: "Spin the wheel",
+    cta_view: "See the Wheel",
+    claim_chest_t: "Chest to open",
+    claim_chest_many: "chests ready",
+    claim_chest_one: "Ready to open",
+    claim_troph_t: "Trophy to claim",
+    cap1_b: "1 real big prize max per quarter",
+    cap1_rest: "displayed, honest odds",
+    cap2_next: "Next chest:",
+    cap2_serie: "-day streak",
+    cap2_left: "to go:",
+    tabs_aria: "Rewards rooms",
+    tab_shop: "Shop",
+    tab_col: "My collection",
+    tab_troph: "Trophies",
+    tab_league: "League",
+    shop_unavailable: "“Shop” unavailable.",
+    open_shop: "Open the shop →",
+    nothing: "Nothing to show yet.",
+    vedette_k: "Shop star",
+    type_bg: "Licence background",
+    type_avatar: "Avatar",
+    in_collection: "In your collection",
+    see_shop: "See in the shop",
+    skins_h: "Skins & backgrounds",
+    skins_s: "your car, your licence",
+    owned: "Owned",
+    see_all_shop: "See the whole shop →",
+    tag_bg: "Licence bg",
+    locked: "Locked",
+    unlocked: "Unlocked",
+    empty_col: "Validate your first skill to unlock a trophy.",
+    see_all_col: "See my whole collection →",
+    new: "New",
+    see_troph: "See my trophies",
+    my_troph: "My trophies",
+    of_unlocked_mid: "of",
+    of_unlocked_end: "unlocked",
+    see_all_troph: "See all my trophies →",
+    tier_mesh: "“Mesh” background",
+    tier_route: "“Road” background",
+    tier_holographic: "“Holographic” background",
+  },
+  ar: {
+    title: "المكافآت",
+    serie_lab: "السلسلة:",
+    day_sing: "يوم",
+    day_plur: "أيام",
+    kicker_big: "العجلة · جوائز كبرى حقيقية",
+    kicker: "العجلة",
+    t_spin_html: "دورتك <em>المجانية</em> بانتظارك",
+    t_back: "عد غدًا للعب من جديد",
+    sub_std: "مقاود وصور رمزية وألقاب تربحها كل يوم.",
+    sub_big_head: "صور رمزية وخلفيات وألقاب… وأحيانًا",
+    sub_big_gift: "هدية حقيقية",
+    sub_big_from: "من",
+    cta_spin: "أدر العجلة",
+    cta_view: "عرض العجلة",
+    claim_chest_t: "صندوق للفتح",
+    claim_chest_many: "صناديق جاهزة",
+    claim_chest_one: "جاهز للفتح",
+    claim_troph_t: "كأس للاستلام",
+    cap1_b: "جائزة كبرى حقيقية واحدة كحد أقصى كل ثلاثة أشهر",
+    cap1_rest: "نِسَب معلنة وصادقة",
+    cap2_next: "الصندوق التالي:",
+    cap2_serie: "سلسلة أيام:",
+    cap2_left: "المتبقي:",
+    tabs_aria: "غرف المكافآت",
+    tab_shop: "المتجر",
+    tab_col: "مجموعتي",
+    tab_troph: "الكؤوس",
+    tab_league: "الدوري",
+    shop_unavailable: "«المتجر» غير متاح.",
+    open_shop: "افتح المتجر ←",
+    nothing: "لا شيء لعرضه حاليًا.",
+    vedette_k: "نجم المتجر",
+    type_bg: "خلفية الرخصة",
+    type_avatar: "صورة رمزية",
+    in_collection: "في مجموعتك",
+    see_shop: "عرض في المتجر",
+    skins_h: "الأشكال والخلفيات",
+    skins_s: "سيارتك ورخصتك",
+    owned: "مِلكك",
+    see_all_shop: "عرض كل المتجر ←",
+    tag_bg: "خلفية رخصة",
+    locked: "مقفلة",
+    unlocked: "مفتوحة",
+    empty_col: "تحقّق من مهارتك الأولى لفتح كأس.",
+    see_all_col: "عرض كل مجموعتي ←",
+    new: "جديد",
+    see_troph: "عرض كؤوسي",
+    my_troph: "كؤوسي",
+    of_unlocked_mid: "من",
+    of_unlocked_end: "مفتوحة",
+    see_all_troph: "عرض كل كؤوسي ←",
+    tier_mesh: "خلفية «شبكي»",
+    tier_route: "خلفية «الطريق»",
+    tier_holographic: "خلفية «هولوغرافي»",
+  },
+};
+function rtR(key, fr) {
+  const l = getLang();
+  return (l !== "fr" && REC_I18N[l]?.[key]) || fr;
+}
+function rt(key, fr) {
+  return esc(rtR(key, fr));
+}
+// Texte traduit posé en HTML : span RTL en arabe (ponctuation au bon endroit).
+function rtD(key, fr) {
+  const v = rt(key, fr);
+  return getLang() === "ar" ? `<span dir="rtl">${v}</span>` : v;
+}
+function rrtl(html) {
+  return getLang() === "ar" ? `<span dir="rtl">${html}</span>` : html;
+}
 
 // ─── Petites constantes locales (dupliquées volontairement — même convention
 // que reviser.js : pas de dépendance page→page pour 2-3 valeurs) ──────────
@@ -341,7 +482,7 @@ const STYLE = `<style>
 // ─── Skeleton ─────────────────────────────────────────────────
 function skeleton() {
   return `${STYLE}<div class="rec">
-    <h1 class="rec-title" tabindex="-1">Récompenses</h1>
+    <h1 class="rec-title" tabindex="-1">${rt("title", "Récompenses")}</h1>
     <div class="rec-hero" style="min-height:260px;background:var(--bg2);border-color:var(--bo)"></div>
     <div class="rec-tabs">${[...Array(4)].map(() => `<div class="rec-tab" style="opacity:.4"></div>`).join("")}</div>
   </div>`;
@@ -358,15 +499,27 @@ function renderHero(ctx) {
     streak,
   } = ctx;
 
-  const kicker = anyBig ? "La Roue · gros lots réels" : "La Roue";
+  const lang = getLang();
+  const kicker = anyBig
+    ? rtR("kicker_big", "La Roue · gros lots réels")
+    : rtR("kicker", "La Roue");
   const title = spinAvailable
-    ? `Ton <em>tour gratuit</em> t'attend`
-    : `Reviens demain pour rejouer`;
+    ? rrtl(rtR("t_spin_html", `Ton <em>tour gratuit</em> t'attend`))
+    : rtD("t_back", `Reviens demain pour rejouer`);
   const sub =
     anyBig && moniteurPrenom
-      ? `Avatars, fonds, titres… et parfois un <b>vrai cadeau</b> signé ${esc(moniteurPrenom)}.`
-      : `Des volants, des avatars et des titres à gagner chaque jour.`;
-  const ctaLabel = spinAvailable ? "Lancer la roue" : "Voir la Roue";
+      ? lang === "fr"
+        ? `Avatars, fonds, titres… et parfois un <b>vrai cadeau</b> signé ${esc(moniteurPrenom)}.`
+        : rrtl(
+            `${rt("sub_big_head", "Avatars, fonds, titres… et parfois un")} <b>${rt("sub_big_gift", "vrai cadeau")}</b> ${rt("sub_big_from", "signé")} ${esc(moniteurPrenom)}.`,
+          )
+      : rtD(
+          "sub_std",
+          `Des volants, des avatars et des titres à gagner chaque jour.`,
+        );
+  const ctaLabel = spinAvailable
+    ? rtR("cta_spin", "Lancer la roue")
+    : rtR("cta_view", "Voir la Roue");
 
   const claims = [];
   if (coffresToOpen > 0) {
@@ -374,8 +527,8 @@ function renderHero(ctx) {
       <a class="rec-claim" href="#/mes-coffres" data-track="claim_coffre">
         ${medallion("coffre", "gold", { size: 34 })}
         <span class="rec-claim-b">
-          <span class="rec-claim-t">Coffre à ouvrir</span>
-          <span class="rec-claim-s">${coffresToOpen > 1 ? `${coffresToOpen} coffres prêts` : "Prêt à ouvrir"}</span>
+          <span class="rec-claim-t">${rt("claim_chest_t", "Coffre à ouvrir")}</span>
+          <span class="rec-claim-s">${coffresToOpen > 1 ? `${coffresToOpen} ${rt("claim_chest_many", "coffres prêts")}` : rt("claim_chest_one", "Prêt à ouvrir")}</span>
         </span>
         <span class="rec-claim-n">${coffresToOpen}</span>
       </a>`);
@@ -385,8 +538,8 @@ function renderHero(ctx) {
       <a class="rec-claim" href="#/trophees" data-track="claim_trophee">
         ${medallion("trophee", "violet", { size: 34 })}
         <span class="rec-claim-b">
-          <span class="rec-claim-t">Trophée à réclamer</span>
-          <span class="rec-claim-s">${esc(freshTrophies[0].title)}</span>
+          <span class="rec-claim-t">${rt("claim_troph_t", "Trophée à réclamer")}</span>
+          <span class="rec-claim-s">${rrtl(esc(trophyTitle(freshTrophies[0].key, freshTrophies[0].title, lang)))}</span>
         </span>
         <span class="rec-claim-n">${freshTrophies.length}</span>
       </a>`);
@@ -395,7 +548,7 @@ function renderHero(ctx) {
   const capLine1 = anyBig
     ? `<div class="rec-hero-cap">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="14" height="14"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
-        <span><b>1 gros lot réel maximum par trimestre</b> · taux affichés et honnêtes</span>
+        <span>${rrtl(`<b>${rt("cap1_b", "1 gros lot réel maximum par trimestre")}</b> · ${rt("cap1_rest", "taux affichés et honnêtes")}`)}</span>
       </div>`
     : "";
 
@@ -403,10 +556,19 @@ function renderHero(ctx) {
     streak.count > 0
       ? nextStreakMilestone(streak.count)
       : nextStreakMilestone(0);
+  const _capTxt = next
+    ? lang === "en"
+      ? `${rt("cap2_next", "Prochain coffre :")} <b>${next.days}-day streak</b> — ${next.remaining} day${next.remaining > 1 ? "s" : ""} to go`
+      : lang === "ar"
+        ? rrtl(
+            `الصندوق التالي: <b>سلسلة ${next.days} أيام</b> — بقي ${next.remaining} ${next.remaining > 1 ? "أيام" : "يوم"}`,
+          )
+        : `Prochain coffre : <b>série ${next.days} jours</b> — encore ${next.remaining} jour${next.remaining > 1 ? "s" : ""}`
+    : "";
   const capLine2 = next
     ? `<div class="rec-hero-cap">
         ${medallion("flamme", "orange", { size: 14 })}
-        <span>Prochain coffre : <b>série ${next.days} jours</b> — encore ${next.remaining} jour${next.remaining > 1 ? "s" : ""}</span>
+        <span>${_capTxt}</span>
       </div>`
     : "";
 
@@ -439,46 +601,48 @@ function renderHero(ctx) {
 // ─── Onglet Boutique (résumé) ─────────────────────────────────
 function renderBoutiquePanel(ctx) {
   const { itemsFailed, shopItems } = ctx;
+  const lang = getLang();
   if (itemsFailed) {
-    return `<div class="rec-empty">« Boutique » indisponible. <a href="#/boutique" style="color:var(--a-txt)">Ouvrir la boutique →</a></div>`;
+    return `<div class="rec-empty">${rtD("shop_unavailable", "« Boutique » indisponible.")} <a href="#/boutique" style="color:var(--a-txt)">${rt("open_shop", "Ouvrir la boutique →")}</a></div>`;
   }
   if (!shopItems.length) {
-    return `<div class="rec-empty">Rien à afficher pour l'instant.</div>`;
+    return `<div class="rec-empty">${rtD("nothing", "Rien à afficher pour l'instant.")}</div>`;
   }
   const vedette = shopItems[0];
   const grid = shopItems.slice(1, 5);
 
   const vedetteHtml = `
     <a class="rec-gold-card" href="#/boutique" data-track="boutique_vedette">
-      <span class="rec-gold-k">Vedette de la boutique</span>
+      <span class="rec-gold-k">${rt("vedette_k", "Vedette de la boutique")}</span>
       <div class="rec-star-row">
         <img class="rec-star-img" src="${escAttr(vedette.asset_url || "")}" alt="" loading="lazy"
           onerror="this.style.display='none'">
         <div class="rec-star-txt">
-          <div class="rec-star-t">${esc(vedette.name)}</div>
-          <div class="rec-star-s">${esc(vedette.type === "permis_bg" ? "Fond de permis" : "Avatar")} · ${esc(RARITY_LABEL_SHOP[vedette.rarity] || "")}</div>
+          <div class="rec-star-t">${rrtl(esc(itemName(vedette.id, vedette.name, lang)))}</div>
+          <div class="rec-star-s">${vedette.type === "permis_bg" ? rt("type_bg", "Fond de permis") : rt("type_avatar", "Avatar")} · ${esc(rarityLabel(vedette.rarity, RARITY_LABEL_SHOP[vedette.rarity] || "", lang))}</div>
         </div>
       </div>
       <div class="rec-star-foot">
         ${
           vedette.owned
-            ? `<span class="rec-item-owned">${medallion("check", "green", { size: 16 })} Dans ta collection</span>`
+            ? `<span class="rec-item-owned">${medallion("check", "green", { size: 16 })} ${rt("in_collection", "Dans ta collection")}</span>`
             : `<span class="rec-star-price">${volantImg(16)} ${vedette.cost_gemmes ?? "—"}</span>`
         }
-        <span class="rec-go-shop">Voir en boutique</span>
+        <span class="rec-go-shop">${rt("see_shop", "Voir en boutique")}</span>
       </div>
     </a>`;
 
   const gridHtml = grid.length
-    ? `<div class="rec-sec-h"><h2>Skins &amp; fonds</h2><span>ta voiture, ton permis</span></div>
+    ? `<div class="rec-sec-h"><h2>${rt("skins_h", "Skins & fonds")}</h2><span>${rt("skins_s", "ta voiture, ton permis")}</span></div>
        <div class="rec-grid">${grid.map((it) => renderShopItem(it)).join("")}</div>`
     : "";
 
   return `${vedetteHtml}${gridHtml}
-    <a class="rec-tout-voir" href="#/boutique" data-track="tout_voir_boutique">Tout voir la boutique →</a>`;
+    <a class="rec-tout-voir" href="#/boutique" data-track="tout_voir_boutique">${rt("see_all_shop", "Tout voir la boutique →")}</a>`;
 }
 
 function renderShopItem(it) {
+  const lang = getLang();
   const cover = it.type === "permis_bg" || /\/car-/.test(it.asset_url || "");
   return `
   <a class="rec-item" href="#/boutique" data-track="boutique_item">
@@ -486,11 +650,11 @@ function renderShopItem(it) {
       <img class="${cover ? "" : "pad"}" src="${escAttr(it.asset_url || "")}" alt="" loading="lazy" onerror="this.style.display='none'">
     </div>
     <div class="rec-item-b">
-      <div class="rec-item-t">${esc(it.name)}</div>
-      <div class="rec-item-r">${esc(RARITY_LABEL_SHOP[it.rarity] || "")}</div>
+      <div class="rec-item-t">${rrtl(esc(itemName(it.id, it.name, lang)))}</div>
+      <div class="rec-item-r">${esc(rarityLabel(it.rarity, RARITY_LABEL_SHOP[it.rarity] || "", lang))}</div>
       ${
         it.owned
-          ? `<span class="rec-item-owned">${medallion("check", "green", { size: 14 })} Obtenu</span>`
+          ? `<span class="rec-item-owned">${medallion("check", "green", { size: 14 })} ${rt("owned", "Obtenu")}</span>`
           : `<span class="rec-item-p">${volantImg(15)} ${it.cost_gemmes ?? "—"}</span>`
       }
     </div>
@@ -500,6 +664,7 @@ function renderShopItem(it) {
 // ─── Onglet Ma collection (résumé galerie.js) ─────────────────
 function renderCollectionPanel(ctx) {
   const { unlockedDefs, lockedDefs, unlockedPermisCount, validatedCount } = ctx;
+  const lang = getLang();
   const totalCollect = CATALOG.length + PERMIS_TIERS.length;
   const doneCollect = unlockedDefs.length + unlockedPermisCount;
   const pct = totalCollect ? Math.round((100 * doneCollect) / totalCollect) : 0;
@@ -508,18 +673,28 @@ function renderCollectionPanel(ctx) {
   // aperçu verrouillé (trophée ou fond de permis) pour donner envie.
   const tiles = [];
   for (const t of unlockedDefs.slice(0, 2)) {
-    tiles.push({ img: t.image, name: t.title, locked: false, tag: null });
+    tiles.push({
+      img: t.image,
+      name: trophyTitle(t.key, t.title, lang),
+      locked: false,
+      tag: null,
+    });
   }
   for (const t of lockedDefs.slice(0, 2)) {
-    tiles.push({ img: t.image, name: t.title, locked: true, tag: null });
+    tiles.push({
+      img: t.image,
+      name: trophyTitle(t.key, t.title, lang),
+      locked: true,
+      tag: null,
+    });
   }
   for (const p of PERMIS_TIERS) {
     if (tiles.length >= 4) break;
     tiles.push({
       img: p.img,
-      name: p.nom,
+      name: rtR(`tier_${p.key}`, p.nom),
       locked: validatedCount < p.min,
-      tag: "Fond permis",
+      tag: rtR("tag_bg", "Fond permis"),
     });
   }
 
@@ -527,7 +702,7 @@ function renderCollectionPanel(ctx) {
     <div class="rec-col-head">
       ${medallion("diamant", "violet", { size: 38 })}
       <div class="rec-col-hb">
-        <div class="rec-col-ht">Ma collection</div>
+        <div class="rec-col-ht">${rt("tab_col", "Ma collection")}</div>
         <div class="rec-col-track" aria-hidden="true"><i style="width:${pct}%"></i></div>
       </div>
       <div class="rec-col-hn">${doneCollect} / ${totalCollect}</div>
@@ -535,9 +710,9 @@ function renderCollectionPanel(ctx) {
     ${
       tiles.length
         ? `<div class="rec-grid">${tiles.map((t) => renderCollectionTile(t)).join("")}</div>`
-        : `<div class="rec-empty">Valide ta première compétence pour débloquer un trophée.</div>`
+        : `<div class="rec-empty">${rtD("empty_col", "Valide ta première compétence pour débloquer un trophée.")}</div>`
     }
-    <a class="rec-tout-voir" href="#/galerie" data-track="tout_voir_collection">Tout voir ma collection →</a>`;
+    <a class="rec-tout-voir" href="#/galerie" data-track="tout_voir_collection">${rt("see_all_col", "Tout voir ma collection →")}</a>`;
 }
 
 function renderCollectionTile(t) {
@@ -548,8 +723,8 @@ function renderCollectionTile(t) {
       <img class="pad" src="${escAttr(t.img || "")}" alt="" loading="lazy" onerror="this.style.display='none'">
     </div>
     <div class="rec-item-b">
-      <div class="rec-item-t">${t.locked ? "???" : esc(t.name)}</div>
-      <div class="rec-item-r">${t.locked ? "Verrouillé" : "Débloqué"}</div>
+      <div class="rec-item-t">${t.locked ? "???" : rrtl(esc(t.name))}</div>
+      <div class="rec-item-r">${t.locked ? rt("locked", "Verrouillé") : rt("unlocked", "Débloqué")}</div>
     </div>
   </a>`;
 }
@@ -557,20 +732,21 @@ function renderCollectionTile(t) {
 // ─── Onglet Trophées (résumé trophees.js) ─────────────────────
 function renderTropheesPanel(ctx) {
   const { unlockedDefs, lockedDefs, freshTrophies } = ctx;
+  const lang = getLang();
   const total = CATALOG.length;
 
   const claimHtml = freshTrophies.length
     ? `
     <a class="rec-gold-card" href="#/trophees" data-track="trophee_claim_card">
-      <span class="rec-gold-k">Nouveau</span>
+      <span class="rec-gold-k">${rt("new", "Nouveau")}</span>
       <div class="rec-star-row">
         <span style="width:56px;height:56px;flex:none;display:flex;align-items:center;justify-content:center">${badgeMarkup(freshTrophies[0], 56)}</span>
         <div class="rec-star-txt">
-          <div class="rec-star-t">${esc(freshTrophies[0].title)}</div>
-          <div class="rec-star-s">${esc(freshTrophies[0].body || "")}</div>
+          <div class="rec-star-t">${rrtl(esc(trophyTitle(freshTrophies[0].key, freshTrophies[0].title, lang)))}</div>
+          <div class="rec-star-s">${rrtl(esc(trophyBody(freshTrophies[0].key, freshTrophies[0].body || "", lang)))}</div>
         </div>
       </div>
-      <div class="rec-star-foot"><span></span><span class="rec-go-shop">Voir mes trophées</span></div>
+      <div class="rec-star-foot"><span></span><span class="rec-go-shop">${rt("see_troph", "Voir mes trophées")}</span></div>
     </a>`
     : "";
 
@@ -579,12 +755,12 @@ function renderTropheesPanel(ctx) {
     ...lockedDefs.slice(0, 6 - Math.min(4, unlockedDefs.length)),
   ].slice(0, 6);
   const gridHtml = preview.length
-    ? `<div class="rec-sec-h"><h2>Mes trophées</h2><span>${unlockedDefs.length} sur ${total} débloqués</span></div>
+    ? `<div class="rec-sec-h"><h2>${rt("my_troph", "Mes trophées")}</h2><span>${unlockedDefs.length} ${rt("of_unlocked_mid", "sur")} ${total} ${rt("of_unlocked_end", "débloqués")}</span></div>
        <div class="rec-tro-grid">${preview.map((t) => renderTrophyTile(t, ctx.unlockedSet.has(t.key))).join("")}</div>`
     : "";
 
   return `${claimHtml}${gridHtml}
-    <a class="rec-tout-voir" href="#/trophees" data-track="tout_voir_trophees">Tout voir mes trophées →</a>`;
+    <a class="rec-tout-voir" href="#/trophees" data-track="tout_voir_trophees">${rt("see_all_troph", "Tout voir mes trophées →")}</a>`;
 }
 
 function renderTrophyTile(t, unlocked) {
@@ -593,7 +769,7 @@ function renderTrophyTile(t, unlocked) {
   <a class="rec-tro${unlocked ? "" : " locked"}" href="#/trophees" data-track="trophee_item">
     ${unlocked ? `<span class="rec-tro-dot" style="background:${color}" aria-hidden="true"></span>` : ""}
     ${badgeMarkup(t, 48)}
-    <div class="rec-tro-t">${unlocked ? esc(t.title) : "???"}</div>
+    <div class="rec-tro-t">${unlocked ? rrtl(esc(trophyTitle(t.key, t.title, getLang()))) : "???"}</div>
   </a>`;
 }
 
@@ -714,19 +890,19 @@ export async function mount(root) {
 
   root.innerHTML = `${STYLE}
   <div class="rec anim-slide-up">
-    <h1 class="rec-title" tabindex="-1">Récompenses</h1>
+    <h1 class="rec-title" tabindex="-1">${rt("title", "Récompenses")}</h1>
     ${
       streak.count > 0
-        ? `<div class="rec-serie">${medallion("flamme", "orange", { size: 22 })}<b>Série : ${streak.count} jour${streak.count > 1 ? "s" : ""}</b></div>`
+        ? `<div class="rec-serie">${medallion("flamme", "orange", { size: 22 })}<b>${getLang() === "fr" ? `Série : ${streak.count} jour${streak.count > 1 ? "s" : ""}` : `${rt("serie_lab", "Série :")} ${streak.count} ${rt(streak.count > 1 ? "day_plur" : "day_sing", "jours")}`}</b></div>`
         : ""
     }
     ${renderHero(ctx)}
 
-    <div class="rec-tabs" role="tablist" aria-label="Salles Récompenses">
-      <button class="rec-tab on" role="tab" aria-selected="true" data-p="boutique">Boutique</button>
-      <button class="rec-tab" role="tab" aria-selected="false" data-p="collection">Ma collection</button>
-      <button class="rec-tab" role="tab" aria-selected="false" data-p="trophees">Trophées</button>
-      <button class="rec-tab" role="tab" aria-selected="false" data-p="ligue">Ligue</button>
+    <div class="rec-tabs" role="tablist" aria-label="${rt("tabs_aria", "Salles Récompenses")}">
+      <button class="rec-tab on" role="tab" aria-selected="true" data-p="boutique">${rt("tab_shop", "Boutique")}</button>
+      <button class="rec-tab" role="tab" aria-selected="false" data-p="collection">${rt("tab_col", "Ma collection")}</button>
+      <button class="rec-tab" role="tab" aria-selected="false" data-p="trophees">${rt("tab_troph", "Trophées")}</button>
+      <button class="rec-tab" role="tab" aria-selected="false" data-p="ligue">${rt("tab_league", "Ligue")}</button>
     </div>
 
     <div class="rec-panel on" id="rec-p-boutique" role="tabpanel">${renderBoutiquePanel(ctx)}</div>

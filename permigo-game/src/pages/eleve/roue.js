@@ -25,6 +25,105 @@ import {
 } from "@/utils/sound.js";
 import { medallion, medLot } from "@/utils/medallions.js";
 import { volantImg } from "@/utils/volant.js";
+import { getLang } from "@/utils/lang.js";
+
+// ── i18n de la COQUE (EN/AR) — dict local (convention coque, cf. profil #555).
+// wt(key, fr) = traduit-ou-français esc() intégré ; wtR = brut (toasts,
+// textContent). Les lots CONFIGURÉS par le moniteur (labels serveur) restent
+// à leur source ; seuls les 2 lots par défaut (hardcodés ici) sont traduits.
+// En 'fr' ou clé absente → FR inchangé.
+const ROUE_I18N = {
+  en: {
+    back: "Back",
+    title: "The Wheel",
+    kicker_apercu: "Preview · playable soon",
+    kicker_free: "Free daily spin",
+    h1: "Wheel of fortune",
+    sub_solo: "Win steering wheels every day. Skins to unlock coming soon.",
+    sub: "Win steering wheels every day. Soon: skins and real gifts from your instructor.",
+    cta_done: "Come back tomorrow",
+    cta_free: "Free spin of the day",
+    free_done: "Your spin for today is already used.",
+    free_ok: "1 free spin a day · real steering wheels.",
+    lot_disque: "A-plate for new drivers",
+    lot_heure: "1 free driving hour",
+    gifts_h: "Real gifts",
+    tag_live: "In play",
+    tag_soon: "Coming soon",
+    gift_fallback: "Gift",
+    big_tag: "To win",
+    offered_by: "Offered by",
+    your_moniteur: "your instructor",
+    sign_live: "Try your luck every day. The gifts come from them.",
+    sign_soon: "They choose the gifts.",
+    wins_h: "🏆 Your prizes won",
+    win_got: "Collected ✓",
+    win_show: "Show this code to your instructor",
+    note_solo:
+      "Steering wheels are earned by playing, <b>never</b> with money.",
+    note: "A <b>big prize</b> can drop (rare!) if your instructor has put one in play. You collect it for real with your code. Steering wheels are earned by playing, <b>never</b> with money.",
+    res_apercu:
+      "Preview. Your steering wheels will be credited when the wheel opens.",
+    res_credited: "steering wheels added to your balance!",
+    gros_badge: "🎁 BIG PRIZE!",
+    gros_code: "Your pickup code",
+    gros_show_pre: "Show this code to",
+    gros_show_post: "to collect your prize. It’s their gift.",
+    spinning: "The wheel is spinning…",
+    retry_toast: "Try again in a moment.",
+    already_toast: "You already spun today. Come back tomorrow!",
+  },
+  ar: {
+    back: "رجوع",
+    title: "العجلة",
+    kicker_apercu: "معاينة · قابلة للعب قريبًا",
+    kicker_free: "دورة اليوم المجانية",
+    h1: "عجلة الحظ",
+    sub_solo: "اربح مقاود كل يوم. قريبًا أشكال جديدة للفتح.",
+    sub: "اربح مقاود كل يوم. قريبًا: أشكال وهدايا حقيقية من مدرّبك.",
+    cta_done: "عد غدًا",
+    cta_free: "دورة اليوم المجانية",
+    free_done: "استُخدمت دورتك لهذا اليوم.",
+    free_ok: "دورة مجانية واحدة يوميًا · مقاود حقيقية.",
+    lot_disque: "لوحة A للسائق الجديد",
+    lot_heure: "ساعة قيادة مجانية",
+    gifts_h: "هدايا حقيقية",
+    tag_live: "قيد اللعب",
+    tag_soon: "قريبًا",
+    gift_fallback: "هدية",
+    big_tag: "للربح",
+    offered_by: "مقدَّمة من",
+    your_moniteur: "مدرّبك",
+    sign_live: "جرّب حظك كل يوم. هو من يقدّم الهدايا.",
+    sign_soon: "هو من يختار الهدايا.",
+    wins_h: "🏆 جوائزك المربوحة",
+    win_got: "استُلمت ✓",
+    win_show: "أرِ هذا الرمز لمدرّبك",
+    note_solo: "تُربح المقاود باللعب — <b>وليس</b> بالمال أبدًا.",
+    note: "قد تسقط <b>جائزة كبرى</b> (نادرًا!) إذا وضعها مدرّبك قيد اللعب. تستلمها فعليًا برمزك. تُربح المقاود باللعب — <b>وليس</b> بالمال أبدًا.",
+    res_apercu: "معاينة. ستُضاف مقاودك عند افتتاح العجلة.",
+    res_credited: "مقود أُضيفت إلى رصيدك!",
+    gros_badge: "🎁 جائزة كبرى!",
+    gros_code: "رمز الاستلام الخاص بك",
+    gros_show_pre: "أرِ هذا الرمز إلى",
+    gros_show_post: "لاستلام جائزتك. هو من يقدّمها.",
+    spinning: "العجلة تدور…",
+    retry_toast: "أعد المحاولة بعد لحظة.",
+    already_toast: "لقد أدرت العجلة اليوم. عد غدًا!",
+  },
+};
+function wtR(key, fr) {
+  const l = getLang();
+  return (l !== "fr" && ROUE_I18N[l]?.[key]) || fr;
+}
+function wt(key, fr) {
+  return esc(wtR(key, fr));
+}
+// Texte (éventuellement avec <b>/<em> maison, jamais de donnée user) posé en
+// HTML : span RTL en arabe pour garder la ponctuation du bon côté.
+function wrtl(html) {
+  return getLang() === "ar" ? `<span dir="rtl">${html}</span>` : html;
+}
 
 const SPIN_MS = 5200; // = durée de la transition CSS du disque
 
@@ -241,14 +340,17 @@ function segLabel(v) {
 // get_moniteur_rewards) — sinon les 2 lots par défaut. Signé à sa marque.
 // Les lots marqués « gros lot » (big) sont réellement gagnables à la roue.
 function renderRealLots(lots, moniteurPrenom) {
-  const name = (moniteurPrenom || "ton moniteur").trim();
+  const name = (moniteurPrenom || wtR("your_moniteur", "ton moniteur")).trim();
   const initiale = (name.charAt(0) || "R").toUpperCase();
   const list =
     Array.isArray(lots) && lots.length
       ? lots
       : [
-          { icon: "🅰️", label: "Disque A jeune conducteur" },
-          { icon: "🚗", label: "1 heure de conduite offerte" },
+          { icon: "🅰️", label: wtR("lot_disque", "Disque A jeune conducteur") },
+          {
+            icon: "🚗",
+            label: wtR("lot_heure", "1 heure de conduite offerte"),
+          },
         ];
   const anyBig = list.some((l) => l && l.big);
   const rows = list
@@ -258,24 +360,24 @@ function renderRealLots(lots, moniteurPrenom) {
     <div class="roue-real-row">
       <div class="roue-real-ic">${medLot(l.icon, { size: 34 })}</div>
       <div class="roue-real-flex">
-        <div class="roue-real-name">${esc(l.label || "Cadeau")}</div>
+        <div class="roue-real-name">${wrtl(esc(l.label || wtR("gift_fallback", "Cadeau")))}</div>
       </div>
-      ${l && l.big ? `<span class="roue-real-big">À gagner</span>` : ""}
+      ${l && l.big ? `<span class="roue-real-big">${wt("big_tag", "À gagner")}</span>` : ""}
     </div>`,
     )
     .join("");
   return `
   <section class="roue-real">
     <div class="roue-real-h">
-      <h2>${medallion("cadeau", "pink", { size: 20 })} Vrais cadeaux</h2>
-      <span class="tag">${anyBig ? "En jeu" : "Bientôt"}</span>
+      <h2>${medallion("cadeau", "pink", { size: 20 })} ${wt("gifts_h", "Vrais cadeaux")}</h2>
+      <span class="tag">${anyBig ? wt("tag_live", "En jeu") : wt("tag_soon", "Bientôt")}</span>
     </div>
     ${rows}
     <div class="roue-real-sign">
       <div class="roue-real-av">${esc(initiale)}</div>
       <div>
-        <b>Offert par ${esc(name)} · ton moniteur</b>
-        <span>${anyBig ? "Tente ta chance chaque jour. C’est lui qui offre." : "C’est lui qui choisit les cadeaux."}</span>
+        <b>${wrtl(`${wt("offered_by", "Offert par")} ${esc(name)} · ${wt("your_moniteur", "ton moniteur")}`)}</b>
+        <span>${anyBig ? wrtl(wt("sign_live", "Tente ta chance chaque jour. C’est lui qui offre.")) : wrtl(wt("sign_soon", "C’est lui qui choisit les cadeaux."))}</span>
       </div>
     </div>
   </section>`;
@@ -292,8 +394,8 @@ function renderMyWins(wins) {
     <div class="roue-wins-row">
       <div class="roue-wins-ic">${esc(w.lot_icon || "🎁")}</div>
       <div class="roue-wins-tx">
-        <b>${esc(w.lot_label || "Cadeau")}</b>
-        <span>${remis ? "Récupéré ✓" : "Montre ce code à ton moniteur"}</span>
+        <b>${wrtl(esc(w.lot_label || wtR("gift_fallback", "Cadeau")))}</b>
+        <span>${remis ? wt("win_got", "Récupéré ✓") : wrtl(wt("win_show", "Montre ce code à ton moniteur"))}</span>
       </div>
       <span class="roue-wins-code${remis ? " remis" : ""}">${esc(w.claim_code || "")}</span>
     </div>`;
@@ -301,7 +403,7 @@ function renderMyWins(wins) {
     .join("");
   return `
   <section class="roue-wins">
-    <h3>🏆 Tes lots gagnés</h3>
+    <h3>${wrtl(wt("wins_h", "🏆 Tes lots gagnés"))}</h3>
     ${rows}
   </section>`;
 }
@@ -369,26 +471,30 @@ export async function mount(root) {
   }
 
   const disabled = mode === "done";
-  const ctaLabel = disabled ? "Reviens demain" : "Tour gratuit du jour";
+  const ctaLabel = disabled
+    ? wtR("cta_done", "Reviens demain")
+    : wtR("cta_free", "Tour gratuit du jour");
   const freeLabel = disabled
-    ? "Ton tour du jour est déjà passé."
-    : "1 tour offert par jour · de vrais volants.";
+    ? wtR("free_done", "Ton tour du jour est déjà passé.")
+    : wtR("free_ok", "1 tour offert par jour · de vrais volants.");
   const kicker =
-    mode === "apercu" ? "Aperçu · bientôt jouable" : "Tour gratuit du jour";
+    mode === "apercu"
+      ? wtR("kicker_apercu", "Aperçu · bientôt jouable")
+      : wtR("kicker_free", "Tour gratuit du jour");
 
   root.innerHTML = `${STYLE}
 <div class="roue">
   <div class="roue-top">
-    <button class="roue-back" id="roue-back" aria-label="Retour">
+    <button class="roue-back" id="roue-back" aria-label="${wt("back", "Retour")}">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
-    <div class="roue-title">La Roue</div>
+    <div class="roue-title">${wt("title", "La Roue")}</div>
   </div>
 
   <div class="roue-hero">
     <div class="roue-kicker">${esc(kicker)}</div>
-    <div class="roue-h1">Roue de la chance</div>
-    <div class="roue-sub">${solo ? "Gagne des volants chaque jour. Bientôt des skins à débloquer." : "Gagne des volants chaque jour. Bientôt des skins et de vrais cadeaux de ton moniteur."}</div>
+    <div class="roue-h1">${wt("h1", "Roue de la chance")}</div>
+    <div class="roue-sub">${solo ? wrtl(wt("sub_solo", "Gagne des volants chaque jour. Bientôt des skins à débloquer.")) : wrtl(wt("sub", "Gagne des volants chaque jour. Bientôt des skins et de vrais cadeaux de ton moniteur."))}</div>
   </div>
 
   <div class="roue-zone">
@@ -414,7 +520,7 @@ export async function mount(root) {
 
   <div class="roue-note">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
-    <p>${solo ? "Les volants se gagnent en jouant, <b>jamais</b> avec de l’argent." : `Un <b>gros lot</b> peut tomber (rare !) si ton moniteur en a mis en jeu. Tu le récupères en vrai avec ton code. Les volants se gagnent en jouant, <b>jamais</b> avec de l’argent.`}</p>
+    <p>${solo ? wrtl(wtR("note_solo", "Les volants se gagnent en jouant, <b>jamais</b> avec de l’argent.")) : wrtl(wtR("note", `Un <b>gros lot</b> peut tomber (rare !) si ton moniteur en a mis en jeu. Tu le récupères en vrai avec ton code. Les volants se gagnent en jouant, <b>jamais</b> avec de l’argent.`))}</p>
   </div>
 </div>`;
 
@@ -474,8 +580,8 @@ export async function mount(root) {
       <div class="roue-result-v">${volantImg(24, { drop: true })}+${volants}</div>
       <div class="roue-result-s">${
         apercu
-          ? "Aperçu. Tes volants seront crédités à l’ouverture de la roue."
-          : "volants ajoutés à ton solde !"
+          ? wrtl(wt("res_apercu", "Aperçu. Tes volants seront crédités à l’ouverture de la roue."))
+          : wrtl(wt("res_credited", "volants ajoutés à ton solde !"))
       }</div>
     </div>`;
   }
@@ -487,17 +593,17 @@ export async function mount(root) {
     if (!slot) return;
     slot.innerHTML = `
     <div class="roue-result roue-gros">
-      <div class="roue-gros-badge">🎁 GROS LOT !</div>
-      <div class="roue-gros-lot"><span class="roue-gros-ic" aria-hidden="true">${esc(gl.icon || "🎁")}</span><b>${esc(gl.label || "Cadeau")}</b></div>
-      <div class="roue-gros-code">Ton code de retrait<br><b>${esc(gl.claim_code || "")}</b></div>
-      <div class="roue-result-s">Montre ce code à <b>${esc(gl.moniteur || "ton moniteur")}</b> pour récupérer ton lot. C’est lui qui offre.</div>
+      <div class="roue-gros-badge">${wt("gros_badge", "🎁 GROS LOT !")}</div>
+      <div class="roue-gros-lot"><span class="roue-gros-ic" aria-hidden="true">${esc(gl.icon || "🎁")}</span><b>${wrtl(esc(gl.label || wtR("gift_fallback", "Cadeau")))}</b></div>
+      <div class="roue-gros-code">${wrtl(wt("gros_code", "Ton code de retrait"))}<br><b>${esc(gl.claim_code || "")}</b></div>
+      <div class="roue-result-s">${wrtl(`${wt("gros_show_pre", "Montre ce code à")} <b>${esc(gl.moniteur || wtR("your_moniteur", "ton moniteur"))}</b> ${wt("gros_show_post", "pour récupérer ton lot. C’est lui qui offre.")}`)}</div>
     </div>`;
   }
 
   function finishDone() {
-    btn.textContent = "Reviens demain";
+    btn.textContent = wtR("cta_done", "Reviens demain");
     btn.disabled = true;
-    if (free) free.textContent = "Ton tour du jour est déjà passé.";
+    if (free) free.textContent = wtR("free_done", "Ton tour du jour est déjà passé.");
     busy = false;
   }
 
@@ -507,7 +613,7 @@ export async function mount(root) {
     haptic("select");
     playClick(); // son au clic du bouton
     btn.disabled = true;
-    btn.textContent = "La roue tourne…";
+    btn.textContent = wtR("spinning", "La roue tourne…");
 
     if (mode === "apercu") {
       // Repli visuel : la migration n'est pas posée → aucun crédit réel.
@@ -537,9 +643,9 @@ export async function mount(root) {
     } catch (e) {
       // RPC absent (migration retirée entre-temps) ou réseau → repli doux
       console.warn("[roue] spin_roue_daily failed", e?.message);
-      toast("Réessaie dans un instant.", "error", 2200);
+      toast(wtR("retry_toast", "Réessaie dans un instant."), "error", 2200);
       btn.disabled = false;
-      btn.textContent = "Tour gratuit du jour";
+      btn.textContent = wtR("cta_free", "Tour gratuit du jour");
       busy = false;
       return;
     }
@@ -557,7 +663,7 @@ export async function mount(root) {
       } catch {
         /* noop */
       }
-      toast("Tu as déjà tourné aujourd’hui. Reviens demain !", "info", 2600);
+      toast(wtR("already_toast", "Tu as déjà tourné aujourd’hui. Reviens demain !"), "info", 2600);
       finishDone();
       return;
     }
