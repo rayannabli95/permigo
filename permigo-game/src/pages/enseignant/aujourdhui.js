@@ -28,7 +28,6 @@ import { renderUserAvatar } from "@/components/common/avatar.js";
 import { fmtName } from "@/utils/fmt-name.js";
 import { openInviteEleveModal } from "@/services/invite-eleve.js";
 import { getMoniteurState } from "@/data/moniteur-levels.js";
-import { getLeague } from "@/utils/league-shared.js";
 import { startTour } from "@/components/common/guided-tour.js";
 import { haptic } from "@/utils/haptic.js";
 import { onPopupsSettled } from "@/utils/intro-overlays.js";
@@ -502,7 +501,6 @@ async function renderInto(root, _me) {
     yesterdayValsRes,
     profileRes,
     totalValsRes,
-    leagueRes,
     provMap,
   ] = await Promise.all([
     // Dernières validations (activité récente) — non utilisées dans ce design
@@ -549,11 +547,6 @@ async function renderInto(root, _me) {
       .select("id", { count: "exact", head: true })
       .eq("validated_by", _me.id),
 
-    // Ligue
-    Promise.resolve(
-      sb.rpc("get_league_leaderboard", { p_role: "enseignant", p_limit: 50 }),
-    ).catch(() => ({ data: null })),
-
     // Provenance CRM (RLS = mes élèves) → Map(eleve_id → {label,color})
     fetchProvenanceMap(),
   ]);
@@ -593,12 +586,6 @@ async function renderInto(root, _me) {
   const totalValsCount = totalValsRes?.count ?? 0;
   const moniteurState = getMoniteurState(totalValsCount);
 
-  // Ma ligue
-  const leagueRows = leagueRes?.data || [];
-  const myLeagueRow = leagueRows.find((r) => r.is_me) || null;
-  const myWeeklyPts = myLeagueRow?.weekly_pts ?? 0;
-  const myLeague = getLeague(myWeeklyPts);
-  const myRank = myLeagueRow?.rank_pos ?? null;
 
   // Élèves que j'ai validé + qui me sont attitrés
   const { data: elevesValides } = await fetchAllRows(() =>
@@ -700,12 +687,6 @@ async function renderInto(root, _me) {
     ? ' style="opacity:.4;filter:grayscale(.75) drop-shadow(0 14px 20px rgba(40,20,90,.3));animation:none"'
     : "";
 
-  // Pastille badge top dept — on montre si rang connu + top quartile
-  const topBadgeHtml =
-    myRank !== null && myRank <= 5
-      ? `<span class="aj-hero-badge"><img src="/skins/trophy-streak-7d.webp" alt="">Top ${myRank} du département</span>`
-      : `<span class="aj-hero-badge">Ta ligue&nbsp;: ${myLeague ? esc(myLeague.name) : "à venir"}</span>`;
-
   // ─── Roster élèves ────────────────────────────────────────────
   function renderRosterCard(e) {
     // escAttr (pas esc) : `nom` sert AUSSI dans aria-label ci-dessous ; esc
@@ -763,11 +744,6 @@ async function renderInto(root, _me) {
     </div>`;
   }
 
-  // Ligue footer
-  const ligueVal = myLeague
-    ? `${esc(myLeague.name)}${myRank ? " · #" + myRank : ""}`
-    : "Hors-ligue";
-
   // ─── Render ───────────────────────────────────────────────────
   root.innerHTML = `
     ${STYLE}
@@ -786,7 +762,6 @@ async function renderInto(root, _me) {
           <div class="aj-hero-label">Prêts pour l’examen</div>
           <div class="aj-hero-big">${heroEmpty ? "—" : nbPrets}<span class="aj-hero-big-unit">${heroEmpty ? "aucun élève" : "sur " + nbElevesActifs + " élève" + (nbElevesActifs > 1 ? "s" : "")}</span></div>
           <div class="aj-hero-sub">${heroSubHtml}</div>
-          ${topBadgeHtml}
         </div>
         <img
           class="aj-hero-trophy"
@@ -835,8 +810,8 @@ async function renderInto(root, _me) {
         <div class="aj-ft">
           <img src="/skins/couronne.png" alt="" loading="lazy" width="32" height="32">
           <div>
-            <div class="aj-ft-val">${esc(ligueVal)}</div>
-            <div class="aj-ft-lbl">ta ligue</div>
+            <div class="aj-ft-val">${nbRecus}</div>
+            <div class="aj-ft-lbl">${nbRecus > 1 ? "reçus 🎉" : "reçu"}</div>
           </div>
         </div>
       </div>

@@ -8,8 +8,6 @@
 //   - Palier      : validations WHERE validated_by = me.id (count) → getMoniteurState
 //   - Trophées    : trophy-sheet.js (source unique des 12 jalons, partagée
 //                   avec la sous-page #/trophees-moniteur inchangée)
-//   - Ligue       : ligue-semaine.js::fetchLeagueLeaderboard (exportée,
-//                   réutilisée telle quelle — RPC get_league_leaderboard 3 args)
 //   - Parcours    : moniteur-levels.js (source unique des 10 paliers, partagée
 //                   avec la sous-page #/parcours-complet inchangée)
 //   - Preuve chiffrée (taux de réussite / permis / élèves en formation) :
@@ -38,14 +36,6 @@ import {
   computeTrophees,
   openTrophySheet,
 } from "@/components/enseignant/trophy-sheet.js";
-import {
-  getLeague,
-  renderLeagueRow,
-  LEAGUE_CSS,
-  msToNextMonday,
-  fmtCountdown,
-} from "@/utils/league-shared.js";
-import { fetchLeagueLeaderboard } from "./ligue-semaine.js";
 import { openPalierSheet } from "@/components/common/palier-sheet.js";
 import { medallion } from "@/utils/medallions.js";
 
@@ -70,7 +60,6 @@ function _markTrophiesSeen(ids) {
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
-${LEAGUE_CSS}
 .mb {
   max-width: 480px; margin: 0 auto;
   padding: 0 0 calc(96px + env(safe-area-inset-bottom, 0px));
@@ -195,43 +184,7 @@ ${LEAGUE_CSS}
 }
 .mb-sec-lnk:focus-visible { outline: 2px solid #4f46e5; border-radius: 4px; }
 
-/* ── Ligue ── */
-.mb-scope {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 0 16px;
-  padding: 4px; background: var(--bg2); border: 1.5px solid var(--bo); border-radius: 999px;
-}
-.mb-scope button {
-  border: 0; border-radius: 999px; padding: 9px 8px; min-height: 40px; cursor: pointer;
-  font: 700 12.5px/1 var(--ens-display, 'Fredoka'), sans-serif; color: var(--mu2);
-  background: transparent; transition: background .16s, color .16s;
-  -webkit-tap-highlight-color: transparent;
-}
-.mb-scope button.on { background: #4f46e5; color: #fff; box-shadow: 0 2px 8px -2px rgba(79,70,229,.55); }
-.mb-scope button:focus-visible { outline: 3px solid #4f46e5; outline-offset: 2px; }
 
-.mb-lg-me {
-  display: flex; align-items: center; gap: 12px; margin: 11px 16px 0; padding: 13px 14px;
-  border-radius: 18px; background: var(--su);
-  box-shadow: 0 8px 18px -8px rgba(60,50,160,.14), inset 0 0 0 1px var(--bo);
-}
-.mb-lg-me-body { flex: 1; min-width: 0; }
-.mb-lg-me-t { font: 700 15px/1.15 var(--ens-display, 'Fredoka'), sans-serif; color: var(--ink); }
-.mb-lg-me-s { font: 600 10.5px/1.4 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; color: var(--mu2); margin-top: 2px; }
-.mb-lg-me-rank { flex: none; text-align: right; }
-.mb-lg-me-pos { font: 700 24px/1 var(--ens-display, 'Fredoka'), sans-serif; color: #b5610a; }
-.mb-lg-me-cd { font: 700 8.5px/1.3 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; color: var(--mu3); text-transform: uppercase; letter-spacing: .04em; margin-top: 3px; }
-
-.mb-lg-band { background: var(--su); border-radius: 18px; margin: 10px 16px 0; overflow: hidden; box-shadow: 0 8px 18px -8px rgba(60,50,160,.14), inset 0 0 0 1px var(--bo); }
-.mb-lg-solo {
-  display: flex; align-items: center; gap: 12px; margin: 10px 16px 0; padding: 15px 14px;
-  border-radius: 18px; background: var(--su); box-shadow: 0 8px 18px -8px rgba(60,50,160,.14), inset 0 0 0 1px var(--bo);
-}
-.mb-lg-solo-t { font: 700 13.5px/1.25 var(--ens-display, 'Fredoka'), sans-serif; color: var(--ink); }
-.mb-lg-solo-s { font: 600 11px/1.5 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; color: var(--mu2); margin-top: 3px; }
-.mb-lg-empty { margin: 10px 16px 0; padding: 20px 16px; text-align: center; border-radius: 18px; background: var(--su); box-shadow: inset 0 0 0 1px var(--bo); color: var(--mu2); font: 500 12.5px/1.5 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; }
-.mb-lg-skel { height: 168px; margin: 10px 16px 0; border-radius: 18px; background: linear-gradient(90deg, var(--bg3), var(--bg5) 50%, var(--bg3)); background-size: 200% 100%; animation: mbShim 1.4s ease-in-out infinite; }
-
-/* ── Trophées : rail ── */
 .mb-troph-row { display: flex; gap: 9px; overflow-x: auto; padding: 2px 20px 4px; scrollbar-width: none; }
 .mb-troph-row::-webkit-scrollbar { display: none; }
 .mb-tcell {
@@ -292,7 +245,7 @@ ${LEAGUE_CSS}
 @keyframes mbHeroIn { from { opacity: 0; transform: translateY(8px) scale(.97); } to { opacity: 1; transform: none; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .mb-hero-fill, .mb-skel, .mb-lg-skel, .mb-hero { animation: none !important; transition: none !important; }
+  .mb-hero-fill, .mb-skel, .mb-hero { animation: none !important; transition: none !important; }
 }
 </style>`;
 
@@ -342,7 +295,7 @@ export async function mount(root) {
 async function _loadData(me) {
   const since30d = new Date(Date.now() - 30 * 86400_000).toISOString();
 
-  const [valsRes, profileRes, elevesRes, activeRes, ecoleRes, ligueRows] =
+  const [valsRes, profileRes, elevesRes, activeRes, ecoleRes] =
     await Promise.all([
       sb
         .from("validations")
@@ -370,10 +323,6 @@ async function _loadData(me) {
             .eq("id", me.auto_ecole_id)
             .maybeSingle()
         : Promise.resolve({ data: null }),
-      fetchLeagueLeaderboard("national").catch((e) => {
-        console.error("[mon-blason] ligue national", e);
-        return [];
-      }),
     ]);
 
   if (valsRes.error) throw valsRes.error;
@@ -432,7 +381,6 @@ async function _loadData(me) {
     nbRecus12m,
     nbResultats12m,
     ecole: ecoleRes.data || null,
-    ligueRows,
   };
 }
 
@@ -440,9 +388,6 @@ async function _loadData(me) {
 function _render(root, me, d) {
   const state = getMoniteurState(d.totalVals);
   const troResults = computeTrophees(d);
-
-  const mine = d.ligueRows.find((r) => r.is_me) || null;
-  const myRank = mine?.rank_pos ?? null;
 
   root.innerHTML = `${STYLE}
 <div class="mb anim-slide-up">
@@ -457,18 +402,7 @@ function _render(root, me, d) {
     </button>
   </div>
 
-  ${_heroHtml(me, d, state, myRank)}
-
-  <!-- Ligue de la semaine -->
-  <div class="mb-sec">
-    <div class="mb-sec-t">Ligue de la semaine <small>1 pt = 1 validation</small></div>
-    <button class="mb-sec-lnk" id="mb-lig-link" aria-label="Voir le classement complet">Classement ${icon("chevron-right", { size: 12, strokeWidth: 2.6 })}</button>
-  </div>
-  <div class="mb-scope" role="group" aria-label="Portée du classement">
-    <button type="button" class="on" data-scope="national">National</button>
-    <button type="button" data-scope="ecole">Mon école</button>
-  </div>
-  <div id="mb-ligue-body">${_ligueBodyHtml("national", d.ligueRows)}</div>
+  ${_heroHtml(me, d, state)}
 
   <!-- Trophées -->
   <div class="mb-sec">
@@ -497,7 +431,7 @@ function _render(root, me, d) {
 }
 
 // ─── Hero écusson ──────────────────────────────────────────────
-function _heroHtml(me, d, state, myRank) {
+function _heroHtml(me, d, state) {
   const palierNum = state.tier?.tier ?? 0;
   const palierTitre = state.tier?.title ?? "Premiers pas";
   const nomComplet = `${me.prenom || ""} ${me.nom || ""}`.trim() || "Moniteur";
@@ -540,11 +474,6 @@ function _heroHtml(me, d, state, myRank) {
         <div class="mb-hero-marque">${esc(marqueLine)}</div>
         <div class="mb-hero-chips">
           <span class="mb-hchip">${esc(palierTitre)}</span>
-          ${
-            myRank
-              ? `<span class="mb-hchip mb-hchip--or">${medallion("couronne", "gold", { size: 16 })}#${myRank} national</span>`
-              : ""
-          }
         </div>
       </div>
     </div>
@@ -605,65 +534,6 @@ function _progHtml(state) {
       ${state.validations} compétence${state.validations > 1 ? "s" : ""} validée${state.validations > 1 ? "s" : ""} · plus que <b>${missing} validation${missing > 1 ? "s" : ""}</b> pour le palier ${nextNum}${nextTitle ? ` — ${esc(nextTitle)}` : ""}
     </div>
   </div>`;
-}
-
-// ─── Section Ligue (préview : top 4 + ma ligne) ───────────────────
-function _ligueBodyHtml(scope, rows) {
-  const mine = rows.find((r) => r.is_me) || null;
-  const myPts = mine?.weekly_pts ?? 0;
-  const myLeague = getLeague(myPts);
-  const myRank = mine?.rank_pos ?? null;
-  const countdown = fmtCountdown(msToNextMonday());
-
-  if (rows.length === 0) {
-    return `<div class="mb-lg-empty">${
-      scope === "national"
-        ? "Aucun moniteur n'a encore marqué de point cette semaine."
-        : "Aucune compétence validée cette semaine sur ton école."
-    }</div>`;
-  }
-
-  // « Mon école » — moniteur indépendant seul dans son école : pas de vrai
-  // classement possible (0-1 concurrent), on l'oriente vers le national.
-  if (scope === "ecole" && rows.length <= 1) {
-    return `<div class="mb-lg-solo">
-      ${medallion("volant", "indigo", { size: 44 })}
-      <div>
-        <div class="mb-lg-solo-t">Tu es seul dans ton école</div>
-        <div class="mb-lg-solo-s">Le classement national est ton vrai terrain de jeu.</div>
-      </div>
-    </div>`;
-  }
-
-  const sorted = [...rows].sort((a, b) => b.weekly_pts - a.weekly_pts);
-  const top4 = sorted.slice(0, 4);
-  const previewRows =
-    mine && !top4.some((r) => r.user_id === mine.user_id)
-      ? [...top4, mine]
-      : top4;
-
-  const meCard = mine
-    ? `<div class="mb-lg-me">
-        ${medallion("couronne", "gold", { size: 46 })}
-        <div class="mb-lg-me-body">
-          <div class="mb-lg-me-t">${myLeague ? `Ligue ${esc(myLeague.name)}` : "Hors-ligue"}</div>
-          <div class="mb-lg-me-s">${myPts} validation${myPts > 1 ? "s" : ""} cette semaine</div>
-        </div>
-        <div class="mb-lg-me-rank">
-          ${myRank ? `<div class="mb-lg-me-pos">#${myRank}</div>` : ""}
-          <div class="mb-lg-me-cd">Remise à zéro<br>lundi · ${esc(countdown)}</div>
-        </div>
-      </div>`
-    : "";
-
-  const bandRows = previewRows
-    .map(
-      (r) =>
-        `<div data-rank="${r.rank_pos ?? 0}">${renderLeagueRow(r, true)}</div>`,
-    )
-    .join("");
-
-  return `${meCard}<div class="mb-lg-band">${bandRows}</div>`;
 }
 
 // ─── Section Trophées : rail (12 jalons) ──────────────────────────
@@ -757,37 +627,6 @@ function _wire(root, me, d, state, troResults) {
     haptic("tap");
     track("mon_blason.share");
     _shareBlason(me, d);
-  });
-
-  // Ligue : toggle National / Mon école
-  let curScope = "national";
-  const ligueBody = root.querySelector("#mb-ligue-body");
-  root.querySelectorAll(".mb-scope button").forEach((b) => {
-    b.addEventListener("click", async () => {
-      const next = b.dataset.scope;
-      if (next === curScope) return;
-      haptic("tap");
-      track("mon_blason.ligue_scope", { scope: next });
-      root
-        .querySelectorAll(".mb-scope button")
-        .forEach((x) => x.classList.toggle("on", x === b));
-      curScope = next;
-      if (!ligueBody) return;
-      ligueBody.innerHTML = `<div class="mb-lg-skel"></div>`;
-      try {
-        const rows = await fetchLeagueLeaderboard(next);
-        ligueBody.innerHTML = _ligueBodyHtml(next, rows);
-      } catch (e) {
-        console.error("[mon-blason] ligue scope", e);
-        ligueBody.innerHTML = `<div class="mb-lg-empty">Vérifie ta connexion, puis réessaie.</div>`;
-      }
-    });
-  });
-
-  root.querySelector("#mb-lig-link")?.addEventListener("click", () => {
-    haptic("tap");
-    track("mon_blason.ligue.classement_complet");
-    navigate("#/ligue-semaine");
   });
 
   // Trophées : rail → feuille de détail (en place) ; "Tout voir" → grille complète
