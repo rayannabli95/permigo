@@ -950,6 +950,7 @@ function render() {
 
       <div class="me-body">
 
+      <div class="me-control">
       <div class="me-search-wrap">
         <span class="me-search-ico">${icon("search", { size: 15, strokeWidth: 2, color: "#a0a6b4" })}</span>
         <input
@@ -969,14 +970,17 @@ function render() {
         ${renderTabButtons()}
       </div>
 
+      <div class="me-seg" id="me-seg" role="group" aria-label="Trier les élèves"${_tab === "liste" ? "" : " hidden"}>
+        <button class="me-seg-btn ${_sort === "etat" ? "on" : ""}" data-sort="etat" type="button" aria-pressed="${_sort === "etat"}">Par état</button>
+        <button class="me-seg-btn ${_sort === "nom" ? "on" : ""}" data-sort="nom" type="button" aria-pressed="${_sort === "nom"}">Nom</button>
+        <button class="me-seg-btn ${_sort === "progres" ? "on" : ""}" data-sort="progres" type="button" aria-pressed="${_sort === "progres"}">Progrès</button>
+        <button class="me-seg-btn ${_sort === "comp" ? "on" : ""}" data-sort="comp" type="button" aria-pressed="${_sort === "comp"}">Compétences</button>
+        <button class="me-seg-btn ${_sort === "engagement" ? "on" : ""}" data-sort="engagement" type="button" aria-pressed="${_sort === "engagement"}">Engagement</button>
+      </div>
+      </div><!-- /.me-control -->
+
+      <div class="me-list-col">
       <div class="me-panel${_tab === "liste" ? " on" : ""}" data-panel="liste" id="me-panel-liste">
-        <div class="me-seg" id="me-seg" role="group" aria-label="Trier les élèves">
-          <button class="me-seg-btn ${_sort === "etat" ? "on" : ""}" data-sort="etat" type="button" aria-pressed="${_sort === "etat"}">Par état</button>
-          <button class="me-seg-btn ${_sort === "nom" ? "on" : ""}" data-sort="nom" type="button" aria-pressed="${_sort === "nom"}">Nom</button>
-          <button class="me-seg-btn ${_sort === "progres" ? "on" : ""}" data-sort="progres" type="button" aria-pressed="${_sort === "progres"}">Progrès</button>
-          <button class="me-seg-btn ${_sort === "comp" ? "on" : ""}" data-sort="comp" type="button" aria-pressed="${_sort === "comp"}">Compétences</button>
-          <button class="me-seg-btn ${_sort === "engagement" ? "on" : ""}" data-sort="engagement" type="button" aria-pressed="${_sort === "engagement"}">Engagement</button>
-        </div>
         <div class="me-pipeline" id="me-pipeline">
           ${renderContent()}
         </div>
@@ -989,6 +993,7 @@ function render() {
       <div class="me-panel${_tab === "classement" ? " on" : ""}" data-panel="classement" id="me-panel-classement">
         ${_tab === "classement" ? classementBodyHtml(_rankingCache[_clMode]) : ""}
       </div>
+      </div><!-- /.me-list-col -->
 
       </div><!-- /.me-body -->
     </div><!-- /.me-page -->
@@ -1456,6 +1461,8 @@ function switchTab(tab, opts = {}) {
   _root.querySelectorAll(".me-panel").forEach((p) => {
     p.classList.toggle("on", p.dataset.panel === tab);
   });
+  const seg = _root.querySelector("#me-seg");
+  if (seg) seg.hidden = tab !== "liste";
 
   if (tab === "relances") renderRelancesPanel();
   else if (tab === "classement") renderClassementPanel();

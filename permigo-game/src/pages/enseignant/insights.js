@@ -796,6 +796,7 @@ function renderAll(root, data) {
     <div class="st-page anim-slide-up">
       <h1 class="st-h1">Stats</h1>
 
+      <div class="st-actions">
       ${secTitle("À faire maintenant", "aujourd'hui")}
       ${renderActions(data)}
 
@@ -804,7 +805,9 @@ function renderAll(root, data) {
 
       ${secTitle(`Silencieux depuis ${SILENCE_JOURS} jours`, "app, quiz, leçons")}
       ${renderSilencieux(data)}
+      </div><!-- /.st-actions -->
 
+      <div class="st-progress">
       ${secTitle("Révisions de tes élèves", "7 derniers jours")}
       ${renderRevisions(data)}
 
@@ -813,6 +816,7 @@ function renderAll(root, data) {
 
       ${secTitle("Où en est ton portefeuille", "à ce jour")}
       ${renderPortefeuille(data)}
+      </div><!-- /.st-progress -->
 
       <p class="st-foot">${
         data.saisies7j > 0

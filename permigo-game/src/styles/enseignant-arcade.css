@@ -226,6 +226,15 @@
   vertical-align: middle;
 }
 
+/* Les enveloppes de colonnes restent transparentes en mobile : le contenu
+   conserve exactement son empilement historique. */
+.st-actions,
+.st-progress,
+.me-control,
+.me-list-col {
+  display: contents;
+}
+
 /* ════════════════════════════════════════════════════════════════
    DESKTOP « CADRE ENRICHI » (≥ 1024 px) — le moniteur est un persona PC
    (écran de démo B2B). On élargit la « fenêtre » app posée au centre et on
@@ -242,7 +251,68 @@
     max-width: 1000px !important;
     width: 1000px !important;
   }
+
+  /* Stats : progression à gauche, décisions/actions dans le rail droit. */
+  .st-page {
+    max-width: 1000px;
+    padding: 4px 26px calc(96px + env(safe-area-inset-bottom, 0px));
+    display: grid;
+    grid-template-columns: minmax(0, 1.62fr) minmax(0, 1fr);
+    column-gap: 26px;
+    align-items: start;
+    align-content: start;
+  }
+  .st-page > .st-h1,
+  .st-page > .st-foot,
+  .st-page > .st-card,
+  .st-page > .st-skel {
+    grid-column: 1 / -1;
+  }
+  .st-progress {
+    grid-column: 1;
+    grid-row: 2;
+    display: flex;
+    flex-direction: column;
+  }
+  .st-actions {
+    grid-column: 2;
+    grid-row: 2;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Mes élèves : pupitre de contrôle à gauche, liste de travail à droite. */
+  .me-page {
+    max-width: 1000px;
+    padding: 4px 26px calc(96px + env(safe-area-inset-bottom, 0px));
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.62fr);
+    column-gap: 26px;
+    align-items: start;
+    align-content: start;
+  }
+  .me-page > .me-hero {
+    grid-column: 1;
+    grid-row: 1;
+    padding: 18px 2px 2px;
+  }
+  .me-page > .me-body {
+    display: contents;
+  }
+  .me-control {
+    grid-column: 1;
+    grid-row: 2;
+    display: flex;
+    flex-direction: column;
+    padding-top: 16px;
+  }
+  .me-list-col {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    display: flex;
+    flex-direction: column;
+    padding-top: 18px;
+  }
   /* La nav du bas reste une pastille centrée (480px) : elle flotte sous la
      colonne large comme une barre d'onglets posée — pas de barre pleine. */
 }
-
