@@ -23,7 +23,7 @@ export const THEORY_LEAGUES = [
   { n: 2, name: "Apprenti", color: "#60a5fa", startAt: 8 },
   { n: 3, name: "Sérieux", color: "#3b82f6", startAt: 18 },
   { n: 4, name: "Confirmé", color: "#2563eb", startAt: 30 },
-  { n: 5, name: "Révision maîtrisée", color: "#1d4ed8", startAt: 42 },
+  { n: 5, name: "Révision certifiée", color: "#1d4ed8", startAt: 42 },
 ];
 
 /**
