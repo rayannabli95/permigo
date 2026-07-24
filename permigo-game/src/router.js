@@ -8,9 +8,11 @@ import { isFreeTierUser, isDiscoveryAllowedRoute } from "@/utils/free-tier.js";
 const CHUNK_RELOAD_KEY = "pg-chunk-reloaded";
 const CHUNK_ERROR_RE =
   /Failed to fetch dynamically imported module|Loading chunk|ChunkLoadError|Importing a module script failed|error loading dynamically imported module/i;
+let _chunkReloadPending = false;
 
 export function reloadOnceOnChunkError(error) {
-  if (!CHUNK_ERROR_RE.test(error?.message || "")) return false;
+  const message = error?.message || String(error || "");
+  if (!CHUNK_ERROR_RE.test(message)) return false;
 
   try {
     if (sessionStorage.getItem(CHUNK_RELOAD_KEY)) return false;
@@ -20,11 +22,15 @@ export function reloadOnceOnChunkError(error) {
     return false;
   }
 
+  _chunkReloadPending = true;
   window.location.reload();
   return true;
 }
 
 export function clearChunkReloadGuard() {
+  // Une navigation concurrente peut finir entre reload() et le changement de
+  // document : elle ne doit pas désarmer le garde-fou pendant cette fenêtre.
+  if (_chunkReloadPending) return;
   try {
     sessionStorage.removeItem(CHUNK_RELOAD_KEY);
   } catch {
