@@ -43,6 +43,32 @@ function loadRead() {
     return {};
   }
 }
+
+// ── Ré-hydratation multi-appareils ────────────────────────────────
+// Le compteur de fiches lues vivait UNIQUEMENT en localStorage → un élève
+// qui a tout lu voyait « 0/31 » sur un autre appareil. Or chaque lecture est
+// déjà en base (event `revision_conduite_fiche_read`, properties.code). Au
+// montage, on récupère les codes lus côté serveur (RPC SECURITY DEFINER,
+// l'élève n'a pas de policy SELECT directe sur events_analytics) et on les
+// FUSIONNE dans le localStorage. Best-effort : RPC absente / hors-ligne →
+// on garde le comportement local d'avant (aucune régression).
+async function hydrateReadFromServer() {
+  try {
+    const { data, error } = await sb.rpc("get_my_conduite_fiches_read");
+    if (error || !Array.isArray(data) || !data.length) return;
+    const r = loadRead();
+    let changed = false;
+    for (const code of data) {
+      if (code && !r[code]) {
+        r[code] = 1;
+        changed = true;
+      }
+    }
+    if (changed) localStorage.setItem(LS_READ_KEY, JSON.stringify(r));
+  } catch {
+    /* hors-ligne / RPC pas encore déployée : repli localStorage */
+  }
+}
 function markRead(code) {
   const r = loadRead();
   r[code] = 1;
@@ -591,6 +617,11 @@ export async function mount(root, param) {
       ?.addEventListener("click", () => navigate("#/"));
     return;
   }
+
+  // Fusionne les lectures déjà enregistrées en base (autres appareils) AVANT
+  // toute lecture de `loadRead()` — corrige le « 0/31 » multi-appareils et la
+  // résolution de « next ».
+  await hydrateReadFromServer();
 
   // Deep-link : #/revision-conduite/{code} (ex. depuis « Ton centre ») ouvre
   // directement la fiche de la compétence.
