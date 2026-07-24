@@ -88,11 +88,13 @@ export const SITUATIONS = [
   //   couleur : "joueur" | "bleu" | "rouge" | "jaune" | "gris"
   // piéton     : scene.pieton = { engage: true|false }
   // panneau/feu: scene.signal = { type, branch, etat? }
-  //   type    : "stop" | "cede" | "prio" | "giratoire" | "feu"
-  //   feu     : + etat "rouge"|"orange"|"vert"
+  //   type    : "stop" | "cede" | "prio" | "giratoire" | "feu" | "sens-interdit" | "limite"
+  //   feu     : + etat "rouge"|"orange"|"vert"   ·   limite : + val (30, 50, 70…)
+  // ambiance   : scene.nuit = true       (teinte nuit + lune + étoiles)
+  //              scene.meteo = "pluie"    (voile bleu-gris + stries)
   //
   // ❌ LE MOTEUR NE SAIT PAS (interdit d'y faire référence dans une question) :
-  //   panneau de vitesse (30/50/70) · sens interdit · la NUIT · la PLUIE/brouillard/neige
+  //   brouillard · neige · verglas
   // → Ajouter une de ces capacités = chantier moteur (Claude), pas une scène.
   // ─────────────────────────────────────────────────────────────
   // ── Giratoire ────────────────────────────────────────────────
