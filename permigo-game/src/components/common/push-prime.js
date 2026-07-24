@@ -18,6 +18,50 @@ import { requestPushPermission } from "@/services/web-push.js";
 import { track } from "@/services/analytics.js";
 import { icon } from "@/utils/icons.js";
 import { notifyPopupOpen, notifyPopupSettled } from "@/utils/intro-overlays.js";
+import { getLang } from "@/utils/lang.js";
+
+// ── i18n de la COQUE (élève non-francophone) — dict local (règle coque),
+// repli FR. Le tu/vous FR reste piloté par `tu` ; en/ar : forme unique.
+const PPR_I18N = {
+  en: {
+    title_eleve: "Turn on your reminders",
+    title_other: "Turn on your notifications",
+    sub_eleve: "One tap now, and we handle the rest.",
+    sub_other: "One tap now — never more than one a day.",
+    cta_eleve: "Turn on my reminders",
+    cta_other: "Turn on notifications",
+    activating: "Turning on…",
+    activated: "Reminders on ✓",
+    later: "Later",
+    row_daily: "Your question of the day",
+    row_streak: "Your streak, before it breaks",
+    row_check_solo: "When you validate a skill",
+    row_check_teacher: "When your instructor validates you",
+    row_bell: "Validations to confirm",
+    row_students: "Your students' activity",
+  },
+  ar: {
+    title_eleve: "فعّل تذكيراتك",
+    title_other: "فعّل إشعاراتك",
+    sub_eleve: "لمسة واحدة الآن، ونحن نتكفّل بالباقي.",
+    sub_other: "لمسة واحدة الآن — أبدًا أكثر من واحدة في اليوم.",
+    cta_eleve: "فعّل تذكيراتي",
+    cta_other: "فعّل الإشعارات",
+    activating: "جارٍ التفعيل…",
+    activated: "تم تفعيل التذكيرات ✓",
+    later: "لاحقًا",
+    row_daily: "سؤال اليوم الخاص بك",
+    row_streak: "سلسلتك، قبل أن تنقطع",
+    row_check_solo: "عند تصديقك على كفاءة",
+    row_check_teacher: "عند تصديق معلمك عليك",
+    row_bell: "التصديقات بانتظار التأكيد",
+    row_students: "نشاط طلابك",
+  },
+};
+function pp(key, fr) {
+  const l = getLang();
+  return (l !== "fr" && PPR_I18N[l]?.[key]) || fr;
+}
 
 const LS_NEXT = "permigo-push-prime-next";
 const SNOOZE_MS = 2 * 24 * 60 * 60 * 1000; // 2 jours
@@ -135,19 +179,29 @@ function show(me) {
   // Élève solo : la validation vient de lui, pas d'un moniteur.
   const rows = tu
     ? [
-        ["sun", "Ta question du jour"],
-        ["flame", "Ta série, avant qu'elle saute"],
+        ["sun", pp("row_daily", "Ta question du jour")],
+        ["flame", pp("row_streak", "Ta série, avant qu'elle saute")],
         [
           "check-circle",
           isSoloEleve(me)
-            ? "Quand tu valides une compétence"
-            : "Quand ton moniteur te valide",
+            ? pp("row_check_solo", "Quand tu valides une compétence")
+            : pp("row_check_teacher", "Quand ton moniteur te valide"),
         ],
       ]
     : [
-        ["bell", "Les validations à confirmer"],
-        ["users", "L'activité de vos élèves"],
+        ["bell", pp("row_bell", "Les validations à confirmer")],
+        ["users", pp("row_students", "L'activité de vos élèves")],
       ];
+
+  const title = tu
+    ? pp("title_eleve", "Active tes rappels")
+    : pp("title_other", "Activez vos notifications");
+  const sub = tu
+    ? pp("sub_eleve", "Un tap maintenant, et on s'occupe du reste.")
+    : pp("sub_other", "Un tap maintenant — jamais plus d'une par jour.");
+  const cta = tu
+    ? pp("cta_eleve", "Activer mes rappels")
+    : pp("cta_other", "Activer les notifications");
 
   const host = document.createElement("div");
   host.innerHTML = `${STYLE}
@@ -155,13 +209,13 @@ function show(me) {
     <div class="ppr" role="dialog" aria-modal="true" aria-labelledby="ppr-title">
       <div class="ppr-handle" aria-hidden="true"></div>
       <div class="ppr-bell" aria-hidden="true">${icon("bell", { size: 30 })}</div>
-      <div class="ppr-title" id="ppr-title">${tu ? "Active tes rappels" : "Activez vos notifications"}</div>
-      <div class="ppr-sub">${tu ? "Un tap maintenant, et on s'occupe du reste." : "Un tap maintenant — jamais plus d'une par jour."}</div>
+      <div class="ppr-title" id="ppr-title">${title}</div>
+      <div class="ppr-sub">${sub}</div>
       <div class="ppr-rows">
         ${rows.map(([ico, txt]) => `<div class="ppr-row"><span class="ppr-row-ico">${icon(ico, { size: 19 })}</span>${txt}</div>`).join("")}
       </div>
-      <button class="ppr-cta" id="ppr-cta" type="button">${tu ? "Activer mes rappels" : "Activer les notifications"}</button>
-      <button class="ppr-later" id="ppr-later" type="button">Plus tard</button>
+      <button class="ppr-cta" id="ppr-cta" type="button">${cta}</button>
+      <button class="ppr-later" id="ppr-later" type="button">${pp("later", "Plus tard")}</button>
     </div>`;
   document.body.appendChild(host);
   notifyPopupOpen(); // le tuto guidé attend que cette sheet soit fermée

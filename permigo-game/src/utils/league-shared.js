@@ -4,6 +4,7 @@
 import { esc } from "@/utils/escape.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
 import { medallion } from "@/utils/medallions.js";
+import { getLang } from "@/utils/lang.js";
 
 // Écusson médaillon par ligue (grammaire visuelle premium, par id de ligue).
 // Basse → bouclier bronze · argent → médaille · or → trophée · haute → diamant.
@@ -121,11 +122,24 @@ export function msToNextMonday() {
   return next - now;
 }
 
+// Unités localisées (EN/AR) — chiffres toujours en latin (jamais indo-arabe),
+// seule l'unité change. Repli FR si langue absente/non gérée.
 export function fmtCountdown(ms) {
   const s = Math.floor(ms / 1000);
   const d = Math.floor(s / 86400);
   const h = Math.floor((s % 86400) / 3600);
   const m = Math.floor((s % 3600) / 60);
+  const l = getLang();
+  if (l === "en") {
+    if (d > 0) return `${d}d ${h}h`;
+    if (h > 0) return `${h}h ${m}min`;
+    return `${m}min`;
+  }
+  if (l === "ar") {
+    if (d > 0) return `${d} ي ${h} س`;
+    if (h > 0) return `${h} س ${m} د`;
+    return `${m} د`;
+  }
   if (d > 0) return `${d}j ${h}h`;
   if (h > 0) return `${h}h ${m}min`;
   return `${m}min`;

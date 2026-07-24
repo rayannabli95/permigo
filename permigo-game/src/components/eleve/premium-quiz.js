@@ -41,6 +41,91 @@ function pick(arr, last) {
   return arr[i];
 }
 
+// ── i18n de la COQUE (élève non-francophone) — dict local (règle coque),
+// repli FR si clé absente. ⚠️ Ne traduit QUE le chrome (louanges, écran de
+// fin, boutons) — les questions/options/explications passent par `bi()`
+// (hook bilingue existant, alimenté par `q.tr`) qu'on ne touche pas ici.
+const PQ_I18N = {
+  en: {
+    praises: [
+      "Spot on",
+      "You've got this",
+      "Nailed it",
+      "Perfect reflex",
+      "Nice one",
+      "Exactly right",
+      "Quick as a flash",
+      "Like a pro",
+      "Clean",
+    ],
+    coach: [
+      "The right move",
+      "Keep this in mind",
+      "The pro tip",
+      "For next time",
+      "Good to know",
+    ],
+    next: "Next",
+    myScore: "My score",
+    quit: "Quit",
+    close: "Close",
+    continue_: "Continue",
+    great_t: "You've got this!",
+    great_s: "Great score. Keep it up, show your instructor.",
+    good_t: "Nice work",
+    good_pass_s: "Quiz passed — do it again to lock it in.",
+    good_mid_s: "Almost there — try two or three more and it'll click.",
+    low_t: "Getting there",
+    low_s: "Re-read the sheet, then try again. It'll sink in.",
+    quest_pass: "✓ This counts for your daily quest",
+    quest_miss: "Daily quest: get {needed}/{total} right — try again anytime",
+  },
+  ar: {
+    praises: [
+      "في الصميم",
+      "أنت بارع",
+      "إجابة مثالية",
+      "ردّ فعل ممتاز",
+      "شوفة جيدة",
+      "بالضبط",
+      "بسرعة البرق",
+      "مثل المحترفين",
+      "نظيف",
+    ],
+    coach: [
+      "الحركة الصحيحة",
+      "احتفظ بهذا في ذهنك",
+      "نصيحة المحترفين",
+      "للمرة القادمة",
+      "معلومة مفيدة",
+    ],
+    next: "التالي",
+    myScore: "نتيجتي",
+    quit: "خروج",
+    close: "إغلاق",
+    continue_: "متابعة",
+    great_t: "أنت بارع!",
+    great_s: "نتيجة رائعة. حافظ على هذا المستوى وأرِه لمعلمك.",
+    good_t: "أحسنت",
+    good_pass_s: "اجتزت الاختبار — أعِده لترسيخ الحركة.",
+    good_mid_s: "أوشكت — أعِد المحاولة مرتين أو ثلاثًا وستثبت في ذهنك.",
+    low_t: "الأمر قادم",
+    low_s: "أعد قراءة البطاقة بهدوء، ثم أعد المحاولة. ستفهمها جيدًا.",
+    quest_pass: "✓ هذا يُحتسب ضمن مهمتك اليومية",
+    quest_miss:
+      "مهمة اليوم: أجب عن {needed}/{total} بشكل صحيح — أعد المحاولة متى شئت",
+  },
+};
+function pqT(key, fr) {
+  const l = getLang();
+  return (l !== "fr" && PQ_I18N[l]?.[key]) || fr;
+}
+// Tableaux localisés (praises/coach) — repli sur les tableaux FR d'origine.
+function pqArr(key, frArr) {
+  const l = getLang();
+  return (l !== "fr" && PQ_I18N[l]?.[key]) || frArr;
+}
+
 // DA « Arène 3D » (cohérente avec le quizz principal — quiz-ui.js) : nuit-violet
 // + or, boutons plastique 3D, Baloo 2. Mascotte non utilisée ici (questions texte).
 const STYLE = `<style>
@@ -232,17 +317,20 @@ export function mountPremiumQuiz(
     let fb = "";
     if (answered) {
       const win = chosen === q.correct;
-      const head = win ? pick(PRAISES, lastPraise) : pick(COACH, lastCoach);
+      const head = win
+        ? pick(pqArr("praises", PRAISES), lastPraise)
+        : pick(pqArr("coach", COACH), lastCoach);
+      const excl = lang === "fr" ? " !" : "!"; // espace avant « ! » = typo FR seulement
       fb = `<div class="pq-fb ${win ? "win" : "lose"}">
-          <div class="pq-fb-h">${win ? esc(head) + " !" : esc(head)}</div>
+          <div class="pq-fb-h">${win ? esc(head) + excl : esc(head)}</div>
           <div class="pq-fb-t">${bi(q.explication || q.options[q.correct], q.tr?.explication || q.tr?.options?.[q.correct])}</div>
         </div>
-        <button class="pq-next" data-next>${idx + 1 >= qs.length ? "Mon score" : "Suivant"}</button>`;
+        <button class="pq-next" data-next>${idx + 1 >= qs.length ? pqT("myScore", "Mon score") : pqT("next", "Suivant")}</button>`;
     }
 
     root.innerHTML = `${STYLE}<div class="pq">
       <div class="pq-top">
-        <button class="pq-x" aria-label="Quitter">✕</button>
+        <button class="pq-x" aria-label="${pqT("quit", "Quitter")}">✕</button>
         <div class="pq-seg">${segHTML()}</div>
         <div class="pq-combo ${combo >= 2 ? "on" : ""}">🔥 ${combo}</div>
       </div>
@@ -313,29 +401,39 @@ export function mountPremiumQuiz(
     let e, t, s;
     if (pct >= 0.8) {
       e = "🏆";
-      t = "Tu maîtrises !";
-      s = "Gros score. Garde ce niveau, montre-le à ton moniteur.";
+      // ⚠️ mot banni : jamais « maîtrise » (cf. règle de ton pivot 17/07).
+      t = pqT("great_t", "Tu assures !");
+      s = pqT(
+        "great_s",
+        "Gros score. Garde ce niveau, montre-le à ton moniteur.",
+      );
     } else if (questHint && passed) {
       // 70–79 % : réussi — ne surtout pas dire « Presque » (contradictoire).
       e = "🔥";
-      t = "Bien joué";
-      s = "Quiz réussi — refais-en pour verrouiller le geste.";
+      t = pqT("good_t", "Bien joué");
+      s = pqT(
+        "good_pass_s",
+        "Quiz réussi — refais-en pour verrouiller le geste.",
+      );
     } else if (pct >= 0.5) {
       e = "🔥";
-      t = "Bien joué";
-      s = "Presque — refais-en deux-trois et c'est verrouillé.";
+      t = pqT("good_t", "Bien joué");
+      s = pqT(
+        "good_mid_s",
+        "Presque — refais-en deux-trois et c'est verrouillé.",
+      );
     } else {
       e = "💪";
-      t = "Ça vient";
-      s = "Relis la fiche cool, puis retente. Ça va rentrer.";
+      t = pqT("low_t", "Ça vient");
+      s = pqT("low_s", "Relis la fiche cool, puis retente. Ça va rentrer.");
     }
     const questLine = !questHint
       ? ""
       : passed
-        ? `<div class="pq-res-quest is-pass">✓ Ça compte pour ta quête du jour</div>`
-        : `<div class="pq-res-quest is-miss">Quête du jour : réussis ${needed}/${total} — retente quand tu veux</div>`;
+        ? `<div class="pq-res-quest is-pass">${esc(pqT("quest_pass", "✓ Ça compte pour ta quête du jour"))}</div>`
+        : `<div class="pq-res-quest is-miss">${esc(pqT("quest_miss", "Quête du jour : réussis {needed}/{total} — retente quand tu veux").replace("{needed}", String(needed)).replace("{total}", String(total)))}</div>`;
     root.innerHTML = `${STYLE}<div class="pq">
-      <div class="pq-top"><button class="pq-x" aria-label="Fermer">✕</button><div class="pq-seg">${segHTML()}</div><div class="pq-combo"></div></div>
+      <div class="pq-top"><button class="pq-x" aria-label="${pqT("close", "Fermer")}">✕</button><div class="pq-seg">${segHTML()}</div><div class="pq-combo"></div></div>
       <div class="pq-res">
         <div class="pq-res-e">${e}</div>
         <div class="pq-res-score"><span data-count>0</span>/${total}</div>
@@ -343,7 +441,7 @@ export function mountPremiumQuiz(
         <div class="pq-res-s">${esc(s)}</div>
         ${questLine}
       </div>
-      <button class="pq-next" data-done>Continuer</button>
+      <button class="pq-next" data-done>${pqT("continue_", "Continuer")}</button>
     </div>`;
     root
       .querySelector(".pq-x")
