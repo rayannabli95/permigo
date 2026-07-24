@@ -29,6 +29,7 @@ import {
   markChestOpened,
 } from "@/utils/game-state.js";
 import { getLang } from "@/utils/lang.js";
+import { worldTr } from "@/data/worlds-i18n.js";
 
 // ── i18n de la COQUE du parcours (EN/AR) — élèves non-francophones.
 // Dict LOCAL (règle coque : pas de fichier partagé), repli FR intégral. Le
@@ -199,7 +200,32 @@ function prcDyn(escaped) {
 }
 
 // ─── CSS ─────────────────────────────────────────────────────────
+// ── Noms de compétences/chapitres : FR + traduction en petit italique (en/ar) ──
+// Le FR reste la référence (vocabulaire de leçon) ; la traduction aide l'élève
+// non-francophone. Étapes = data/fiches-i18n.js (chargé à la demande au mount) ;
+// chapitres = data/worlds-i18n.js.
+let _fichesMod = null;
+function subTr(code) {
+  const l = getLang();
+  if (l === "fr" || !_fichesMod) return null;
+  return _fichesMod.ficheTr?.(code, l)?.titre || null;
+}
+function chapTr(world) {
+  return worldTr(world?.id, getLang())?.titre || null;
+}
+function chapDescTr(world) {
+  return worldTr(world?.id, getLang())?.desc || null;
+}
+function nameBi(fr, tr) {
+  const f = esc(fr ?? "");
+  const l = getLang();
+  if (l === "fr" || !tr || tr === fr) return f;
+  const t = l === "ar" ? `<span dir="rtl">${esc(tr)}</span>` : esc(tr);
+  return `${f}<span class="prc-name-tr">${t}</span>`;
+}
+
 const STYLE = `<style>
+.prc-name-tr { display:block; font-size:.8em; font-style:italic; font-weight:500; opacity:.72; margin-top:2px; line-height:1.25; }
 /* CSS purgé (vue carte/liste supprimée) — seul le CSS vue-chapitre + bsheet + fiche suit */
 
 /* ── Bottom sheet ── */
@@ -1714,6 +1740,16 @@ export async function mount(root) {
 
   track("page.view", { page: "eleve_parcours" });
 
+  // Traductions des noms d'étapes (petit italique) : chunk fiches chargé à la
+  // demande pour les élèves EN/AR uniquement.
+  if (getLang() !== "fr" && !_fichesMod) {
+    try {
+      _fichesMod = await import("@/data/fiches-i18n.js");
+    } catch {
+      /* repli FR */
+    }
+  }
+
   root.innerHTML = `${STYLE}<div class="prc"><div class="prc-hd"><div><div class="prc-title">${prcD("page_title", "Mon parcours")}</div><div class="prc-subtitle">${prcD("page_sub", "31 compétences · Permis B")}</div></div></div><div style="padding:32px;text-align:center;color:var(--mu2)">${prcD("loading", "Chargement…")}</div></div>`;
 
   const { data: valData, error: valErr } = await sb
@@ -2334,8 +2370,8 @@ function renderChapterView(
               <span>${prcD("suivi", "Suivi")}</span>
             </a>
           </div>
-          <h1 class="prc-cv-world-title">${esc(chapTitle)}</h1>
-          <p class="prc-cv-world-sub">${esc(world.description ?? "")}</p>
+          <h1 class="prc-cv-world-title">${nameBi(chapTitle, chapTr(world))}</h1>
+          <p class="prc-cv-world-sub">${nameBi(world.description ?? "", chapDescTr(world))}</p>
         </div>
         <div class="prc-cv-world-prog">
           <div class="prc-cv-wp-top">
@@ -2363,7 +2399,7 @@ function renderChapterView(
           ${medallion("cadenas", "slate", { size: 46, shape: "tile" })}
         </div>
         <div>
-          <div class="prc-cv-gate-g1">${esc(chapTitle)}</div>
+          <div class="prc-cv-gate-g1">${nameBi(chapTitle, chapTr(world))}</div>
           <div class="prc-cv-gate-g2">${getLang() === "fr" ? `Valide encore <strong style="color:#cdbff5">${need} compétence${need > 1 ? "s" : ""}</strong> du chapitre précédent` : prcD(need > 1 ? "gate_many" : "gate_one", "", { n: need })}</div>
         </div>
       </div>`;
@@ -2427,7 +2463,7 @@ function renderChapterView(
               role="button" tabindex="0"
               aria-label="${prcT("aria_current", `Étape en cours : ${sub.n} — Continuer`, { name: sub.n })}">
             <div class="prc-cv-call-kick">${prcD("call_kick", "★ Étape en cours")}</div>
-            <div class="prc-cv-call-ct">${esc(sub.n)}</div>
+            <div class="prc-cv-call-ct">${nameBi(sub.n, subTr(sub.c))}</div>
             <button class="prc-cv-cta" type="button"
                     data-comp="${escAttr(sub.c)}" data-world-idx="${currentIdx}">
               ${prcD("continue", "Continuer")}
@@ -2435,7 +2471,7 @@ function renderChapterView(
             </button>
           </div>`
           : `<div class="${labelClass}">
-            <div class="prc-cv-ms-ttl">${esc(sub.n)}</div>
+            <div class="prc-cv-ms-ttl">${nameBi(sub.n, subTr(sub.c))}</div>
             <div class="prc-cv-ms-meta">${metaText}</div>
            </div>`;
 
@@ -2470,7 +2506,7 @@ function renderChapterView(
         </div>
         <div class="prc-cv-boss-card ${bossWon ? "won" : "wait"}">
           <div class="prc-cv-boss-kick">${bossWon ? prcD("boss_won_kick", "★ Boss vaincu") : prcD("boss_kick", "Boss du chapitre")}</div>
-          <div class="prc-cv-boss-ttl">${esc(chapTitle)}</div>
+          <div class="prc-cv-boss-ttl">${nameBi(chapTitle, chapTr(world))}</div>
           <div class="prc-cv-boss-sub">${
             bossWon
               ? prcD("boss_won_sub", "Chapitre certifié — ta récompense est là")
@@ -2941,7 +2977,7 @@ function openFiche(root, compId, ws, validatedMap, pendingMap, hasMoniteur) {
       <div class="fiche-circle has-med ${st === "done" ? "done" : ""}">
         ${stIcon}
       </div>
-      <h3 id="bsheet-title">${esc(sub.n)}</h3>
+      <h3 id="bsheet-title">${nameBi(sub.n, subTr(sub.c))}</h3>
       <div class="fiche-state ${st}">
         <span class="fiche-state-dot" aria-hidden="true"></span>
         <span class="fiche-state-txt">${prcDyn(esc(stateLine))}</span>
