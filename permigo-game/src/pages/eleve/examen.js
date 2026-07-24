@@ -10,6 +10,126 @@ import { track } from "@/services/analytics.js";
 import { icon } from "@/utils/icons.js";
 import { medallion } from "@/utils/medallions.js";
 import { hideBottomNav } from "@/utils/nav.js";
+import { getLang } from "@/utils/lang.js";
+
+// ── i18n de la COQUE (élève non-francophone) — page ENTIÈRE (hero, compte à
+// rebours, prédiction, checklist, conseils, centre d'examen, état d'erreur).
+// Dict local (règle coque), repli FR si clé absente. buildCriteria/buildVerdict
+// sont EXPORTÉS et réutilisés tels quels par mon-permis.js : les traduire ici
+// traduit aussi, sans duplication, le bloc « prêt pour l'examen » de ce hub.
+const EX_I18N = {
+  en: {
+    title: "Your exam",
+    subtitle: "Your countdown and where you stand.",
+    countdown_title: "Countdown",
+    no_date_txt: "Add your exam date to start the countdown.",
+    choose_btn: "Choose my date",
+    save_btn: "Save",
+    passed_title: "Your exam has passed",
+    passed_sub: "Good luck with the results.",
+    change_date_btn: "Change date",
+    day_lbl: "Days",
+    hour_lbl: "Hours",
+    min_lbl: "Minutes",
+    modify_btn: "Edit",
+    predict_title: "Where you stand",
+    ready_title: "Ready for the exam",
+    ready_sub: "{n}/31 skills validated · goal reached",
+    almost_title: "Almost ready · {n} more to go",
+    almost_sub: "{n}/31 validated. Left: {list}",
+    estimating: "Estimating…",
+    ready_by: "Ready around {date}",
+    default_advice: "{n} more skills to validate",
+    validated_lbl: "{n} validated",
+    pct_objective: "{pct}% of goal",
+    target_lbl: "target {n}",
+    checklist_title: "Your preparation",
+    crit1_label: "Journey over 50%",
+    crit1_sub: "{n} skills validated out of 31",
+    crit2_label: "Active streak",
+    crit2_sub_active: "{n}-day streak",
+    crit2_sub_inactive: "Come back and revise today",
+    crit3_label: "Quiz score over 70%",
+    crit3_sub_avg: "Average: {n}%",
+    crit3_sub_none: "No quiz recorded yet",
+    crit4_label: "Revision done",
+    crit4_sub_done: "Revision sheets read",
+    crit4_sub_todo: "Check out your revision sheets",
+    verdict_high: "Ready for the exam. Your {n} core skills are validated.",
+    verdict_mid: "Almost ready. {n} more core skill(s) to validate.",
+    verdict_low:
+      "In preparation. Validate your skills as you go through your lessons and revisions.",
+    tips_title: "Last-mile tips",
+    tip1: "Sleep 8 hours the night before. Your brain consolidates memory during sleep.",
+    tip2: "Eat light in the morning. Avoid fast sugar before the exam.",
+    tip3: "Arrive 15 min early. Time to relax and check your paperwork.",
+    tip4: "Breathe from your belly before starting. 4 s in, 4 s out.",
+    centre_title: "Your exam centre",
+    centre_sub: "Difficulty, route pitfalls, tips on the day.",
+    err_title: "“Your exam” unavailable",
+    err_sub: "Check your connection, then try again.",
+    retry_btn: "Retry",
+  },
+  ar: {
+    title: "امتحانك",
+    subtitle: "العد التنازلي وأين أنت الآن.",
+    countdown_title: "العد التنازلي",
+    no_date_txt: "أضف تاريخ امتحانك لبدء العد التنازلي.",
+    choose_btn: "اختر تاريخي",
+    save_btn: "احفظ",
+    passed_title: "امتحانك انتهى",
+    passed_sub: "حظًا موفقًا مع النتائج.",
+    change_date_btn: "غيّر التاريخ",
+    day_lbl: "أيام",
+    hour_lbl: "ساعات",
+    min_lbl: "دقائق",
+    modify_btn: "تعديل",
+    predict_title: "أين أنت الآن",
+    ready_title: "جاهز للامتحان",
+    ready_sub: "{n}/31 مهارة تم اعتمادها · الهدف تحقّق",
+    almost_title: "على وشك الجاهزية · تبقّى {n}",
+    almost_sub: "{n}/31 تم اعتمادها. تبقّى: {list}",
+    estimating: "جارٍ التقدير…",
+    ready_by: "جاهز حوالي {date}",
+    default_advice: "تبقّى {n} مهارة للاعتماد",
+    validated_lbl: "{n} تم اعتمادها",
+    pct_objective: "{pct}% من الهدف",
+    target_lbl: "الهدف {n}",
+    checklist_title: "تحضيرك",
+    crit1_label: "المسار فوق 50%",
+    crit1_sub: "{n} مهارة تم اعتمادها من أصل 31",
+    crit2_label: "سلسلة نشطة",
+    crit2_sub_active: "سلسلة {n} أيام",
+    crit2_sub_inactive: "عد للمراجعة اليوم",
+    crit3_label: "درجة الاختبار فوق 70%",
+    crit3_sub_avg: "المتوسط: {n}%",
+    crit3_sub_none: "لا يوجد اختبار مسجَّل",
+    crit4_label: "المراجعة تمّت",
+    crit4_sub_done: "تمت قراءة بطاقات المراجعة",
+    crit4_sub_todo: "اطّلع على بطاقات المراجعة",
+    verdict_high: "جاهز للامتحان. مهاراتك الأساسية الـ{n} معتمدة.",
+    verdict_mid: "قريبًا جاهز. تبقّى {n} مهارة أساسية للاعتماد.",
+    verdict_low: "قيد التحضير. اعتمد مهاراتك مع دروسك ومراجعاتك.",
+    tips_title: "نصائح اللحظات الأخيرة",
+    tip1: "نم 8 ساعات ليلة الامتحان. الدماغ يثبّت الذاكرة أثناء النوم.",
+    tip2: "تناول وجبة خفيفة صباحًا. تجنّب السكر السريع قبل الامتحان.",
+    tip3: "صل قبل 15 دقيقة. وقت كافٍ للاسترخاء والتحقق من الأوراق.",
+    tip4: "تنفّس من بطنك قبل البدء. 4 ثوانٍ شهيقًا، 4 ثوانٍ زفيرًا.",
+    centre_title: "مركز امتحانك",
+    centre_sub: "الصعوبة، مطبّات المسار، نصائح يوم الامتحان.",
+    err_title: "«امتحانك» غير متاح",
+    err_sub: "تحقّق من اتصالك، ثم أعد المحاولة.",
+    retry_btn: "إعادة المحاولة",
+  },
+};
+function xt(key, fr) {
+  const l = getLang();
+  return (l !== "fr" && EX_I18N[l]?.[key]) || fr;
+}
+// RTL par ATTRIBUT sur le bloc de texte (jamais <html dir> — règle lang.js).
+function xRtl() {
+  return getLang() === "ar" ? ' dir="rtl" lang="ar"' : "";
+}
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -327,18 +447,22 @@ const QUIZ_TARGET = 70;
 const TIPS = [
   {
     ico: medallion("lune", "indigo", { size: 34 }),
+    key: "tip1",
     txt: "Dors 8 h la veille. Le cerveau consolide la mémoire pendant le sommeil.",
   },
   {
     ico: medallion("eclair", "orange", { size: 34 }),
+    key: "tip2",
     txt: "Mange léger le matin. Évite le sucre rapide avant l’examen.",
   },
   {
     ico: medallion("horloge", "blue", { size: 34 }),
+    key: "tip3",
     txt: "Arrive 15 min en avance. Le temps de te détendre et de vérifier le matériel.",
   },
   {
     ico: medallion("stats", "teal", { size: 34 }),
+    key: "tip4",
     txt: "Respire par le ventre avant de démarrer. 4 s inspiré, 4 s expiré.",
   },
 ];
@@ -466,13 +590,13 @@ function renderCountdown(examDate) {
     return `
 <div class="exam-no-date">
   <span class="exam-no-date-emoji">${icon("calendar", { size: 26 })}</span>
-  <div class="exam-no-date-txt">Ajoute ta date d’examen pour lancer le compte à rebours.</div>
+  <div class="exam-no-date-txt"${xRtl()}>${esc(xt("no_date_txt", "Ajoute ta date d’examen pour lancer le compte à rebours."))}</div>
   <button class="exam-choose-btn" id="exam-btn-choose">
-    ${icon("calendar", { size: 16 })} Choisir ma date
+    ${icon("calendar", { size: 16 })} ${esc(xt("choose_btn", "Choisir ma date"))}
   </button>
   <div class="exam-date-input-wrap" id="exam-date-wrap">
     <input type="date" class="exam-date-input" id="exam-date-input" />
-    <button class="exam-date-save" id="exam-date-save">Enregistrer</button>
+    <button class="exam-date-save" id="exam-date-save">${esc(xt("save_btn", "Enregistrer"))}</button>
   </div>
 </div>`;
   }
@@ -485,14 +609,14 @@ function renderCountdown(examDate) {
     return `
 <div style="text-align:center;padding:8px 0">
   <div style="margin-bottom:8px;color:var(--gr)">${icon("check-circle", { size: 34 })}</div>
-  <div style="font:700 16px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:4px">Ton examen est passé</div>
-  <div style="font:500 13px/1.5 'Inter',sans-serif;color:var(--mu3);margin-bottom:16px">Bonne chance pour les résultats.</div>
+  <div style="font:700 16px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:4px"${xRtl()}>${esc(xt("passed_title", "Ton examen est passé"))}</div>
+  <div style="font:500 13px/1.5 'Inter',sans-serif;color:var(--mu3);margin-bottom:16px"${xRtl()}>${esc(xt("passed_sub", "Bonne chance pour les résultats."))}</div>
   <button class="exam-choose-btn" id="exam-btn-choose" style="background:var(--gr)">
-    ${icon("calendar", { size: 16 })} Changer la date
+    ${icon("calendar", { size: 16 })} ${esc(xt("change_date_btn", "Changer la date"))}
   </button>
   <div class="exam-date-input-wrap" id="exam-date-wrap">
     <input type="date" class="exam-date-input" id="exam-date-input" />
-    <button class="exam-date-save" id="exam-date-save">Enregistrer</button>
+    <button class="exam-date-save" id="exam-date-save">${esc(xt("save_btn", "Enregistrer"))}</button>
   </div>
 </div>`;
   }
@@ -501,15 +625,15 @@ function renderCountdown(examDate) {
 <div class="exam-countdown-tiles">
   <div class="exam-tile ${tileClass}">
     <span class="exam-tile-num">${String(cd.days).padStart(2, "0")}</span>
-    <span class="exam-tile-lbl">Jours</span>
+    <span class="exam-tile-lbl"${xRtl()}>${esc(xt("day_lbl", "Jours"))}</span>
   </div>
   <div class="exam-tile ${tileClass}">
     <span class="exam-tile-num">${String(cd.hours).padStart(2, "0")}</span>
-    <span class="exam-tile-lbl">Heures</span>
+    <span class="exam-tile-lbl"${xRtl()}>${esc(xt("hour_lbl", "Heures"))}</span>
   </div>
   <div class="exam-tile ${tileClass}">
     <span class="exam-tile-num">${String(cd.minutes).padStart(2, "0")}</span>
-    <span class="exam-tile-lbl">Minutes</span>
+    <span class="exam-tile-lbl"${xRtl()}>${esc(xt("min_lbl", "Minutes"))}</span>
   </div>
 </div>
 <div style="text-align:center;font:500 12px/1.4 'Inter',sans-serif;color:var(--mu3);margin-bottom:14px">
@@ -517,7 +641,7 @@ function renderCountdown(examDate) {
 </div>
 <div class="exam-date-row">
   <input type="date" class="exam-date-input" id="exam-date-input" value="${examDate.toISOString().slice(0, 10)}" />
-  <button class="exam-date-save" id="exam-date-save">Modifier</button>
+  <button class="exam-date-save" id="exam-date-save">${esc(xt("modify_btn", "Modifier"))}</button>
 </div>`;
 }
 
@@ -536,17 +660,18 @@ function renderPredict(data) {
 <div class="exam-predict-ready">
   <span aria-hidden="true">${medallion("check", "green", { size: 24 })}</span>
   <div>
-    <div class="exam-predict-title">Prêt pour l’examen</div>
-    <div class="exam-predict-sub">${compsCount}/31 compétences validées · objectif atteint</div>
+    <div class="exam-predict-title"${xRtl()}>${esc(xt("ready_title", "Prêt pour l’examen"))}</div>
+    <div class="exam-predict-sub"${xRtl()}>${esc(xt("ready_sub", `${compsCount}/31 compétences validées · objectif atteint`).replace("{n}", String(compsCount)))}</div>
   </div>
 </div>`;
     }
+    const restText = fails.map((f) => f.label).join(" · ");
     return `
 <div class="exam-predict-almost">
   <span aria-hidden="true">${medallion("panneau", "orange", { size: 24 })}</span>
   <div>
-    <div class="exam-predict-title">Presque prêt · encore ${fails.length} critère${fails.length > 1 ? "s" : ""}</div>
-    <div class="exam-predict-sub">${compsCount}/31 validées. Reste : ${esc(fails.map((f) => f.label).join(" · "))}</div>
+    <div class="exam-predict-title"${xRtl()}>${esc(xt("almost_title", `Presque prêt · encore ${fails.length} critère${fails.length > 1 ? "s" : ""}`).replace("{n}", String(fails.length)))}</div>
+    <div class="exam-predict-sub"${xRtl()}>${esc(xt("almost_sub", `${compsCount}/31 validées. Reste : ${restText}`).replace("{n}", String(compsCount)).replace("{list}", restText))}</div>
   </div>
 </div>`;
   }
@@ -559,23 +684,35 @@ function renderPredict(data) {
     : null;
   const advice =
     predict?.advice ||
-    `Encore ${PREDICT_TARGET - compsCount} compétences à valider`;
+    xt(
+      "default_advice",
+      `Encore ${PREDICT_TARGET - compsCount} compétences à valider`,
+    ).replace("{n}", String(PREDICT_TARGET - compsCount));
 
   return `
 <div class="exam-predict">
   <div class="exam-predict-ico">${icon("calendar", { size: 18, color: "var(--a)" })}</div>
   <div class="exam-predict-body">
-    <div class="exam-predict-title">${dateStr ? `Prêt vers le ${esc(dateStr)}` : "Estimation en cours"}</div>
-    <div class="exam-predict-sub">${esc(advice)}</div>
+    <div class="exam-predict-title"${xRtl()}>${
+      dateStr
+        ? esc(
+            xt("ready_by", `Prêt vers le ${dateStr}`).replace(
+              "{date}",
+              dateStr,
+            ),
+          )
+        : esc(xt("estimating", "Estimation en cours"))
+    }</div>
+    <div class="exam-predict-sub"${xRtl()}>${esc(advice)}</div>
   </div>
 </div>
 <div class="exam-predict-track">
   <div class="exam-predict-fill" style="width:${pct}%"></div>
 </div>
-<div class="exam-predict-labels">
-  <span>${compsCount} validées</span>
-  <span>${pct}% de l’objectif</span>
-  <span>cible ${PREDICT_TARGET}</span>
+<div class="exam-predict-labels"${xRtl()}>
+  <span>${esc(xt("validated_lbl", `${compsCount} validées`).replace("{n}", String(compsCount)))}</span>
+  <span>${esc(xt("pct_objective", `${pct}% de l’objectif`).replace("{pct}", String(pct)))}</span>
+  <span>${esc(xt("target_lbl", `cible ${PREDICT_TARGET}`).replace("{n}", String(PREDICT_TARGET)))}</span>
 </div>`;
 }
 
@@ -596,18 +733,27 @@ export function buildVerdict({ baseAcquis = 0, solo = false } = {}) {
   if (baseAcquis >= BASE_TOTAL) {
     return {
       level: "high",
-      text: `Prêt·e pour l’examen. Tes ${BASE_TOTAL} compétences de base sont validées.`,
+      text: xt(
+        "verdict_high",
+        `Prêt·e pour l’examen. Tes ${BASE_TOTAL} compétences de base sont validées.`,
+      ).replace("{n}", String(BASE_TOTAL)),
     };
   }
   if (baseAcquis >= 18) {
     return {
       level: "mid",
-      text: `Bientôt prêt·e. ${baseRestantes} compétence${baseRestantes > 1 ? "s" : ""} de base à valider.`,
+      text: xt(
+        "verdict_mid",
+        `Bientôt prêt·e. ${baseRestantes} compétence${baseRestantes > 1 ? "s" : ""} de base à valider.`,
+      ).replace("{n}", String(baseRestantes)),
     };
   }
   return {
     level: "low",
-    text: "En préparation. Valide tes compétences au fil de tes leçons et de tes révisions.",
+    text: xt(
+      "verdict_low",
+      "En préparation. Valide tes compétences au fil de tes leçons et de tes révisions.",
+    ),
   };
 }
 
@@ -615,36 +761,47 @@ export function buildCriteria({ compsCount, streak, avgScore }) {
   const revised = isRevised();
   return [
     {
-      label: "Parcours au-dessus de 50 %",
-      sub: `${compsCount} compétences validées sur 31`,
+      label: xt("crit1_label", "Parcours au-dessus de 50 %"),
+      sub: xt("crit1_sub", `${compsCount} compétences validées sur 31`).replace(
+        "{n}",
+        String(compsCount),
+      ),
       pass: compsCount >= COMPS_TARGET,
       badge: `${Math.round((compsCount / 31) * 100)}%`,
       ico: medallion("carte", "blue", { size: 30 }),
     },
     {
-      label: "Série active",
+      label: xt("crit2_label", "Série active"),
       sub:
         streak > 0
-          ? `${streak} jour${streak > 1 ? "s" : ""} d’affilée`
-          : "Reviens réviser aujourd’hui",
+          ? xt(
+              "crit2_sub_active",
+              `${streak} jour${streak > 1 ? "s" : ""} d’affilée`,
+            ).replace("{n}", String(streak))
+          : xt("crit2_sub_inactive", "Reviens réviser aujourd’hui"),
       pass: streak > 0,
       badge: streak > 0 ? `${streak}j` : "0j",
       ico: medallion("flamme", "orange", { size: 30 }),
     },
     {
-      label: "Score quiz au-dessus de 70 %",
+      label: xt("crit3_label", "Score quiz au-dessus de 70 %"),
       sub:
-        avgScore !== null ? `Moyenne : ${avgScore}%` : "Aucun quiz enregistré",
+        avgScore !== null
+          ? xt("crit3_sub_avg", `Moyenne : ${avgScore}%`).replace(
+              "{n}",
+              String(avgScore),
+            )
+          : xt("crit3_sub_none", "Aucun quiz enregistré"),
       pass: avgScore !== null && avgScore >= QUIZ_TARGET,
       neutral: avgScore === null,
       badge: avgScore !== null ? `${avgScore}%` : "—",
       ico: medallion("ampoule", "gold", { size: 30 }),
     },
     {
-      label: "Révision faite",
+      label: xt("crit4_label", "Révision faite"),
       sub: revised
-        ? "Fiches de révision consultées"
-        : "Consulte tes fiches de révision",
+        ? xt("crit4_sub_done", "Fiches de révision consultées")
+        : xt("crit4_sub_todo", "Consulte tes fiches de révision"),
       pass: revised,
       badge: revised ? "✓" : "—",
       ico: medallion("livret", "violet", { size: 30 }),
@@ -674,7 +831,7 @@ function renderChecklist(data) {
       const cls = c.neutral ? "neutral" : c.pass ? "pass" : "fail";
       return `<div class="exam-check-row ${cls}" role="listitem">
   <div class="exam-check-ico" aria-hidden="true">${c.ico}</div>
-  <div class="exam-check-body">
+  <div class="exam-check-body"${xRtl()}>
     <div class="exam-check-label">${esc(c.label)}</div>
     <div class="exam-check-sub">${esc(c.sub)}</div>
   </div>
@@ -684,7 +841,7 @@ function renderChecklist(data) {
     .join("");
 
   return `
-<div class="exam-readiness ${readinessClass}" role="status">${readinessTxt}</div>
+<div class="exam-readiness ${readinessClass}" role="status"${xRtl()}>${readinessTxt}</div>
 <div class="exam-checklist" role="list">${rows}</div>`;
 }
 
@@ -693,7 +850,7 @@ function renderTips() {
     (t) => `
 <div class="exam-tip">
   <span class="exam-tip-ico" aria-hidden="true">${t.ico}</span>
-  <div class="exam-tip-txt">${esc(t.txt)}</div>
+  <div class="exam-tip-txt"${xRtl()}>${esc(xt(t.key, t.txt))}</div>
 </div>`,
   ).join("");
 }
@@ -758,15 +915,15 @@ export async function mount(root) {
   <div class="exam-hd">
     <div class="exam-hd-ico" aria-hidden="true">${medallion("examen", "gold", { size: 48 })}</div>
     <div>
-      <h1 class="exam-hd-title">Ton examen</h1>
-      <div class="exam-hd-sub">Ton compte à rebours et où tu en es.</div>
+      <h1 class="exam-hd-title"${xRtl()}>${esc(xt("title", "Ton examen"))}</h1>
+      <div class="exam-hd-sub"${xRtl()}>${esc(xt("subtitle", "Ton compte à rebours et où tu en es."))}</div>
     </div>
   </div>
   <div class="exam-card" style="text-align:center;padding:28px 20px">
     <div style="margin-bottom:10px;color:var(--mu3)">${icon("alert-circle", { size: 30 })}</div>
-    <div style="font:700 15px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:6px">« Ton examen » indisponible</div>
-    <div style="font:500 13px/1.5 'Inter',sans-serif;color:var(--mu3);margin-bottom:16px">Vérifie ta connexion, puis réessaie.</div>
-    <button class="exam-choose-btn" id="exam-retry">Réessayer</button>
+    <div style="font:700 15px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:6px"${xRtl()}>${esc(xt("err_title", "« Ton examen » indisponible"))}</div>
+    <div style="font:500 13px/1.5 'Inter',sans-serif;color:var(--mu3);margin-bottom:16px"${xRtl()}>${esc(xt("err_sub", "Vérifie ta connexion, puis réessaie."))}</div>
+    <button class="exam-choose-btn" id="exam-retry">${esc(xt("retry_btn", "Réessayer"))}</button>
   </div>
 </div>`;
     root
@@ -782,14 +939,14 @@ export async function mount(root) {
   <div class="exam-hd exam-card" style="background:transparent;border:0;box-shadow:none;padding:0;margin-bottom:16px">
     <div class="exam-hd-ico" aria-hidden="true">${medallion("examen", "gold", { size: 48 })}</div>
     <div>
-      <h1 class="exam-hd-title">Ton examen</h1>
-      <div class="exam-hd-sub">Ton compte à rebours et où tu en es.</div>
+      <h1 class="exam-hd-title"${xRtl()}>${esc(xt("title", "Ton examen"))}</h1>
+      <div class="exam-hd-sub"${xRtl()}>${esc(xt("subtitle", "Ton compte à rebours et où tu en es."))}</div>
     </div>
   </div>
 
   <!-- 2. COUNTDOWN -->
   <div class="exam-card" id="exam-countdown-card">
-    <div class="exam-card-title">Compte à rebours</div>
+    <div class="exam-card-title"${xRtl()}>${esc(xt("countdown_title", "Compte à rebours"))}</div>
     <div id="exam-countdown-body">
       ${renderCountdown(examDate)}
     </div>
@@ -797,19 +954,19 @@ export async function mount(root) {
 
   <!-- 3. PREDICT -->
   <div class="exam-card">
-    <div class="exam-card-title">Où tu en es</div>
+    <div class="exam-card-title"${xRtl()}>${esc(xt("predict_title", "Où tu en es"))}</div>
     ${renderPredict(data)}
   </div>
 
   <!-- 4. CHECKLIST -->
   <div class="exam-card">
-    <div class="exam-card-title">Ta préparation</div>
+    <div class="exam-card-title"${xRtl()}>${esc(xt("checklist_title", "Ta préparation"))}</div>
     ${renderChecklist(data)}
   </div>
 
   <!-- 5. TIPS -->
   <div class="exam-card">
-    <div class="exam-card-title">Conseils dernière ligne droite</div>
+    <div class="exam-card-title"${xRtl()}>${esc(xt("tips_title", "Conseils dernière ligne droite"))}</div>
     <div class="exam-tips">
       ${renderTips()}
     </div>
@@ -821,9 +978,9 @@ export async function mount(root) {
     <div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
       ${medallion("carte", "blue", { size: 36 })}
     </div>
-    <div style="flex:1;min-width:0">
-      <div style="font-size:15px;font-weight:800">Ton centre d’examen</div>
-      <div style="font-size:13px;color:var(--mu2);margin-top:2px">Difficulté, pièges du parcours, conseils sur place.</div>
+    <div style="flex:1;min-width:0"${xRtl()}>
+      <div style="font-size:15px;font-weight:800">${esc(xt("centre_title", "Ton centre d’examen"))}</div>
+      <div style="font-size:13px;color:var(--mu2);margin-top:2px">${esc(xt("centre_sub", "Difficulté, pièges du parcours, conseils sur place."))}</div>
     </div>
     ${icon("chevron-right", { size: 20, color: "var(--mu3)" })}
   </a>

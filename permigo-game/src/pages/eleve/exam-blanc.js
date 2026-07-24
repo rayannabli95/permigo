@@ -51,6 +51,221 @@ import {
   playWhoosh,
 } from "@/utils/sound.js";
 
+// ── i18n de la COQUE (élève non-francophone) — ÉCRAN DE SÉLECTION seulement.
+// Les QUESTIONS (énoncés/options/explications) restent gérées par examBi/
+// examTr/examUi (data/parcours-quiz-i18n.js) — on n'y touche pas ici. Dict
+// local (règle coque), repli FR si clé absente. Le confirm() natif de sortie
+// de parcours/examen est aussi traduit (cf. RULES de la tâche).
+const EXBS_I18N = {
+  en: {
+    back_aria: "Back",
+    trophy_start: "First spark",
+    trophy_end: "A month without a miss",
+    title: "Your exam journey",
+    subtitle: "The real exam experience, or practise by topic.",
+    officiel_kicker: "Official exam",
+    officiel_title: "40 questions · timed · just like the real thing",
+    officiel_sub_unlocked: "Pass with 5 mistakes maximum.",
+    officiel_cta: "Start →",
+    officiel_aria_locked: "Official exam locked",
+    officiel_aria_unlocked: "Start the official exam",
+    lock_badge_premium: "PermiGo+",
+    lock_badge_comp1: "Skill 1",
+    lock_sub_premium: "Unlock the real mock exam with PermiGo+.",
+    lock_sub_comp1: "Validate skill 1 to unlock the real mock exam.",
+    weak_title: "Your weak points",
+    weak_stat: "{left} to review · {pct}% missed",
+    weak_cta: "Review →",
+    theme_sub2: "Practise by topic · {n} journeys of 15 questions",
+    pcard_num: "Journey {n}",
+    pcard_stars_lbl: "Difficulty",
+    pcard_stars_aria: "Difficulty {n}/5",
+    pcard_aria_start: "Start the journey",
+    pcard_meta: "15 questions · pass from 12/15",
+    toast_premium: "Coming soon: the official exam with PermiGo+",
+    toast_locked: "Validate skill 1 to unlock the mock exam 🔒",
+    confirm_quit_parcours: "Quit this journey? Your progress will be lost.",
+    confirm_quit_officiel: "Quit the exam? Your progress will be lost.",
+  },
+  ar: {
+    back_aria: "رجوع",
+    trophy_start: "الشرارة الأولى",
+    trophy_end: "شهر دون خطأ",
+    title: "مسارك للامتحان",
+    subtitle: "الامتحان كالحقيقي، أو تدرّب حسب الموضوع.",
+    officiel_kicker: "الامتحان الرسمي",
+    officiel_title: "40 سؤالاً · بوقت محدد · كالامتحان الحقيقي",
+    officiel_sub_unlocked: "النجاح بـ 5 أخطاء كحد أقصى.",
+    officiel_cta: "ابدأ ←",
+    officiel_aria_locked: "الامتحان الرسمي مقفل",
+    officiel_aria_unlocked: "ابدأ الامتحان الرسمي",
+    lock_badge_premium: "PermiGo+",
+    lock_badge_comp1: "المهارة 1",
+    lock_sub_premium: "افتح الامتحان التجريبي الحقيقي مع PermiGo+.",
+    lock_sub_comp1: "اعتمد المهارة 1 لفتح الامتحان التجريبي الحقيقي.",
+    weak_title: "نقاط ضعفك",
+    weak_stat: "{left} للمراجعة · {pct}% إجابات خاطئة",
+    weak_cta: "راجع ←",
+    theme_sub2: "تدرّب حسب الموضوع · {n} مسارًا من 15 سؤالاً",
+    pcard_num: "المسار {n}",
+    pcard_stars_lbl: "الصعوبة",
+    pcard_stars_aria: "الصعوبة {n}/5",
+    pcard_aria_start: "ابدأ مسار",
+    pcard_meta: "15 سؤالاً · النجاح من 12/15",
+    toast_premium: "قريبًا: الامتحان الرسمي مع PermiGo+",
+    toast_locked: "اعتمد المهارة 1 لفتح الامتحان التجريبي 🔒",
+    confirm_quit_parcours: "الخروج من هذا المسار؟ ستفقد تقدّمك.",
+    confirm_quit_officiel: "الخروج من الامتحان؟ ستفقد تقدّمك.",
+  },
+};
+function exsT(key, fr) {
+  const l = getLang();
+  return (l !== "fr" && EXBS_I18N[l]?.[key]) || fr;
+}
+// RTL par ATTRIBUT sur le bloc de texte (jamais <html dir> — règle lang.js).
+function exsRtl() {
+  return getLang() === "ar" ? ' dir="rtl" lang="ar"' : "";
+}
+
+// Titres/descriptions des 12 parcours (coque de l'écran de sélection). Les
+// contextes gardent le vocabulaire FR pour les termes métier (giratoires,
+// créneau…) entre parenthèses à la 1re occurrence — cf. règle de la tâche.
+// Clé = id du parcours (PARCOURS[i].id, data/parcours-quiz.js).
+const PARCOURS_I18N = {
+  en: {
+    1: {
+      nom: "Cergy — roundabouts",
+      contexte:
+        "Leaving Cergy-Saint-Christophe station, heavy traffic, many roundabouts (giratoires) and 30 km/h zones.",
+    },
+    2: {
+      nom: "Paris — heavy traffic",
+      contexte:
+        "Crossing central Paris, 50 km/h boulevards, cycle boxes (sas vélos), lots of pedestrians.",
+    },
+    3: {
+      nom: "Beauce countryside",
+      contexte:
+        "Country roads with no road markings, unmarked intersections, farm tractors.",
+    },
+    4: {
+      nom: "Lyon — 30 zone",
+      contexte:
+        "Residential area in Lyon, 30 km/h zone (zone 30), tramway, lots of cyclists and pedestrians.",
+    },
+    5: {
+      nom: "Expressway / A86",
+      contexte:
+        "Merging onto the A86, high-speed driving, overtaking lanes, hard shoulder (bande d'arrêt d'urgence).",
+    },
+    6: {
+      nom: "Essential revision",
+      contexte:
+        "The basics that come up in every exam: alcohol, speed, equipment, first aid, road signs.",
+    },
+    7: {
+      nom: "Night & bad weather",
+      contexte:
+        "Night driving, rain, fog, snow and ice: see and be seen, adjust your speed.",
+    },
+    8: {
+      nom: "Signs & road markings",
+      contexte:
+        "Read fast and right: prohibition, danger, obligation, road markings and traffic lights.",
+    },
+    9: {
+      nom: "Mountain & winding roads",
+      contexte:
+        "Downhill sections, hairpin bends, engine braking, mountain priority rules and slippery roads.",
+    },
+    10: {
+      nom: "Sharing the road",
+      contexte:
+        "Bicycles, two-wheelers, vulnerable pedestrians, buses, trucks and blind spots.",
+    },
+    11: {
+      nom: "Parking & manoeuvres",
+      contexte:
+        "Stopping or parking? Parallel parking (créneau), U-turns, no-parking zones and road markings.",
+    },
+    12: {
+      nom: "Signs & road markings",
+      contexte:
+        "Recognise the signs that come up in the exam: stop, priority, prohibition and danger signs. One picture, one right answer.",
+    },
+  },
+  ar: {
+    1: {
+      nom: "سيرجي — الدوارات",
+      contexte:
+        "الخروج من محطة سيرجي-سان-كريستوف، حركة مرور كثيفة، دوّارات (giratoires) عديدة ومناطق سرعة 30.",
+    },
+    2: {
+      nom: "باريس — حركة كثيفة",
+      contexte:
+        "عبور وسط باريس، شوارع بسرعة 50 كم/سا، مربعات انتظار الدراجات (sas vélos)، مشاة بكثرة.",
+    },
+    3: {
+      nom: "ريف بوس",
+      contexte:
+        "طرق ريفية بلا علامات أرضية، تقاطعات غير مؤشَّرة، جرارات زراعية.",
+    },
+    4: {
+      nom: "ليون — منطقة 30",
+      contexte:
+        "حي سكني في ليون، منطقة سرعة 30 (zone 30)، ترام، دراجات ومشاة بكثرة.",
+    },
+    5: {
+      nom: "طريق سريع / A86",
+      contexte:
+        "الاندماج في طريق A86 السريع، قيادة بسرعة عالية، حارات التجاوز، حارة الطوارئ (bande d'arrêt d'urgence).",
+    },
+    6: {
+      nom: "مراجعة أساسية",
+      contexte:
+        "الأساسيات التي تتكرر في كل امتحان: الكحول، السرعة، التجهيزات، الإسعافات، الإشارات.",
+    },
+    7: {
+      nom: "الليل والطقس الصعب",
+      contexte:
+        "القيادة ليلاً، تحت المطر، الضباب، الثلج والجليد: أن ترى وتُرى، وتكيّف سرعتك.",
+    },
+    8: {
+      nom: "اللافتات والإشارات",
+      contexte:
+        "اقرأ بسرعة ودقة: المنع، الخطر، الإلزام، العلامات الأرضية والإشارات الضوئية.",
+    },
+    9: {
+      nom: "الجبل والطرق المتعرجة",
+      contexte:
+        "المنحدرات، المنعطفات الحادة، الكبح بالمحرك، قواعد الأولوية في الجبل والطرق الزلقة.",
+    },
+    10: {
+      nom: "مشاركة الطريق",
+      contexte:
+        "الدراجات، المركبات ذات العجلتين، المشاة الضعفاء، الحافلات، الشاحنات والزوايا العمياء.",
+    },
+    11: {
+      nom: "التوقف والمناورات",
+      contexte:
+        "وقوف أم توقف؟ ركن السيارة (créneau)، الاستدارة الكاملة، أماكن ممنوعة والعلامات الأرضية.",
+    },
+    12: {
+      nom: "اللافتات والإشارات",
+      contexte:
+        "تعرّف على اللافتات التي تتكرر في الامتحان: قف، الأولوية، المنع والخطر. صورة واحدة، إجابة صحيحة واحدة.",
+    },
+  },
+};
+function parcoursNom(p) {
+  const l = getLang();
+  return (l !== "fr" && PARCOURS_I18N[l]?.[p.id]?.nom) || p.nom;
+}
+function parcoursContexte(p) {
+  const l = getLang();
+  return (l !== "fr" && PARCOURS_I18N[l]?.[p.id]?.contexte) || p.contexte;
+}
+
 const PASS_THRESHOLD = 12; // / 15
 
 // ── Mode « Examen officiel » ──────────────────────────────────
@@ -145,20 +360,22 @@ const TROPHY_START = {
   img: "/skins/trophy-first-validation.webp",
   ico: "zap",
   nom: "Première étincelle",
+  nomKey: "trophy_start",
 };
 const TROPHY_END = {
   img: "/skins/trophy-streak-30d.webp",
   ico: "gem",
   nom: "Mois sans rater",
+  nomKey: "trophy_end",
 };
 
 function renderTrophy(t, variant) {
   return `
     <div class="exb-trophy ${variant}">
-      <img class="exb-trophy-img" src="${escAttr(t.img)}" alt="${escAttr(t.nom)}"
+      <img class="exb-trophy-img" src="${escAttr(t.img)}" alt="${escAttr(exsT(t.nomKey, t.nom))}"
            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <span class="exb-trophy-emoji" style="display:none">${icon(t.ico, { size: 28 })}</span>
-      <span class="exb-trophy-cap">${esc(t.nom)}</span>
+      <span class="exb-trophy-cap">${esc(exsT(t.nomKey, t.nom))}</span>
     </div>`;
 }
 
@@ -324,14 +541,14 @@ function renderSelection() {
     ).join("")}</span>`;
   const cards = PARCOURS.map(
     (p) => `
-    <button class="exb-pcard" data-pid="${p.id}" aria-label="Démarrer le parcours ${esc(p.nom)}">
+    <button class="exb-pcard" data-pid="${p.id}" aria-label="${escAttr(exsT("pcard_aria_start", "Démarrer le parcours"))} ${escAttr(parcoursNom(p))}">
       <div class="exb-pcard-top">
-        <span class="exb-pcard-num">Parcours ${p.id}</span>
-        <span class="exb-pcard-stars" aria-label="Difficulté ${p.difficulte}/5"><small class="exb-pcard-stars-lbl">Difficulté</small>${stars(p.difficulte)}</span>
+        <span class="exb-pcard-num"${exsRtl()}>${esc(exsT("pcard_num", `Parcours ${p.id}`).replace("{n}", String(p.id)))}</span>
+        <span class="exb-pcard-stars" aria-label="${escAttr(exsT("pcard_stars_aria", `Difficulté ${p.difficulte}/5`).replace("{n}", String(p.difficulte)))}"><small class="exb-pcard-stars-lbl"${exsRtl()}>${esc(exsT("pcard_stars_lbl", "Difficulté"))}</small>${stars(p.difficulte)}</span>
       </div>
-      <div class="exb-pcard-nom">${esc(p.nom)}</div>
-      <div class="exb-pcard-ctx">${esc(p.contexte)}</div>
-      <div class="exb-pcard-meta">15 questions · réussir dès 12/15</div>
+      <div class="exb-pcard-nom"${exsRtl()}>${esc(parcoursNom(p))}</div>
+      <div class="exb-pcard-ctx"${exsRtl()}>${esc(parcoursContexte(p))}</div>
+      <div class="exb-pcard-meta"${exsRtl()}>${esc(exsT("pcard_meta", "15 questions · réussir dès 12/15"))}</div>
     </button>
   `,
   ).join("");
@@ -339,40 +556,50 @@ function renderSelection() {
   const locked = EXAMEN_OFFICIEL_LOCKED || !_examenUnlocked;
   const lockMed = medallion("cadenas", "slate", { size: 16 });
   const lockBadge = EXAMEN_OFFICIEL_LOCKED
-    ? `${lockMed} PermiGo+`
-    : `${lockMed} Compétence 1`;
+    ? `${lockMed} ${esc(exsT("lock_badge_premium", "PermiGo+"))}`
+    : `${lockMed} ${esc(exsT("lock_badge_comp1", "Compétence 1"))}`;
   const lockSub = EXAMEN_OFFICIEL_LOCKED
-    ? "Débloque le vrai examen blanc avec PermiGo+."
-    : "Valide ta compétence 1 pour ouvrir le vrai examen blanc.";
+    ? exsT("lock_sub_premium", "Débloque le vrai examen blanc avec PermiGo+.")
+    : exsT(
+        "lock_sub_comp1",
+        "Valide ta compétence 1 pour ouvrir le vrai examen blanc.",
+      );
   const officiel = locked
-    ? `<button class="exo-hero is-locked" id="exb-officiel" aria-label="Examen officiel verrouillé">
-        <span class="exo-hero-lock">${lockBadge}</span>
-        <span class="exo-hero-kicker">Examen officiel</span>
-        <span class="exo-hero-title">40 questions · chrono · comme le vrai</span>
-        <span class="exo-hero-sub">${lockSub}</span>
+    ? `<button class="exo-hero is-locked" id="exb-officiel" aria-label="${escAttr(exsT("officiel_aria_locked", "Examen officiel verrouillé"))}">
+        <span class="exo-hero-lock"${exsRtl()}>${lockBadge}</span>
+        <span class="exo-hero-kicker"${exsRtl()}>${esc(exsT("officiel_kicker", "Examen officiel"))}</span>
+        <span class="exo-hero-title"${exsRtl()}>${esc(exsT("officiel_title", "40 questions · chrono · comme le vrai"))}</span>
+        <span class="exo-hero-sub"${exsRtl()}>${esc(lockSub)}</span>
       </button>`
-    : `<button class="exo-hero" id="exb-officiel" aria-label="Démarrer l’examen officiel">
-        <span class="exo-hero-kicker">Examen officiel</span>
-        <span class="exo-hero-title">40 questions · chrono · comme le vrai</span>
-        <span class="exo-hero-sub">Admis avec 5 fautes maximum.</span>
-        <span class="exo-hero-cta">Commencer →</span>
+    : `<button class="exo-hero" id="exb-officiel" aria-label="${escAttr(exsT("officiel_aria_unlocked", "Démarrer l’examen officiel"))}">
+        <span class="exo-hero-kicker"${exsRtl()}>${esc(exsT("officiel_kicker", "Examen officiel"))}</span>
+        <span class="exo-hero-title"${exsRtl()}>${esc(exsT("officiel_title", "40 questions · chrono · comme le vrai"))}</span>
+        <span class="exo-hero-sub"${exsRtl()}>${esc(exsT("officiel_sub_unlocked", "Admis avec 5 fautes maximum."))}</span>
+        <span class="exo-hero-cta"${exsRtl()}>${esc(exsT("officiel_cta", "Commencer →"))}</span>
       </button>`;
 
   const weak = getWeakPoints({ minSeen: 3, limit: 3 });
   const weakSection = weak.length
     ? `<div class="exb-weak">
-    <p class="exb-weak-title">${medallion("cible", "red", { size: 24 })} Tes points faibles</p>
+    <p class="exb-weak-title"${exsRtl()}>${medallion("cible", "red", { size: 24 })} ${esc(exsT("weak_title", "Tes points faibles"))}</p>
     <div class="exb-weak-list">
       ${weak
         .map(
           (w) =>
             `
-        <button class="exb-weak-btn" data-tag="${escAttr(w.tag)}" data-label="${escAttr(w.label)}" aria-label="Réviser ${esc(w.label)}">
+        <button class="exb-weak-btn" data-tag="${escAttr(w.tag)}" data-label="${escAttr(w.label)}" aria-label="${escAttr(exsT("weak_cta", "Réviser").replace(" →", ""))} ${escAttr(w.label)}">
           <span class="exb-weak-info">
             <span class="exb-weak-nom">${esc(w.label)}</span>
-            <span class="exb-weak-stat">${w.left} à revoir · ${Math.round(w.rate * 100)} % ratées</span>
+            <span class="exb-weak-stat"${exsRtl()}>${esc(
+              exsT(
+                "weak_stat",
+                `${w.left} à revoir · ${Math.round(w.rate * 100)} % ratées`,
+              )
+                .replace("{left}", String(w.left))
+                .replace("{pct}", String(Math.round(w.rate * 100))),
+            )}</span>
           </span>
-          <span class="exb-weak-cta">Réviser →</span>
+          <span class="exb-weak-cta"${exsRtl()}>${esc(exsT("weak_cta", "Réviser →"))}</span>
         </button>`,
         )
         .join("")}
@@ -383,14 +610,14 @@ function renderSelection() {
   return `
 <div class="exb anim-slide-up" id="exb-screen">
   <div class="exb-sel-header">
-    <button class="exb-quit-btn" id="exb-back" aria-label="Retour">←</button>
+    <button class="exb-quit-btn" id="exb-back" aria-label="${escAttr(exsT("back_aria", "Retour"))}">←</button>
     ${renderTrophy(TROPHY_START, "exb-trophy--start")}
-    <h1 class="exb-sel-title">Ton parcours d’examen</h1>
-    <p class="exb-sel-sub">L’examen comme le vrai, ou entraîne-toi par thème.</p>
+    <h1 class="exb-sel-title"${exsRtl()}>${esc(exsT("title", "Ton parcours d’examen"))}</h1>
+    <p class="exb-sel-sub"${exsRtl()}>${esc(exsT("subtitle", "L’examen comme le vrai, ou entraîne-toi par thème."))}</p>
   </div>
   ${officiel}
   ${weakSection}
-  <p class="exb-sel-sub2">Entraîne-toi par thème · ${PARCOURS.length} parcours de 15 questions</p>
+  <p class="exb-sel-sub2"${exsRtl()}>${esc(exsT("theme_sub2", `Entraîne-toi par thème · ${PARCOURS.length} parcours de 15 questions`).replace("{n}", String(PARCOURS.length)))}</p>
   <div class="exb-pcards" id="exb-pcards">
     ${cards}
   </div>
@@ -407,12 +634,19 @@ function wireSelection(root) {
     haptic("select");
     if (EXAMEN_OFFICIEL_LOCKED) {
       // Le jour J : ouvrir ici la feuille d'achat PermiGo+ (Stripe élève).
-      toast("Bientôt : l’examen officiel avec PermiGo+", "info", 3500);
+      toast(
+        exsT("toast_premium", "Bientôt : l’examen officiel avec PermiGo+"),
+        "info",
+        3500,
+      );
       return;
     }
     if (!_examenUnlocked) {
       toast(
-        "Valide ta compétence 1 pour ouvrir l’examen blanc 🔒",
+        exsT(
+          "toast_locked",
+          "Valide ta compétence 1 pour ouvrir l’examen blanc 🔒",
+        ),
         "info",
         3500,
       );
@@ -595,7 +829,14 @@ function startParcours(root, parcours_id) {
         <span class="exb-quiz-parcours-name">${esc(parcours?.nom ?? "")}</span>
       </div>`,
     onQuit: (num) => {
-      if (confirm("Quitter ce parcours ? Ta progression sera perdue.")) {
+      if (
+        confirm(
+          exsT(
+            "confirm_quit_parcours",
+            "Quitter ce parcours ? Ta progression sera perdue.",
+          ),
+        )
+      ) {
         haptic("tap");
         track("parcours_quiz.quit", { parcours_id, question: num });
         root.innerHTML = renderStyles() + renderSelection();
@@ -799,7 +1040,14 @@ function startExamenOfficiel(root) {
         <span class="exb-quiz-parcours-name">Examen officiel</span>
       </div>`,
     onQuit: (num) => {
-      if (confirm("Quitter l’examen ? Ta progression sera perdue.")) {
+      if (
+        confirm(
+          exsT(
+            "confirm_quit_officiel",
+            "Quitter l’examen ? Ta progression sera perdue.",
+          ),
+        )
+      ) {
         clearExamTimer();
         haptic("tap");
         track("examen_officiel.quit", { question: num });
