@@ -3,6 +3,8 @@
 > Ce fichier est lu automatiquement par ChatGPT Codex à chaque session.
 > Il te dit **comment travailler sur PermiGo sans rien casser ni écraser le travail des autres**.
 > Écrit le 24/07/2026. La section « État » en bas est datée → à rafraîchir.
+>
+> 🤝 **Le protocole de collaboration commun (Claude ↔ Codex ↔ Rayan) vit dans [`WORKFLOW.md`](WORKFLOW.md) — lis-le : c'est la source de vérité du *comment on bosse ensemble*.** Ce fichier-ci ne garde que ce qui est propre à Codex.
 
 ---
 
