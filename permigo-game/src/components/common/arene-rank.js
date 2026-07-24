@@ -12,6 +12,11 @@
 //   arenePaliers({ items, doneCount, targetIdx, title, goal })
 // ═══════════════════════════════════════════════════════════════
 import { esc } from "@/utils/escape.js";
+import { getLang } from "@/utils/lang.js";
+// i18n coque (EN/AR), repli FR.
+function arYou() { const l = getLang(); return l === "en" ? "You" : l === "ar" ? "أنت" : "Toi"; }
+function arRank(n) { const l = getLang(); return l === "en" ? `Rank ${n}` : l === "ar" ? `المرتبة ${n}` : `Rang ${n}`; }
+function arMyRank(n) { const l = getLang(); return l === "en" ? `Your rank: ${n}` : l === "ar" ? `مركزك: ${n}` : `Ta place : ${n}`; }
 import { renderUserAvatar } from "@/components/common/avatar.js";
 
 // Presets d'accent (couleur, clair, foncé). On peut aussi passer un objet
@@ -255,7 +260,7 @@ const CROWN_SVG = `<svg class="arn-crown" viewBox="0 0 30 22" fill="none" aria-h
  */
 export function arenePodium(
   top3,
-  { fmtScore, meLabel = "Toi", attrsOf = null } = {},
+  { fmtScore, meLabel = arYou(), attrsOf = null } = {},
 ) {
   const by = {};
   top3.forEach((r) => (by[r.rang] = r));
@@ -278,7 +283,7 @@ export function arenePodium(
         ${isFirst ? CROWN_SVG : ""}
         <div class="arn-pav m-${metal}${r.is_me ? " is-me" : ""}">
           ${av}
-          <span class="arn-medal ${metal}" aria-label="Rang ${r.rang}">${r.rang}</span>
+          <span class="arn-medal ${metal}" aria-label="${arRank(r.rang)}">${r.rang}</span>
         </div>
         <div class="arn-pname${r.is_me ? " me" : ""}">${nameHtml}</div>
         <div class="arn-pscore${r.is_me ? " me" : ""}">${fmtScore(r)}</div>
@@ -299,7 +304,7 @@ export function areneRow(
   { fmtScore, idx = 0, rightHtml = "", attrs = "", clickable = false } = {},
 ) {
   return `<div class="arn-row${clickable ? " clickable" : ""}" style="--i:${idx}" ${attrs}>
-    <span class="arn-rk" aria-label="Rang ${r.rang}">${r.rang}</span>
+    <span class="arn-rk" aria-label="${arRank(r.rang)}">${r.rang}</span>
     <span class="arn-av">${renderUserAvatar({ avatar_url: r.avatar, prenom: r.display_name }, 38)}</span>
     <span class="arn-nm">${esc(r.display_name)}</span>
     ${rightHtml}
@@ -313,9 +318,9 @@ export function areneRow(
  */
 export function areneMeRow(
   mine,
-  { fmtScore, palier = "", meLabel = "Toi" } = {},
+  { fmtScore, palier = "", meLabel = arYou() } = {},
 ) {
-  return `<div class="arn-merow" aria-label="Ta place : ${esc(String(mine.rang))}">
+  return `<div class="arn-merow" aria-label="${esc(arMyRank(String(mine.rang)))}">
     <span class="arn-rk">#${mine.rang}</span>
     <span class="arn-av">${renderUserAvatar({ avatar_url: mine.avatar, prenom: mine.display_name }, 42)}</span>
     <span class="arn-nm">${meLabel} · ${esc(mine.display_name)}${palier ? `<span class="pal">${esc(palier)}</span>` : ""}</span>

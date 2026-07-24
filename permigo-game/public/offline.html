@@ -30,9 +30,28 @@
 <body>
   <div class="box">
     <div class="logo">PERMI<b>GO</b></div>
-    <h1>Tu es hors ligne</h1>
-    <p>Pas de connexion pour le moment. Tes progrès t'attendent — réessaie dès que le réseau revient.</p>
-    <button onclick="location.reload()">Réessayer</button>
+    <h1 id="ol-title">Tu es hors ligne</h1>
+    <p id="ol-body">Pas de connexion pour le moment. Tes progrès t'attendent — réessaie dès que le réseau revient.</p>
+    <button id="ol-retry" onclick="location.reload()">Réessayer</button>
   </div>
+  <script>
+    // Page servie hors-ligne par le service worker (hors du système de modules) :
+    // on traduit à la volée selon la langue mémorisée (miroir localStorage).
+    (function () {
+      try {
+        var l = localStorage.getItem("permigo_lang");
+        if (l !== "en" && l !== "ar") return;
+        var T = {
+          en: { t: "You're offline", b: "No connection right now. Your progress is waiting — try again as soon as you're back online.", r: "Retry" },
+          ar: { t: "أنت غير متصل", b: "لا اتصال حاليًا. تقدّمك في انتظارك — أعد المحاولة بمجرد عودة الشبكة.", r: "أعد المحاولة" }
+        }[l];
+        document.documentElement.lang = l;
+        if (l === "ar") document.documentElement.dir = "rtl";
+        document.getElementById("ol-title").textContent = T.t;
+        document.getElementById("ol-body").textContent = T.b;
+        document.getElementById("ol-retry").textContent = T.r;
+      } catch (e) {}
+    })();
+  </script>
 </body>
 </html>
