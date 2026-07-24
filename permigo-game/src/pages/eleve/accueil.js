@@ -1532,10 +1532,6 @@ const WORLDS = REMC.map((cat, i) => ({
   color: "var(--adk)",
 }));
 
-// L'examen blanc s'ouvre quand le monde 3 devient accessible
-// (même règle que le parcours : 6 compétences du monde 2 acquises).
-const EXAM_UNLOCK_WORLD2_DONE = 6;
-
 // Thème déclaré par l'élève pour sa prochaine leçon (pastille 🎯 du hero).
 // Simple code de compétence REMC en localStorage — une intention, pas un
 // planning (charte : pas de réservation dans PermiGo).
@@ -2102,10 +2098,6 @@ function render({
 
   // ── Séance à confirmer (priorité absolue quand présente) ──
   const pendingSession = pendingSessions?.[0] ?? null;
-
-  // Examen blanc : s'ouvre quand le monde 3 devient accessible.
-  // (conservé pour usage futur — actuellement non affiché dans l'accueil)
-  // const examUnlocked = (worlds[1]?.done ?? 0) >= EXAM_UNLOCK_WORLD2_DONE;
 
   // ── Hero « Prépare ta prochaine leçon » (maquette A validée 17/07) ──
   // Toujours le même message : l'élève prépare sa vraie leçon de conduite.

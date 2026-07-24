@@ -227,7 +227,7 @@ export async function mount(root, param) {
     const count = isIntro ? INTRO_SIZE : ROUND_SIZE;
     stage.innerHTML = `
       <div class="sit-top">
-        <button class="sit-x" id="sit-quit" type="button" aria-label="${esc(isIntro ? sit("skip", "Passer") : sit("quit", "Quitter le jeu"))}">✕</button>
+        <button class="sit-x" id="sit-quit" type="button" aria-label="${escAttr(isIntro ? sit("skip", "Passer") : sit("quit", "Quitter le jeu"))}">✕</button>
       </div>
       <div class="sit-intro">
         <div class="sit-kicker"${sitRtl()}>${esc(isIntro ? sit("kicker_intro", "Avant de démarrer") : sit("kicker_game", "Mini-jeu"))}</div>
@@ -480,7 +480,7 @@ export async function mount(root, param) {
             : sit("title_welcome", "Bienvenue à bord !");
       stage.innerHTML = `
         <div class="sit-top">
-          <button class="sit-x" id="sit-quit" type="button" aria-label="${esc(sit('skip', 'Passer'))}">✕</button>
+          <button class="sit-x" id="sit-quit" type="button" aria-label="${escAttr(sit('skip', 'Passer'))}">✕</button>
         </div>
         <div class="sit-recap">
           <div class="sit-kicker"${sitRtl()}>${esc(sit("done", "Terminé"))}</div>
@@ -534,7 +534,7 @@ export async function mount(root, param) {
 
     stage.innerHTML = `
       <div class="sit-top">
-        <button class="sit-x" id="sit-quit" type="button" aria-label="${esc(sit('quit', 'Quitter le jeu'))}">✕</button>
+        <button class="sit-x" id="sit-quit" type="button" aria-label="${escAttr(sit('quit', 'Quitter le jeu'))}">✕</button>
       </div>
       <div class="sit-recap">
         <div class="sit-kicker"${sitRtl()}>${esc(sit("round_done", "Manche terminée"))}</div>

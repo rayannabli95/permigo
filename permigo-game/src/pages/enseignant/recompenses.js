@@ -12,7 +12,7 @@ import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { toast } from "@/components/common/toast.js";
 import { haptic } from "@/utils/haptic.js";
-import { medallion, medLot } from "@/utils/medallions.js";
+import { medLot } from "@/utils/medallions.js";
 import { icon } from "@/utils/icons.js";
 
 // Icônes proposées pour un lot perso (emoji = rendu identique élève/moniteur,

@@ -22,7 +22,6 @@
 //  - Sortie : fade + scale 0.95 200ms
 // ═══════════════════════════════════════════════════════════════
 import { esc, escAttr } from "@/utils/escape.js";
-import { ASSETS } from "@/utils/assets.js";
 import { haptic } from "@/utils/haptic.js";
 import { playReward } from "@/utils/sound.js";
 import { track } from "@/services/analytics.js";

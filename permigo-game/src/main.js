@@ -179,7 +179,7 @@ async function boot() {
     // Marqueur de rôle → permet de scoper un thème par rôle (ex: arcade enseignant)
     document.body.dataset.role = me.role || "";
 
-    startNotifListener();
+    if (me.role === "eleve") startNotifListener();
 
     // Boucle d'engagement notifs :
     //  - app installée (standalone) → primer « active tes rappels » (sur iOS,

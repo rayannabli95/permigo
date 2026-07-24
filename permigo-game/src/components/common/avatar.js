@@ -13,14 +13,20 @@ import { esc, escAttr } from "@/utils/escape.js";
  * Rend l'avatar d'un utilisateur. Rendu unique partagé (header, carte profil…).
  * @param {{ avatar_url?: string, prenom?: string, nom?: string }} user
  * @param {number} size - diamètre en px
+ * @param {{ loading?: "lazy" | "eager" }} options
  * @returns {string} HTML
  */
-export function renderUserAvatar({ avatar_url, prenom, nom } = {}, size = 40) {
+export function renderUserAvatar(
+  { avatar_url, prenom, nom } = {},
+  size = 40,
+  { loading = "lazy" } = {},
+) {
   const name = `${prenom || ""} ${nom || ""}`.trim();
   if (avatar_url) {
     // escAttr (pas esc) : dans un ATTRIBUT, les guillemets doivent être
     // encodés, sinon une URL piégée sort de src="…" (XSS via onerror).
-    return `<img src="${escAttr(avatar_url)}" alt="${escAttr(name)}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;object-position:center;display:block" referrerpolicy="no-referrer">`;
+    const loadingAttr = loading === "eager" ? "eager" : "lazy";
+    return `<img src="${escAttr(avatar_url)}" alt="${escAttr(name)}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;object-position:center;display:block" loading="${loadingAttr}" referrerpolicy="no-referrer">`;
   }
   const init =
     (name || nom || "?")

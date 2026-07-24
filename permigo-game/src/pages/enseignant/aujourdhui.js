@@ -22,9 +22,6 @@ const BASE_COMPS = REMC.filter((c) => BASE_CATS.includes(c.id)).flatMap((c) =>
 );
 const isPretExam = (acquisSet) =>
   !!acquisSet && BASE_COMPS.every((c) => acquisSet.has(c));
-import { labelComp } from "@/utils/remc-label.js";
-import { statutCfg } from "@/utils/statut-label.js";
-import { renderUserAvatar } from "@/components/common/avatar.js";
 import { fmtName } from "@/utils/fmt-name.js";
 import { openInviteEleveModal } from "@/services/invite-eleve.js";
 import { getMoniteurState } from "@/data/moniteur-levels.js";

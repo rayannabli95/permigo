@@ -5,7 +5,6 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
-import { lancerQuiz } from "@/services/quiz-engine.js";
 import { track } from "@/services/analytics.js";
 import { toast } from "@/components/common/toast.js";
 import { burstConfetti } from "@/components/common/confetti.js";
@@ -174,6 +173,7 @@ async function handleQuiz(notif, me, type, nbQuestions) {
 
   _quizOpen = true;
   try {
+    const { lancerQuiz } = await import("@/services/quiz-engine.js");
     await lancerQuiz({
       competenceId,
       type,

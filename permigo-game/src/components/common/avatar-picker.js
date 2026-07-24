@@ -11,7 +11,7 @@
 import { ASSETS } from "@/utils/assets.js";
 import { icon } from "@/utils/icons.js";
 import { haptic } from "@/utils/haptic.js";
-import { esc, escAttr } from "@/utils/escape.js";
+import { escAttr } from "@/utils/escape.js";
 
 /** Sentinelle exportée — utilisée par les consommateurs pour détecter le choix "upload custom" */
 export const AVATAR_PICKER_UPLOAD = "__permigo_upload_custom__";

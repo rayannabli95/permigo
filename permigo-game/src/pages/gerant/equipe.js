@@ -482,16 +482,22 @@ function openInviteModal(me) {
       if (error) throw error;
 
       // Déclenche l'envoi d'email via Edge Function (best-effort, ne bloque pas l'UX)
+      let emailSent = true;
       try {
-        await sb.functions.invoke("send-invitation-email", {
-          body: {
-            invitation_id: data?.id,
-            token,
-            email: data?.email,
-            role: "enseignant",
+        const { error: emailError } = await sb.functions.invoke(
+          "send-invitation-email",
+          {
+            body: {
+              invitation_id: data?.id,
+              token,
+              email: data?.email,
+              role: "enseignant",
+            },
           },
-        });
+        );
+        if (emailError) throw emailError;
       } catch (emailErr) {
+        emailSent = false;
         // Email a échoué mais l'invitation est créée en DB → on garde
         console.warn(
           "[invite] email send failed (invitation still created)",
@@ -502,6 +508,38 @@ function openInviteModal(me) {
       const { toast } = await import("@/components/common/toast.js");
       const { playNotify } = await import("@/utils/sound.js");
       playNotify();
+      if (!emailSent) {
+        const invitationLink = `${window.location.origin}/#/signup?token=${encodeURIComponent(data?.token || token)}`;
+        overlay.querySelector(".inv-title").textContent = "Invitation créée";
+        overlay.querySelector(".inv-sub").textContent =
+          "L'email n'a pas pu être envoyé. Copie ce lien et partage-le directement.";
+        const labels = overlay.querySelectorAll(".inv-label");
+        labels[0].textContent = "Lien d'invitation";
+        labels[1].hidden = true;
+        emailEl.type = "text";
+        emailEl.value = invitationLink;
+        emailEl.readOnly = true;
+        prenomEl.hidden = true;
+        overlay.querySelector("#inv-cancel").textContent = "Fermer";
+        const copyBtn = sendBtn.cloneNode(true);
+        copyBtn.disabled = false;
+        copyBtn.textContent = "Copier le lien";
+        sendBtn.replaceWith(copyBtn);
+        copyBtn.addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText(invitationLink);
+            toast("Lien copié ✓", "success");
+          } catch {
+            emailEl.focus();
+            emailEl.select();
+            toast("Copie impossible — sélectionne le lien", "error");
+          }
+        });
+        toast("Invitation créée — email non envoyé", "info", 5000);
+        emailEl.focus();
+        emailEl.select();
+        return;
+      }
       toast("Invitation envoyée ✓", "success");
       close();
     } catch (e) {

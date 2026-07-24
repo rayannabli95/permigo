@@ -20,7 +20,7 @@
  *   });
  */
 
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { icon } from "@/utils/icons.js";
 import { burstConfetti } from "@/components/common/confetti.js";
 import { playFanfare } from "@/utils/sound.js";
@@ -197,7 +197,7 @@ export function playUnlockCinematic({
       `
       }
 
-      <button class="wuc-skip" id="wuc-skip" type="button" aria-label="${esc(wucTR("skip", "Passer"))}">${wucD("skip", "Passer")}</button>
+      <button class="wuc-skip" id="wuc-skip" type="button" aria-label="${escAttr(wucTR("skip", "Passer"))}">${wucD("skip", "Passer")}</button>
 
       <!-- Signature PermiGo en haut, discrète -->
       <div class="wuc-brand" aria-hidden="true">

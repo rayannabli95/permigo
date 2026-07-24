@@ -3,7 +3,7 @@
 // Monté par main.js avant le chrome tant que parental_consent_required
 // est vrai et parental_consent_given_at est null.
 // ═══════════════════════════════════════════════════════════════
-import { esc, escAttr } from "@/utils/escape.js";
+import { escAttr } from "@/utils/escape.js";
 import { icon } from "@/utils/icons.js";
 import { track } from "@/services/analytics.js";
 import { logout } from "@/auth/auth.js";
