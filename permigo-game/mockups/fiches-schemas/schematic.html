@@ -1,0 +1,102 @@
+<meta charset="utf-8">
+<style>
+  body{ margin:0; background:#222; }
+  .plate{ width:1024px; height:1024px; }
+  svg{ display:block; width:1024px; height:1024px; }
+</style>
+<div class="plate"><svg id="s1" viewBox="0 0 1024 1024"></svg></div>
+<div class="plate"><svg id="s2" viewBox="0 0 1024 1024"></svg></div>
+<div class="plate"><svg id="s3" viewBox="0 0 1024 1024"></svg></div>
+<div class="plate"><svg id="s4" viewBox="0 0 1024 1024"></svg></div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const GREEN='#1f9e41',GREEN_DK='#0e5f26',RED='#e23b3b',RED_DK='#7d1414';
+const BLUE='#2f6bff',BLUE_DK='#12379e',GREY='#c8 ced8'.replace(' ',''),GREY_DK='#7b8291';
+const SIDE='#e7e2d7',ROAD='#9599a2',KERB='#f2efe7',DASH='#f4f5f7';
+const C=512, HW=118;            // centre + demi-largeur de chaussée
+function E(n,a,k){const e=document.createElementNS(NS,n);for(const x in a)e.setAttribute(x,a[x]);(k||[]).forEach(c=>e.appendChild(c));return e;}
+
+function base(svg){
+  const add=e=>svg.appendChild(e);
+  add(E('rect',{x:0,y:0,width:1024,height:1024,fill:SIDE}));
+  // chaussées
+  add(E('rect',{x:C-HW,y:0,width:HW*2,height:1024,fill:ROAD}));
+  add(E('rect',{x:0,y:C-HW,width:1024,height:HW*2,fill:ROAD}));
+  // bordures (kerb) le long des routes
+  for(const x of [C-HW,C+HW]){ add(E('line',{x1:x,y1:0,x2:x,y2:C-HW,stroke:KERB,'stroke-width':4})); add(E('line',{x1:x,y1:C+HW,x2:x,y2:1024,stroke:KERB,'stroke-width':4})); }
+  for(const y of [C-HW,C+HW]){ add(E('line',{x1:0,y1:y,x2:C-HW,y2:y,stroke:KERB,'stroke-width':4})); add(E('line',{x1:C+HW,y1:y,x2:1024,y2:y,stroke:KERB,'stroke-width':4})); }
+  // lignes d'axe pointillées (hors carrefour)
+  const dash=(x1,y1,x2,y2)=>add(E('line',{x1,y1,x2,y2,stroke:DASH,'stroke-width':5,'stroke-dasharray':'22 20','stroke-linecap':'round'}));
+  dash(C,0,C,C-HW); dash(C,C+HW,C,1024); dash(0,C,C-HW,C); dash(C+HW,C,1024,C);
+}
+function mk(svg){
+  const add=e=>svg.appendChild(e); const api={};
+  api.car=(x,y,rot,color,dark,blinker)=>{const W=76,H=140,g=E('g',{transform:`translate(${x} ${y}) rotate(${rot})`});
+    for(const [wx,wy] of [[-W/2-4,-H/2+22],[W/2-6,-H/2+22],[-W/2-4,H/2-46],[W/2-6,H/2-46]]) g.appendChild(E('rect',{x:wx,y:wy,width:12,height:34,rx:5,fill:'#15171c'}));
+    g.appendChild(E('rect',{x:-W/2,y:-H/2,width:W,height:H,rx:24,fill:color,stroke:dark,'stroke-width':5}));
+    g.appendChild(E('rect',{x:-W/2+14,y:-H/2+20,width:W-28,height:28,rx:10,fill:'#dbe6ff'}));
+    g.appendChild(E('rect',{x:-W/2+14,y:H/2-44,width:W-28,height:24,rx:9,fill:'#c2cee6'}));
+    g.appendChild(E('rect',{x:-W/2+16,y:-H/2+54,width:W-32,height:50,rx:9,fill:color,opacity:.5}));
+    add(g);
+    if(blinker){const s=blinker==='left'?-1:1,rad=rot*Math.PI/180,cos=Math.cos(rad),sin=Math.sin(rad);
+      for(const ly of [-H/2+16,H/2-16]){const lx=s*(W/2+5),px=x+(lx*cos-ly*sin),py=y+(lx*sin+ly*cos);
+        add(E('circle',{cx:px,cy:py,r:15,fill:'#f7941d',opacity:.45})); add(E('circle',{cx:px,cy:py,r:8,fill:'#ffb347',stroke:'#b56400','stroke-width':2}));}}
+  };
+  // flèche DROITE (x1,y1)->(x2,y2)
+  api.arrow=(x1,y1,x2,y2)=>{const a=Math.atan2(y2-y1,x2-x1);
+    add(E('line',{x1,y1,x2,y2,stroke:GREEN_DK,'stroke-width':30,'stroke-linecap':'round'}));
+    add(E('line',{x1,y1,x2,y2,stroke:GREEN,'stroke-width':20,'stroke-linecap':'round'}));
+    const s=40;add(E('path',{d:`M ${x2+Math.cos(a)*10} ${y2+Math.sin(a)*10} L ${x2-Math.cos(a-0.5)*s} ${y2-Math.sin(a-0.5)*s} L ${x2-Math.cos(a+0.5)*s} ${y2-Math.sin(a+0.5)*s} Z`,fill:GREEN,stroke:GREEN_DK,'stroke-width':5,'stroke-linejoin':'round'}));
+  };
+  api.bar=(x,y,vert)=>{const w=96,h=20; add(E('rect',{x:x-(vert?h/2:w/2),y:y-(vert?w/2:h/2),width:vert?h:w,height:vert?w:h,rx:6,fill:RED,stroke:RED_DK,'stroke-width':3}));};
+  api.signStop=(x,y)=>{const g=E('g',{transform:`translate(${x} ${y})`}),r=40,pts=[];
+    for(let i=0;i<8;i++){const a=Math.PI/8+i*Math.PI/4;pts.push(`${(r*Math.cos(a)).toFixed(1)},${(r*Math.sin(a)).toFixed(1)}`);}
+    g.appendChild(E('circle',{cx:0,cy:0,r:50,fill:'#fff'}));
+    g.appendChild(E('polygon',{points:pts.join(' '),fill:'#d21f1f',stroke:'#fff','stroke-width':5}));
+    const t=E('text',{x:0,y:1,'text-anchor':'middle','dominant-baseline':'central',fill:'#fff','font-size':22,'font-weight':800,'font-family':'Arial'});t.textContent='STOP';g.appendChild(t);add(g);};
+  api.light=(x,y,active)=>{const g=E('g',{transform:`translate(${x} ${y})`});
+    g.appendChild(E('circle',{cx:0,cy:0,r:60,fill:'#fff'}));
+    g.appendChild(E('rect',{x:-22,y:-58,width:44,height:116,rx:13,fill:'#23262e'}));
+    [['red',-36,RED],['orange',0,'#f0a020'],['green',36,GREEN]].forEach(([n,dy,c])=>g.appendChild(E('circle',{cx:0,cy:dy,r:15,fill:n===active?c:'#3a3e48'})));add(g);};
+  api.oneWay=(x,y,dir)=>{const s=dir==='right'?1:-1,g=E('g',{transform:`translate(${x} ${y})`});
+    g.appendChild(E('rect',{x:-58,y:-32,width:116,height:64,rx:11,fill:'#1b5fbf',stroke:'#fff','stroke-width':6}));
+    g.appendChild(E('line',{x1:-32*s,y1:0,x2:26*s,y2:0,stroke:'#fff','stroke-width':12,'stroke-linecap':'round'}));
+    g.appendChild(E('path',{d:`M ${34*s} 0 L ${10*s} -16 L ${10*s} 16 Z`,fill:'#fff'}));add(g);};
+  api.badge=(x,y,n)=>{add(E('circle',{cx:x,cy:y,r:38,fill:'#fff',stroke:'#111','stroke-width':6}));
+    const t=E('text',{x,y:y+1,'text-anchor':'middle','dominant-baseline':'central','font-size':50,'font-weight':800,'font-family':'Arial',fill:'#111'});t.textContent=n;add(t);};
+  return api;
+}
+const S=id=>{const svg=document.getElementById(id);base(svg);return mk(svg);};
+
+// coords repères : mon approche (montante) sur voie de droite x=560 ; carrefour centre 512
+const MEX=560, MEY=845;
+// voie horizontale : direction ouest (va à gauche) sur y=460 ; direction est (va à droite) sur y=564
+
+// 1. LA RÈGLE — la droite passe, je cède
+(()=>{const a=S('s1');
+  a.car(MEX,MEY,0,BLUE,BLUE_DK,null); a.bar(MEX,715);
+  a.car(760,460,-90,GREY,GREY_DK,null); a.arrow(700,460,455,460);   // vient de droite -> passe (flèche gauche droite)
+  a.badge(MEX+70,MEY,1); a.badge(830,398,2);
+})();
+// 2. STOP / CÉDEZ — je cède même à gauche
+(()=>{const a=S('s2');
+  a.car(MEX,MEY,0,BLUE,BLUE_DK,null); a.bar(MEX,715);
+  a.signStop(672,700);
+  a.car(264,564,90,GREY,GREY_DK,null); a.arrow(324,564,569,564);    // vient de gauche -> passe (flèche droite)
+  a.badge(672,628,1); a.badge(196,626,2);
+})();
+// 3. FEU — vert je passe
+(()=>{const a=S('s3');
+  a.car(MEX,MEY,0,BLUE,BLUE_DK,null); a.arrow(MEX,730,MEX,455);      // je passe tout droit
+  a.light(700,700,'green');
+  a.car(760,460,-90,GREY,GREY_DK,null); a.bar(672,460,true);         // à droite mais rouge, il s'arrête
+  a.badge(MEX+70,MEY,1); a.badge(700,612,2);
+})();
+// 4. SENS UNIQUE À DROITE — personne ne vient, je passe
+(()=>{const a=S('s4');
+  a.car(MEX,MEY,0,BLUE,BLUE_DK,null); a.arrow(MEX,730,MEX,455);
+  a.oneWay(770,430,'right');
+  a.badge(MEX+70,MEY,1); a.badge(770,516,2);
+})();
+</script>
