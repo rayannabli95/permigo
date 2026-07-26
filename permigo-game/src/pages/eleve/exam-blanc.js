@@ -89,6 +89,49 @@ const EXBS_I18N = {
     toast_locked: "Validate skill 1 to unlock the mock exam 🔒",
     confirm_quit_parcours: "Quit this journey? Your progress will be lost.",
     confirm_quit_officiel: "Quit the exam? Your progress will be lost.",
+    answers_aria: "Answers",
+    road_sign_alt: "Road sign to identify",
+    quit_aria: "Quit",
+    official_exam: "Official exam",
+    perfect: "Perfect! No mistakes.",
+    wrong_questions: "Questions missed",
+    your_answer: "Your answer:",
+    correct_answer: "Correct answer:",
+    verdict_eliminatory: "Failed · eliminatory fault",
+    verdict_pass: "Passed · you're on target",
+    verdict_fail: "Not passed · a little more practice",
+    cepc_eliminatory:
+      "An eliminatory fault means an immediate fail in the exam, whatever the rest of your score.",
+    cepc_pass:
+      "With this score, you would get your licence. Keep it up.",
+    cepc_fail:
+      "You need at least 12/15 with no eliminatory fault. Come back and practise.",
+    retry_journey: "Retry this journey",
+    choose_journey: "Choose another journey",
+    home: "← Home",
+    official_perfect: "No mistakes. Impressive.",
+    to_review: "To review ({count})",
+    no_answer: "No answer · time ran out",
+    mistakes: "{count} mistake(s) · {pct}%",
+    official_verdict_pass: "Passed · well done",
+    official_verdict_fail: "Failed · more than 5 mistakes",
+    official_cepc_pass:
+      "The real exam requires 35/40. You made it. Keep it up.",
+    official_cepc_fail:
+      "You need at least 35/40, which means 5 mistakes maximum. Come back and practise.",
+    retry_official: "Retry an official exam",
+    choose_training: "Choose practice",
+    review_header: "Review · {label}",
+    no_theme_questions: "No questions on this topic yet",
+    unknown_centre: "Unknown centre",
+    no_centre_questions: "No questions for this centre yet",
+    centre_traps: "Tricky questions from {name}",
+    theme_perfect: "No mistakes on this topic. You've mastered it.",
+    revision_done: "Review complete",
+    revision_help:
+      "Repeat this set until you've mastered it, then try the official exam.",
+    retry: "Retry",
+    back: "Back",
   },
   ar: {
     back_aria: "رجوع",
@@ -122,11 +165,57 @@ const EXBS_I18N = {
     toast_locked: "اعتمد المهارة 1 لفتح الامتحان التجريبي 🔒",
     confirm_quit_parcours: "الخروج من هذا المسار؟ ستفقد تقدّمك.",
     confirm_quit_officiel: "الخروج من الامتحان؟ ستفقد تقدّمك.",
+    answers_aria: "الإجابات",
+    road_sign_alt: "لافتة طريق للتعرّف عليها",
+    quit_aria: "خروج",
+    official_exam: "الامتحان الرسمي",
+    perfect: "ممتاز! بلا أخطاء.",
+    wrong_questions: "الأسئلة الخاطئة",
+    your_answer: "إجابتك:",
+    correct_answer: "الإجابة الصحيحة:",
+    verdict_eliminatory: "راسب · خطأ إقصائي",
+    verdict_pass: "ناجح · أنت ضمن المطلوب",
+    verdict_fail: "غير ناجح · تحتاج إلى مزيد من التدريب",
+    cepc_eliminatory:
+      "الخطأ الإقصائي يعني الرسوب المباشر في الامتحان مهما كانت بقية النتيجة.",
+    cepc_pass: "بهذه النتيجة كنت ستحصل على رخصتك. واصل هكذا.",
+    cepc_fail:
+      "تحتاج إلى 12/15 على الأقل من دون خطأ إقصائي. عد للتدريب.",
+    retry_journey: "إعادة هذا المسار",
+    choose_journey: "اختيار مسار آخر",
+    home: "← الرئيسية",
+    official_perfect: "بلا أخطاء. رائع.",
+    to_review: "للمراجعة ({count})",
+    no_answer: "لا إجابة · انتهى الوقت",
+    mistakes: "{count} خطأ · {pct}%",
+    official_verdict_pass: "ناجح · أحسنت",
+    official_verdict_fail: "راسب · أكثر من 5 أخطاء",
+    official_cepc_pass:
+      "يتطلب الامتحان الحقيقي 35/40. لقد نجحت. واصل هكذا.",
+    official_cepc_fail:
+      "تحتاج إلى 35/40 على الأقل، أي 5 أخطاء كحد أقصى. عد للتدريب.",
+    retry_official: "إعادة امتحان رسمي",
+    choose_training: "اختيار تدريب",
+    review_header: "مراجعة · {label}",
+    no_theme_questions: "لا توجد أسئلة عن هذا الموضوع بعد",
+    unknown_centre: "مركز غير معروف",
+    no_centre_questions: "لا توجد أسئلة لهذا المركز بعد",
+    centre_traps: "أسئلة {name} الصعبة",
+    theme_perfect: "بلا أخطاء في هذا الموضوع. لقد أتقنته.",
+    revision_done: "انتهت المراجعة",
+    revision_help:
+      "أعد هذه السلسلة حتى تتقنها، ثم جرّب الامتحان الرسمي.",
+    retry: "إعادة",
+    back: "رجوع",
   },
 };
-function exsT(key, fr) {
+function exsT(key, fr, vars) {
   const l = getLang();
-  return (l !== "fr" && EXBS_I18N[l]?.[key]) || fr;
+  let value = (l !== "fr" && EXBS_I18N[l]?.[key]) || fr;
+  if (vars)
+    for (const [name, replacement] of Object.entries(vars))
+      value = value.split(`{${name}}`).join(String(replacement));
+  return value;
 }
 // RTL par ATTRIBUT sur le bloc de texte (jamais <html dir> — règle lang.js).
 function exsRtl() {
@@ -462,7 +551,7 @@ export async function mount(root, param) {
 // ─── Écran 1 : sélection du parcours ─────────────────────────
 // Grille de réponses A/B/C/D — markup partagé par les boucles de quiz exam-blanc.
 function renderChoices(q) {
-  return `<div class="exb-choices" id="exb-choices" role="group" aria-label="Réponses">
+  return `<div class="exb-choices" id="exb-choices" role="group" aria-label="${escAttr(exsT("answers_aria", "Réponses"))}">
           ${q.options
             .map(
               (opt, i) => `
@@ -490,7 +579,7 @@ function renderQuestionBody(
           ${muteButtonHTML()}
           <p class="exb-qtext">${examBi(q.enonce, q.tr?.enonce)}</p>
         </div>
-        ${q.image ? `<img class="exb-qimg" src="${escAttr(q.image)}" alt="Panneau routier à identifier" />` : visualSlot(q.enonce)}
+        ${q.image ? `<img class="exb-qimg" src="${escAttr(q.image)}" alt="${escAttr(exsT("road_sign_alt", "Panneau routier à identifier"))}" />` : visualSlot(q.enonce)}
         ${renderChoices(q)}
         <div class="exb-feedback" id="exb-feedback" role="status" aria-live="polite" hidden></div>
       </div>`;
@@ -827,7 +916,7 @@ function startParcours(root, parcours_id) {
     feedbackLast: exsT("fb_results", "Voir les résultats →"),
     renderHeader: ({ num, total, idx, answers }) => `
       <div class="exb-quiz-header">
-        <button class="exb-quit-btn" id="exb-quit" aria-label="Quitter">×</button>
+        <button class="exb-quit-btn" id="exb-quit" aria-label="${escAttr(exsT("quit_aria", "Quitter"))}">×</button>
         <div class="exb-track-wrap">
           ${renderTrack(questions, answers, idx)}
           <span class="exb-progress-label">${num} / ${total}</span>
@@ -921,17 +1010,17 @@ function showResults(root, questions, answers, parcours_id) {
 
   const wrongHtml =
     wrongItems.length === 0
-      ? `<p class="exb-perfect">Parfait ! Aucune erreur.</p>`
+      ? `<p class="exb-perfect"${exsRtl()}>${esc(exsT("perfect", "Parfait ! Aucune erreur."))}</p>`
       : `
-      <h2 class="exb-recap-title">Questions ratées</h2>
+      <h2 class="exb-recap-title"${exsRtl()}>${esc(exsT("wrong_questions", "Questions ratées"))}</h2>
       <div class="exb-recap-list">
         ${wrongItems
           .map(
             ({ q, chosen }) => `
           <div class="exb-recap-item">
             <p class="exb-recap-enonce">${examBi(q.enonce, q.tr?.enonce)}</p>
-            ${chosen !== null ? `<p class="exb-recap-wrong">Ta réponse : <strong>${esc(q.options[chosen])}</strong></p>` : ""}
-            <p class="exb-recap-correct">Bonne réponse : <strong>${esc(q.options[q.correct])}</strong></p>
+            ${chosen !== null ? `<p class="exb-recap-wrong"${exsRtl()}>${esc(exsT("your_answer", "Ta réponse :"))} <strong>${examBi(q.options[chosen], q.tr?.options?.[chosen])}</strong></p>` : ""}
+            <p class="exb-recap-correct"${exsRtl()}>${esc(exsT("correct_answer", "Bonne réponse :"))} <strong>${examBi(q.options[q.correct], q.tr?.options?.[q.correct])}</strong></p>
             <p class="exb-recap-explication">${examBi(q.explication, q.tr?.explication)}</p>
           </div>
         `,
@@ -941,7 +1030,7 @@ function showResults(root, questions, answers, parcours_id) {
     `;
 
   root.querySelector("#exb-screen").innerHTML = `
-    <div class="exb-results">
+    <div class="exb-results"${exsRtl()}>
       ${renderTrophy(TROPHY_END, "exb-trophy--end")}
       <div class="exb-res-top ${passed ? "exb-res-top--pass" : "exb-res-top--fail"}">
         <div class="exb-res-ico">${
@@ -955,17 +1044,37 @@ function showResults(root, questions, answers, parcours_id) {
         <div class="exb-res-pct">${pct} %</div>
         <div class="exb-res-verdict">${
           fauteRatee
-            ? "Recalé · faute éliminatoire"
+            ? esc(exsT("verdict_eliminatory", "Recalé · faute éliminatoire"))
             : passed
-              ? "Admis · tu es dans les clous"
-              : "Non admis · encore un peu d’entraînement"
+              ? esc(exsT("verdict_pass", "Admis · tu es dans les clous"))
+              : esc(
+                  exsT(
+                    "verdict_fail",
+                    "Non admis · encore un peu d’entraînement",
+                  ),
+                )
         }</div>
         <div class="exb-res-cepc">${
           fauteRatee
-            ? "Une faute éliminatoire, c’est l’échec direct à l’examen, quel que soit le reste du score."
+            ? esc(
+                exsT(
+                  "cepc_eliminatory",
+                  "Une faute éliminatoire, c’est l’échec direct à l’examen, quel que soit le reste du score.",
+                ),
+              )
             : passed
-              ? "Avec ce score, tu décrocherais ton permis. Continue comme ça."
-              : "Il te faut au moins 12/15, sans faute éliminatoire. Reviens t’entraîner."
+              ? esc(
+                  exsT(
+                    "cepc_pass",
+                    "Avec ce score, tu décrocherais ton permis. Continue comme ça.",
+                  ),
+                )
+              : esc(
+                  exsT(
+                    "cepc_fail",
+                    "Il te faut au moins 12/15, sans faute éliminatoire. Reviens t’entraîner.",
+                  ),
+                )
         }</div>
       </div>
 
@@ -977,9 +1086,9 @@ function showResults(root, questions, answers, parcours_id) {
       </div>
 
       <div class="exb-res-actions">
-        <button class="exb-retry-btn" id="exb-retry">Refaire ce parcours</button>
-        <button class="exb-start-btn" id="exb-other">Choisir un autre parcours</button>
-        <button class="exb-quit-btn-text" id="exb-home">← Accueil</button>
+        <button class="exb-retry-btn" id="exb-retry">${esc(exsT("retry_journey", "Refaire ce parcours"))}</button>
+        <button class="exb-start-btn" id="exb-other">${esc(exsT("choose_journey", "Choisir un autre parcours"))}</button>
+        <button class="exb-quit-btn-text" id="exb-home">${esc(exsT("home", "← Accueil"))}</button>
       </div>
     </div>
   `;
@@ -1037,13 +1146,13 @@ function startExamenOfficiel(root) {
     feedbackLast: exsT("fb_result", "Voir le résultat →"),
     renderHeader: ({ num, total }) => `
       <div class="exb-quiz-header">
-        <button class="exb-quit-btn" id="exb-quit" aria-label="Quitter">×</button>
+        <button class="exb-quit-btn" id="exb-quit" aria-label="${escAttr(exsT("quit_aria", "Quitter"))}">×</button>
         <div class="exo-run-bar">
           <span class="exo-chrono" id="exo-chrono"><span id="exo-time">${OFFICIEL_SECONDS}</span>s</span>
           <div class="exo-prog"><div class="exo-prog-fill" style="width:${(num / total) * 100}%"></div></div>
           <span class="exb-progress-label">${num} / ${total}</span>
         </div>
-        <span class="exb-quiz-parcours-name">Examen officiel</span>
+        <span class="exb-quiz-parcours-name"${exsRtl()}>${esc(exsT("official_exam", "Examen officiel"))}</span>
       </div>`,
     onQuit: (num) => {
       if (
@@ -1120,9 +1229,9 @@ function showOfficielResults(root, questions, answers, startedAt) {
 
   const wrongHtml =
     wrongItems.length === 0
-      ? `<p class="exb-perfect">Sans faute. Impressionnant.</p>`
+      ? `<p class="exb-perfect"${exsRtl()}>${esc(exsT("official_perfect", "Sans faute. Impressionnant."))}</p>`
       : `
-      <h2 class="exb-recap-title">À revoir (${wrongItems.length})</h2>
+      <h2 class="exb-recap-title"${exsRtl()}>${esc(exsT("to_review", "À revoir ({count})", { count: wrongItems.length }))}</h2>
       <div class="exb-recap-list">
         ${wrongItems
           .map(
@@ -1131,10 +1240,10 @@ function showOfficielResults(root, questions, answers, startedAt) {
             <p class="exb-recap-enonce">${examBi(q.enonce, q.tr?.enonce)}</p>
             ${
               chosen != null && chosen >= 0
-                ? `<p class="exb-recap-wrong">Ta réponse : <strong>${esc(q.options[chosen])}</strong></p>`
-                : `<p class="exb-recap-wrong">Pas de réponse · temps écoulé</p>`
+                ? `<p class="exb-recap-wrong"${exsRtl()}>${esc(exsT("your_answer", "Ta réponse :"))} <strong>${examBi(q.options[chosen], q.tr?.options?.[chosen])}</strong></p>`
+                : `<p class="exb-recap-wrong"${exsRtl()}>${esc(exsT("no_answer", "Pas de réponse · temps écoulé"))}</p>`
             }
-            <p class="exb-recap-correct">Bonne réponse : <strong>${esc(q.options[q.correct])}</strong></p>
+            <p class="exb-recap-correct"${exsRtl()}>${esc(exsT("correct_answer", "Bonne réponse :"))} <strong>${examBi(q.options[q.correct], q.tr?.options?.[q.correct])}</strong></p>
             <p class="exb-recap-explication">${examBi(q.explication, q.tr?.explication)}</p>
           </div>`,
           )
@@ -1142,7 +1251,7 @@ function showOfficielResults(root, questions, answers, startedAt) {
       </div>`;
 
   root.querySelector("#exb-screen").innerHTML = `
-    <div class="exb-results">
+    <div class="exb-results"${exsRtl()}>
       <div class="exb-res-top ${passed ? "exb-res-top--pass" : "exb-res-top--fail"}">
         <div class="exb-res-ico">${
           passed
@@ -1150,12 +1259,22 @@ function showOfficielResults(root, questions, answers, startedAt) {
             : medallion("faute", "red", { size: 60 })
         }</div>
         <div class="exb-res-score">${score}<span class="exb-res-total"> / ${total}</span></div>
-        <div class="exb-res-pct">${fautes} faute${fautes > 1 ? "s" : ""} · ${pct} %</div>
-        <div class="exb-res-verdict">${passed ? "Admis · bien joué" : "Recalé · plus de 5 fautes"}</div>
+        <div class="exb-res-pct">${esc(exsT("mistakes", `${fautes} faute${fautes > 1 ? "s" : ""} · ${pct} %`, { count: fautes, pct }))}</div>
+        <div class="exb-res-verdict">${passed ? esc(exsT("official_verdict_pass", "Admis · bien joué")) : esc(exsT("official_verdict_fail", "Recalé · plus de 5 fautes"))}</div>
         <div class="exb-res-cepc">${
           passed
-            ? "Au vrai examen, il faut 35/40. Tu y es. Continue comme ça."
-            : "Il te faut au moins 35/40, soit 5 fautes maximum. Reviens t’entraîner."
+            ? esc(
+                exsT(
+                  "official_cepc_pass",
+                  "Au vrai examen, il faut 35/40. Tu y es. Continue comme ça.",
+                ),
+              )
+            : esc(
+                exsT(
+                  "official_cepc_fail",
+                  "Il te faut au moins 35/40, soit 5 fautes maximum. Reviens t’entraîner.",
+                ),
+              )
         }</div>
       </div>
       <div class="exb-res-body">
@@ -1165,9 +1284,9 @@ function showOfficielResults(root, questions, answers, startedAt) {
         ${wrongHtml}
       </div>
       <div class="exb-res-actions">
-        <button class="exb-start-btn" id="exo-retry">Refaire un examen officiel</button>
-        <button class="exb-retry-btn" id="exb-other">Choisir un entraînement</button>
-        <button class="exb-quit-btn-text" id="exb-home">← Accueil</button>
+        <button class="exb-start-btn" id="exo-retry">${esc(exsT("retry_official", "Refaire un examen officiel"))}</button>
+        <button class="exb-retry-btn" id="exb-other">${esc(exsT("choose_training", "Choisir un entraînement"))}</button>
+        <button class="exb-quit-btn-text" id="exb-home">${esc(exsT("home", "← Accueil"))}</button>
       </div>
     </div>`;
 
@@ -1203,12 +1322,12 @@ function runRevision(
     feedbackLast: exsT("fb_bilan", "Voir le bilan →"),
     renderHeader: ({ num, total }) => `
       <div class="exb-quiz-header">
-        <button class="exb-quit-btn" id="exb-quit" aria-label="Quitter">×</button>
+        <button class="exb-quit-btn" id="exb-quit" aria-label="${escAttr(exsT("quit_aria", "Quitter"))}">×</button>
         <div class="exo-run-bar">
           <div class="exo-prog"><div class="exo-prog-fill" style="width:${(num / total) * 100}%"></div></div>
           <span class="exb-progress-label">${num} / ${total}</span>
         </div>
-        <span class="exb-quiz-parcours-name">Révision · ${esc(label)}</span>
+        <span class="exb-quiz-parcours-name"${exsRtl()}>${esc(exsT("review_header", "Révision · {label}", { label }))}</span>
       </div>`,
     onQuit: (num) => {
       haptic("tap");
@@ -1242,7 +1361,10 @@ function startThemeRevision(root, tag, label) {
     .slice(0, Math.min(12, pool.length))
     .map(withShuffledOptions);
   if (!questions.length) {
-    toast("Pas encore de questions sur ce thème", "info");
+    toast(
+      exsT("no_theme_questions", "Pas encore de questions sur ce thème"),
+      "info",
+    );
     return;
   }
   runRevision(root, questions, {
@@ -1257,7 +1379,7 @@ function startThemeRevision(root, tag, label) {
 function startCentreRevision(root, slug) {
   const c = getCentre(slug);
   if (!c) {
-    toast("Centre inconnu", "info");
+    toast(exsT("unknown_centre", "Centre inconnu"), "info");
     return;
   }
   const tags = c.quizTags || [];
@@ -1272,10 +1394,16 @@ function startCentreRevision(root, slug) {
     .slice(0, Math.min(15, pool.length))
     .map(withShuffledOptions);
   if (!questions.length) {
-    toast("Pas encore de questions pour ce centre", "info");
+    toast(
+      exsT(
+        "no_centre_questions",
+        "Pas encore de questions pour ce centre",
+      ),
+      "info",
+    );
     return;
   }
-  const label = `Pièges de ${c.nom}`;
+  const label = exsT("centre_traps", "Pièges de {name}", { name: c.nom });
   runRevision(root, questions, {
     label,
     trackName: "revision_centre",
@@ -1307,17 +1435,17 @@ function showRevisionResults(
     .filter((x) => x.chosen !== x.q.correct);
 
   const wrongHtml = perfect
-    ? `<p class="exb-perfect">Sans faute sur ce thème. Tu le maîtrises.</p>`
+    ? `<p class="exb-perfect"${exsRtl()}>${esc(exsT("theme_perfect", "Sans faute sur ce thème. Tu le maîtrises."))}</p>`
     : `
-      <h2 class="exb-recap-title">À revoir (${wrongItems.length})</h2>
+      <h2 class="exb-recap-title"${exsRtl()}>${esc(exsT("to_review", "À revoir ({count})", { count: wrongItems.length }))}</h2>
       <div class="exb-recap-list">
         ${wrongItems
           .map(
             ({ q, chosen }) => `
           <div class="exb-recap-item">
             <p class="exb-recap-enonce">${examBi(q.enonce, q.tr?.enonce)}</p>
-            ${chosen != null ? `<p class="exb-recap-wrong">Ta réponse : <strong>${esc(q.options[chosen])}</strong></p>` : ""}
-            <p class="exb-recap-correct">Bonne réponse : <strong>${esc(q.options[q.correct])}</strong></p>
+            ${chosen != null ? `<p class="exb-recap-wrong"${exsRtl()}>${esc(exsT("your_answer", "Ta réponse :"))} <strong>${examBi(q.options[chosen], q.tr?.options?.[chosen])}</strong></p>` : ""}
+            <p class="exb-recap-correct"${exsRtl()}>${esc(exsT("correct_answer", "Bonne réponse :"))} <strong>${examBi(q.options[q.correct], q.tr?.options?.[q.correct])}</strong></p>
             <p class="exb-recap-explication">${examBi(q.explication, q.tr?.explication)}</p>
           </div>`,
           )
@@ -1325,7 +1453,7 @@ function showRevisionResults(
       </div>`;
 
   root.querySelector("#exb-screen").innerHTML = `
-    <div class="exb-results">
+    <div class="exb-results"${exsRtl()}>
       <div class="exb-res-top ${perfect ? "exb-res-top--pass" : "exb-res-top--fail"}">
         <div class="exb-res-ico">${
           perfect
@@ -1334,8 +1462,8 @@ function showRevisionResults(
         }</div>
         <div class="exb-res-score">${score}<span class="exb-res-total"> / ${total}</span></div>
         <div class="exb-res-pct">${esc(label)} · ${pct} %</div>
-        <div class="exb-res-verdict">Révision terminée</div>
-        <div class="exb-res-cepc">Refais cette série jusqu’à la maîtriser, puis tente l’examen officiel.</div>
+        <div class="exb-res-verdict">${esc(exsT("revision_done", "Révision terminée"))}</div>
+        <div class="exb-res-cepc">${esc(exsT("revision_help", "Refais cette série jusqu’à la maîtriser, puis tente l’examen officiel."))}</div>
       </div>
       <div class="exb-res-body">
         <div class="exb-res-bar">
@@ -1344,9 +1472,9 @@ function showRevisionResults(
         ${wrongHtml}
       </div>
       <div class="exb-res-actions">
-        <button class="exb-start-btn" id="exo-revretry">Refaire</button>
-        <button class="exb-retry-btn" id="exb-other">Retour</button>
-        <button class="exb-quit-btn-text" id="exb-home">← Accueil</button>
+        <button class="exb-start-btn" id="exo-revretry">${esc(exsT("retry", "Refaire"))}</button>
+        <button class="exb-retry-btn" id="exb-other">${esc(exsT("back", "Retour"))}</button>
+        <button class="exb-quit-btn-text" id="exb-home">${esc(exsT("home", "← Accueil"))}</button>
       </div>
     </div>`;
 
