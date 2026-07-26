@@ -253,7 +253,7 @@ const STYLE = `<style>
   .vi-close {
     position: absolute; z-index: 3;
     top: calc(env(safe-area-inset-top, 0px) + 12px); right: 14px;
-    width: 42px; height: 42px; border-radius: 50%;
+    width: 44px; height: 44px; border-radius: 50%;
     display: grid; place-items: center; cursor: pointer;
     color: #fff; border: 0;
     background: rgba(0,0,0,.45);

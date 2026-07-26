@@ -147,7 +147,7 @@ export function openProvenanceEditor({ eleveId, prenom, current, onSaved }) {
         margin-bottom: 16px; outline: none; }
       .pv-inp:focus { border-color: var(--a); }
       .pv-sw-row { display: flex; flex-wrap: wrap; gap: 11px; align-items: center; margin-bottom: 20px; }
-      .pv-sw { width: 34px; height: 34px; border-radius: 50%; border: 0; cursor: pointer; padding: 0;
+      .pv-sw { width: 44px; height: 44px; border-radius: 50%; border: 0; cursor: pointer; padding: 0;
         background: var(--sc); position: relative; -webkit-tap-highlight-color: transparent;
         box-shadow: 0 2px 8px -2px color-mix(in srgb, var(--sc) 55%, transparent), inset 0 1.5px 0 rgba(255,255,255,.35);
         transition: transform .12s cubic-bezier(.34,1.56,.64,1); }
@@ -155,7 +155,7 @@ export function openProvenanceEditor({ eleveId, prenom, current, onSaved }) {
       .pv-sw.on { box-shadow: 0 0 0 3px var(--su), 0 0 0 5px var(--sc); }
       .pv-sw.on::after { content: ""; position: absolute; inset: 0; background: center/15px no-repeat
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E"); }
-      .pv-free { width: 34px; height: 34px; border-radius: 50%; border: 1.5px dashed var(--bo4);
+      .pv-free { width: 44px; height: 44px; border-radius: 50%; border: 1.5px dashed var(--bo4);
         display: grid; place-items: center; cursor: pointer; position: relative; overflow: hidden;
         background: conic-gradient(from 0deg, #ff5f5f, #ffb03a, #6fe016, #22d3ee, #7c4dff, #ec4899, #ff5f5f); }
       .pv-free input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
