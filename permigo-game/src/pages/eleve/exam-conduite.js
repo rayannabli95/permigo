@@ -173,7 +173,7 @@ function phaseMed(emoji, size = 56) {
 
 const STYLE = `<style>
 .exc2 { position:relative; max-width:480px; margin:0 auto; min-height:100dvh; isolation:isolate;
-  padding:0 18px calc(24px + env(safe-area-inset-bottom)); display:flex; flex-direction:column;
+  padding:env(safe-area-inset-top, 0px) 18px calc(24px + env(safe-area-inset-bottom, 0px)); display:flex; flex-direction:column;
   color:#f4f1ff; font-family:'Fredoka','Inter',sans-serif;
   background:
     radial-gradient(150% 60% at 50% -5%, rgba(255,180,60,.10) 0%, transparent 50%),
@@ -186,7 +186,7 @@ const STYLE = `<style>
     radial-gradient(1.1px 1.1px at 64% 18%, rgba(255,255,255,.3), transparent); }
 .exc2 > * { position:relative; z-index:1; }
 body.exc2-immersive #header-bar, body.exc2-immersive #bottom-nav { display:none !important; }
-body.exc2-immersive #app { padding-top:0 !important; }
+body.exc2-immersive #app { padding-top:0 !important; padding-bottom:0 !important; }
 
 .exc2-top { display:flex; align-items:center; gap:12px; padding:16px 0 6px; }
 .exc2-x { width:38px; height:38px; flex-shrink:0; border:0; border-radius:12px; cursor:pointer;

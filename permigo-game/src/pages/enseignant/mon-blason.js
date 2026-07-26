@@ -65,7 +65,7 @@ const STYLE = `<style>
   padding: 0 0 calc(96px + env(safe-area-inset-bottom, 0px));
   background: var(--bg); color: var(--ink);
   font-family: var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
-  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* ── En-tête : titre + Partager ── */
