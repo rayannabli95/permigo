@@ -2069,7 +2069,7 @@ const DIALOG_STYLE = `
     }
     .me-cf-btn:active { transform: scale(.98); }
     .me-cf-btn.confirm { border: 0; color: var(--a-ink); background: linear-gradient(to bottom, var(--a-lt) 0%, var(--a) 48%, var(--adk) 100%); box-shadow: 0 2px 10px 0 color-mix(in srgb, var(--adk) 35%, transparent), 0 1.5px 0 0 rgba(255,255,255,.28) inset, 0 -2px 8px 0 color-mix(in srgb, var(--adk) 50%, transparent) inset; }
-    .me-cf-btn.danger { border: 0; color: #fff; background: linear-gradient(to bottom, var(--rd) 0%, var(--rd-txt, #dc2626) 100%); box-shadow: 0 2px 10px 0 rgba(220,38,38,.35), 0 1.5px 0 0 rgba(255,255,255,.22) inset; }
+    .me-cf-btn.danger { border: 0; color: #fff; background: linear-gradient(to bottom, var(--rdx) 0%, var(--rd-txt, #9b2c2c) 100%); box-shadow: 0 2px 10px 0 rgba(220,38,38,.35), 0 1.5px 0 0 rgba(255,255,255,.22) inset; }
     .me-cf-btn.danger:disabled { opacity: .6; cursor: wait; }
   </style>`;
 

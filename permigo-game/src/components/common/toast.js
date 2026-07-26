@@ -115,7 +115,7 @@ export function toastAvatar({ title, sub = '', initials = '?', color = 'var(--a)
       .toast-rich .ta-check {
         width: 22px; height: 22px;
         border-radius: 50%;
-        background: var(--gr);
+        background: var(--grdk);
         color: #fff;
         display: flex; align-items: center; justify-content: center;
         font: 700 14px/1 'Inter', sans-serif;

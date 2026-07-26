@@ -569,7 +569,7 @@ const STYLE = `<style>
   flex-shrink: 0;
   width: 32px; height: 32px;
   border-radius: var(--r);
-  background: var(--am);
+  background: var(--amx);
   color: #fff;
   display: grid;
   place-items: center;
@@ -611,7 +611,7 @@ const STYLE = `<style>
   place-items: center;
   flex-shrink: 0;
 }
-.fiche-status.done   .fiche-status-ico { background: var(--gr); color: #fff; }
+.fiche-status.done   .fiche-status-ico { background: var(--grdk); color: #fff; }
 .fiche-status.next   .fiche-status-ico { background: var(--wc, var(--a)); color: #fff; }
 .fiche-status.locked .fiche-status-ico { background: var(--bo4); color: #fff; }
 .fiche-status-body { flex: 1; }

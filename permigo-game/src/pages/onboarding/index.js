@@ -1406,7 +1406,7 @@ const STYLE = `<style>
      CLAIR PREMIUM — uniquement quand le thème global est clair.
      ═══════════════════════════════════════════════════════════════ */
   html[data-theme="light"] .ob {
-    --ob-violet: #7c4dff; --ob-violet-d: #5a2fd6; --ob-violet-l: #a583ff;
+    --ob-violet: #5d56d8; --ob-violet-d: #4a3fc9; --ob-violet-l: #665edb;
     --ob-or-l: #f5b400;
     --c-ink: #1d1b2e; --c-ink-2: #4a4761; --c-ink-3: #8b88a3;
     --c-bg: #ffffff; --c-line: #ece8f7; --c-lav: #f0ebff; --c-lav-2: #e7deff;

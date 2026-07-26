@@ -586,7 +586,7 @@ const STYLE = `<style>
    arrondi de la carte), révélé pendant le swipe uniquement */
 .nf2-delete-bg {
   position: absolute; right: 0; top: 0; bottom: 0;
-  width: 72px; background: var(--rd);
+  width: 72px; background: var(--rdx);
   display: flex; align-items: center; justify-content: center;
   color: #fff; font: 600 11px/1 'Inter', sans-serif; gap: 4px;
   flex-direction: column;

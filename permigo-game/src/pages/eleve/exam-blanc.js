@@ -2024,7 +2024,7 @@ const EXB_CSS = `
   transition: color .2s, border-color .2s, background .2s;
 }
 .exo-chrono.is-urgent {
-  color: #fff; background: var(--rd); border-color: var(--rd);
+  color: #fff; background: var(--rdx); border-color: var(--rdx);
   animation: exoPulse 1s ease-in-out infinite;
 }
 @keyframes exoPulse { 0%,100%{ transform: scale(1) } 50%{ transform: scale(1.08) } }

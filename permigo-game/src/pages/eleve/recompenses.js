@@ -263,7 +263,7 @@ function badgeMarkup(def, size) {
 const STYLE = `<style>
 .rec {
   --gold-1:#ffe9a8; --gold-2:#ffd24a; --gold-3:#ff9c1c; --gold-deep:#c87d12; --gold-ink:#7a5510;
-  --go-1:#7ee83a; --go-2:#58cc02; --go-3:#46a302; --go-deep:#357c00;
+  --go-1:#338316; --go-2:#2f7d12; --go-3:#276a0d; --go-deep:#1f5608;
   max-width: 480px; margin: 0 auto; padding: 14px 15px 32px;
   font-family: 'Nunito', system-ui, sans-serif; color: var(--ink);
   background:

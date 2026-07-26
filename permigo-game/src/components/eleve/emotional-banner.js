@@ -85,10 +85,10 @@ const STYLES = `
 @media (hover:hover) and (pointer:fine) { .eb-cta:hover { opacity: .88; } }
 
 /* CTA color per tone */
-.eb-warm     .eb-cta { background: var(--or); color: #fff; }
-.eb-urgent   .eb-cta { background: var(--rd); color: #fff; }
+.eb-warm     .eb-cta { background: var(--or); color: #3a1d00; }
+.eb-urgent   .eb-cta { background: var(--rdx); color: #fff; }
 .eb-celebrate .eb-cta { background: var(--a); color: var(--a-ink); }
-.eb-gentle   .eb-cta { background: var(--bl2); color: #fff; }
+.eb-gentle   .eb-cta { background: var(--blk2); color: #fff; }
 
 /* ── Close button ── */
 .eb-close {

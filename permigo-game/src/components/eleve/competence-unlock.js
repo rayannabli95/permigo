@@ -79,7 +79,7 @@ const CSS = `
   --night-core:#2d1b69; --night-mid:#1a1040; --night-edge:#0d0a1a;
   --gold-1:#ffe9a8; --gold-2:#ffcf52; --gold-3:#f0a818; --gold-deep:#b9760a;
   --violet-ink:#efe7ff; --violet-soft:#c9b8ff; --violet-mute:#9d8bd6;
-  --go-1:#6fe016; --go-2:#58cc02; --go-shadow:#46A302;
+  --go-1:#338316; --go-2:#2f7d12; --go-shadow:#276a0d;
   --cwn-ease:cubic-bezier(.22,.61,.36,1);
   --cwn-spring:cubic-bezier(.34,1.56,.64,1);
 

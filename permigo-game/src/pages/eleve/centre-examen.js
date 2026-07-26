@@ -649,7 +649,7 @@ const STYLE = `<style>
   top: -6px; right: -6px;
   width: 20px; height: 20px;
   border-radius: 50%;
-  background: var(--am);
+  background: var(--amx);
   display: flex; align-items: center; justify-content: center;
   font: 900 9px/1 'Inter', sans-serif;
   color: #fff;

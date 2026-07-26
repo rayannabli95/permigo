@@ -149,7 +149,7 @@ const STYLE = `<style>
      où l'or et les raretés rayonnent. */
   --ar-ink:#fff; --ar-mu:#c3b8e8; --ar-mu2:#9488bf;
   --ar-panel:#241644; --ar-panel2:#2b1b54; --ar-line:rgba(167,139,250,.18);
-  --ar-violet:#a855f7; --ar-violet2:#7c4dff;
+  --ar-violet:#7750db; --ar-violet2:#5d56d8;
   --ar-gold1:#ffe9a8; --ar-gold2:#ffd24a; --ar-gold3:#ff9c1c; --ar-gold4:#c87d12;
   /* raretés (glow coloré différencié) */
   --rc-commun:#9a93c8; --rc-rare:#54a0ff; --rc-epique:#b06bff; --rc-legendaire:#ffd24a;
