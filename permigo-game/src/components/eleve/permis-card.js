@@ -361,7 +361,7 @@ function formatDate(iso) {
  * @param {number} opts.validated  - nb compétences validées
  * @param {number} opts.total      - total compétences REMC (31)
  */
-export function renderPermisCard({
+function renderPermisCard({
   prenom = "",
   nom = "",
   created_at = null,

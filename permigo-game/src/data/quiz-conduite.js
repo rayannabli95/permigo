@@ -10,7 +10,7 @@ import monde3 from "./fiches/monde-3.quiz.json";
 import monde4 from "./fiches/monde-4.quiz.json";
 import jeuFaute from "./jeu-faute.json";
 
-export const QUIZ_CONDUITE = [...monde1, ...monde2, ...monde3, ...monde4];
+const QUIZ_CONDUITE = [...monde1, ...monde2, ...monde3, ...monde4];
 
 export function quizByCode(code) {
   return QUIZ_CONDUITE.filter((q) => q.code === code);

@@ -78,14 +78,14 @@ const LEAGUES = [
   },
 ];
 
-export function getLeague(xp) {
+function getLeague(xp) {
   for (let i = LEAGUES.length - 1; i >= 0; i--) {
     if (xp >= LEAGUES[i].min) return LEAGUES[i];
   }
   return LEAGUES[0];
 }
 
-export function getNextLeague(xp) {
+function getNextLeague(xp) {
   const cur = getLeague(xp);
   const curIdx = LEAGUES.findIndex((l) => l.id === cur.id);
   return LEAGUES[curIdx + 1] || null;
@@ -499,7 +499,7 @@ export function addGemmes(n) {
   return next;
 }
 
-export function spendGemmes(n) {
+function spendGemmes(n) {
   const cur = getGemmes();
   if (cur < n) return false;
   const next = cur - n;
@@ -524,11 +524,11 @@ function getOwnedSet() {
 export function getOwnedItems() {
   return Array.from(getOwnedSet());
 }
-export function ownsItem(itemId) {
+function ownsItem(itemId) {
   return getOwnedSet().has(itemId);
 }
 
-export function addOwnedItem(itemId) {
+function addOwnedItem(itemId) {
   const s = getOwnedSet();
   s.add(itemId);
   localStorage.setItem(LS_OWNED, JSON.stringify(Array.from(s)));
@@ -641,7 +641,7 @@ const THEME_COLORS = {
   },
 };
 
-export function applyThemeColor(themeId) {
+function applyThemeColor(themeId) {
   const root = document.documentElement;
   // Accepte aussi bien "rouge" que "theme_rouge" (id boutique)
   const key =

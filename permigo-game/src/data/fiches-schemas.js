@@ -9,7 +9,7 @@
 // Une fiche sans entrée = pas de galerie (repli gracieux).
 // ═══════════════════════════════════════════════════════════════
 
-export const FICHE_SCHEMAS = {
+const FICHE_SCHEMAS = {
   // ── MONDE 1 · Maniement ──────────────────────────────────────
   C1a: [
     {

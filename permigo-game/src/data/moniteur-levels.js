@@ -135,7 +135,7 @@ const MAX_VAL = MONITEUR_TIERS[MONITEUR_TIERS.length - 1].threshold;
 /**
  * 12 saisons = 12 mois.
  */
-export const SAISONS = [
+const SAISONS = [
   {
     month: 0,
     name: "Janvier — Nouveau départ",

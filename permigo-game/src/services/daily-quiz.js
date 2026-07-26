@@ -29,8 +29,8 @@ const LS_DONE = "pg-daily-quiz-done"; // valeur = YYYY-MM-DD (local)
 //  - Pas de menace de perte : JAMAIS « tu vas perdre ta série ! »
 //  - Affiché avec fierté quand >= 2 jours, ignoré à 0 ou 1
 //  - Remis à 0 silencieusement si un jour est sauté (sans bruit)
-export const LS_DAILY_STREAK = "pg-daily-streak"; // entier (jours consécutifs)
-export const LS_DAILY_STREAK_LAST = "pg-daily-streak-last"; // YYYY-MM-DD du dernier jour fait
+const LS_DAILY_STREAK = "pg-daily-streak"; // entier (jours consécutifs)
+const LS_DAILY_STREAK_LAST = "pg-daily-streak-last"; // YYYY-MM-DD du dernier jour fait
 
 /** Clé du jour en heure locale (pas UTC : l'élève vit en heure locale). */
 export function todayKey() {

@@ -13,7 +13,7 @@
 import { STREAK_SEUIL, QUIZ_SEUIL } from "@/data/achievements.js";
 
 // ─── Trophées (CATALOG d'achievements.js) : t = titre, b = description ──
-export const TROPHY_I18N = {
+const TROPHY_I18N = {
   en: {
     comp_5: {
       t: "First adjustments",
@@ -134,7 +134,7 @@ export function trophyBody(key, fr, lang) {
 }
 
 // ─── Groupes du catalogue (« Compétences / Séries / Quiz ») ─────
-export const TROPHY_GROUP_I18N = {
+const TROPHY_GROUP_I18N = {
   en: { Compétences: "Skills", Séries: "Streaks", Quiz: "Quizzes" },
   ar: { Compétences: "المهارات", Séries: "السلاسل", Quiz: "الاختبارات" },
 };
@@ -168,7 +168,7 @@ export function trophyGoal(key, stats = { compCount: 0, streak: 0 }, lang) {
 // ─── Objets de la boutique (items_catalog prod) : n = nom, d = descr. ──
 // Seuls avatar/permis_bg sont affichés en boutique (les thèmes ne sortent
 // jamais dans l'UI actuelle). Fallback FR pour tout id inconnu.
-export const ITEM_I18N = {
+const ITEM_I18N = {
   en: {
     car_citadine: {
       n: "City car",
@@ -245,7 +245,7 @@ export function itemDesc(id, fr, lang) {
 }
 
 // ─── Raretés (libellés partagés par les 4 salles) ───────────────
-export const RARITY_I18N = {
+const RARITY_I18N = {
   en: {
     commun: "Common",
     rare: "Rare",

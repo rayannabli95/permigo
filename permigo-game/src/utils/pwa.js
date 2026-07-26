@@ -49,7 +49,7 @@ export function guessPlatform() {
 // L'« ajout à l'écran d'accueil » y est IMPOSSIBLE → il faut ouvrir dans le
 // vrai navigateur. Levier critique : la plupart des liens partagés (Le Bon Coin,
 // DM, réseaux) s'ouvrent dans ce type de webview.
-export function isInAppBrowser() {
+function isInAppBrowser() {
   const ua = navigator.userAgent || "";
   // NB : uniquement des webviews embarquées (pas les navigateurs autonomes type
   // DuckDuckGo qui, eux, savent installer) → on évite les faux positifs.
@@ -60,7 +60,7 @@ export function isInAppBrowser() {
 
 // iOS : seul Safari peut « Sur l'écran d'accueil ». Chrome/Firefox/Edge/Opera iOS
 // ne le peuvent PAS (mêmes restrictions WebKit, pas de menu A2HS).
-export function isIosNonSafari() {
+function isIosNonSafari() {
   const ua = navigator.userAgent || "";
   return (
     guessPlatform() === "ios" && /CriOS|FxiOS|EdgiOS|OPiOS|mercury/i.test(ua)

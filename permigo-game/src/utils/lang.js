@@ -26,7 +26,7 @@ const STORAGE_KEY = "permigo_lang";
 export const LANGS = ["fr", "en", "ar"];
 export const LANG_LABELS = { fr: "Français", en: "English", ar: "العربية" };
 
-export function isLang(v) {
+function isLang(v) {
   return v === "fr" || v === "en" || v === "ar";
 }
 

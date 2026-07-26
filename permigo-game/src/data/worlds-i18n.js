@@ -9,7 +9,7 @@
 // traduction évite « mastery/إتقان » (voisin du terme banni « maîtrisé »).
 // Traductions vérifiées (relecture bilingue adversariale).
 // ═══════════════════════════════════════════════════════════════
-export const WORLD_I18N = {
+const WORLD_I18N = {
   1: {
     en: {
       titre: "Handling the vehicle",

@@ -7,7 +7,7 @@
 // ═══════════════════════════════════════════════════
 import { getLang } from "@/utils/lang.js";
 
-export const FICHE_UI = {
+const FICHE_UI = {
  "en": {
   "sub": "Tick your steps, then unlock the test.",
   "deck": "Your deck",
@@ -45,7 +45,7 @@ export const FICHE_UI = {
 };
 
 // clé = code de fiche → { en:{titre,competence,methode[],pourquoi,erreur,bva,quiz[]}, ar:{...} }
-export const FICHE_I18N = {
+const FICHE_I18N = {
  "C1a": {
   "en": {
    "titre": "Getting to grips with the driver's seat",

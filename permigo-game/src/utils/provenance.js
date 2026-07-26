@@ -20,7 +20,7 @@ import { track } from "@/services/analytics.js";
 const HEX = /^#[0-9a-fA-F]{6}$/;
 
 // Palette proposée (teintes saturées → texte lisible).
-export const PROV_COLORS = [
+const PROV_COLORS = [
   "#ff6e14",
   "#e1306c",
   "#4285f4",
@@ -32,7 +32,7 @@ export const PROV_COLORS = [
 ];
 
 // Choix rapides : nom + couleur par défaut (le moniteur peut tout changer).
-export const PROV_PRESETS = [
+const PROV_PRESETS = [
   { label: "Le Bon Coin", color: "#ff6e14" },
   { label: "Instagram", color: "#e1306c" },
   { label: "Google", color: "#4285f4" },
@@ -53,7 +53,7 @@ function lum(hex) {
 }
 
 /** Couleur de texte lisible sur une pastille `hex`. */
-export function provInk(hex) {
+function provInk(hex) {
   return HEX.test(hex) && lum(hex) > 0.6 ? "#1a1f2b" : "#fff";
 }
 

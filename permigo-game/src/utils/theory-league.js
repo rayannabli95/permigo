@@ -11,7 +11,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 // Barème — SOURCE DE VÉRITÉ unique (UI : légende, tuto, animation de gain)
-export const THEORY_PTS = { quiz: 1, exam: 4 };
+const THEORY_PTS = { quiz: 1, exam: 4 };
 // Seuil de réussite d'un quiz compétence pour marquer le point théorie
 export const THEORY_QUIZ_PASS_PCT = 70;
 
