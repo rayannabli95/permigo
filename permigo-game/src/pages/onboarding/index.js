@@ -1331,7 +1331,7 @@ const STYLE = `<style>
   .ob-a2hs-steps .a2s-point { color: var(--ob-ink-2); }
   .ob-a2hs-install {
     width: 100%; margin-bottom: 12px; border: 0; border-radius: 14px;
-    background: linear-gradient(180deg, #9a6dff, var(--ob-vio-d)); color: #fff;
+    background: linear-gradient(180deg, #7750db, var(--ob-vio-d)); color: #fff;
     font: 800 15px/1 'Baloo 2', 'Plus Jakarta Sans', sans-serif; padding: 14px; cursor: pointer;
     box-shadow: 0 5px 0 #4321a8, 0 10px 18px rgba(124,77,255,.4), 0 1px 0 rgba(255,255,255,.4) inset;
   }
@@ -1355,7 +1355,7 @@ const STYLE = `<style>
     width: 100%; min-height: 56px; padding: 17px; cursor: pointer; border: 0;
     border-radius: 18px; color: #fff; position: relative; overflow: hidden;
     font: 800 18px/1 'Baloo 2', 'Plus Jakarta Sans', sans-serif; letter-spacing: .3px;
-    background: linear-gradient(180deg, #9a6dff 0%, var(--ob-vio) 48%, var(--ob-vio-d) 100%);
+    background: linear-gradient(180deg, #7750db 0%, var(--ob-vio) 48%, var(--ob-vio-d) 100%);
     box-shadow: 0 7px 0 #4321a8, 0 12px 22px rgba(124,77,255,.5),
                 0 1px 0 rgba(255,255,255,.55) inset, 0 -3px 6px rgba(0,0,0,.22) inset;
     transition: transform .1s, box-shadow .1s, opacity .15s;
