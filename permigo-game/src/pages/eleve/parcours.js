@@ -712,7 +712,7 @@ const STYLE = `<style>
 .fiche-status.done   { background: rgba(62,224,126,.1) !important; }
 .fiche-status.next   { background: rgba(124,77,255,.16) !important; }
 .fiche-status.locked { background: rgba(255,255,255,.05) !important; }
-.fiche-status.done   .fiche-status-ico { background: linear-gradient(160deg,#3ee07e,#178246); color:#fff; }
+.fiche-status.done   .fiche-status-ico { background: linear-gradient(160deg,#0c7858,#065f46); color:#fff; }
 .fiche-status.next   .fiche-status-ico { background: linear-gradient(160deg,#fff0bf,#ffd24a 50%,#ff9c1c); color:#3a1c00; }
 .fiche-status.locked .fiche-status-ico { background: rgba(255,255,255,.12); color:#cdbff5; }
 .fiche-status-title { color: #fff !important; }

@@ -51,13 +51,13 @@ const STYLE = `<style>
   .a2hs-step { display: flex; gap: 13px; align-items: flex-start; padding: 11px 0; }
   .a2hs-step + .a2hs-step { border-top: 1px solid rgba(0,0,0,.06); }
   .a2hs-num { flex: 0 0 26px; width: 26px; height: 26px; border-radius: 50%;
-              background: #22c55e; color: #fff; font: 800 14px/26px 'Inter'; text-align: center; }
+              background: #0a6e50; color: #fff; font: 800 14px/26px 'Inter'; text-align: center; }
   .a2hs-step-txt { font-size: 14.5px; line-height: 1.45; padding-top: 2px; }
   .a2hs-glyph { display: inline-flex; vertical-align: -5px; margin: 0 3px; padding: 3px;
                 border-radius: 7px; background: var(--su2, #eef1ff); color: #4f46e5; }
   /* Bouton install natif */
   .a2hs-install { width: 100%; margin: 4px 0 14px; border: 0; border-radius: 14px;
-                  background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff;
+                  background: linear-gradient(135deg, #0a6e50, #065f46); color: #fff;
                   font: 800 16px/1 'Inter'; padding: 16px; cursor: pointer;
                   box-shadow: 0 8px 20px rgba(34,197,94,.35); }
   .a2hs-install:active { transform: translateY(1px); }

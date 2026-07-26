@@ -334,15 +334,15 @@ const STYLE = `<style>
     padding: 4px 9px; border-radius: 999px;
     flex-shrink: 0;
   }
-  .me-badge.actif, .me-badge.pret { color: #fff; background: #16a34a; }
+  .me-badge.actif, .me-badge.pret { color: #07150c; background: #16a34a; }
   .me-badge.inactif { color: var(--mu2); background: var(--bg2); }
   .me-badge.approche { color: #fff; background: #1d4ed8; }
   .me-badge.recu { color: #07150c; background: #16a34a; }
-  .me-badge.planifie { color: #fff; background: #f59e0b; }
+  .me-badge.planifie { color: #3a2600; background: #f59e0b; }
   .me-badge-relancer {
     font: 700 10px/1 'Inter', sans-serif;
     padding: 4px 9px; border-radius: 999px;
-    color: #fff; background: #f59e0b; flex-shrink: 0;
+    color: #3a2600; background: #f59e0b; flex-shrink: 0;
     display: inline-flex; align-items: center; gap: 3px;
   }
 
@@ -385,7 +385,7 @@ const STYLE = `<style>
     display: inline-flex; align-items: center; justify-content: center;
     min-width: 16px; height: 16px; margin-left: 5px; padding: 0 4px; border-radius: 999px;
     font: 800 9.5px/1 'Inter', sans-serif; color: #fff;
-    background: linear-gradient(180deg, #f87171, #dc2626);
+    background: linear-gradient(180deg, #c53030, #9b1c1c);
     vertical-align: 2px;
   }
   .me-panel { display: none; }

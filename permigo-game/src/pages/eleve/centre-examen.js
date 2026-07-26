@@ -758,7 +758,7 @@ const STYLE = `<style>
   cursor: pointer;
   font: 800 16px/1.1 'Plus Jakarta Sans', sans-serif;
   letter-spacing: -.01em;
-  color: #fff;
+  color: #3a2600;
   /* Gradient or/ambre premium cohérent avec le style cinématique */
   background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
   box-shadow: 0 6px 24px rgba(245, 158, 11, 0.40);
