@@ -7,6 +7,31 @@
 // connecté (map[role].default), la landing publique sinon.
 // ═══════════════════════════════════════════════════════════════
 import { track } from "@/services/analytics.js";
+import { esc } from "@/utils/escape.js";
+import { getLang } from "@/utils/lang.js";
+
+const NF_I18N = {
+  en: {
+    title: "This page does not exist",
+    subtitle:
+      "The address may have changed, or there may be a typo in the link.",
+    back_home: "Back to home",
+  },
+  ar: {
+    title: "هذه الصفحة غير موجودة",
+    subtitle: "ربما تغيّر العنوان، أو يوجد خطأ في كتابة الرابط.",
+    back_home: "العودة إلى الصفحة الرئيسية",
+  },
+};
+
+function nft(key, fr) {
+  const lang = getLang();
+  return esc((lang !== "fr" && NF_I18N[lang]?.[key]) || fr);
+}
+
+function nfDir() {
+  return getLang() === "ar" ? ' dir="rtl" lang="ar"' : "";
+}
 
 export function mount(root) {
   try {
@@ -27,11 +52,11 @@ export function mount(root) {
       background:var(--a);color:var(--a-txt);font-size:16px;font-weight:700;
       text-decoration:none;cursor:pointer;}
   </style>
-  <div class="nf-wrap">
+  <div class="nf-wrap"${nfDir()}>
     <img class="nf-img" src="/skins/mascot-wait.png" alt="" role="presentation"
          loading="lazy" onerror="this.style.display='none'" />
-    <h1 class="nf-title">Cette page n'existe pas</h1>
-    <p class="nf-sub">L'adresse a peut-être changé, ou il y a une faute de frappe dans le lien.</p>
-    <a class="nf-cta" href="#/">Retour à l'accueil</a>
+    <h1 class="nf-title">${nft("title", "Cette page n'existe pas")}</h1>
+    <p class="nf-sub">${nft("subtitle", "L'adresse a peut-être changé, ou il y a une faute de frappe dans le lien.")}</p>
+    <a class="nf-cta" href="#/">${nft("back_home", "Retour à l'accueil")}</a>
   </div>`;
 }
