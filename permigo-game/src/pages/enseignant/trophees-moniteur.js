@@ -62,7 +62,7 @@ const STYLE = `<style>
 .tr2-hero-wrap {
   position: relative; overflow: hidden;
   padding: 20px 20px 32px;
-  background: linear-gradient(150deg, #4f46e5, #6d6bff 60%, #8b5cf6);
+  background: linear-gradient(150deg, #4f46e5, #625ee8 60%, #7750db);
   color: #fff;
   isolation: isolate;
 }

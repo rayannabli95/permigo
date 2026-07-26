@@ -104,7 +104,7 @@ const STYLE = `<style>
     position: relative; overflow: hidden;
     margin: 0 -16px 18px;
     padding: 18px 16px 24px;
-    background: linear-gradient(150deg, #4f46e5, #6d6bff 60%, #8b5cf6);
+    background: linear-gradient(150deg, #4f46e5, #625ee8 60%, #7750db);
     color: #fff;
     isolation: isolate;
   }

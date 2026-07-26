@@ -99,7 +99,7 @@ const STYLE = `<style>
 .mb-hero {
   position: relative; margin: 14px 16px 0; border-radius: 24px;
   padding: 18px 16px 20px; color: #fff; overflow: hidden; isolation: isolate;
-  background: linear-gradient(150deg, #4f46e5, #6d6bff 58%, #8b5cf6);
+  background: linear-gradient(150deg, #4f46e5, #625ee8 58%, #7750db);
   box-shadow: 0 16px 40px -14px rgba(79,70,229,.58);
   animation: mbHeroIn .45s cubic-bezier(.22,.68,0,1.2) both;
 }

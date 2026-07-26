@@ -109,7 +109,7 @@ const STYLE = `<style>
   .aj-hero {
     position: relative;
     margin: 14px 16px 0;
-    background: linear-gradient(150deg, #4f46e5, #6d6bff 60%, #8b5cf6);
+    background: linear-gradient(150deg, #4f46e5, #625ee8 60%, #7750db);
     border-radius: 26px;
     padding: 20px 18px 24px;
     overflow: visible;
