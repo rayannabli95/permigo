@@ -12,6 +12,91 @@ import { navigate } from "@/router.js";
 import { icon } from "@/utils/icons.js";
 import { medallion } from "@/utils/medallions.js";
 import { haptic } from "@/utils/haptic.js";
+import { getLang } from "@/utils/lang.js";
+
+const SC_I18N = {
+  en: {
+    back: "Back",
+    title: "Confirm your lesson",
+    not_found: "Lesson not found.",
+    instructor_default: "Instructor",
+    date_missing: "Date not specified",
+    lesson_with: "Lesson with",
+    details: "Lesson details",
+    date: "Date",
+    duration: "Duration",
+    hour_short: "h",
+    minute_short: "min",
+    skills_validated: "Skills validated · {count}",
+    acquired: "Acquired",
+    feedback_from: "Feedback from {name}",
+    confirm: "Confirm your lesson",
+    refuse: "Refuse",
+    loading: "Processing…",
+    confirmed: "Lesson confirmed.",
+    confirm_failed: "Unable to confirm — {message}",
+    retry_later: "try again in a moment",
+    error_already_decided: "this lesson has already been processed",
+    error_not_found: "lesson not found",
+    error_forbidden: "you do not have access to this lesson",
+    error_invalid_status: "invalid lesson status",
+    refuse_title: "Refuse this lesson?",
+    refuse_notice: "{name} will receive a refusal notification.",
+    refuse_yes: "Yes, refuse it",
+    cancel: "Cancel",
+    refused: "Lesson refused",
+    refuse_failed: "Unable to refuse — {message}",
+  },
+  ar: {
+    back: "رجوع",
+    title: "تأكيد حصة القيادة",
+    not_found: "حصة القيادة غير موجودة.",
+    instructor_default: "المدرّب",
+    date_missing: "التاريخ غير محدد",
+    lesson_with: "حصة مع",
+    details: "تفاصيل الحصة",
+    date: "التاريخ",
+    duration: "المدة",
+    hour_short: "س",
+    minute_short: "د",
+    skills_validated: "المهارات المعتمدة · {count}",
+    acquired: "مُتقَن",
+    feedback_from: "ملاحظات {name}",
+    confirm: "تأكيد الحصة",
+    refuse: "رفض",
+    loading: "جارٍ التنفيذ…",
+    confirmed: "تم تأكيد الحصة.",
+    confirm_failed: "تعذّر التأكيد — {message}",
+    retry_later: "أعد المحاولة بعد قليل",
+    error_already_decided: "تمت معالجة هذه الحصة من قبل",
+    error_not_found: "حصة القيادة غير موجودة",
+    error_forbidden: "لا يمكنك الوصول إلى هذه الحصة",
+    error_invalid_status: "حالة الحصة غير صالحة",
+    refuse_title: "رفض هذه الحصة؟",
+    refuse_notice: "سيتلقى {name} إشعارًا بالرفض.",
+    refuse_yes: "نعم، ارفضها",
+    cancel: "إلغاء",
+    refused: "تم رفض الحصة",
+    refuse_failed: "تعذّر الرفض — {message}",
+  },
+};
+
+function sct(key, fr, vars) {
+  const lang = getLang();
+  let value = (lang !== "fr" && SC_I18N[lang]?.[key]) || fr;
+  if (vars)
+    for (const [name, replacement] of Object.entries(vars))
+      value = value.split(`{${name}}`).join(String(replacement));
+  return value;
+}
+
+function scDir() {
+  return getLang() === "ar" ? ' dir="rtl" lang="ar"' : "";
+}
+
+function scDateLocale() {
+  return { fr: "fr-FR", en: "en-GB", ar: "ar" }[getLang()] || "fr-FR";
+}
 
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
@@ -328,10 +413,10 @@ export async function mount(root, sessionId) {
   });
 
   root.innerHTML = `${STYLE}
-    <div class="sc">
+    <div class="sc"${scDir()}>
       <div class="sc-hd">
-        <button class="sc-back" id="sc-back-btn" aria-label="Retour">${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}</button>
-        <div class="sc-hd-title">Confirmer ta séance</div>
+        <button class="sc-back" id="sc-back-btn" aria-label="${escAttr(sct("back", "Retour"))}">${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}</button>
+        <div class="sc-hd-title">${esc(sct("title", "Confirmer ta séance"))}</div>
       </div>
       <div class="sc-skel" style="height:200px;border-radius:0"></div>
       <div class="sc-skel" style="height:120px;margin:16px"></div>
@@ -350,7 +435,7 @@ export async function mount(root, sessionId) {
     .maybeSingle();
 
   if (error || !session) {
-    toast("Séance introuvable.", "error");
+    toast(sct("not_found", "Séance introuvable."), "error");
     navigate("#/");
     return;
   }
@@ -368,29 +453,40 @@ export async function mount(root, sessionId) {
 
   // ─── Render ─────────────────────────────────────────────────
   const mon = session.moniteur ?? {};
-  const monPrenom = mon.prenom ?? "Moniteur";
+  const monPrenom = mon.prenom ?? sct("instructor_default", "Moniteur");
   const monNom = mon.nom ?? "";
   const initials =
     ((monPrenom[0] ?? "") + (monNom[0] ?? "")).toUpperCase() || "M";
 
   const dateStr = session.session_date
-    ? new Date(session.session_date).toLocaleDateString("fr-FR", {
+    ? new Date(session.session_date).toLocaleDateString(scDateLocale(), {
         weekday: "long",
         day: "numeric",
         month: "long",
         year: "numeric",
       })
-    : "Date non précisée";
+    : sct("date_missing", "Date non précisée");
+  const durationHours = Math.floor((session.duration_minutes ?? 0) / 60);
+  const durationMinutes = (session.duration_minutes ?? 0) % 60;
   const durStr = session.duration_minutes
-    ? `${Math.floor(session.duration_minutes / 60) > 0 ? `${Math.floor(session.duration_minutes / 60)}h` : ""}${session.duration_minutes % 60 > 0 ? `${session.duration_minutes % 60}min` : ""}`.trim()
+    ? [
+        durationHours > 0
+          ? `${durationHours}${sct("hour_short", "h")}`
+          : "",
+        durationMinutes > 0
+          ? `${durationMinutes}${sct("minute_short", "min")}`
+          : "",
+      ]
+        .filter(Boolean)
+        .join(" ")
     : null;
 
   root.innerHTML = `${STYLE}
-    <div class="sc anim-slide-up">
+    <div class="sc anim-slide-up"${scDir()}>
 
       <div class="sc-hd">
-        <button class="sc-back" id="sc-back-btn" aria-label="Retour">${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}</button>
-        <h1 class="sc-hd-title" tabindex="-1">Confirmer ta séance</h1>
+        <button class="sc-back" id="sc-back-btn" aria-label="${escAttr(sct("back", "Retour"))}">${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}</button>
+        <h1 class="sc-hd-title" tabindex="-1">${esc(sct("title", "Confirmer ta séance"))}</h1>
       </div>
 
       <!-- HERO moniteur -->
@@ -405,7 +501,7 @@ export async function mount(root, sessionId) {
               }
             </div>
             <div class="sc-hero-info">
-              <div class="sc-hero-label">Séance avec</div>
+              <div class="sc-hero-label">${esc(sct("lesson_with", "Séance avec"))}</div>
               <div class="sc-hero-name">${esc(monPrenom)} ${esc(monNom)}</div>
             </div>
           </div>
@@ -414,11 +510,11 @@ export async function mount(root, sessionId) {
 
       <!-- Récap session -->
       <div class="sc-recap">
-        <div class="sc-recap-title">Détails de la séance</div>
+        <div class="sc-recap-title">${esc(sct("details", "Détails de la séance"))}</div>
         <div class="sc-recap-row">
           <div class="sc-recap-ico">${medallion("calendrier", "indigo", { size: 28 })}</div>
           <div>
-            <div class="sc-recap-lbl">Date</div>
+            <div class="sc-recap-lbl">${esc(sct("date", "Date"))}</div>
             <div class="sc-recap-val">${esc(dateStr)}</div>
           </div>
         </div>
@@ -428,7 +524,7 @@ export async function mount(root, sessionId) {
         <div class="sc-recap-row">
           <div class="sc-recap-ico">${medallion("horloge", "teal", { size: 28 })}</div>
           <div>
-            <div class="sc-recap-lbl">Durée</div>
+            <div class="sc-recap-lbl">${esc(sct("duration", "Durée"))}</div>
             <div class="sc-recap-val">${esc(durStr)}</div>
           </div>
         </div>`
@@ -441,14 +537,14 @@ export async function mount(root, sessionId) {
         comps.length > 0
           ? `
       <div class="sc-comps">
-        <div class="sc-comps-title">Compétences validées · ${comps.length}</div>
+        <div class="sc-comps-title">${esc(sct("skills_validated", "Compétences validées · {count}", { count: comps.length }))}</div>
         ${comps
           .map(
             (v) => `
           <div class="sc-comp-row">
             <div class="sc-comp-dot"></div>
             <div class="sc-comp-name">${esc(v.competences_remc?.nom ?? v.competence_id)}</div>
-            <div class="sc-comp-status">${icon("check", { size: 10, strokeWidth: 3 })} Acquis</div>
+            <div class="sc-comp-status">${icon("check", { size: 10, strokeWidth: 3 })} ${esc(sct("acquired", "Acquis"))}</div>
           </div>
         `,
           )
@@ -462,7 +558,7 @@ export async function mount(root, sessionId) {
         session.notes
           ? `
       <div class="sc-comment">
-        <div class="sc-comment-label">Retour de ${esc(monPrenom)}</div>
+        <div class="sc-comment-label">${esc(sct("feedback_from", "Retour de {name}", { name: monPrenom }))}</div>
         <div class="sc-comment-text">"${esc(session.notes)}"</div>
       </div>`
           : ""
@@ -474,11 +570,11 @@ export async function mount(root, sessionId) {
     <div class="sc-actions">
       <button class="sc-btn-confirm" id="sc-confirm-btn" data-session-id="${escAttr(sessionId)}">
         ${icon("check", { size: 16, strokeWidth: 2.8 })}
-        Confirmer ta séance
+        ${esc(sct("confirm", "Confirmer ta séance"))}
       </button>
       <button class="sc-btn-refuse" id="sc-refuse-btn">
         ${icon("x", { size: 14, strokeWidth: 2.5 })}
-        Refuser
+        ${esc(sct("refuse", "Refuser"))}
       </button>
     </div>`;
 
@@ -500,7 +596,7 @@ function wire(root, { sessionId, monPrenom }) {
       if (btn.disabled) return;
       haptic("success");
       btn.disabled = true;
-      btn.innerHTML = `<div style="width:18px;height:18px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> En cours…`;
+      btn.innerHTML = `<div style="width:18px;height:18px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> ${esc(sct("loading", "En cours…"))}`;
       try {
         const { data, error } = await sb.rpc("confirm_session", {
           p_session_id: sessionId,
@@ -509,15 +605,21 @@ function wire(root, { sessionId, monPrenom }) {
         if (error || data?.error) throw error || new Error(data.error);
         track("session.confirmed", { session_id: sessionId });
         navigator.vibrate?.(50);
-        toast("Séance confirmée.", "success");
+        toast(sct("confirmed", "Séance confirmée."), "success");
         setTimeout(() => navigate("#/"), 800);
       } catch (err) {
         console.error("[session-confirmation] confirm", err);
         const msg =
-          translateSessionError(err?.message) || "réessaie dans un instant";
-        toast(`Confirmation impossible — ${msg}`, "error");
+          translateSessionError(err?.message) ||
+          sct("retry_later", "réessaie dans un instant");
+        toast(
+          sct("confirm_failed", "Confirmation impossible — {message}", {
+            message: msg,
+          }),
+          "error",
+        );
         btn.disabled = false;
-        btn.innerHTML = `${icon("check", { size: 16, strokeWidth: 2.8 })} Confirmer ta séance`;
+        btn.innerHTML = `${icon("check", { size: 16, strokeWidth: 2.8 })} ${esc(sct("confirm", "Confirmer ta séance"))}`;
       }
     });
 
@@ -528,13 +630,22 @@ function wire(root, { sessionId, monPrenom }) {
   });
 }
 
-// Traduit les codes d'erreur backend RPC confirm_session en messages FR lisibles
+// Traduit les codes d'erreur backend RPC confirm_session dans la langue active.
 function translateSessionError(code) {
   const map = {
-    already_decided: "cette séance a déjà été traitée",
-    not_found: "séance introuvable",
-    forbidden: "tu n’as pas accès à cette séance",
-    invalid_status: "statut de séance invalide",
+    already_decided: sct(
+      "error_already_decided",
+      "cette séance a déjà été traitée",
+    ),
+    not_found: sct("error_not_found", "séance introuvable"),
+    forbidden: sct(
+      "error_forbidden",
+      "tu n’as pas accès à cette séance",
+    ),
+    invalid_status: sct(
+      "error_invalid_status",
+      "statut de séance invalide",
+    ),
   };
   return map[code] || null;
 }
@@ -543,14 +654,16 @@ function translateSessionError(code) {
 function showRefuseModal(root, sessionId, monPrenom) {
   const modal = document.createElement("div");
   modal.className = "sc-modal-bg";
+  modal.dir = getLang() === "ar" ? "rtl" : "ltr";
+  if (getLang() === "ar") modal.lang = "ar";
   modal.innerHTML = `
     <div class="sc-modal">
-      <div class="sc-modal-title">Refuser cette séance ?</div>
-      <div class="sc-modal-sub">${esc(monPrenom)} recevra une notification du refus.</div>
+      <div class="sc-modal-title">${esc(sct("refuse_title", "Refuser cette séance ?"))}</div>
+      <div class="sc-modal-sub">${esc(sct("refuse_notice", "{name} recevra une notification du refus.", { name: monPrenom }))}</div>
       <button class="sc-modal-confirm-refuse" id="sc-modal-refuse-confirm">
-        ${icon("x", { size: 16 })} Oui, refuser
+        ${icon("x", { size: 16 })} ${esc(sct("refuse_yes", "Oui, refuser"))}
       </button>
-      <button class="sc-modal-cancel" id="sc-modal-cancel">Annuler</button>
+      <button class="sc-modal-cancel" id="sc-modal-cancel">${esc(sct("cancel", "Annuler"))}</button>
     </div>`;
 
   document.body.appendChild(modal);
@@ -566,7 +679,7 @@ function showRefuseModal(root, sessionId, monPrenom) {
     ?.addEventListener("click", async () => {
       const btn = modal.querySelector("#sc-modal-refuse-confirm");
       btn.disabled = true;
-      btn.textContent = "En cours…";
+      btn.textContent = sct("loading", "En cours…");
       try {
         const { data, error } = await sb.rpc("confirm_session", {
           p_session_id: sessionId,
@@ -575,15 +688,21 @@ function showRefuseModal(root, sessionId, monPrenom) {
         if (error || data?.error) throw error || new Error(data.error);
         track("session.refused", { session_id: sessionId });
         modal.remove();
-        toast("Séance refusée", "info");
+        toast(sct("refused", "Séance refusée"), "info");
         setTimeout(() => navigate("#/"), 800);
       } catch (err) {
         console.error("[session-confirmation] refuse", err);
         const msg =
-          translateSessionError(err?.message) || "réessaie dans un instant";
-        toast(`Impossible de refuser — ${msg}`, "error");
+          translateSessionError(err?.message) ||
+          sct("retry_later", "réessaie dans un instant");
+        toast(
+          sct("refuse_failed", "Impossible de refuser — {message}", {
+            message: msg,
+          }),
+          "error",
+        );
         btn.disabled = false;
-        btn.innerHTML = `${icon("x", { size: 16 })} Oui, refuser`;
+        btn.innerHTML = `${icon("x", { size: 16 })} ${esc(sct("refuse_yes", "Oui, refuser"))}`;
       }
     });
 }
