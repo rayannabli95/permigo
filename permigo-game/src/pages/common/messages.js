@@ -10,8 +10,79 @@ import { toast } from "@/components/common/toast.js";
 import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { emptyState } from "@/components/common/empty-state.js";
+import { getLang } from "@/utils/lang.js";
 
 const MSG_LIMIT = 50;
+
+const MSG_I18N = {
+  en: {
+    title: "Messages",
+    load_failed: "Unable to load messages",
+    retry: "Try again",
+    empty_title: "No messages",
+    empty_student: "Start the conversation with your instructor.",
+    empty_instructor: "Your conversations with your students will appear here.",
+    write_instructor: "Write to my instructor",
+    no_instructor: "No instructor linked yet",
+    instructor_default: "Your instructor",
+    open_failed: "Unable to open the conversation",
+    unknown: "Unknown",
+    conversation: "Conversation",
+    back: "Back",
+    placeholder: "Write a message…",
+    send: "Send message",
+    start_conversation: "Start the conversation",
+    send_failed: "Unable to send",
+    connection_error: "Connection error",
+    sending: "Sending…",
+    now: "just now",
+    minutes_ago: "{n} min ago",
+    hours_ago: "{n} hr ago",
+    days_ago: "{n} d ago",
+  },
+  ar: {
+    title: "الرسائل",
+    load_failed: "تعذّر تحميل الرسائل",
+    retry: "إعادة المحاولة",
+    empty_title: "لا توجد رسائل",
+    empty_student: "ابدأ المحادثة مع مدرّبك.",
+    empty_instructor: "ستظهر محادثاتك مع طلابك هنا.",
+    write_instructor: "الكتابة إلى مدرّبي",
+    no_instructor: "لا يوجد مدرّب مرتبط حاليًا",
+    instructor_default: "مدرّبك",
+    open_failed: "تعذّر فتح المحادثة",
+    unknown: "غير معروف",
+    conversation: "محادثة",
+    back: "رجوع",
+    placeholder: "اكتب رسالة…",
+    send: "إرسال الرسالة",
+    start_conversation: "ابدأ المحادثة",
+    send_failed: "تعذّر الإرسال",
+    connection_error: "خطأ في الاتصال",
+    sending: "جارٍ الإرسال…",
+    now: "الآن",
+    minutes_ago: "منذ {n} د",
+    hours_ago: "منذ {n} س",
+    days_ago: "منذ {n} ي",
+  },
+};
+
+function mt(key, fr, vars) {
+  const lang = getLang();
+  let value = (lang !== "fr" && MSG_I18N[lang]?.[key]) || fr;
+  if (vars)
+    for (const [name, replacement] of Object.entries(vars))
+      value = value.split(`{${name}}`).join(String(replacement));
+  return value;
+}
+
+function mth(key, fr, vars) {
+  return esc(mt(key, fr, vars));
+}
+
+function msgDir() {
+  return getLang() === "ar" ? ' dir="rtl" lang="ar"' : "";
+}
 
 // ─── Mount ───────────────────────────────────────────────────
 export async function mount(root) {
@@ -22,7 +93,7 @@ export async function mount(root) {
   root.innerHTML =
     renderStyles() +
     `
-<div class="msg anim-slide-up" id="msg-root">
+<div class="msg anim-slide-up" id="msg-root"${msgDir()}>
   <div class="msg-list-view" id="msg-list-view">
     ${renderListSkeleton()}
   </div>
@@ -46,8 +117,8 @@ async function loadThreads(root, me) {
     root.querySelector("#msg-list-view").innerHTML = `
       <div class="msg-empty">
         <div class="msg-empty-ico">${icon("alert-triangle", { size: 28 })}</div>
-        <div class="msg-empty-txt">Impossible de charger les messages</div>
-        <button class="msg-retry-btn" id="msg-retry">Réessayer</button>
+        <div class="msg-empty-txt">${mth("load_failed", "Impossible de charger les messages")}</div>
+        <button class="msg-retry-btn" id="msg-retry">${mth("retry", "Réessayer")}</button>
       </div>
     `;
     root.querySelector("#msg-retry")?.addEventListener("click", () => {
@@ -65,16 +136,19 @@ function renderThreadList(root, me, threads) {
     const isEleve = me?.role === "eleve";
     listView.innerHTML = `
       <div class="msg-list-header">
-        <h1 class="msg-title">Messages</h1>
+        <h1 class="msg-title">${mth("title", "Messages")}</h1>
       </div>
       ${emptyState({
         image: "/skins/empty-states/empty_messages.png",
-        title: "Aucun message",
+        title: mt("empty_title", "Aucun message"),
         body: isEleve
-          ? "Lance la conversation avec ton moniteur."
-          : "Tes conversations avec tes élèves apparaîtront ici.",
+          ? mt("empty_student", "Lance la conversation avec ton moniteur.")
+          : mt(
+              "empty_instructor",
+              "Tes conversations avec tes élèves apparaîtront ici.",
+            ),
         cta: isEleve
-          ? `<button class="es-cta" id="msg-empty-cta">Écrire à mon moniteur</button>`
+          ? `<button class="es-cta" id="msg-empty-cta">${mth("write_instructor", "Écrire à mon moniteur")}</button>`
           : "",
       })}
     `;
@@ -92,7 +166,11 @@ function renderThreadList(root, me, threads) {
               .limit(1);
             const moniteur = data?.[0];
             if (error || !moniteur) {
-              toast("Pas de moniteur rattaché pour l'instant", "error", 2500);
+              toast(
+                mt("no_instructor", "Pas de moniteur rattaché pour l'instant"),
+                "error",
+                2500,
+              );
               return;
             }
             track("messages.empty_cta", {});
@@ -100,11 +178,15 @@ function renderThreadList(root, me, threads) {
               partner_id: moniteur.id,
               partner_name:
                 [moniteur.prenom, moniteur.nom].filter(Boolean).join(" ") ||
-                "Ton moniteur",
+                mt("instructor_default", "Ton moniteur"),
             });
           } catch (e) {
             console.error("[messages] empty cta", e);
-            toast("Impossible d'ouvrir la conversation", "error", 2500);
+            toast(
+              mt("open_failed", "Impossible d'ouvrir la conversation"),
+              "error",
+              2500,
+            );
           }
         });
     }
@@ -113,7 +195,7 @@ function renderThreadList(root, me, threads) {
 
   listView.innerHTML = `
     <div class="msg-list-header">
-      <h1 class="msg-title">Messages</h1>
+      <h1 class="msg-title">${mth("title", "Messages")}</h1>
       <span class="msg-count">${threads.length}</span>
     </div>
     <div class="msg-threads" id="msg-threads">
@@ -130,7 +212,7 @@ function renderThreadList(root, me, threads) {
 }
 
 function renderThreadRow(thread, me) {
-  const name = esc(thread.partner_name || "Inconnu");
+  const name = esc(thread.partner_name || mt("unknown", "Inconnu"));
   const lastMsg = esc(thread.last_message || "");
   const unread = thread.unread_count || 0;
   const initials = (thread.partner_name || "?")
@@ -164,18 +246,20 @@ async function openConversation(root, me, thread) {
   listView.style.display = "none";
   convView.style.display = "flex";
 
-  const partnerName = esc(thread.partner_name || "Conversation");
+  const partnerName = esc(
+    thread.partner_name || mt("conversation", "Conversation"),
+  );
   convView.innerHTML = `
     <div class="msg-conv-header">
-      <button class="msg-back-btn" id="msg-back" aria-label="Retour">←</button>
+      <button class="msg-back-btn" id="msg-back" aria-label="${escAttr(mt("back", "Retour"))}">←</button>
       <div class="msg-conv-name">${partnerName}</div>
     </div>
     <div class="msg-conv-messages" id="msg-conv-messages">
       ${renderConvSkeleton()}
     </div>
     <div class="msg-conv-footer">
-      <input class="msg-input" id="msg-input" type="text" placeholder="Écrire un message…" autocomplete="off" maxlength="500">
-      <button class="msg-send-btn" id="msg-send" aria-label="Envoyer le message">↑</button>
+      <input class="msg-input" id="msg-input" type="text" placeholder="${escAttr(mt("placeholder", "Écrire un message…"))}" autocomplete="off" maxlength="500">
+      <button class="msg-send-btn" id="msg-send" aria-label="${escAttr(mt("send", "Envoyer le message"))}">↑</button>
     </div>
   `;
 
@@ -206,7 +290,7 @@ async function loadMessages(root, me, partnerId) {
     console.error("[messages] loadMessages", e);
     const el = root.querySelector("#msg-conv-messages");
     if (el)
-      el.innerHTML = `<div class="msg-conv-err">Impossible de charger les messages</div>`;
+      el.innerHTML = `<div class="msg-conv-err">${mth("load_failed", "Impossible de charger les messages")}</div>`;
   }
 }
 
@@ -215,7 +299,7 @@ function renderMessages(root, me, messages) {
   if (!el) return;
 
   if (messages.length === 0) {
-    el.innerHTML = `<div class="msg-conv-empty">Commencez la conversation</div>`;
+    el.innerHTML = `<div class="msg-conv-empty">${mth("start_conversation", "Commencez la conversation")}</div>`;
     return;
   }
 
@@ -257,14 +341,14 @@ function wireConvInput(root, me, partnerId) {
       });
       if (error || data?.error) {
         optimisticEl?.remove();
-        toast(data?.error || "Envoi impossible", "error");
+        toast(data?.error || mt("send_failed", "Envoi impossible"), "error");
         input.value = body;
       } else {
         track("messages.sent", { partner_id: partnerId });
       }
     } catch (e) {
       optimisticEl?.remove();
-      toast("Erreur de connexion", "error");
+      toast(mt("connection_error", "Erreur de connexion"), "error");
       input.value = body;
     } finally {
       sendBtn.disabled = false;
@@ -288,7 +372,7 @@ function appendOptimistic(root, me, body) {
   div.className = "msg-bubble-wrap msg-bubble-wrap--mine";
   div.innerHTML = `
     <div class="msg-bubble msg-bubble--mine msg-bubble--pending">${esc(body)}</div>
-    <div class="msg-bubble-ts">Envoi…</div>
+    <div class="msg-bubble-ts">${mth("sending", "Envoi…")}</div>
   `;
   el.appendChild(div);
   el.scrollTop = el.scrollHeight;
@@ -299,18 +383,18 @@ function appendOptimistic(root, me, body) {
 function relativeTime(iso) {
   const diff = Date.now() - new Date(iso).getTime();
   const m = Math.floor(diff / 60000);
-  if (m < 1) return "à l'instant";
-  if (m < 60) return `il y a ${m} min`;
+  if (m < 1) return mt("now", "à l'instant");
+  if (m < 60) return mt("minutes_ago", "il y a {n} min", { n: m });
   const h = Math.floor(m / 60);
-  if (h < 24) return `il y a ${h} h`;
+  if (h < 24) return mt("hours_ago", "il y a {n} h", { n: h });
   const d = Math.floor(h / 24);
-  return `il y a ${d} j`;
+  return mt("days_ago", "il y a {n} j", { n: d });
 }
 
 function renderListSkeleton() {
   return `
 <div class="msg-list-header">
-  <h1 class="msg-title">Messages</h1>
+  <h1 class="msg-title">${mth("title", "Messages")}</h1>
 </div>
 ${[...Array(4)]
   .map(
