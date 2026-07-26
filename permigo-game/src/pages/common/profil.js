@@ -1600,6 +1600,7 @@ const STYLE_ARENE = `<style>
 .arn-modal-head{position:relative;padding:14px 18px;text-align:center;background:linear-gradient(180deg,rgba(255,255,255,.22),transparent 44%),linear-gradient(180deg,var(--gd-pale) 0%,var(--gd) 46%,var(--gd-2) 80%,var(--gd-deep) 100%);box-shadow:inset 0 2px 0 rgba(255,255,255,.6),0 4px 0 var(--gd-deep)}
 .arn-modal-head h3{font-family:'Fredoka',sans-serif;font-weight:600;font-size:18px;color:var(--gd-ink);margin:0;text-shadow:0 1px 0 rgba(255,255,255,.35)}
 .arn-modal-close{position:absolute;right:13px;top:11px;width:30px;height:30px;border:0;border-radius:9px;cursor:pointer;background:rgba(60,30,5,.22);color:var(--gd-ink);font-weight:800;font-size:16px;line-height:1}
+.arn-modal-close::before{content:"";position:absolute;inset:-7px}
 .arn-modal-body{padding:20px 18px 22px}
 .arn-modal-tip{font-size:12.5px;font-weight:600;color:var(--tx-dim);text-align:center;line-height:1.55;margin:0 0 16px}
 .arn-field{display:flex;align-items:center;gap:8px;background:#120d33;border-radius:16px;padding:0 14px;box-shadow:inset 0 2px 5px rgba(0,0,0,.5),inset 0 0 0 1.5px rgba(124,92,255,.3)}

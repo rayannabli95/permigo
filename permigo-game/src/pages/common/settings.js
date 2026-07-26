@@ -348,7 +348,7 @@ const STYLE = `<style>
   flex: 1; padding: 9px 4px; border: none; border-radius: var(--r-sm);
   background: transparent; font: 700 12.5px/1 'Inter', sans-serif; color: var(--mu);
   cursor: pointer; transition: background .15s cubic-bezier(.23,1,.32,1), color .15s, box-shadow .15s;
-  white-space: nowrap; min-height: 40px; font-family: inherit;
+  white-space: nowrap; min-height: 44px; font-family: inherit;
   display: inline-flex; align-items: center; justify-content: center; gap: 5px;
 }
 .st-theme-btn svg { width: 15px; height: 15px; }
@@ -357,7 +357,7 @@ const STYLE = `<style>
 /* Accent color swatches */
 .st-accent-row { display: flex; gap: 12px; flex-wrap: wrap; }
 .st-accent-sw {
-  width: 42px; height: 42px; border-radius: 50%;
+  width: 44px; height: 44px; border-radius: 50%;
   border: 0; cursor: pointer; padding: 0;
   background: var(--sw);
   box-shadow: 0 2px 8px -2px color-mix(in srgb, var(--sw) 55%, transparent), inset 0 1.5px 0 rgba(255,255,255,.3);
