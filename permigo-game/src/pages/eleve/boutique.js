@@ -1663,7 +1663,7 @@ async function doPurchase(item) {
       return null;
     }
     if (data?.error === "insufficient_gemmes") {
-      toast("Pas assez de volants", "error");
+      toast(btR("not_enough", "Pas assez de volants"), "error");
       return null;
     }
     if (data?.error === "already_owned") {
