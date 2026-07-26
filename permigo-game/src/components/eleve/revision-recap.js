@@ -122,7 +122,7 @@ const STYLE = `
   position: absolute; top: 50%; right: -2px; transform: translate(0,-50%) scale(.4);
   z-index: 4; padding: 6px 11px; border-radius: 999px;
   font: 900 13px/1 var(--fd, system-ui), sans-serif; letter-spacing: .02em;
-  color: #06070d; background: linear-gradient(135deg, color-mix(in srgb, var(--rcp-accent) 80%, #fff), var(--rcp-accent));
+  color: #fff; background: linear-gradient(135deg, color-mix(in srgb, var(--rcp-accent) 64%, #000), color-mix(in srgb, var(--rcp-accent) 55%, #000));
   box-shadow: 0 6px 18px color-mix(in srgb, var(--rcp-accent) 45%, transparent);
   opacity: 0;
 }
@@ -176,8 +176,8 @@ const STYLE = `
 .rcp-cta {
   margin-top: 26px; width: 100%; max-width: 360px; min-height: 54px; padding: 17px 28px;
   border: 0; border-radius: 16px; cursor: pointer;
-  font: 800 15px/1 var(--fd, system-ui), sans-serif; letter-spacing: .04em; text-transform: uppercase; color: #06070d;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--rcp-accent) 75%, #fff), var(--rcp-accent));
+  font: 800 15px/1 var(--fd, system-ui), sans-serif; letter-spacing: .04em; text-transform: uppercase; color: #fff;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--rcp-accent) 64%, #000), color-mix(in srgb, var(--rcp-accent) 55%, #000));
   box-shadow: 0 14px 32px color-mix(in srgb, var(--rcp-accent) 40%, transparent), inset 0 2px 0 rgba(255,255,255,.45), inset 0 -3px 0 rgba(0,0,0,.2);
   opacity: 0; transform: translateY(10px);
   transition: opacity .45s ease .7s, transform .55s cubic-bezier(0.23,1,0.32,1) .7s, scale .12s ease;
