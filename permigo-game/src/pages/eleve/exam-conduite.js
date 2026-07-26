@@ -230,7 +230,7 @@ body.exc2-immersive #app { padding-top:0 !important; }
   box-shadow:inset 0 1px 0 rgba(255,255,255,.16), 0 3px 0 #110d35; }
 .exc2-opt.good { background:linear-gradient(180deg,#ffd24a,#ff9c1c); border-color:rgba(255,255,255,.35); color:#3a1d00;
   box-shadow:0 5px 0 #b85e00, 0 10px 20px rgba(255,140,30,.4), inset 0 1px 0 rgba(255,255,255,.65); }
-.exc2-opt.good .exc2-opt-k { background:linear-gradient(180deg,#fff,#ffe7a8); color:#c46a00; }
+.exc2-opt.good .exc2-opt-k { background:linear-gradient(180deg,#fff,#ffe7a8); color:#8f4900; }
 .exc2-opt.bad { background:linear-gradient(180deg,#4a2740,#34203a); border-color:rgba(255,160,90,.3); color:#ffd9c2; box-shadow:0 5px 0 #1f1430; }
 .exc2-opt.elim { background:linear-gradient(180deg,#7a1f2e,#4a121d); border-color:rgba(255,90,90,.45); color:#ffd7d7; box-shadow:0 5px 0 #3a0d14; }
 .exc2-opt.elim .exc2-opt-k { background:#b3122b; color:#fff; }

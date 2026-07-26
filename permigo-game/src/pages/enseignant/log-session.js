@@ -230,7 +230,7 @@ const STYLE = `<style>
   .vl-cat-hd:active { background: var(--su2); }
   .vl-cn {
     width: 32px; height: 32px; border-radius: 10px; flex: none; display: grid; place-items: center;
-    background: linear-gradient(160deg, var(--a-lt, #6d6bff), var(--a));
+    background: linear-gradient(160deg, var(--a-lt, #625ee8), var(--a));
     color: #fff; font: 700 13px var(--ens-display, 'Fredoka'), sans-serif;
     box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 3px 8px -2px color-mix(in srgb, var(--a) 55%, transparent);
   }

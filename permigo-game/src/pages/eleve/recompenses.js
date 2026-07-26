@@ -353,7 +353,7 @@ const STYLE = `<style>
 .rec-claim-n {
   flex: none; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; display: grid; place-items: center;
   font: 800 11.5px/1 'Baloo 2', cursive; color: #fff;
-  background: linear-gradient(180deg,#ff8a8a,#f43f5e 60%,#d92c4b); border: 1px solid rgba(255,255,255,.5);
+  background: linear-gradient(180deg,#d13f69,#b72d56 60%,#98205c); border: 1px solid rgba(255,255,255,.5);
 }
 
 .rec-hero-cap { display: flex; align-items: flex-start; gap: 7px; margin-top: 12px; font-size: 10.5px; font-weight: 700; color: var(--mu2); }

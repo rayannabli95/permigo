@@ -2383,7 +2383,7 @@ const STYLE_ENS = `<style>
 .enp-rlist{display:flex;flex-direction:column;gap:7px}
 .enp-rrow{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:15px;background:var(--c-soft);box-shadow:inset 0 0 0 1px var(--enl)}
 .enp-rrow .rp{width:30px;height:30px;flex:0 0 auto;border-radius:9px;display:grid;place-items:center;font-family:'Fredoka',sans-serif;font-weight:600;font-size:14px;color:var(--enmu);background:#fff;box-shadow:inset 0 0 0 1px var(--enl2)}
-.enp-rrow .rav{width:34px;height:34px;flex:0 0 auto;border-radius:10px;display:grid;place-items:center;font-family:'Fredoka',sans-serif;font-weight:600;font-size:13px;color:#fff;letter-spacing:.5px;background:linear-gradient(160deg,#9b95c6,#7d77ad);box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}
+.enp-rrow .rav{width:34px;height:34px;flex:0 0 auto;border-radius:10px;display:grid;place-items:center;font-family:'Fredoka',sans-serif;font-weight:600;font-size:13px;color:#fff;letter-spacing:.5px;background:linear-gradient(160deg,#6f6a9c,#5a5588);box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}
 .enp-rrow .rnm{flex:1;font-size:14px;font-weight:700;color:var(--enk2);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .enp-rrow .rpt{font-family:'Fredoka',sans-serif;font-weight:600;font-size:14px;color:var(--enmu);flex:0 0 auto}
 .enp-rrow .rpt span{font-size:11px;font-weight:700;color:var(--enfa)}

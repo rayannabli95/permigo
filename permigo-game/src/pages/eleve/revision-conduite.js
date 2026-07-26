@@ -237,8 +237,8 @@ const STYLE = `<style>
 
 .rvc-go { position:sticky; bottom: calc(16px + env(safe-area-inset-bottom)); width:100%;
   border:0; border-radius:14px; padding:15px; cursor:pointer; margin-top:18px;
-  font:800 16px 'Plus Jakarta Sans',sans-serif; color:#fff; background:var(--a,#6366f1);
-  box-shadow:0 8px 20px color-mix(in srgb, var(--a,#6366f1) 40%, transparent); }
+  font:800 16px 'Plus Jakarta Sans',sans-serif; color:#fff; background:var(--a,#5b5edb);
+  box-shadow:0 8px 20px color-mix(in srgb, var(--a,#5b5edb) 40%, transparent); }
 .rvc-go:active { transform: scale(0.98); }
 
 /* Flashcards */

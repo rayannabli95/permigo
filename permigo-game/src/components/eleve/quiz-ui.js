@@ -420,7 +420,7 @@ export const QUIZ_STYLE =
 
   /* Bonne réponse = bouton OR (le « win ») */
   .qz-opt.ok{background:linear-gradient(180deg,var(--qz-sel-top),var(--qz-sel-bot));border:1px solid rgba(255,255,255,.35);color:#3a1d00;box-shadow:0 5px 0 var(--qz-sel-edge),0 10px 20px rgba(255,140,30,.4),inset 0 1px 0 rgba(255,255,255,.65),inset 0 -2px 6px rgba(180,80,0,.3)}
-  .qz-opt.ok .qz-key{background:linear-gradient(180deg,#fff,#ffe7a8);color:#c46a00;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 3px 0 #c46a00}
+  .qz-opt.ok .qz-key{background:linear-gradient(180deg,#fff,#ffe7a8);color:#8f4900;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 3px 0 #8f4900}
   .qz-opt.ok .qz-txt{font-weight:600}
   .qz-opt.ok .qz-txt strong{color:#7a3d00}
   /* Hero : pop spring sur la bonne réponse choisie */

@@ -440,8 +440,8 @@ const STYLE = `<style>
   .me-cl-score small { font: 700 9.5px/1 'Inter', sans-serif; color: #9a99bb; }
   .me-cl-rank { font: 800 11px/1 'Manrope', sans-serif; color: #fff; width: 22px; height: 22px; border-radius: 999px; display: flex; align-items: center; justify-content: center; margin-top: 2px; }
   .me-cl-rank.r1 { background: linear-gradient(180deg,#ffd27a,#e8a317); color: #5a3a08; }
-  .me-cl-rank.r2 { background: linear-gradient(180deg,#e8edf5,#aab6c9); color: #3e4f63; }
-  .me-cl-rank.r3 { background: linear-gradient(180deg,#ffd9ac,#c97b3d); color: #4d2708; }
+  .me-cl-rank.r2 { background: linear-gradient(180deg,#e8edf5,#aab6c9); color: #314155; }
+  .me-cl-rank.r3 { background: linear-gradient(180deg,#ffd9ac,#c97b3d); color: #3a1d07; }
   .me-cl-head { display: flex; align-items: center; gap: 9px; margin: 4px 0 8px; font: 800 10px/1 'Inter', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #9a99bb; }
   .me-cl-head .rule { flex: 1; height: 1px; background: #e3e1f2; }
   .me-cl-band { background: #fff; border-radius: 18px; overflow: hidden; box-shadow: 0 8px 18px -8px rgba(60,50,160,.14), inset 0 0 0 1px #eceaf6; }
@@ -488,7 +488,7 @@ const STYLE = `<style>
   .me-eng--det { color: #4338ca; background: #e0e7ff; }
   .me-eng--reg { color: #0e7490; background: #cffafe; }
   .me-eng--dec { color: #b45309; background: #fef3c7; }
-  .me-eng--new { color: #64748b; background: #eef0f6; }
+  .me-eng--new { color: #556070; background: #eef0f6; }
 </style>`;
 
 const INACTIF_SEUIL_MS = 14 * 86400000; // 14 jours

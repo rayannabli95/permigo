@@ -724,7 +724,7 @@ const STYLE = `<style>
   .pv-pass-tag {
     position: absolute; top: -11px; left: 16px; z-index: 1;
     font: 800 10.5px/1 Inter, sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #fff;
-    background: #e2513f; padding: 7px 12px; border-radius: 99px; box-shadow: 0 4px 10px rgba(0,0,0,.35);
+    background: #c64133; padding: 7px 12px; border-radius: 99px; box-shadow: 0 4px 10px rgba(0,0,0,.35);
   }
   .pv-err { font: 700 13px/1.4 'Baloo 2', sans-serif; color: #ffb4a8; text-align: center; margin: 4px 0 0; display: none; }
   .pv-err.on { display: block; }
