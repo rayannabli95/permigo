@@ -313,7 +313,7 @@ function ensureStyles() {
     /* Close button */
     .wrep-close{
       position:absolute;top:max(28px,calc(env(safe-area-inset-top) + 14px));right:14px;
-      width:36px;height:36px;border-radius:50%;
+      width:44px;height:44px;border-radius:50%;
       background:rgba(255,255,255,.18);color:#fff;border:0;
       font-size:22px;cursor:pointer;z-index:5;
       backdrop-filter:blur(8px);

@@ -38,7 +38,7 @@
   border-radius: var(--r);
   cursor: pointer;
   transition: transform var(--t), background var(--t), border-color var(--t), box-shadow var(--t);
-  min-height: 40px; min-width: 40px;
+  min-height: 44px; min-width: 44px;
   position: relative; overflow: hidden;
 }
 .btn:hover { background: var(--bg2); }
@@ -52,7 +52,7 @@
    Audit 2026-06 : .btn-p / .btn-g / .btn-r / .btn-primary Duo 3D étaient
    du code mort → supprimés. Ne pas réinventer de CTA par page. */
 
-.btn-sm { min-height: 36px; padding: 6px 12px; font-size: 12px; }
+.btn-sm { min-height: 44px; padding: 6px 12px; font-size: 12px; }
 .btn-lg { min-height: 48px; padding: 14px 22px; font-size: 14px; }
 .btn-w { width: 100%; }
 
@@ -205,7 +205,9 @@ button:active:not(:disabled),
   display: inline-flex; align-items: center; justify-content: center;
   flex-shrink: 0;
   transition: background .15s;
+  position: relative;
 }
+.toast .toast-close::before { content: ''; position: absolute; inset: -11px; }
 .toast-error .toast-close,
 .toast-success .toast-close { background: rgba(255,255,255,.25); color: #fff; }
 .toast .toast-close:hover { background: rgba(11,13,26,.15); }

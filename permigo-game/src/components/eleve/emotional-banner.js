@@ -77,7 +77,7 @@ const STYLES = `
   font: 600 13px/1 'Plus Jakarta Sans', sans-serif;
   border: 0;
   cursor: pointer;
-  min-height: 36px;
+  min-height: 44px;
   text-decoration: none;
   transition: transform 140ms cubic-bezier(.23,1,.32,1), opacity 140ms;
 }
@@ -105,6 +105,7 @@ const STYLES = `
   line-height: 1;
   transition: background .14s;
 }
+.eb-close::before { content: ''; position: absolute; inset: -8px; }
 .eb-close:hover { background: rgba(0,0,0,.12); }
 
 /* ── Progress bar (auto-dismiss countdown) ── */

@@ -195,7 +195,7 @@ const STYLE = `
 
 .rcp-close {
   position: absolute; top: max(16px, env(safe-area-inset-top)); right: 16px;
-  width: 36px; height: 36px; border-radius: 50%; z-index: 5;
+  width: 44px; height: 44px; border-radius: 50%; z-index: 5;
   background: rgba(255,255,255,.1); color: #fff; border: 0; cursor: pointer;
   font-size: 20px; line-height: 1; display: grid; place-items: center;
   opacity: 0; transition: opacity .3s ease .8s, background .15s;
