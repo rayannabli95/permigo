@@ -237,7 +237,7 @@ const STYLE = `<style>
   .vl-nm { font: 600 15px var(--ens-display, 'Fredoka'), sans-serif; color: var(--ink); flex: 1; min-width: 0; letter-spacing: .2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .vl-pr { display: flex; align-items: center; gap: 8px; flex: none; }
   .vl-bar { width: 50px; height: 7px; border-radius: 99px; background: var(--bo2); overflow: hidden; }
-  .vl-bar i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--a-lt, #6d6bff), var(--a)); }
+  .vl-bar i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--a-lt, #625ee8), var(--a)); }
   .vl-ct { font: 700 12px var(--ens-body, sans-serif); color: var(--mu2); font-variant-numeric: tabular-nums; }
   .vl-chev { color: var(--mu2); display: inline-flex; transition: transform .2s; }
   .vl-cat.closed .vl-body { display: none; }
