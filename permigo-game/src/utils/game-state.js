@@ -613,9 +613,9 @@ export function purchaseItem(itemId, cost) {
 // Les variantes restent assez profondes pour une encre blanche uniforme sur CTA.
 const THEME_COLORS = {
   rose: {
-    a: "#ec4899",
-    adk: "#be185d",
-    lt: "#fb7bb8",
+    a: "#b83275",
+    adk: "#98205c",
+    lt: "#c13c80",
     ink: "#ffffff",
     ap: "rgba(236,72,153,.09)",
   },
@@ -634,9 +634,9 @@ const THEME_COLORS = {
     ap: "rgba(14,165,233,.09)",
   },
   rouge: {
-    a: "#ef4444",
-    adk: "#b91c1c",
-    lt: "#f87171",
+    a: "#c53030",
+    adk: "#9b1c1c",
+    lt: "#d13b3b",
     ink: "#ffffff",
     ap: "rgba(239,68,68,.09)",
   },

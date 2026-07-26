@@ -14,9 +14,9 @@ export const ACCENTS = [
     // Violet « Arène 3D » — DA élève par défaut, raccord avec le login/quiz.
     id: "violet",
     name: "Violet PermiGo",
-    a: "#6c63ff",
+    a: "#5d56d8",
     adk: "#4a3fc9",
-    lt: "#8e87ff",
+    lt: "#665edb",
     ink: "#ffffff",
   },
   {
@@ -30,9 +30,9 @@ export const ACCENTS = [
   {
     id: "bleu",
     name: "Bleu",
-    a: "#2f80ed",
-    adk: "#1b5fc0",
-    lt: "#5aa0ff",
+    a: "#1d5fba",
+    adk: "#164a96",
+    lt: "#2269c7",
     ink: "#ffffff",
   },
   {
@@ -54,9 +54,9 @@ export const ACCENTS = [
   {
     id: "rose",
     name: "Rose",
-    a: "#ec4899",
-    adk: "#be185d",
-    lt: "#fb7bb8",
+    a: "#b83275",
+    adk: "#98205c",
+    lt: "#c13c80",
     ink: "#ffffff",
   },
 ];
