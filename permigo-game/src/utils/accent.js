@@ -7,7 +7,8 @@
 const KEY = "permigo-accent";
 
 // ink = couleur du texte/icône POSÉ sur l'accent (contraste).
-// Teintes claires (vert/orange/cyan) → ink foncé ; teintes soutenues → blanc.
+// Les accents d'action restent assez profonds pour recevoir une encre blanche :
+// même grammaire visuelle sur les CTA, sans libellés presque noirs sur couleur vive.
 export const ACCENTS = [
   {
     // Violet « Arène 3D » — DA élève par défaut, raccord avec le login/quiz.
@@ -21,10 +22,10 @@ export const ACCENTS = [
   {
     id: "vert",
     name: "Vert Duo",
-    a: "#58CC02",
-    adk: "#46A302",
-    lt: "#6fe016",
-    ink: "#1a2800",
+    a: "#2f7d12",
+    adk: "#276a0d",
+    lt: "#338316",
+    ink: "#ffffff",
   },
   {
     id: "bleu",
@@ -37,18 +38,18 @@ export const ACCENTS = [
   {
     id: "cyan",
     name: "Cyan",
-    a: "#06b6d4",
-    adk: "#0e7490",
-    lt: "#3ddcf0",
-    ink: "#042a30",
+    a: "#0b7188",
+    adk: "#075a6c",
+    lt: "#087f9b",
+    ink: "#ffffff",
   },
   {
     id: "orange",
     name: "Orange",
-    a: "#f97316",
-    adk: "#c2540a",
-    lt: "#ffa24d",
-    ink: "#2a1400",
+    a: "#b8430c",
+    adk: "#8f2f0a",
+    lt: "#c2410c",
+    ink: "#ffffff",
   },
   {
     id: "rose",
