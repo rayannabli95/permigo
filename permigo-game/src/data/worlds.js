@@ -21,7 +21,7 @@ export const WORLDS = [
     description: 'Intersections, ronds-points, partage de la route.',
     couleur: '#06b6d4', // cyan
     emoji: '🏙️',
-    image: '/skins/permigo-remc-circulation-normale-v2.png',
+    image: '/skins/permigo-remc-circulation-normale-v2.webp',
     sousCompetences: 8, // C2a → C2h
   },
   {

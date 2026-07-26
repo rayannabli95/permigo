@@ -120,7 +120,7 @@ function crtl(html) {
 const CHEST_META = {
   world_1: {
     label: "Monde 1 — Sécurité",
-    image: "/skins/chests/chest_world_1.png",
+    image: "/skins/chests/chest_world_1.webp",
     ico: "shield",
     tier: "bronze",
     xp: 200,
@@ -128,7 +128,7 @@ const CHEST_META = {
   },
   world_2: {
     label: "Monde 2 — Manœuvres",
-    image: "/skins/chests/chest_world_2.png",
+    image: "/skins/chests/chest_world_2.webp",
     ico: "settings",
     tier: "argent",
     xp: 400,
@@ -136,7 +136,7 @@ const CHEST_META = {
   },
   world_3: {
     label: "Monde 3 — Conduite",
-    image: "/skins/chests/chest_world_3.png",
+    image: "/skins/chests/chest_world_3.webp",
     ico: "car",
     tier: "or",
     xp: 700,
@@ -144,7 +144,7 @@ const CHEST_META = {
   },
   world_4: {
     label: "Monde 4 — Maîtrise",
-    image: "/skins/chests/chest_world_4.png",
+    image: "/skins/chests/chest_world_4.webp",
     ico: "trophy",
     tier: "legendaire",
     xp: 1200,
@@ -152,7 +152,7 @@ const CHEST_META = {
   },
   streak_7: {
     label: "Série 7 jours",
-    image: "/skins/chests/chest_streak_7.png",
+    image: "/skins/chests/chest_streak_7.webp",
     ico: "flame",
     tier: "argent",
     xp: 150,
@@ -160,7 +160,7 @@ const CHEST_META = {
   },
   streak_14: {
     label: "Série 14 jours",
-    image: "/skins/chests/chest_streak_14.png",
+    image: "/skins/chests/chest_streak_14.webp",
     ico: "zap",
     tier: "or",
     xp: 350,
@@ -168,7 +168,7 @@ const CHEST_META = {
   },
   streak_30: {
     label: "Série 30 jours",
-    image: "/skins/chests/chest_streak_30.png",
+    image: "/skins/chests/chest_streak_30.webp",
     ico: "crown",
     tier: "legendaire",
     xp: 800,
@@ -176,7 +176,7 @@ const CHEST_META = {
   },
   perfect_quiz: {
     label: "Quiz parfait",
-    image: "/skins/chests/chest_perfect_quiz.png",
+    image: "/skins/chests/chest_perfect_quiz.webp",
     emoji: "✨",
     tier: "or",
     xp: 100,
@@ -184,7 +184,7 @@ const CHEST_META = {
   },
   welcome: {
     label: "Coffre de bienvenue",
-    image: "/skins/chests/chest_welcome.png",
+    image: "/skins/chests/chest_welcome.webp",
     ico: "gift",
     tier: "bronze",
     xp: 50,
@@ -446,7 +446,7 @@ function renderCard(chest) {
        tabindex="${canOpen ? "0" : "-1"}"
        aria-label="${canOpen ? `${ct("open_aria", "Ouvrir")} ${esc(label)}` : `${ct("already_aria", "Déjà ouvert :")} ${esc(label)}`}">
     <div class="mc-thumb" style="background:${grad}">
-      <img src="${meta.image}" alt="${escAttr(label)}" loading="lazy"
+      <img src="${meta.image}" alt="${escAttr(label)}" width="64" height="64" loading="lazy" decoding="async"
            onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
            style="width:64px;height:64px;object-fit:contain;filter:drop-shadow(0 4px 12px rgba(0,0,0,.35))">
       <span style="display:none" aria-hidden="true">${_chestMed(chest.chest_type, meta.tier, 56)}</span>

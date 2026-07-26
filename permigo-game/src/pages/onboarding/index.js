@@ -24,7 +24,7 @@ import { sb } from "@/auth/auth.js";
 import { getCurUser, setCurUser } from "@/auth/cur-user.js";
 import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
-import { ASSETS } from "@/utils/assets.js";
+import { ASSETS, optimizedAvatarUrl } from "@/utils/assets.js";
 import { haptic } from "@/utils/haptic.js";
 import {
   isStandalone,
@@ -223,9 +223,10 @@ export async function mount(root) {
     me.prenom && me.prenom !== emailPrefix ? me.prenom : "";
 
   // ─── État ──────────────────────────────────────────────────────
+  const currentAvatar = optimizedAvatarUrl(me.avatar_url);
   let avatar =
-    me.avatar_url && ASSETS.avatar?.includes(me.avatar_url)
-      ? me.avatar_url
+    currentAvatar && ASSETS.avatar?.includes(currentAvatar)
+      ? currentAvatar
       : ASSETS.avatar?.[0] || null;
   let accentId = getAccent();
   let a2hsPlat = guessPlatform() === "android" ? "android" : "ios";

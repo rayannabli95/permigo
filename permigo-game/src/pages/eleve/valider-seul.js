@@ -31,7 +31,7 @@ import { toast } from "@/components/common/toast.js";
 import { haptic } from "@/utils/haptic.js";
 import { lancerQuiz } from "@/services/quiz-engine.js";
 import { findSubComp, findCategory } from "@/data/remc.js";
-import { getFiche } from "@/data/fiches-conduite.js";
+import { loadFiche } from "@/data/fiches-loader.js";
 import { burstConfetti } from "@/components/common/confetti.js";
 import { refreshGemmes } from "@/utils/game-state.js";
 import { getLang } from "@/utils/lang.js";
@@ -282,8 +282,7 @@ function blockedScreen(sub) {
   </div>`;
 }
 
-function introScreen(sub, cat, already) {
-  const fiche = getFiche(sub.c);
+function introScreen(sub, cat, already, fiche) {
   const steps = (fiche?.methode || []).slice(0, 4);
   const ficheList = steps.length
     ? `<ul class="vs-fiche-list">${steps.map((s, i) => `<li><b>${String(i + 1).padStart(2, "0")}</b>${esc(s.replace(/^.{2,26}? [—–] /, ""))}</li>`).join("")}</ul>`
@@ -385,6 +384,7 @@ export async function mount(root, param) {
   });
 
   root.innerHTML = skeleton();
+  const fichePromise = loadFiche(compId).catch(() => null);
 
   // Garde-fou côté AFFICHAGE (la vraie garantie est côté RPC — jamais
   // confiance au client). Ouvert à TOUS les élèves depuis le pivot 17/07 ;
@@ -408,6 +408,7 @@ export async function mount(root, param) {
     valRes.status === "fulfilled" && valRes.value.data?.statut === "acquis";
   const already =
     selfRes.status === "fulfilled" ? selfRes.value.data || null : null;
+  const fiche = await fichePromise;
 
   if (acquisMoniteur) {
     root.innerHTML = blockedScreen(sub);
@@ -415,7 +416,7 @@ export async function mount(root, param) {
     return;
   }
 
-  root.innerHTML = introScreen(sub, cat, already);
+  root.innerHTML = introScreen(sub, cat, already, fiche);
   wireIntro(root, me, compId, sub, cat);
 }
 
@@ -595,8 +596,9 @@ function wireResult(root, me, compId, sub, cat) {
     const c = e.currentTarget.getAttribute("data-comp");
     navigate(c ? `#/parcours?focus=${encodeURIComponent(c)}` : "#/parcours");
   });
-  root.querySelector("#vs-retry")?.addEventListener("click", () => {
-    root.innerHTML = introScreen(sub, cat, null);
+  root.querySelector("#vs-retry")?.addEventListener("click", async () => {
+    const fiche = await loadFiche(compId).catch(() => null);
+    root.innerHTML = introScreen(sub, cat, null, fiche);
     wireIntro(root, me, compId, sub, cat);
   });
 }

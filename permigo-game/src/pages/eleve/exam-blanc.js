@@ -7,7 +7,6 @@ import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { esc, escAttr } from "@/utils/escape.js";
 import { getLang } from "@/utils/lang.js";
-import { examTr, examUi } from "@/data/parcours-quiz-i18n.js";
 import { icon } from "@/utils/icons.js";
 import { medallion } from "@/utils/medallions.js";
 import { track } from "@/services/analytics.js";
@@ -18,12 +17,7 @@ import {
   getWeakPoints,
   TAG_LABELS,
 } from "@/utils/weak-points.js";
-import {
-  PARCOURS,
-  QUESTIONS,
-  questionsForParcours,
-} from "@/data/parcours-quiz.js";
-import { getCentre } from "@/data/centres-examen.js";
+import { PARCOURS } from "@/data/parcours-quiz-meta.js";
 import { toast } from "@/components/common/toast.js";
 import {
   computeTheoryGain,
@@ -50,6 +44,44 @@ import {
   playQuizMusic,
   playWhoosh,
 } from "@/utils/sound.js";
+
+let quizData = null;
+let quizDataPromise = null;
+let examI18n = null;
+let examI18nPromise = null;
+
+async function ensureQuizData() {
+  if (quizData) return quizData;
+  if (!quizDataPromise)
+    quizDataPromise = import("@/data/parcours-quiz.js").then((module) => {
+      quizData = module;
+      return module;
+    });
+  return quizDataPromise;
+}
+
+async function ensureExamI18n() {
+  if (getLang() === "fr" || examI18n) return examI18n;
+  if (!examI18nPromise)
+    examI18nPromise = import("@/data/parcours-quiz-i18n.js").then((module) => {
+      examI18n = module;
+      return module;
+    });
+  return examI18nPromise;
+}
+
+function examTr(id, lang) {
+  return examI18n?.examTr(id, lang) || null;
+}
+
+function examUi(key, fr) {
+  return examI18n?.examUi(key, fr) ?? fr;
+}
+
+async function getCentre(slug) {
+  const { getCentre: findCentre } = await import("@/data/centres-examen.js");
+  return findCentre(slug);
+}
 
 // ── i18n de la COQUE (élève non-francophone) — ÉCRAN DE SÉLECTION seulement.
 // Les QUESTIONS (énoncés/options/explications) restent gérées par examBi/
@@ -426,10 +458,10 @@ export async function mount(root, param) {
   // → lance directement la révision du centre sans afficher la sélection.
   if (param && param.startsWith("c-")) {
     const slug = param.slice(2);
-    const centre = getCentre(slug);
+    const centre = await getCentre(slug);
     if (centre) {
       root.innerHTML = renderStyles() + renderSelection();
-      startCentreRevision(root, slug);
+      await startCentreRevision(root, slug, centre);
       return;
     }
   }
@@ -440,7 +472,7 @@ export async function mount(root, param) {
     const tag = param.slice(2);
     if (TAG_LABELS[tag]) {
       root.innerHTML = renderStyles() + renderSelection();
-      startThemeRevision(root, tag, TAG_LABELS[tag]);
+      await startThemeRevision(root, tag, TAG_LABELS[tag]);
       return;
     }
   }
@@ -815,7 +847,9 @@ function runExbQuiz(
   renderQ();
 }
 
-function startParcours(root, parcours_id) {
+async function startParcours(root, parcours_id) {
+  const { questionsForParcours } = await ensureQuizData();
+  await ensureExamI18n();
   const parcours = PARCOURS.find((p) => p.id === parcours_id);
   const questions = questionsForParcours(parcours_id).map(withShuffledOptions);
   track("parcours_quiz.started", { parcours_id, nom: parcours?.nom });
@@ -1016,7 +1050,7 @@ function showResults(root, questions, answers, parcours_id) {
 
 // ─── Mode « Examen officiel » : 40 questions chrono ──────────
 function pickOfficielQuestions() {
-  const pool = QUESTIONS.slice();
+  const pool = quizData.QUESTIONS.slice();
   // Fisher-Yates
   for (let i = pool.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -1027,7 +1061,8 @@ function pickOfficielQuestions() {
     .map(withShuffledOptions);
 }
 
-function startExamenOfficiel(root) {
+async function startExamenOfficiel(root) {
+  await Promise.all([ensureQuizData(), ensureExamI18n()]);
   const questions = pickOfficielQuestions();
   const startedAt = Date.now();
   track("examen_officiel.started", { total: questions.length });
@@ -1232,7 +1267,9 @@ function runRevision(
 }
 
 // ─── Révision ciblée d'un thème (points faibles) ─────────────
-function startThemeRevision(root, tag, label) {
+async function startThemeRevision(root, tag, label) {
+  const { QUESTIONS } = await ensureQuizData();
+  await ensureExamI18n();
   const pool = QUESTIONS.filter((q) => (q.tags || []).includes(tag));
   for (let i = pool.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -1254,8 +1291,12 @@ function startThemeRevision(root, tag, label) {
 }
 
 // ─── Révision multi-tags par centre d'examen ─────────────────
-function startCentreRevision(root, slug) {
-  const c = getCentre(slug);
+async function startCentreRevision(root, slug, knownCentre = null) {
+  const [{ QUESTIONS }, c] = await Promise.all([
+    ensureQuizData(),
+    knownCentre ? Promise.resolve(knownCentre) : getCentre(slug),
+    ensureExamI18n(),
+  ]);
   if (!c) {
     toast("Centre inconnu", "info");
     return;

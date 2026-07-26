@@ -14,7 +14,6 @@ import {
   THEME_WEAK_TAGS,
   SITUATIONS,
 } from "@/data/situations-conduite.js";
-import { SITU_I18N, THEME_I18N, SITU_UI } from "@/data/situations-i18n.js";
 import { getLang } from "@/utils/lang.js";
 import { recordAnswer } from "@/utils/weak-points.js";
 import { getScenesVues, marquerSceneVue } from "@/utils/situations-vues.js";
@@ -206,15 +205,20 @@ export async function mount(root, param) {
 
   // ── i18n : rendu traduit + français gardé dessous (arabe RTL par span) ──
   const lang = getLang();
+  const situationI18n =
+    lang === "fr" ? null : await import("@/data/situations-i18n.js");
   const rtl = lang === "ar";
   const sBi = (fr, tr) =>
     lang === "fr" || !tr
       ? esc(fr)
       : `<span class="sit-tr"${rtl ? ' dir="rtl" lang="ar"' : ""}>${esc(tr)}</span><span class="sit-fr" lang="fr">${esc(fr)}</span>`;
   const sT1 = (fr, tr) => esc(lang !== "fr" && tr ? tr : fr);
-  const sUI = (key, fr) => sT1(fr, SITU_UI[lang]?.[key]);
-  const sScene = (id) => (lang !== "fr" ? SITU_I18N[id]?.[lang] : null);
-  const sTheme = (theme) => (lang !== "fr" ? THEME_I18N[lang]?.[theme] : null);
+  const sUI = (key, fr) =>
+    sT1(fr, situationI18n?.SITU_UI[lang]?.[key]);
+  const sScene = (id) =>
+    lang !== "fr" ? situationI18n?.SITU_I18N[id]?.[lang] : null;
+  const sTheme = (theme) =>
+    lang !== "fr" ? situationI18n?.THEME_I18N[lang]?.[theme] : null;
 
   if (isJour) startRound();
   else renderIntro();

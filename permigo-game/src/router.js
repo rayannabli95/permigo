@@ -4,6 +4,7 @@
 import { phPageview } from "@/services/posthog.js";
 import { accessGateFor } from "@/auth/route-guards.js";
 import { isFreeTierUser, isDiscoveryAllowedRoute } from "@/utils/free-tier.js";
+import { getCurUser } from "@/auth/cur-user.js";
 
 const CHUNK_RELOAD_KEY = "pg-chunk-reloaded";
 const CHUNK_ERROR_RE =
@@ -471,27 +472,20 @@ async function routePublic(app) {
 }
 
 window.addEventListener("hashchange", () => {
-  import("@/auth/cur-user.js")
-    .then(({ getCurUser }) => {
-      const me = getCurUser();
-      if (me) {
-        route(document.getElementById("app"), me).catch((e) => {
-          console.error("[router:hashchange]", e);
-          reloadOnceOnChunkError(e);
-        });
-        phPageview(); // hash-router SPA : PostHog ne détecte pas les hashchanges seul
-      } else {
-        // Visiteur déconnecté → route vers la page publique correspondant au hash
-        routePublic(document.getElementById("app")).catch((e) => {
-          console.error("[router:public]", e);
-          reloadOnceOnChunkError(e);
-        });
-      }
-    })
-    .catch((e) => {
+  const me = getCurUser();
+  if (me) {
+    route(document.getElementById("app"), me).catch((e) => {
       console.error("[router:hashchange]", e);
       reloadOnceOnChunkError(e);
     });
+    phPageview(); // hash-router SPA : PostHog ne détecte pas les hashchanges seul
+  } else {
+    // Visiteur déconnecté → route vers la page publique correspondant au hash
+    routePublic(document.getElementById("app")).catch((e) => {
+      console.error("[router:public]", e);
+      reloadOnceOnChunkError(e);
+    });
+  }
 });
 
 export function navigate(path) {
