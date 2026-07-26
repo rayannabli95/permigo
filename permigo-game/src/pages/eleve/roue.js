@@ -182,7 +182,7 @@ const STYLE = `<style>
 }
 .roue-top { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
 .roue-back {
-  width: 40px; height: 40px; flex: none; border-radius: 13px;
+  width: 44px; height: 44px; flex: none; border-radius: 13px;
   border: 1px solid var(--line); background: rgba(255,255,255,.06);
   color: #fff; display: grid; place-items: center; cursor: pointer;
 }

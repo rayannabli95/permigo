@@ -158,7 +158,7 @@ const STYLE = `<style>
 .vs { max-width: 480px; margin: 0 auto; padding: 0 16px calc(110px + env(safe-area-inset-bottom));
   font-family: 'Inter', sans-serif; color: var(--ink); }
 .vs-top { display:flex; align-items:center; gap:10px; padding:16px 0 8px; }
-.vs-back { width:38px; height:38px; border-radius:11px; border:0; cursor:pointer;
+.vs-back { width:44px; height:44px; border-radius:11px; border:0; cursor:pointer;
   background: var(--su, #fff); color: var(--ink); font-size:20px; line-height:1;
   box-shadow: 0 1px 4px rgba(0,0,0,.08); flex-shrink:0; }
 .vs-back:active { transform: scale(0.95); }
