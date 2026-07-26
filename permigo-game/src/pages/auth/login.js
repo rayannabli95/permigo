@@ -329,7 +329,7 @@ function template() {
         padding:24px 18px calc(24px + env(safe-area-inset-bottom));
         font-family:'Baloo 2',var(--fb);-webkit-font-smoothing:antialiased;
         /* Jetons DA (scopés) */
-        --in:#6c63ff;--in-lt:#8e87ff;--in-dp:#4a3fc9;--in-dk:#372fa3;
+        --in:#5d56d8;--in-lt:#665edb;--in-dp:#4a3fc9;--in-dk:#372fa3;
         --gold:#ffce4d;--gold-dp:#e8a317;--go:#58cc02;--go-dp:#3a8a01;
         --ncard:#2b2160;--ink:#f4f1ff;--ink-soft:#cdc8ec;--ink-mu:#aaa2d8;
         --field:#221a4f;--field-line:#6257a8;--focus:#ffd84d;--rad:26px;--tap:46px;
