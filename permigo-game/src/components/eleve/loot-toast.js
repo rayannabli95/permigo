@@ -6,14 +6,19 @@
  *
  * Usage :
  *   import { lootToast } from '@/components/eleve/loot-toast.js';
- *   lootToast({ icon: '⭐', label: '+100 XP', subLabel: 'Compétence acquise' });
- *   lootToast({ icon: '🔥', label: 'STREAK ×5', subLabel: 'Continue !', kind: 'warm' });
- *   lootToast({ icon: '🎉', label: 'LEVEL UP!', subLabel: 'Niveau 7', kind: 'levelup' });
+ *   lootToast({ iconText: '⭐', label: '+100 XP', subLabel: 'Compétence acquise' });
+ *   lootToast({ iconText: '🔥', label: 'STREAK ×5', subLabel: 'Continue !', kind: 'warm' });
+ *   lootToast({ iconText: '🎉', label: 'LEVEL UP!', subLabel: 'Niveau 7', kind: 'levelup' });
  *
  * Les toasts s'empilent verticalement à droite. Auto-dismiss 2.8s.
  */
 
+import { esc, escAttr, safeAssetUrl } from "@/utils/escape.js";
+import { icon as renderIcon } from "@/utils/icons.js";
+
 let _root = null;
+const LOOT_KINDS = new Set(["warm", "levelup", "success", "gold"]);
+const LOOT_ICON_NAMES = new Set(["trophy"]);
 
 function ensureRoot() {
   if (_root) return _root;
@@ -94,6 +99,7 @@ function ensureRoot() {
     }
     @keyframes loot-ic-pulse{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:.85;transform:scale(1.15)}}
     .loot-toast .ic{font-size:22px;line-height:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,.5))}
+    .loot-toast .ic img{display:block;width:22px;height:22px;object-fit:contain}
 
     .loot-toast .bd{flex:1;min-width:0;position:relative;z-index:1}
     .loot-toast .lb{
@@ -119,20 +125,38 @@ function ensureRoot() {
   return _root;
 }
 
-export function lootToast({ icon = '⭐', label = '', subLabel = '', kind = '', duration = 2800 } = {}) {
+export function lootToast({
+  iconText = "⭐",
+  iconName = "",
+  iconImage = "",
+  label = "",
+  subLabel = "",
+  kind = "",
+  duration = 2800,
+} = {}) {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
     // Fallback : utilise le toast classique
     return;
   }
   const root = ensureRoot();
   const el = document.createElement('div');
-  el.className = `loot-toast ${kind}`;
+  const safeKind = LOOT_KINDS.has(kind) ? kind : "";
+  const safeDuration = Number.isFinite(Number(duration))
+    ? Math.max(0, Number(duration))
+    : 2800;
+  const imageUrl = safeAssetUrl(iconImage);
+  const iconHtml = LOOT_ICON_NAMES.has(iconName)
+    ? renderIcon(iconName, { size: 22 })
+    : imageUrl
+      ? `<img src="${escAttr(imageUrl)}" alt="" aria-hidden="true">`
+      : esc(iconText);
+  el.className = `loot-toast${safeKind ? ` ${safeKind}` : ""}`;
   el.style.position = 'relative';
   el.innerHTML = `
-    <div class="ic-wrap"><span class="ic" aria-hidden="true">${icon}</span></div>
+    <div class="ic-wrap"><span class="ic" aria-hidden="true">${iconHtml}</span></div>
     <div class="bd">
-      <div class="lb">${label}</div>
-      ${subLabel ? `<div class="sub">${subLabel}</div>` : ''}
+      <div class="lb">${esc(label)}</div>
+      ${subLabel ? `<div class="sub">${esc(subLabel)}</div>` : ''}
     </div>
     <div class="bar"></div>
   `;
@@ -143,5 +167,5 @@ export function lootToast({ icon = '⭐', label = '', subLabel = '', kind = '', 
   setTimeout(() => {
     el.classList.add('out');
     el.addEventListener('animationend', () => el.remove(), { once: true });
-  }, duration);
+  }, safeDuration);
 }

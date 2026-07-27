@@ -483,8 +483,11 @@ function renderQuestionBody(
   num,
   { mascot = false, mascotState = "think" } = {},
 ) {
+  const safeMascotState = ["hello", "think"].includes(mascotState)
+    ? mascotState
+    : "think";
   return `<div class="exb-qbody" id="exb-qbody">
-        ${mascot ? `<img class="exb-mascot" src="/skins/mascot-${esc(mascotState)}.png" alt="" aria-hidden="true" />` : ""}
+        ${mascot ? `<img class="exb-mascot" src="/skins/mascot-${safeMascotState}.png" alt="" aria-hidden="true" />` : ""}
         <p class="exb-qnum">${esc(examUi("qNum", "Question"))} ${num}</p>
         <div class="exb-qhead">
           ${muteButtonHTML()}

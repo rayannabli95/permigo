@@ -9,7 +9,12 @@ import { icon } from "@/utils/icons.js";
 import { medallion } from "@/utils/medallions.js";
 import { volantImg } from "@/utils/volant.js";
 import { getCurUser } from "@/auth/cur-user.js";
-import { esc, escAttr } from "@/utils/escape.js";
+import {
+  esc,
+  escAttr,
+  safeAssetUrl,
+  safeCssColor,
+} from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import {
   CATALOG,
@@ -319,6 +324,8 @@ const STYLE = `<style>
   letter-spacing: .1em; text-transform: uppercase;
   padding: 5px 12px; border-radius: 99px;
   margin-bottom: 10px;
+  color: var(--rarity-color, var(--mu2));
+  background: color-mix(in srgb, var(--rarity-color, var(--mu2)) 16%, transparent);
 }
 .gal-modal-nom { font: 800 21px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); letter-spacing: -.02em; margin-bottom: 8px; }
 .gal-modal-desc { font: 500 14px/1.5 'Inter', sans-serif; color: var(--mu); margin-bottom: 16px; }
@@ -457,6 +464,25 @@ export async function mount(root) {
 
   let activeTab = "trophees";
 
+  function applyGalleryStyles(scope) {
+    scope.querySelectorAll("[data-gal-color]").forEach((element) => {
+      element.style.setProperty(
+        "--gc",
+        safeCssColor(element.dataset.galColor, "var(--mu2)"),
+      );
+    });
+    scope.querySelectorAll("[data-rarity-color]").forEach((element) => {
+      element.style.setProperty(
+        "--rarity-color",
+        safeCssColor(element.dataset.rarityColor, "var(--mu2)"),
+      );
+    });
+    scope.querySelectorAll("[data-gal-bg]").forEach((element) => {
+      const url = safeAssetUrl(element.dataset.galBg);
+      if (url) element.style.backgroundImage = `url("${url}")`;
+    });
+  }
+
   function renderTrophees() {
     const unlocked = trophees.filter((t) => t.unlocked);
     const locked = trophees.filter((t) => !t.unlocked);
@@ -490,14 +516,18 @@ export async function mount(root) {
   }
 
   function renderTrophyCard(t, unlocked) {
-    const color = t.color || "var(--mu2)";
-    const visual = t.image
-      ? `<img src="${escAttr(t.image)}" alt="${escAttr(t.nom)}" loading="lazy" />`
+    const color = safeCssColor(t.color, "var(--mu2)");
+    const imageUrl = safeAssetUrl(t.image);
+    const visual = imageUrl
+      ? `<img src="${escAttr(imageUrl)}" alt="${escAttr(t.nom)}" loading="lazy" />`
       : `<span class="gal-emoji">${medallion("trophee", "gold", { size: 48 })}</span>`;
+    const ariaLabel = unlocked
+      ? `${gtR("see_troph", "Voir le trophée")} ${t.nom}`
+      : `${gtR("locked_troph", "Trophée verrouillé :")} ${t.nom}`;
     return `
-      <div class="gal-card ${unlocked ? "acquis" : "locked"}" style="--gc:${color}"
+      <div class="gal-card ${unlocked ? "acquis" : "locked"}" data-gal-color="${escAttr(color)}"
            data-id="${escAttr(t.id)}" role="button" tabindex="0"
-           aria-label="${unlocked ? `${gt("see_troph", "Voir le trophée")} ${esc(t.nom)}` : `${gt("locked_troph", "Trophée verrouillé :")} ${esc(t.nom)}`}">
+           aria-label="${escAttr(ariaLabel)}">
         ${!unlocked ? `<div class="gal-lock-badge" aria-hidden="true">${medallion("cadenas", "slate", { size: 18 })}</div>` : ""}
         <div class="gal-card-visual">${visual}</div>
         <div class="gal-card-nom">${grtl(esc(t.nom))}</div>
@@ -517,7 +547,7 @@ export async function mount(root) {
           .map(
             (t) => `
           <div class="gal-permis-card ${t.unlocked ? "acquis" : "locked"}">
-            <div class="gal-permis-preview" style="background-image:url('${esc(t.img)}')"></div>
+            <div class="gal-permis-preview" data-gal-bg="${escAttr(safeAssetUrl(t.img))}"></div>
             <div class="gal-permis-info">
               <div class="gal-permis-nom">${grtl(esc(t.nom))}</div>
               <div class="gal-permis-cond">${grtl(esc(t.cond))}</div>
@@ -540,24 +570,28 @@ export async function mount(root) {
   // Modal d'agrandissement d'un trophée (clic carte)
   function openTrophyModal(t, unlocked) {
     if (document.querySelector(".gal-modal-bg")) return;
-    const color = t.color || "var(--mu2)";
-    const rarityColor = RARITY_COLOR[t.rarity] || "var(--mu2)";
+    const color = safeCssColor(t.color, "var(--mu2)");
+    const rarityColor = safeCssColor(
+      RARITY_COLOR[t.rarity],
+      "var(--mu2)",
+    );
     const rarityTxt = rarityLabel(
       t.rarity,
       RARITY_LABEL[t.rarity] || t.rarity || "",
       getLang(),
     );
-    const visual = t.image
-      ? `<img src="${escAttr(t.image)}" alt="${escAttr(t.nom)}" />`
+    const imageUrl = safeAssetUrl(t.image);
+    const visual = imageUrl
+      ? `<img src="${escAttr(imageUrl)}" alt="${escAttr(t.nom)}" />`
       : `<span class="gal-emoji">${medallion("trophee", "gold", { size: 96 })}</span>`;
 
     const overlay = document.createElement("div");
     overlay.className = "gal-modal-bg";
     overlay.innerHTML = `
-      <div class="gal-modal ${unlocked ? "" : "locked"}" style="--gc:${color}" role="dialog" aria-modal="true" aria-label="${escAttr(t.nom)}">
-        <button class="gal-modal-close" type="button" aria-label="${gt("close", "Fermer")}">×</button>
+      <div class="gal-modal ${unlocked ? "" : "locked"}" data-gal-color="${escAttr(color)}" role="dialog" aria-modal="true" aria-label="${escAttr(t.nom)}">
+        <button class="gal-modal-close" type="button" aria-label="${escAttr(gtR("close", "Fermer"))}">×</button>
         <div class="gal-modal-visual">${visual}</div>
-        ${rarityTxt ? `<div class="gal-modal-rarity" style="color:${rarityColor};background:color-mix(in srgb,${rarityColor} 16%,transparent)">${esc(rarityTxt)}</div>` : ""}
+        ${rarityTxt ? `<div class="gal-modal-rarity" data-rarity-color="${escAttr(rarityColor)}">${esc(rarityTxt)}</div>` : ""}
         <div class="gal-modal-nom">${grtl(esc(t.nom))}</div>
         <div class="gal-modal-desc">${grtl(esc(t.desc || ""))}</div>
         <div class="gal-modal-foot">
@@ -566,6 +600,7 @@ export async function mount(root) {
         </div>
       </div>`;
     document.body.appendChild(overlay);
+    applyGalleryStyles(overlay);
     track("galerie.trophy_opened", { trophy_id: t.id, unlocked });
 
     const onKey = (e) => {
@@ -608,6 +643,7 @@ export async function mount(root) {
           ${activeTab === "trophees" ? renderTrophees() : renderPermisTiers()}
         </div>
       </div>`;
+    applyGalleryStyles(root);
 
     root.querySelectorAll(".gal-tab").forEach((btn) => {
       btn.addEventListener("click", () => {

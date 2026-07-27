@@ -12,7 +12,10 @@
 // nav SANS redirection ni masquage manuel. Cliquer un trophée du rail ouvre donc
 // son détail directement, en place (plus de navigation « page en flou »).
 // ═══════════════════════════════════════════════════════════════
-import { openBottomSheet } from "@/components/common/bottom-sheet.js";
+import {
+  openBottomSheet,
+  trustedBottomSheetHtml,
+} from "@/components/common/bottom-sheet.js";
 import { esc } from "@/utils/escape.js";
 import { icon } from "@/utils/icons.js";
 import { haptic } from "@/utils/haptic.js";
@@ -398,7 +401,7 @@ export function openTrophySheet(t, opts = {}) {
   const { overlay, close } = openBottomSheet({
     bgClass: "trsh-bg",
     sheetSelector: ".trsh",
-    html: _sheetHtml(t, cfg),
+    html: trustedBottomSheetHtml(_sheetHtml(t, cfg)),
     labelledBy: "trsh-title",
     triggerEl: opts.triggerEl,
   });

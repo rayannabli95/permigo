@@ -19,6 +19,7 @@ import { burstConfetti } from "@/components/common/confetti.js";
 import { playWhoosh, playUnlock, playGold, playCoin } from "@/utils/sound.js";
 import { lootToast } from "@/components/eleve/loot-toast.js";
 import { getLang } from "@/utils/lang.js";
+import { ASSETS } from "@/utils/assets.js";
 
 // ── i18n de la COQUE des coffres (EN/AR). Dict LOCAL, repli FR. « volants »
 // → "steering wheels" / « مقود ». Les noms de tiers/labels sont de la coque.
@@ -211,12 +212,12 @@ export function openChestModal({ worldNum, worldName, onClaim }) {
       // Phase 4 : Cascade de récompenses (1300ms+)
       const list = [
         {
-          icon: volantImg(20),
+          iconImage: ASSETS.volantCoin,
           label: `+${tier.gemmes} ${chT("volants", "volants")}`,
           delay: 200,
         },
         {
-          icon: icon("trophy", { size: 20 }),
+          iconName: "trophy",
           label: `Titre "Maître ${worldName}"`,
           delay: 600,
         },
@@ -224,17 +225,28 @@ export function openChestModal({ worldNum, worldName, onClaim }) {
       // Compétence 1 franchie → on débloque le vrai examen blanc (mode officiel).
       // C'est le « premier coffre » : moment idéal pour l'annoncer.
       if (worldNum === 1) {
-        list.push({ icon: "📝", label: "Examen blanc débloqué", delay: 1000 });
+        list.push({
+          iconText: "📝",
+          label: "Examen blanc débloqué",
+          delay: 1000,
+        });
       }
       list.forEach((r) => {
         setTimeout(() => {
           const d = document.createElement("div");
           d.className = "chest-reward";
-          d.innerHTML = `<span class="ic">${r.icon}</span><span class="lb">${esc(r.label)}</span><span class="shine"></span>`;
+          const rewardIcon = r.iconName
+            ? icon(r.iconName, { size: 20 })
+            : r.iconImage
+              ? `<img src="${escAttr(r.iconImage)}" alt="" aria-hidden="true" width="20" height="20">`
+              : esc(r.iconText || "");
+          d.innerHTML = `<span class="ic">${rewardIcon}</span><span class="lb">${esc(r.label)}</span><span class="shine"></span>`;
           rewards.appendChild(d);
           playCoin();
           lootToast({
-            icon: r.icon,
+            iconName: r.iconName,
+            iconImage: r.iconImage,
+            iconText: r.iconText,
             label: r.label,
             subLabel: tier.name,
             kind: "gold",

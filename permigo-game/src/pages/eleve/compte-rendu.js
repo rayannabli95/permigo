@@ -301,7 +301,10 @@ function fmtDate(iso) {
 function renderPage(cr) {
   const dateStr = fmtDate(cr.session_date);
   const total = cr.total_acquis ?? 0;
-  const pct = REMC_TOTAL > 0 ? Math.round((total / REMC_TOTAL) * 100) : 0;
+  const pct =
+    REMC_TOTAL > 0
+      ? Math.max(0, Math.min(100, Math.round((Number(total) / REMC_TOTAL) * 100)))
+      : 0;
 
   const acquis = cr.acquis || [];
   const retravailler = cr.a_retravailler || [];
@@ -371,7 +374,7 @@ function renderPage(cr) {
       <span class="cr-prog-count">${esc(String(total))} / ${esc(String(REMC_TOTAL))}</span>
     </div>
     <div class="cr-prog-track">
-      <div class="cr-prog-fill" style="width:${esc(String(pct))}%"></div>
+      <div class="cr-prog-fill" data-progress="${escAttr(String(pct))}"></div>
     </div>
   </div>
 
@@ -391,6 +394,13 @@ function renderPage(cr) {
 
 // ─── Wire ──────────────────────────────────────────────────────
 function wire(root) {
+  const progress = root.querySelector(".cr-prog-fill");
+  const pct = Math.max(
+    0,
+    Math.min(100, Number(progress?.dataset.progress) || 0),
+  );
+  if (progress) progress.style.width = `${pct}%`;
+
   // Chantier nav simplifiée : « Voir mon itinéraire » renvoie désormais vers
   // le hub « Mon permis » (progression validée par le moniteur) et non plus
   // vers #/parcours (le jeu) — le jeu et le sérieux sont séparés, et un

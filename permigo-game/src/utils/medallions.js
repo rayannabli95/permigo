@@ -17,6 +17,8 @@
 // pour cohabiter sans collision sur une même page.
 // ═══════════════════════════════════════════════════════════════
 
+import { escAttr } from "@/utils/escape.js";
+
 /** Rampes [hotspot, corps, profond] + teinte d'ombre du glyphe. */
 export const MED_RAMPS = {
   gold: ["#fff2c0", "#ffd24a", "#f08a12", "#9a5a05"],
@@ -102,15 +104,24 @@ let _uid = 0;
 
 /**
  * Génère un médaillon 3D premium.
- * @param {keyof typeof GLYPHS|string} name  glyphe (ou SVG brut si inconnu)
+ * @param {keyof typeof GLYPHS|string} name  glyphe du catalogue interne
  * @param {keyof typeof MED_RAMPS} ramp  rampe de couleur
- * @param {{ size?: number, shape?: "coin"|"tile", glow?: boolean, cls?: string, rawGlyph?: string }} opts
+ * @param {{ size?: number, shape?: "coin"|"tile", glow?: boolean, cls?: string }} opts
  */
 export function medallion(name, ramp = "violet", opts = {}) {
-  const { size = 44, shape = "coin", glow = false, cls = "", rawGlyph } = opts;
+  const requestedSize = Number(opts.size);
+  const size = Number.isFinite(requestedSize)
+    ? Math.min(256, Math.max(12, Math.round(requestedSize)))
+    : 44;
+  const shape = opts.shape === "tile" ? "tile" : "coin";
+  const glow = opts.glow === true;
+  const cls = String(opts.cls ?? "")
+    .split(/\s+/)
+    .filter((part) => /^[a-z][a-z0-9_-]*$/i.test(part))
+    .join(" ");
   const [hot, mid, deep, ink] = MED_RAMPS[ramp] || MED_RAMPS.violet;
   const id = `pgm${++_uid}`;
-  const glyph = rawGlyph || GLYPHS[name] || GLYPHS.etoile;
+  const glyph = GLYPHS[name] || GLYPHS.etoile;
 
   const body =
     shape === "tile"
@@ -125,7 +136,7 @@ export function medallion(name, ramp = "violet", opts = {}) {
          <path d="M11.5 23.5a21 12.5 0 0 1 41 0 25 16.5 0 0 0-41 0z" fill="url(#${id}g)"/>
          <path d="M13 40a20.5 11 0 0 0 38 0 24 14.5 0 0 1-38 0z" fill="#fff" opacity=".13"/>`;
 
-  return `<svg class="pg-med ${cls}" width="${size}" height="${size}" viewBox="0 0 64 64" aria-hidden="true"><defs>
+  return `<svg class="pg-med${cls ? ` ${escAttr(cls)}` : ""}" width="${size}" height="${size}" viewBox="0 0 64 64" aria-hidden="true"><defs>
     <radialGradient id="${id}b" cx="36%" cy="27%" r="80%"><stop offset="0" stop-color="${hot}"/><stop offset=".48" stop-color="${mid}"/><stop offset="1" stop-color="${deep}"/></radialGradient>
     <linearGradient id="${id}r" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".85"/><stop offset=".55" stop-color="#fff" stop-opacity=".18"/><stop offset="1" stop-color="#000" stop-opacity=".3"/></linearGradient>
     <linearGradient id="${id}g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".6"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>

@@ -7,7 +7,7 @@
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
-import { esc, escAttr } from "@/utils/escape.js";
+import { esc, escAttr, safeCssColor } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { icon } from "@/utils/icons.js";
 import { navigate } from "@/router.js";
@@ -677,7 +677,7 @@ function render(data, me) {
 
 // ─── KPI renderer ────────────────────────────────────────────────
 function renderKpi(kpi, idx) {
-  const color = kpi.color ?? ACC;
+  const color = safeCssColor(kpi.color, ACC);
   const val =
     kpi.value !== null && kpi.value !== undefined ? String(kpi.value) : "—";
   const unit = kpi.unit
@@ -694,7 +694,7 @@ function renderKpi(kpi, idx) {
   }
 
   return `
-    <div class="ck-kpi" style="--kpi-color:${esc(color)}">
+    <div class="ck-kpi" data-kpi-color="${escAttr(color)}">
       <div class="ck-kpi-label">${esc(kpi.label)}</div>
       <div class="ck-kpi-val">${esc(val)}${unit}</div>
       ${deltaHtml}
@@ -742,9 +742,9 @@ function renderDonut(cohorts) {
     const largeArc = seg.pct > 0.5 ? 1 : 0;
 
     if (seg.pct >= 0.99) {
-      svgPaths += `<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${seg.color}" stroke-width="18" data-cohort="${escAttr(seg.key)}"/>`;
+      svgPaths += `<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${escAttr(safeCssColor(seg.color, ACC))}" stroke-width="18" data-cohort="${escAttr(seg.key)}"/>`;
     } else {
-      svgPaths += `<path d="M ${x1} ${y1} A ${R} ${R} 0 ${largeArc} 1 ${x2} ${y2}" fill="none" stroke="${escAttr(seg.color)}" stroke-width="18" stroke-linecap="butt" data-cohort="${escAttr(seg.key)}" style="cursor:pointer"/>`;
+      svgPaths += `<path d="M ${x1} ${y1} A ${R} ${R} 0 ${largeArc} 1 ${x2} ${y2}" fill="none" stroke="${escAttr(safeCssColor(seg.color, ACC))}" stroke-width="18" stroke-linecap="butt" data-cohort="${escAttr(seg.key)}" style="cursor:pointer"/>`;
     }
   }
 
@@ -756,7 +756,7 @@ function renderDonut(cohorts) {
     const pct = total > 0 ? Math.round((count / total) * 100) : 0;
     return `
       <div class="ck-legend-row" data-cohort="${escAttr(key)}">
-        <div class="ck-legend-dot" style="background:${esc(meta.color)}"></div>
+        <div class="ck-legend-dot" data-legend-color="${escAttr(safeCssColor(meta.color, ACC))}"></div>
         <div class="ck-legend-label">${esc(meta.label)}</div>
         <div class="ck-legend-val">${count}</div>
         <div class="ck-legend-pct">${pct}%</div>
@@ -825,6 +825,19 @@ function renderMon(mon, idx, maxVal) {
 
 // ─── Wire ────────────────────────────────────────────────────────
 function wire(root, me) {
+  root.querySelectorAll("[data-kpi-color]").forEach((element) => {
+    element.style.setProperty(
+      "--kpi-color",
+      safeCssColor(element.dataset.kpiColor, ACC),
+    );
+  });
+  root.querySelectorAll("[data-legend-color]").forEach((element) => {
+    element.style.backgroundColor = safeCssColor(
+      element.dataset.legendColor,
+      ACC,
+    );
+  });
+
   // Animate moniteur bars
   root.querySelectorAll(".ck-mon-bar-fill[data-target]").forEach((el) => {
     setTimeout(() => {
@@ -866,7 +879,8 @@ function wire(root, me) {
       const titleEl = root.querySelector("#ck-bs-title");
       const subEl = root.querySelector("#ck-bs-sub");
       const listEl = root.querySelector("#ck-bs-list");
-      if (titleEl) titleEl.style.color = meta.color;
+      if (titleEl)
+        titleEl.style.color = safeCssColor(meta.color, ACC);
       if (titleEl) titleEl.textContent = `Groupe : ${meta.label}`;
       if (subEl) subEl.textContent = "Chargement…";
       if (listEl)

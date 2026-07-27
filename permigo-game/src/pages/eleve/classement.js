@@ -345,7 +345,7 @@ function _myRow(rows) {
 }
 function _fmtScore(ligue) {
   const of = OF[ligue];
-  return (r) => `${r.score ?? 0}<span class="of">/${of}</span>`;
+  return (r) => ({ value: r.score ?? 0, suffix: `/${of}` });
 }
 
 // Palier courant (pour la ligne « Toi ») + rail des paliers.

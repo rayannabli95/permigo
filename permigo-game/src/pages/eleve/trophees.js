@@ -12,7 +12,10 @@ import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { haptic } from "@/utils/haptic.js";
 import { toast } from "@/components/common/toast.js";
-import { openBottomSheet } from "@/components/common/bottom-sheet.js";
+import {
+  openBottomSheet,
+  trustedBottomSheetHtml,
+} from "@/components/common/bottom-sheet.js";
 import { CATALOG, shortProgress } from "@/data/achievements.js";
 import { recompensesTabs } from "@/components/eleve/recompenses-tabs.js";
 import { getLang } from "@/utils/lang.js";
@@ -927,7 +930,7 @@ function showModal(def, unlockData, totalUnlocked) {
   const { overlay, close: closeModal } = openBottomSheet({
     bgClass: "tr2-modal-bg",
     sheetSelector: ".tr2-modal",
-    html,
+    html: trustedBottomSheetHtml(html),
   });
   track("trophy.modal_opened", { key: def.key, unlocked: isUnlocked });
   overlay

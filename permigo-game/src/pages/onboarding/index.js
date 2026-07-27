@@ -22,7 +22,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser, setCurUser } from "@/auth/cur-user.js";
-import { esc, escAttr } from "@/utils/escape.js";
+import { esc, escAttr, safeCssColor } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { ASSETS } from "@/utils/assets.js";
 import { haptic } from "@/utils/haptic.js";
@@ -353,7 +353,7 @@ export async function mount(root) {
                   aria-checked="${c.id === accentId ? "true" : "false"}"
                   aria-label="${escAttr(c.name)}"
                   type="button"
-                  style="--sw:${esc(c.a)};--sw-dk:${esc(c.adk)}"
+                  style="${escAttr(`--sw:${safeCssColor(c.a, "#6c63ff")};--sw-dk:${safeCssColor(c.adk, "#4a3fc9")}`)}"
                 >
                   <span class="ob-color-dot" aria-hidden="true"></span>
                 </button>`,

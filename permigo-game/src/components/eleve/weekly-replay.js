@@ -68,6 +68,12 @@ export function playReplay(stats) {
 
   const hoursThisWeek = Number(stats.hoursThisWeek) || 0;
   const hoursLastWeek = Number(stats.hoursLastWeek) || 0;
+  const compsValidated = Math.max(
+    0,
+    Math.trunc(Number(stats.compsValidated) || 0),
+  );
+  const monsReview = Math.max(0, Math.min(5, Number(stats.monsReview) || 0));
+  const streak = Math.max(0, Math.trunc(Number(stats.streak) || 0));
   const delta =
     hoursLastWeek > 0
       ? Math.round(((hoursThisWeek - hoursLastWeek) / hoursLastWeek) * 100)
@@ -81,7 +87,7 @@ export function playReplay(stats) {
           ? `${delta}% vs semaine dernière`
           : "Stable vs semaine dernière";
 
-  const cards = [
+  const cardDefinitions = [
     {
       bg: "linear-gradient(180deg,#1e1b4b 0%,#312e81 50%,var(--adx) 100%)",
       content: `
@@ -104,9 +110,9 @@ export function playReplay(stats) {
       bg: "linear-gradient(180deg,#064e3b 0%,var(--gr) 50%,#34d399 100%)",
       content: `
         <div class="wrep-tag">COMPÉTENCES</div>
-        <div class="wrep-big">${stats.compsValidated}</div>
-        <div class="wrep-medium">${stats.compsValidated === 1 ? "compétence validée" : "compétences validées"}</div>
-        <div class="wrep-meta">+${stats.compsValidated * 100} XP gagnés</div>
+        <div class="wrep-big">${compsValidated}</div>
+        <div class="wrep-medium">${compsValidated === 1 ? "compétence validée" : "compétences validées"}</div>
+        <div class="wrep-meta">+${compsValidated * 100} XP gagnés</div>
       `,
     },
     {
@@ -114,8 +120,8 @@ export function playReplay(stats) {
       content: stats.topLessonHour
         ? `
         <div class="wrep-tag">${icon("star", { size: 14, strokeWidth: 2 })} MOMENT FORT</div>
-        <div class="wrep-em">${stats.monsReview >= 4 ? icon("trophy", { size: 72, strokeWidth: 1 }) : icon("zap", { size: 72, strokeWidth: 1 })}</div>
-        <h2 class="wrep-h2">${stats.monsReview ? `Note ${stats.monsReview}/5` : "Une belle session"}</h2>
+        <div class="wrep-em">${monsReview >= 4 ? icon("trophy", { size: 72, strokeWidth: 1 }) : icon("zap", { size: 72, strokeWidth: 1 })}</div>
+        <h2 class="wrep-h2">${monsReview ? `Note ${monsReview}/5` : "Une belle session"}</h2>
         <div class="wrep-medium">${esc(stats.topLessonHour)}${stats.topLessonLieu ? " · " + esc(stats.topLessonLieu) : ""}</div>
       `
         : `
@@ -129,9 +135,9 @@ export function playReplay(stats) {
       bg: "linear-gradient(180deg,#451a03 0%,#a16207 50%,var(--aml2) 100%)",
       content: `
         <div class="wrep-tag">SÉRIE</div>
-        <div class="wrep-big">${stats.streak || 1}<small>j</small></div>
-        <div class="wrep-medium">${(stats.streak || 1) > 1 ? "d'affilée" : "à continuer demain"}</div>
-        ${stats.streak >= 7 ? '<div class="wrep-meta">Tu deviens un habitué</div>' : '<div class="wrep-meta">Reviens demain pour grandir la série</div>'}
+        <div class="wrep-big">${streak || 1}<small>j</small></div>
+        <div class="wrep-medium">${(streak || 1) > 1 ? "d'affilée" : "à continuer demain"}</div>
+        ${streak >= 7 ? '<div class="wrep-meta">Tu deviens un habitué</div>' : '<div class="wrep-meta">Reviens demain pour grandir la série</div>'}
       `,
     },
     {
@@ -144,6 +150,11 @@ export function playReplay(stats) {
       `,
     },
   ];
+  const cards = cardDefinitions.map(({ bg, content }) => {
+    const template = document.createElement("template");
+    template.innerHTML = content;
+    return { bg, content: template.content };
+  });
 
   const overlay = document.createElement("div");
   overlay.className = "wrep-overlay";
@@ -166,7 +177,11 @@ export function playReplay(stats) {
     const stage = overlay.querySelector("#wrep-stage");
     const c = cards[idx];
     overlay.style.background = c.bg;
-    stage.innerHTML = `<div class="wrep-card" key="${idx}">${c.content}</div>`;
+    const card = document.createElement("div");
+    card.className = "wrep-card";
+    card.dataset.card = String(idx);
+    card.appendChild(c.content.cloneNode(true));
+    stage.replaceChildren(card);
 
     // Update progress bars
     overlay.querySelectorAll(".wrep-pbar").forEach((pb, i) => {

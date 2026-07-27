@@ -1138,7 +1138,7 @@ function _renderReferral(stats) {
     code
       ? `
   <div class="prf-ref-code-wrap">
-    <span class="prf-ref-code" id="prf-ref-code" aria-label="Mon code parrainage : ${esc(code)}">${esc(code)}</span>
+    <span class="prf-ref-code" id="prf-ref-code" aria-label="${escAttr(`Mon code parrainage : ${code}`)}">${esc(code)}</span>
     <button class="prf-ref-copy-btn" id="prf-ref-copy" title="Copier le code" aria-label="Copier mon code parrainage">
       ${icon("copy", { size: 18 })}
     </button>

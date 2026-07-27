@@ -340,15 +340,21 @@ export function resultHTML({ score, total, ctaLabel = "Continuer" }) {
 }
 
 // Mascotte d'angle (état pensif/célébration/coach)
+const MASCOT_STATES = new Set(["think", "celebrate", "coach", "hello"]);
+function safeMascotState(state) {
+  return MASCOT_STATES.has(state) ? state : "think";
+}
+
 export function mascotHTML(state = "think") {
-  return `<img class="qz-mascot" src="/skins/mascot-${esc(state)}.png" alt="" aria-hidden="true" />`;
+  const safeState = safeMascotState(state);
+  return `<img class="qz-mascot" src="/skins/mascot-${safeState}.png" alt="" aria-hidden="true" />`;
 }
 
 export function setMascot(container, state) {
   const img = container.querySelector(".qz-mascot");
   if (!img) return;
   // Swap src only if actually different (avoids spurious reflow)
-  const next = `/skins/mascot-${state}.png`;
+  const next = `/skins/mascot-${safeMascotState(state)}.png`;
   if (img.src.endsWith(next.replace(/^\//, ""))) return;
   img.src = next;
   // Micro-pop on state change: remove + force reflow + re-add so the
