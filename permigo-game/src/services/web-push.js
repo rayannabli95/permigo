@@ -119,13 +119,17 @@ export async function maybeSendStreakRiskNotif() {
     now.getMonth(),
     now.getDate(),
   ).toISOString();
-  const { data: todayEvents } = await sb
+  const { data: todayEvents, error } = await sb
     .from("events_analytics")
     .select("id")
     .eq("user_id", me.id)
     .gte("created_at", localMidnight)
     .limit(1);
 
+  if (error) {
+    console.error("[web-push] vérification activité du jour", error);
+    return;
+  }
   if (todayEvents?.length) return;
 
   localStorage.setItem(lastSentKey, "1");

@@ -658,7 +658,27 @@ export async function mount(root) {
     return;
   }
 
-  await loadData();
+  const loaded = await loadData();
+  if (!loaded) {
+    root.innerHTML = `
+      ${STYLE}
+      <div class="me-page anim-slide-up">
+        <div class="me-hero">
+          <div class="me-hero-content">
+            <p class="me-hero-kicker">Suivi des élèves</p>
+            <h1 class="me-hero-title">« Mes élèves » indisponible</h1>
+            <p class="me-hero-sub">Vérifie ta connexion, puis réessaie.</p>
+            <div class="me-hero-actions">
+              <button id="me-retry" type="button">Réessayer</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    root
+      .querySelector("#me-retry")
+      ?.addEventListener("click", () => mount(root));
+    return;
+  }
   // Onglet Classement en entrée (deep-link/legacy) → charge AVANT le 1er
   // rendu pour éviter un flash « chargement » supplémentaire.
   if (_tab === "classement") await ensureRanking(_clMode);
@@ -715,8 +735,17 @@ async function loadData() {
     // Best-effort : si la RPC n'est pas déployée, la liste marche sans étiquette.
     sb
       .rpc("get_eleves_engagement")
-      .then((r) => r.data || [])
-      .catch(() => []),
+      .then((r) => {
+        if (r.error) {
+          console.error("[mes-eleves] engagement", r.error);
+          return [];
+        }
+        return r.data || [];
+      })
+      .catch((error) => {
+        console.error("[mes-eleves] engagement", error);
+        return [];
+      }),
   ]);
   const engMap = new Map();
   (engRows || []).forEach((r) => engMap.set(r.eleve_id, r));
@@ -726,7 +755,7 @@ async function loadData() {
     console.error("[mes-eleves] query error", e1);
     toast("Vérifie ta connexion, puis réessaie.", "error");
     _eleves = [];
-    return;
+    return false;
   }
 
   if (!elevesRaw || elevesRaw.length === 0) {
@@ -757,8 +786,16 @@ async function loadData() {
   //    seule contribution du moniteur courant (sinon 0/31 trompeur pour un
   //    élève suivi par un collègue). RLS partage déjà les validations école.
   const { data: valsRaw, error: e2 } = valsRes;
-
-  if (e2) console.error("[mes-eleves] validations query error", e2);
+  const { data: examsRaw, error: e3 } = examsRes;
+  if (e2 || e3) {
+    console.error("[mes-eleves] données de progression", {
+      validations: e2 || null,
+      examens: e3 || null,
+    });
+    toast("Progression des élèves indisponible — réessaie.", "error");
+    _eleves = [];
+    return false;
+  }
 
   // Map : eleve_id → Set des competence_id acquis (total école).
   // Le Set alimente à la fois le count et la liste des compétences manquantes.
@@ -780,10 +817,6 @@ async function loadData() {
   });
 
   // 3. Dernier examen par élève (le plus récent fait foi).
-  const { data: examsRaw, error: e3 } = examsRes;
-
-  if (e3) console.error("[mes-eleves] examens query error", e3);
-
   const lastExamByEleve = {};
   (examsRaw || []).forEach((ex) => {
     // ordonné desc → la première ligne vue par élève est la plus récente
@@ -833,6 +866,7 @@ async function loadData() {
         return touchedEleves.has(a.id) ? -1 : 1;
       return (a.prenom || "").localeCompare(b.prenom || "");
     });
+  return true;
 }
 
 // ─── Drill mode : élèves bloqués sur une compétence ──────────────

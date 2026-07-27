@@ -386,26 +386,45 @@ export async function mount(root, eleveId) {
     </div>
   `;
 
-  await loadData();
+  const loadError = await loadData();
+  if (loadError) {
+    console.error("[livret-remc] chargement", loadError);
+    root.innerHTML = `
+      ${STYLE}
+      <div class="lr-page">
+        <div class="lr-err">
+          <div class="lr-err-ico">${illus("clipboard", { size: 64 })}</div>
+          Livret indisponible. Vérifie ta connexion, puis réessaie.
+          <button id="lr-retry" type="button">Réessayer</button>
+        </div>
+      </div>
+    `;
+    root
+      .querySelector("#lr-retry")
+      ?.addEventListener("click", () => mount(root, _eleveId));
+    return;
+  }
   render();
 }
 
 // ─── Data ─────────────────────────────────────────────────────────
 async function loadData() {
   // Profil élève
-  const { data: profil } = await sb
+  const { data: profil, error: profilError } = await sb
     .from("profiles")
     .select("id, prenom, nom")
     .eq("id", _eleveId)
     .single();
+  if (profilError) return profilError;
 
   _eleveProfil = profil || { prenom: "Élève", nom: "" };
 
   // Toutes les validations de cet élève (tous enseignants — pour voir l'état complet)
-  const { data: vals } = await sb
+  const { data: vals, error: validationsError } = await sb
     .from("validations")
     .select("competence_id, statut, note_enseignant, validated_at")
     .eq("eleve_id", _eleveId);
+  if (validationsError) return validationsError;
 
   _valsRaw = vals || [];
   _validationsMap = {};
@@ -473,6 +492,7 @@ async function loadData() {
   } catch (e) {
     _engagement = null;
   }
+  return null;
 }
 
 // Streak réellement vivant : la valeur stockée ne se reset qu'au prochain login

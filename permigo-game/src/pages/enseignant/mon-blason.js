@@ -325,8 +325,13 @@ async function _loadData(me) {
         : Promise.resolve({ data: null }),
     ]);
 
-  if (valsRes.error) throw valsRes.error;
-  if (elevesRes.error) throw elevesRes.error;
+  const loadError =
+    valsRes.error ||
+    profileRes.error ||
+    elevesRes.error ||
+    activeRes.error ||
+    ecoleRes.error;
+  if (loadError) throw loadError;
 
   const eleveIds = (elevesRes.data || []).map((e) => e.id);
   const studentsTotal = eleveIds.length;

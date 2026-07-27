@@ -893,7 +893,23 @@ function wireItems(root, me, initialUnread) {
         wrap.style.height = "0";
         wrap.style.opacity = "0";
         wrap.style.overflow = "hidden";
-        await sb.from("notifications").delete().eq("id", id);
+        try {
+          const { error } = await sb
+            .from("notifications")
+            .delete()
+            .eq("id", id);
+          if (error) throw error;
+        } catch (error) {
+          console.error("[notifications] suppression", error);
+          wrap.style.transition = "";
+          wrap.style.height = "";
+          wrap.style.opacity = "";
+          wrap.style.overflow = "";
+          const item = wrap.querySelector(".nf2-item");
+          if (item) item.style.transform = "";
+          toast("Suppression impossible — réessaie", "error");
+          return;
+        }
         setTimeout(() => wrap.remove(), 350);
         if (wrap.querySelector(".nf2-item.unread")) {
           unreadCount = Math.max(0, unreadCount - 1);

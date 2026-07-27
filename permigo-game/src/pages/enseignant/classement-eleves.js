@@ -74,7 +74,15 @@ export async function fetchRanking(me, { isTheorie = false } = {}) {
     sb.from("streaks").select("user_id, current_streak, last_activity_date"),
   ]);
 
-  if (elevesRes.error) {
+  const loadError =
+    elevesRes.error || valsRes.error || examsRes.error || streaksRes.error;
+  if (loadError) {
+    console.error("[classement-eleves] chargement", {
+      eleves: elevesRes.error || null,
+      validations: valsRes.error || null,
+      examens: examsRes.error || null,
+      series: streaksRes.error || null,
+    });
     return { error: true, ranked: [], hof: [], isTheorie };
   }
 

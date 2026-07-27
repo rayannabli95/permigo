@@ -33,6 +33,7 @@ import {
 } from "@/services/web-push.js";
 import { mountMoniteurRanking } from "@/components/enseignant/moniteur-ranking.js";
 import { getLang } from "@/utils/lang.js";
+import { toast } from "@/components/common/toast.js";
 
 // ─── Labels rôle ─────────────────────────────────────────────
 let _areneEscHandler = null;
@@ -45,6 +46,29 @@ export function unmount() {
     document.removeEventListener("keydown", _areneEscHandler);
     _areneEscHandler = null;
   }
+}
+
+function _queryError(result) {
+  if (result?.status === "rejected") {
+    return result.reason || new Error("Requête Supabase rejetée");
+  }
+  if (result?.status === "fulfilled") return result.value?.error || null;
+  return result?.error || null;
+}
+
+function _queryData(result) {
+  if (_queryError(result)) return null;
+  return result?.status === "fulfilled" ? result.value?.data : result?.data;
+}
+
+function _reportQueryErrors(scope, entries, toastMessage = "") {
+  const errors = entries
+    .map(([label, result]) => [label, _queryError(result)])
+    .filter(([, error]) => error);
+  if (!errors.length) return false;
+  console.error(`[profil] ${scope}`, Object.fromEntries(errors));
+  if (toastMessage) toast(toastMessage, "error");
+  return true;
 }
 
 const ROLE_LABELS = {
@@ -645,33 +669,44 @@ export async function mount(root) {
   root.innerHTML = `${STYLE}<div class="prf"><div class="skel skel-card" style="height:220px;margin:0 0 10px"></div><div class="skel skel-card" style="height:80px;margin:0 16px 10px"></div><div class="skel skel-card" style="height:140px;margin:0 16px"></div></div>`;
 
   // ── Fetch profil complet ──────────────────────────────────
-  const { data: profile } = await sb
+  const { data: profile, error: profileError } = await sb
     .from("profiles")
     .select(
       "email, prenom, nom, xp, streak_pro_days, created_at, avatar_url, banner_url, username",
     )
     .eq("id", me.id)
     .single();
+  if (profileError) {
+    console.error("[profil] profil principal", profileError);
+    toast("Certaines données du profil sont indisponibles.", "error");
+  }
 
   // ── Fetch élève : validations + streak + parrainage ───────
   let permisData = null;
   let eleveStreak = 0;
   let referralStats = null;
   if (me.role === "eleve") {
-    const [{ data: valData }, { data: streakRow }, { data: rStats }] =
-      await Promise.all([
-        sb
-          .from("validations")
-          .select("competence_id")
-          .eq("eleve_id", me.id)
-          .eq("statut", "acquis"),
-        sb
-          .from("streaks")
-          .select("current_streak, last_activity_date")
-          .eq("user_id", me.id)
-          .maybeSingle(),
-        sb.rpc("get_my_referral_stats"),
-      ]);
+    const [valRes, streakRes, referralRes] = await Promise.all([
+      sb
+        .from("validations")
+        .select("competence_id")
+        .eq("eleve_id", me.id)
+        .eq("statut", "acquis"),
+      sb
+        .from("streaks")
+        .select("current_streak, last_activity_date")
+        .eq("user_id", me.id)
+        .maybeSingle(),
+      sb.rpc("get_my_referral_stats"),
+    ]);
+    _reportQueryErrors("données élève", [
+      ["validations", valRes],
+      ["série", streakRes],
+      ["parrainage", referralRes],
+    ]);
+    const valData = _queryData(valRes);
+    const streakRow = _queryData(streakRes);
+    const rStats = _queryData(referralRes);
     const _yStrE = yesterdayKey();
     // Série d'activité : périmée si dernière activité < hier (cf. accueil).
     eleveStreak =
@@ -693,21 +728,28 @@ export async function mount(root) {
   if (me.role === "enseignant") {
     const yearStart = `${new Date().getFullYear()}-01-01`;
     const today = new Date().toISOString().slice(0, 10);
-    const [{ data: valData }, { data: streakProfile }, { data: elevesData }] =
-      await Promise.all([
-        sb
-          .from("validations")
-          .select("competence_id, eleve_id, validated_at")
-          .eq("validated_by", me.id)
-          .gte("validated_at", yearStart),
-        sb.from("profiles").select("streak_pro_days").eq("id", me.id).single(),
-        sb
-          .from("profiles")
-          .select("id")
-          .eq("role", "eleve")
-          .eq("enseignant_id", me.id)
-          .is("deleted_at", null),
-      ]);
+    const [validationsRes, streakProfileRes, elevesRes] = await Promise.all([
+      sb
+        .from("validations")
+        .select("competence_id, eleve_id, validated_at")
+        .eq("validated_by", me.id)
+        .gte("validated_at", yearStart),
+      sb.from("profiles").select("streak_pro_days").eq("id", me.id).single(),
+      sb
+        .from("profiles")
+        .select("id")
+        .eq("role", "eleve")
+        .eq("enseignant_id", me.id)
+        .is("deleted_at", null),
+    ]);
+    _reportQueryErrors("statistiques enseignant", [
+      ["validations", validationsRes],
+      ["série", streakProfileRes],
+      ["élèves", elevesRes],
+    ]);
+    const valData = _queryData(validationsRes);
+    const streakProfile = _queryData(streakProfileRes);
+    const elevesData = _queryData(elevesRes);
 
     const vals = valData || [];
     const elevesIds = new Set((elevesData || []).map((e) => e.id));
@@ -1804,12 +1846,26 @@ async function mountEleveArene(root, me) {
       sb.from("self_validations").select("competence_id").eq("eleve_id", me.id),
     ]);
 
-  const profile = profileRes.value?.data;
-  const streakRow = streakRes.value?.data;
-  const validatedSet = new Set(
-    (valRes.value?.data || []).map((v) => v.competence_id),
+  _reportQueryErrors(
+    "carte élève",
+    [
+      ["profil", profileRes],
+      ["validations", valRes],
+      ["série", streakRes],
+      ["trophées", achRes],
+      ["auto-validations", selfValRes],
+    ],
+    "Certaines données du profil sont indisponibles.",
   );
-  for (const s of selfValRes.value?.data || [])
+  const profile = _queryData(profileRes);
+  const streakRow = _queryData(streakRes);
+  const valData = _queryData(valRes);
+  const selfValData = _queryData(selfValRes);
+  const achData = _queryData(achRes);
+  const validatedSet = new Set(
+    (valData || []).map((v) => v.competence_id),
+  );
+  for (const s of selfValData || [])
     validatedSet.add(s.competence_id);
   const validated = validatedSet.size;
   const _yStrS = yesterdayKey();
@@ -1858,9 +1914,9 @@ async function mountEleveArene(root, me) {
       });
   }
 
-  const achOk = !achRes.value?.error && Array.isArray(achRes.value?.data);
+  const achOk = Array.isArray(achData);
   const unlockedKeys = new Set(
-    (achRes.value?.data || []).map((u) => u.achievement_key),
+    (achData || []).map((u) => u.achievement_key),
   );
   const achievements = _areneAchievements(
     unlockedKeys,
@@ -2434,12 +2490,7 @@ async function mountEnseignantArene(root, me) {
   const today = new Date().toISOString().slice(0, 10);
   const month = new Date().toISOString().slice(0, 7) + "-01";
 
-  const [
-    { data: profile },
-    { data: valData },
-    { data: elevesData },
-    rankingRes,
-  ] = await Promise.all([
+  const [profileRes, validationsRes, elevesRes, rankingRes] = await Promise.all([
     sb
       .from("profiles")
       .select("email, prenom, nom, created_at, streak_pro_days, avatar_url")
@@ -2458,9 +2509,23 @@ async function mountEnseignantArene(root, me) {
       .is("deleted_at", null),
     sb.rpc("get_moniteur_ranking", { p_month: month }).then(
       (r) => r,
-      () => ({ data: null }),
+      (error) => ({ data: null, error }),
     ),
   ]);
+  _reportQueryErrors(
+    "carte enseignant",
+    [
+      ["profil", profileRes],
+      ["validations", validationsRes],
+      ["élèves", elevesRes],
+      ["classement", rankingRes],
+    ],
+    "Certaines données du profil sont indisponibles.",
+  );
+  const profile = _queryData(profileRes);
+  const valData = _queryData(validationsRes);
+  const elevesData = _queryData(elevesRes);
+  const rankingData = _queryData(rankingRes);
 
   // ── Stats Mon Année ───────────────────────────────────────
   const vals = valData || [];
@@ -2484,7 +2549,7 @@ async function mountEnseignantArene(root, me) {
   ).size;
 
   // ── Classement réel ───────────────────────────────────────
-  const ranking = Array.isArray(rankingRes?.data) ? rankingRes.data : [];
+  const ranking = Array.isArray(rankingData) ? rankingData : [];
   const myIdx = ranking.findIndex((r) => r.moniteur_id === me.id);
   const mine = myIdx >= 0 ? ranking[myIdx] : null;
   const myRank = mine?.rank ?? 0;

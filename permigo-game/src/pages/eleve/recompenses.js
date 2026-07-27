@@ -68,6 +68,7 @@ import {
 const REC_I18N = {
   en: {
     title: "Rewards",
+    partial: "Some rewards are temporarily unavailable.",
     serie_lab: "Streak:",
     day_sing: "day",
     day_plur: "days",
@@ -124,6 +125,7 @@ const REC_I18N = {
   },
   ar: {
     title: "المكافآت",
+    partial: "بعض المكافآت غير متاحة مؤقتًا.",
     serie_lab: "السلسلة:",
     day_sing: "يوم",
     day_plur: "أيام",
@@ -272,6 +274,11 @@ const STYLE = `<style>
     var(--bg);
 }
 .rec-title { font: 800 26px/1.1 'Baloo 2', cursive; letter-spacing: .2px; margin: 4px 2px 12px; }
+.rec-partial {
+  margin: 0 0 12px; padding: 10px 12px; border-radius: 12px;
+  background: var(--amp); border: 1px solid color-mix(in srgb, var(--am) 35%, var(--bo));
+  color: var(--am-txt); font: 700 12px/1.4 'Nunito', sans-serif;
+}
 
 /* ── Série (statut discret) ── */
 .rec-serie {
@@ -819,6 +826,31 @@ export async function mount(root) {
     sb.from("self_validations").select("competence_id").eq("eleve_id", me.id),
   ]);
 
+  const resultError = (result) =>
+    result.status === "rejected"
+      ? result.reason || new Error("Requête Supabase rejetée")
+      : result.value?.error;
+  const supabaseResults = [
+    ["roue", spinRes],
+    ["lots moniteur", rewardsRes],
+    ["trophées", achRes],
+    ["validations", validRes],
+    ["catalogue", itemsRes],
+    ["classement conduite", condRes],
+    ["classement révision", revRes],
+    ["auto-validations", selfValRes],
+  ];
+  const dataErrors = supabaseResults
+    .map(([label, result]) => [label, resultError(result)])
+    .filter(([, error]) => error);
+  if (dataErrors.length) {
+    console.error(
+      "[recompenses] chargement partiel",
+      Object.fromEntries(dataErrors),
+    );
+  }
+  const partialData = dataErrors.length > 0;
+
   // ── Roue ──
   const spinAvailable =
     spinRes.status === "fulfilled" && !spinRes.value.error
@@ -851,12 +883,14 @@ export async function mount(root) {
   const freshTrophies = getFreshTrophies(unlockedDefs);
 
   // Compétences acquises (moniteur ou auto-validées), dédupliquées.
+  const validOk = !resultError(validRes);
+  const selfValOk = !resultError(selfValRes);
   const _compSet = new Set(
-    validRes.status === "fulfilled"
+    validOk
       ? (validRes.value?.data || []).map((v) => v.competence_id)
       : [],
   );
-  if (selfValRes.status === "fulfilled") {
+  if (selfValOk) {
     for (const s of selfValRes.value?.data || []) _compSet.add(s.competence_id);
   }
   const validatedCount = _compSet.size;
@@ -891,6 +925,7 @@ export async function mount(root) {
   root.innerHTML = `${STYLE}
   <div class="rec anim-slide-up">
     <h1 class="rec-title" tabindex="-1">${rt("title", "Récompenses")}</h1>
+    ${partialData ? `<div class="rec-partial" role="status">${rtD("partial", "Certaines récompenses sont temporairement indisponibles.")}</div>` : ""}
     ${
       streak.count > 0
         ? `<div class="rec-serie">${medallion("flamme", "orange", { size: 22 })}<b>${getLang() === "fr" ? `Série : ${streak.count} jour${streak.count > 1 ? "s" : ""}` : `${rt("serie_lab", "Série :")} ${streak.count} ${rt(streak.count > 1 ? "day_plur" : "day_sing", "jours")}`}</b></div>`
@@ -940,12 +975,14 @@ export async function mount(root) {
   });
 
   // ── Ligue : composant partagé (identique à accueil.js) ──
+  const condOk = !resultError(condRes);
+  const revOk = !resultError(revRes);
   const conduite =
-    condRes.status === "fulfilled" && Array.isArray(condRes.value?.data)
+    condOk && Array.isArray(condRes.value?.data)
       ? condRes.value.data
       : [];
   const revision =
-    revRes.status === "fulfilled" && Array.isArray(revRes.value?.data)
+    revOk && Array.isArray(revRes.value?.data)
       ? revRes.value.data
       : [];
   if (!document.getElementById("lgh-css")) {

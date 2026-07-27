@@ -545,14 +545,37 @@ export async function loadData(meId) {
       sb.from("self_validations").select("competence_id").eq("eleve_id", meId),
     ]);
 
+  const resultError = (result) =>
+    result.status === "rejected"
+      ? result.reason || new Error("Requête Supabase rejetée")
+      : result.value?.error;
+  const validError = resultError(validRes);
+  const streakError = resultError(streakRes);
+  const quizError = resultError(quizRes);
+  const predictError = resultError(predictRes);
+  const selfValError = resultError(selfValRes);
+  const queryErrors = [
+    ["validations", validError],
+    ["série", streakError],
+    ["quiz", quizError],
+    ["prédiction", predictError],
+    ["auto-validations", selfValError],
+  ].filter(([, error]) => error);
+  if (queryErrors.length) {
+    console.error(
+      "[examen] chargement partiel",
+      Object.fromEntries(queryErrors),
+    );
+  }
+
   // Compétences acquises (distinctes). On dérive les BASES C1-C3 (24)
   // pour aligner la readiness élève sur la règle moniteur (« prêt » =
   // 100% des bases validées par le moniteur).
-  const validRows = validRes.value?.data ?? [];
+  const validRows = validError ? [] : validRes.value?.data ?? [];
   const acquisSet = new Set(
     validRows.map((v) => v.competence_id).filter(Boolean),
   );
-  for (const s of selfValRes.value?.data ?? [])
+  for (const s of selfValError ? [] : selfValRes.value?.data ?? [])
     if (s.competence_id) acquisSet.add(s.competence_id);
   const compsCount = acquisSet.size;
   const baseAcquis = [...acquisSet].filter((c) => /^C[123]/.test(c)).length;
@@ -561,7 +584,7 @@ export async function loadData(meId) {
   // login. Si la dernière activité est plus vieille qu'hier, la série est morte
   // → 0 (sinon la checklist « Suis-je prêt ? » coche « série active » à tort pour
   // un élève inactif qui ouvre #/examen sans passer par l'accueil).
-  const _streakRow = streakRes.value?.data;
+  const _streakRow = streakError ? null : streakRes.value?.data;
   const _yesterdayStr = new Date(Date.now() - 86400000)
     .toISOString()
     .slice(0, 10);
@@ -569,17 +592,22 @@ export async function loadData(meId) {
     _streakRow && _streakRow.last_activity_date >= _yesterdayStr
       ? (_streakRow.current_streak ?? 0)
       : 0;
-  const scores = quizRes.value?.data ?? [];
+  const scores = quizError ? [] : quizRes.value?.data ?? [];
   const avgScore = scores.length
     ? Math.round(scores.reduce((s, r) => s + (r.score ?? 0), 0) / scores.length)
     : null;
 
-  const predictRaw = predictRes.value?.data;
+  const predictRaw = predictError ? null : predictRes.value?.data;
   const predict = predictRaw?.error ? null : predictRaw || null;
 
   // Fetch critique : si les validations n'ont pas pu être lues, on ne doit
   // pas afficher « 0 compétence » ni une readiness fausse (dégradation silencieuse)
-  const loadFailed = validRes.status !== "fulfilled" || !!validRes.value?.error;
+  const loadFailed = !!(
+    validError ||
+    streakError ||
+    quizError ||
+    selfValError
+  );
 
   return { compsCount, baseAcquis, streak, avgScore, predict, loadFailed };
 }

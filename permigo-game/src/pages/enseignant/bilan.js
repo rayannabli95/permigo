@@ -541,8 +541,16 @@ export async function mount(root, eleveId) {
     bilanRes.status === "fulfilled"
       ? bilanRes.value
       : { data: null, error: bilanRes.reason };
+  const ecoleError =
+    ecoleRes.status === "rejected"
+      ? ecoleRes.reason || new Error("Lecture de l'école rejetée")
+      : ecoleRes.value?.error;
+  if (ecoleError) {
+    // Le bilan reste utilisable : seul le nom d'école repasse sur « PermiGo ».
+    console.error("[bilan] nom de l'école", ecoleError);
+  }
   const ecoleNom =
-    (ecoleRes.status === "fulfilled" && ecoleRes.value?.data?.nom) || "PermiGo";
+    (!ecoleError && ecoleRes.value?.data?.nom) || "PermiGo";
 
   if (error || !data) {
     toast("« Bilan » indisponible", "error");
