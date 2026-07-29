@@ -466,6 +466,7 @@ function renderStyles() {
   flex-shrink: 0;
 }
 .msg-back-btn {
+  position: relative;
   background: rgba(255,255,255,.08);
   border: none;
   border-radius: 8px;
@@ -479,6 +480,7 @@ function renderStyles() {
   justify-content: center;
   transition: background 120ms;
 }
+.msg-back-btn::before { content: ''; position: absolute; inset: -4px; }
 .msg-back-btn:active { background: rgba(255,255,255,.15); }
 .msg-conv-name {
   font: 700 16px/1 'Plus Jakarta Sans', sans-serif;

@@ -215,7 +215,7 @@ const STYLE = `
   position: absolute;
   top: max(20px, env(safe-area-inset-top, 0px));
   right: 20px;
-  width: 36px; height: 36px;
+  width: 44px; height: 44px;
   border-radius: 50%;
   background: rgba(255,255,255,.12);
   color: #fff;

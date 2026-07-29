@@ -1231,14 +1231,18 @@ const STYLE = `<style>
   .ob-toggle-ts { font: 500 12.5px/1.3 'Plus Jakarta Sans', sans-serif; color: var(--ob-ink-3); }
 
   .ob-switch {
-    flex: 0 0 auto; width: 62px; height: 36px; border-radius: 99px;
+    flex: 0 0 auto; width: 62px; height: 44px; border-radius: 99px;
     padding: 3px; cursor: pointer; position: relative; border: 0;
+    background: transparent;
+  }
+  .ob-switch::before {
+    content: ""; position: absolute; inset: 4px 0; border-radius: 99px;
     background: linear-gradient(180deg, #5a3fb0, var(--ob-vio-d));
     box-shadow: 0 3px 8px rgba(124,77,255,.45), 0 1px 0 rgba(255,255,255,.18) inset, 0 -2px 4px rgba(0,0,0,.25) inset;
     transition: background .2s;
   }
   .ob-knob {
-    position: absolute; top: 3px; left: 29px;
+    position: absolute; top: 7px; left: 29px;
     width: 30px; height: 30px; border-radius: 50%;
     background: linear-gradient(180deg, #fff, #e7e0ff);
     box-shadow: 0 3px 6px rgba(0,0,0,.4), 0 1px 0 rgba(255,255,255,.9) inset;
@@ -1248,7 +1252,7 @@ const STYLE = `<style>
     content: ""; width: 10px; height: 10px; border-radius: 50%;
     background: var(--ob-or); box-shadow: 0 0 8px var(--ob-or);
   }
-  .ob-switch.off { background: linear-gradient(180deg, #3a3060, #241a4d); }
+  .ob-switch.off::before { background: linear-gradient(180deg, #3a3060, #241a4d); }
   .ob-switch.off .ob-knob { left: 3px; }
   .ob-switch.off .ob-knob::after { background: #6b6090; box-shadow: none; }
 
@@ -1496,16 +1500,21 @@ const STYLE = `<style>
   html[data-theme="light"] .ob-toggle-tt { color: var(--c-ink); }
   html[data-theme="light"] .ob-toggle-ts { color: var(--c-ink-3); }
   html[data-theme="light"] .ob-switch {
-    width: 58px; height: 34px;
+    width: 58px; height: 44px;
+    background: transparent;
+    box-shadow: none;
+  }
+  html[data-theme="light"] .ob-switch::before {
+    inset: 5px 0;
     background: linear-gradient(135deg, var(--ob-violet), var(--ob-violet-d));
     box-shadow: inset 0 1px 3px rgba(0,0,0,.18), 0 2px 8px rgba(124,77,255,.3);
   }
   html[data-theme="light"] .ob-knob {
-    left: 27px; width: 28px; height: 28px;
+    top: 8px; left: 27px; width: 28px; height: 28px;
     background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,.25);
   }
   html[data-theme="light"] .ob-knob::after { display: none; }
-  html[data-theme="light"] .ob-switch.off { background: #cfc7e6; }
+  html[data-theme="light"] .ob-switch.off::before { background: #cfc7e6; }
   html[data-theme="light"] .ob-switch.off .ob-knob { left: 3px; }
   html[data-theme="light"] .ob-micro {
     color: var(--c-ink-2); padding-top: 14px; margin-top: 14px;

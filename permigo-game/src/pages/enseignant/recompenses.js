@@ -58,7 +58,7 @@ const STYLE = `<style>
 }
 .mrw-top { display: flex; align-items: center; gap: 10px; padding: 6px 0 8px; }
 .mrw-back {
-  width: 40px; height: 40px; flex: none; border-radius: 13px; border: 1px solid var(--line);
+  width: 44px; height: 44px; flex: none; border-radius: 13px; border: 1px solid var(--line);
   background: var(--card); color: var(--ink); display: grid; place-items: center; cursor: pointer; box-shadow: var(--sh);
 }
 .mrw-back svg { width: 20px; height: 20px; }
@@ -97,16 +97,16 @@ const STYLE = `<style>
 .mrw-wins-tx b { display: block; font: 800 13.5px/1.2 'Nunito', sans-serif; }
 .mrw-wins-tx span { font: 700 11px/1.3 'Nunito', sans-serif; color: var(--mu2); }
 .mrw-wins-code { flex: none; font: 800 13px/1 'Fredoka', sans-serif; letter-spacing: .06em; color: var(--ind-deep); background: var(--ind-soft); border: 1px dashed rgba(99,102,241,.4); border-radius: 9px; padding: 6px 9px; }
-.mrw-wins-btn { flex: none; min-height: 38px; padding: 0 14px; border: 0; border-radius: 10px; background: linear-gradient(180deg, var(--ind-2), var(--ind)); color: #fff; font: 600 12.5px/1 'Fredoka', sans-serif; cursor: pointer; }
+.mrw-wins-btn { flex: none; min-height: 44px; padding: 0 14px; border: 0; border-radius: 10px; background: linear-gradient(180deg, var(--ind-2), var(--ind)); color: #fff; font: 600 12.5px/1 'Fredoka', sans-serif; cursor: pointer; }
 .mrw-wins-btn:disabled { opacity: .55; }
 .mrw-wins-done { flex: none; font: 700 12px/1 'Fredoka', sans-serif; color: var(--green); display: inline-flex; align-items: center; gap: 5px; }
 .mrw-wins-empty { font: 700 12.5px/1.5 'Nunito', sans-serif; color: var(--mu); text-align: center; padding: 4px 0; }
 .mrw-lot-del { flex: none; width: 30px; height: 30px; border: 0; border-radius: 9px; background: transparent; color: var(--mu2); cursor: pointer; display: grid; place-items: center; }
 .mrw-lot-del svg { width: 16px; height: 16px; }
 
-.mrw-sw { position: relative; flex: none; width: 46px; height: 28px; }
+.mrw-sw { position: relative; flex: none; width: 46px; height: 44px; }
 .mrw-sw input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
-.mrw-sw i { position: absolute; inset: 0; border-radius: 999px; background: #d7daea; transition: background .18s; pointer-events: none; }
+.mrw-sw i { position: absolute; inset: 8px 0; border-radius: 999px; background: #d7daea; transition: background .18s; pointer-events: none; }
 .mrw-sw i::after { content: ""; position: absolute; left: 3px; top: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 2px 5px rgba(30,34,70,.25); transition: transform .18s; }
 .mrw-sw input:checked + i { background: var(--ind); }
 .mrw-sw input:checked + i::after { transform: translateX(18px); }

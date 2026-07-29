@@ -2080,7 +2080,7 @@ function render({
     .acc-install-txt{min-width:0;flex:1}
     .acc-install-t{font:700 13px/1.2 'Plus Jakarta Sans',sans-serif;color:var(--ink)}
     .acc-install-s{font:500 11px/1.3 'Inter',sans-serif;color:var(--mu);margin-top:2px}
-    .acc-install-btn{flex:0 0 auto;min-height:36px;padding:0 14px;border:0;border-radius:10px;background:linear-gradient(180deg,var(--acc-vio-lt),var(--acc-vio));color:#fff;font:700 12px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer;box-shadow:0 3px 8px -2px color-mix(in srgb, var(--a) 45%, transparent)}
+    .acc-install-btn{flex:0 0 auto;min-height:44px;padding:0 14px;border:0;border-radius:10px;background:linear-gradient(180deg,var(--acc-vio-lt),var(--acc-vio));color:#fff;font:700 12px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer;box-shadow:0 3px 8px -2px color-mix(in srgb, var(--a) 45%, transparent)}
     .acc-install-btn:active{transform:scale(.96)}
     </style>
     <div class="acc-install" id="acc-install">

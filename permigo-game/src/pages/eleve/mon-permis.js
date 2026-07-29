@@ -435,11 +435,11 @@ const STYLE = `<style>
 .mp-exam-date-wrap.open { display: flex; }
 .mp-exam-date-input {
   flex: 1; border: 1.5px solid var(--bo); border-radius: 12px; padding: 9px 12px; font: 500 13px/1 'Inter', sans-serif;
-  color: var(--ink); background: var(--bg); outline: none; min-height: 40px;
+  color: var(--ink); background: var(--bg); outline: none; min-height: 44px;
 }
 .mp-exam-date-save {
   padding: 9px 14px; background: var(--a); color: var(--a-ink); border: 0; border-radius: 12px;
-  font: 700 12.5px/1 'Nunito', sans-serif; cursor: pointer; min-height: 40px;
+  font: 700 12.5px/1 'Nunito', sans-serif; cursor: pointer; min-height: 44px;
 }
 .mp-exam-nodate { text-align: center; padding: 6px 0 2px; }
 .mp-exam-nodate p { font: 600 12.5px/1.4 'Inter', sans-serif; color: var(--mu); margin-bottom: 10px; }
@@ -483,7 +483,7 @@ const STYLE = `<style>
 .mp-err p { font: 600 13px/1.5 'Inter', sans-serif; color: var(--mu3); margin: 8px 0 12px; }
 .mp-err button {
   padding: 10px 20px; border: 0; border-radius: 12px; background: var(--a); color: var(--a-ink);
-  font: 700 13px/1 'Inter', sans-serif; cursor: pointer; min-height: 40px;
+  font: 700 13px/1 'Inter', sans-serif; cursor: pointer; min-height: 44px;
 }
 
 /* ── Skeleton ── */

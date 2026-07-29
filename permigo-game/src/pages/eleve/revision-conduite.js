@@ -228,7 +228,7 @@ const STYLE = `<style>
 .rvc { max-width: 480px; margin: 0 auto; padding: 0 16px calc(110px + env(safe-area-inset-bottom));
   background: var(--bg); color: var(--ink); font-family: 'Inter', sans-serif; }
 .rvc-top { display:flex; align-items:center; gap:10px; padding:16px 0 8px; }
-.rvc-back { width:38px; height:38px; border-radius:11px; border:0; cursor:pointer;
+.rvc-back { width:44px; height:44px; border-radius:11px; border:0; cursor:pointer;
   background: var(--su, #fff); color: var(--ink); font-size:20px; line-height:1;
   box-shadow: 0 1px 4px rgba(0,0,0,.08); flex-shrink:0; }
 .rvc-back:active { transform: scale(0.95); }
@@ -281,7 +281,7 @@ const FD_STYLE = `<style>
 
 .fd-hero{ position:relative; padding:16px 18px 20px; }
 .fd-topbar{ display:flex; align-items:center; gap:12px; }
-.fd-back{ width:42px; height:42px; flex:0 0 42px; border-radius:14px; cursor:pointer;
+.fd-back{ width:44px; height:44px; flex:0 0 44px; border-radius:14px; cursor:pointer;
   background:linear-gradient(180deg,#ffffff,#efecff); border:1px solid #e6e2fb; border-top-color:#fff;
   box-shadow:0 4px 0 rgba(20,12,60,.35), inset 0 1px 0 rgba(255,255,255,.9);
   display:flex; align-items:center; justify-content:center; }
@@ -449,7 +449,7 @@ const MONDE_STYLE = `<style>
 .wm-gold{ background:linear-gradient(180deg,#fff2cf 0%,#ffe093 38%,#f4b24a 72%,#e0921f 100%);
   -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent; }
 .wm-hero{ display:flex; align-items:center; gap:12px; padding:16px 18px 4px; }
-.wm-back{ flex:0 0 38px; width:38px; height:38px; border-radius:12px; cursor:pointer;
+.wm-back{ flex:0 0 44px; width:44px; height:44px; border-radius:12px; cursor:pointer;
   background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.14); display:flex; align-items:center; justify-content:center; }
 .wm-back:active{ transform:scale(.95); }
@@ -497,7 +497,7 @@ const HUB_STYLE = `<style>
   -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent; }
 
 .hub-hero{ display:flex; align-items:center; gap:10px; padding:16px 18px 6px; }
-.hub-back{ flex:0 0 38px; width:38px; height:38px; border-radius:12px; cursor:pointer;
+.hub-back{ flex:0 0 44px; width:44px; height:44px; border-radius:12px; cursor:pointer;
   background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.14); display:flex; align-items:center; justify-content:center; }
 .hub-back:active{ transform:scale(.95); }

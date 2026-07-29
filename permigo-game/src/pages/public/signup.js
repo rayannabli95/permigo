@@ -188,7 +188,7 @@ const STYLE = `<style>
   .sg-pwd-wrap .sg-input { width: 100%; box-sizing: border-box; padding-right: 50px; }
   .sg-pwd-toggle {
     position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
-    width: 40px; height: 40px; border: 0; background: none; cursor: pointer;
+    width: 44px; height: 44px; border: 0; background: none; cursor: pointer;
     color: #b7afe8; display: flex; align-items: center; justify-content: center;
     border-radius: 10px; -webkit-tap-highlight-color: transparent;
   }

@@ -116,7 +116,7 @@ const STYLE = `<style>
   }
   .vs-hd-inner { position: relative; z-index: 2; display: flex; align-items: center; gap: 12px; }
   .vs-back {
-    width: 40px; height: 40px; flex-shrink: 0;
+    width: 44px; height: 44px; flex-shrink: 0;
     border: 1.5px solid rgba(255,255,255,.22); background: rgba(255,255,255,.1);
     border-radius: var(--ens-r, 16px); color: #fff;
     display: flex; align-items: center; justify-content: center; cursor: pointer;
@@ -394,7 +394,7 @@ const STYLE = `<style>
   }
   .vs-cr2-share {
     flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px;
-    min-height: 38px; padding: 0 11px; border-radius: 10px;
+    min-height: 44px; padding: 0 11px; border-radius: 10px;
     border: 1.5px solid var(--bo); background: var(--su); color: var(--ink);
     font: 700 12px/1 var(--ens-body, 'Inter'), sans-serif; cursor: pointer;
     -webkit-tap-highlight-color: transparent; transition: background .12s;

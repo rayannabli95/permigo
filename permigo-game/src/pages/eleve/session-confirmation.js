@@ -49,6 +49,7 @@ const STYLE = `<style>
   gap: 10px;
 }
 .sc-back {
+  position: relative;
   width: 36px; height: 36px;
   border-radius: 10px;
   background: var(--bg2);
@@ -60,6 +61,7 @@ const STYLE = `<style>
   -webkit-tap-highlight-color: transparent;
   transition: background .12s;
 }
+.sc-back::before { content: ''; position: absolute; inset: -4px; }
 .sc-back:active { background: var(--bo); transform: scale(.93); }
 .sc-hd-title {
   font: 700 16px/1 'Plus Jakarta Sans', sans-serif;

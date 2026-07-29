@@ -303,6 +303,7 @@ const STYLE = `<style>
   font-size: 18px; line-height: 1;
   display: grid; place-items: center;
 }
+.gal-modal-close::before { content: ''; position: absolute; inset: -6px; }
 .gal-modal-visual {
   width: 132px; height: 132px;
   margin: 4px auto 16px;
