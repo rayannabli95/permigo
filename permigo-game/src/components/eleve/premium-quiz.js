@@ -130,7 +130,7 @@ function pqArr(key, frArr) {
 // + or, boutons plastique 3D, Baloo 2. Mascotte non utilisée ici (questions texte).
 const STYLE = `<style>
 .pq { position:relative; max-width: 480px; margin: 0 auto; min-height: 100dvh;
-  padding: 0 18px calc(20px + env(safe-area-inset-bottom));
+  padding: env(safe-area-inset-top, 0px) 18px calc(20px + env(safe-area-inset-bottom, 0px));
   display: flex; flex-direction: column; isolation:isolate;
   color: #f4f1ff; font-family: 'Fredoka','Inter', sans-serif;
   background:

@@ -87,7 +87,7 @@ const STYLE = `<style>
     background: #eef1fb;
     font-family: 'Inter', sans-serif;
     color: #1a1c2e;
-    min-height: 100vh;
+    min-height: 100dvh;
   }
 
   /* ── Salutation ── */

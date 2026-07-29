@@ -46,7 +46,7 @@ export const ARENE_CSS = `<style>
   --bronze:#cd8b5b; --bronze-dk:#a96a3c;
   --aink:#f4f2ff; --asoft:#c7c2e8; --amute:#9a93c8; --aup:#3ddc84;
   position:relative; isolation:isolate;
-  min-height:100vh; max-width:520px;
+  min-height:100dvh; max-width:520px;
   /* Remonte de la hauteur déjà comptée par #app : le fond nuit glisse sous le
      header verre (pattern livret), le contenu reste sous le header. */
   margin:calc(-1 * (var(--th,52px) + env(safe-area-inset-top,0px))) auto 0;

@@ -157,6 +157,8 @@ const STYLE = `
     display: flex;
     align-items: stretch;
     z-index: 300;
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
   #bottom-nav[hidden] { display: none !important; } /* #11 — masquée pendant les épreuves */

@@ -30,8 +30,8 @@ const STYLE = `
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-left: 16px;
-    padding-right: 12px;
+    padding-left: calc(16px + env(safe-area-inset-left, 0px));
+    padding-right: calc(12px + env(safe-area-inset-right, 0px));
     z-index: 300;
   }
   .pg-logo-btn {
