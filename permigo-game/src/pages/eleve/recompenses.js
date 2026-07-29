@@ -80,6 +80,8 @@ const REC_I18N = {
     sub_big_head: "Avatars, backgrounds, titles… and sometimes a",
     sub_big_gift: "real gift",
     sub_big_from: "from",
+    sub_big_full:
+      "Avatars, backgrounds, titles… and sometimes a <b>real gift</b> from {name}.",
     cta_spin: "Spin the wheel",
     cta_view: "See the Wheel",
     claim_chest_t: "Chest to open",
@@ -91,6 +93,8 @@ const REC_I18N = {
     cap2_next: "Next chest:",
     cap2_serie: "-day streak",
     cap2_left: "to go:",
+    cap2_full:
+      "Next chest: <b>{days}-day streak</b> — {remaining} {day_word} to go",
     tabs_aria: "Rewards rooms",
     tab_shop: "Shop",
     tab_col: "My collection",
@@ -137,6 +141,8 @@ const REC_I18N = {
     sub_big_head: "صور رمزية وخلفيات وألقاب… وأحيانًا",
     sub_big_gift: "هدية حقيقية",
     sub_big_from: "من",
+    sub_big_full:
+      "صور رمزية وخلفيات وألقاب… وأحيانًا <b>هدية حقيقية</b> من {name}.",
     cta_spin: "أدر العجلة",
     cta_view: "عرض العجلة",
     claim_chest_t: "صندوق للفتح",
@@ -148,6 +154,8 @@ const REC_I18N = {
     cap2_next: "الصندوق التالي:",
     cap2_serie: "سلسلة أيام:",
     cap2_left: "المتبقي:",
+    cap2_full:
+      "الصندوق التالي: <b>سلسلة {days} أيام</b> — بقي {remaining} {day_word}",
     tabs_aria: "غرف المكافآت",
     tab_shop: "المتجر",
     tab_col: "مجموعتي",
@@ -181,12 +189,16 @@ const REC_I18N = {
     tier_holographic: "خلفية «هولوغرافي»",
   },
 };
-function rtR(key, fr) {
+function rtR(key, fr, vars) {
   const l = getLang();
-  return (l !== "fr" && REC_I18N[l]?.[key]) || fr;
+  let value = (l !== "fr" && REC_I18N[l]?.[key]) || fr;
+  if (vars)
+    for (const [name, replacement] of Object.entries(vars))
+      value = value.split(`{${name}}`).join(String(replacement));
+  return value;
 }
-function rt(key, fr) {
-  return esc(rtR(key, fr));
+function rt(key, fr, vars) {
+  return esc(rtR(key, fr, vars));
 }
 // Texte traduit posé en HTML : span RTL en arabe (ponctuation au bon endroit).
 function rtD(key, fr) {
@@ -515,11 +527,13 @@ function renderHero(ctx) {
     : rtD("t_back", `Reviens demain pour rejouer`);
   const sub =
     anyBig && moniteurPrenom
-      ? lang === "fr"
-        ? `Avatars, fonds, titres… et parfois un <b>vrai cadeau</b> signé ${esc(moniteurPrenom)}.`
-        : rrtl(
-            `${rt("sub_big_head", "Avatars, fonds, titres… et parfois un")} <b>${rt("sub_big_gift", "vrai cadeau")}</b> ${rt("sub_big_from", "signé")} ${esc(moniteurPrenom)}.`,
-          )
+      ? rrtl(
+          rtR(
+            "sub_big_full",
+            "Avatars, fonds, titres… et parfois un <b>vrai cadeau</b> signé {name}.",
+            { name: esc(moniteurPrenom) },
+          ),
+        )
       : rtD(
           "sub_std",
           `Des volants, des avatars et des titres à gagner chaque jour.`,
@@ -564,13 +578,20 @@ function renderHero(ctx) {
       ? nextStreakMilestone(streak.count)
       : nextStreakMilestone(0);
   const _capTxt = next
-    ? lang === "en"
-      ? `${rt("cap2_next", "Prochain coffre :")} <b>${next.days}-day streak</b> — ${next.remaining} day${next.remaining > 1 ? "s" : ""} to go`
-      : lang === "ar"
-        ? rrtl(
-            `الصندوق التالي: <b>سلسلة ${next.days} أيام</b> — بقي ${next.remaining} ${next.remaining > 1 ? "أيام" : "يوم"}`,
-          )
-        : `Prochain coffre : <b>série ${next.days} jours</b> — encore ${next.remaining} jour${next.remaining > 1 ? "s" : ""}`
+    ? rrtl(
+        rtR(
+          "cap2_full",
+          "Prochain coffre : <b>série {days} jours</b> — encore {remaining} {day_word}",
+          {
+            days: next.days,
+            remaining: next.remaining,
+            day_word: rtR(
+              next.remaining > 1 ? "day_plur" : "day_sing",
+              next.remaining > 1 ? "jours" : "jour",
+            ),
+          },
+        ),
+      )
     : "";
   const capLine2 = next
     ? `<div class="rec-hero-cap">
