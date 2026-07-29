@@ -56,7 +56,7 @@ export const TIERS = {
 export const TIER_ORDER = ["bronze", "argent", "or", "platine", "diamant"];
 
 // ─── Les 12 trophées (jalons pédagogiques) ───────────────────────
-export const TROPHEES = [
+const TROPHEES = [
   // ─ Bronze
   {
     id: "premiere_seance",
@@ -188,7 +188,7 @@ export const TROPHEES = [
 ];
 
 // Badge 3D par jalon (assets public/skins/badge-3d-*.webp).
-export const BADGE_IMG = {
+const BADGE_IMG = {
   premiere_seance: "badge-3d-01",
   dix_comps: "badge-3d-02",
   premier_eleve: "badge-3d-03",

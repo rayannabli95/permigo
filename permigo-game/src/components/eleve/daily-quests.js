@@ -66,7 +66,7 @@ function dqRtl(html) {
 // Nettoie un libellé de quête venu de la DB : retire le suffixe technique
 // « (≥70%) » / « (70 %) » en fin de titre — du jargon qui ne parle pas à
 // l'élève (« Réussir 1 quiz (≥70%) » → « Réussir 1 quiz »).
-export function cleanQuestTitle(title) {
+function cleanQuestTitle(title) {
   return String(title ?? "")
     .replace(/\s*\([^)]*%\)\s*$/u, "")
     .trim();

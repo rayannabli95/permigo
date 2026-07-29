@@ -86,7 +86,7 @@ const school = `
   <circle cx="46" cy="34" r="6" fill="#fff"/>
   <rect x="56" y="30" width="20" height="8" rx="4" fill="#fff"/>`;
 
-export const ILLUS = {
+const ILLUS = {
   car,
   wheel,
   podium,

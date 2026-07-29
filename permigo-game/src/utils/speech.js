@@ -14,7 +14,7 @@
 const MUTE_KEY = "permigo_quiz_muted";
 const hasTTS = typeof window !== "undefined" && "speechSynthesis" in window;
 
-export function isQuizMuted() {
+function isQuizMuted() {
   try {
     return localStorage.getItem(MUTE_KEY) === "1";
   } catch {
@@ -22,7 +22,7 @@ export function isQuizMuted() {
   }
 }
 
-export function setQuizMuted(muted) {
+function setQuizMuted(muted) {
   try {
     localStorage.setItem(MUTE_KEY, muted ? "1" : "0");
   } catch {
@@ -86,7 +86,7 @@ export function stopSpeaking() {
   }
 }
 
-export function speakQuestion(text) {
+function speakQuestion(text) {
   if (!hasTTS || isQuizMuted()) return;
   const txt = plainText(text);
   if (!txt) return;

@@ -32,7 +32,7 @@ export function getTheme() {
 let _mql = null;
 let _mqlListener = null;
 
-export function listenSystem() {
+function listenSystem() {
   if (!window.matchMedia) return;
 
   _mql = window.matchMedia('(prefers-color-scheme: dark)');

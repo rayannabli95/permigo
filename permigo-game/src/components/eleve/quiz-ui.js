@@ -18,7 +18,7 @@ import {
 // ─── Texte ───────────────────────────────────────────────────────
 
 // Esc + **mot** → <strong> + auto-bold des chiffres/unités/mots-pièges
-export function richEsc(str) {
+function richEsc(str) {
   return esc(String(str ?? ""))
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
     .replace(
@@ -175,14 +175,14 @@ function pickVaried(pool, last) {
   return i;
 }
 
-export function pickPraise(lang = getLang()) {
+function pickPraise(lang = getLang()) {
   _lastPraise = pickVaried(PRAISES, _lastPraise);
   return (
     (lang !== "fr" && PRAISES_I18N[lang]?.[_lastPraise]) || PRAISES[_lastPraise]
   );
 }
 
-export function pickCoachHead(lang = getLang()) {
+function pickCoachHead(lang = getLang()) {
   _lastCoach = pickVaried(COACH_HEADS, _lastCoach);
   return (
     (lang !== "fr" && COACH_HEADS_I18N[lang]?.[_lastCoach]) ||
@@ -209,7 +209,7 @@ const RESULT_MSGS = {
   ],
 };
 
-export function pickResultMsg({ perfect, passed }, lang = getLang()) {
+function pickResultMsg({ perfect, passed }, lang = getLang()) {
   const key = perfect ? "perfect" : passed ? "passed" : "learn";
   const pool = RESULT_MSGS[key];
   const i = Math.floor(Math.random() * pool.length);
@@ -221,7 +221,7 @@ export function pickResultMsg({ perfect, passed }, lang = getLang()) {
 const KEYS = ["A", "B", "C", "D", "E", "F"];
 
 // Pips segmentés (1 par question) — remplace la barre fine
-export function pipsHTML(idx, total) {
+function pipsHTML(idx, total) {
   const pips = Array.from({ length: total }, (_, i) => {
     const cls = i < idx ? "done" : i === idx ? "cur" : "";
     return `<span class="qz-pip ${cls}"></span>`;

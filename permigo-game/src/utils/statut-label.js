@@ -26,7 +26,7 @@ const FALLBACK = STATUT_CFG.null;
  * @param {string|null|undefined} statut
  * @returns {{label: string, color: string, bg: string, dot: string}}
  */
-export function statutCfg(statut) {
+function statutCfg(statut) {
   if (statut == null) return FALLBACK;
   return STATUT_CFG[statut] || FALLBACK;
 }

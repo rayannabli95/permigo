@@ -7,7 +7,7 @@
 // ═══════════════════════════════════════════════════
 import { getLang } from "@/utils/lang.js";
 
-export const EXAM_UI = {
+const EXAM_UI = {
  "en": {
   "qNum": "Question",
   "verdictOk": "Correct answer",
@@ -27,7 +27,7 @@ export const EXAM_UI = {
 };
 
 // clé = id de question (ex "p1q1") → { en:{enonce,options[],explication}, ar:{...} }
-export const EXAM_I18N = {
+const EXAM_I18N = {
  "p1q1": {
   "en": {
    "enonce": "You arrive at a roundabout. Who goes first?",

@@ -126,7 +126,7 @@ export function detectAndPlayUnlock({
 }
 
 /** Lance manuellement la cinematic pour un monde donné. */
-export function playUnlockCinematic({
+function playUnlockCinematic({
   worldNum,
   worldName,
   worldColor = "var(--aml2)",

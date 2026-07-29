@@ -62,7 +62,7 @@ export const ACCENTS = [
 
 const DEFAULT = "violet";
 
-export function byId(id) {
+function byId(id) {
   return ACCENTS.find((x) => x.id === id) || ACCENTS[0];
 }
 

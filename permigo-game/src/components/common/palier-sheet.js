@@ -160,7 +160,7 @@ export function openPalierSheet(tier, totalVals = 0) {
   requestAnimationFrame(() => ov.classList.add("show"));
 }
 
-export function closePalierSheet() {
+function closePalierSheet() {
   if (_onKeydown) {
     document.removeEventListener("keydown", _onKeydown);
     _onKeydown = null;

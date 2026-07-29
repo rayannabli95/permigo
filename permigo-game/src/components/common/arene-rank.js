@@ -21,7 +21,7 @@ import { renderUserAvatar } from "@/components/common/avatar.js";
 
 // Presets d'accent (couleur, clair, foncé). On peut aussi passer un objet
 // { acc, lt, dk } à areneAccent() pour un accent sur-mesure.
-export const ARENE_ACCENTS = {
+const ARENE_ACCENTS = {
   violet: { acc: "#6d4dff", lt: "#a78bff", dk: "#4a2fc4" }, // Conduite (élève)
   bleu: { acc: "#2563eb", lt: "#60a5fa", dk: "#1d4ed8" }, // Révision (élève)
   indigo: { acc: "#4f46e5", lt: "#8b8bff", dk: "#3730c4" }, // Moniteur

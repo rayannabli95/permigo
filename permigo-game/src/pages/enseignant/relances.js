@@ -19,7 +19,7 @@ import { medallion } from "@/utils/medallions.js";
 // Règle produit : relance élève à 14 jours (aligné sur mes-eleves
 // INACTIF_SEUIL_MS et insights « à relancer > 14j » — le radar était le
 // seul écran à 7j).
-export const COOL_SEUIL_J = 14;
+const COOL_SEUIL_J = 14;
 
 /**
  * Calcule la liste des élèves « refroidis » à partir d'un jeu de profils

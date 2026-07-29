@@ -247,7 +247,7 @@ const STYLE = `
  * Les illustrations doivent exister dans /public/skins/success-*.png (1080×1920).
  * En l'absence d'image, fallback emoji.
  */
-export const CELEBRATE_PRESETS = {
+const CELEBRATE_PRESETS = {
   firstValidation: {
     presetKey: "firstValidation",
     illustration: "/skins/trophy-first-validation.webp",
@@ -347,7 +347,7 @@ function renderConfetti(overlay, count = 24) {
  * @param {string} [opts.trackKey]       event analytics à logger à l'ouverture
  * @returns {Promise<void>} résout à la fermeture
  */
-export function showCelebrate(opts = {}) {
+function showCelebrate(opts = {}) {
   ensureStyle();
 
   const {

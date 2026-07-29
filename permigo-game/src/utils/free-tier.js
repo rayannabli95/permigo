@@ -14,7 +14,7 @@ const LS_KEY = "pg_freetier_v1";
 
 // Quotas quotidiens par « jour Paris » (cf. todayKey, même approche que roue.js).
 // quiz = nombre de QUESTIONS ; fiche / scène = nombre de contenus distincts.
-export const FREE_QUOTAS = { quiz: 3, fiche: 1, scene: 1 };
+const FREE_QUOTAS = { quiz: 3, fiche: 1, scene: 1 };
 
 // Surfaces que l'élève en mode découverte peut explorer librement (chrome
 // affiché ; les quotas sont appliqués DANS la page). Tout le reste est muré
