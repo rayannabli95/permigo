@@ -77,6 +77,7 @@ const MP_I18N = {
     s1_title: "My skills",
     s1_sub: "the 4 chapters of the Permis B (the French driving licence)",
     s1_err: "“My skills” is unavailable. Check your connection and try again.",
+    s2_err: "“My lessons” is unavailable. Check your connection and try again.",
     retry: "Try again",
     lbl_done: "done",
     lbl_locked: "upcoming",
@@ -150,6 +151,7 @@ const MP_I18N = {
     s1_title: "مهاراتي",
     s1_sub: "الفصول الأربعة لرخصة القيادة الفرنسية (Permis B)",
     s1_err: "تعذّر تحميل «مهاراتي». تحقّق من اتصالك ثم أعد المحاولة.",
+    s2_err: "تعذّر تحميل «دروسي». تحقّق من اتصالك ثم أعد المحاولة.",
     retry: "أعد المحاولة",
     lbl_done: "مكتمل",
     lbl_locked: "لاحقًا",
@@ -642,7 +644,18 @@ function renderStep1({
 }
 
 // ─── Étape 2 : mes leçons ───────────────────────────────────────
-function renderStep2({ lastCR, crCount }) {
+function renderStep2({ lastCR, crCount, loadFailed = false }) {
+  if (loadFailed) {
+    return `<section class="mp-step" id="mp-step-lecons">
+      <span class="mp-step-num" aria-hidden="true">2</span>
+      <div class="mp-step-h"><h2 class="mp-step-t">${mpD("s2_title", "Mes leçons")}</h2></div>
+      <div class="mp-err">
+        <p>${mpD("s2_err", "« Mes leçons » indisponible. Vérifie ta connexion, puis réessaie.")}</p>
+        <button id="mp-retry-2" type="button">${mpD("retry", "Réessayer")}</button>
+      </div>
+    </section>`;
+  }
+
   let crHtml;
   if (lastCR) {
     const acquisN = (lastCR.acquis || []).length;
@@ -884,6 +897,9 @@ function wire(root, ctx) {
     .querySelector("#mp-retry-1")
     ?.addEventListener("click", () => mount(root));
   root
+    .querySelector("#mp-retry-2")
+    ?.addEventListener("click", () => mount(root));
+  root
     .querySelector("#mp-retry-3")
     ?.addEventListener("click", () => mount(root));
 
@@ -962,7 +978,8 @@ export async function mount(root) {
         .select("enseignant_id")
         .eq("id", me.id)
         .maybeSingle();
-      if (error || !moi?.enseignant_id) return { data: null };
+      if (error) return { data: null, error };
+      if (!moi?.enseignant_id) return { data: null, error: null };
       return sb
         .from("profiles")
         .select("prenom")
@@ -988,24 +1005,48 @@ export async function mount(root) {
     sb.from("self_validations").select("competence_id").eq("eleve_id", me.id),
   ]);
 
+  const settledError = (result) =>
+    result.status === "rejected"
+      ? result.reason || new Error("Requête Supabase rejetée")
+      : result.value?.error;
+  const valError = settledError(valRes);
+  const profError = settledError(profRes);
+  const sessError = settledError(sessRes);
+  const crCountError = settledError(crCountRes);
+  const selfValError = settledError(selfValRes);
+  const dataErrors = [
+    ["validations", valError],
+    ["profil moniteur", profError],
+    ["séances", sessError],
+    ["compte-rendus", crCountError],
+    ["auto-validations", selfValError],
+  ].filter(([, error]) => error);
+  if (dataErrors.length) {
+    console.error(
+      "[mon-permis] chargement partiel",
+      Object.fromEntries(dataErrors),
+    );
+  }
+
   const examMod = examModRes.status === "fulfilled" ? examModRes.value : null;
   const parcoursMod =
     parcoursModRes.status === "fulfilled" ? parcoursModRes.value : null;
 
   // ── Étape 1 : compétences ──
-  const valOk = valRes.status === "fulfilled" && !valRes.value.error;
+  const valOk = !valError;
+  const selfValOk = !selfValError;
   const validatedMap = {};
   if (valOk) {
     for (const v of valRes.value.data || []) {
       if (v.statut === "acquis") validatedMap[v.competence_id] = true;
     }
   }
-  if (selfValRes.status === "fulfilled" && !selfValRes.value.error) {
+  if (selfValOk) {
     for (const s of selfValRes.value.data || []) {
       if (!validatedMap[s.competence_id]) validatedMap[s.competence_id] = true;
     }
   }
-  const step1Failed = !valOk || !parcoursMod;
+  const step1Failed = !valOk || !selfValOk || !parcoursMod;
   const worldStates = step1Failed
     ? []
     : parcoursMod.computeWorldStates(validatedMap);
@@ -1023,10 +1064,9 @@ export async function mount(root) {
   const currentTitre = worldStates[currentIdx]?.world?.titre || "";
 
   const moniteurPrenom =
-    profRes.status === "fulfilled" ? profRes.value.data?.prenom || null : null;
+    !profError ? profRes.value?.data?.prenom || null : null;
 
-  const sessRows =
-    sessRes.status === "fulfilled" ? sessRes.value.data || [] : [];
+  const sessRows = !sessError ? sessRes.value?.data || [] : [];
   const totalMin = sessRows.reduce(
     (n, r) => n + (Number(r.duration_minutes) || 0),
     0,
@@ -1035,8 +1075,9 @@ export async function mount(root) {
 
   // ── Étape 2 : mes leçons ──
   const lastCR = crRes.status === "fulfilled" ? crRes.value : null;
-  const crCount =
-    crCountRes.status === "fulfilled" ? crCountRes.value.count || 0 : 0;
+  const crCount = !crCountError ? crCountRes.value?.count || 0 : 0;
+  const step2Failed =
+    !!crCountError || crRes.status === "rejected";
 
   // ── Étape 3 : examen ──
   const examData =
@@ -1056,7 +1097,7 @@ export async function mount(root) {
     ${step1Failed ? "" : renderHero({ totalAcquis, currentTitre, allDone, solo })}
     <div class="mp-tl">
       ${renderStep1({ worldStates, step1Failed, totalMin, nbLecons, moniteurPrenom })}
-      ${solo ? "" : renderStep2({ lastCR, crCount })}
+      ${solo ? "" : renderStep2({ lastCR, crCount, loadFailed: step2Failed })}
       ${renderStep3({ examMod, examData, examDate, solo, num: solo ? 2 : 3 })}
     </div>
   </div>`;

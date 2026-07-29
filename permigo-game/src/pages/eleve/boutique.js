@@ -897,8 +897,18 @@ export async function mount(root) {
     sb.rpc("get_items_catalog"),
   ]);
 
+  const profileError =
+    profileRes.status === "rejected"
+      ? profileRes.reason || new Error("Chargement du solde rejeté")
+      : profileRes.value?.error;
+  if (profileError) {
+    // Le solde local reste utilisable ; l'achat renverra ensuite le solde
+    // serveur canonique. On ne transforme pas silencieusement la panne en 0.
+    console.error("[boutique] chargement du solde", profileError);
+  }
+
   // Si le serveur renvoie un solde plus récent, on prend le serveur.
-  const serverBalance = profileRes.value?.data?.gemmes;
+  const serverBalance = profileError ? null : profileRes.value?.data?.gemmes;
   if (typeof serverBalance === "number") {
     gemmes = serverBalance;
     // Met à jour localStorage + notifie le header.

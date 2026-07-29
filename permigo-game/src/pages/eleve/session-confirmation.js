@@ -357,13 +357,19 @@ export async function mount(root, sessionId) {
 
   // Fetch compétences validées pendant cette séance
   const sessionDate = session.session_date ?? session.created_at;
-  const { data: validations } = await sb
+  const { data: validations, error: validationsError } = await sb
     .from("validations")
     .select("competence_id, competences_remc!competence_id(nom), statut")
     .eq("eleve_id", me.id)
     .eq("validated_by", session.moniteur_id)
     .gte("validated_at", sessionDate);
 
+  if (validationsError) {
+    console.error(
+      "[session-confirmation] compétences de la séance",
+      validationsError,
+    );
+  }
   const comps = validations ?? [];
 
   // ─── Render ─────────────────────────────────────────────────
@@ -438,7 +444,9 @@ export async function mount(root, sessionId) {
 
       <!-- Compétences validées -->
       ${
-        comps.length > 0
+        validationsError
+          ? `<div class="sc-comps-empty">Compétences temporairement indisponibles. Tu peux quand même confirmer ou refuser la séance.</div>`
+          : comps.length > 0
           ? `
       <div class="sc-comps">
         <div class="sc-comps-title">Compétences validées · ${comps.length}</div>
