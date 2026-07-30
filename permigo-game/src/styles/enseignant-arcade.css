@@ -321,6 +321,47 @@ body[data-role="enseignant"] .me-seg[hidden] {
     display: flex;
     flex-direction: column;
   }
+
+  /* ── Livret / fiche élève : « qui c'est » à gauche, « où il en est » à
+     droite. C'est LA page que le moniteur ouvre sur son ordi ; elle restait
+     un ruban de 600 px au milieu d'un cadre de 1000 px. À gauche le portrait
+     (progression, engagement, profil, fil) ; à droite la colonne de travail
+     (les 31 compétences), qui n'oblige plus à scroller pour l'atteindre. */
+  body[data-role="enseignant"] .lr-page {
+    max-width: 1000px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.62fr);
+    column-gap: 26px;
+    align-items: start;
+    align-content: start;
+    padding: 0 26px calc(96px + env(safe-area-inset-bottom, 0px));
+  }
+  /* Le hero garde sa pleine largeur (il porte le retour + le nom + Bilan) et
+     doit rester collé en haut : on annule le padding latéral de la grille. */
+  body[data-role="enseignant"] .lr-page > .lr-hero {
+    grid-column: 1 / -1;
+    margin-left: -26px;
+    margin-right: -26px;
+  }
+  body[data-role="enseignant"] .lr-page > .lr-kpi,
+  body[data-role="enseignant"] .lr-page > .lr-eng,
+  body[data-role="enseignant"] .lr-page > .lr-profil,
+  body[data-role="enseignant"] .lr-page > #lr-feed-section {
+    grid-column: 1;
+    margin-left: 0;
+    margin-right: 0;
+  }
+  body[data-role="enseignant"] .lr-page > #lr-feed-section {
+    padding: 0 0 24px !important;
+  }
+  /* Les 4 mondes (31 compétences) : la colonne de travail, à droite, sur
+     toute la hauteur du rail. */
+  body[data-role="enseignant"] .lr-page > .lr-body {
+    grid-column: 2;
+    grid-row: 2 / span 20;
+    padding: 0;
+  }
+
   /* La nav du bas reste une pastille centrée (480px) : elle flotte sous la
      colonne large comme une barre d'onglets posée — pas de barre pleine. */
 }
