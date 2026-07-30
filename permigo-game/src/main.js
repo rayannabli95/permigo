@@ -23,6 +23,7 @@ import { initAccentEarly, applyAccent } from "@/utils/accent.js";
 import { initGameState, initEquippedTheme } from "@/utils/game-state.js";
 import { mountCookieBanner } from "@/components/common/cookie-banner.js";
 import { initPosthog } from "@/services/posthog.js";
+import { initMetaPixel } from "@/services/meta-pixel.js";
 import { initVercelAnalytics } from "@/services/vercel-analytics.js";
 import { tapHaptic } from "@/utils/haptic.js";
 // Import statique volontaire : le listener beforeinstallprompt doit être armé
@@ -265,12 +266,15 @@ boot()
 mountCookieBanner();
 
 // PostHog : init immédiat si déjà consenti (visite précédente), ou attend le bandeau.
+// Pixel Meta : même règle, et en plus inerte tant que VITE_META_PIXEL_ID est vide.
 initPosthog();
 initVercelAnalytics();
+initMetaPixel();
 window.addEventListener("permigo:consent", (e) => {
   if (e.detail === "all") {
     initPosthog();
     initVercelAnalytics();
+    initMetaPixel();
   }
 });
 

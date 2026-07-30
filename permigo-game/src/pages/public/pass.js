@@ -25,6 +25,7 @@ import { track } from "@/services/analytics.js";
 import { startPassCheckout } from "@/services/billing.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { illMask } from "@/utils/illustrations.js";
+import { fbTrack } from "@/services/meta-pixel.js";
 
 const LOGO = "/p-badge.png";
 
@@ -220,8 +221,8 @@ const STR = {
       },
     ],
     nonFranco: {
-      title: "New to French? We've got you.",
-      txt: "The exam is in French. So the app trains you in short, simple French: the exact words you'll need on test day. Mini-games are visual first. And we answer your messages in English, step by step.",
+      title: "Learning in French? You keep your language.",
+      txt: "The app speaks English: driving lessons, questions, mini-games. And it keeps the French right underneath, word for word. Your exam is in French, so you learn the exact words you'll hear on test day instead of guessing them.",
     },
     mathsRows: [
       ["1 hour of driving lessons", "€55"],
@@ -281,7 +282,7 @@ const STR = {
       ],
       [
         "Is the app in English?",
-        "This page and our support are. The app itself is in <strong>simple French</strong>. On purpose: your exam will be in French, and training in the exact words you'll hear on test day is what gets you through. Mini-games are visual first, so basic French is enough.",
+        "Yes. The driving lessons, the questions, the mini-games and the mock exam are all in <strong>English</strong>. The French is kept right underneath, on purpose: your exam will be in French, and hearing the real words is what gets you through. A few corners of the app are still French only, and we're finishing them.",
       ],
       [
         "What does the examiner expect on test day?",
@@ -361,8 +362,8 @@ const STR = {
       },
     ],
     nonFranco: {
-      title: "لغتك الفرنسية ضعيفة؟ نحن معك.",
-      txt: "الامتحان بالفرنسية. لذلك يدرّبك التطبيق بفرنسية قصيرة وبسيطة: الكلمات نفسها التي ستحتاجها يوم الامتحان. الألعاب المصغّرة بصرية أولاً. ونجيب على رسائلك، خطوة بخطوة.",
+      title: "تتعلّم القيادة بالفرنسية؟ لغتك تبقى معك.",
+      txt: "التطبيق بالعربية: دروس القيادة والأسئلة والألعاب المصغّرة، مع بقاء الفرنسية أسفلها مباشرة، كلمة بكلمة. امتحانك بالفرنسية، فتتعلّم الكلمات نفسها التي ستسمعها يوم الامتحان بدل أن تخمّنها.",
     },
     mathsRows: [
       ["ساعة قيادة واحدة", "€55"],
@@ -422,7 +423,7 @@ const STR = {
       ],
       [
         "هل التطبيق باللغة العربية؟",
-        "هذه الصفحة نعم. أمّا التطبيق نفسه فهو <strong>بفرنسية بسيطة</strong>. وذلك عن قصد: امتحانك سيكون بالفرنسية، والتدرّب على الكلمات نفسها التي ستسمعها يوم الامتحان هو ما يساعدك على النجاح. الألعاب المصغّرة بصرية أولاً، لذا تكفي فرنسية أساسية.",
+        "نعم. دروس القيادة والأسئلة والألعاب المصغّرة والامتحان التجريبي كلّها <strong>بالعربية</strong>، مع بقاء الفرنسية أسفلها مباشرة، وذلك عن قصد: امتحانك سيكون بالفرنسية، وسماع الكلمات الحقيقية هو ما يساعدك على النجاح. ما زالت بعض الزوايا في التطبيق بالفرنسية وحدها، ونحن ننهيها.",
       ],
       [
         "ماذا يتوقّع الممتحن يوم الامتحان؟",
@@ -456,6 +457,11 @@ const STR = {
     successCtaSolo: "أنشئ حسابي · وصول فوري",
   },
 };
+
+// Montants en euros, pour la mesure publicitaire uniquement (Meta apprend « qui
+// achète combien »). ⚠️ Ce n'est PAS ce qui est facturé : le vrai prix vit dans
+// l'edge function pass-checkout, côté serveur.
+const PLAN_VALUE = { mensuel: 9.99, pass3: 24.99, pass6: 39.99 };
 
 const PLAN_LABELS = {
   fr: {
@@ -821,11 +827,32 @@ function hashQuery() {
 }
 
 /** Langue : choix mémorisé > ?lang= > langue du navigateur. */
+// Le `?lang=` d'un lien de pub n'a le droit de forcer la langue QU'UNE FOIS,
+// au chargement de la page. Sinon, cliquer « FR » alors que l'URL dit `lang=ar`
+// ne ferait rien (le sélecteur n'écrit que `pv_lang`, il ne touche pas l'URL).
+// Un nouveau clic sur la pub = nouveau chargement = module réévalué = la langue
+// de la pub reprend la main. C'est exactement ce qu'on veut.
+let urlLangApplied = false;
+
 function getLang() {
-  const stored = localStorage.getItem("pv_lang");
-  if (stored === "fr" || stored === "en" || stored === "ar") return stored;
+  const ok = (v) => v === "fr" || v === "en" || v === "ar";
+
+  // ⚠️ La langue du lien passe AVANT le choix mémorisé : sans ça, un visiteur
+  // déjà venu une fois en français voyait la pub arabe atterrir en français.
   const p = hashQuery().get("lang");
-  if (p === "fr" || p === "en" || p === "ar") return p;
+  if (ok(p) && !urlLangApplied) {
+    urlLangApplied = true;
+    try {
+      localStorage.setItem("pv_lang", p);
+    } catch {
+      /* navigation privée stricte : tant pis, la langue tiendra le temps de la visite */
+    }
+    return p;
+  }
+
+  const stored = localStorage.getItem("pv_lang");
+  if (ok(stored)) return stored;
+  if (ok(p)) return p;
   const appStored = localStorage.getItem("permigo_lang");
   if (appStored === "fr" || appStored === "en" || appStored === "ar")
     return appStored;
@@ -879,6 +906,14 @@ export async function mount(root) {
   // ── Retour succès : bienvenue dans l'aventure ──
   if (checkout === "success") {
     track("pass.checkout_success", { plan: planParam || "?" });
+    // Achat côté pub. ⚠️ C'est un retour de navigateur : rechargé ou partagé,
+    // il peut se déclencher deux fois. La vérité comptable reste Stripe +
+    // `pass_purchases` ; le pixel ne sert qu'à apprendre à Meta qui achète.
+    fbTrack("Purchase", {
+      content_name: planParam || "pass",
+      currency: "EUR",
+      value: PLAN_VALUE[planParam] ?? 0,
+    });
     const label = PLAN_LABELS[lang][planParam] || "Pass Permis";
     root.innerHTML = `${STYLE}
       <div class="pv" dir="${lang === "ar" ? "rtl" : "ltr"}">
@@ -1135,6 +1170,11 @@ function wire(root, me, lang, L) {
     btn.addEventListener("click", async () => {
       const plan = btn.dataset.plan;
       track("pass.checkout_click", { plan, lang, logged: !!me });
+      fbTrack("InitiateCheckout", {
+        content_name: plan,
+        currency: "EUR",
+        value: PLAN_VALUE[plan] ?? 0,
+      });
       err?.classList.remove("on");
       btns.forEach((b) => (b.disabled = true));
       const prev = btn.innerHTML;

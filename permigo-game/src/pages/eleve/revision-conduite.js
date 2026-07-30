@@ -20,6 +20,7 @@ import { getLang } from "@/utils/lang.js";
 import { openCoachSheet } from "@/components/eleve/coach-sheet.js";
 import {
   isFreeTierUser,
+  isFreeSub,
   freeQuota,
   consumeFree,
   resetIfNewDay,
@@ -1090,22 +1091,19 @@ export async function mount(root, param) {
       return render();
     }
 
-    // ── Mode découverte : 1 fiche lisible par jour ─────────────────────────
-    // Ré-ouvrir la MÊME fiche reste permis (relecture) ; une AUTRE fiche après
-    // la fiche du jour → mur découverte. Les re-render de coche de geste
-    // repassent par ici : consumeFree est idempotent sur le même code.
+    // ── Compte gratuit : les 3 premières leçons, en grand ──────────────────
+    // Plus de quota quotidien sur les fiches (cf. free-tier.js) : C1a, C1b et
+    // C1c sont ouvertes autant qu'il veut, tout le reste renvoie au mur. Il
+    // traverse le début du cours d'une traite et bute sur « Démarrer et
+    // s'arrêter » — là où l'envie est la plus forte.
     const meFt = getCurUser();
-    if (isFreeTierUser(meFt)) {
-      resetIfNewDay();
-      if (!freeQuota("fiche", f.code).allowed) {
-        track("freetier.quota_hit", { kind: "fiche", code: f.code });
-        return mountFreeTierWall(root, {
-          me: meFt,
-          reason: "quota",
-          kind: "fiche",
-        });
-      }
-      consumeFree("fiche", f.code);
+    if (isFreeTierUser(meFt) && !isFreeSub(f.code)) {
+      track("freetier.quota_hit", { kind: "fiche", code: f.code });
+      return mountFreeTierWall(root, {
+        me: meFt,
+        reason: "quota",
+        kind: "fiche",
+      });
     }
 
     // Ouvrir = « lue » (progression du hub), tracké UNE fois — pas à chaque coche

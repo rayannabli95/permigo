@@ -15,8 +15,8 @@ import { getLang } from "@/utils/lang.js";
 
 // i18n coque (EN/AR), repli FR.
 const CK_I18N = {
-  en: { aria: "Cookie preferences", title: "Cookies & privacy", txt: "We use the strict minimum to sign you in, plus internal audience measurement (no ads, no third-party trackers) to improve the app.", privacy: "Privacy policy", essential: "Essential only", accept: "Accept all" },
-  ar: { aria: "تفضيلات ملفات تعريف الارتباط", title: "ملفات تعريف الارتباط والخصوصية", txt: "نستخدم الحد الأدنى الضروري لتسجيل دخولك، إضافةً إلى قياس داخلي للجمهور (بلا إعلانات ولا متتبّعات خارجية) لتحسين التطبيق.", privacy: "سياسة الخصوصية", essential: "الضروري فقط", accept: "قبول الكل" },
+  en: { aria: "Cookie preferences", title: "Cookies & privacy", txt: "We use the strict minimum to sign you in, plus audience measurement to improve the app and see where our visitors come from — including Facebook, if you accept all. No ads inside the app.", privacy: "Privacy policy", essential: "Essential only", accept: "Accept all" },
+  ar: { aria: "تفضيلات ملفات تعريف الارتباط", title: "ملفات تعريف الارتباط والخصوصية", txt: "نستخدم الحد الأدنى الضروري لتسجيل دخولك، إضافةً إلى قياس الجمهور لتحسين التطبيق ومعرفة مصدر زوّارنا — بما في ذلك فيسبوك، إذا قبلت الكل. لا إعلانات داخل التطبيق.", privacy: "سياسة الخصوصية", essential: "الضروري فقط", accept: "قبول الكل" },
 };
 function ckt(k, fr) { const l = getLang(); return (l !== "fr" && CK_I18N[l]?.[k]) || fr; }
 
@@ -118,7 +118,7 @@ export function mountCookieBanner() {
     <div class="ck-banner" role="dialog" aria-label="${ckt("aria", "Préférences cookies")}" aria-live="polite" dir="${getLang() === "ar" ? "rtl" : "ltr"}">
       <div class="ck-ttl">${ckt("title", "Cookies & confidentialité")}</div>
       <p class="ck-txt">
-        ${ckt("txt", "On utilise le strict nécessaire pour te connecter, plus une mesure d\u0027audience interne (sans pub ni tracker tiers) pour améliorer l\u0027app.")}
+        ${ckt("txt", "On utilise le strict nécessaire pour te connecter, plus une mesure d\u0027audience pour améliorer l\u0027app et savoir d\u0027où viennent nos visiteurs — dont Facebook, si tu acceptes tout. Aucune publicité dans l\u0027app.")}
         <a href="#/legal/privacy">${ckt("privacy", "Politique de confidentialité")}</a>
       </p>
       <div class="ck-row">

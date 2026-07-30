@@ -2,6 +2,7 @@
 // Router minimal — route selon role + hash
 // ═══════════════════════════════════════════════════════════════
 import { phPageview } from "@/services/posthog.js";
+import { fbPageview } from "@/services/meta-pixel.js";
 import { accessGateFor } from "@/auth/route-guards.js";
 import { isFreeTierUser, isDiscoveryAllowedRoute } from "@/utils/free-tier.js";
 import { getCurUser } from "@/auth/cur-user.js";
@@ -461,6 +462,7 @@ window.addEventListener("hashchange", () => {
       reloadOnceOnChunkError(e);
     });
     phPageview(); // hash-router SPA : PostHog ne détecte pas les hashchanges seul
+    fbPageview(); // idem pour le pixel Meta (inerte si non configuré)
   } else {
     // Visiteur déconnecté → route vers la page publique correspondant au hash
     routePublic(document.getElementById("app")).catch((e) => {

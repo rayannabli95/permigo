@@ -23,6 +23,7 @@ import { icon } from "@/utils/icons.js";
 import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { getLang, applyLang } from "@/utils/lang.js";
+import { fbTrack } from "@/services/meta-pixel.js";
 
 const STYLE = `<style>
   /* DA « Arène 3D » (nuit-violet + plastique 3D) — cohérence avec le login */
@@ -783,6 +784,13 @@ export async function mount(root) {
           role: "eleve",
           from: solo ? "pass_solo" : "join_code",
           minor: !!consentToken,
+        });
+        // Compte créé = LA conversion mesurable de la campagne pub. Avec 200 €
+        // on n'aura jamais assez d'achats pour qu'un algorithme apprenne ; les
+        // inscriptions, si.
+        fbTrack("CompleteRegistration", {
+          content_name: solo ? "compte_gratuit" : "code_moniteur",
+          status: true,
         });
 
         // Persiste la langue choisie sur le profil (le miroir localStorage est

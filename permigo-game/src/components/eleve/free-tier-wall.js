@@ -11,7 +11,11 @@
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { getCurUser } from "@/auth/cur-user.js";
-import { discoveryCounterLabel, freeQuota } from "@/utils/free-tier.js";
+import {
+  discoveryCounterLabel,
+  freeQuota,
+  FREE_SUBS,
+} from "@/utils/free-tier.js";
 
 const COPY = {
   quota: {
@@ -19,6 +23,15 @@ const COPY = {
     emoji: "🎉",
     title: "Tu as goûté PermiGo aujourd'hui",
     sub: "Reviens demain pour une nouvelle dose. Ou débloque tout ton parcours maintenant, sans attendre.",
+  },
+  // ⚠️ Une leçon au-delà des 3 offertes ne s'ouvrira PAS demain : surtout pas
+  // de « reviens demain » ici, ce serait une promesse fausse (les questions et
+  // la scène, elles, reviennent bien chaque jour → COPY.quota).
+  lesson: {
+    kick: "Compte gratuit",
+    emoji: "🔑",
+    title: "Tu as fini les leçons offertes",
+    sub: "Les 3 premières sont à toi pour toujours. La suite du parcours s'ouvre avec ton Pass.",
   },
   route: {
     kick: "Mode découverte",
@@ -106,7 +119,12 @@ export async function mountFreeTierWall(
   // restaure pour que l'élève garde sa navigation vers le reste de la découverte.
   document.body.classList.remove("sit-immersive", "pq-immersive");
 
-  const c = COPY[reason] || COPY.quota;
+  // Une fiche murée = « tu as fini les leçons offertes » (définitif), pas
+  // « reviens demain » (le quota quotidien, lui, ne concerne que quiz + scène).
+  const c =
+    reason === "quota" && kind === "fiche"
+      ? COPY.lesson
+      : COPY[reason] || COPY.quota;
   const counter =
     reason === "quota" && kind
       ? `<p class="ftw-note">${esc(discoveryCounterLabel(kind))}</p>`
@@ -171,13 +189,14 @@ const BANNER_STYLE = `<style>
 
 export function discoveryBannerHTML() {
   const q = freeQuota("quiz");
-  const f = freeQuota("fiche");
   const s = freeQuota("scene");
+  // Les fiches ne sont plus un quota : les 3 premières leçons sont ouvertes en
+  // permanence (cf. free-tier.js). On affiche donc un acquis, pas un décompte.
   return `${BANNER_STYLE}<div class="ft-banner" role="status">
-    <b>Mode découverte</b>
+    <b>Compte gratuit</b>
     <span class="items">
+      <span>${FREE_SUBS.length} premières leçons</span>
       <span>${q.used}/${q.max} questions</span>
-      <span>${f.used}/${f.max} fiche</span>
       <span>${s.used}/${s.max} scène</span>
     </span>
   </div>`;
