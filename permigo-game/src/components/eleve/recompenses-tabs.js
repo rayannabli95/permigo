@@ -9,8 +9,8 @@ import { getLang } from "@/utils/lang.js";
 
 const ROOMS = [
   { id: "boutique", label: "Boutique", route: "/boutique" },
-  { id: "galerie", label: "Collection", route: "/galerie" },
-  { id: "trophees", label: "Trophées", route: "/trophees" },
+  { id: "galerie", label: "Galerie", route: "/galerie" },
+  { id: "cartes", label: "Cartes", route: "/cartes" },
   { id: "classement", label: "Ligue", route: "/classement" },
 ];
 
