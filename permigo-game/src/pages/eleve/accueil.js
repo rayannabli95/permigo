@@ -616,37 +616,39 @@ const STYLE = `<style>
   pointer-events: none;
   background: var(--acc-hero-shade);
 }
-/* Teintes du texte par scène (l'image est fixe : ces couleurs ne
-   dépendent PAS du thème clair/sombre de l'app, sinon illisible). */
-.acc2-hero--matin, .acc2-hero--midi {
-  --acc-scene-ink: #241f3d;
-  --acc-scene-kick: #6a4a9c;
-  --acc-scene-mu: #4a4166;
-  --acc-scene-sh: 0 1px 0 rgba(255,255,255,.5);
+/* Titre BLANC sur les 3 scènes (demande Rayan 30/07). Du blanc sur le ciel
+   clair du matin/midi serait illisible → le voile côté texte devient SOMBRE
+   et teinté par scène (chaud le matin, bleu à midi, violet le soir), à la
+   façon d'une affiche de film. La route et la voiture, à droite, ne sont
+   jamais assombries. Ces couleurs ne dépendent PAS du thème clair/sombre de
+   l'app : l'image est fixe. */
+.acc2-hero--matin, .acc2-hero--midi, .acc2-hero--soir {
+  --acc-scene-ink: #ffffff;
+  --acc-scene-kick: rgba(255,255,255,.82);
+  --acc-scene-mu: rgba(255,255,255,.9);
+  --acc-scene-sh: 0 2px 18px rgba(20,12,40,.55), 0 1px 2px rgba(20,12,40,.4);
+}
+.acc2-hero--matin {
   --acc-hero-shade: linear-gradient(92deg,
-    rgba(255,255,255,.62) 0%,
-    rgba(255,255,255,.30) 38%,
-    rgba(255,255,255,.02) 62%,
-    transparent 76%);
+    rgba(58,22,44,.66) 0%,
+    rgba(58,22,44,.40) 40%,
+    rgba(58,22,44,.08) 66%,
+    transparent 80%);
 }
 .acc2-hero--midi {
-  --acc-scene-kick: #3d5a9e;
   --acc-hero-shade: linear-gradient(92deg,
-    rgba(255,255,255,.58) 0%,
-    rgba(255,255,255,.26) 40%,
-    rgba(255,255,255,.02) 64%,
-    transparent 78%);
+    rgba(14,30,64,.66) 0%,
+    rgba(14,30,64,.40) 40%,
+    rgba(14,30,64,.08) 66%,
+    transparent 80%);
 }
 .acc2-hero--soir {
-  --acc-scene-ink: #fffdf8;
   --acc-scene-kick: #ffcf8f;
-  --acc-scene-mu: #e4d9ff;
-  --acc-scene-sh: 0 2px 14px rgba(15,12,48,.5);
   --acc-hero-shade: linear-gradient(92deg,
-    rgba(16,12,44,.62) 0%,
-    rgba(16,12,44,.34) 40%,
-    rgba(16,12,44,.05) 66%,
-    transparent 80%);
+    rgba(16,12,44,.70) 0%,
+    rgba(16,12,44,.44) 40%,
+    rgba(16,12,44,.10) 66%,
+    transparent 82%);
 }
 .acc2-hero-v2-txt {
   position: relative;
@@ -664,9 +666,13 @@ const STYLE = `<style>
   margin-bottom: 7px;
   text-shadow: var(--acc-scene-sh);
 }
+/* Titre « affiche » : Archivo 900 en capitales serrées. Fredoka (rond,
+   enfantin) manquait de punch sur une photo — ici on veut le coup de poing
+   d'un titre de sport. Archivo reste dans la famille de l'app. */
 .acc2-hero-h1 {
-  font: 700 clamp(27px, 8.2vw, 33px)/.98 'Fredoka', 'Plus Jakarta Sans', sans-serif;
-  letter-spacing: -.03em;
+  font: 900 clamp(25px, 7.5vw, 31px)/.92 'Archivo', 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -.035em;
+  text-transform: uppercase;
   color: var(--acc-scene-ink);
   margin: 0;
   text-wrap: balance;
@@ -778,21 +784,18 @@ const STYLE = `<style>
   gap: 9px;
   margin-top: 13px;
   max-width: 100%;
-  background: rgba(255,255,255,.80);
-  -webkit-backdrop-filter: blur(9px) saturate(1.2);
-  backdrop-filter: blur(9px) saturate(1.2);
-  border: 1.5px solid rgba(255,255,255,.72);
+  /* Verre dépoli SOMBRE sur les 3 scènes : le titre est blanc, la pastille
+     doit rester dans la même famille (une pastille blanche ferait une tache). */
+  background: rgba(26,18,54,.52);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2);
+  backdrop-filter: blur(10px) saturate(1.2);
+  border: 1.5px solid rgba(255,255,255,.24);
   border-radius: 999px;
   padding: 7px 13px 7px 9px;
-  color: #241f3d;
-  box-shadow: 0 8px 20px -10px rgba(22,25,58,.5);
+  color: #fff;
+  box-shadow: 0 8px 20px -10px rgba(12,8,32,.55);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-}
-.acc2-hero--soir .acc2-prep-pill {
-  background: rgba(30,22,68,.58);
-  border-color: rgba(255,255,255,.26);
-  color: #fffdf8;
 }
 .acc2-prep-pill:active { transform: scale(.97); }
 .acc2-prep-pill-ic {
@@ -801,9 +804,8 @@ const STYLE = `<style>
   display: flex; align-items: center; justify-content: center;
   border-radius: 8px;
   font-size: 14px;
-  background: rgba(255,255,255,.6);
+  background: rgba(255,255,255,.16);
 }
-.acc2-hero--soir .acc2-prep-pill-ic { background: rgba(255,255,255,.16); }
 .acc2-prep-pill-tl {
   display: flex; flex-direction: column; min-width: 0;
   line-height: 1.15; text-align: left;
