@@ -3,7 +3,7 @@
 // URL : #/pass  (partageable en DM : www.permigo.fr/#/pass?lang=en)
 //
 // DA « Ticket d'Or » — v3 (retours Rayan après SON vrai paiement, 15/07 soir) :
-//  - logo = le P vert gloss (/icon-192.png), plus de wordmark illisible
+//  - logo = le badge de marque (/p-badge.png), plus de wordmark illisible
 //  - « Offre de lancement* », tarif exceptionnel, prix barré partout,
 //    chips d'économie jaunes façon Ornikar (−17 % / −33 %)
 //  - PLUS de compteur de places ni de billet numéroté (retiré à sa demande)
@@ -338,8 +338,7 @@ const STR = {
     situTitle: "ألعاب «على الطريق» المصغّرة",
     situTxt:
       "مشهد واحد، قرار واحد: من يمرّ أولاً؟ أولوية المرور، المسافات، الاندماج — كما خلف المقود.",
-    situAlt:
-      "لعبة مصغّرة على الطريق: مفترق طرق، أنت تقرّر من يمرّ أولاً",
+    situAlt: "لعبة مصغّرة على الطريق: مفترق طرق، أنت تقرّر من يمرّ أولاً",
     centreTitle: "مركز امتحانك، مفصّلاً",
     centreTxt:
       "الصعوبة، الوصول، سمعة الممتحنين والفخاخ المعروفة في المسار — مركزاً تلو الآخر.",

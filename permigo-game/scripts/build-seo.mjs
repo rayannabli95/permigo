@@ -139,7 +139,7 @@ ${ld}
 </head>
 <body>
 <header class="top"><div class="wrap">
-<a class="brand" href="/"><img src="/permigo-logo.png" alt="PermiGo"/>PermiGo</a>
+<a class="brand" href="/"><img src="/icon-192.png" alt="PermiGo"/>PermiGo</a>
 <a class="btn btn-ghost" href="/#/signup">Ouvrir l'app</a>
 </div></header>
 <main class="wrap">
@@ -391,7 +391,7 @@ ${relatedHtml}
     publisher: {
       "@type": "Organization",
       name: "PermiGo",
-      logo: { "@type": "ImageObject", url: `${SITE}/permigo-logo.png` },
+      logo: { "@type": "ImageObject", url: `${SITE}/icon-512.png` },
     },
   };
   const jsonLd = [breadcrumbLd(trail), article];
