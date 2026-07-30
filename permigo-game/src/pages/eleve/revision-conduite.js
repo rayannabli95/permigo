@@ -479,7 +479,10 @@ const FD_STYLE = `<style>
   box-shadow:inset 0 -2px 3px rgba(120,60,0,.55), inset 0 1px 1px rgba(255,255,255,.7); }
 .fd-tag b{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:12px; letter-spacing:.08em; color:#ffe4a6;
   text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.fd-title{ font-family:'Baloo 2',cursive; font-weight:800; font-size:27px; line-height:1.07; letter-spacing:-.01em;
+/* color:inherit obligatoire — base.css pose une couleur sur h1..h4 et une règle
+   directe bat la couleur héritée : sans ça le titre passe en encre sombre sur ce
+   fond sombre (illisible en thème clair). */
+.fd-title{ color:inherit; font-family:'Baloo 2',cursive; font-weight:800; font-size:27px; line-height:1.07; letter-spacing:-.01em;
   margin:15px 0 4px; filter:drop-shadow(0 2px 0 rgba(60,30,0,.30)); }
 .fd-sub{ font-size:13px; color:#ded7ff; font-weight:600; margin-bottom:16px; }
 

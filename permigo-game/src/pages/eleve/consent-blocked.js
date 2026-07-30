@@ -45,7 +45,10 @@ const STYLE = `<style>
     display:flex; flex-direction:column; align-items:center; justify-content:center;
     padding:32px 22px max(40px,env(safe-area-inset-bottom)); font-family:'Inter',sans-serif; color:#fff; text-align:center; }
   .cb-ico { font-size:60px; margin-bottom:18px; }
-  .cb-title { font:800 24px/1.25 'Plus Jakarta Sans',sans-serif; margin:0 0 12px; letter-spacing:-.02em; max-width:18ch; }
+  /* color:inherit obligatoire — base.css pose une couleur sur h1..h4 et une
+     règle directe bat la couleur héritée : sans ça ce titre passe en encre
+     sombre sur ce fond sombre (invisible en thème clair). */
+  .cb-title { color:inherit; font:800 24px/1.25 'Plus Jakarta Sans',sans-serif; margin:0 0 12px; letter-spacing:-.02em; max-width:18ch; }
   .cb-sub { font:500 15px/1.55 'Inter',sans-serif; color:rgba(255,255,255,.72); margin:0 0 22px; max-width:34ch; }
   .cb-link-row { width:100%; max-width:420px; margin-bottom:12px; }
   .cb-input { width:100%; padding:14px 16px; border:1.5px solid rgba(255,255,255,.18); border-radius:14px;
