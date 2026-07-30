@@ -11,7 +11,7 @@ import { REMC } from "@/data/remc.js";
 import { WORLDS } from "@/data/worlds.js";
 import { ASSETS } from "@/utils/assets.js";
 import { getCompDetail } from "@/data/remc-details.js";
-import { getFiche } from "@/data/fiches-conduite.js";
+import { loadFiche } from "@/data/fiches-loader.js";
 import { openCoachSheet } from "@/components/eleve/coach-sheet.js";
 import { icon } from "@/utils/icons.js";
 import { medallion, medStatus } from "@/utils/medallions.js";
@@ -2837,7 +2837,14 @@ function wire(root, worldStates, validatedMap, pendingMap, me) {
     enableSheetSwipe(sheet, closeFn, { overlay: bg, direction: "down" });
 }
 
-function openFiche(root, compId, ws, validatedMap, pendingMap, hasMoniteur) {
+async function openFiche(
+  root,
+  compId,
+  ws,
+  validatedMap,
+  pendingMap,
+  hasMoniteur,
+) {
   const { idx, cat, status, nextChallenge } = ws;
   const meta = WORLDS_META[idx];
   const world = WORLDS[idx];
@@ -2901,7 +2908,8 @@ function openFiche(root, compId, ws, validatedMap, pendingMap, hasMoniteur) {
   // encart toujours visible + tapable → lecture en grand (coach-sheet.js).
   // Texte : le « pourquoi » de la fiche de révision conduite quand elle
   // existe (31/31, plus riche), sinon repli sur detail.tip.
-  const tipTxt = getFiche(compId)?.pourquoi || detail.tip;
+  const fiche = await loadFiche(compId).catch(() => null);
+  const tipTxt = fiche?.pourquoi || detail.tip;
   const TIP_ZOOM = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="2"/><path d="M15.5 15.5L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M10.5 8v5M8 10.5h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`;
   const tipBlock = tipTxt
     ? `

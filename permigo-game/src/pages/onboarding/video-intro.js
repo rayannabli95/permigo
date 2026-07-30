@@ -82,7 +82,7 @@ export function mountVideoIntro(root, onDone) {
           src="${VIDEO_SRC}"
           poster="${POSTER_SRC}"
           playsinline
-          preload="auto"
+          preload="none"
         ></video>
         <div class="vi-loading" id="vi-loading" aria-hidden="true"><i></i><i></i><i></i></div>
         <button class="vi-close" id="vi-close" type="button" aria-label="${t("skip_aria", "Passer la vidéo")}">
@@ -117,6 +117,8 @@ export function mountVideoIntro(root, onDone) {
     player.hidden = false;
 
     try {
+      // La vidéo reste à zéro octet avant le choix explicite de l'élève.
+      video.load();
       await video.play(); // avec son : autorisé car dans le geste utilisateur
     } catch {
       // Autoplay avec son refusé malgré le geste → on retente en muet.

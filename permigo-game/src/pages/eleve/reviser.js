@@ -20,8 +20,11 @@ import { navigate } from "@/router.js";
 import { haptic } from "@/utils/haptic.js";
 import { getStreak } from "@/utils/game-state.js";
 import { getLang } from "@/utils/lang.js";
-import { SITUATIONS } from "@/data/situations-conduite.js";
-import { FICHES } from "@/data/fiches-conduite.js";
+import {
+  FICHE_CODES,
+  FICHE_TOTAL,
+  SITUATION_TOTAL,
+} from "@/data/conduite-meta.js";
 import { isFreeTierUser } from "@/utils/free-tier.js";
 import { discoveryBannerHTML } from "@/components/eleve/free-tier-wall.js";
 
@@ -90,13 +93,13 @@ function rvRtl() {
 }
 
 const LS_READ_KEY = "rvc_read_v1"; // même clé que revision-conduite.js
-const HERO_IMG = "/showcase/eleve-en-situation.png"; // vraie capture du jeu (cadrée sur la scène)
+const HERO_IMG = "/showcase/eleve-en-situation.webp"; // vraie capture du jeu (cadrée sur la scène)
 
 // Badges 3D glossy (public/art/reviser/), posés sans cadre sur les cartes.
 const BADGE = {
-  exam: "/art/reviser/cible.png",
-  fiche: "/art/reviser/livre.png",
-  centre: "/art/reviser/panneau.png",
+  exam: "/art/reviser/cible.webp",
+  fiche: "/art/reviser/livre.webp",
+  centre: "/art/reviser/panneau.webp",
 };
 
 const SVG = {
@@ -218,7 +221,7 @@ function render({
 
   const item = (id, badge, title, sub, meta) => `
     <button class="rv4-item" data-go="${id}">
-      <span class="rv4-badge"><img src="${badge}" alt="" loading="lazy"></span>
+      <span class="rv4-badge"><img src="${badge}" alt="" width="512" height="512" loading="lazy" decoding="async"></span>
       <span class="rv4-itx"><h3${R}>${title}</h3><p${R}>${sub}</p></span>
       <span class="rv4-meta">${meta}</span>
     </button>`;
@@ -236,7 +239,7 @@ function render({
       <span class="rv4-eyebrow"${R}>${rv("eyebrow", `Mise en situation · ${sceneCount} scènes`).replace("{n}", String(sceneCount))}</span>
       <span class="rv4-frame">
         <span class="rv4-pastille"><span class="dot"></span><span${R}>${rv("fav", "Le préféré des élèves")}</span></span>
-        <img src="${HERO_IMG}" alt="${rv("hero_alt", "Une scène du jeu En situation : un croisement à décider")}" loading="eager">
+        <img src="${HERO_IMG}" alt="${rv("hero_alt", "Une scène du jeu En situation : un croisement à décider")}" width="780" height="980" loading="eager" decoding="async">
       </span>
       <span class="rv4-hbody">
         <h2 class="rv4-htitle"${R}>${rv("hero_title", "Une scène, une décision")}</h2>
@@ -280,7 +283,7 @@ export async function mount(root) {
   } catch {
     /* noop */
   }
-  const fichesLues = FICHES.filter((f) => read[f.code]).length;
+  const fichesLues = FICHE_CODES.filter((code) => read[code]).length;
 
   // Meilleur score de l'examen blanc de CONDUITE (repli gracieux si indispo).
   let examBest = null;
@@ -302,10 +305,10 @@ export async function mount(root) {
 
   root.innerHTML = render({
     streak: getStreak(),
-    sceneCount: SITUATIONS.length,
+    sceneCount: SITUATION_TOTAL,
     examBest,
     fichesLues,
-    fichesTotal: FICHES.length,
+    fichesTotal: FICHE_TOTAL,
     discovery: isFreeTierUser(me),
   });
   wire(root);

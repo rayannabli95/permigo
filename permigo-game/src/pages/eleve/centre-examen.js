@@ -18,7 +18,7 @@ import {
 import { haptic } from "@/utils/haptic.js";
 import { setupReveals } from "@/utils/reveal-on-scroll.js";
 import { navigate } from "@/router.js";
-import { getFiche } from "@/data/fiches-conduite.js";
+import { getFicheMeta } from "@/data/conduite-meta.js";
 import { getLang } from "@/utils/lang.js";
 
 const CENTRES_PREMIUM_LOCKED = false;
@@ -137,7 +137,7 @@ function centreFiches(c) {
       if (!codes.includes(code)) codes.push(code);
     }),
   );
-  return codes.map((code) => getFiche(code)).filter(Boolean);
+  return codes.map((code) => getFicheMeta(code)).filter(Boolean);
 }
 
 // ─── Couleur de difficulté (1-5) ─────────────────────────────

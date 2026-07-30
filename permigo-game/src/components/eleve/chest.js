@@ -100,9 +100,9 @@ const TIERS = {
   },
 };
 
-/** Image PNG premium du coffre par monde (fournie par Rayan). */
+/** Image WebP sans perte du coffre par monde (fournie par Rayan). */
 function chestImage(worldNum) {
-  return `/skins/chests/chest_world_${worldNum}.png`;
+  return `/skins/chests/chest_world_${worldNum}.webp`;
 }
 
 /** Rendu inline d'un coffre fermé / ouvert. */
@@ -116,7 +116,7 @@ export function renderChest({ worldNum, worldName, opened = false }) {
       ${!opened ? '<div class="chest-rays" aria-hidden="true"></div>' : ""}
       <div class="chest-halo" aria-hidden="true"></div>
       <div class="chest-icon" aria-hidden="true">
-        <img class="chest-icon-img" src="${chestImage(worldNum)}" alt="" loading="lazy"
+        <img class="chest-icon-img" src="${chestImage(worldNum)}" alt="" width="64" height="64" loading="lazy" decoding="async"
              onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
         <span class="chest-icon-emoji" style="display:none">🎁</span>
       </div>
@@ -154,7 +154,7 @@ export function openChestModal({ worldNum, worldName, onClaim }) {
         <div class="chest-modal-spotlight"></div>
         <div class="chest-modal-burst" aria-hidden="true"></div>
         <div class="chest-modal-img-wrap">
-          <img class="chest-modal-img" src="${chestImage(worldNum)}" alt="${escAttr(tierName(worldNum))}"
+          <img class="chest-modal-img" src="${chestImage(worldNum)}" alt="${escAttr(tierName(worldNum))}" width="600" height="600" decoding="async"
                onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
           <span class="chest-modal-emoji" style="display:none">🎁</span>
         </div>

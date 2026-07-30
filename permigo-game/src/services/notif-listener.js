@@ -128,9 +128,8 @@ async function _celebrateValidation(compId) {
   // Trigger éventuel d'un Celebrate Screen fullscreen sur les paliers majeurs
   // (1ère validation, 10 acquises, 28 acquises = prêt examen, 31 acquises = permis)
   try {
-    const me = (await import("@/auth/cur-user.js")).getCurUser();
+    const me = getCurUser();
     if (!me?.id) return;
-    const { sb } = await import("@/auth/auth.js");
     const [valRes, selfValRes] = await Promise.allSettled([
       sb
         .from("validations")

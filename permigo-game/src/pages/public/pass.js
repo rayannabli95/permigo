@@ -938,7 +938,7 @@ export async function mount(root) {
       <p class="pv-cta-note">${L.ctaNote}</p>
 
       <div class="pv-stage pv-rev" aria-hidden="true">
-        <div class="pv-phone"><img src="/showcase/eleve-parcours.png" alt="" width="390" height="844" loading="lazy" decoding="async"></div>
+        <div class="pv-phone"><img src="/showcase/eleve-parcours.webp" alt="" width="390" height="844" loading="lazy" decoding="async"></div>
         <img class="pv-coin" src="/skins/volant-coin.webp" alt="" loading="lazy" decoding="async">
         <img class="pv-mascot" src="/skins/mascot-celebrate.png" alt="" loading="lazy" decoding="async">
         <div class="pv-bulle">${L.bulle}<small>${L.bulleSub}</small></div>
@@ -949,7 +949,7 @@ export async function mount(root) {
 
       <div class="pv-conduite pv-rev">
         <div class="pv-situ">
-          <div class="pv-situ-shot"><img src="/showcase/eleve-en-situation.png" alt="${L.situAlt}" loading="lazy" decoding="async"></div>
+          <div class="pv-situ-shot"><img src="/showcase/eleve-en-situation.webp" alt="${L.situAlt}" width="780" height="980" loading="lazy" decoding="async"></div>
           <div class="pv-situ-txt">
             <b>${L.situTitle}</b>
             <span>${L.situTxt}</span>
@@ -960,7 +960,7 @@ export async function mount(root) {
             <b>${L.centreTitle}</b>
             <span>${L.centreTxt}</span>
           </div>
-          <div class="pv-situ-shot"><img src="/showcase/eleve-centre-examen.png" alt="${L.centreAlt}" loading="lazy" decoding="async"></div>
+          <div class="pv-situ-shot"><img src="/showcase/eleve-centre-examen.webp" alt="${L.centreAlt}" width="780" height="990" loading="lazy" decoding="async"></div>
         </div>
         ${L.feats
           .map(

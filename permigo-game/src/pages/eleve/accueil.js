@@ -2966,7 +2966,7 @@ async function _loadAndInjectChests(root) {
     slot.innerHTML = `
       <div class="acc2-chest-v2" id="acc-chest-teaser" role="button" tabindex="0"
            aria-label="${escAttr(label)}">
-        <img src="/skins/chests/chest_welcome.png" alt="" aria-hidden="true" loading="lazy">
+        <img src="/skins/chests/chest_welcome.webp" alt="" width="400" height="600" aria-hidden="true" loading="lazy" decoding="async">
         <div class="acc2-chest-v2-body">
           <strong class="acc2-chest-v2-title">${_rtl(esc(label))}</strong>
           <span class="acc2-chest-v2-sub">${at("chest_sub", "Réclame ta récompense du jour.")}</span>

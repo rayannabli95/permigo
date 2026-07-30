@@ -6,7 +6,7 @@
 import { navigate } from "@/router.js";
 import { track } from "@/services/analytics.js";
 import { mountPremiumQuiz } from "@/components/eleve/premium-quiz.js";
-import { jeuFauteSession } from "@/data/quiz-conduite.js";
+import { loadJeuFauteSession } from "@/data/quiz-conduite-loader.js";
 import { getLang } from "@/utils/lang.js";
 import { esc } from "@/utils/escape.js";
 
@@ -38,7 +38,7 @@ function jfRtl() {
 
 export async function mount(root) {
   track("page_view", { page: "jeu-faute" });
-  const questions = jeuFauteSession(8);
+  const questions = await loadJeuFauteSession(8);
   if (!questions.length) {
     // État vide explicite plutôt qu'une redirection muette (cul-de-sac invisible)
     root.innerHTML = `
