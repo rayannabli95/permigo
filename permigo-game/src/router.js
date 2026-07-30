@@ -120,7 +120,6 @@ const ROUTES = {
     ...SIGNUP_ROUTES,
     reviser: () => import("@/pages/eleve/reviser.js"),
     parcours: () => import("@/pages/eleve/parcours.js"),
-    sessions: () => import("@/pages/eleve/session-confirmation.js"),
     quiz: () => import("@/pages/eleve/quiz.js"),
     // Collection de cartes « Monument Valley » : une carte par compétence,
     // débloquée à la certification. Swipe deck (#/cartes). Remplace les
@@ -262,7 +261,6 @@ const ROUTE_TITLES = {
   livret: "Livret REMC",
   insights: "Insights",
   bilan: "Bilan",
-  sessions: "Mes séances",
   quiz: "Quiz",
   trophees: "Ma collection",
   cartes: "Ma collection",

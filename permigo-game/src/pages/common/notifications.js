@@ -300,9 +300,13 @@ import { emptyState } from "@/components/common/empty-state.js";
 function notifRoute(n) {
   const d = n.data || {};
   switch (n.type) {
+    // Retrait de la confirmation de séance (30/07/2026) : le moniteur ne peut
+    // plus enregistrer de séance, la page #/sessions n'existe plus. Les
+    // notifications DÉJÀ reçues restent lisibles — elles renvoient à l'accueil
+    // au lieu d'ouvrir un écran d'erreur.
     case "session_confirmation":
     case "session_logged":
-      return d.session_id ? `#/sessions/${d.session_id}` : "#/";
+      return "#/";
     case "new_message":
       return d.thread_id ? `#/messages/${d.thread_id}` : "#/messages";
     case "achievement_unlocked":

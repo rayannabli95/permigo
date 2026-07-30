@@ -104,11 +104,6 @@ const ACC_I18N = {
     bs_active: "{n} active day{s}",
     bs_freeze: "Freeze my streak · 50",
     bs_freeze_desc: "Protects your streak for 24 h.",
-    session_label: "Session to confirm",
-    session_moniteur_fallback: "Your instructor",
-    session_recent: "Recently",
-    session_title: "{name} logged a session",
-    session_confirm: "Confirm the session",
     hud_streak_aria: "{n}-day streak · view details",
     cr_aria: "Your instructor sent you a report · tap to read",
     cr_t: "Your instructor sent you a report",
@@ -211,11 +206,6 @@ const ACC_I18N = {
     bs_active: "{n} يوم نشط",
     bs_freeze: "تجميد سلسلتي · 50",
     bs_freeze_desc: "تحمي سلسلتك لمدة 24 ساعة.",
-    session_label: "جلسة للتأكيد",
-    session_moniteur_fallback: "مدرّبك",
-    session_recent: "مؤخّراً",
-    session_title: "{name} سجّل جلسة",
-    session_confirm: "تأكيد الجلسة",
     hud_streak_aria: "سلسلة {n} يوم · عرض التفاصيل",
     cr_aria: "أرسل لك مدرّبك تقريراً · اضغط للقراءة",
     cr_t: "أرسل لك مدرّبك تقريراً",
@@ -1139,89 +1129,6 @@ const STYLE = `<style>
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* ══════════ BLOC 2 — SÉANCE À CONFIRMER (si en attente) ════════ */
-.acc2-ms {
-  margin: 24px 16px 0;
-  border-radius: 28px;
-  overflow: hidden;
-  position: relative;
-  animation: acc2MsIn .55s .1s var(--ease-spring) both;
-}
-@keyframes acc2MsIn {
-  from { opacity: 0; transform: translateY(14px) scale(.97); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-/* Session à confirmer (priorité) */
-.acc2-ms-session {
-  background: linear-gradient(145deg, var(--ink) 0%, var(--ink4) 50%, var(--ink) 100%);
-  padding: 24px;
-  min-height: 200px;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 20px 40px -12px rgba(15,23,42,.5), 0 6px 16px rgba(10,13,26,.15);
-}
-.acc2-ms-session::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse 70% 60% at 90% 20%, color-mix(in srgb, var(--a) 25%, transparent) 0%, transparent 55%);
-  pointer-events: none;
-}
-.acc2-ms-session-label {
-  font: 600 10px/1 'Inter', sans-serif;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,.5);
-  margin-bottom: 12px;
-  position: relative; z-index: 1;
-}
-.acc2-ms-session-top {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-  position: relative; z-index: 1;
-}
-.acc2-ms-session-av {
-  width: 48px; height: 48px;
-  border-radius: var(--r-md);
-  background: color-mix(in srgb, var(--a) 30%, transparent);
-  border: 1px solid color-mix(in srgb, var(--a) 40%, transparent);
-  display: flex; align-items: center; justify-content: center;
-  font: 700 16px/1 'Plus Jakarta Sans', sans-serif;
-  color: #fff;
-  flex-shrink: 0;
-}
-.acc2-ms-session-info { flex: 1; }
-.acc2-ms-session-title {
-  font: 700 18px/1.2 'Plus Jakarta Sans', sans-serif;
-  color: #fff;
-  letter-spacing: -.02em;
-  margin-bottom: 4px;
-}
-.acc2-ms-session-sub {
-  font: 500 12.5px/1.4 'Inter', sans-serif;
-  color: rgba(255,255,255,.6);
-}
-.acc2-ms-session-btn {
-  display: flex; align-items: center; justify-content: center;
-  width: 100%;
-  padding: 14px 20px;
-  background: var(--acc-vio);
-  border: none;
-  border-radius: var(--r-lg);
-  color: #fff;
-  font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
-  cursor: pointer;
-  min-height: 52px;
-  -webkit-tap-highlight-color: transparent;
-  transition: transform .14s var(--ease-spring), opacity .12s;
-  position: relative; z-index: 1;
-}
-.acc2-ms-session-btn:active { transform: scale(.96); opacity: .9; }
-
-
 /* ═══════════════════════ BELOW FOLD ═══════════════════════════ */
 /* Réserve la hauteur des ligues injectées en async : évite le layout-shift
    à chaque retour sur l'accueil. :empty → la réserve disparaît une fois
@@ -1810,8 +1717,7 @@ export async function mount(root) {
       ]);
 
     // RPCs optionnels (peuvent ne pas exister encore)
-    const [pendingSessionsRes, todayQuestsRes] = await Promise.allSettled([
-      sb.rpc("get_pending_sessions_eleve"),
+    const [todayQuestsRes] = await Promise.allSettled([
       sb.rpc("get_today_quests"),
     ]);
 
@@ -1861,7 +1767,6 @@ export async function mount(root) {
       attemptsRes.value?.data || [],
       streak,
     );
-    const pendingSessions = pendingSessionsRes.value?.data || [];
     // quest_validate_1 (« Valider 1 compétence ») retirée de l'affichage :
     // l'élève ne valide JAMAIS lui-même (c'est le moniteur). Quête « morte »
     // qu'il ne peut pas accomplir → masquée en attendant sa version reformulée
@@ -1974,7 +1879,6 @@ export async function mount(root) {
       worlds,
       activityDays,
       gemmes,
-      pendingSessions,
       todayQuests,
       pendingNotif,
       prep,
@@ -1987,7 +1891,6 @@ export async function mount(root) {
       streakSt,
       gemmes,
       activityDays,
-      pendingSessions,
       todayQuests,
       pendingNotif,
     });
@@ -2188,7 +2091,6 @@ function render({
   worlds,
   activityDays,
   gemmes,
-  pendingSessions,
   todayQuests,
   pendingNotif,
   prep,
@@ -2236,7 +2138,6 @@ function render({
   const isFirstRun = totalValidated === 0 && !streak.current_streak;
 
   // ── Séance à confirmer (priorité absolue quand présente) ──
-  const pendingSession = pendingSessions?.[0] ?? null;
 
   // ── Hero « Prépare ta prochaine leçon » (maquette A validée 17/07) ──
   // Toujours le même message : l'élève prépare sa vraie leçon de conduite.
@@ -2443,7 +2344,6 @@ function render({
     </div>
   </div>
 
-  ${pendingSession ? `<div class="acc2-ms">${renderSessionConfirm(pendingSession)}</div>` : ""}
 
   <!-- Tes ligues : École (REMC) + Révision (quiz solo), à égalité -->
   <div id="acc-lb-slot"></div>
@@ -2504,39 +2404,6 @@ function render({
 
 // ─── Bloc 2 renderers ────────────────────────────────────────────
 
-function renderSessionConfirm(session) {
-  const prenom =
-    session.moniteur_prenom ?? atR("session_moniteur_fallback", "Ton moniteur");
-  const initials = prenom.slice(0, 2).toUpperCase();
-  const dateStr = session.session_date
-    ? new Date(session.session_date).toLocaleDateString(atLoc(), {
-        weekday: "short",
-        day: "numeric",
-        month: "long",
-      })
-    : atR("session_recent", "Récemment");
-  const durStr = session.duration_minutes
-    ? `${session.duration_minutes} ${atR("unit_min", "min")}`
-    : "";
-  const sub = [dateStr, durStr].filter(Boolean).join(" · ");
-
-  return `
-    <div class="acc2-ms-session">
-      <div class="acc2-ms-session-label">${at("session_label", "Séance à confirmer")}</div>
-      <div class="acc2-ms-session-top">
-        <div class="acc2-ms-session-av">${esc(initials)}</div>
-        <div class="acc2-ms-session-info">
-          <div class="acc2-ms-session-title">${_rtl(esc(atR("session_title", "{name} a enregistré une séance").replace("{name}", prenom)))}</div>
-          <div class="acc2-ms-session-sub">${esc(sub)}</div>
-        </div>
-      </div>
-      <button class="acc2-ms-session-btn" id="confirm-session-btn" data-session-id="${escAttr(session.session_id)}">
-        ${icon("check", { size: 16, strokeWidth: 2.8 })}
-        ${at("session_confirm", "Confirmer la séance")}
-      </button>
-    </div>`;
-}
-
 // ─── Wire ────────────────────────────────────────────────────────
 function wire(
   root,
@@ -2548,7 +2415,6 @@ function wire(
     streakSt,
     gemmes,
     activityDays,
-    pendingSessions,
     todayQuests,
     pendingNotif,
   },
@@ -2704,18 +2570,6 @@ function wire(
       }, 2500);
     });
   });
-
-  // Session confirm btn
-  root
-    .querySelector("#confirm-session-btn")
-    ?.addEventListener("click", async (e) => {
-      const btn = e.currentTarget;
-      const sessionId = btn.dataset.sessionId;
-      if (!sessionId) return;
-      haptic("select");
-      track("session.confirm_tapped", { session_id: sessionId });
-      navigate(`#/sessions/${sessionId}`);
-    });
 
   // CTA king (hero prep) — enregistre le cycle AVANT de naviguer : l'angle
   // tourne pour la prochaine prep (fiche → questions → situation → questions…)

@@ -84,12 +84,7 @@ const TABS = {
       id: "parcours",
       label: "Mon permis",
       ico: "map",
-      match: [
-        "mon-permis",
-        "examen",
-        "centre-examen",
-        "sessions",
-      ],
+      match: ["mon-permis", "examen", "centre-examen"],
     },
     {
       id: "recompenses",
