@@ -16,7 +16,8 @@ const ui = {
   state: "idle",
   lit: false,
   warning: "engine",
-  rpm: 0,
+  speed: 50,
+  rpm: 2400,
 };
 
 const stateLabels = {
@@ -66,6 +67,7 @@ function elementOptions(silhouette = false) {
     silhouette,
     lit: ui.lit,
     warning: ui.warning,
+    speed: ui.speed,
     rpm: ui.rpm,
   };
 }
@@ -163,6 +165,23 @@ function appTemplate() {
           <div class="al-warning-buttons" role="group" aria-label="Voyant à allumer">
             ${renderWarningButtons()}
           </div>
+
+          <label class="al-rpm-control al-speed-control">
+            <span>
+              <span>Vitesse</span>
+              <strong data-speed-output>${ui.speed} km/h</strong>
+            </span>
+            <input
+              type="range"
+              min="0"
+              max="130"
+              step="1"
+              value="${ui.speed}"
+              data-speed-range
+              aria-label="Vitesse de 0 à 130 kilomètres par heure"
+            />
+            <span class="al-rpm-scale" aria-hidden="true"><i>0</i><i>65</i><i>130</i></span>
+          </label>
 
           <label class="al-rpm-control">
             <span>
@@ -262,6 +281,13 @@ function wire() {
       ui.lit = true;
       render();
     });
+  });
+
+  root.querySelector("[data-speed-range]")?.addEventListener("input", (event) => {
+    ui.speed = Number(event.currentTarget.value);
+    const output = root.querySelector("[data-speed-output]");
+    if (output) output.textContent = `${ui.speed} km/h`;
+    refreshBoard();
   });
 
   root.querySelector("[data-rpm-range]")?.addEventListener("input", (event) => {

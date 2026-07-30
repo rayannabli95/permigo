@@ -34,6 +34,7 @@ renderDashboardElement("instrument-cluster", {
   state: "active",
   warning: "oil",
   lit: true,
+  speed: 50,
   rpm: 2400,
 });
 ```
@@ -60,7 +61,7 @@ renderWarningIcon("seatbelt", {
 
 | Type | Élément | Options |
 |---|---|---|
-| `instrument-cluster` | bloc compteurs complet | `warning`, `lit`, `rpm` |
+| `instrument-cluster` | bloc compteurs complet | `warning`, `lit`, `speed`, `rpm` |
 | `warning-lights` | collection des douze voyants | `warning`, `lit` |
 | `tachometer` | compte-tours et zone rouge | `rpm` |
 
@@ -73,9 +74,10 @@ engine · oil · battery · abs · airbag · temperature
 tyre-pressure · handbrake · fuel · esp · seatbelt · lights
 ```
 
-`rpm` est borné entre 0 et 8 000 et arrondi par pas de 100. Une seule alerte
-peut être éclairée à la fois. `lit: false` éteint les douze voyants sans changer
-la sélection mémorisée.
+`speed` est borné entre 0 et 130 km/h et pilote l’aiguille gauche. `rpm` est
+borné entre 0 et 8 000 et arrondi par pas de 100. Une seule alerte peut être
+éclairée à la fois. `lit: false` éteint les douze voyants sans changer la
+sélection mémorisée.
 
 ## Noyau commun
 
@@ -99,7 +101,7 @@ node mockups/moteur-pilote/art-library/validate-lot2.mjs
 ```
 
 Le validateur contrôle les trois largeurs, les quatre états, les douze voyants,
-le régime 0–8 000, les quinze silhouettes à 40, les cibles tactiles, le
-mouvement réduit, l’accessibilité et la console.
+la vitesse 0–130, le régime 0–8 000, les quinze silhouettes à 40, les cibles
+tactiles, le mouvement réduit, l’accessibilité et la console.
 
 Le lot 3 n’est volontairement pas commencé.

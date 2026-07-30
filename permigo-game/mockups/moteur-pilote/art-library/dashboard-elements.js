@@ -127,6 +127,12 @@ function safeRpm(value) {
   return Math.min(8000, Math.max(0, Math.round(numeric / 100) * 100));
 }
 
+function safeSpeed(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return 0;
+  return Math.min(130, Math.max(0, Math.round(numeric)));
+}
+
 function warningBody(id) {
   if (id === "engine") {
     return `
@@ -299,7 +305,7 @@ function embeddedWarnings(selectedWarning, lit) {
   ).join("");
 }
 
-function clusterLabels(rpm, warning, lit, labels = {}) {
+function clusterLabels(speed, rpm, warning, lit, labels = {}) {
   const selected = warningMeta(warning);
   const warningLabel = labels[selected.id] || selected.label;
   return `
@@ -307,7 +313,7 @@ function clusterLabels(rpm, warning, lit, labels = {}) {
       class="pg-object-label pg-cluster-speed"
       dir="auto"
       style="--label-x:50%;--label-y:43%"
-    >0</span>
+    >${speed}</span>
     <span
       class="pg-object-label pg-cluster-unit"
       dir="auto"
@@ -326,9 +332,11 @@ function clusterLabels(rpm, warning, lit, labels = {}) {
 }
 
 function instrumentCluster(id, options) {
+  const speed = safeSpeed(options.speed);
   const rpm = safeRpm(options.rpm);
   const warning = safeWarning(options.warning);
   const lit = options.lit !== false;
+  const speedAngle = 140 + (speed / 130) * 260;
   const tachAngle = 140 + (rpm / 8000) * 260;
   const drawing = svgShell(
     id,
@@ -343,8 +351,8 @@ function instrumentCluster(id, options) {
       <g class="pg-dial-ticks">${dialTicks(43, 42, 24)}</g>
       <g class="pg-dial-ticks">${dialTicks(117, 42, 24)}</g>
       <path class="pg-red-zone" d="${arcPath(117, 42, 22, 350, 400)}" fill="none" stroke="${ART_PALETTE.red}" stroke-width="4" stroke-linecap="round"/>
-      <g class="pg-cluster-needle pg-cluster-speed-needle" transform="rotate(140 43 42)">
-        <path d="M38 42H67" fill="none" stroke="${ART_PALETTE.accent}" stroke-width="3" stroke-linecap="round"/>
+      <g class="pg-cluster-needle pg-cluster-speed-needle" transform="rotate(${speedAngle.toFixed(2)} 43 42)">
+        <path d="M38 42H67" fill="none" stroke="${ART_PALETTE.gold}" stroke-width="3" stroke-linecap="round"/>
       </g>
       <g class="pg-cluster-needle pg-cluster-rpm-needle" transform="rotate(${tachAngle.toFixed(2)} 117 42)">
         <path d="M112 42H141" fill="none" stroke="${ART_PALETTE.gold}" stroke-width="3" stroke-linecap="round"/>
@@ -359,7 +367,7 @@ function instrumentCluster(id, options) {
   );
   return {
     drawing,
-    labels: clusterLabels(rpm, warning, lit, options.labels),
+    labels: clusterLabels(speed, rpm, warning, lit, options.labels),
   };
 }
 
@@ -449,6 +457,7 @@ function renderByType(type, id, options) {
  * @param {"idle"|"active"|"found"|"error"} [options.state="idle"]
  * @param {string} [options.warning="engine"] - Une valeur de DASHBOARD_WARNINGS[].id.
  * @param {boolean} [options.lit=true] - Éclairage du voyant sélectionné.
+ * @param {number} [options.speed=0] - Vitesse comprise entre 0 et 130.
  * @param {number} [options.rpm=0] - Valeur comprise entre 0 et 8000.
  * @param {boolean} [options.silhouette=false] - Test de lecture à 40.
  * @param {object} [options.labels] - Libellés HTML traduisibles.
@@ -472,7 +481,7 @@ export function renderDashboardElement(type, options = {}) {
     labels: rendered.labels,
     silhouette: options.silhouette,
     extraClasses: "pg-element-dashboard",
-    extraAttributes: `data-warning="${safeWarning(options.warning)}" data-rpm="${safeRpm(options.rpm)}"`,
+    extraAttributes: `data-warning="${safeWarning(options.warning)}" data-speed="${safeSpeed(options.speed)}" data-rpm="${safeRpm(options.rpm)}"`,
   });
 }
 

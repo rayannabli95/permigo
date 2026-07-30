@@ -118,6 +118,46 @@ try {
     0,
   );
 
+  const speedNeedleTransforms = [];
+  for (const speed of [0, 30, 80, 130]) {
+    await page.locator("[data-speed-range]").fill(String(speed));
+    const cluster = page.locator(
+      '[data-card="instrument-cluster"] .pg-element',
+    );
+    assert.equal(Number(await cluster.getAttribute("data-speed")), speed);
+    assert.equal(
+      await cluster.locator(".pg-cluster-speed").textContent(),
+      String(speed),
+    );
+    speedNeedleTransforms.push(
+      await cluster
+        .locator(".pg-cluster-speed-needle")
+        .getAttribute("transform"),
+    );
+    const needleInsideDial = await cluster
+      .locator(".pg-cluster-speed-needle path")
+      .evaluate((needle) => {
+        const rect = needle.getBoundingClientRect();
+        const svg = needle.ownerSVGElement.getBoundingClientRect();
+        return (
+          rect.width + rect.height > 3 &&
+          rect.left >= svg.left - 1 &&
+          rect.top >= svg.top - 1 &&
+          rect.right <= svg.right + 1 &&
+          rect.bottom <= svg.bottom + 1
+        );
+      });
+    assert.ok(
+      needleInsideDial,
+      `L’aiguille de vitesse sort du cadran à ${speed} km/h`,
+    );
+  }
+  assert.equal(
+    new Set(speedNeedleTransforms).size,
+    speedNeedleTransforms.length,
+    "L’aiguille de vitesse ne suit pas la valeur",
+  );
+
   for (const rpm of [0, 2000, 6500, 8000]) {
     await page.locator("[data-rpm-range]").fill(String(rpm));
     const values = await page
@@ -196,6 +236,7 @@ try {
         host.innerHTML = renderDashboardElement(type, {
           state: "active",
           warning: "oil",
+          speed: 80,
           rpm: 6500,
         });
         document.body.append(host);
@@ -241,11 +282,13 @@ try {
 
   if (capturePath) {
     await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.locator("[data-speed-range]").fill("80");
+    await page.locator("[data-rpm-range]").fill("4000");
     await page.screenshot({ path: capturePath, fullPage: true });
   }
 
   console.log(
-    "LOT2_VALIDATION_OK widths=320,390,520 states=4 warnings=12 rpm=0..8000 silhouettes=15 axe=0 console=0",
+    "LOT2_VALIDATION_OK widths=320,390,520 states=4 warnings=12 speed=0..130 rpm=0..8000 silhouettes=15 axe=0 console=0",
   );
 } finally {
   await context.close();
