@@ -51,6 +51,15 @@ Elle expose six composants pilotables, leurs quatre états, l’éclairage sépa
 de chaque position P/R/N/D et de chaque rapport, ainsi que le test de silhouette
 à 40. Voir `art-library/README.md` pour l’API.
 
+Le lot 2 « tableau de bord » est disponible à :
+
+```text
+http://127.0.0.1:4175/mockups/moteur-pilote/art-library/lot2.html
+```
+
+Il ajoute le bloc compteurs, les douze voyants isolables et le compte-tours
+pilotable. Voir `art-library/LOT2.md` pour l’API et la commande de validation.
+
 ## Ajouter une mission
 
 Ajouter une entrée à `MISSIONS` avec :

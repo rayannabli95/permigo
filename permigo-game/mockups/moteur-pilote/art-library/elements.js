@@ -9,51 +9,21 @@
  * éléments HTML superposés et peuvent être remplacés via options.labels.
  */
 
-export const ART_PALETTE = Object.freeze({
-  night: "#100922",
-  n2: "#1a1038",
-  n3: "#281957",
-  accent: "#8b6dff",
-  gold: "#f4c75e",
-  green: "#38d994",
-  red: "#ff766e",
-});
+import {
+  ART_PALETTE,
+  createArtId,
+  escapeText,
+  renderElementFrame,
+  safeState,
+  svgShell,
+} from "./art-core.js";
 
-export const ART_MATERIALS = Object.freeze({
-  matte: Object.freeze({
-    base: ART_PALETTE.night,
-    middle: ART_PALETTE.n2,
-    light: ART_PALETTE.accent,
-  }),
-  gloss: Object.freeze({
-    base: ART_PALETTE.night,
-    middle: ART_PALETTE.n3,
-    light: ART_PALETTE.accent,
-  }),
-  glass: Object.freeze({
-    base: ART_PALETTE.night,
-    middle: ART_PALETTE.n2,
-    light: ART_PALETTE.accent,
-  }),
-  metal: Object.freeze({
-    base: ART_PALETTE.night,
-    middle: ART_PALETTE.n3,
-    light: ART_PALETTE.accent,
-  }),
-});
-
-export const ART_SCALE = Object.freeze({
-  wheel: 1,
-  counter: 1 / 3,
-  control: 1 / 10,
-});
-
-export const ELEMENT_STATES = Object.freeze([
-  "idle",
-  "active",
-  "found",
-  "error",
-]);
+export {
+  ART_MATERIALS,
+  ART_PALETTE,
+  ART_SCALE,
+  ELEMENT_STATES,
+} from "./art-core.js";
 
 export const LOT_ONE_ELEMENTS = Object.freeze([
   Object.freeze({
@@ -122,85 +92,12 @@ const DEFAULT_LABELS = Object.freeze({
   }),
 });
 
-let elementSequence = 0;
-
-function safeState(value) {
-  return ELEMENT_STATES.includes(value) ? value : "idle";
-}
-
 function safeSelectorPosition(value) {
   return SELECTOR_POSITIONS.includes(value) ? value : "D";
 }
 
 function safeGear(value) {
   return GEAR_POSITIONS.includes(value) ? value : "1";
-}
-
-function escapeText(value) {
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&apos;");
-}
-
-function createId(type) {
-  elementSequence += 1;
-  return `pg-${type}-${elementSequence}`;
-}
-
-function materialDefs(id) {
-  return `
-    <defs>
-      <linearGradient id="${id}-matte" x1="0" x2="0" y1="0" y2="1">
-        <stop offset="0" stop-color="${ART_MATERIALS.matte.light}"/>
-        <stop offset=".12" stop-color="${ART_MATERIALS.matte.middle}"/>
-        <stop offset="1" stop-color="${ART_MATERIALS.matte.base}"/>
-      </linearGradient>
-      <linearGradient id="${id}-gloss" x1="0" x2="0" y1="0" y2="1">
-        <stop offset="0" stop-color="${ART_MATERIALS.gloss.light}"/>
-        <stop offset=".08" stop-color="${ART_MATERIALS.gloss.middle}"/>
-        <stop offset=".22" stop-color="${ART_MATERIALS.gloss.base}"/>
-        <stop offset="1" stop-color="${ART_MATERIALS.gloss.middle}"/>
-      </linearGradient>
-      <linearGradient id="${id}-glass" x1="0" x2="1" y1="0" y2="1">
-        <stop offset="0" stop-color="${ART_MATERIALS.glass.base}" stop-opacity=".88"/>
-        <stop offset=".46" stop-color="${ART_MATERIALS.glass.middle}" stop-opacity=".58"/>
-        <stop offset=".54" stop-color="${ART_MATERIALS.glass.light}" stop-opacity=".28"/>
-        <stop offset="1" stop-color="${ART_MATERIALS.glass.base}" stop-opacity=".82"/>
-      </linearGradient>
-      <linearGradient id="${id}-metal" x1="0" x2="1" y1="0" y2="0">
-        <stop offset="0" stop-color="${ART_MATERIALS.metal.base}"/>
-        <stop offset=".34" stop-color="${ART_MATERIALS.metal.light}"/>
-        <stop offset=".5" stop-color="${ART_MATERIALS.metal.middle}"/>
-        <stop offset=".66" stop-color="${ART_MATERIALS.metal.light}"/>
-        <stop offset="1" stop-color="${ART_MATERIALS.metal.base}"/>
-      </linearGradient>
-      <radialGradient id="${id}-contact" cx=".5" cy=".5" r=".5">
-        <stop offset="0" stop-color="${ART_PALETTE.night}" stop-opacity=".72"/>
-        <stop offset="1" stop-color="${ART_PALETTE.night}" stop-opacity="0"/>
-      </radialGradient>
-    </defs>`;
-}
-
-function svgShell(id, body, className = "") {
-  return `
-    <svg
-      class="pg-drawing ${className}"
-      viewBox="0 0 100 100"
-      preserveAspectRatio="xMidYMid meet"
-      aria-hidden="true"
-      focusable="false"
-    >
-      ${materialDefs(id)}
-      ${body}
-      <path
-        class="pg-glass-sweep"
-        d="M18 22 65 10 82 18 35 30Z"
-        fill="url(#${id}-glass)"
-      />
-    </svg>`;
 }
 
 function pedalPad(id, x, y, width, height, kind, pressed = false) {
@@ -556,32 +453,17 @@ export function renderDrivingElement(type, options = {}) {
 
   const meta = LOT_ONE_ELEMENTS.find((element) => element.type === type);
   const state = safeState(options.state);
-  const id = createId(type);
+  const id = createArtId(type);
   const labels = mergeLabels(options.labels);
   const rendered = renderByType(type, id, options, labels);
-  const classes = [
-    "pg-element",
-    `pg-element-${type}`,
-    `is-${state}`,
-    options.silhouette ? "is-silhouette" : "",
-  ].filter(Boolean).join(" ");
-
-  return `
-    <div
-      class="${classes}"
-      data-driving-element="${type}"
-      data-state="${state}"
-      role="img"
-      aria-label="${meta.ariaLabel}"
-    >
-      <span class="pg-light pg-light-key" aria-hidden="true"></span>
-      <span class="pg-light pg-light-warm" aria-hidden="true"></span>
-      ${rendered.drawing}
-      <span class="pg-label-layer" aria-hidden="true">
-        ${rendered.labels}
-      </span>
-      <span class="pg-state-marker" aria-hidden="true"><i></i></span>
-    </div>`;
+  return renderElementFrame({
+    type,
+    state,
+    ariaLabel: meta.ariaLabel,
+    drawing: rendered.drawing,
+    labels: rendered.labels,
+    silhouette: options.silhouette,
+  });
 }
 
 /**
