@@ -35,6 +35,7 @@ import { loadFiche } from "@/data/fiches-loader.js";
 import { burstConfetti } from "@/components/common/confetti.js";
 import { refreshGemmes } from "@/utils/game-state.js";
 import { getLang } from "@/utils/lang.js";
+import { findCarte } from "@/data/cartes.js";
 
 const NB_QUESTIONS = 5; // plus que le quiz-récap (3) : la note ≥80% doit avoir du sens
 const SEUIL = 80;
@@ -363,14 +364,45 @@ function introScreen(sub, cat, already, fiche) {
 }
 
 function successScreen(sub, scorePct, volants = 0) {
-  return `${STYLE}<div class="vsr anim-slide-up">
-    <div class="vsr-med">${medallion("check", "violet", { size: 96 })}</div>
-    <span class="vsr-kick">${icon("shield", { size: 13 })} ${vsD("ok_kick", "Certifiée par toi")}</span>
-    <h1 class="vsr-ttl">${vsD("ok_title", "Compétence certifiée !")}</h1>
-    <p class="vsr-p">${vsD("ok_p", `« ${sub.n} » est maintenant acquise dans ton parcours.`, { n: sub.n })}</p>
-    <p class="vsr-score">${vsD("ok_score", `Quiz réussi à ${scorePct}%`, { p: scorePct })}</p>
-    ${volants > 0 ? `<span class="vsr-volants"><img src="/skins/volant-coin.webp" alt=""> ${vsD("ok_volants", `+${volants} volants`, { n: volants })}</span>` : ""}
-    <button class="vsr-cta" id="vs-cta-parcours" type="button" data-comp="${escAttr(sub.c)}">${vsD("ok_cta", "Retrouve cette compétence dans Mon permis")}</button>
+  const carte = findCarte(sub.c);
+  // La carte se révèle UNE fois (vsrCarte), puis garde un gloss permanent
+  // (vsr-carte-gloss) qui lui donne la texture d'un objet de collection.
+  const carteBlock = carte
+    ? `<div class="vsr-carte">
+        <img class="vsr-carte-img" src="${esc(carte.img)}" alt="Carte ${esc(carte.n)}" draggable="false">
+        <i class="vsr-carte-gloss"></i>
+        <div class="vsr-carte-shine"></div>
+      </div>`
+    : "";
+  return `${STYLE}
+    <style>
+    .vsr-carte { position:relative; width:172px; aspect-ratio:5/7; margin:4px auto 6px; border-radius:18px; overflow:hidden;
+      box-shadow:0 18px 40px -14px rgba(0,0,0,.7), 0 0 0 3px rgba(255,215,110,.4);
+      animation: vsrCarte .8s cubic-bezier(.34,1.56,.64,1) both; }
+    .vsr-carte-img { width:100%; height:100%; object-fit:cover; display:block; }
+    /* gloss permanent : bande brillante fixe + léger balayage lent */
+    .vsr-carte-gloss { position:absolute; inset:0; pointer-events:none; mix-blend-mode:screen;
+      background:linear-gradient(125deg, transparent 38%, rgba(255,255,255,.10) 46%, rgba(255,255,255,.42) 50%, rgba(255,255,255,.10) 54%, transparent 62%);
+      background-size:250% 250%; background-position:120% 0; animation: vsrGloss 5.5s ease-in-out 1.3s infinite; }
+    .vsr-carte-shine { position:absolute; inset:0; background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.55) 48%,transparent 62%);
+      transform:translateX(-120%); animation: vsrShine 1.1s ease .5s 1 both; }
+    @keyframes vsrCarte { 0%{opacity:0; transform:scale(.55) rotate(-9deg);} 60%{transform:scale(1.06) rotate(2deg);} 100%{opacity:1; transform:scale(1) rotate(0);} }
+    @keyframes vsrShine { to { transform:translateX(120%); } }
+    @keyframes vsrGloss { 0%{background-position:120% 0;} 50%{background-position:-20% 0;} 100%{background-position:120% 0;} }
+    .vsr-name { font:800 17px/1.25 'Plus Jakarta Sans',sans-serif; color:#fff; margin:2px 0 0; max-width:300px; }
+    .vsr-cta-carte { width:100%; max-width:340px; margin-top:20px; padding:15px; border:0; border-radius:14px; cursor:pointer;
+      font:800 14px/1 'Plus Jakarta Sans',sans-serif; color:#4a2500;
+      background:linear-gradient(180deg,#ffd76e,#f0a93f); box-shadow:0 6px 0 #b46a10, 0 12px 22px rgba(0,0,0,.4); }
+    .vsr-cta-carte:active { transform:translateY(3px); box-shadow:0 3px 0 #b46a10, 0 7px 14px rgba(0,0,0,.4); }
+    @media (prefers-reduced-motion: reduce) { .vsr-carte, .vsr-carte-shine, .vsr-carte-gloss { animation:none; } .vsr-carte-shine { display:none; } }
+    </style>
+    <div class="vsr anim-slide-up">
+    ${carteBlock || `<div class="vsr-med">${medallion("check", "violet", { size: 96 })}</div>`}
+    <h1 class="vsr-ttl">${vsD("ok_title", "Compétence certifiée")}</h1>
+    <p class="vsr-name">${esc(sub.n)}</p>
+    ${volants > 0 ? `<span class="vsr-volants"><img src="/skins/volant-coin.webp" alt="volant"> +${volants}</span>` : ""}
+    ${carte ? `<button class="vsr-cta-carte" id="vs-cta-carte" type="button">${vsD("ok_cta_carte", "Voir ma carte")}</button>` : ""}
+    <button class="vsr-ghost" id="vs-cta-parcours" type="button" data-comp="${escAttr(sub.c)}">${vsD("ok_cta", "Retrouve cette compétence dans Mon permis")}</button>
   </div>`;
 }
 
@@ -637,6 +669,9 @@ function wireResult(root, me, compId, sub, cat) {
     const c = e.currentTarget.getAttribute("data-comp");
     navigate(c ? `#/parcours?focus=${encodeURIComponent(c)}` : "#/parcours");
   });
+  root
+    .querySelector("#vs-cta-carte")
+    ?.addEventListener("click", () => navigate(`#/cartes/${compId}`));
   root.querySelector("#vs-retry")?.addEventListener("click", async () => {
     const fiche = await loadFiche(compId).catch(() => null);
     root.innerHTML = introScreen(sub, cat, null, fiche);
