@@ -621,10 +621,10 @@ async function certify(root, me, compId, sub, cat, scorePct, answers) {
       wireResult(root, me, compId, sub, cat);
       return;
     }
-    try {
-      if (localStorage.getItem("pg-prep-theme") === compId)
-        localStorage.removeItem("pg-prep-theme");
-    } catch {}
+    // (Le hero « Prépare ta leçon » n'a plus besoin qu'on efface son thème
+    // ici : accueil.js RECALCULE et refuse de servir une compétence acquise
+    // — cf. readPrepTheme(). Nettoyer depuis un seul des trois chemins de
+    // certification était justement la cause du hero qui restait collé.)
     haptic("success");
     burstConfetti({ count: 120, power: 18 });
     track("valider_seul.validated", {
