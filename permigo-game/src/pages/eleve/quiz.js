@@ -939,7 +939,7 @@ function renderResult(
       btn.disabled = true;
       const src = await runRevisionRecap();
       location.hash =
-        src === "secondary" ? "#/classement/revision" : "#/parcours";
+        src === "secondary" ? "#/classement" : "#/parcours";
       return;
     }
     location.hash = "#/parcours";

@@ -582,7 +582,7 @@ function _renderTheoryRow() {
   if (!_theory) return "";
   const info = theoryLeague(_theory.score);
   const label = info.league
-    ? `Ligue ${info.league.n} — ${esc(info.league.name)} · ${_theory.score} pts`
+    ? `Niveau ${info.league.n} — ${esc(info.league.name)} · ${_theory.score} pts`
     : "Pas encore commencé";
   const detail = info.league
     ? `${_theory.nComp} quiz de compétence réussi${_theory.nComp > 1 ? "s" : ""} · ${_theory.nExams} examen${_theory.nExams > 1 ? "s" : ""} blanc${_theory.nExams > 1 ? "s" : ""} réussi${_theory.nExams > 1 ? "s" : ""}`

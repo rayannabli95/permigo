@@ -26,7 +26,7 @@
 //   - Trophées     : get_my_achievements + data/achievements.js CATALOG
 //   - Boutique     : get_items_catalog
 //   - Collection   : mêmes données que trophées + paliers fonds permis (galerie.js)
-//   - Ligue        : get_eleve_leaderboard + get_theory_leaderboard_weekly
+//   - Ligue        : get_eleve_leaderboard (compétences certifiées, /31)
 //     (via league-hero.js, identique à accueil.js)
 //
 // Écarts assumés vs la maquette (données honnêtes, jamais inventées) :
@@ -36,8 +36,8 @@
 //     côté serveur (spin_roue_daily = 1 tour gratuit/jour, point).
 //   - « 1 gros lot réel maximum par TRIMESTRE » (pas « par mois ») : c'est la
 //     vraie règle serveur (spin_roue_daily, cf. moniteur_reward_config).
-//   - Ligue = Ligue Révision (Novice/Apprenti/…) et non « Ligue Argent » :
-//     « Argent » est un palier réservé à l'échelle moniteur.
+//   - Ligue = LA ligue (compétences que l'élève a certifiées, paliers C1→C4)
+//     et non « Ligue Argent » : « Argent » est un palier de l'échelle moniteur.
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
@@ -822,7 +822,6 @@ export async function mount(root) {
     validRes,
     itemsRes,
     condRes,
-    revRes,
     selfValRes,
   ] = await Promise.allSettled([
     sb
@@ -840,7 +839,6 @@ export async function mount(root) {
       .eq("statut", "acquis"),
     sb.rpc("get_items_catalog"),
     sb.rpc("get_eleve_leaderboard", { p_scope: "ecole", p_limit: 50 }),
-    sb.rpc("get_theory_leaderboard_weekly", { p_scope: "ecole", p_limit: 50 }),
     // Validation autonome (élève solo, valider-seul.js) : table séparée de
     // `validations`, fusionnée pour ne pas laisser le palier permis bloqué.
     // Même pattern que accueil.js / mon-permis.js.
@@ -857,8 +855,7 @@ export async function mount(root) {
     ["trophées", achRes],
     ["validations", validRes],
     ["catalogue", itemsRes],
-    ["classement conduite", condRes],
-    ["classement révision", revRes],
+    ["classement", condRes],
     ["auto-validations", selfValRes],
   ];
   const dataErrors = supabaseResults
@@ -907,9 +904,7 @@ export async function mount(root) {
   const validOk = !resultError(validRes);
   const selfValOk = !resultError(selfValRes);
   const _compSet = new Set(
-    validOk
-      ? (validRes.value?.data || []).map((v) => v.competence_id)
-      : [],
+    validOk ? (validRes.value?.data || []).map((v) => v.competence_id) : [],
   );
   if (selfValOk) {
     for (const s of selfValRes.value?.data || []) _compSet.add(s.competence_id);
@@ -995,17 +990,11 @@ export async function mount(root) {
     haptic("tap");
   });
 
-  // ── Ligue : composant partagé (identique à accueil.js) ──
+  // ── Ligue : composant partagé (identique à accueil.js) — ligue unique
+  // des compétences certifiées depuis le 30/07 (cf. classement.js).
   const condOk = !resultError(condRes);
-  const revOk = !resultError(revRes);
-  const conduite =
-    condOk && Array.isArray(condRes.value?.data)
-      ? condRes.value.data
-      : [];
-  const revision =
-    revOk && Array.isArray(revRes.value?.data)
-      ? revRes.value.data
-      : [];
+  const rows =
+    condOk && Array.isArray(condRes.value?.data) ? condRes.value.data : [];
   if (!document.getElementById("lgh-css")) {
     const st = document.createElement("style");
     st.id = "lgh-css";
@@ -1013,6 +1002,5 @@ export async function mount(root) {
     document.head.appendChild(st);
   }
   const ligueSlot = root.querySelector("#rec-ligue-slot");
-  if (ligueSlot)
-    mountLeagueHero(ligueSlot, { conduite, revision, defaultTab: "revision" });
+  if (ligueSlot) mountLeagueHero(ligueSlot, { rows });
 }

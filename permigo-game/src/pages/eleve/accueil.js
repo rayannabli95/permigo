@@ -2987,39 +2987,29 @@ function openPrepThemeSheet(root, { prep, prepMondes, prepSuggestions }) {
   ov.querySelector(".prep-sheet")?.focus();
 }
 
-// ─── Héros « Ta Ligue » (async) — Conduite + Révision ────────────
-// Deux dimensions à égalité, mises en avant dans une carte Arène :
-//  - Conduite = classement REMC cumulé à vie   → get_eleve_leaderboard
-//  - Révision = saison hebdo (points semaine)  → get_theory_leaderboard_weekly
+// ─── Héros « Ta Ligue » (async) — LES COMPÉTENCES CERTIFIÉES ─────
+// Ligue unique (décision Rayan 30/07/2026) : get_eleve_leaderboard, qui
+// fusionne les compétences certifiées par l'élève et les anciennes
+// validations moniteur. L'ancienne 2e ligue (saison hebdo de révision,
+// get_theory_leaderboard_weekly) ne fait plus classement — la révision reste
+// une progression personnelle. cf. pages/eleve/classement.js
 async function _loadAndInjectLeagues(root) {
   const slot = root.querySelector("#acc-lb-slot");
   if (!slot) return;
   try {
-    // Deux dimensions à égalité, mises en avant dans un héros (toggle) :
-    //  - Conduite = classement REMC cumulé à VIE (validations moniteur)
-    //  - Révision = SAISON HEBDO (points de la semaine, reset lundi)
-    // cf. components/eleve/league-hero.js
     // Élève SOLO (sans moniteur) : portée nationale + profils fictifs
     // (utils/league-bots.js), sinon sa ligue « école » serait vide.
     const me = getCurUser();
     const solo = isSoloEleve(me);
     const scope = solo ? "national" : "ecole";
-    const [condRes, revRes] = await Promise.allSettled([
-      sb.rpc("get_eleve_leaderboard", { p_scope: scope, p_limit: 50 }),
-      sb.rpc("get_theory_leaderboard_weekly", {
-        p_scope: scope,
-        p_limit: 50,
-      }),
-    ]);
-    const blend = (res, ligue) => {
-      const rows =
-        res.status === "fulfilled" && Array.isArray(res.value?.data)
-          ? res.value.data
-          : [];
-      return solo ? blendLeagueRows(rows, { ligue, userKey: me.id }) : rows;
-    };
-    const conduite = blend(condRes, "conduite");
-    const revision = blend(revRes, "revision");
+    const { data } = await sb.rpc("get_eleve_leaderboard", {
+      p_scope: scope,
+      p_limit: 50,
+    });
+    const raw = Array.isArray(data) ? data : [];
+    const rows = solo
+      ? blendLeagueRows(raw, { ligue: "conduite", userKey: me.id })
+      : raw;
 
     // CSS du héros injecté une seule fois (carte toujours sombre — skin Arène)
     if (!document.getElementById("lgh-css")) {
@@ -3028,7 +3018,7 @@ async function _loadAndInjectLeagues(root) {
       st.textContent = LEAGUE_HERO_CSS;
       document.head.appendChild(st);
     }
-    mountLeagueHero(slot, { conduite, revision, solo });
+    mountLeagueHero(slot, { rows, solo });
   } catch (e) {
     console.error("[accueil] leagues", e);
   }
