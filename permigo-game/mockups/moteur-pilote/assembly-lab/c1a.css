@@ -1,0 +1,347 @@
+/* Session Mode Pilote. Le style vit ici, les dessins viennent de library.css. */
+
+.mp-shell {
+  width: min(32.5rem, 100%);
+  margin: 0 auto;
+  padding: 1.1rem 1rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  color: #f2eeff;
+}
+
+.mp-topbar {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.mp-topbar h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.mp-topbar p {
+  margin: 0.1rem 0 0;
+  font-size: 0.8rem;
+  color: var(--al-accent);
+}
+
+.mp-box-switch {
+  margin-left: auto;
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.22rem;
+  background: var(--al-n2);
+  border: 0.06rem solid var(--al-n3);
+  border-radius: 999px;
+}
+
+.mp-box-switch button {
+  min-height: 2.75rem;
+  padding: 0 0.85rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--al-accent);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.mp-box-switch button[aria-pressed="true"] {
+  background: var(--al-gold);
+  color: #1b1140;
+}
+
+/* ------------------------------------------------------------------ brief */
+
+.mp-brief,
+.mp-outcome {
+  background: var(--al-n2);
+  border: 0.06rem solid var(--al-n3);
+  border-radius: 1.1rem;
+  padding: 1.4rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.mp-eyebrow {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--al-accent);
+}
+
+.mp-brief h1 {
+  margin: 0;
+  font-size: 1.6rem;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.mp-hook {
+  margin: 0;
+  font-size: 1rem;
+  color: #cdc2f2;
+}
+
+.mp-duration {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--al-accent);
+}
+
+/* ------------------------------------------------------------------- beat */
+
+.mp-progress {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.mp-progress i {
+  flex: 1;
+  height: 0.25rem;
+  border-radius: 999px;
+  background: var(--al-n3);
+}
+
+.mp-progress i.est-fait {
+  background: var(--al-gold);
+}
+
+.mp-progress i.est-ici {
+  background: var(--al-accent);
+}
+
+.mp-stage {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border-radius: 1.1rem;
+  border: 0.06rem solid var(--al-n3);
+  overflow: hidden;
+  background:
+    radial-gradient(120% 70% at 50% 0%, rgb(139 109 255 / 26%), transparent 60%),
+    linear-gradient(180deg, var(--al-n2), var(--al-night) 72%);
+}
+
+.mp-asset {
+  position: absolute;
+  width: calc(46% * var(--pg-asset-scale, 1));
+  aspect-ratio: var(--pg-asset-ratio, 1.14);
+  translate: -50% -50%;
+}
+
+/* Un seul objet en scène : il respire, et rien n'a besoin de le désigner. */
+.mp-stage:has(.mp-asset:only-child) .mp-asset {
+  width: calc(86% * var(--pg-asset-scale, 1));
+}
+
+.mp-stage:has(.mp-asset:only-child) .pg-state-marker {
+  display: none;
+}
+
+.mp-asset .pg-element {
+  width: 100%;
+}
+
+.mp-panel {
+  background: var(--al-n2);
+  border: 0.06rem solid var(--al-n3);
+  border-radius: 1.1rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.mp-prompt {
+  margin: 0;
+  font-size: 1.06rem;
+  font-weight: 700;
+  line-height: 1.3;
+  text-wrap: balance;
+}
+
+.mp-answers {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.mp-answer {
+  min-height: 2.9rem;
+  padding: 0.7rem 0.9rem;
+  text-align: start;
+  border: 0.06rem solid var(--al-n3);
+  border-radius: 0.8rem;
+  background: var(--al-night);
+  color: #f2eeff;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: border-color 0.18s var(--al-ease), background 0.18s var(--al-ease);
+}
+
+.mp-answer:hover:not(:disabled) {
+  border-color: var(--al-accent);
+}
+
+.mp-answer[data-etat="bon"] {
+  border-color: var(--al-green);
+  background: rgb(56 217 148 / 14%);
+}
+
+.mp-answer[data-etat="mauvais"] {
+  border-color: var(--al-red);
+  background: rgb(255 118 110 / 14%);
+}
+
+.mp-answer:disabled {
+  cursor: default;
+  opacity: 0.72;
+}
+
+.mp-answer[data-etat] {
+  opacity: 1;
+}
+
+.mp-feedback {
+  margin: 0;
+  min-height: 1.2rem;
+  font-size: 0.92rem;
+  line-height: 1.4;
+  color: #cdc2f2;
+}
+
+.mp-feedback:empty {
+  display: none;
+}
+
+.mp-feedback.is-reussi {
+  color: var(--al-green);
+  font-weight: 700;
+}
+
+.mp-feedback.is-consolider {
+  color: var(--al-red);
+  font-weight: 700;
+}
+
+.mp-hint {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: #cdc2f2;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.7rem;
+  background: rgb(244 199 94 / 10%);
+  border: 0.06rem solid rgb(244 199 94 / 34%);
+}
+
+.mp-hint span {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--al-gold);
+}
+
+.mp-hint-ask {
+  align-self: flex-start;
+  min-height: 2.75rem;
+  padding: 0 0.2rem;
+  border: 0;
+  background: transparent;
+  color: var(--al-gold);
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+
+.mp-next,
+.mp-replay {
+  min-height: 3rem;
+  border: 0;
+  border-radius: 0.85rem;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.mp-next {
+  background: var(--al-gold);
+  color: #1b1140;
+  box-shadow: 0 0.3rem 0 #b08c2e;
+  transition: translate 0.08s var(--al-ease), box-shadow 0.08s var(--al-ease);
+}
+
+.mp-next:active:not(:disabled) {
+  translate: 0 0.24rem;
+  box-shadow: 0 0.06rem 0 #b08c2e;
+}
+
+.mp-next:disabled {
+  opacity: 0.38;
+  cursor: default;
+  box-shadow: 0 0.3rem 0 #6b5a34;
+}
+
+.mp-replay {
+  background: transparent;
+  color: var(--al-accent);
+  border: 0.06rem solid var(--al-n3);
+}
+
+/* ---------------------------------------------------------------- sortie */
+
+.mp-outcome h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  line-height: 1.2;
+}
+
+.mp-recap {
+  margin: 0;
+  padding-inline-start: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+  font-size: 0.95rem;
+  color: #cdc2f2;
+}
+
+.mp-outcome p {
+  margin: 0;
+  font-size: 0.98rem;
+  color: #cdc2f2;
+}
+
+.mp-transfer {
+  padding: 0.7rem 0.8rem;
+  border-radius: 0.7rem;
+  background: rgb(139 109 255 / 12%);
+  border: 0.06rem solid rgb(139 109 255 / 34%);
+}
+
+.mp-transfer span {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--al-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mp-next,
+  .mp-answer {
+    transition: none;
+  }
+}
