@@ -64,7 +64,7 @@ const STYLE = `<style>
   }
   .gt-step {
     display: inline-block;
-    font: 800 11px/1 'Baloo 2', 'Fredoka', sans-serif;
+    font: 800 11px/1 'Archivo', sans-serif;
     letter-spacing: .1em; text-transform: uppercase;
     color: var(--a-txt, var(--a, #6366f1));
     background: color-mix(in srgb, var(--a, #6366f1) 14%, transparent);
@@ -72,20 +72,20 @@ const STYLE = `<style>
     border-radius: 999px; padding: 6px 11px; margin-bottom: 12px;
   }
   .gt-title {
-    font: 800 26px/1.12 'Baloo 2', 'Fredoka', 'Plus Jakarta Sans', sans-serif;
+    font: 800 26px/1.12 'Archivo', sans-serif;
     color: var(--ink, #0a0d1a); margin: 0 0 8px; letter-spacing: -.01em;
     text-wrap: balance;
   }
   .gt-bubble.gt-center .gt-title { font-size: 30px; }
   .gt-text {
-    font: 600 15.5px/1.5 'Plus Jakarta Sans', 'Inter', sans-serif;
+    font: 600 15.5px/1.5 'Archivo', sans-serif;
     color: var(--ink2, #3a3f52); margin: 0 0 18px;
   }
   .gt-actions { display: flex; align-items: center; gap: 12px; }
   .gt-skip {
     flex-shrink: 0;
     background: none; border: none; cursor: pointer;
-    font: 700 14px/1 'Plus Jakarta Sans', sans-serif; color: var(--mu, #9aa0b4);
+    font: 700 14px/1 'Archivo', sans-serif; color: var(--mu, #9aa0b4);
     padding: 10px 6px; min-height: 44px;
     -webkit-tap-highlight-color: transparent;
   }
@@ -94,7 +94,7 @@ const STYLE = `<style>
   .gt-next {
     flex: 1;
     border: none; cursor: pointer; position: relative; overflow: hidden;
-    font: 800 17px/1 'Baloo 2', 'Fredoka', 'Plus Jakarta Sans', sans-serif;
+    font: 800 17px/1 'Archivo', sans-serif;
     letter-spacing: .3px;
     color: var(--a-ink, #fff);
     padding: 0 20px; min-height: 52px; border-radius: 16px;

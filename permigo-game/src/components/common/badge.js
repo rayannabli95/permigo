@@ -19,7 +19,7 @@ const STYLE = `
     justify-content: center;
     gap: 5px;
     border: 1px solid transparent;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Archivo', sans-serif;
     font-weight: 500;
     white-space: nowrap;
     line-height: 1;

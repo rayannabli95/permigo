@@ -1032,7 +1032,7 @@ const STYLE = `<style>
   .ob {
     position: fixed; inset: 0; z-index: 9999;
     display: flex; flex-direction: column;
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-family: 'Archivo', system-ui, sans-serif;
     color: var(--ob-ink);
     -webkit-font-smoothing: antialiased;
     background:
@@ -1063,7 +1063,7 @@ const STYLE = `<style>
   .ob-skip {
     flex-shrink: 0; background: none; border: 0;
     color: var(--ob-ink-3); cursor: pointer;
-    font: 600 13px/1 'Plus Jakarta Sans', sans-serif;
+    font: 600 13px/1 'Archivo', sans-serif;
     padding: 10px 4px; min-height: 44px;
   }
   .ob-skip:active { color: #fff; }
@@ -1084,7 +1084,7 @@ const STYLE = `<style>
   /* ── HERO ── */
   .ob-hero { text-align: center; padding-top: 6px; }
   .ob-eyebrow {
-    font: 700 14px/1 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+    font: 700 14px/1 'Archivo', sans-serif;
     letter-spacing: 2.4px; text-transform: uppercase;
     color: var(--ob-ink-2); display: inline-block; margin-bottom: 14px;
   }
@@ -1107,12 +1107,12 @@ const STYLE = `<style>
   @keyframes obPop { 0% { transform: scale(.6); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
   @media (prefers-reduced-motion: reduce) { .ob-mascot { animation: none; } }
   .ob-h1 {
-    font: 800 30px/1.1 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+    font: 800 30px/1.1 'Archivo', sans-serif;
     letter-spacing: -.3px; margin: 0 0 12px;
     text-shadow: 0 2px 10px rgba(0,0,0,.3); outline: none;
   }
   .ob-lead {
-    font: 500 15.5px/1.5 'Plus Jakarta Sans', sans-serif;
+    font: 500 15.5px/1.5 'Archivo', sans-serif;
     color: var(--ob-ink-2); max-width: 290px; margin: 0 auto;
   }
   .ob-lead b { color: #fff; font-weight: 700; }
@@ -1123,12 +1123,12 @@ const STYLE = `<style>
   .ob-sec-num {
     flex: 0 0 auto; width: 34px; height: 34px; border-radius: 11px;
     display: grid; place-items: center;
-    font: 800 16px/1 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+    font: 800 16px/1 'Archivo', sans-serif;
     color: #1a1233; background: linear-gradient(180deg, #ffe39a, var(--ob-or-d));
     box-shadow: 0 4px 0 #b87d00, 0 0 0 1px rgba(255,255,255,.5) inset;
   }
   .ob-sec-title {
-    margin: 0; font: 700 19px/1.1 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+    margin: 0; font: 700 19px/1.1 'Archivo', sans-serif;
     letter-spacing: .1px;
   }
 
@@ -1136,7 +1136,7 @@ const STYLE = `<style>
   .ob-id-card { display: flex; flex-direction: column; gap: 16px; }
   .ob-id-label {
     display: block; margin: 0 0 6px 2px;
-    font: 700 12px/1 'Plus Jakarta Sans', sans-serif;
+    font: 700 12px/1 'Archivo', sans-serif;
     color: var(--ob-ink-2); text-transform: uppercase; letter-spacing: .05em;
   }
   .ob-id-opt { text-transform: none; letter-spacing: 0; font-weight: 600; color: var(--ob-ink-3); }
@@ -1144,7 +1144,7 @@ const STYLE = `<style>
     width: 100%; box-sizing: border-box; height: 50px; padding: 0 14px;
     border-radius: 13px; border: 1px solid var(--ob-line);
     background: var(--ob-plate); color: var(--ob-ink);
-    font: 600 16px/1.3 'Plus Jakarta Sans', sans-serif;
+    font: 600 16px/1.3 'Archivo', sans-serif;
     transition: border-color .15s, box-shadow .15s;
   }
   .ob-id-input::placeholder { color: var(--ob-ink-3); font-weight: 500; }
@@ -1187,13 +1187,13 @@ const STYLE = `<style>
   .ob-av-check svg { width: 13px; height: 13px; }
   .ob-av.sel .ob-av-check { opacity: 1; transform: scale(1); }
   .ob-helper {
-    font: 500 13px/1.4 'Plus Jakarta Sans', sans-serif;
+    font: 500 13px/1.4 'Archivo', sans-serif;
     color: var(--ob-ink-3); text-align: center; margin: 14px 0 0;
   }
 
   /* ── Couleur d'accent (rangée compacte) ── */
   .ob-color-label {
-    font: 700 11px/1 'Plus Jakarta Sans', sans-serif;
+    font: 700 11px/1 'Archivo', sans-serif;
     letter-spacing: .06em; text-transform: uppercase;
     color: var(--ob-ink-3); margin: 22px 0 10px;
   }
@@ -1216,7 +1216,7 @@ const STYLE = `<style>
   .ob-color.sel .ob-color-dot::after {
     content: '✓'; position: absolute; inset: 0;
     display: flex; align-items: center; justify-content: center;
-    color: #fff; font: 800 16px/1 'Plus Jakarta Sans', sans-serif;
+    color: #fff; font: 800 16px/1 'Archivo', sans-serif;
     text-shadow: 0 1px 3px rgba(0,0,0,.45);
   }
 
@@ -1228,8 +1228,8 @@ const STYLE = `<style>
   }
   .ob-toggle-row { display: flex; align-items: center; gap: 14px; }
   .ob-toggle-txt { flex: 1; min-width: 0; }
-  .ob-toggle-tt { font: 700 16px/1.2 'Baloo 2', 'Plus Jakarta Sans', sans-serif; margin-bottom: 3px; }
-  .ob-toggle-ts { font: 500 12.5px/1.3 'Plus Jakarta Sans', sans-serif; color: var(--ob-ink-3); }
+  .ob-toggle-tt { font: 700 16px/1.2 'Archivo', sans-serif; margin-bottom: 3px; }
+  .ob-toggle-ts { font: 500 12.5px/1.3 'Archivo', sans-serif; color: var(--ob-ink-3); }
 
   .ob-switch {
     flex: 0 0 auto; width: 62px; height: 44px; border-radius: 99px;
@@ -1258,7 +1258,7 @@ const STYLE = `<style>
   .ob-switch.off .ob-knob::after { background: #6b6090; box-shadow: none; }
 
   .ob-micro {
-    font: 500 14px/1.5 'Plus Jakarta Sans', sans-serif;
+    font: 500 14px/1.5 'Archivo', sans-serif;
     color: var(--ob-ink-2); margin: 14px 0 0;
   }
   .ob-micro b { color: #fff; font-weight: 700; }
@@ -1285,24 +1285,24 @@ const STYLE = `<style>
   }
   .ob-reward-body { flex: 1; min-width: 0; }
   .ob-reward-tag {
-    font: 700 11px/1 'Plus Jakarta Sans', sans-serif;
+    font: 700 11px/1 'Archivo', sans-serif;
     letter-spacing: .08em; text-transform: uppercase;
     color: var(--ob-or); margin-bottom: 4px;
   }
   .ob-reward-title {
-    font: 700 15px/1.2 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+    font: 700 15px/1.2 'Archivo', sans-serif;
     color: #fff; margin-bottom: 8px;
   }
   .ob-pills { display: flex; gap: 8px; flex-wrap: wrap; }
   .ob-pill {
     display: inline-flex; align-items: center; gap: 6px;
-    font: 700 13px/1 'Plus Jakarta Sans', sans-serif;
+    font: 700 13px/1 'Archivo', sans-serif;
     padding: 5px 11px 5px 8px; border-radius: 99px;
     background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.10);
   }
   .ob-pill-xp { color: var(--ob-vio-l); }
   .ob-xp-ic {
-    font: 900 10px/1 'Plus Jakarta Sans', sans-serif;
+    font: 900 10px/1 'Archivo', sans-serif;
     background: linear-gradient(180deg, var(--ob-vio-l), var(--ob-vio));
     color: #1a1233; border-radius: 6px; padding: 2px 5px;
   }
@@ -1318,7 +1318,7 @@ const STYLE = `<style>
     box-shadow: 0 5px 0 rgba(0,0,0,.28), 0 0 16px rgba(124,77,255,.25), 0 1px 0 rgba(255,255,255,.08) inset;
     padding: 9px;
   }
-  .ob-install-lead { font: 500 14px/1.45 'Plus Jakarta Sans', sans-serif; color: var(--ob-ink-2); margin: 0; }
+  .ob-install-lead { font: 500 14px/1.45 'Archivo', sans-serif; color: var(--ob-ink-2); margin: 0; }
   .ob-install-lead b { color: #fff; font-weight: 700; }
   .ob-a2hs-steps { margin-top: 14px; }
 
@@ -1337,14 +1337,14 @@ const STYLE = `<style>
   .ob-a2hs-install {
     width: 100%; margin-bottom: 12px; border: 0; border-radius: 14px;
     background: linear-gradient(180deg, #9a6dff, var(--ob-vio-d)); color: #fff;
-    font: 800 15px/1 'Baloo 2', 'Plus Jakarta Sans', sans-serif; padding: 14px; cursor: pointer;
+    font: 800 15px/1 'Archivo', sans-serif; padding: 14px; cursor: pointer;
     box-shadow: 0 5px 0 #4321a8, 0 10px 18px rgba(124,77,255,.4), 0 1px 0 rgba(255,255,255,.4) inset;
   }
   .ob-a2hs-install:active { transform: translateY(2px); box-shadow: 0 3px 0 #4321a8, 0 6px 12px rgba(124,77,255,.35); }
   .ob-a2hs-install:disabled { opacity: .6; cursor: wait; }
   .ob-plat-switch {
     margin: 14px auto 0; display: block; background: none; border: 0;
-    color: var(--ob-ink-3); font: 500 13px/1 'Plus Jakarta Sans', sans-serif;
+    color: var(--ob-ink-3); font: 500 13px/1 'Archivo', sans-serif;
     cursor: pointer; padding: 10px; min-height: 44px;
   }
   .ob-plat-switch:active { color: #fff; }
@@ -1359,7 +1359,7 @@ const STYLE = `<style>
     display: flex; align-items: center; justify-content: center; gap: 8px;
     width: 100%; min-height: 56px; padding: 17px; cursor: pointer; border: 0;
     border-radius: 18px; color: #fff; position: relative; overflow: hidden;
-    font: 800 18px/1 'Baloo 2', 'Plus Jakarta Sans', sans-serif; letter-spacing: .3px;
+    font: 800 18px/1 'Archivo', sans-serif; letter-spacing: .3px;
     background: linear-gradient(180deg, #9a6dff 0%, var(--ob-vio) 48%, var(--ob-vio-d) 100%);
     box-shadow: 0 7px 0 #4321a8, 0 12px 22px rgba(124,77,255,.5),
                 0 1px 0 rgba(255,255,255,.55) inset, 0 -3px 6px rgba(0,0,0,.22) inset;
@@ -1392,7 +1392,7 @@ const STYLE = `<style>
   }
   .ob-cue.hide { opacity: 0; transform: translateY(8px); }
   .ob-cue-txt {
-    font: 800 13px/1 'Plus Jakarta Sans', sans-serif; color: #1a1233;
+    font: 800 13px/1 'Archivo', sans-serif; color: #1a1233;
     background: linear-gradient(180deg, #ffe39a, var(--ob-or-d));
     padding: 8px 15px; border-radius: 99px;
     box-shadow: 0 8px 20px -5px rgba(255,206,77,.55);
@@ -1418,7 +1418,7 @@ const STYLE = `<style>
     --c-shadow-card: 0 1px 2px rgba(29,27,46,.04), 0 8px 24px rgba(90,47,214,.06);
     --c-shadow-soft: 0 2px 8px rgba(29,27,46,.05);
     color: var(--c-ink);
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-family: 'Archivo', system-ui, sans-serif;
     background: linear-gradient(180deg, #f7f5fd 0%, #ffffff 38%);
   }
 

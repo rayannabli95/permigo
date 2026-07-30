@@ -162,7 +162,7 @@ const STYLE = `<style>
   padding: 0 0 calc(110px + env(safe-area-inset-bottom));
   background: var(--bg);
   color: var(--ink);
-  font-family: 'Inter', sans-serif;
+  font-family: 'Archivo', sans-serif;
   position: relative;
 }
 
@@ -203,12 +203,12 @@ const STYLE = `<style>
   box-shadow: 0 4px 14px color-mix(in srgb, var(--a) 45%, transparent);
 }
 .cea-hd-tit {
-  font: 800 20px/1.1 'Plus Jakarta Sans', sans-serif;
+  font: 800 20px/1.1 'Archivo', sans-serif;
   letter-spacing: -.025em;
   color: var(--ink);
 }
 .cea-hd-sub {
-  font: 500 12px/1.3 'Inter', sans-serif;
+  font: 500 12px/1.3 'Archivo', sans-serif;
   color: var(--mu2);
   margin-top: 2px;
 }
@@ -219,7 +219,7 @@ const STYLE = `<style>
   gap: 5px;
   padding: 4px 10px;
   border-radius: 999px;
-  font: 800 9px/1 'Inter', sans-serif;
+  font: 800 9px/1 'Archivo', sans-serif;
   letter-spacing: .12em;
   text-transform: uppercase;
   color: var(--a-txt);
@@ -252,7 +252,7 @@ const STYLE = `<style>
   border: 1.5px solid var(--bo);
   background: var(--bg3);
   color: var(--ink);
-  font: 700 13px/1 'Inter', sans-serif;
+  font: 700 13px/1 'Archivo', sans-serif;
   cursor: pointer;
   white-space: nowrap;
   transition: transform .14s cubic-bezier(.23,1,.32,1),
@@ -336,7 +336,7 @@ const STYLE = `<style>
   gap: 5px;
   padding: 4px 10px;
   border-radius: 999px;
-  font: 700 11px/1 'Inter', sans-serif;
+  font: 700 11px/1 'Archivo', sans-serif;
   letter-spacing: .05em;
   background: rgba(255,255,255,.12);
   border: 1px solid rgba(255,255,255,.2);
@@ -347,7 +347,7 @@ const STYLE = `<style>
 
 /* Nom du centre — entrée animée */
 .cea-hero-nom {
-  font: 900 clamp(24px,7vw,32px)/1.05 'Plus Jakarta Sans', sans-serif;
+  font: 900 clamp(24px,7vw,32px)/1.05 'Archivo', sans-serif;
   letter-spacing: -.03em;
   color: #fff;
   margin-bottom: 14px;
@@ -372,7 +372,7 @@ const STYLE = `<style>
   margin-bottom: 16px;
 }
 .cea-diff-label {
-  font: 800 10px/1 'Inter', sans-serif;
+  font: 800 10px/1 'Archivo', sans-serif;
   letter-spacing: .1em;
   text-transform: uppercase;
   color: rgba(255,255,255,.55);
@@ -409,7 +409,7 @@ const STYLE = `<style>
 
 /* Résumé */
 .cea-hero-resume {
-  font: 500 14px/1.6 'Inter', sans-serif;
+  font: 500 14px/1.6 'Archivo', sans-serif;
   color: rgba(255,255,255,.72);
   margin: 0;
 }
@@ -424,7 +424,7 @@ const STYLE = `<style>
   overflow: hidden;
 }
 .cea-section-tit {
-  font: 800 15px/1.2 'Plus Jakarta Sans', sans-serif;
+  font: 800 15px/1.2 'Archivo', sans-serif;
   letter-spacing: -.01em;
   color: var(--ink);
   display: flex;
@@ -440,7 +440,7 @@ const STYLE = `<style>
   align-items: center;
   gap: 10px;
   padding: 0 0 12px;
-  font: 700 14px/1.3 'Inter', sans-serif;
+  font: 700 14px/1.3 'Archivo', sans-serif;
   color: var(--ink);
   border-bottom: 1px solid var(--bo);
   margin-bottom: 12px;
@@ -451,7 +451,7 @@ const STYLE = `<style>
   align-items: flex-start;
   gap: 10px;
   padding: 7px 0;
-  font: 500 13.5px/1.5 'Inter', sans-serif;
+  font: 500 13.5px/1.5 'Archivo', sans-serif;
   color: var(--mu);
 }
 .cea-acces-item svg { color: var(--mu3); flex-shrink: 0; margin-top: 2px; }
@@ -468,7 +468,7 @@ const STYLE = `<style>
   border-radius: 14px;
   background: var(--a);
   color: var(--a-ink);
-  font: 800 15px/1 'Plus Jakarta Sans', sans-serif;
+  font: 800 15px/1 'Archivo', sans-serif;
   text-decoration: none;
   border: none;
   cursor: pointer;
@@ -488,8 +488,8 @@ const STYLE = `<style>
 .cea-rev-intro { font-size:13px; line-height:1.5; color:var(--mu2,#64748b); margin:0 0 10px; }
 .cea-rev-row { display:flex; align-items:center; justify-content:space-between; gap:10px; text-decoration:none; background:var(--su,#fff); border:1px solid var(--bo2,#e2e8f0); border-radius:12px; padding:13px 14px; margin-bottom:8px; }
 .cea-rev-row:active { transform: scale(0.99); }
-.cea-rev-t { font:700 14px/1.25 'Plus Jakarta Sans',sans-serif; color:var(--ink,#0f172a); }
-.cea-rev-go { font:700 13px 'Plus Jakarta Sans',sans-serif; color:var(--a,#6366f1); white-space:nowrap; }
+.cea-rev-t { font:700 14px/1.25 'Archivo',sans-serif; color:var(--ink,#0f172a); }
+.cea-rev-go { font:700 13px 'Archivo',sans-serif; color:var(--a,#6366f1); white-space:nowrap; }
 .cea-pieges-list {
   display: flex;
   flex-direction: column;
@@ -525,12 +525,12 @@ const STYLE = `<style>
 }
 .cea-piege-body { flex: 1; min-width: 0; }
 .cea-piege-tit {
-  font: 800 14.5px/1.2 'Plus Jakarta Sans', sans-serif;
+  font: 800 14.5px/1.2 'Archivo', sans-serif;
   color: var(--ink);
   margin-bottom: 4px;
 }
 .cea-piege-txt {
-  font: 500 13px/1.55 'Inter', sans-serif;
+  font: 500 13px/1.55 'Archivo', sans-serif;
   color: var(--mu);
 }
 
@@ -540,7 +540,7 @@ const STYLE = `<style>
   gap: 10px;
   align-items: flex-start;
   padding: 9px 0;
-  font: 500 13.5px/1.5 'Inter', sans-serif;
+  font: 500 13.5px/1.5 'Archivo', sans-serif;
   color: var(--mu);
   border-bottom: 1px solid var(--bo);
 }
@@ -568,7 +568,7 @@ const STYLE = `<style>
   justify-content: space-between;
   gap: 12px;
   padding: 14px 0;
-  font: 700 14px/1.35 'Inter', sans-serif;
+  font: 700 14px/1.35 'Archivo', sans-serif;
   color: var(--ink);
   cursor: pointer;
   min-height: 48px;
@@ -592,7 +592,7 @@ const STYLE = `<style>
 }
 .cea-faq-body-inner {
   padding: 0 0 14px;
-  font: 500 13.5px/1.6 'Inter', sans-serif;
+  font: 500 13.5px/1.6 'Archivo', sans-serif;
   color: var(--mu);
 }
 @media (prefers-reduced-motion: reduce) {
@@ -651,7 +651,7 @@ const STYLE = `<style>
   border-radius: 50%;
   background: var(--am);
   display: flex; align-items: center; justify-content: center;
-  font: 900 9px/1 'Inter', sans-serif;
+  font: 900 9px/1 'Archivo', sans-serif;
   color: #fff;
   box-shadow: 0 2px 8px rgba(245,158,11,.5);
   animation: ceaLockBadge 1.6s ease-in-out infinite;
@@ -664,13 +664,13 @@ const STYLE = `<style>
   .cea-lock-badge { animation: none; }
 }
 .cea-lock-tit {
-  font: 900 20px/1.2 'Plus Jakarta Sans', sans-serif;
+  font: 900 20px/1.2 'Archivo', sans-serif;
   letter-spacing: -.02em;
   color: var(--ink);
   margin-bottom: 8px;
 }
 .cea-lock-sub {
-  font: 500 14px/1.6 'Inter', sans-serif;
+  font: 500 14px/1.6 'Archivo', sans-serif;
   color: var(--mu);
   margin: 0 auto 20px;
   max-width: 320px;
@@ -689,7 +689,7 @@ const STYLE = `<style>
   gap: 5px;
   padding: 6px 12px;
   border-radius: 999px;
-  font: 700 12px/1 'Inter', sans-serif;
+  font: 700 12px/1 'Archivo', sans-serif;
   background: var(--bg5, var(--bg2));
   color: var(--ink);
   border: 1px solid var(--bo);
@@ -705,7 +705,7 @@ const STYLE = `<style>
   border-radius: 16px;
   background: linear-gradient(135deg, var(--adk, #4f46e5), var(--a));
   color: #fff;
-  font: 800 16px/1 'Plus Jakarta Sans', sans-serif;
+  font: 800 16px/1 'Archivo', sans-serif;
   border: none;
   cursor: pointer;
   box-shadow: 0 6px 22px color-mix(in srgb, var(--a) 42%, transparent);
@@ -722,7 +722,7 @@ const STYLE = `<style>
 
 /* ── Note bas de page ── */
 .cea-note {
-  font: 500 11.5px/1.55 'Inter', sans-serif;
+  font: 500 11.5px/1.55 'Archivo', sans-serif;
   color: var(--mu3);
   text-align: center;
   padding: 14px 20px 0;
@@ -756,7 +756,7 @@ const STYLE = `<style>
   border-radius: 18px;
   border: none;
   cursor: pointer;
-  font: 800 16px/1.1 'Plus Jakarta Sans', sans-serif;
+  font: 800 16px/1.1 'Archivo', sans-serif;
   letter-spacing: -.01em;
   color: #fff;
   /* Gradient or/ambre premium cohérent avec le style cinématique */
@@ -799,7 +799,7 @@ const STYLE = `<style>
   box-shadow: 0 3px 12px rgba(245, 158, 11, 0.28);
 }
 .cea-revise-sub {
-  font: 500 12px/1 'Inter', sans-serif;
+  font: 500 12px/1 'Archivo', sans-serif;
   color: var(--mu2);
   text-align: center;
   margin: 6px 0 0;

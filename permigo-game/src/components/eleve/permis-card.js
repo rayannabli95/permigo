@@ -23,7 +23,7 @@ const STYLE = `<style>
   border-radius: 24px;
   padding: 24px 20px 20px;
   color: #fff;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Archivo', sans-serif;
   overflow: hidden;
   cursor: pointer;
   transform-style: preserve-3d;
@@ -155,7 +155,7 @@ const STYLE = `<style>
   box-shadow: 0 1px 3px rgba(0,0,0,.15);
 }
 .pc-brand {
-  font: 700 13px/1 'Plus Jakarta Sans', sans-serif;
+  font: 700 13px/1 'Archivo', sans-serif;
   letter-spacing: .04em;
   background: rgba(255,255,255,.18);
   backdrop-filter: blur(8px);
@@ -166,19 +166,19 @@ const STYLE = `<style>
 }
 
 .pc-label {
-  font: 600 9.5px/1 'Inter', sans-serif;
+  font: 600 9.5px/1 'Archivo', sans-serif;
   letter-spacing: .18em;
   text-transform: uppercase;
   opacity: .82;
   margin: 16px 0 4px;
 }
 .pc-title {
-  font: 700 19px/1.15 'Plus Jakarta Sans', sans-serif;
+  font: 700 19px/1.15 'Archivo', sans-serif;
   letter-spacing: -0.01em;
   margin: 0 0 2px;
 }
 .pc-subtitle {
-  font: 500 11px/1 'Inter', sans-serif;
+  font: 500 11px/1 'Archivo', sans-serif;
   opacity: .75;
   margin: 0 0 18px;
 }
@@ -196,21 +196,21 @@ const STYLE = `<style>
   background: rgba(255,255,255,.16);
   border: 1.5px solid rgba(255,255,255,.3);
   display: flex; align-items: center; justify-content: center;
-  font: 700 18px/1 'Plus Jakarta Sans', sans-serif;
+  font: 700 18px/1 'Archivo', sans-serif;
   flex-shrink: 0;
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 }
 .pc-id-info { min-width: 0; }
 .pc-nom {
-  font: 700 16px/1.2 'Plus Jakarta Sans', sans-serif;
+  font: 700 16px/1.2 'Archivo', sans-serif;
   letter-spacing: -0.01em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .pc-prenom {
-  font: 500 12px/1 'Inter', sans-serif;
+  font: 500 12px/1 'Archivo', sans-serif;
   opacity: .82;
   margin-top: 3px;
 }
@@ -231,14 +231,14 @@ const STYLE = `<style>
   -webkit-backdrop-filter: blur(6px);
 }
 .pc-meta-lbl {
-  font: 600 9px/1 'Inter', sans-serif;
+  font: 600 9px/1 'Archivo', sans-serif;
   letter-spacing: .12em;
   text-transform: uppercase;
   opacity: .72;
   margin-bottom: 4px;
 }
 .pc-meta-val {
-  font: 600 12px/1.2 'Inter', sans-serif;
+  font: 600 12px/1.2 'Archivo', sans-serif;
 }
 
 /* Footer : progression + sceau */
@@ -251,13 +251,13 @@ const STYLE = `<style>
   margin-bottom: 6px;
 }
 .pc-prog-lbl {
-  font: 600 9.5px/1 'Inter', sans-serif;
+  font: 600 9.5px/1 'Archivo', sans-serif;
   letter-spacing: .12em;
   text-transform: uppercase;
   opacity: .78;
 }
 .pc-prog-pct {
-  font: 700 22px/1 'Plus Jakarta Sans', sans-serif;
+  font: 700 22px/1 'Archivo', sans-serif;
   letter-spacing: -0.02em;
 }
 .pc-prog-bar {
@@ -284,7 +284,7 @@ const STYLE = `<style>
   justify-content: center;
   text-align: center;
   border: 2px solid currentColor;
-  font: 800 8px/1.05 'Plus Jakarta Sans', sans-serif;
+  font: 800 8px/1.05 'Archivo', sans-serif;
   letter-spacing: .04em;
   text-transform: uppercase;
   transform: rotate(-8deg);
@@ -306,7 +306,7 @@ const STYLE = `<style>
 /* Hint sous la carte */
 .pc-hint {
   text-align: center;
-  font: 500 11px/1.4 'Inter', sans-serif;
+  font: 500 11px/1.4 'Archivo', sans-serif;
   color: var(--mu2);
   margin-top: 12px;
   padding: 0 24px;
@@ -471,14 +471,14 @@ function showBgMilestoneToast(card, tier) {
   toast.style.cssText = `
     position: absolute; left: 50%; top: -8px; transform: translate(-50%, -100%);
     background: rgba(15, 23, 42, .94); color: #fff; padding: 12px 16px; border-radius: 14px;
-    font: 600 12px/1.3 'Inter', sans-serif; box-shadow: 0 12px 28px rgba(10,13,26,.32);
+    font: 600 12px/1.3 'Archivo', sans-serif; box-shadow: 0 12px 28px rgba(10,13,26,.32);
     z-index: 10; min-width: 220px; text-align: center; pointer-events: none;
     opacity: 0; transition: opacity .35s ease, transform .35s cubic-bezier(.23,1,.32,1);
     backdrop-filter: blur(8px);
   `;
   toast.innerHTML = `
-    <div style="font:800 13px/1.2 'Plus Jakarta Sans',sans-serif;margin-bottom:3px;color:var(--aml)">🎴 ${conf.title}</div>
-    <div style="font:500 11px/1.4 'Inter',sans-serif;color:var(--bo4)">${conf.sub}</div>
+    <div style="font:800 13px/1.2 'Archivo',sans-serif;margin-bottom:3px;color:var(--aml)">🎴 ${conf.title}</div>
+    <div style="font:500 11px/1.4 'Archivo',sans-serif;color:var(--bo4)">${conf.sub}</div>
   `;
   card.style.position = card.style.position || "relative";
   card.appendChild(toast);
@@ -502,7 +502,7 @@ const MINI_STYLE = `<style>
   border-radius: 20px;
   padding: 16px 18px;
   color: #fff;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Archivo', sans-serif;
   overflow: hidden;
   cursor: pointer;
   user-select: none;
@@ -527,13 +527,13 @@ const MINI_STYLE = `<style>
   box-shadow: 0 1px 3px rgba(0,0,0,.2);
 }
 .pcm-label {
-  flex: 1; font: 700 10px/1 'Inter', sans-serif;
+  flex: 1; font: 700 10px/1 'Archivo', sans-serif;
   letter-spacing: .14em; text-transform: uppercase;
   color: rgba(255,255,255,.85);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .pcm-state {
-  font: 800 9.5px/1 'Inter', sans-serif; letter-spacing: .06em;
+  font: 800 9.5px/1 'Archivo', sans-serif; letter-spacing: .06em;
   text-transform: uppercase; padding: 5px 9px; border-radius: 99px;
   background: rgba(255,255,255,.94); flex-shrink: 0;
 }
@@ -541,16 +541,16 @@ const MINI_STYLE = `<style>
 .pcm.s-pret      .pcm-state { color: var(--adk); }
 .pcm.s-valide    .pcm-state { color: #92400e; }
 .pcm-name {
-  font: 800 19px/1.15 'Plus Jakarta Sans', sans-serif;
+  font: 800 19px/1.15 'Archivo', sans-serif;
   letter-spacing: -.02em; text-transform: uppercase; position: relative;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.pcm-since { font: 500 12.5px/1 'Inter', sans-serif; color: rgba(255,255,255,.78); margin-top: 5px; position: relative; }
+.pcm-since { font: 500 12.5px/1 'Archivo', sans-serif; color: rgba(255,255,255,.78); margin-top: 5px; position: relative; }
 .pcm-foot { margin-top: 18px; position: relative; }
 .pcm-prog-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 7px; }
-.pcm-count { font: 600 13px/1 'Inter', sans-serif; color: rgba(255,255,255,.92); }
-.pcm-count b { font: 800 16px/1 'Plus Jakarta Sans', sans-serif; }
-.pcm-pct { font: 800 24px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: -.02em; }
+.pcm-count { font: 600 13px/1 'Archivo', sans-serif; color: rgba(255,255,255,.92); }
+.pcm-count b { font: 800 16px/1 'Archivo', sans-serif; }
+.pcm-pct { font: 800 24px/1 'Archivo', sans-serif; letter-spacing: -.02em; }
 .pcm-bar { height: 6px; background: rgba(0,0,0,.25); border-radius: 99px; overflow: hidden; }
 .pcm-fill {
   height: 100%; background: #fff; border-radius: 99px;

@@ -30,6 +30,7 @@ import {
 } from "@/utils/game-state.js";
 import { getLang } from "@/utils/lang.js";
 import { worldTr } from "@/data/worlds-i18n.js";
+import { chromeNight } from "@/utils/chrome-night.js";
 
 // ── i18n de la COQUE du parcours (EN/AR) — élèves non-francophones.
 // Dict LOCAL (règle coque : pas de fichier partagé), repli FR intégral. Le
@@ -294,7 +295,7 @@ const STYLE = `<style>
 }
 .fiche-hero .fiche-close:active { transform: scale(.97); }
 .fiche-badge-cat {
-  font: 700 9.5px/1 'Inter', sans-serif;
+  font: 700 9.5px/1 'Archivo', sans-serif;
   letter-spacing: 1.8px;
   text-transform: uppercase;
   color: var(--mu2);
@@ -320,7 +321,7 @@ const STYLE = `<style>
   100%{ transform: scale(1) rotate(0); }
 }
 .fiche-hero h3 {
-  font: 800 17px/1.2 'Plus Jakarta Sans', sans-serif;
+  font: 800 17px/1.2 'Archivo', sans-serif;
   color: var(--ink);
   margin: 0 0 3px;
 }
@@ -338,7 +339,7 @@ const STYLE = `<style>
   filter: drop-shadow(0 6px 12px rgba(10,4,26,.32));
 }
 .fiche-hero .fiche-id {
-  font: 600 10.5px/1 'Inter', sans-serif;
+  font: 600 10.5px/1 'Archivo', sans-serif;
   color: var(--mu2);
   letter-spacing: 1px;
   margin-bottom: 10px;
@@ -349,7 +350,7 @@ const STYLE = `<style>
   gap: 5px;
   padding: 5px 12px;
   border-radius: var(--r-full);
-  font-family: 'Inter', sans-serif;
+  font-family: 'Archivo', sans-serif;
   font-size: 10px;
   font-weight: 900;
   letter-spacing: .12em;
@@ -366,7 +367,7 @@ const STYLE = `<style>
 
 /* ── Fiche compacte (mobile) ── */
 .fiche-summary-txt {
-  font: 500 13.5px/1.5 'Inter', sans-serif;
+  font: 500 13.5px/1.5 'Archivo', sans-serif;
   color: var(--mu); margin: 0; text-align: center;
 }
 .fiche-acc {
@@ -377,7 +378,7 @@ const STYLE = `<style>
   list-style: none; cursor: pointer;
   display: flex; align-items: center; gap: 7px;
   padding: 12px 14px;
-  font: 700 12px/1 'Inter', sans-serif; color: var(--ink);
+  font: 700 12px/1 'Archivo', sans-serif; color: var(--ink);
   -webkit-tap-highlight-color: transparent;
 }
 .fiche-acc > summary::-webkit-details-marker { display: none; }
@@ -388,7 +389,7 @@ const STYLE = `<style>
 .fiche-acc-tip {
   margin: 4px 12px 12px; padding: 10px 12px;
   background: var(--amp); border-radius: var(--r);
-  font: 500 12px/1.45 'Inter', sans-serif; color: var(--amx);
+  font: 500 12px/1.45 'Archivo', sans-serif; color: var(--amx);
   display: flex; gap: 7px; align-items: flex-start;
 }
 .fiche-acc-tip svg { color: var(--amx); flex-shrink: 0; margin-top: 1px; }
@@ -403,7 +404,7 @@ const STYLE = `<style>
   margin-bottom: 10px;
 }
 .fiche-section .sec-lbl {
-  font: 700 9.5px/1 'Inter', sans-serif;
+  font: 700 9.5px/1 'Archivo', sans-serif;
   letter-spacing: .15em;
   text-transform: uppercase;
   color: var(--mu2);
@@ -413,7 +414,7 @@ const STYLE = `<style>
   gap: 6px;
 }
 .fiche-section .sec-txt {
-  font: 500 13.5px/1.5 'Inter', sans-serif;
+  font: 500 13.5px/1.5 'Archivo', sans-serif;
   color: var(--ink);
   font-style: italic;
 }
@@ -427,13 +428,13 @@ const STYLE = `<style>
 }
 .fiche-meta-row:first-of-type { border-top: 0; padding-top: 0; }
 .fiche-meta-row .ml { color: var(--mu3); font-weight: 500; }
-.fiche-meta-row .mv { color: var(--ink); font-weight: 700; font-family: 'Inter', sans-serif; font-size: 12px; }
+.fiche-meta-row .mv { color: var(--ink); font-weight: 700; font-family: 'Archivo', sans-serif; font-size: 12px; }
 .fiche-empty {
   text-align: center;
   padding: 18px;
 }
 .fiche-empty .em { font-size: 28px; opacity: .4; margin-bottom: 6px; }
-.fiche-empty .et { font: 500 12.5px/1.5 'Inter', sans-serif; color: var(--mu2); font-style: italic; }
+.fiche-empty .et { font: 500 12.5px/1.5 'Archivo', sans-serif; color: var(--mu2); font-style: italic; }
 
 /* ── Fiche premium v2 (refonte 2026-05) ──────────────────────── */
 .fiche-circle svg { width: 36px; height: 36px; stroke: #fff; stroke-width: 2.5; }
@@ -450,7 +451,7 @@ const STYLE = `<style>
 .fiche-summary::before { content: none; }
 .fiche-summary p {
   margin: 0;
-  font: 600 15.5px/1.5 'Plus Jakarta Sans', sans-serif;
+  font: 600 15.5px/1.5 'Archivo', sans-serif;
   color: var(--ink);
   opacity: .82;
   letter-spacing: -.01em;
@@ -471,14 +472,14 @@ const STYLE = `<style>
   text-align: left;
 }
 .fiche-progress-step {
-  font: 700 11px/1 'Inter', sans-serif;
+  font: 700 11px/1 'Archivo', sans-serif;
   color: var(--mu2);
   letter-spacing: .08em;
   text-transform: uppercase;
   margin-bottom: 4px;
 }
 .fiche-progress-val {
-  font: 800 16px/1 'Plus Jakarta Sans', sans-serif;
+  font: 800 16px/1 'Archivo', sans-serif;
   color: var(--ink);
 }
 .fiche-progress-val .of { font-weight: 600; color: var(--mu2); font-size: 13px; }
@@ -506,7 +507,7 @@ const STYLE = `<style>
   margin: 0;
 }
 .fiche-block-title {
-  font: 700 11px/1 'Inter', sans-serif;
+  font: 700 11px/1 'Archivo', sans-serif;
   letter-spacing: .12em;
   text-transform: uppercase;
   color: var(--mu2);
@@ -522,7 +523,7 @@ const STYLE = `<style>
   align-items: flex-start;
   gap: 10px;
   padding: 9px 0;
-  font: 500 13.5px/1.4 'Inter', sans-serif;
+  font: 500 13.5px/1.4 'Archivo', sans-serif;
   color: var(--ink);
   border-top: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
 }
@@ -578,7 +579,7 @@ const STYLE = `<style>
 .fiche-tip-body { flex: 1; padding-right: 26px; }
 .fiche-tip-label {
   display: block;
-  font: 700 10px/1 'Inter', sans-serif;
+  font: 700 10px/1 'Archivo', sans-serif;
   letter-spacing: .12em;
   text-transform: uppercase;
   color: var(--amx);
@@ -586,7 +587,7 @@ const STYLE = `<style>
 }
 .fiche-tip-text {
   display: block;
-  font: 500 13.5px/1.45 'Inter', sans-serif;
+  font: 500 13.5px/1.45 'Archivo', sans-serif;
   /* Fond crème codé en dur (.fiche-tip) → couleur fixe lisible.
      var(--ink) devenait blanc en dark mode = texte blanc sur fond clair. */
   color: #422006;
@@ -616,12 +617,12 @@ const STYLE = `<style>
 .fiche-status.locked .fiche-status-ico { background: var(--bo4); color: #fff; }
 .fiche-status-body { flex: 1; }
 .fiche-status-title {
-  font: 700 13px/1.3 'Plus Jakarta Sans', sans-serif;
+  font: 700 13px/1.3 'Archivo', sans-serif;
   color: var(--ink);
   margin-bottom: 2px;
 }
 .fiche-status-sub {
-  font: 500 12px/1.4 'Inter', sans-serif;
+  font: 500 12px/1.4 'Archivo', sans-serif;
   color: var(--mu);
 }
 /* Variante .done : fond vert clair codé en dur (#ecfdf5) → texte vert foncé fixe.
@@ -669,7 +670,7 @@ const STYLE = `<style>
     inset 0 2px 0 rgba(255,255,255,.5) !important;
 }
 .fiche-hero h3 {
-  font-family: 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Archivo', sans-serif;
   font-weight: 800; font-size: 21px; letter-spacing: -.3px;
   color: #fff; text-shadow: 0 2px 14px rgba(8,2,26,.5);
 }
@@ -684,7 +685,7 @@ const STYLE = `<style>
 .fiche-state {
   display: inline-flex; align-items: center; gap: 8px;
   margin-top: 8px;
-  font: 700 12.5px/1.3 'Inter', sans-serif;
+  font: 700 12.5px/1.3 'Archivo', sans-serif;
   color: #cdbff5;
 }
 .fiche-state-dot {
@@ -703,7 +704,7 @@ const STYLE = `<style>
   border-radius: var(--r-lg);
   background: rgba(255,255,255,.05);
   border: 1px solid rgba(255,255,255,.09);
-  font: 500 12.5px/1.45 'Inter', sans-serif;
+  font: 500 12.5px/1.45 'Archivo', sans-serif;
   color: #b9aee0;
 }
 .fiche-locked-note svg { color: #cdbff5; flex-shrink: 0; }
@@ -736,7 +737,7 @@ const STYLE = `<style>
   margin: 2px 0 0; padding: 15px; min-height: 54px;
   border: 0; border-radius: 16px; cursor: pointer;
   text-decoration: none; -webkit-tap-highlight-color: transparent;
-  font: 800 14.5px/1 'Baloo 2','Inter',sans-serif; color: #3a1c00;
+  font: 800 14.5px/1 'Archivo',sans-serif; color: #3a1c00;
   background: linear-gradient(180deg, #fff0bf 0%, #ffd24a 45%, #ff9c1c 100%);
   box-shadow:
     0 6px 0 #b85e00,
@@ -771,7 +772,7 @@ const STYLE = `<style>
   margin: 8px 0 0; padding: 13px 14px; min-height: 46px;
   border: 1.5px dashed rgba(168,85,247,.5); border-radius: 14px; cursor: pointer;
   text-decoration: none; -webkit-tap-highlight-color: transparent;
-  font: 700 12.5px/1.3 'Inter',sans-serif; color: #cdbff5;
+  font: 700 12.5px/1.3 'Archivo',sans-serif; color: #cdbff5;
   background: rgba(124,77,255,.1);
   transition: transform .12s var(--ease-snap), background .12s var(--ease-snap);
 }
@@ -786,7 +787,7 @@ const STYLE = `<style>
 .fiche-auto-pill {
   display: inline-flex; align-items: center; margin-left: 6px;
   padding: 2px 8px; border-radius: 99px;
-  font: 800 9.5px/1.6 'Inter',sans-serif; letter-spacing: .04em; text-transform: uppercase;
+  font: 800 9.5px/1.6 'Archivo',sans-serif; letter-spacing: .04em; text-transform: uppercase;
   background: rgba(124,77,255,.18); color: #cdbff5; vertical-align: middle;
 }
 .prc-cv.is-light .fiche-auto-pill { background: rgba(124,77,255,.12); color: #5a2fa0; }
@@ -825,9 +826,9 @@ const STYLE = `<style>
 .prc-cv-exam:active { transform:scale(.98); }
 .prc-cv-exam-ic { font-size:24px; flex:none; }
 .prc-cv-exam-tx { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
-.prc-cv-exam-tx b { font:700 14.5px/1.2 'Plus Jakarta Sans',sans-serif; }
-.prc-cv-exam-tx small { font:500 12px/1.5 'Inter',sans-serif; color:var(--mu,#6b7089); }
-.prc-cv-exam-go { font:800 18px/1 'Plus Jakarta Sans',sans-serif; color:var(--a,#6366f1); flex:none; }
+.prc-cv-exam-tx b { font:700 14.5px/1.2 'Archivo',sans-serif; }
+.prc-cv-exam-tx small { font:500 12px/1.5 'Archivo',sans-serif; color:var(--mu,#6b7089); }
+.prc-cv-exam-go { font:800 18px/1 'Archivo',sans-serif; color:var(--a,#6366f1); flex:none; }
 
 /* ══ Décor immersif : panneaux de signalisation (fond, gouttières) ══ */
 .prc-signs { position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
@@ -1086,7 +1087,7 @@ const STYLE = `<style>
   display: inline-flex; align-items: center; gap: 5px;
   padding: 6px 11px; border: 0; border-radius: 999px;
   background: transparent; color: #cdbff5;
-  font: 800 12px/1 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+  font: 800 12px/1 'Archivo', sans-serif;
   cursor: pointer; -webkit-tap-highlight-color: transparent;
   transition: background .15s, color .15s, transform .12s;
 }
@@ -1126,7 +1127,7 @@ const STYLE = `<style>
   min-width: 34px; height: 34px; padding: 0 5px;
   display: inline-flex; align-items: center; justify-content: center;
   border-radius: 11px;
-  font: 800 14px/1 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+  font: 800 14px/1 'Archivo', sans-serif;
   color: #cdbff5;
   background: rgba(42,27,82,.6);
   border: 1.5px solid rgba(168,85,247,.28);
@@ -1175,7 +1176,7 @@ const STYLE = `<style>
   padding: 6px 12px; border-radius: 20px;
   background: rgba(18,10,36,.55);
   border: 1px solid rgba(255,210,74,.35);
-  font: 800 11.5px/1 'Inter', sans-serif; letter-spacing: .06em; text-transform: uppercase;
+  font: 800 11.5px/1 'Archivo', sans-serif; letter-spacing: .06em; text-transform: uppercase;
   color: #ffe1a0;
   box-shadow: 0 2px 10px -4px rgba(255,156,28,.5);
 }
@@ -1188,7 +1189,7 @@ const STYLE = `<style>
   padding: 7px 12px; border-radius: 20px;
   background: rgba(42,27,82,.6);
   border: 1.5px solid rgba(168,85,247,.35);
-  font: 800 12px/1 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+  font: 800 12px/1 'Archivo', sans-serif;
   color: #cdbff5; text-decoration: none;
   -webkit-tap-highlight-color: transparent;
   transition: transform .12s, background .15s;
@@ -1198,7 +1199,7 @@ const STYLE = `<style>
 .prc-cv-suivi:active { transform: scale(.95); }
 .prc-cv-suivi:focus-visible { outline: 2px solid var(--cv-gold); outline-offset: 2px; }
 .prc-cv-world-title {
-  font-family: 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Archivo', sans-serif;
   font-weight: 800; font-size: 27px; line-height: 1.02; letter-spacing: -.6px;
   margin: 13px 0 4px;
   text-shadow: 0 2px 14px rgba(10,2,30,.6);
@@ -1208,7 +1209,7 @@ const STYLE = `<style>
 .prc-cv-world-prog { position: relative; z-index: 2; margin-top: 18px; }
 .prc-cv-wp-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
 .prc-cv-wp-top span { font-size: 12px; color: var(--cv-mute); font-weight: 600; }
-.prc-cv-wp-top b { font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 14px; color: #ffe9a8; }
+.prc-cv-wp-top b { font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 14px; color: #ffe9a8; }
 .prc-cv-wp-bar {
   height: 13px; border-radius: 10px;
   background: rgba(11,5,24,.7);
@@ -1237,7 +1238,7 @@ const STYLE = `<style>
   padding: 24px 22px 4px;
 }
 .prc-cv-route-head h2 {
-  font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 16px; letter-spacing: -.2px;
+  font-family: 'Archivo', sans-serif; font-weight: 700; font-size: 16px; letter-spacing: -.2px;
   color: var(--cv-ink, #fff);
 }
 .prc-cv-step-count {
@@ -1455,15 +1456,15 @@ const STYLE = `<style>
   box-shadow: 0 14px 34px -14px rgba(255,156,28,.5), inset 0 1px 0 rgba(255,255,255,.1);
 }
 .prc-cv-boss-kick {
-  font: 800 11px/1 'Inter', sans-serif; letter-spacing: .14em; text-transform: uppercase;
+  font: 800 11px/1 'Archivo', sans-serif; letter-spacing: .14em; text-transform: uppercase;
   color: #c9b8ff;
 }
 .prc-cv-boss-card.won .prc-cv-boss-kick { color: #ffd98a; }
 .prc-cv-boss-ttl {
-  font-family: 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Archivo', sans-serif;
   font-weight: 800; font-size: 17px; line-height: 1.1; color: var(--cv-ink, #fff); margin: 5px 0 3px;
 }
-.prc-cv-boss-sub { font: 500 12px/1.35 'Inter', sans-serif; color: #b9aee0; }
+.prc-cv-boss-sub { font: 500 12px/1.35 'Archivo', sans-serif; color: #b9aee0; }
 .prc-cv-boss-card.won .prc-cv-boss-sub { color: #f0d9a8; }
 
 /* ── Coffre du chapitre (récompense) ───────────────────────────── */
@@ -1473,7 +1474,7 @@ const STYLE = `<style>
 .prc-cv-ms-label { max-width: 184px; }
 .prc-cv-ms.right .prc-cv-ms-label { text-align: right; }
 .prc-cv-ms-ttl {
-  font-family: 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Archivo', sans-serif;
   font-weight: 700; font-size: 15px; line-height: 1.1; letter-spacing: -.2px;
   color: var(--cv-ink, #fff);
 }
@@ -1503,13 +1504,13 @@ const STYLE = `<style>
 .prc-cv-current-call:focus-visible { outline: 2px solid var(--cv-gold); outline-offset: 2px; border-radius: 20px; }
 .prc-cv-call-kick { font-size: 10.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #ffd98a; }
 .prc-cv-call-ct {
-  font-family: 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Archivo', sans-serif;
   font-weight: 700; font-size: 14.5px; margin: 3px 0 11px; line-height: 1.15; color: var(--cv-ink, #fff);
 }
 .prc-cv-cta {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 11px 18px; border-radius: 15px; border: none; cursor: pointer;
-  font-family: 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Archivo', sans-serif;
   font-weight: 800; font-size: 14px; letter-spacing: .2px; color: #3a1c00;
   background: linear-gradient(160deg, #ffe48f 0%, #ffd24a 40%, #ff9c1c 100%);
   box-shadow: 0 5px 0 var(--cv-gold-dk), 0 12px 22px -8px rgba(255,156,28,.8), inset 0 1px 0 rgba(255,255,255,.7);
@@ -1532,7 +1533,7 @@ const STYLE = `<style>
   background: linear-gradient(160deg, #2c1f4e, #1c1338);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 4px 0 #140d28;
 }
-.prc-cv-gate-g1 { font-family: 'Baloo 2', 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 14px; color: var(--cv-ink, #cdbff5); }
+.prc-cv-gate-g1 { font-family: 'Archivo', sans-serif; font-weight: 700; font-size: 14px; color: var(--cv-ink, #cdbff5); }
 .prc-cv-gate-g2 { font-size: 11.5px; color: var(--cv-mute); font-weight: 600; margin-top: 2px; }
 
 /* Panneaux routiers en fond de l'itinéraire (comme la vue carte). Volontairement
@@ -1575,7 +1576,7 @@ const STYLE = `<style>
 .prc-cv-next-badge {
   width: 50px; height: 50px; flex: 0 0 auto; border-radius: 15px;
   display: flex; align-items: center; justify-content: center;
-  font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 22px;
+  font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 22px;
 }
 .prc-cv-next-badge.open {
   color: #3a1c00;
@@ -1588,15 +1589,15 @@ const STYLE = `<style>
 }
 .prc-cv-next-txt { flex: 1 1 auto; min-width: 0; }
 .prc-cv-next-kick {
-  font: 800 10.5px/1 'Inter', sans-serif; letter-spacing: .12em; text-transform: uppercase;
+  font: 800 10.5px/1 'Archivo', sans-serif; letter-spacing: .12em; text-transform: uppercase;
   color: #c9b8ff; margin-bottom: 4px;
 }
 .prc-cv-next.locked .prc-cv-next-kick { color: var(--cv-mute); }
 .prc-cv-next-ttl {
-  font-family: 'Baloo 2', 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 17px;
+  font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 17px;
   color: var(--cv-ink, #fff); line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.prc-cv-next-sub { font: 500 11.5px/1.3 'Inter', sans-serif; color: var(--cv-mute); margin-top: 3px; }
+.prc-cv-next-sub { font: 500 11.5px/1.3 'Archivo', sans-serif; color: var(--cv-mute); margin-top: 3px; }
 .prc-cv-next-go {
   flex: 0 0 auto; width: 38px; height: 38px; border-radius: 50%; color: #fff;
   display: flex; align-items: center; justify-content: center;
@@ -1762,7 +1763,7 @@ export async function mount(root) {
     root.innerHTML = `${STYLE}<div class="prc"><div class="prc-hd"><div><div class="prc-title">${prcD("page_title", "Mon parcours")}</div></div></div>
       <div style="padding:48px 24px;text-align:center;color:var(--mu3)">
         <div style="font-size:40px;margin-bottom:12px">${icon("alert-circle", { size: 30 })}</div>
-        <p style="font:600 15px/1.5 'Inter',sans-serif">${prcD("err_1", "« Mon parcours » indisponible.")}<br>${prcD("err_2", "Vérifie ta connexion, puis réessaie.")}</p>
+        <p style="font:600 15px/1.5 'Archivo',sans-serif">${prcD("err_1", "« Mon parcours » indisponible.")}<br>${prcD("err_2", "Vérifie ta connexion, puis réessaie.")}</p>
         <button id="prc-retry" style="margin-top:14px;padding:12px 24px;border:0;background:var(--a);color:var(--a-ink);border-radius:12px;cursor:pointer">${prcD("retry", "Réessayer")}</button>
       </div></div>`;
     root
@@ -2152,7 +2153,7 @@ function spawnArrow(node, compId) {
         color: var(--a-ink);
         padding: 10px 16px;
         border-radius: var(--r-md);
-        font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif;
+        font: 700 13px/1.2 'Archivo', sans-serif;
         white-space: nowrap;
         box-shadow: 0 12px 32px -8px color-mix(in srgb, var(--a) 60%, transparent);
         margin-bottom: 6px;
@@ -2631,7 +2632,9 @@ function renderChapterView(
         })}</div>`
       : "";
 
-  return `<div class="prc-cv" role="main" aria-label="${prcT("main_aria", "Ton parcours — vue chapitre")}">
+  // La carte de voyage est la SEULE vue nuit de la page (le squelette et
+  // l'état d'erreur restent clairs) → le chrome se teinte ici, pas dans STYLE.
+  return `<style>${chromeNight("#1d1140", "#0b0719")}</style><div class="prc-cv" role="main" aria-label="${prcT("main_aria", "Ton parcours — vue chapitre")}">
   <div class="prc-cv-screen">
     <div class="prc-cv-topbar">
       ${chapNav}

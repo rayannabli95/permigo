@@ -19,7 +19,7 @@ const STYLE = `<style>
     position: relative;
     min-height: 100dvh;
     padding: 32px 18px max(60px, calc(24px + env(safe-area-inset-bottom)));
-    font-family: 'Baloo 2', var(--fb), sans-serif;
+    font-family: 'Archivo', var(--fb), sans-serif;
     -webkit-font-smoothing: antialiased;
     display: flex;
     flex-direction: column;
@@ -82,14 +82,14 @@ const STYLE = `<style>
     box-shadow: inset 0 2px 3px rgba(255,255,255,.5), 0 4px 8px rgba(0,0,0,.4); }
   .sg-logo-fb b { color:#fff; font-size:38px; font-weight:800; text-shadow:0 2px 2px rgba(0,0,0,.35); }
   .sg-title {
-    font: 800 24px/1.15 'Baloo 2', var(--fb), sans-serif;
+    font: 800 24px/1.15 'Archivo', var(--fb), sans-serif;
     color: var(--sg-ink);
     text-align: center;
     margin: 6px 0 4px;
     text-shadow: 0 2px 0 rgba(0,0,0,.35);
   }
   .sg-sub {
-    font: 600 14.5px/1.5 'Baloo 2', var(--fb), sans-serif;
+    font: 600 14.5px/1.5 'Archivo', var(--fb), sans-serif;
     color: var(--ink-soft);
     text-align: center;
     margin: 0 0 24px;
@@ -97,7 +97,7 @@ const STYLE = `<style>
   .sg-sub strong { color: var(--gold); }
   .sg-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
   .sg-label {
-    font: 700 13px/1 'Baloo 2', var(--fb), sans-serif;
+    font: 700 13px/1 'Archivo', var(--fb), sans-serif;
     color: var(--ink-soft);
     letter-spacing: .04em;
     text-transform: uppercase;
@@ -108,7 +108,7 @@ const STYLE = `<style>
     height: 52px;
     border: 0;
     border-radius: 15px;
-    font: 600 16px/1.3 'Baloo 2', var(--fb), sans-serif;
+    font: 600 16px/1.3 'Archivo', var(--fb), sans-serif;
     color: var(--sg-ink);
     background: var(--field);
     box-shadow: inset 0 2px 5px rgba(0,0,0,.5), inset 0 0 0 1.5px var(--field-line);
@@ -129,7 +129,7 @@ const STYLE = `<style>
   /* Date picker lisible sur fond sombre */
   .sg-input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(.85); cursor: pointer; }
   .sg-help {
-    font: 600 11.5px/1.4 'Baloo 2', var(--fb), sans-serif;
+    font: 600 11.5px/1.4 'Archivo', var(--fb), sans-serif;
     color: var(--ink-mu);
     margin-top: 2px;
     margin-left: 4px;
@@ -137,7 +137,7 @@ const STYLE = `<style>
   .sg-help.error { color: #ffb3b3; }
   .sg-help.ok { color: #8fe85a; }
   .sg-italic {
-    font: italic 500 12px/1.45 'Baloo 2', var(--fb), sans-serif;
+    font: italic 500 12px/1.45 'Archivo', var(--fb), sans-serif;
     color: var(--ink-mu);
     margin-top: 4px;
     margin-left: 4px;
@@ -162,7 +162,7 @@ const STYLE = `<style>
     color: #fff;
     border: 0;
     border-radius: 17px;
-    font: 800 18px/1 'Baloo 2', var(--fb), sans-serif;
+    font: 800 18px/1 'Archivo', var(--fb), sans-serif;
     letter-spacing: .2px;
     cursor: pointer;
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
@@ -200,7 +200,7 @@ const STYLE = `<style>
     background: linear-gradient(90deg, transparent, rgba(124,111,224,.4), transparent); }
 
   /* Lien se connecter */
-  .sg-login-row { text-align: center; margin-top: 16px; font: 600 13.5px/1.4 'Baloo 2', var(--fb), sans-serif; color: var(--ink-soft); }
+  .sg-login-row { text-align: center; margin-top: 16px; font: 600 13.5px/1.4 'Archivo', var(--fb), sans-serif; color: var(--ink-soft); }
   .sg-login-row a { color: var(--gold); font-weight: 800; text-decoration: underline; text-underline-offset: 2px; }
   .sg-login-row a:hover { color: #ffe39a; }
   .sg-login-row a:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 6px; }
@@ -212,7 +212,7 @@ const STYLE = `<style>
     background: linear-gradient(180deg, var(--gold), var(--gold-dp));
     color: #3a2600;
     border-radius: 99px;
-    font: 800 11px/1 'Baloo 2', var(--fb), sans-serif;
+    font: 800 11px/1 'Archivo', var(--fb), sans-serif;
     text-transform: uppercase;
     letter-spacing: .08em;
     box-shadow: inset 0 1px 1px rgba(255,255,255,.6), 0 3px 8px rgba(0,0,0,.35);
@@ -235,20 +235,20 @@ const STYLE = `<style>
   }
   .sg-error-ico { color: #ffb3b3; margin-bottom: 12px; display: flex; justify-content: center; }
   .sg-error-title {
-    font: 800 19px/1.2 'Baloo 2', var(--fb), sans-serif;
+    font: 800 19px/1.2 'Archivo', var(--fb), sans-serif;
     color: var(--sg-ink);
     margin: 0 0 8px;
     text-shadow: 0 2px 0 rgba(0,0,0,.3);
   }
   .sg-error-msg {
-    font: 600 13.5px/1.5 'Baloo 2', var(--fb), sans-serif;
+    font: 600 13.5px/1.5 'Archivo', var(--fb), sans-serif;
     color: var(--ink-soft);
     margin: 0 0 18px;
   }
   /* Lien-bouton secondaire (retour / J'ai compris) — plaque sombre */
   .sg-link {
     color: var(--sg-ink);
-    font: 800 14px/1 'Baloo 2', var(--fb), sans-serif;
+    font: 800 14px/1 'Archivo', var(--fb), sans-serif;
     text-decoration: none;
     padding: 13px 24px;
     border: 0;

@@ -27,6 +27,7 @@ import {
 } from "@/data/conduite-meta.js";
 import { isFreeTierUser } from "@/utils/free-tier.js";
 import { discoveryBannerHTML } from "@/components/eleve/free-tier-wall.js";
+import { chromeNight } from "@/utils/chrome-night.js";
 
 // i18n de la COQUE (élève non-francophone) : textes REMPLACÉS (pas de FR gardé
 // dessous — ça, c'est pour le contenu pédagogique long). Dict local (règle
@@ -113,10 +114,11 @@ const SVG = {
 };
 
 const STYLE = `<style>
+${chromeNight("#241a52", "#1a1340")}
 .rv4 { position:relative; overflow:hidden; max-width:480px; margin:0 auto;
   min-height:100dvh; color:#fff;
   background:linear-gradient(180deg,#241a52 0%,#1e1648 46%,#1a1340 100%);
-  font-family:'Nunito',sans-serif; -webkit-font-smoothing:antialiased; }
+  font-family:'Archivo',sans-serif; -webkit-font-smoothing:antialiased; }
 .rv4::before { content:""; position:absolute; top:-120px; left:50%; transform:translateX(-50%);
   width:360px; height:300px; pointer-events:none;
   background:radial-gradient(ellipse at center,rgba(142,135,255,.18),transparent 70%); }
@@ -124,10 +126,10 @@ const STYLE = `<style>
 
 /* ===== HEADER ===== */
 .rv4-top { display:flex; align-items:center; justify-content:space-between; padding:8px 2px 14px; }
-.rv4-top h1 { font:800 30px/1 'Plus Jakarta Sans',sans-serif; letter-spacing:-.03em; color:#fff; margin:0; }
+.rv4-top h1 { font:800 30px/1 'Archivo',sans-serif; letter-spacing:-.03em; color:#fff; margin:0; }
 .rv4-streak { display:flex; align-items:center; gap:7px; padding:7px 13px 7px 10px; border-radius:999px;
   background:rgba(245,196,81,.12); border:1px solid rgba(245,196,81,.34); }
-.rv4-streak span { font:800 13.5px/1 'Plus Jakarta Sans',sans-serif; letter-spacing:-.01em; color:#f5c451; white-space:nowrap; }
+.rv4-streak span { font:800 13.5px/1 'Archivo',sans-serif; letter-spacing:-.01em; color:#f5c451; white-space:nowrap; }
 .rv4-flame { width:15px; height:19px; display:block; flex:none; }
 
 /* ===== HÉROS ===== */
@@ -136,7 +138,7 @@ const STYLE = `<style>
   background:linear-gradient(180deg,#2c2264 0%,#241a56 100%);
   box-shadow:0 22px 44px -20px rgba(8,4,30,.9), inset 0 1px 0 rgba(255,255,255,.05);
   -webkit-tap-highlight-color:transparent; color:inherit; }
-.rv4-eyebrow { display:block; font:800 11px/1 'Plus Jakarta Sans',sans-serif; letter-spacing:.16em;
+.rv4-eyebrow { display:block; font:800 11px/1 'Archivo',sans-serif; letter-spacing:.16em;
   text-transform:uppercase; color:#f5c451; margin:2px 2px 9px; }
 /* Le cadre suit un ratio, PAS une hauteur fixe : la capture fait 780×980 (le
    plein écran du jeu, question + réponses comprises). Une hauteur figée à
@@ -152,17 +154,17 @@ const STYLE = `<style>
   background:linear-gradient(180deg,transparent 62%,rgba(29,21,66,.55) 100%); }
 .rv4-pastille { position:absolute; top:12px; left:12px; z-index:2; display:flex; align-items:center; gap:6px;
   background:linear-gradient(180deg,#f7cf68,#f0aa2c); color:#2a1e05;
-  font:800 11.5px/1 'Plus Jakarta Sans',sans-serif; letter-spacing:-.01em; padding:6px 11px 6px 9px; border-radius:999px;
+  font:800 11.5px/1 'Archivo',sans-serif; letter-spacing:-.01em; padding:6px 11px 6px 9px; border-radius:999px;
   box-shadow:0 6px 14px -4px rgba(240,170,44,.6), inset 0 1px 0 rgba(255,255,255,.5); }
 .rv4-pastille .dot { width:6px; height:6px; border-radius:50%; background:#2a1e05; }
 .rv4-hbody { display:block; padding:15px 4px 2px; }
-.rv4-htitle { font:800 25px/1.06 'Plus Jakarta Sans',sans-serif; letter-spacing:-.03em; color:#fff; margin:0; }
-.rv4-hsub { margin:7px 0 0; font:700 14px/1.35 'Nunito',sans-serif; color:#b3aede; }
+.rv4-htitle { font:800 25px/1.06 'Archivo',sans-serif; letter-spacing:-.03em; color:#fff; margin:0; }
+.rv4-hsub { margin:7px 0 0; font:700 14px/1.35 'Archivo',sans-serif; color:#b3aede; }
 .rv4-cta { display:flex; align-items:center; justify-content:center; gap:9px; width:100%; margin-top:15px;
   padding:15px; border:0; border-radius:16px; cursor:pointer;
   background:linear-gradient(180deg,#8e87ff,#6c63ff);
   box-shadow:0 4px 0 #4a3fc9, 0 12px 22px -10px rgba(74,63,201,.9);
-  color:#fff; font:800 16.5px/1 'Plus Jakarta Sans',sans-serif; letter-spacing:-.01em;
+  color:#fff; font:800 16.5px/1 'Archivo',sans-serif; letter-spacing:-.01em;
   transition:transform .1s ease, box-shadow .1s ease; }
 .rv4-cta:active { transform:translateY(2px); box-shadow:0 2px 0 #4a3fc9, 0 8px 16px -10px rgba(74,63,201,.9); }
 .rv4-cta svg { display:block; }
@@ -170,7 +172,7 @@ const STYLE = `<style>
 /* ===== SECONDAIRES ===== */
 .rv4-rail { margin-top:20px; display:flex; flex-direction:column; gap:11px; }
 .rv4-railhead { display:flex; align-items:center; gap:10px; margin:0 2px 3px; }
-.rv4-railhead span { font:800 11px/1 'Plus Jakarta Sans',sans-serif; letter-spacing:.14em; text-transform:uppercase; color:#9089c7; }
+.rv4-railhead span { font:800 11px/1 'Archivo',sans-serif; letter-spacing:.14em; text-transform:uppercase; color:#9089c7; }
 .rv4-railhead .rule { flex:1; height:1px; background:linear-gradient(90deg,#3a3178,transparent); }
 .rv4-item { display:flex; align-items:center; gap:13px; width:100%; text-align:left; cursor:pointer;
   background:linear-gradient(180deg,#322a6b,#2a2160); border:1px solid #3a3178; border-radius:16px; padding:12px 14px;
@@ -180,10 +182,10 @@ const STYLE = `<style>
 .rv4-badge { flex:none; width:64px; height:64px; display:grid; place-items:center; }
 .rv4-badge img { width:64px; height:64px; object-fit:contain; display:block; filter:drop-shadow(0 5px 8px rgba(0,0,0,.5)); }
 .rv4-itx { flex:1; min-width:0; }
-.rv4-itx h3 { font:800 16px/1.15 'Plus Jakarta Sans',sans-serif; letter-spacing:-.02em; color:#fff; margin:0; }
-.rv4-itx p { margin:2px 0 0; font:600 12.5px/1.3 'Nunito',sans-serif; color:#b3aede; }
-.rv4-meta { flex:none; text-align:right; font:800 12.5px/1.1 'Plus Jakarta Sans',sans-serif; letter-spacing:-.01em; color:#f5c451; }
-.rv4-meta small { display:block; font:700 9.5px/1 'Nunito',sans-serif; letter-spacing:.08em; text-transform:uppercase; color:#9089c7; margin-bottom:3px; }
+.rv4-itx h3 { font:800 16px/1.15 'Archivo',sans-serif; letter-spacing:-.02em; color:#fff; margin:0; }
+.rv4-itx p { margin:2px 0 0; font:600 12.5px/1.3 'Archivo',sans-serif; color:#b3aede; }
+.rv4-meta { flex:none; text-align:right; font:800 12.5px/1.1 'Archivo',sans-serif; letter-spacing:-.01em; color:#f5c451; }
+.rv4-meta small { display:block; font:700 9.5px/1 'Archivo',sans-serif; letter-spacing:.08em; text-transform:uppercase; color:#9089c7; margin-bottom:3px; }
 
 /* Skeleton */
 .rv4-skel { border-radius:18px; background:rgba(255,255,255,.05); animation:rv4pulse 1.2s ease-in-out infinite; }

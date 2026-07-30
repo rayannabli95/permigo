@@ -110,7 +110,7 @@ const TIERS = [
 const STYLE = `<style>
 .prq{ position:relative; max-width:480px; margin:0 auto; min-height:100dvh;
   padding:26px 18px calc(24px + env(safe-area-inset-bottom));
-  font-family:'Plus Jakarta Sans','Inter',sans-serif; color:#ece9ff;
+  font-family:'Archivo',sans-serif; color:#ece9ff;
   background:
     radial-gradient(120% 46% at 50% -6%, rgba(124,99,255,.35) 0%, rgba(124,99,255,0) 55%),
     linear-gradient(180deg,#2a2170 0%,#1d1852 60%,#14103a 100%); }
@@ -120,7 +120,7 @@ const STYLE = `<style>
 /* color:inherit obligatoire — base.css pose une couleur sur h1..h4 et une règle
    directe bat la couleur héritée : sans ça le titre passe en encre sombre sur ce
    fond violet foncé (illisible en thème clair). */
-.prq-title{ color:inherit; font-family:'Baloo 2',cursive; font-weight:800; font-size:25px; line-height:1.14; margin:0 0 8px; }
+.prq-title{ color:inherit; font-family:'Archivo', system-ui, sans-serif; font-weight:800; font-size:25px; line-height:1.14; margin:0 0 8px; }
 .prq-sub{ font-size:13.5px; font-weight:600; color:#c3bdf0; margin:0 auto; max-width:330px; line-height:1.5; }
 .prq-tiers{ display:flex; flex-direction:column; gap:11px; margin-bottom:16px; }
 .prq-tier{ display:flex; align-items:center; gap:13px; width:100%; text-align:left; cursor:pointer;
@@ -130,10 +130,10 @@ const STYLE = `<style>
 .prq-tier.best{ background:linear-gradient(180deg,rgba(124,99,255,.28),rgba(124,99,255,.12)); border-color:#8f7bff;
   box-shadow:0 0 0 3px rgba(143,123,255,.22), inset 0 1px 0 rgba(255,255,255,.18); }
 .prq-tinfo{ flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
-.prq-tnom{ font-family:'Baloo 2',cursive; font-weight:800; font-size:16px; color:#fff; line-height:1.1; }
+.prq-tnom{ font-family:'Archivo', system-ui, sans-serif; font-weight:800; font-size:16px; color:#fff; line-height:1.1; }
 .prq-tsous{ font-size:11.5px; font-weight:600; color:#b8aef0; margin-top:2px; }
 .prq-tprice{ flex:0 0 auto; text-align:right; }
-.prq-tprice b{ font-family:'Baloo 2',cursive; font-weight:800; font-size:19px; color:#ffe4a6; }
+.prq-tprice b{ font-family:'Archivo', system-ui, sans-serif; font-weight:800; font-size:19px; color:#ffe4a6; }
 .prq-tprice span{ display:block; font-size:10px; font-weight:700; color:#b8aef0; }
 .prq-badge{ position:absolute; top:-9px; right:14px; font-weight:800; font-size:9px; letter-spacing:.08em; text-transform:uppercase;
   color:#1a1240; background:linear-gradient(180deg,#ffe9b0,#f4b24a); padding:3px 9px; border-radius:999px; box-shadow:0 2px 5px rgba(20,12,60,.35); }

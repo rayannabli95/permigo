@@ -188,7 +188,7 @@ export function mountLeagueHero(slot, { rows, solo } = {}) {
 // L'or ne reste que sur le rang.
 export const LEAGUE_HERO_CSS = `
 .lgh-eyebrow{
-  font:800 11.5px/1 'Plus Jakarta Sans',sans-serif;letter-spacing:.06em;
+  font:800 11.5px/1 'Archivo',sans-serif;letter-spacing:.06em;
   text-transform:uppercase;color:var(--mu);margin:28px 20px 10px;
   display:flex;align-items:center;gap:8px;
 }
@@ -220,22 +220,22 @@ export const LEAGUE_HERO_CSS = `
 /* chip saison — sur sa PROPRE ligne, alignée à droite (plus d'absolute → plus de collision avec la flèche) */
 .lgh-head{display:flex;justify-content:flex-end;margin-bottom:6px}
 .lgh-season{display:inline-flex;align-items:center;gap:5px;
-  padding:5px 10px;border-radius:999px;font:800 11px/1 'Plus Jakarta Sans',sans-serif;color:#e4defc;
+  padding:5px 10px;border-radius:999px;font:800 11px/1 'Archivo',sans-serif;color:#e4defc;
   background:rgba(10,7,24,.55);border:1px solid color-mix(in srgb, var(--a) 40%, transparent)}
 .lgh-season svg{color:var(--a-lt)}
 .lgh-season b{color:#fff;font-variant-numeric:tabular-nums}
 
 /* cœur : gros rang doré + place + flèche */
 .lgh-core{display:flex;align-items:center;gap:15px;margin-top:8px}
-.lgh-rank-big{flex:0 0 auto;font:800 58px/.86 'Baloo 2',cursive;letter-spacing:-.03em;
+.lgh-rank-big{flex:0 0 auto;font:800 58px/.86 'Archivo', system-ui, sans-serif;letter-spacing:-.03em;
   background:linear-gradient(180deg,#fff 0%,#fff7e0 50%,#ffd86b 100%);
   -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
   filter:drop-shadow(0 3px 2px rgba(0,0,0,.35))}
 .lgh-rank-big.is-empty{font-size:44px;opacity:.85}
 .lgh-hash{font-size:28px;-webkit-text-fill-color:#ffd24a;color:#ffd24a;vertical-align:14px;margin-right:1px}
 .lgh-mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
-.lgh-lbl{font:800 10.5px/1 'Plus Jakarta Sans',sans-serif;letter-spacing:.05em;text-transform:uppercase;color:#c9c2ea}
-.lgh-of{font:800 15px/1.2 'Baloo 2','Plus Jakarta Sans',sans-serif;color:#f7f5ff;
+.lgh-lbl{font:800 10.5px/1 'Archivo',sans-serif;letter-spacing:.05em;text-transform:uppercase;color:#c9c2ea}
+.lgh-of{font:800 15px/1.2 'Archivo',sans-serif;color:#f7f5ff;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lgh-go{flex:0 0 auto;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;
   color:#fff;background:linear-gradient(180deg,color-mix(in srgb, var(--a) 85%, #fff) 0%,var(--a) 50%,var(--adk) 100%);
@@ -244,7 +244,7 @@ export const LEAGUE_HERO_CSS = `
 
 /* objectif : une seule ligne (jamais culpabilisante) */
 .lgh-nudge{margin-top:13px;padding-top:12px;border-top:1px solid color-mix(in srgb, var(--a) 22%, transparent);
-  font:800 12.5px/1.35 'Nunito',sans-serif;color:#e7ddff;display:flex;align-items:center;gap:7px}
+  font:800 12.5px/1.35 'Archivo',sans-serif;color:#e7ddff;display:flex;align-items:center;gap:7px}
 .lgh-nudge b{color:#fff}
 .lgh-nudge .lgh-up{color:#ffd24a;font-size:13px;flex:0 0 auto}
 .lgh-nudge-invite{color:#c9c2ea;font-weight:700}

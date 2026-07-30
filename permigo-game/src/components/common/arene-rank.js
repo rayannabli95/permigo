@@ -33,6 +33,7 @@ function arMyRank(n) {
       : `Ta place : ${n}`;
 }
 import { renderUserAvatar } from "@/components/common/avatar.js";
+import { chromeNight } from "@/utils/chrome-night.js";
 
 // Presets d'accent (couleur, clair, foncé). On peut aussi passer un objet
 // { acc, lt, dk } à areneAccent() pour un accent sur-mesure.
@@ -53,6 +54,7 @@ const METAL = { 1: "gold", 2: "silver", 3: "bronze" };
 
 // ─── CSS ─────────────────────────────────────────────────────────
 export const ARENE_CSS = `<style>
+${chromeNight("var(--adk)", "#0a0820")}
 .arn{
   --acc:#6d4dff; --acc-lt:#a78bff; --acc-dk:#4a2fc4;
   --n0:#0a0820; --n1:#13102f;
@@ -65,7 +67,7 @@ export const ARENE_CSS = `<style>
      header verre (pattern livret), le contenu reste sous le header. */
   margin:calc(-1 * (var(--th,52px) + env(safe-area-inset-top,0px))) auto 0;
   padding:calc(var(--th,52px) + env(safe-area-inset-top,0px)) 0 calc(86px + env(safe-area-inset-bottom,0px));
-  color:var(--aink); font-family:'Inter',system-ui,sans-serif;
+  color:var(--aink); font-family:'Archivo',system-ui,sans-serif;
   background:
     radial-gradient(115% 55% at 50% 4%, color-mix(in srgb,var(--acc) 26%, transparent), transparent 60%),
     radial-gradient(140% 80% at 50% 120%, rgba(0,0,0,.55), transparent 55%),
@@ -85,8 +87,8 @@ export const ARENE_CSS = `<style>
 
 /* ── En-tête ── */
 .arn-hd{ padding:14px 20px 0; text-align:center; }
-.arn-hd h1{ font:800 22px/1.1 'Plus Jakarta Sans',sans-serif; letter-spacing:-.02em; margin:0; }
-.arn-hd .arn-sub{ font:600 12.5px/1.4 'Inter',sans-serif; color:var(--amute); margin:5px 0 0; }
+.arn-hd h1{ font:800 22px/1.1 'Archivo',sans-serif; letter-spacing:-.02em; margin:0; }
+.arn-hd .arn-sub{ font:600 12.5px/1.4 'Archivo',sans-serif; color:var(--amute); margin:5px 0 0; }
 
 /* ── Segmented control (ligues) ── */
 .arn-seg{
@@ -96,12 +98,12 @@ export const ARENE_CSS = `<style>
 }
 .arn-seg button{
   flex:1; border:0; cursor:pointer; padding:10px 6px; border-radius:12px;
-  font:700 14px/1.15 'Plus Jakarta Sans',sans-serif; letter-spacing:-.2px;
+  font:700 14px/1.15 'Archivo',sans-serif; letter-spacing:-.2px;
   color:var(--asoft); background:transparent;
   display:flex; flex-direction:column; align-items:center; gap:1px;
   transition:color .2s, background .2s; -webkit-tap-highlight-color:transparent;
 }
-.arn-seg button .sub{ font:600 10px/1.2 'Inter',sans-serif; opacity:.72; letter-spacing:0; }
+.arn-seg button .sub{ font:600 10px/1.2 'Archivo',sans-serif; opacity:.72; letter-spacing:0; }
 .arn-seg button[aria-selected="true"]{
   color:#fff; background:linear-gradient(180deg, var(--acc-lt), var(--acc));
   box-shadow:0 4px 14px color-mix(in srgb,var(--acc) 55%, transparent), inset 0 1px 0 rgba(255,255,255,.35);
@@ -111,10 +113,10 @@ export const ARENE_CSS = `<style>
 /* ── Portée (Mon école / National) + effectif ── */
 .arn-scopebar{ margin:12px 20px 4px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
 .arn-scope{ display:inline-flex; padding:3px; gap:2px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.09); border-radius:11px; }
-.arn-scope button{ border:0; cursor:pointer; background:transparent; color:var(--amute); font:700 12px/1 'Inter',sans-serif; padding:7px 12px; border-radius:9px; transition:.18s; -webkit-tap-highlight-color:transparent; }
+.arn-scope button{ border:0; cursor:pointer; background:transparent; color:var(--amute); font:700 12px/1 'Archivo',sans-serif; padding:7px 12px; border-radius:9px; transition:.18s; -webkit-tap-highlight-color:transparent; }
 .arn-scope button.on{ background:rgba(255,255,255,.14); color:#fff; }
 .arn-scope button:active{ transform:scale(.97); }
-.arn-effectif{ font:600 11.5px/1 'Inter',sans-serif; color:var(--amute); font-variant-numeric:tabular-nums; flex-shrink:0; }
+.arn-effectif{ font:600 11.5px/1 'Archivo',sans-serif; color:var(--amute); font-variant-numeric:tabular-nums; flex-shrink:0; }
 
 /* ── PODIUM ── */
 .arn-podium-wrap{ margin:4px 0 0; padding:0 14px; position:relative; }
@@ -134,29 +136,29 @@ export const ARENE_CSS = `<style>
 .arn-pav.m-bronze{ box-shadow:0 0 16px rgba(205,139,91,.4); } .arn-pav.m-bronze::after{ background:linear-gradient(160deg,#f0cba6,var(--bronze),var(--bronze-dk)); }
 .arn-pav.is-me{ box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 75%, transparent), 0 0 26px color-mix(in srgb,var(--acc) 60%, transparent); }
 .arn-medal{ position:absolute; bottom:-6px; left:50%; transform:translateX(-50%); width:22px; height:22px; border-radius:50%;
-  display:flex; align-items:center; justify-content:center; font:800 11px/1 'Plus Jakarta Sans',sans-serif; color:#3a2a00; border:2px solid var(--n0); }
+  display:flex; align-items:center; justify-content:center; font:800 11px/1 'Archivo',sans-serif; color:#3a2a00; border:2px solid var(--n0); }
 .arn-medal.gold{ background:linear-gradient(160deg,#ffe08a,var(--gold)); }
 .arn-medal.silver{ background:linear-gradient(160deg,#eef1f6,var(--silver)); color:#2c3140; }
 .arn-medal.bronze{ background:linear-gradient(160deg,#f0cba6,var(--bronze)); color:#3a230f; }
-.arn-pname{ margin-top:11px; font:700 13px/1.2 'Plus Jakarta Sans',sans-serif; max-width:100%; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.arn-pname{ margin-top:11px; font:700 13px/1.2 'Archivo',sans-serif; max-width:100%; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .arn-pname.me{ color:#fff; }
-.arn-youtag{ display:inline-block; font:800 9px/1 'Inter',sans-serif; letter-spacing:.4px; background:linear-gradient(180deg,var(--acc-lt),var(--acc)); color:#fff; padding:1px 6px; border-radius:6px; margin-left:2px; vertical-align:1px; }
-.arn-pscore{ font:800 15px/1 'Plus Jakarta Sans',sans-serif; margin-top:3px; font-variant-numeric:tabular-nums; letter-spacing:-.3px; }
-.arn-pscore .of{ font:700 11px/1 'Inter',sans-serif; color:var(--amute); }
+.arn-youtag{ display:inline-block; font:800 9px/1 'Archivo',sans-serif; letter-spacing:.4px; background:linear-gradient(180deg,var(--acc-lt),var(--acc)); color:#fff; padding:1px 6px; border-radius:6px; margin-left:2px; vertical-align:1px; }
+.arn-pscore{ font:800 15px/1 'Archivo',sans-serif; margin-top:3px; font-variant-numeric:tabular-nums; letter-spacing:-.3px; }
+.arn-pscore .of{ font:700 11px/1 'Archivo',sans-serif; color:var(--amute); }
 .arn-pscore.me{ color:var(--acc-lt); }
 .arn-ped{ width:100%; margin-top:11px; border-radius:14px 14px 0 0; display:flex; align-items:flex-start; justify-content:center; padding-top:8px;
-  font:800 22px/1 'Plus Jakarta Sans',sans-serif; background:linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.03));
+  font:800 22px/1 'Archivo',sans-serif; background:linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.03));
   border:1px solid rgba(255,255,255,.12); border-bottom:0; box-shadow:inset 0 1px 0 rgba(255,255,255,.22); }
 .arn-ped.p1{ height:80px; color:var(--gold); } .arn-ped.p2{ height:58px; color:var(--silver); } .arn-ped.p3{ height:46px; color:var(--bronze); }
 .arn-ped.p1.me-ped{ background:linear-gradient(180deg, color-mix(in srgb,var(--acc) 32%,transparent), color-mix(in srgb,var(--acc) 8%,transparent)); border-color:color-mix(in srgb,var(--acc) 45%, transparent); }
 
 /* ── Nudge perso ── */
-.arn-nudge{ margin:6px 20px 0; font:600 12px/1.4 'Inter',sans-serif; color:var(--asoft); text-align:center; }
+.arn-nudge{ margin:6px 20px 0; font:600 12px/1.4 'Archivo',sans-serif; color:var(--asoft); text-align:center; }
 .arn-nudge b{ color:var(--acc-lt); font-weight:800; }
 
 /* ── Liste dense ── */
 .arn-list-head{ display:flex; align-items:center; margin:16px 20px 8px; }
-.arn-list-head .lbl{ font:700 12px/1 'Inter',sans-serif; color:var(--amute); letter-spacing:.3px; text-transform:uppercase; white-space:nowrap; }
+.arn-list-head .lbl{ font:700 12px/1 'Archivo',sans-serif; color:var(--amute); letter-spacing:.3px; text-transform:uppercase; white-space:nowrap; }
 .arn-list-head .rule{ flex:1; height:1px; margin-left:12px; background:linear-gradient(90deg,rgba(255,255,255,.14),transparent); }
 .arn-list{ padding:0 14px; display:flex; flex-direction:column; gap:6px; }
 .arn-row{ display:flex; align-items:center; gap:11px; padding:9px 12px; border-radius:14px;
@@ -167,13 +169,13 @@ export const ARENE_CSS = `<style>
 .arn-row.clickable:hover{ background:rgba(255,255,255,.09); }
 .arn-row.clickable:active{ transform:scale(.985); }
 .arn-row:focus-visible{ outline:2px solid var(--acc-lt); outline-offset:2px; }
-.arn-rk{ flex-shrink:0; width:24px; text-align:center; font:800 14px/1 'Plus Jakarta Sans',sans-serif; color:var(--amute); font-variant-numeric:tabular-nums; }
+.arn-rk{ flex-shrink:0; width:24px; text-align:center; font:800 14px/1 'Archivo',sans-serif; color:var(--amute); font-variant-numeric:tabular-nums; }
 .arn-av{ flex-shrink:0; width:38px; height:38px; }
 .arn-av-lg{ width:74px; height:74px; } .arn-av-md{ width:56px; height:56px; }
-.arn-nm{ flex:1; min-width:0; font:700 14px/1.25 'Plus Jakarta Sans',sans-serif; letter-spacing:-.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.arn-sc{ flex-shrink:0; font:800 15px/1 'Plus Jakarta Sans',sans-serif; font-variant-numeric:tabular-nums; letter-spacing:-.3px; text-align:right; }
-.arn-sc .of{ font:700 11px/1 'Inter',sans-serif; color:var(--amute); }
-.arn-chip{ flex-shrink:0; display:inline-flex; align-items:center; gap:3px; font:700 11px/1 'Inter',sans-serif; padding:4px 8px; border-radius:999px; }
+.arn-nm{ flex:1; min-width:0; font:700 14px/1.25 'Archivo',sans-serif; letter-spacing:-.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.arn-sc{ flex-shrink:0; font:800 15px/1 'Archivo',sans-serif; font-variant-numeric:tabular-nums; letter-spacing:-.3px; text-align:right; }
+.arn-sc .of{ font:700 11px/1 'Archivo',sans-serif; color:var(--amute); }
+.arn-chip{ flex-shrink:0; display:inline-flex; align-items:center; gap:3px; font:700 11px/1 'Archivo',sans-serif; padding:4px 8px; border-radius:999px; }
 .arn-chip.flame{ color:#fff; background:color-mix(in srgb,#f59e0b 88%, var(--acc)); }
 .arn-chip.flame.off{ color:var(--amute); background:rgba(255,255,255,.07); }
 
@@ -185,25 +187,25 @@ export const ARENE_CSS = `<style>
   box-shadow:0 10px 28px color-mix(in srgb,var(--acc) 45%, transparent), 0 0 0 1px rgba(255,255,255,.06) inset; }
 .arn-merow .arn-rk{ width:34px; color:#fff; font-size:16px; }
 .arn-merow .arn-av{ width:42px; height:42px; box-shadow:0 0 0 2px rgba(255,255,255,.25); border-radius:50%; }
-.arn-merow .arn-nm{ font:800 14.5px/1.2 'Plus Jakarta Sans',sans-serif; color:#fff; }
-.arn-merow .arn-nm .pal{ display:block; font:600 11px/1.2 'Inter',sans-serif; color:rgba(255,255,255,.82); margin-top:2px; }
+.arn-merow .arn-nm{ font:800 14.5px/1.2 'Archivo',sans-serif; color:#fff; }
+.arn-merow .arn-nm .pal{ display:block; font:600 11px/1.2 'Archivo',sans-serif; color:rgba(255,255,255,.82); margin-top:2px; }
 .arn-merow .arn-sc{ font-size:18px; color:#fff; } .arn-merow .arn-sc .of{ color:rgba(255,255,255,.75); }
 
 /* ── Rail des paliers ── */
 .arn-paliers{ margin:18px 14px 4px; padding:13px 12px 12px; background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.08); border-radius:18px; }
 .arn-palhd{ display:flex; align-items:center; justify-content:space-between; margin-bottom:11px; }
-.arn-palhd .arn-palt{ font:800 12px/1 'Plus Jakarta Sans',sans-serif; color:var(--aink); letter-spacing:.2px; }
-.arn-palhd .arn-palgoal{ font:700 11px/1 'Inter',sans-serif; color:var(--acc-lt); }
+.arn-palhd .arn-palt{ font:800 12px/1 'Archivo',sans-serif; color:var(--aink); letter-spacing:.2px; }
+.arn-palhd .arn-palgoal{ font:700 11px/1 'Archivo',sans-serif; color:var(--acc-lt); }
 .arn-rail{ display:flex; align-items:flex-end; gap:6px; }
 .arn-badge{ flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; text-align:center; opacity:.42; transition:opacity .3s, transform .3s; }
 .arn-badge.done{ opacity:1; } .arn-badge.target{ opacity:1; transform:translateY(-3px); }
 .arn-shield{ width:40px; height:44px; position:relative; display:flex; align-items:center; justify-content:center;
-  font:800 14px/1 'Plus Jakarta Sans',sans-serif; color:#fff; clip-path:polygon(50% 0,100% 16%,100% 64%,50% 100%,0 64%,0 16%);
+  font:800 14px/1 'Archivo',sans-serif; color:#fff; clip-path:polygon(50% 0,100% 16%,100% 64%,50% 100%,0 64%,0 16%);
   filter:drop-shadow(0 3px 4px rgba(0,0,0,.4)); }
 .arn-shield::before{ content:""; position:absolute; top:3px; left:6px; right:6px; height:38%; border-radius:50%; background:linear-gradient(180deg,rgba(255,255,255,.45),transparent); }
 .arn-badge.target .arn-shield{ animation:arnPulse 2s ease-in-out infinite; }
 @keyframes arnPulse{ 0%,100%{filter:drop-shadow(0 3px 4px rgba(0,0,0,.4))} 50%{filter:drop-shadow(0 3px 10px color-mix(in srgb,var(--acc) 75%,transparent))} }
-.arn-badge .bn{ font:700 9.5px/1.1 'Inter',sans-serif; color:var(--asoft); max-width:62px; }
+.arn-badge .bn{ font:700 9.5px/1.1 'Archivo',sans-serif; color:var(--asoft); max-width:62px; }
 .arn-badge.done .bn{ color:var(--aink); } .arn-badge.target .bn{ color:var(--acc-lt); font-weight:800; }
 
 /* ── Bouton verre (CTA quiz) ── */
@@ -211,7 +213,7 @@ export const ARENE_CSS = `<style>
   display:flex; align-items:center; justify-content:center; gap:9px; padding:14px 20px; border-radius:16px; box-sizing:border-box;
   border:1px solid color-mix(in srgb,#fff 26%, var(--acc)); color:#fff; cursor:pointer; -webkit-tap-highlight-color:transparent;
   background:linear-gradient(135deg, color-mix(in srgb,var(--acc) 82%, transparent), color-mix(in srgb,var(--acc-dk) 92%, transparent));
-  font:800 15px/1 'Plus Jakarta Sans',sans-serif;
+  font:800 15px/1 'Archivo',sans-serif;
   box-shadow:0 8px 24px -6px color-mix(in srgb,var(--acc-dk) 60%, transparent), inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(0,0,0,.12);
   transition:transform .14s; }
 .arn-glass:active{ transform:scale(.98); }
@@ -221,16 +223,16 @@ export const ARENE_CSS = `<style>
 
 /* ── Aide « ? » (revoir le tuto) ── */
 .arn-help{ flex-shrink:0; width:30px; height:30px; border-radius:50%; border:1px solid rgba(255,255,255,.18);
-  background:rgba(255,255,255,.08); color:var(--asoft); font:800 14px/1 'Plus Jakarta Sans',sans-serif; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  background:rgba(255,255,255,.08); color:var(--asoft); font:800 14px/1 'Archivo',sans-serif; cursor:pointer; -webkit-tap-highlight-color:transparent; }
 .arn-help:active{ transform:scale(.95); }
 
 /* ── Hall of Fame (lauréats permis) ── */
-.arn-hof-title{ display:flex; align-items:center; gap:8px; margin:24px 18px 4px; font:700 11px/1 'Inter',sans-serif; text-transform:uppercase; letter-spacing:.1em; color:var(--amute); }
+.arn-hof-title{ display:flex; align-items:center; gap:8px; margin:24px 18px 4px; font:700 11px/1 'Archivo',sans-serif; text-transform:uppercase; letter-spacing:.1em; color:var(--amute); }
 .arn-hof-title::after{ content:''; flex:1; height:1px; background:rgba(255,255,255,.14); }
 .arn-hof-row{ display:flex; align-items:center; gap:12px; margin:8px 14px 0; padding:11px 13px; border-radius:14px;
   background:rgba(255,255,255,.05); border:1px solid color-mix(in srgb,var(--acc-lt) 22%, rgba(255,255,255,.08)); }
 .arn-hof-row.clickable{ cursor:pointer; } .arn-hof-row.clickable:active{ transform:scale(.985); }
-.arn-hof-badge{ flex-shrink:0; display:inline-flex; align-items:center; gap:4px; font:700 11px/1 'Inter',sans-serif; color:#fff;
+.arn-hof-badge{ flex-shrink:0; display:inline-flex; align-items:center; gap:4px; font:700 11px/1 'Archivo',sans-serif; color:#fff;
   background:linear-gradient(180deg,var(--acc-lt),var(--acc)); padding:4px 9px; border-radius:999px; }
 
 /* ── Lien discret (pseudo, retour…) ── */
@@ -238,13 +240,13 @@ export const ARENE_CSS = `<style>
   background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.08); color:var(--aink); }
 .arn-link:active{ transform:scale(.99); }
 .arn-link-body{ flex:1; min-width:0; }
-.arn-link-t{ font:700 13px/1.2 'Plus Jakarta Sans',sans-serif; }
-.arn-link-s{ font:500 11px/1.3 'Inter',sans-serif; color:var(--amute); margin-top:2px; }
+.arn-link-t{ font:700 13px/1.2 'Archivo',sans-serif; }
+.arn-link-s{ font:500 11px/1.3 'Archivo',sans-serif; color:var(--amute); margin-top:2px; }
 
 /* ── Vide ── */
 .arn-empty{ text-align:center; padding:46px 24px; color:var(--asoft); }
 .arn-empty-ico{ opacity:.5; margin-bottom:12px; display:inline-flex; }
-.arn-empty-txt{ font:600 13.5px/1.55 'Inter',sans-serif; max-width:300px; margin:0 auto; }
+.arn-empty-txt{ font:600 13.5px/1.55 'Archivo',sans-serif; max-width:300px; margin:0 auto; }
 
 /* ── Entrée en cascade ── */
 @keyframes arnRowIn{ from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:none} }

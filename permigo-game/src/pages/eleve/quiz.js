@@ -155,7 +155,7 @@ const STYLE = `<style>
   @media (prefers-reduced-motion: reduce) { .qp-mascot { animation: none; } }
   .qp-badge {
     display: inline-block;
-    font: 700 11px/1 'Inter', sans-serif;
+    font: 700 11px/1 'Archivo', sans-serif;
     letter-spacing: .1em;
     text-transform: uppercase;
     color: var(--a-txt);
@@ -165,7 +165,7 @@ const STYLE = `<style>
     margin-bottom: 20px;
   }
   .qp-cat-row {
-    font: 500 13px/1 'Inter', sans-serif;
+    font: 500 13px/1 'Archivo', sans-serif;
     color: var(--mu);
     margin-bottom: 12px;
     display: flex;
@@ -174,7 +174,7 @@ const STYLE = `<style>
     gap: 6px;
   }
   .qp-comp {
-    font: 800 22px/1.3 'Plus Jakarta Sans', sans-serif;
+    font: 800 22px/1.3 'Archivo', sans-serif;
     color: var(--ink);
     margin: 0 0 20px;
   }
@@ -185,7 +185,7 @@ const STYLE = `<style>
     margin-bottom: 28px;
   }
   .qp-meta-item {
-    font: 600 12px/1 'Inter', sans-serif;
+    font: 600 12px/1 'Archivo', sans-serif;
     color: var(--mu);
     background: var(--bg2);
     border-radius: var(--r-xl);
@@ -198,7 +198,7 @@ const STYLE = `<style>
     border: 0;
     border-radius: var(--r-lg);
     color: var(--a-ink);
-    font: 800 16px/1 'Plus Jakarta Sans', sans-serif;
+    font: 800 16px/1 'Archivo', sans-serif;
     cursor: pointer;
     box-shadow: 0 8px 24px color-mix(in srgb, var(--a) 40%, transparent), 0 1.5px 0 0 rgba(255,255,255,.28) inset, 0 -2px 8px 0 color-mix(in srgb, var(--adk) 50%, transparent) inset;
     transition: transform .15s, opacity .15s, box-shadow .15s;
@@ -210,7 +210,7 @@ const STYLE = `<style>
     background: none;
     border: 0;
     color: var(--mu);
-    font: 500 14px/1 'Inter', sans-serif;
+    font: 500 14px/1 'Archivo', sans-serif;
     cursor: pointer;
     padding: 8px;
     width: 100%;
@@ -254,16 +254,16 @@ const STYLE = `<style>
   .ring-ok .qp-ring-prog { stroke: url(#qpRingGold); --ring-glow: var(--gr); }
   .ring-warn .qp-ring-prog { stroke: url(#qpRingAmber); --ring-glow: var(--am); }
   .qp-score-num {
-    font: 600 30px/1 'Fredoka', 'Plus Jakarta Sans', sans-serif;
+    font: 600 30px/1 'Archivo', sans-serif;
     color: var(--ink);
   }
   .qp-score-pct {
-    font: 600 14px/1 'Inter', sans-serif;
+    font: 600 14px/1 'Archivo', sans-serif;
     color: var(--mu);
     margin-top: 4px;
   }
   .qp-result-msg {
-    font: 500 15px/1.5 'Inter', sans-serif;
+    font: 500 15px/1.5 'Archivo', sans-serif;
     color: var(--mu4);
     margin: 0 0 28px;
   }
@@ -274,7 +274,7 @@ const STYLE = `<style>
     border: 0;
     border-radius: var(--r-md);
     color: var(--a-ink);
-    font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
+    font: 700 15px/1 'Archivo', sans-serif;
     cursor: pointer;
     margin-bottom: 12px;
     transition: transform .15s, opacity .15s;
@@ -288,7 +288,7 @@ const STYLE = `<style>
     border: 1.5px solid var(--bo);
     border-radius: var(--r-md);
     color: var(--mu4);
-    font: 600 14px/1 'Inter', sans-serif;
+    font: 600 14px/1 'Archivo', sans-serif;
     cursor: pointer;
     transition: transform .14s var(--ease-snap);
   }
@@ -343,10 +343,10 @@ export async function mount(root, params = {}) {
   }
 
   if (!competenceId) {
-    root.innerHTML = `<div style="padding:48px 24px;text-align:center;font-family:'Inter',sans-serif;color:var(--mu2)"${qtRtl()}>
-      <div style="font:700 16px/1.4 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:8px">${esc(qt("na_t", "Quiz non disponible"))}</div>
+    root.innerHTML = `<div style="padding:48px 24px;text-align:center;font-family:'Archivo',sans-serif;color:var(--mu2)"${qtRtl()}>
+      <div style="font:700 16px/1.4 'Archivo',sans-serif;color:var(--ink);margin-bottom:8px">${esc(qt("na_t", "Quiz non disponible"))}</div>
       <p style="font-size:14px;margin:0 0 20px">${esc(qt("na_p", "Sélectionne une compétence depuis ton parcours pour démarrer un quiz."))}</p>
-      <a href="#/parcours" style="display:inline-block;padding:15px 24px;background:var(--a);color: var(--a-ink);border-radius:12px;font:700 14px/1 'Plus Jakarta Sans',sans-serif;text-decoration:none">${esc(qt("na_btn", "Retour au parcours"))}</a>
+      <a href="#/parcours" style="display:inline-block;padding:15px 24px;background:var(--a);color: var(--a-ink);border-radius:12px;font:700 14px/1 'Archivo',sans-serif;text-decoration:none">${esc(qt("na_btn", "Retour au parcours"))}</a>
     </div>`;
     return;
   }
@@ -840,7 +840,7 @@ function renderResult(
     .qp-daily-streak {
       display: inline-flex; align-items: center; gap: 5px;
       margin: 10px auto 0;
-      font: 700 13px/1 'Plus Jakarta Sans', sans-serif;
+      font: 700 13px/1 'Archivo', sans-serif;
       color: var(--am-txt);
       background: color-mix(in srgb, var(--am, #f59e0b) 12%, transparent);
       border: 1px solid color-mix(in srgb, var(--am, #f59e0b) 28%, transparent);

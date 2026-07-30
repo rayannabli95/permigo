@@ -256,7 +256,7 @@ export function ensureHeatmapStyles() {
     .hmap-lcell.lv-2{background:var(--al)}
     .hmap-lcell.lv-3{background:var(--a)}
     .hmap-lcell.lv-4{background:var(--adk)}
-    .hmap-tooltip{position:fixed;background:var(--ink);color:#fff;font:600 11px/1.4 'Inter',sans-serif;padding:6px 10px;border-radius:8px;pointer-events:none;z-index:9000;opacity:0;transition:opacity .15s;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+    .hmap-tooltip{position:fixed;background:var(--ink);color:#fff;font:600 11px/1.4 'Archivo',sans-serif;padding:6px 10px;border-radius:8px;pointer-events:none;z-index:9000;opacity:0;transition:opacity .15s;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.2)}
   `;
   document.head.appendChild(style);
 }

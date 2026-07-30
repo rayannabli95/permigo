@@ -180,7 +180,7 @@ const STYLE = `<style>
   margin-top: calc(-1 * (var(--th, 52px) + env(safe-area-inset-top, 0px)));
   padding: calc(var(--th, 52px) + env(safe-area-inset-top, 0px) + 8px) 16px 96px;
   min-height: 100dvh; max-width: 480px; margin-inline: auto;
-  color: #fff; font-family: 'Nunito', system-ui, sans-serif; overflow: hidden;
+  color: #fff; font-family: 'Archivo', system-ui, sans-serif; overflow: hidden;
   background:
     radial-gradient(120% 55% at 20% -6%, rgba(168,85,247,.42) 0%, transparent 54%),
     radial-gradient(110% 45% at 96% 4%, rgba(255,156,28,.16) 0%, transparent 50%),
@@ -193,21 +193,21 @@ const STYLE = `<style>
   color: #fff; display: grid; place-items: center; cursor: pointer;
 }
 .roue-back svg { width: 20px; height: 20px; }
-.roue-title { font: 800 20px/1 'Baloo 2', cursive; text-shadow: 0 0 18px rgba(168,85,247,.4); }
+.roue-title { font: 800 20px/1 'Archivo', system-ui, sans-serif; text-shadow: 0 0 18px rgba(168,85,247,.4); }
 
 .roue-hero { text-align: center; padding: 8px 8px 2px; }
 .roue-kicker {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 4px 12px; border-radius: 999px; margin-bottom: 8px;
   background: rgba(255,210,74,.16); border: 1px solid rgba(255,210,74,.4);
-  font: 600 10px/1 'Fredoka', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--gold-s);
+  font: 600 10px/1 'Archivo', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--gold-s);
 }
 .roue-h1 {
-  font: 800 25px/1.05 'Baloo 2', cursive;
+  font: 800 25px/1.05 'Archivo', system-ui, sans-serif;
   background: linear-gradient(180deg, #fff 0%, #fff7e0 55%, #ffd86b 100%);
   -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
 }
-.roue-sub { margin-top: 5px; font: 700 12.5px/1.5 'Nunito', sans-serif; color: var(--mu); }
+.roue-sub { margin-top: 5px; font: 700 12.5px/1.5 'Archivo', sans-serif; color: var(--mu); }
 
 .roue-zone { position: relative; margin: 14px auto 4px; width: 290px; height: 290px; }
 .roue-zone::before {
@@ -238,7 +238,7 @@ const STYLE = `<style>
 .roue-seg > span {
   position: absolute; left: 50%; top: -98px; transform: translateX(-50%);
   display: inline-flex; align-items: center; gap: 3px; white-space: nowrap;
-  font: 800 15px/1 'Baloo 2', cursive; color: #1a1030; text-shadow: 0 1px 0 rgba(255,255,255,.35);
+  font: 800 15px/1 'Archivo', system-ui, sans-serif; color: #1a1030; text-shadow: 0 1px 0 rgba(255,255,255,.35);
 }
 .roue-hub {
   position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); z-index: 4;
@@ -258,14 +258,14 @@ const STYLE = `<style>
 .roue-cta {
   display: block; width: 100%; max-width: 330px; margin: 16px auto 0; min-height: 60px;
   border: 0; border-radius: 18px; cursor: pointer;
-  font: 800 17px/1 'Baloo 2', cursive; color: #fff; text-shadow: 0 2px 0 rgba(40,90,5,.55);
+  font: 800 17px/1 'Archivo', system-ui, sans-serif; color: #fff; text-shadow: 0 2px 0 rgba(40,90,5,.55);
   background: linear-gradient(180deg, var(--a-lt), var(--a));
   box-shadow: inset 0 1.5px 0 rgba(255,255,255,.5), 0 6px 0 var(--adk), 0 12px 24px -6px color-mix(in srgb, var(--a) 70%, transparent);
   transition: transform .1s, filter .15s;
 }
 .roue-cta:active { transform: translateY(3px); box-shadow: inset 0 1.5px 0 rgba(255,255,255,.5), 0 3px 0 var(--adk); }
 .roue-cta:disabled { filter: grayscale(.5) brightness(.8); cursor: default; }
-.roue-free { text-align: center; margin-top: 10px; font: 600 12px/1.4 'Fredoka', sans-serif; color: var(--mu); }
+.roue-free { text-align: center; margin-top: 10px; font: 600 12px/1.4 'Archivo', sans-serif; color: var(--mu); }
 
 .roue-result {
   margin: 14px auto 0; max-width: 360px; text-align: center;
@@ -274,8 +274,8 @@ const STYLE = `<style>
   animation: rouepop .35s cubic-bezier(.34,1.56,.64,1) both;
 }
 @keyframes rouepop { from { opacity: 0; transform: scale(.9); } to { opacity: 1; transform: scale(1); } }
-.roue-result-v { font: 800 26px/1 'Baloo 2', cursive; color: var(--gold-s); display: inline-flex; align-items: center; gap: 7px; }
-.roue-result-s { font: 700 12px/1.5 'Nunito', sans-serif; color: var(--mu2); margin-top: 5px; }
+.roue-result-v { font: 800 26px/1 'Archivo', system-ui, sans-serif; color: var(--gold-s); display: inline-flex; align-items: center; gap: 7px; }
+.roue-result-s { font: 700 12px/1.5 'Archivo', sans-serif; color: var(--mu2); margin-top: 5px; }
 
 .roue-real {
   margin: 20px auto 0; max-width: 400px; border-radius: 20px; padding: 16px;
@@ -285,54 +285,54 @@ const STYLE = `<style>
   box-shadow: 0 16px 30px -18px rgba(0,0,0,.8), 0 0 26px -10px color-mix(in srgb, var(--a) 35%, transparent);
 }
 .roue-real-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
-.roue-real-h h2 { font: 700 15px/1.1 'Baloo 2', cursive; display: flex; align-items: center; gap: 7px; }
-.roue-real-h .tag { flex: none; font: 600 9.5px/1 'Fredoka', sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--a-lt); padding: 4px 9px; border-radius: 999px; background: color-mix(in srgb, var(--a) 14%, transparent); border: 1px solid color-mix(in srgb, var(--a) 35%, transparent); }
+.roue-real-h h2 { font: 700 15px/1.1 'Archivo', system-ui, sans-serif; display: flex; align-items: center; gap: 7px; }
+.roue-real-h .tag { flex: none; font: 600 9.5px/1 'Archivo', sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--a-lt); padding: 4px 9px; border-radius: 999px; background: color-mix(in srgb, var(--a) 14%, transparent); border: 1px solid color-mix(in srgb, var(--a) 35%, transparent); }
 .roue-real-row { display: flex; align-items: center; gap: 11px; padding: 10px 2px; border-bottom: 1px solid color-mix(in srgb, var(--a) 12%, transparent); }
 .roue-real-row:last-of-type { border-bottom: 0; }
 .roue-real-ic { width: 38px; height: 38px; flex: none; display: grid; place-items: center; }
 .roue-real-ic svg { filter: drop-shadow(0 3px 5px rgba(0,0,0,.4)); }
-.roue-real-name { font: 700 13.5px/1.15 'Baloo 2', cursive; color: #e9ffd2; }
-.roue-real-sub { font: 700 11px/1.3 'Nunito', sans-serif; color: var(--mu2); margin-top: 1px; }
+.roue-real-name { font: 700 13.5px/1.15 'Archivo', system-ui, sans-serif; color: #e9ffd2; }
+.roue-real-sub { font: 700 11px/1.3 'Archivo', sans-serif; color: var(--mu2); margin-top: 1px; }
 .roue-real-flex { flex: 1; min-width: 0; }
 .roue-real-sign { margin-top: 10px; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; background: rgba(10,7,24,.35); border: 1px dashed color-mix(in srgb, var(--a) 35%, transparent); }
-.roue-real-av { width: 32px; height: 32px; flex: none; border-radius: 50%; display: grid; place-items: center; font: 800 15px/1 'Baloo 2', cursive; color: #fff; background: linear-gradient(160deg, var(--a-lt), var(--a)); border: 2px solid rgba(255,255,255,.5); }
-.roue-real-sign b { display: block; font: 700 12.5px/1.2 'Baloo 2', cursive; color: #e9ffd2; }
-.roue-real-sign span { font: 700 10.5px/1.3 'Nunito', sans-serif; color: var(--mu2); }
+.roue-real-av { width: 32px; height: 32px; flex: none; border-radius: 50%; display: grid; place-items: center; font: 800 15px/1 'Archivo', system-ui, sans-serif; color: #fff; background: linear-gradient(160deg, var(--a-lt), var(--a)); border: 2px solid rgba(255,255,255,.5); }
+.roue-real-sign b { display: block; font: 700 12.5px/1.2 'Archivo', system-ui, sans-serif; color: #e9ffd2; }
+.roue-real-sign span { font: 700 10.5px/1.3 'Archivo', sans-serif; color: var(--mu2); }
 
 .roue-note { margin: 14px auto 0; max-width: 400px; display: flex; align-items: flex-start; gap: 9px; padding: 12px 14px; border-radius: 16px; background: rgba(124,77,255,.10); border: 1px solid rgba(167,139,250,.22); }
 .roue-note svg { width: 16px; height: 16px; flex: none; color: #c9b8ff; margin-top: 1px; }
-.roue-note p { font: 700 11.5px/1.5 'Nunito', sans-serif; color: var(--mu); }
+.roue-note p { font: 700 11.5px/1.5 'Archivo', sans-serif; color: var(--mu); }
 .roue-note b { color: #c9b8ff; }
 
 /* Célébration GROS LOT (au lieu du résultat volants) */
 .roue-gros { background: linear-gradient(180deg, #2a1a08, #3a2408); border-color: rgba(255,210,74,.55);
   box-shadow: 0 0 34px -6px rgba(255,180,40,.5), inset 0 1px 0 rgba(255,255,255,.12); }
-.roue-gros-badge { display: inline-block; font: 800 12px/1 'Baloo 2', cursive; letter-spacing: .1em;
+.roue-gros-badge { display: inline-block; font: 800 12px/1 'Archivo', system-ui, sans-serif; letter-spacing: .1em;
   color: #3a2408; background: linear-gradient(180deg, #ffe9a8, #ffd24a); padding: 6px 14px; border-radius: 999px;
   box-shadow: 0 4px 0 #c87d12; }
 .roue-gros-lot { margin: 12px 0 4px; display: flex; align-items: center; justify-content: center; gap: 10px; }
 .roue-gros-lot .roue-gros-ic { font-size: 30px; }
-.roue-gros-lot b { font: 800 20px/1.1 'Baloo 2', cursive; color: var(--gold-s); }
-.roue-gros-code { margin-top: 8px; font: 700 13px/1.3 'Nunito', sans-serif; color: #fff; }
-.roue-gros-code b { font: 800 20px/1 'Baloo 2', cursive; letter-spacing: .12em; color: var(--gold);
+.roue-gros-lot b { font: 800 20px/1.1 'Archivo', system-ui, sans-serif; color: var(--gold-s); }
+.roue-gros-code { margin-top: 8px; font: 700 13px/1.3 'Archivo', sans-serif; color: #fff; }
+.roue-gros-code b { font: 800 20px/1 'Archivo', system-ui, sans-serif; letter-spacing: .12em; color: var(--gold);
   display: inline-block; margin-top: 3px; padding: 5px 12px; border-radius: 12px;
   background: rgba(255,210,74,.14); border: 1px dashed rgba(255,210,74,.55); }
 
 /* Mes lots gagnés (le code reste retrouvable après coup) */
 .roue-wins { margin: 16px auto 0; max-width: 400px; border-radius: 18px; padding: 14px 16px;
   background: linear-gradient(180deg, var(--pnl), var(--pnl2)); border: 1px solid rgba(255,210,74,.4); }
-.roue-wins h3 { font: 700 14px/1.1 'Baloo 2', cursive; display: flex; align-items: center; gap: 7px; margin-bottom: 4px; }
+.roue-wins h3 { font: 700 14px/1.1 'Archivo', system-ui, sans-serif; display: flex; align-items: center; gap: 7px; margin-bottom: 4px; }
 .roue-wins-row { display: flex; align-items: center; gap: 11px; padding: 9px 0; border-bottom: 1px solid rgba(167,139,250,.14); }
 .roue-wins-row:last-child { border-bottom: 0; }
 .roue-wins-ic { width: 34px; height: 34px; flex: none; border-radius: 11px; display: grid; place-items: center; font-size: 18px; background: rgba(255,210,74,.12); border: 1px solid rgba(255,210,74,.3); }
 .roue-wins-tx { flex: 1; min-width: 0; }
-.roue-wins-tx b { display: block; font: 700 13px/1.2 'Baloo 2', cursive; color: #fff; }
-.roue-wins-tx span { font: 700 11px/1.3 'Nunito', sans-serif; color: var(--mu2); }
-.roue-wins-code { flex: none; font: 800 13px/1 'Baloo 2', cursive; letter-spacing: .08em; color: var(--gold);
+.roue-wins-tx b { display: block; font: 700 13px/1.2 'Archivo', system-ui, sans-serif; color: #fff; }
+.roue-wins-tx span { font: 700 11px/1.3 'Archivo', sans-serif; color: var(--mu2); }
+.roue-wins-code { flex: none; font: 800 13px/1 'Archivo', system-ui, sans-serif; letter-spacing: .08em; color: var(--gold);
   padding: 6px 10px; border-radius: 10px; background: rgba(255,210,74,.12); border: 1px dashed rgba(255,210,74,.45); }
 .roue-wins-code.remis { color: var(--mu2); border-style: solid; border-color: rgba(167,139,250,.3); }
 
-.roue-real-big { flex: none; font: 700 9px/1 'Fredoka', sans-serif; letter-spacing: .06em; text-transform: uppercase;
+.roue-real-big { flex: none; font: 700 9px/1 'Archivo', sans-serif; letter-spacing: .06em; text-transform: uppercase;
   color: #3a2408; background: linear-gradient(180deg, #ffe9a8, #ffd24a); padding: 3px 7px; border-radius: 999px; }
 @media (prefers-reduced-motion: reduce) { .roue-disc { transition: transform 1.2s ease-out; } .roue-result { animation: none; } }
 </style>`;

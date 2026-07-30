@@ -30,7 +30,7 @@ function _ensureCss() {
   .vol-spark{position:fixed;z-index:9001;pointer-events:none;width:8px;height:8px;border-radius:50%;
     background:radial-gradient(circle,#ffe27a,#f5a623);will-change:transform,opacity}
   .vol-fallback{position:fixed;z-index:9000;pointer-events:none;display:flex;align-items:center;gap:6px;
-    font:800 17px/1 'Plus Jakarta Sans',system-ui,sans-serif;color:#b8860b;
+    font:800 17px/1 'Archivo',system-ui,sans-serif;color:#b8860b;
     text-shadow:0 1px 2px rgba(255,255,255,.6);will-change:transform,opacity}
   @media (prefers-reduced-motion:reduce){.vol-fly,.vol-spark{display:none}}
   `;

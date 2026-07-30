@@ -230,7 +230,7 @@ const STYLE = `<style>
   padding: 20px 16px 110px;
   background: var(--bg);
   color: var(--ink);
-  font-family: 'Inter', sans-serif;
+  font-family: 'Archivo', sans-serif;
 }
 .mc-hd {
   display: flex; align-items: center; gap: 12px;
@@ -250,13 +250,13 @@ const STYLE = `<style>
 }
 .mc-back:active { transform: scale(.93); }
 .mc-h1 {
-  font: 700 22px/1.15 'Plus Jakarta Sans', sans-serif;
+  font: 700 22px/1.15 'Archivo', sans-serif;
   color: var(--ink); letter-spacing: -.02em; margin: 0; flex: 1;
 }
 
 /* ── Section headers ── */
 .mc-section {
-  font: 700 12px/1 'Plus Jakarta Sans', sans-serif;
+  font: 700 12px/1 'Archivo', sans-serif;
   color: var(--mu2);
   letter-spacing: .08em;
   text-transform: uppercase;
@@ -343,12 +343,12 @@ const STYLE = `<style>
 
 .mc-info { flex: 1; min-width: 0; }
 .mc-label {
-  font: 600 14px/1.3 'Plus Jakarta Sans', sans-serif;
+  font: 600 14px/1.3 'Archivo', sans-serif;
   color: var(--ink);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .mc-sub {
-  font: 500 12px/1.4 'Inter', sans-serif;
+  font: 500 12px/1.4 'Archivo', sans-serif;
   color: var(--mu);
   margin-top: 3px;
 }
@@ -356,7 +356,7 @@ const STYLE = `<style>
   display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap;
 }
 .mc-rew-chip {
-  font: 700 11px/1 'Inter', sans-serif;
+  font: 700 11px/1 'Archivo', sans-serif;
   padding: 3px 8px; border-radius: 99px;
   background: color-mix(in srgb, var(--a) 8%, transparent);
   color: var(--a-txt);
@@ -368,7 +368,7 @@ const STYLE = `<style>
   padding: 8px 14px;
   border-radius: 10px;
   border: 0;
-  font: 700 12px/1 'Plus Jakarta Sans', sans-serif;
+  font: 700 12px/1 'Archivo', sans-serif;
   background: linear-gradient(to bottom, var(--a-lt) 0%, var(--a) 48%, var(--adk) 100%);
   box-shadow: 0 2px 8px 0 color-mix(in srgb, var(--adk) 35%, transparent), 0 1.5px 0 0 rgba(255,255,255,.28) inset, 0 -2px 6px 0 color-mix(in srgb, var(--adk) 50%, transparent) inset;
   color: var(--a-ink);
@@ -382,7 +382,7 @@ const STYLE = `<style>
 /* ── Empty ── */
 .mc-empty {
   text-align: center; padding: 40px 0;
-  font: 500 14px/1.6 'Inter', sans-serif;
+  font: 500 14px/1.6 'Archivo', sans-serif;
   color: var(--mu2);
 }
 .mc-empty-ico { font-size: 36px; margin-bottom: 12px; }

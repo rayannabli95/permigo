@@ -97,7 +97,7 @@ const STYLE = `<style>
   border: 3px solid var(--su);
   background: linear-gradient(135deg, var(--a), var(--adk));
   overflow: hidden; display: flex; align-items: center; justify-content: center;
-  font: 800 26px/1 'Plus Jakarta Sans', sans-serif; color: var(--a-ink);
+  font: 800 26px/1 'Archivo', sans-serif; color: var(--a-ink);
   box-shadow: 0 6px 18px rgba(10,13,26,.18);
 }
 .pcc-card.is-ens .pcc-av { border-color: rgba(255,255,255,.92); }
@@ -117,14 +117,14 @@ const STYLE = `<style>
 
 .pcc-id { flex: 1; min-width: 0; }
 .pcc-name {
-  font: 700 21px/1.15 'Fredoka', 'Plus Jakarta Sans', sans-serif;
+  font: 700 21px/1.15 'Archivo', sans-serif;
   letter-spacing: -.01em;
   color: var(--pcc-fg, var(--ink));
   margin: 0;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .pcc-bio {
-  font: 600 13px/1.4 'Plus Jakarta Sans', sans-serif;
+  font: 600 13px/1.4 'Archivo', sans-serif;
   color: var(--pcc-fg-mu, var(--mu));
   margin: 3px 0 0;
 }
@@ -134,7 +134,7 @@ const STYLE = `<style>
   position: absolute; top: 0; right: 0; z-index: 3;
   display: inline-flex; align-items: center; gap: 5px;
   padding: 8px 12px; border-radius: 999px; border: 0; cursor: pointer;
-  font: 700 12px/1 'Plus Jakarta Sans', sans-serif;
+  font: 700 12px/1 'Archivo', sans-serif;
   transition: transform .15s ease;
 }
 .pcc-card.is-eleve .pcc-share {
@@ -157,10 +157,10 @@ const STYLE = `<style>
   margin-bottom: 7px;
 }
 .pcc-prog-lbl {
-  font: 700 12px/1 'Plus Jakarta Sans', sans-serif; color: var(--ink2);
+  font: 700 12px/1 'Archivo', sans-serif; color: var(--ink2);
 }
 .pcc-prog-val {
-  font: 800 12px/1 'Plus Jakarta Sans', sans-serif; color: var(--a-txt);
+  font: 800 12px/1 'Archivo', sans-serif; color: var(--a-txt);
 }
 .pcc-prog-track {
   height: 9px; border-radius: 999px;
@@ -196,13 +196,13 @@ const STYLE = `<style>
 .pcc-card.is-eleve .pcc-stat + .pcc-stat { border-color: color-mix(in srgb, var(--a) 14%, var(--bo)); }
 .pcc-card.is-ens .pcc-stat + .pcc-stat { border-color: rgba(255,255,255,.2); }
 .pcc-stat-val {
-  font: 800 23px/1 'Fredoka', 'Plus Jakarta Sans', sans-serif;
+  font: 800 23px/1 'Archivo', sans-serif;
   letter-spacing: -.01em;
   color: var(--pcc-fg, var(--ink));
   margin-bottom: 4px;
 }
 .pcc-stat-lbl {
-  font: 600 11px/1.1 'Plus Jakarta Sans', sans-serif;
+  font: 600 11px/1.1 'Archivo', sans-serif;
   color: var(--pcc-fg-mu, var(--mu2));
 }
 

@@ -85,7 +85,7 @@ const CSS = `
 
   position:fixed; inset:0; z-index:10050;
   overflow:hidden; isolation:isolate;
-  font-family:"Nunito",system-ui,sans-serif;
+  font-family:'Archivo',system-ui,sans-serif;
   background:radial-gradient(120% 90% at 50% 40%, var(--night-core) 0%, var(--night-mid) 46%, var(--night-edge) 100%);
   opacity:0; transition:opacity .32s var(--cwn-ease);
   -webkit-font-smoothing:antialiased;
@@ -156,7 +156,7 @@ const CSS = `
   opacity:0; animation:cwnFadeDown .7s var(--cwn-ease) .1s forwards; }
 .cwn-brand img{ height:22px; width:auto; filter:drop-shadow(0 3px 10px rgba(120,80,220,.6)); }
 .cwn-brand img.cwn-broken{ display:none; }
-.cwn-brand .cwn-brand-fb{ display:none; font-family:"Baloo 2",sans-serif; font-weight:800; font-size:18px; color:#fff; text-shadow:0 3px 10px rgba(120,80,220,.6); }
+.cwn-brand .cwn-brand-fb{ display:none; font-family:'Archivo',sans-serif; font-weight:800; font-size:18px; color:#fff; text-shadow:0 3px 10px rgba(120,80,220,.6); }
 .cwn-brand img.cwn-broken + .cwn-brand-fb{ display:inline-block; }
 @keyframes cwnFadeDown{ from{ opacity:0; transform:translateY(-8px);} to{ opacity:1; transform:translateY(0);} }
 
@@ -171,7 +171,7 @@ const CSS = `
 .cwn-kicker .cwn-tick{ width:22px; height:22px; flex:none; border-radius:50%; display:grid; place-items:center;
   background:linear-gradient(180deg, var(--go-1), var(--go-2)); box-shadow:0 2px 0 var(--go-shadow), 0 0 14px -2px rgba(110,224,22,.8); }
 .cwn-kicker .cwn-tick svg{ width:13px; height:13px; color:#fff; }
-.cwn-kicker span{ font-family:"Fredoka",sans-serif; font-weight:600; font-size:12.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--gold-1); text-shadow:0 1px 6px rgba(255,180,40,.4); }
+.cwn-kicker span{ font-family:'Archivo',sans-serif; font-weight:600; font-size:12.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--gold-1); text-shadow:0 1px 6px rgba(255,180,40,.4); }
 @keyframes cwnPopIn{ 0%{ opacity:0; transform:scale(.7);} 100%{ opacity:1; transform:scale(1);} }
 
 .cwn-focal{ position:relative; margin-top:8px; width:230px; height:200px; display:flex; align-items:flex-end; justify-content:center; }
@@ -228,7 +228,7 @@ const CSS = `
 
 .cwn-titleWrap{ text-align:center; margin-top:10px; }
 .cwn-title{
-  font-family:"Baloo 2",sans-serif; font-weight:800; font-size:clamp(26px,8.5vw,34px); line-height:1.05;
+  font-family:'Archivo',sans-serif; font-weight:800; font-size:clamp(26px,8.5vw,34px); line-height:1.05;
   letter-spacing:-.3px; max-width:13ch; margin:0 auto; text-wrap:balance;
   color:#fff;
   background:linear-gradient(180deg,#ffffff 0%,#fff7e0 58%,#ffd86b 100%);
@@ -238,7 +238,7 @@ const CSS = `
   transform:scale(.6); opacity:0; animation:cwnTitleSlam .7s var(--cwn-spring) .75s forwards;
 }
 @keyframes cwnTitleSlam{ 0%{ opacity:0; transform:scale(.6);} 60%{ opacity:1; transform:scale(1.08);} 100%{ opacity:1; transform:scale(1);} }
-.cwn-sub{ margin-top:8px; font-family:"Fredoka",sans-serif; font-weight:500; font-size:15px; color:var(--violet-soft);
+.cwn-sub{ margin-top:8px; font-family:'Archivo',sans-serif; font-weight:500; font-size:15px; color:var(--violet-soft);
   opacity:0; animation:cwnFadeUp .6s var(--cwn-ease) .95s forwards; }
 .cwn-sub b{ color:var(--gold-1); font-weight:600; }
 @keyframes cwnFadeUp{ from{ opacity:0; transform:translateY(10px);} to{ opacity:1; transform:translateY(0);} }
@@ -252,15 +252,15 @@ const CSS = `
 .cwn-stat.s1{ animation:cwnStatUp .55s var(--cwn-spring) 1.05s forwards; }
 .cwn-stat.s2{ animation:cwnStatUp .55s var(--cwn-spring) 1.18s forwards; }
 @keyframes cwnStatUp{ to{ opacity:1; transform:translateY(0);} }
-.cwn-stat__v{ font-family:"Baloo 2",sans-serif; font-weight:800; font-size:27px; line-height:1; color:var(--gold-1);
+.cwn-stat__v{ font-family:'Archivo',sans-serif; font-weight:800; font-size:27px; line-height:1; color:var(--gold-1);
   text-shadow:0 2px 0 rgba(90,50,10,.4), 0 5px 10px rgba(0,0,0,.4); font-variant-numeric:tabular-nums; }
-.cwn-stat__l{ margin-top:5px; font-family:"Nunito",sans-serif; font-weight:700; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--violet-soft); }
+.cwn-stat__l{ margin-top:5px; font-family:'Archivo',sans-serif; font-weight:700; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--violet-soft); }
 
 .cwn-permis{ width:100%; max-width:320px; margin-top:16px; opacity:0; transform:translateY(12px); animation:cwnStatUp .55s var(--cwn-spring) 1.3s forwards; }
 .cwn-permis__top{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:8px; }
-.cwn-permis__l{ font-family:"Fredoka",sans-serif; font-weight:600; font-size:13.5px; color:var(--violet-ink); display:inline-flex; align-items:center; gap:7px; }
+.cwn-permis__l{ font-family:'Archivo',sans-serif; font-weight:600; font-size:13.5px; color:var(--violet-ink); display:inline-flex; align-items:center; gap:7px; }
 .cwn-permis__l svg{ width:16px; height:16px; color:var(--gold-2); }
-.cwn-permis__pct{ font-family:"Baloo 2",sans-serif; font-weight:800; font-size:16px; color:var(--gold-1); font-variant-numeric:tabular-nums; text-shadow:0 2px 6px rgba(0,0,0,.4); }
+.cwn-permis__pct{ font-family:'Archivo',sans-serif; font-weight:800; font-size:16px; color:var(--gold-1); font-variant-numeric:tabular-nums; text-shadow:0 2px 6px rgba(0,0,0,.4); }
 .cwn-permis__track{ position:relative; height:16px; border-radius:999px; background:linear-gradient(180deg,#1a1136,#2a1c52); border:1px solid rgba(255,207,82,.22); box-shadow:0 2px 6px rgba(0,0,0,.5) inset; overflow:hidden; }
 .cwn-permis__fill{ position:absolute; left:0; top:0; bottom:0; width:0; border-radius:999px;
   background:linear-gradient(180deg, var(--gold-1) 0%, var(--gold-2) 48%, var(--gold-3) 100%);
@@ -277,12 +277,12 @@ const CSS = `
 .cwn-reward img.cwn-broken{ display:none; }
 .cwn-reward .cwn-coin-fb{ display:none; width:28px; height:28px; border-radius:50%; background:radial-gradient(circle at 38% 32%, #fff4d2, var(--gold-2) 55%, var(--gold-3)); border:2px solid #fff7df; box-shadow:0 2px 0 var(--gold-deep); }
 .cwn-reward img.cwn-broken + .cwn-coin-fb{ display:inline-block; }
-.cwn-reward__n{ font-family:"Baloo 2",sans-serif; font-weight:800; font-size:20px; color:#fff; text-shadow:0 2px 0 rgba(90,50,10,.45), 0 4px 8px rgba(0,0,0,.4); font-variant-numeric:tabular-nums; }
-.cwn-reward__l{ font-family:"Nunito",sans-serif; font-weight:800; font-size:13px; color:var(--gold-1); }
+.cwn-reward__n{ font-family:'Archivo',sans-serif; font-weight:800; font-size:20px; color:#fff; text-shadow:0 2px 0 rgba(90,50,10,.45), 0 4px 8px rgba(0,0,0,.4); font-variant-numeric:tabular-nums; }
+.cwn-reward__l{ font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; color:var(--gold-1); }
 
 .cwn-ctaWrap{ margin-top:auto; padding-top:18px; width:100%; max-width:320px; }
 .cwn-cta{ position:relative; width:100%; min-height:60px; border:0; border-radius:20px; cursor:pointer;
-  font-family:"Baloo 2",sans-serif; font-weight:800; font-size:19px; letter-spacing:.3px; color:#fff;
+  font-family:'Archivo',sans-serif; font-weight:800; font-size:19px; letter-spacing:.3px; color:#fff;
   text-shadow:0 2px 0 rgba(40,90,5,.55);
   background:linear-gradient(180deg, var(--go-1) 0%, var(--go-2) 100%);
   box-shadow:0 1.5px 0 rgba(255,255,255,.5) inset, 0 6px 0 var(--go-shadow), 0 10px 22px -6px rgba(70,163,2,.7);

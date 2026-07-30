@@ -42,14 +42,14 @@ const STYLE = `
   }
   .xpt-text { flex: 1; min-width: 0; }
   .xpt-label {
-    font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif;
+    font: 700 13px/1.2 'Archivo', sans-serif;
     color: var(--ink);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
   .xpt-sub {
-    font: 500 11px/1.3 'Inter', sans-serif;
+    font: 500 11px/1.3 'Archivo', sans-serif;
     color: var(--mu3);
     margin-top: 2px;
     white-space: nowrap;

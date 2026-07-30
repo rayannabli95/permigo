@@ -298,7 +298,7 @@ const STYLE = `<style>
   --acc-txt: color-mix(in srgb, var(--a) 58%, #000);
   --acc-soft: color-mix(in srgb, var(--a) 9%, transparent);
   --f-d: 'Archivo', system-ui, sans-serif;
-  --f-b: 'Inter', system-ui, sans-serif;
+  --f-b: 'Archivo', system-ui, sans-serif;
 }
 .bo3 {
   max-width: 480px; margin: 0 auto; padding: 0 0 110px; min-height: 100dvh;
