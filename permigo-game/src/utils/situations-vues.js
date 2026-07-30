@@ -1,8 +1,8 @@
 // Collection « En situation » — quelles scènes l'élève a déjà jouées.
 // localStorage only (comme le plafond de volants du jeu), clé scopée par
 // compte : deux élèves sur le même appareil ont chacun leur collection.
-// Consommé par la page du jeu (marquage + récap) et l'accueil (carte
-// « Scène du jour » : « Tu en as vu X / N »).
+// Consommé par la page du jeu (marquage + récap). L'accueil ne l'affiche
+// plus : sa carte est une jaquette générique, sans compteur.
 
 const LS_VUES = "pg-sit-vues-ids"; // { ids: string[] }
 

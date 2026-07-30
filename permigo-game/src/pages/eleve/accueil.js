@@ -24,13 +24,6 @@ import { medallion } from "@/utils/medallions.js";
 import { volantImg } from "@/utils/volant.js";
 import { ASSETS } from "@/utils/assets.js";
 import { emotionalBanner } from "@/components/eleve/emotional-banner.js";
-import {
-  situationDuJour,
-  SITUATIONS,
-  THEME_LABELS,
-} from "@/data/situations-conduite.js";
-import { renderSituationScene } from "@/components/eleve/situation-scene.js";
-import { getScenesVues } from "@/utils/situations-vues.js";
 import { getMyChests } from "@/utils/game-state.js";
 import { mountDailyQuests } from "@/components/eleve/daily-quests.js";
 import { toast } from "@/components/common/toast.js";
@@ -85,12 +78,9 @@ const ACC_I18N = {
     sos_freeze_aria: "Freeze my streak for 50 tokens",
     day_sing: "day",
     day_plur: "days",
-    sitday_aria: "Scene of the day: {q} — play In Situation",
-    sitday_k: "Scene of the day",
-    sitday_theme_fallback: "Road rules",
-    sitday_btn: "I decide →",
-    sitday_collec: "Your collection: {c} scenes seen",
-    sitday_daily: "A different scene every day · {n} situations",
+    sitday_aria: "In situation — play today's scene",
+    sitday_title: "In situation",
+    sitday_play: "Play",
     permis_aria: "Your virtual licence — {n} of 31 skills",
     permis_label: "Your virtual licence",
     permis_sub_zero_solo: "Every skill you validate completes it.",
@@ -187,12 +177,9 @@ const ACC_I18N = {
     sos_freeze_aria: "تجميد سلسلتي مقابل 50 مقودًا",
     day_sing: "يوم",
     day_plur: "أيام",
-    sitday_aria: "مشهد اليوم: {q} — العب «في موقف»",
-    sitday_k: "مشهد اليوم",
-    sitday_theme_fallback: "قانون السير",
-    sitday_btn: "أقرّر ←",
-    sitday_collec: "مجموعتك: {c} مشهد",
-    sitday_daily: "مشهد مختلف كل يوم · {n} موقف",
+    sitday_aria: "في موقف — العب مشهد اليوم",
+    sitday_title: "في موقف",
+    sitday_play: "العب",
     permis_aria: "رخصتك الافتراضية — {n} من 31 مهارة",
     permis_label: "رخصتك الافتراضية",
     permis_sub_zero_solo: "كل مهارة تثبّتها تُكملها.",
@@ -297,12 +284,11 @@ function mondeNom(n, fr) {
   const l = getLang();
   return (l !== "fr" && MONDE_I18N[l]?.[n]) || fr;
 }
-// Titres de fiches + scène du jour : contenu DYNAMIQUE. Décision Rayan 23/07
-// (« plus un mot de FR dans la coque ») : en 'en'/'ar' on charge les chunks
-// fiches-i18n / situations-i18n À LA DEMANDE dans mount() — les élèves FR ne
-// paient jamais ces ~70 ko (la décision bundle de #538 reste vraie pour eux).
+// Titres de fiches : contenu DYNAMIQUE. Décision Rayan 23/07 (« plus un mot
+// de FR dans la coque ») : en 'en'/'ar' on charge le chunk fiches-i18n À LA
+// DEMANDE dans mount() — les élèves FR ne le paient jamais (la décision
+// bundle de #538 reste vraie pour eux).
 let _ficheI18nMod = null;
-let _situI18nMod = null;
 function ficheTitre(code, fr) {
   const l = getLang();
   if (l === "fr") return fr;
@@ -1658,15 +1644,12 @@ export async function mount(root) {
   root.innerHTML = SKELETON;
 
   try {
-    // Langue ≠ fr : titres de fiches + scène du jour affichés dans la langue
-    // choisie → chunks i18n chargés ICI seulement (jamais pour les élèves FR).
+    // Langue ≠ fr : titres de fiches affichés dans la langue choisie → chunk
+    // i18n chargé ICI seulement (jamais pour les élèves FR). Les situations
+    // ont le leur, chargé par la page En situation elle-même.
     if (getLang() !== "fr") {
-      const [fm, sm] = await Promise.allSettled([
-        import("@/data/fiches-i18n.js"),
-        import("@/data/situations-i18n.js"),
-      ]);
+      const [fm] = await Promise.allSettled([import("@/data/fiches-i18n.js")]);
       if (fm.status === "fulfilled") _ficheI18nMod = fm.value;
-      if (sm.status === "fulfilled") _situI18nMod = sm.value;
     }
 
     // Core fetches en parallèle
@@ -2097,19 +2080,6 @@ function render({
 }) {
   const totalValidated = worlds.reduce((s, w) => s + w.done, 0);
   const prenom = profile.prenom || me.prenom || "Toi";
-  const _sit = situationDuJour();
-  const _sitVues = getScenesVues(me.id).size;
-  // Scène du jour dans la langue choisie (chunk situations-i18n chargé par
-  // mount() quand lang ≠ fr) — repli FR si la traduction manque.
-  const _lang = getLang();
-  const _sitTr =
-    _lang !== "fr" ? _situI18nMod?.SITU_I18N?.[_sit.id]?.[_lang] || null : null;
-  const _sitQ = _sitTr?.q || _sit.question;
-  const _sitTheme =
-    (_lang !== "fr" && _situI18nMod?.THEME_I18N?.[_lang]?.[_sit.theme]) ||
-    THEME_LABELS[_sit.theme] ||
-    atR("sitday_theme_fallback", "Code de la route");
-
   // Bandeau d'installation — visible TANT QUE l'app n'est pas installée
   // (sur iPhone, installer = la seule façon d'avoir les notifs). Il disparaît
   // tout seul une fois installée (isStandalone) : pas un popup qu'on oublie.
@@ -2258,46 +2228,29 @@ function render({
   <!-- Ancre pour les quêtes du jour (mountDailyQuests) -->
   <div id="acc-action-anchor"></div>
 
-  <!-- ══ SCÈNE DU JOUR — En situation (panneau nuit, comme le jeu) ══ -->
+  <!-- ══ MISE EN SITUATION — jaquette générique (esprit « mode de jeu ») ══
+       La carte d'accueil ne montre JAMAIS le scénario du jour : même image,
+       même texte tous les jours. La vraie scène (question + réponses) ne se
+       découvre qu'après le clic, sur #/en-situation/jour. -->
   <style>
-    .acc2-sitday{display:block;width:calc(100% - 32px);text-align:left;margin:0 16px 14px;padding:13px 15px 11px;border:0;border-radius:20px;cursor:pointer;position:relative;overflow:hidden;color:#ece8ff;background:radial-gradient(120% 80% at 50% 0%,rgba(110,70,220,.35) 0%,transparent 60%),linear-gradient(180deg,#181241 0%,#0c0a26 100%);box-shadow:0 10px 24px -8px rgba(24,18,65,.45)}
-    .acc2-sitday:active{transform:scale(.985)}
-    .acc2-sitday-k{display:flex;align-items:center;gap:7px;font:800 11px/1 'Baloo 2','Fredoka',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#ffcb3d}
-    .acc2-sitday-k .th{background:#ffcb3d;color:#3a1d00;border-radius:999px;padding:3px 9px;letter-spacing:.02em}
-    .acc2-sitday-row{display:flex;align-items:center;gap:12px;margin-top:7px}
-    .acc2-sitday-q{flex:1;min-width:0;font:800 17px/1.25 'Baloo 2','Fredoka',sans-serif;color:#fff;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-    .acc2-sitday-btn{flex:0 0 auto;background:linear-gradient(180deg,#ffd24a,#ff9c1c);color:#3a1d00;font:800 14px/1 'Baloo 2','Fredoka',sans-serif;border-radius:13px;padding:12px 18px;box-shadow:0 4px 0 #b85e00;white-space:nowrap}
-    .acc2-sitday-scene{margin:2px auto 0;max-width:280px;pointer-events:none}
-    .acc2-sitday-scene svg{width:100%;height:auto;max-height:122px;display:block}
-    .acc2-sitday-m{display:block;margin-top:6px;font:500 12px/1.3 'Inter',sans-serif;color:#b9b3e6}
-    .acc2-sitday-m b{color:#ffcb3d;font-weight:800}
-    .acc2-sitday-bar{display:block;margin-top:6px;height:6px;border-radius:999px;background:rgba(255,255,255,.14);overflow:hidden}
-    .acc2-sitday-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#ffcb3d,#ff9b1e)}
+    .acc2-cover{display:block;position:relative;width:calc(100% - 32px);margin:0 16px 14px;padding:0;border:0;border-radius:22px;overflow:hidden;cursor:pointer;aspect-ratio:16/10;background:#16103c;box-shadow:0 14px 30px -12px rgba(38,20,90,.55);-webkit-tap-highlight-color:transparent;transition:transform .18s cubic-bezier(.2,.8,.3,1)}
+    .acc2-cover:active{transform:scale(.985)}
+    .acc2-cover-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 58%;transition:transform .35s cubic-bezier(.2,.8,.3,1)}
+    @media (hover:hover){.acc2-cover:hover .acc2-cover-img{transform:scale(1.04)}}
+    .acc2-cover-veil{position:absolute;inset:0;background:linear-gradient(180deg,rgba(22,12,58,.30) 0%,rgba(22,12,58,.08) 34%,rgba(18,9,48,.58) 74%,rgba(15,7,40,.88) 100%)}
+    .acc2-cover-in{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:0 16px 15px}
+    .acc2-cover-t{flex:1;min-width:0;text-align:left;font:900 clamp(21px,6.4vw,30px)/1.03 'Archivo','Baloo 2',system-ui,sans-serif;word-spacing:.06em;text-transform:uppercase;color:#fff;text-shadow:0 3px 0 rgba(88,40,200,.55),0 10px 26px rgba(26,9,68,.85)}
+    .acc2-cover-btn{flex:0 0 auto;background:#fff;color:#24124f;font:800 15px/1 'Archivo','Baloo 2',system-ui,sans-serif;border-radius:999px;padding:13px 24px;box-shadow:0 8px 18px -8px rgba(10,4,32,.8)}
+    @media (prefers-reduced-motion:reduce){.acc2-cover,.acc2-cover-img{transition:none}}
   </style>
-  <button class="acc2-sitday" id="acc-sit-day" type="button"
-          aria-label="${escAttr(atR("sitday_aria", "Scène du jour : {q} — jouer à En situation").replace("{q}", _sitQ))}">
-    <span class="acc2-sitday-k">${at("sitday_k", "Scène du jour")} <span class="th">${_rtl(esc(_sitTheme))}</span></span>
-    <span class="acc2-sitday-row">
-      <span class="acc2-sitday-q">${_rtl(esc(_sitQ))}</span>
-      <span class="acc2-sitday-btn" aria-hidden="true">${at("sitday_btn", "Je décide →")}</span>
+  <button class="acc2-cover" id="acc-sit-day" type="button"
+          aria-label="${escAttr(atR("sitday_aria", "Mise en situation — jouer la scène du jour"))}">
+    <img class="acc2-cover-img" src="/skins/cover-mise-en-situation.webp" alt="" aria-hidden="true" loading="lazy" decoding="async">
+    <span class="acc2-cover-veil" aria-hidden="true"></span>
+    <span class="acc2-cover-in">
+      <span class="acc2-cover-t">${at("sitday_title", "Mise en situation")}</span>
+      <span class="acc2-cover-btn" aria-hidden="true">${at("sitday_play", "Jouer")}</span>
     </span>
-    <span class="acc2-sitday-scene" aria-hidden="true">${renderSituationScene(_sit.scene)}</span>
-    <span class="acc2-sitday-m">${_rtl(
-      _sitVues > 0
-        ? atR("sitday_collec", "Ta collection : {c} scènes vues").replace(
-            "{c}",
-            `<b dir="ltr">${_sitVues} / ${SITUATIONS.length}</b>`,
-          )
-        : atR(
-            "sitday_daily",
-            "Une scène différente chaque jour · {n} situations",
-          ).replace("{n}", SITUATIONS.length),
-    )}</span>
-    ${
-      _sitVues > 0
-        ? `<span class="acc2-sitday-bar" aria-hidden="true"><i style="width:${Math.round((_sitVues / SITUATIONS.length) * 100)}%"></i></span>`
-        : ""
-    }
   </button>
 
   <!-- ══ PERMIS VIRTUEL — carte compacte maquette ══ -->
