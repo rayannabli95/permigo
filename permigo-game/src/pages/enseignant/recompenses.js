@@ -160,7 +160,7 @@ const STYLE = `<style>
 /* Écran focus (sous-page config) : on masque la nav du bas + le FAB « séance »
    le temps de la page (retour propre via le bouton en haut). Le <style> est
    retiré au changement de route → la nav revient d'elle-même. */
-#bottom-nav, #bn-seance-fab { display: none !important; }
+#bottom-nav { display: none !important; }
 
 .mrw-skel { height: 120px; border-radius: 20px; margin-top: 16px; background: linear-gradient(90deg,#eef0f8 0%,#f7f8fc 50%,#eef0f8 100%); background-size: 200% 100%; animation: mrwsh 1.4s infinite; }
 @keyframes mrwsh { to { background-position: -200% 0; } }

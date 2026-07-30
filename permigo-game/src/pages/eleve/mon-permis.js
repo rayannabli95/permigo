@@ -1,34 +1,36 @@
 // ═══════════════════════════════════════════════════════════════
 // Élève — Hub « Mon permis » : la route vers le VRAI permis (chantier 5,
 // nav simplifiée, maquette validée Rayan : mockups/nav-mon-permis-A.html,
-// variante A « La Route » — timeline sérieuse en 3 étapes).
+// variante A « La Route » — timeline sérieuse).
 //
 // Décision produit ferme (2026-07) : le JEU et le SÉRIEUX sont séparés.
 //   - La route immersive (mondes/boss/coffres de parcours.js) RESTE à
 //     #/parcours, accessible par Réviser → « Jouer ». Elle n'apparaît PAS
 //     ici.
-//   - « Mon permis » devient la route crédible : ce que le moniteur a
-//     VALIDÉ en leçon (table `validations`), les comptes-rendus reçus, et
-//     l'examen. Zéro XP/mondes/coffres dans cet écran.
+//   - « Mon permis » devient la route crédible : les compétences acquises
+//     (`validations` + `self_validations`) et l'examen. Zéro XP/mondes/
+//     coffres dans cet écran.
 //
-// Grammaire éditoriale (fidèle à la maquette, façon Carnet) : timeline 3
-// étapes, numéros violets + filet vertical — PAS de médaillon-monde/route
+// Retrait du moniteur (lot 4 du pivot, 30/07/2026, décision Rayan) : le hub est
+// passé de 3 à 2 étapes. L'étape ② « Mes leçons » (les comptes-rendus du
+// moniteur) est retirée — il n'émet plus rien, elle ne pouvait que se vider.
+//
+// Grammaire éditoriale (fidèle à la maquette, façon Carnet) : timeline,
+// numéros violets + filet vertical — PAS de médaillon-monde/route
 // SVG (ça, c'est le langage du jeu).
 //
 // Réutilisation (ne duplique PAS la grosse logique métier des pages
 // dédiées — même doctrine que recompenses.js) :
 //   ① Mes compétences → `computeWorldStates()` EXPORTÉE de parcours.js
 //     (mêmes seuils de déblocage, mêmes 4 chapitres, zéro seuil réécrit).
-//   ③ L'examen → `loadData/buildCriteria/buildVerdict/parseSavedDate/
+//   ② L'examen → `loadData/buildCriteria/buildVerdict/parseSavedDate/
 //     saveExamDate/countdown/fmtDate` EXPORTÉS de examen.js (la readiness
 //     reste GELÉE : un seul calcul dans toute l'app, jamais un « prêt à
 //     X % » inventé ici).
-//   ② Mes leçons → `fetchLastCompteRendu()` EXPORTÉE de accueil.js (même
-//     table `comptes_rendus`, même tri).
-// Ces 3 pages sœurs sont IMPORTÉES DYNAMIQUEMENT (jamais en import statique
-// en tête de fichier) : parcours.js/accueil.js sont de GROS chunks (chest,
-// sheet-swipe, league-hero, heatmap…) — un import statique les fusionnerait
-// dans le chunk de ce hub, alors que #/parcours et #/accueil ont déjà leur
+// Ces pages sœurs sont IMPORTÉES DYNAMIQUEMENT (jamais en import statique
+// en tête de fichier) : parcours.js est un GROS chunk (chest,
+// sheet-swipe, league-hero, heatmap…) — un import statique le fusionnerait
+// dans le chunk de ce hub, alors que #/parcours a déjà son
 // propre chunk chargé par le router. Même raisonnement que le commentaire
 // de reviser.js sur exam-blanc.js, appliqué via import() plutôt que
 // duplication (les seuils/la readiness ne doivent JAMAIS diverger).
@@ -242,10 +244,6 @@ function mpDyn(escaped) {
   return getLang() === "ar" ? mpRtl(escaped) : escaped;
 }
 
-function ordinalOrPlural(n, singular, plural) {
-  return n > 1 ? plural : singular;
-}
-
 // ─── STYLE (scopé .mp-*, tokens theme-aware — jamais --surface/--border/--muted) ──
 // ── Nom de chapitre : FR + traduction en petit italique (en/ar), repli FR ──
 function mpNameBi(fr, tr) {
@@ -269,7 +267,7 @@ const STYLE = `<style>
 }
 .mp-title { font: 800 26px/1.1 'Baloo 2', cursive; letter-spacing: .2px; margin: 4px 2px 14px; }
 
-/* ── Chip moniteur : la preuve que c'est LUI qui valide ── */
+/* ── Chip moniteur : qui suit l'élève (il observe, il ne valide plus) ── */
 .mp-monit {
   display: inline-flex; align-items: center; gap: 8px; margin-bottom: 14px;
   padding: 5px 13px 5px 6px; border-radius: 999px;
@@ -375,29 +373,6 @@ const STYLE = `<style>
 .mp-renvoi svg { width: 16px; height: 16px; flex: none; color: var(--a-txt); }
 
 /* ── Étape 2 : mes leçons (comptes-rendus) ── */
-.mp-cr {
-  display: block; width: 100%; padding: 13px 14px; border-radius: 19px; cursor: pointer; text-align: left; font: inherit; color: inherit;
-  background: var(--su); border: 1px solid var(--bo); box-shadow: 0 4px 0 var(--bg2), 0 1px 2px rgba(10,13,26,.04);
-  min-height: 44px;
-}
-.mp-cr-top { display: flex; align-items: center; gap: 8px; }
-.mp-cr-date { font: 800 14.5px/1.2 'Baloo 2', cursive; flex: 1; }
-.mp-cr-new {
-  padding: 3px 9px; border-radius: 999px; flex: none; font: 600 8.5px/1 'Fredoka', sans-serif;
-  letter-spacing: .1em; text-transform: uppercase; color: var(--a-ink);
-  background: linear-gradient(180deg, var(--a), var(--adk)); box-shadow: 0 2px 6px color-mix(in srgb, var(--adk) 45%, transparent);
-}
-.mp-cr-chips { display: flex; gap: 7px; margin-top: 9px; flex-wrap: wrap; }
-.mp-cr-chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 800; }
-.mp-cr-chip.ok { background: var(--grp); color: var(--gr-txt); border: 1px solid color-mix(in srgb, var(--gr) 25%, transparent); }
-.mp-cr-chip.warn { background: var(--amp); color: var(--am-txt); border: 1px solid color-mix(in srgb, var(--am) 25%, transparent); }
-.mp-cr-note {
-  margin-top: 10px; padding: 9px 12px; border-radius: 12px; background: var(--bg2); border-left: 3px solid var(--a);
-  font-size: 12px; font-weight: 700; color: var(--mu); line-height: 1.45; font-style: italic;
-}
-.mp-cr-note b { color: var(--ink); font-style: normal; }
-.mp-cr-empty { padding: 16px 14px; border-radius: 19px; background: var(--su); border: 1px dashed var(--bo); text-align: center; }
-.mp-cr-empty p { font-size: 12.5px; font-weight: 700; color: var(--mu); line-height: 1.5; }
 
 .mp-linkrow {
   display: flex; align-items: center; gap: 10px; width: 100%; margin-top: 9px; padding: 11px 13px; border-radius: 15px; cursor: pointer;
@@ -514,18 +489,6 @@ function fmtHeures(totalMin) {
   return Number.isInteger(h) ? String(h) : String(h).replace(".", ",");
 }
 
-function fmtDateFR(iso) {
-  if (!iso) return "";
-  const [y, m, d] = String(iso).slice(0, 10).split("-").map(Number);
-  const dt = y && m && d ? new Date(y, m - 1, d) : new Date(iso);
-  const locale = { fr: "fr-FR", en: "en-GB", ar: "ar" }[getLang()] || "fr-FR";
-  return dt.toLocaleDateString(locale, {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  });
-}
-
 // Médaillon d'un chapitre selon son état — grammaire dédiée « permis
 // virtuel » (check/vert = acquis, étoile/or = en cours, cadenas/slate =
 // à venir), distincte des médaillons-monde du jeu (parcours.js).
@@ -541,7 +504,7 @@ function renderChip(moniteurPrenom) {
   const initial = (moniteurPrenom[0] || "?").toUpperCase();
   return `<div class="mp-monit">
     <span class="mp-mavatar" aria-hidden="true">${esc(initial)}</span>
-    <b>${mpD("chip_followed", `Suivi par ${moniteurPrenom}`, { name: moniteurPrenom })}</b><i>${mpD("chip_sub", "· validé en leçon")}</i>
+    <b>${mpD("chip_followed", `Suivi par ${moniteurPrenom}`, { name: moniteurPrenom })}</b><i>${mpD("chip_sub", "· il voit ta progression")}</i>
   </div>`;
 }
 
@@ -557,7 +520,9 @@ function renderHero({ totalAcquis, currentTitre, allDone, solo }) {
       <div class="mp-hero-txt">
         <div class="mp-hero-t">${totalAcquis} <small>${mpD("hero_of", `sur ${REMC_TOTAL}`, { t: REMC_TOTAL })}</small></div>
         <div class="mp-hero-lbl">${mpD("hero_lbl", "compétences validées")}</div>
-        <div class="mp-hero-s">${solo ? mpD("hero_sub_solo", "En autonomie, à ton rythme — c'est ta vraie progression.") : mpD("hero_sub_monit", "Par ton moniteur, en leçon — c'est ta vraie progression.")}</div>
+        <!-- Retrait du moniteur (lot 4 du pivot) : plus d'attribution « par ton
+             moniteur » — l'élève pratique en leçon puis certifie lui-même. -->
+        <div class="mp-hero-s">${solo ? mpD("hero_sub_solo", "En autonomie, à ton rythme — c'est ta vraie progression.") : mpD("hero_sub_monit", "Pratiquée en leçon, certifiée par toi — c'est ta vraie progression.")}</div>
       </div>
       <span class="mp-hero-med" aria-hidden="true">${medallion("trophee", "gold", { size: 68 })}</span>
     </div>
@@ -644,69 +609,9 @@ function renderStep1({
 }
 
 // ─── Étape 2 : mes leçons ───────────────────────────────────────
-function renderStep2({ lastCR, crCount, loadFailed = false }) {
-  if (loadFailed) {
-    return `<section class="mp-step" id="mp-step-lecons">
-      <span class="mp-step-num" aria-hidden="true">2</span>
-      <div class="mp-step-h"><h2 class="mp-step-t">${mpD("s2_title", "Mes leçons")}</h2></div>
-      <div class="mp-err">
-        <p>${mpD("s2_err", "« Mes leçons » indisponible. Vérifie ta connexion, puis réessaie.")}</p>
-        <button id="mp-retry-2" type="button">${mpD("retry", "Réessayer")}</button>
-      </div>
-    </section>`;
-  }
-
-  let crHtml;
-  if (lastCR) {
-    const acquisN = (lastCR.acquis || []).length;
-    const retrN = (lastCR.a_retravailler || []).length;
-    const chips = [];
-    if (acquisN > 0)
-      chips.push(
-        `<span class="mp-cr-chip ok">${medallion("check", "green", { size: 15 })}${mpD(acquisN > 1 ? "cr_valid_many" : "cr_valid_one", `${acquisN} validée${acquisN > 1 ? "s" : ""}`, { n: acquisN })}</span>`,
-      );
-    if (retrN > 0)
-      chips.push(
-        `<span class="mp-cr-chip warn">${medallion("cible", "orange", { size: 15 })}${mpD("cr_rework", `${retrN} à retravailler`, { n: retrN })}</span>`,
-      );
-    const noteHtml = lastCR.note
-      ? `<div class="mp-cr-note">« ${esc(lastCR.note)} »</div>`
-      : "";
-    crHtml = `<button class="mp-cr" id="mp-cr-open" type="button" data-id="${escAttr(lastCR.id)}">
-      <div class="mp-cr-top">
-        <span class="mp-cr-date">${mpD("cr_lesson_of", `Leçon du ${fmtDateFR(lastCR.session_date || lastCR.created_at)}`, { date: fmtDateFR(lastCR.session_date || lastCR.created_at) })}</span>
-        ${!lastCR.read_at ? `<span class="mp-cr-new">${mpD("cr_new", "Nouveau")}</span>` : ""}
-      </div>
-      ${chips.length ? `<div class="mp-cr-chips">${chips.join("")}</div>` : ""}
-      ${noteHtml}
-    </button>`;
-  } else {
-    crHtml = `<div class="mp-cr-empty"><p>${mpD("cr_empty", "Ton moniteur ne t'a pas encore envoyé de compte-rendu de leçon.")}</p></div>`;
-  }
-
-  const totalTxt =
-    crCount > 0
-      ? mpTR(
-          crCount > 1 ? "cr_count_many" : "cr_count_one",
-          `${crCount} compte${ordinalOrPlural(crCount, "", "s")}-rendu${ordinalOrPlural(crCount, "", "s")}`,
-          { n: crCount },
-        )
-      : mpTR("cr_none", "Aucun compte-rendu pour l'instant");
-
-  return `<section class="mp-step" id="mp-step-lecons">
-    <span class="mp-step-num" aria-hidden="true">2</span>
-    <div class="mp-step-h">
-      <h2 class="mp-step-t">${mpD("s2_title", "Mes leçons")}</h2>
-      <span class="mp-step-s">${mpD("s2_sub", "les comptes-rendus de ton moniteur")}</span>
-    </div>
-    ${crHtml}
-    <button class="mp-linkrow" id="mp-btn-toutes-lecons" type="button">
-      ${medallion("livret", "violet", { size: 28 })}
-      <p>${mpD("cr_all", "Toutes mes leçons")} <i>${mpDyn(esc(totalTxt))}</i></p>
-      ${CHEVRON}
-    </button>
-  </section>`;
-}
+// Retrait du moniteur (lot 4 du pivot, 30/07/2026) : l'étape ② « Mes leçons »
+// (dernier compte-rendu + lien vers l'historique) vivait ici. Elle était
+// alimentée à 100 % par le moniteur → le hub passe à 2 étapes.
 
 // ─── Étape 3 : l'examen ─────────────────────────────────────────
 const READINESS_ICON = {
@@ -880,19 +785,6 @@ function wire(root, ctx) {
     navigate("/reviser");
   });
 
-  root.querySelector("#mp-cr-open")?.addEventListener("click", (e) => {
-    haptic("tap");
-    const id = e.currentTarget.dataset.id;
-    track("mon_permis.compte_rendu_open", { cr_id: id });
-    navigate(`/compte-rendu/${id}`);
-  });
-
-  root.querySelector("#mp-btn-toutes-lecons")?.addEventListener("click", () => {
-    haptic("tap");
-    track("mon_permis.toutes_lecons");
-    navigate("/mes-lecons");
-  });
-
   root
     .querySelector("#mp-retry-1")
     ?.addEventListener("click", () => mount(root));
@@ -945,18 +837,14 @@ export async function mount(root) {
 
   // Import dynamique des pages sœurs (jamais statique — cf. commentaire de
   // tête de fichier). Démarré immédiatement, en parallèle des requêtes DB.
-  const accueilModP = import("@/pages/eleve/accueil.js");
   const examModP = import("@/pages/eleve/examen.js");
   const parcoursModP = import("@/pages/eleve/parcours.js");
-  const crP = accueilModP.then((m) => m.fetchLastCompteRendu(me));
   const examDataP = examModP.then((m) => m.loadData(me.id));
 
   const [
     valRes,
     profRes,
     sessRes,
-    crCountRes,
-    crRes,
     examDataRes,
     parcoursModRes,
     examModRes,
@@ -991,11 +879,6 @@ export async function mount(root) {
       .select("duration_minutes")
       .eq("eleve_id", me.id)
       .in("confirmation_status", ["confirmed", "auto"]),
-    sb
-      .from("comptes_rendus")
-      .select("id", { count: "exact", head: true })
-      .eq("eleve_id", me.id),
-    crP,
     examDataP,
     parcoursModP,
     examModP,
@@ -1012,13 +895,11 @@ export async function mount(root) {
   const valError = settledError(valRes);
   const profError = settledError(profRes);
   const sessError = settledError(sessRes);
-  const crCountError = settledError(crCountRes);
   const selfValError = settledError(selfValRes);
   const dataErrors = [
     ["validations", valError],
     ["profil moniteur", profError],
     ["séances", sessError],
-    ["compte-rendus", crCountError],
     ["auto-validations", selfValError],
   ].filter(([, error]) => error);
   if (dataErrors.length) {
@@ -1073,22 +954,15 @@ export async function mount(root) {
   );
   const nbLecons = sessRows.length;
 
-  // ── Étape 2 : mes leçons ──
-  const lastCR = crRes.status === "fulfilled" ? crRes.value : null;
-  const crCount = !crCountError ? crCountRes.value?.count || 0 : 0;
-  const step2Failed =
-    !!crCountError || crRes.status === "rejected";
-
-  // ── Étape 3 : examen ──
+  // ── Étape 2 : examen ──
   const examData =
     examDataRes.status === "fulfilled"
       ? examDataRes.value
       : { loadFailed: true };
   const examDate = examMod ? examMod.parseSavedDate() : null;
 
-  // Élève solo : pas de moniteur → pas d'étape « Mes leçons » (impasse
-  // permanente : aucun compte-rendu ne viendra jamais), étape examen
-  // renumérotée, libellés sans « ton moniteur ».
+  // `solo` ne pilote plus la présence de l'étape « Mes leçons » (retirée pour
+  // TOUS depuis le retrait du moniteur) : il ne sert plus qu'aux libellés.
   const solo = isSoloEleve(me);
   root.innerHTML = `${STYLE}
   <div class="mp anim-slide-up">
@@ -1097,8 +971,7 @@ export async function mount(root) {
     ${step1Failed ? "" : renderHero({ totalAcquis, currentTitre, allDone, solo })}
     <div class="mp-tl">
       ${renderStep1({ worldStates, step1Failed, totalMin, nbLecons, moniteurPrenom })}
-      ${solo ? "" : renderStep2({ lastCR, crCount, loadFailed: step2Failed })}
-      ${renderStep3({ examMod, examData, examDate, solo, num: solo ? 2 : 3 })}
+      ${renderStep3({ examMod, examData, examDate, solo, num: 2 })}
     </div>
   </div>`;
 

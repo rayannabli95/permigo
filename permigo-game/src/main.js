@@ -209,7 +209,6 @@ async function boot() {
       ],
       enseignant: [
         () => import("@/pages/enseignant/mes-eleves.js"),
-        () => import("@/pages/enseignant/log-session.js"),
       ],
       gerant: [() => import("@/pages/gerant/pulse.js")],
       owner: [() => import("@/pages/gerant/owner.js")],

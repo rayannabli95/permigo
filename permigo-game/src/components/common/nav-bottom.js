@@ -73,7 +73,6 @@ const TABS = {
         "revision-conduite",
         "exam-conduite",
         "jeu-faute",
-        "flash-quiz",
       ],
     },
     {
@@ -89,9 +88,7 @@ const TABS = {
         "mon-permis",
         "examen",
         "centre-examen",
-        "compte-rendu",
         "sessions",
-        "mes-lecons",
       ],
     },
     {
@@ -121,18 +118,9 @@ const TABS = {
       ico: "users",
       match: ["relances", "classement-eleves", "bilan"],
     },
-    // « Mon blason » (chantier nav simplifiée) fusionne Parcours + Trophées +
-    // Ligue en une seule page statut/fierté. `parcours` = ancienne route hub
-    // (parcours-pro.js, retiré) qui atterrit maintenant sur mon-blason.js —
-    // gardée en match pour que l'onglet s'allume aussi sur les vieux liens.
-    // `parcours-complet`/`trophees-moniteur` restent de VRAIES sous-pages
-    // satellites du même onglet (pas fusionnées).
-    {
-      id: "mon-blason",
-      label: "Mon blason",
-      ico: "trophy",
-      match: ["parcours", "parcours-complet", "trophees-moniteur"],
-    },
+    // Retrait de la gamification moniteur (30/07/2026, décision Rayan) :
+    // l'onglet « Mon blason » (paliers + trophées + ligue, tous calculés sur
+    // ses validations) est retiré. Sa nav ne garde que de l'observation.
     { id: "insights", label: "Stats", ico: "chart" },
   ],
   gerant: [

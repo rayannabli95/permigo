@@ -122,7 +122,6 @@ const ROUTES = {
     parcours: () => import("@/pages/eleve/parcours.js"),
     sessions: () => import("@/pages/eleve/session-confirmation.js"),
     quiz: () => import("@/pages/eleve/quiz.js"),
-    "flash-quiz": () => import("@/pages/eleve/flash-quiz.js"),
     // Collection de cartes « Monument Valley » : une carte par compétence,
     // débloquée à la certification. Swipe deck (#/cartes). Remplace les
     // trophées (décision Rayan 30/07) — l'ancienne URL #/trophees redirige
@@ -132,20 +131,18 @@ const ROUTES = {
     classement: () => import("@/pages/eleve/classement.js"),
     galerie: () => import("@/pages/eleve/galerie.js"),
     recompenses: () => import("@/pages/eleve/recompenses.js"),
-    // Chantier nav simplifiée (dernier chantier) : « Mon permis » est le
-    // nouveau hub crédible (compétences validées par le moniteur + leçons +
-    // examen) — le jeu (mondes/boss/coffres) RESTE à `parcours` ci-dessus,
-    // séparé volontairement. `mes-lecons` = sous-page (historique des
-    // comptes-rendus), ouverte depuis l'étape ② du hub.
+    // Chantier nav simplifiée : « Mon permis » est le hub crédible (compétences
+    // acquises + examen) — le jeu (mondes/boss/coffres) RESTE à `parcours`
+    // ci-dessus, séparé volontairement. Depuis le retrait du moniteur (lot 4 du
+    // pivot, 30/07/2026) le hub n'a plus d'étape « Mes leçons » : elle n'était
+    // alimentée que par les comptes-rendus du moniteur, qui n'émet plus rien.
     "mon-permis": () => import("@/pages/eleve/mon-permis.js"),
-    "mes-lecons": () => import("@/pages/eleve/mes-lecons.js"),
     // Certification d'une compétence par l'élève (TOUS les élèves depuis
     // le pivot 17/07) : CTA depuis la fiche compétence de `parcours.js`
     // (openFiche), route #/valider-seul/{compId}.
     "valider-seul": () => import("@/pages/eleve/valider-seul.js"),
     examen: () => import("@/pages/eleve/examen.js"),
     "centre-examen": () => import("@/pages/eleve/centre-examen.js"),
-    feedback: () => import("@/pages/eleve/feedback.js"),
     boutique: () => import("@/pages/eleve/boutique.js"),
     "exam-blanc": () => import("@/pages/eleve/exam-blanc.js"),
     "revision-conduite": () => import("@/pages/eleve/revision-conduite.js"),
@@ -154,7 +151,6 @@ const ROUTES = {
     "en-situation": () => import("@/pages/eleve/en-situation.js"),
     roue: () => import("@/pages/eleve/roue.js"),
     "mes-coffres": () => import("@/pages/eleve/mes-coffres.js"),
-    "compte-rendu": () => import("@/pages/eleve/compte-rendu.js"),
     messages: () => import("@/pages/common/messages.js"),
     legal: () => import("@/pages/common/legal.js"),
     dbg: () => import("@/pages/admin/debug.js"),
@@ -177,34 +173,26 @@ const ROUTES = {
     // semaine. L'ancienne route top-level `#/parcours` reste valide (liens/
     // notifs/tuiles existants) et atterrit sur ce même hub — même mécanique que
     // `relances`/`classement-eleves` → mes-eleves.js ci-dessous.
-    // #/trophees-moniteur et #/ligue-semaine restent en revanche de VRAIES
-    // sous-pages (grille complète des 12 jalons / classement jusqu'à 50 rangs) :
-    // nav-bottom.js les traite déjà comme des satellites du même onglet, pas
-    // des routes fusionnées — elles sont les cibles de "Tout voir"/"Classement
-    // complet" depuis le blason.
-    "mon-blason": () => import("@/pages/enseignant/mon-blason.js"),
-    parcours: () => import("@/pages/enseignant/mon-blason.js"),
-    "parcours-complet": () =>
-      import("@/pages/enseignant/parcours-pro-complet.js"),
-    // Refonte : "Valider" n'est plus un moteur séparé — la Séance est l'unique
-    // point de saisie. On garde la route en alias vers log-session (?eleveId=).
-    validation: () => import("@/pages/enseignant/log-session.js"),
+    // Retrait du moniteur (lot 4 du pivot, 30/07/2026, décision Rayan) :
+    //   · la page de SAISIE de séance (log-session, routes `validation` et
+    //     `log-session`) est supprimée — le moniteur n'écrit plus rien qui
+    //     atterrisse chez l'élève, il observe ;
+    //   · sa GAMIFICATION est supprimée aussi (mon-blason, parcours-complet,
+    //     trophees-moniteur, ligue-semaine) : ligue, trophées et paliers
+    //     comptaient tous ses validations → ils mesuraient une action devenue
+    //     impossible (0 point à vie, paliers inatteignables).
+    // Il garde Aujourd'hui · Mes élèves · Stats : de l'observation, qui reste vraie.
     eleves: () => import("@/pages/enseignant/mes-eleves.js"),
     // Chantier nav simplifiée : « Mes élèves » est désormais un hub à onglets
     // (Liste · Relances · Classement). Les anciennes routes top-level restent
     // valides (liens/notifs existants) mais atterrissent sur le hub avec le
     // bon onglet actif — mes-eleves.js lit location.hash pour le déterminer
-    // (même alias que `validation` → log-session.js ci-dessus).
     relances: () => import("@/pages/enseignant/mes-eleves.js"),
     recompenses: () => import("@/pages/enseignant/recompenses.js"),
     "classement-eleves": () => import("@/pages/enseignant/mes-eleves.js"),
     livret: () => import("@/pages/enseignant/livret-remc.js"),
     insights: () => import("@/pages/enseignant/insights.js"),
     bilan: () => import("@/pages/enseignant/bilan.js"),
-    "trophees-moniteur": () =>
-      import("@/pages/enseignant/trophees-moniteur.js"),
-    "ligue-semaine": () => import("@/pages/enseignant/ligue-semaine.js"),
-    "log-session": () => import("@/pages/enseignant/log-session.js"),
     messages: () => import("@/pages/common/messages.js"),
     legal: () => import("@/pages/common/legal.js"),
     dbg: () => import("@/pages/admin/debug.js"),
@@ -269,28 +257,20 @@ const ROUTE_TITLES = {
   "creer-compte": "Crée ton compte moniteur",
   aujourdhui: "Aujourd'hui",
   parcours: "Parcours",
-  "mon-blason": "Mon blason",
-  "parcours-complet": "Parcours",
-  validation: "Valider",
   eleves: "Mes élèves",
   "classement-eleves": "Classement des élèves",
   livret: "Livret REMC",
   insights: "Insights",
   bilan: "Bilan",
-  "log-session": "Séance",
   sessions: "Mes séances",
   quiz: "Quiz",
-  "flash-quiz": "Quiz éclair",
   trophees: "Ma collection",
   cartes: "Ma collection",
-  "trophees-moniteur": "Mes trophées",
-  "ligue-semaine": "Ligue de la semaine",
   classement: "Classement",
   galerie: "Galerie",
   recompenses: "Récompenses",
   roue: "La Roue",
   "mon-permis": "Mon permis",
-  "mes-lecons": "Mes leçons",
   "valider-seul": "Certifier une compétence",
   examen: "Examen",
   "exam-blanc": "Examen blanc du code",
@@ -298,10 +278,8 @@ const ROUTE_TITLES = {
   "exam-conduite": "Examen blanc de conduite",
   "jeu-faute": "Trouve la faute",
   "en-situation": "En situation",
-  feedback: "Feedback",
   boutique: "Boutique",
   "mes-coffres": "Mes coffres",
-  "compte-rendu": "Compte-rendu",
   messages: "Messages",
   legal: "Mentions légales",
   profil: "Profil",
