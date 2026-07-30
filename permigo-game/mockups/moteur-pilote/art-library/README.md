@@ -1,4 +1,4 @@
-# Bibliothèque graphique Mode Pilote — lot 1
+# Bibliothèque graphique Mode Pilote
 
 Bibliothèque SVG réutilisable pour les mini-jeux PermiGo. Ce premier lot couvre
 uniquement les pieds et les boîtes de vitesses. Aucun fichier image n’est
@@ -19,6 +19,13 @@ http://127.0.0.1:4175/mockups/moteur-pilote/art-library/
 ```
 
 La planche est conçue et contrôlée à 390 pixels de large.
+
+Les lots suivants ont leur propre planche :
+
+- lot 2 « tableau de bord » : `./lot2.html` ;
+- lot 3 « véhicule et contrôles » : `./lot3.html`.
+
+Leur API et leur validation sont détaillées dans `LOT2.md` et `LOT3.md`.
 
 ## Valider le lot
 
@@ -102,11 +109,8 @@ d’une taille choisie à l’œil.
 - une seule animation lente : le balayage du verre ;
 - animations et transitions supprimées avec `prefers-reduced-motion`.
 
-## Ajouter le lot suivant
+## Étendre la bibliothèque
 
 Ajouter les types à une nouvelle liste sans modifier les six types existants.
 Réutiliser `materialDefs()` et les classes de matière. Un nouveau type doit
 exposer ses variantes par options : ne pas créer une copie par état.
-
-Le lot 2 n’est volontairement pas commencé : chaque lot attend la validation
-visuelle du précédent.

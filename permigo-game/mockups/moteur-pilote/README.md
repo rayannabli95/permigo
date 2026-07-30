@@ -60,6 +60,16 @@ http://127.0.0.1:4175/mockups/moteur-pilote/art-library/lot2.html
 Il ajoute le bloc compteurs, les douze voyants isolables et le compte-tours
 pilotable. Voir `art-library/LOT2.md` pour l’API et la commande de validation.
 
+Le lot 3 « véhicule et contrôles » est disponible à :
+
+```text
+http://127.0.0.1:4175/mockups/moteur-pilote/art-library/lot3.html
+```
+
+Il ajoute trois vues du véhicule, le pneu et son témoin d’usure, les blocs
+optiques avant et arrière, ainsi que le capot ouvert et ses quatre niveaux.
+Voir `art-library/LOT3.md` pour l’API et la commande de validation.
+
 ## Ajouter une mission
 
 Ajouter une entrée à `MISSIONS` avec :

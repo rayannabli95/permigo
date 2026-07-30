@@ -943,6 +943,329 @@ svg {
   font-size: clamp(0.35rem, 1.8vw, 0.52rem);
 }
 
+/* ─────────────────────────────────────────────────────────────
+   LOT 3 · VÉHICULE ET CONTRÔLES
+   Vues génériques, indépendantes de la transmission et pilotables la nuit.
+   ───────────────────────────────────────────────────────────── */
+
+.al-vehicle-controls {
+  display: grid;
+  gap: 0.72rem;
+  margin-top: 0.72rem;
+  padding-top: 0.72rem;
+  border-top: 0.08rem solid rgb(139 109 255 / 18%);
+}
+
+.al-fluid-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.3rem;
+}
+
+.al-fluid-button {
+  min-width: 0;
+  min-height: 2.75rem;
+  display: grid;
+  grid-template-columns: 0.5rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.38rem;
+  padding: 0.35rem 0.48rem;
+  border: 0.08rem solid rgb(139 109 255 / 23%);
+  border-radius: 0.65rem;
+  color: var(--al-accent);
+  background: var(--al-night);
+  font-size: 0.56rem;
+  font-weight: 900;
+  line-height: 1;
+  text-align: left;
+  cursor: pointer;
+}
+
+.al-fluid-button > span {
+  width: 0.5rem;
+  aspect-ratio: 1;
+  border: 0.09rem solid var(--fluid-tone);
+  border-radius: 36%;
+}
+
+.al-fluid-button.is-selected {
+  color: var(--al-night);
+  border-color: var(--fluid-tone);
+  background: var(--fluid-tone);
+  box-shadow: 0 0 0.75rem rgb(244 199 94 / 18%);
+}
+
+.al-fluid-button.is-selected > span {
+  border-color: currentColor;
+  background: currentColor;
+}
+
+.al-wear-control input::-webkit-slider-runnable-track {
+  background: linear-gradient(
+    90deg,
+    var(--al-green),
+    var(--al-gold) 62%,
+    var(--al-red)
+  );
+}
+
+.al-wear-control input::-moz-range-track {
+  background: linear-gradient(
+    90deg,
+    var(--al-green),
+    var(--al-gold) 62%,
+    var(--al-red)
+  );
+}
+
+.al-level-control input::-webkit-slider-runnable-track {
+  background: linear-gradient(
+    90deg,
+    var(--al-red),
+    var(--al-gold) 30%,
+    var(--al-green)
+  );
+}
+
+.al-level-control input::-moz-range-track {
+  background: linear-gradient(
+    90deg,
+    var(--al-red),
+    var(--al-gold) 30%,
+    var(--al-green)
+  );
+}
+
+.al-vehicle-board {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.al-card-vehicle.is-wide {
+  grid-column: 1 / -1;
+}
+
+.al-element-slot-vehicle {
+  aspect-ratio: 1.2;
+}
+
+.al-element-slot-tyre {
+  aspect-ratio: 1.05;
+}
+
+.al-element-slot-hood {
+  aspect-ratio: 1.58;
+}
+
+.pg-element-vehicle .pg-glass-sweep {
+  opacity: 0.16;
+}
+
+.pg-drawing-vehicle {
+  inset: 4% 2%;
+  width: 96%;
+  height: 92%;
+}
+
+.pg-drawing-light {
+  inset: 3%;
+  width: 94%;
+  height: 94%;
+}
+
+.pg-drawing-hood {
+  inset: 2%;
+  width: 96%;
+  height: 96%;
+}
+
+.pg-car-body,
+.pg-car-side,
+.pg-car-hood,
+.pg-car-trunk,
+.pg-car-wheel,
+.pg-light-housing,
+.pg-light-glass,
+.pg-tail-glass,
+.pg-fluid-container {
+  transition:
+    fill 180ms ease,
+    stroke 180ms ease,
+    opacity 180ms ease,
+    filter 180ms ease;
+}
+
+.pg-car-body,
+.pg-light-housing,
+.pg-tyre-shell,
+.pg-hood-lid,
+.pg-engine-bay {
+  filter: drop-shadow(0 0.35rem 0.45rem rgb(16 9 34 / 48%));
+}
+
+.pg-car-lamp,
+.pg-light-unit,
+.pg-tail-core,
+.pg-light-beam {
+  transition:
+    fill 180ms ease,
+    opacity 180ms ease,
+    filter 180ms ease;
+}
+
+.pg-car-lamp.is-off,
+.pg-light-unit.is-off,
+.pg-tail-core.is-off {
+  opacity: 0.28;
+}
+
+.pg-car-lamp.is-lit,
+.pg-light-unit.is-lit,
+.pg-tail-core.is-lit {
+  opacity: 1;
+  filter: drop-shadow(0 0 0.34rem currentColor);
+}
+
+.pg-car-lamp-front.is-lit,
+.pg-light-bulb.is-lit {
+  color: var(--al-gold);
+}
+
+.pg-car-lamp-rear.is-lit,
+.pg-tail-glass.is-lit,
+.pg-tail-core.is-lit {
+  color: var(--al-red);
+  filter: drop-shadow(0 0 0.42rem var(--al-red));
+}
+
+.pg-light-beam.is-lit {
+  filter: drop-shadow(0 0 0.36rem var(--al-gold));
+}
+
+.pg-element-vehicle:not(.is-idle) .pg-focus-edge {
+  stroke: var(--pg-state);
+  stroke-opacity: 0.96;
+}
+
+.pg-element-vehicle.is-active .pg-car-body,
+.pg-element-vehicle.is-active .pg-tyre-shell,
+.pg-element-vehicle.is-active .pg-light-housing,
+.pg-element-vehicle.is-active .pg-hood-lid {
+  filter:
+    drop-shadow(0 0.35rem 0.45rem rgb(16 9 34 / 48%))
+    drop-shadow(0 0 0.3rem rgb(244 199 94 / 28%));
+}
+
+.pg-element-vehicle.is-found .pg-car-body,
+.pg-element-vehicle.is-found .pg-tyre-shell,
+.pg-element-vehicle.is-found .pg-light-housing,
+.pg-element-vehicle.is-found .pg-hood-lid {
+  filter:
+    drop-shadow(0 0.35rem 0.45rem rgb(16 9 34 / 48%))
+    drop-shadow(0 0 0.3rem rgb(56 217 148 / 28%));
+}
+
+.pg-element-vehicle.is-error .pg-car-body,
+.pg-element-vehicle.is-error .pg-tyre-shell,
+.pg-element-vehicle.is-error .pg-light-housing,
+.pg-element-vehicle.is-error .pg-hood-lid {
+  filter:
+    drop-shadow(0 0.35rem 0.45rem rgb(16 9 34 / 48%))
+    drop-shadow(0 0 0.3rem rgb(255 118 110 / 28%));
+}
+
+.pg-tyre-tread {
+  transition: opacity 180ms ease;
+}
+
+.pg-wear-gauge {
+  filter: drop-shadow(0 0.2rem 0.3rem rgb(16 9 34 / 56%));
+}
+
+.pg-wear-label {
+  min-width: 22%;
+  padding: 2% 3%;
+  border-radius: 99rem;
+  color: var(--al-gold);
+  background: var(--al-night);
+  box-shadow: inset 0 0 0 0.05rem rgb(244 199 94 / 34%);
+}
+
+.pg-fluid-container {
+  opacity: 0.52;
+}
+
+.pg-fluid-container.is-selected {
+  opacity: 1;
+  filter: drop-shadow(0 0 0.34rem var(--fluid-tone));
+}
+
+.pg-fluid-container.is-selected .pg-fluid-mark {
+  stroke: var(--fluid-tone);
+  stroke-width: 2;
+}
+
+.pg-fluid-label {
+  max-width: 25%;
+  overflow: hidden;
+  padding: 1.8% 2.4%;
+  border-radius: 99rem;
+  color: var(--al-accent);
+  background: var(--al-night);
+  font-size: clamp(0.3rem, 1.45vw, 0.46rem);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pg-fluid-label.is-selected {
+  color: var(--al-night);
+  background: var(--fluid-tone);
+  box-shadow: 0 0 0.45rem var(--fluid-tone);
+}
+
+.pg-silhouette-only {
+  display: none;
+}
+
+.al-silhouette-row-lot3 {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.2rem;
+}
+
+.pg-element-vehicle.is-silhouette .pg-car-grille-detail,
+.pg-element-vehicle.is-silhouette .pg-car-door,
+.pg-element-vehicle.is-silhouette .pg-tyre-spokes,
+.pg-element-vehicle.is-silhouette .pg-tyre-tread,
+.pg-element-vehicle.is-silhouette .pg-wear-gauge,
+.pg-element-vehicle.is-silhouette .pg-tail-segment,
+.pg-element-vehicle.is-silhouette .pg-hood-brace,
+.pg-element-vehicle.is-silhouette .pg-engine-detail,
+.pg-element-vehicle.is-silhouette .pg-fluid-container,
+.pg-element-vehicle.is-silhouette .pg-focus-edge {
+  display: none;
+}
+
+.pg-element-headlight-front.is-silhouette .pg-light-housing,
+.pg-element-headlight-front.is-silhouette .pg-light-glass,
+.pg-element-headlight-front.is-silhouette .pg-light-reflector,
+.pg-element-headlight-front.is-silhouette .pg-light-bulb,
+.pg-element-headlight-front.is-silhouette .pg-light-beam,
+.pg-element-taillight-rear.is-silhouette .pg-light-housing,
+.pg-element-taillight-rear.is-silhouette .pg-tail-glass,
+.pg-element-taillight-rear.is-silhouette .pg-tail-segment,
+.pg-element-taillight-rear.is-silhouette .pg-tail-core,
+.pg-element-hood-levels.is-silhouette .pg-hood-lid,
+.pg-element-hood-levels.is-silhouette .pg-hood-inner,
+.pg-element-hood-levels.is-silhouette .pg-hood-brace,
+.pg-element-hood-levels.is-silhouette .pg-engine-bay,
+.pg-element-hood-levels.is-silhouette .pg-engine-cover,
+.pg-element-hood-levels.is-silhouette .pg-engine-detail {
+  display: none;
+}
+
+.pg-element-vehicle.is-silhouette .pg-silhouette-only {
+  display: block;
+}
+
 .al-warning-test {
   position: relative;
   z-index: 1;
@@ -1418,6 +1741,11 @@ svg {
 
   .pg-object-label {
     font-size: 0.32rem;
+  }
+
+  .al-silhouette-row-lot3 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    row-gap: 0.55rem;
   }
 }
 
