@@ -17,7 +17,6 @@ import { haptic } from "@/utils/haptic.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
 import { fmtName } from "@/utils/fmt-name.js";
 import { REMC, REMC_TOTAL } from "@/data/remc.js";
-import { getFiche } from "@/data/fiches-conduite.js";
 import { labelComp } from "@/utils/remc-label.js";
 import { shouldShowHint, markHintSeen } from "@/utils/coach-hint.js";
 import { startTour } from "@/components/common/guided-tour.js";
@@ -1024,7 +1023,7 @@ const REVSUGG_TAG = {
 
 // À partir des compétences passées « acquis » cette séance, propose un petit set
 // à faire réviser : celles du jour (cochées), 1-2 d'avant (renfort), la suivante.
-// Ne garde que les compétences ayant une fiche de révision.
+// Les 31 compétences REMC ont chacune une fiche de révision.
 function buildRevisionSuggestions(validatedCodes) {
   const idxOf = (code) => ALL_SUBS.findIndex((s) => s.c === code);
   const valid = (validatedCodes || []).filter((c) => idxOf(c) >= 0);
@@ -1047,8 +1046,7 @@ function buildRevisionSuggestions(validatedCodes) {
   }
   return [...picked.entries()]
     .sort((a, b) => a[0] - b[0])
-    .map(([idx, m]) => ({ code: ALL_SUBS[idx].c, nom: ALL_SUBS[idx].n, ...m }))
-    .filter((s) => getFiche(s.code));
+    .map(([idx, m]) => ({ code: ALL_SUBS[idx].c, nom: ALL_SUBS[idx].n, ...m }));
 }
 
 // Insère les révisions ciblées (l'élève les voit dans #/revision-conduite).

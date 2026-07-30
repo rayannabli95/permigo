@@ -8,6 +8,7 @@
 // "orange" payants en gemmes) — supprimé (antipattern vision V3).
 // ═══════════════════════════════════════════════════════════════
 import { esc, escAttr } from "@/utils/escape.js";
+import { optimizedAvatarUrl } from "@/utils/assets.js";
 
 /**
  * Rend l'avatar d'un utilisateur. Rendu unique partagé (header, carte profil…).
@@ -26,7 +27,8 @@ export function renderUserAvatar(
     // escAttr (pas esc) : dans un ATTRIBUT, les guillemets doivent être
     // encodés, sinon une URL piégée sort de src="…" (XSS via onerror).
     const loadingAttr = loading === "eager" ? "eager" : "lazy";
-    return `<img src="${escAttr(avatar_url)}" alt="${escAttr(name)}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;object-position:center;display:block" loading="${loadingAttr}" referrerpolicy="no-referrer">`;
+    const src = optimizedAvatarUrl(avatar_url);
+    return `<img src="${escAttr(src)}" alt="${escAttr(name)}" width="${size}" height="${size}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;object-position:center;display:block" loading="${loadingAttr}" decoding="async" referrerpolicy="no-referrer">`;
   }
   const init =
     (name || nom || "?")

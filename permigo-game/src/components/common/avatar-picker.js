@@ -8,7 +8,7 @@
 //
 // Pattern : promise-based, résout avec l'URL choisie ou null si annulé.
 // ═══════════════════════════════════════════════════════════════
-import { ASSETS } from "@/utils/assets.js";
+import { ASSETS, optimizedAvatarUrl } from "@/utils/assets.js";
 import { icon } from "@/utils/icons.js";
 import { haptic } from "@/utils/haptic.js";
 import { escAttr } from "@/utils/escape.js";
@@ -160,10 +160,10 @@ export function openAvatarPicker(opts = {}) {
           ${ASSETS.avatar
             .map(
               (url, i) => `
-            <button class="avpk-opt ${url === opts.currentUrl ? "selected" : ""}"
+            <button class="avpk-opt ${url === optimizedAvatarUrl(opts.currentUrl) ? "selected" : ""}"
                     data-url="${escAttr(url)}"
                     aria-label="Avatar ${i + 1}">
-              <img src="${escAttr(url)}" alt="" loading="lazy" />
+              <img src="${escAttr(url)}" alt="" width="512" height="512" loading="lazy" decoding="async" />
             </button>
           `,
             )

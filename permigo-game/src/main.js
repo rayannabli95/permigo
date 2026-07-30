@@ -25,7 +25,10 @@ import { mountCookieBanner } from "@/components/common/cookie-banner.js";
 import { initPosthog } from "@/services/posthog.js";
 import { initVercelAnalytics } from "@/services/vercel-analytics.js";
 import { tapHaptic } from "@/utils/haptic.js";
-import "@/utils/pwa.js"; // capte beforeinstallprompt très tôt
+// Import statique volontaire : le listener beforeinstallprompt doit être armé
+// avant que le navigateur émette l'événement. Réutiliser le même module plus
+// bas évite un faux import dynamique qui ne créait aucun chunk.
+import { isStandalone } from "@/utils/pwa.js";
 
 // Apply saved/system theme before any rendering (reads localStorage, synchronous)
 initThemeEarly();
@@ -188,15 +191,13 @@ async function boot() {
     //  - navigateur mobile → PLUS de nudge d'install à froid (l'élève le ferme
     //    par réflexe). L'install est proposée à un moment de valeur : 1er quiz
     //    réussi (roue offerte), séance validée… cf. promptInstallAtValueMoment.
-    import("@/utils/pwa.js")
-      .then(({ isStandalone }) => {
-        if (isStandalone())
-          import("@/components/common/push-prime.js").then((m) =>
-            m.maybeShowPushPrime(me),
-          );
-        else notifyPopupSettled(); // aucun popup à froid → libère le tuto guidé
-      })
-      .catch(() => notifyPopupSettled());
+    if (isStandalone()) {
+      import("@/components/common/push-prime.js")
+        .then((m) => m.maybeShowPushPrime(me))
+        .catch(() => notifyPopupSettled());
+    } else {
+      notifyPopupSettled(); // aucun popup à froid → libère le tuto guidé
+    }
 
     // Prefetch idle des routes chaudes (navigation instantanée au tap).
     // requestIdleCallback → jamais en concurrence avec le rendu initial.
@@ -213,11 +214,27 @@ async function boot() {
       gerant: [() => import("@/pages/gerant/pulse.js")],
       owner: [() => import("@/pages/gerant/owner.js")],
     };
-    const prefetch = () =>
-      (HOT[me.role] || []).forEach((load) => load().catch(() => {}));
-    if ("requestIdleCallback" in window)
-      requestIdleCallback(prefetch, { timeout: 4000 });
-    else setTimeout(prefetch, 2500);
+    const connection =
+      navigator.connection ||
+      navigator.mozConnection ||
+      navigator.webkitConnection;
+    const slowNetwork = ["slow-2g", "2g"].includes(
+      connection?.effectiveType,
+    );
+    const canPrefetch =
+      navigator.onLine !== false &&
+      !connection?.saveData &&
+      !slowNetwork;
+    if (canPrefetch) {
+      const prefetch = () => {
+        // L'onglet a pu passer en arrière-plan entre le boot et l'idle.
+        if (document.visibilityState !== "visible") return;
+        (HOT[me.role] || []).forEach((load) => load().catch(() => {}));
+      };
+      if ("requestIdleCallback" in window)
+        requestIdleCallback(prefetch, { timeout: 4000 });
+      else setTimeout(prefetch, 2500);
+    }
   } catch (e) {
     console.error("[boot]", e);
     if (reloadOnceOnChunkError(e)) throw e;

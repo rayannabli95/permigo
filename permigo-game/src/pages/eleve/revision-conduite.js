@@ -13,11 +13,10 @@ import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { haptic } from "@/utils/haptic.js";
 import { mountPremiumQuiz } from "@/components/eleve/premium-quiz.js";
-import { quizByCode } from "@/data/quiz-conduite.js";
+import { loadQuizByCode } from "@/data/quiz-conduite-loader.js";
 import { track } from "@/services/analytics.js";
 import { medallion } from "@/utils/medallions.js";
 import { getLang } from "@/utils/lang.js";
-import { ficheTr, uiFiche } from "@/data/fiches-i18n.js";
 import { openCoachSheet } from "@/components/eleve/coach-sheet.js";
 import {
   isFreeTierUser,
@@ -28,11 +27,57 @@ import {
 import { mountFreeTierWall } from "@/components/eleve/free-tier-wall.js";
 import { ficheSchemas } from "@/data/fiches-schemas.js";
 import {
-  FICHES,
-  MONDES,
-  getFiche,
-  fichesByMonde,
-} from "@/data/fiches-conduite.js";
+  FICHE_META as FICHES,
+  MONDES_CONDUITE as MONDES,
+  getFicheMeta,
+  fichesMetaByMonde as fichesByMonde,
+} from "@/data/conduite-meta.js";
+import { loadFiche } from "@/data/fiches-loader.js";
+
+const ficheCache = new Map();
+const quizCache = new Map();
+let fichesI18n = null;
+let fichesI18nPromise = null;
+
+function getFiche(code) {
+  return ficheCache.get(code) || null;
+}
+
+async function ensureFiche(code) {
+  if (ficheCache.has(code)) return ficheCache.get(code);
+  const fiche = await loadFiche(code);
+  if (fiche) ficheCache.set(code, fiche);
+  return fiche;
+}
+
+async function ensureQuiz(code) {
+  if (quizCache.has(code)) return quizCache.get(code);
+  const questions = await loadQuizByCode(code);
+  quizCache.set(code, questions);
+  return questions;
+}
+
+function quizByCode(code) {
+  return quizCache.get(code) || [];
+}
+
+async function ensureFichesI18n() {
+  if (getLang() === "fr" || fichesI18n) return fichesI18n;
+  if (!fichesI18nPromise)
+    fichesI18nPromise = import("@/data/fiches-i18n.js").then((module) => {
+      fichesI18n = module;
+      return module;
+    });
+  return fichesI18nPromise;
+}
+
+function ficheTr(code, lang) {
+  return fichesI18n?.ficheTr(code, lang) || null;
+}
+
+function uiFiche(lang, key, fr) {
+  return fichesI18n?.uiFiche(lang, key, fr) ?? fr;
+}
 
 const LS_KEY = "rvc_revised_v1"; // { [code]: isoDate }
 const LS_READ_KEY = "rvc_read_v1"; // { [code]: 1 } — fiche déjà déroulée (relecture = tout affiché)
@@ -40,8 +85,7 @@ const LS_READ_KEY = "rvc_read_v1"; // { [code]: 1 } — fiche déjà déroulée 
 const RVC_I18N = {
   en: {
     empty_title: "Review your driving",
-    empty_body:
-      "The review cards are almost ready. Come back in a moment.",
+    empty_body: "The review cards are almost ready. Come back in a moment.",
     back: "Back",
     unread: "To read",
     back_worlds: "Back to the worlds",
@@ -146,9 +190,7 @@ function rvcT(key, fr, vars) {
 
 function rvcDisplay(value) {
   const safe = esc(value);
-  return getLang() === "ar"
-    ? `<span dir="rtl" lang="ar">${safe}</span>`
-    : safe;
+  return getLang() === "ar" ? `<span dir="rtl" lang="ar">${safe}</span>` : safe;
 }
 
 function rvcText(key, fr, vars) {
@@ -168,9 +210,7 @@ function rvcRich(key, fr, vars) {
   let safe = esc(value);
   for (const [marker, replacement] of replacements)
     safe = safe.split(marker).join(`<b>${esc(replacement)}</b>`);
-  return getLang() === "ar"
-    ? `<span dir="rtl" lang="ar">${safe}</span>`
-    : safe;
+  return getLang() === "ar" ? `<span dir="rtl" lang="ar">${safe}</span>` : safe;
 }
 
 function rvcWorld(m, field) {
@@ -789,7 +829,7 @@ export async function mount(root, param) {
     const read = loadRead();
     resolved = (FICHES.find((f) => !read[f.code]) || FICHES[0]).code;
   }
-  const deep = resolved && getFiche(resolved) ? resolved : null;
+  const deep = resolved && getFicheMeta(resolved) ? resolved : null;
   let view = deep ? (pAction === "quiz" ? "quiz" : "fiche") : "home";
   let code = deep;
   let focusId = null;
@@ -797,6 +837,12 @@ export async function mount(root, param) {
   let orderPool = [];
   let mondeN = null;
   let lastFicheTracked = null; // évite de re-tracker/markRead à chaque coche de geste
+
+  if (deep) {
+    const loaders = [ensureFiche(deep), ensureFichesI18n()];
+    if (view === "quiz") loaders.push(ensureQuiz(deep));
+    await Promise.all(loaders);
+  }
 
   // Ciblages du moniteur (couche 2). Requête gardée : si la table n'est pas
   // encore migrée / élève hors-ligne, on ignore silencieusement (pas de bannière).
@@ -844,7 +890,7 @@ export async function mount(root, param) {
     const fm = fichesByMonde(m.n);
     const done = fm.filter((f) => read[f.code]).length;
     const p = fm.length ? Math.round((done / fm.length) * 100) : 0;
-    const badge = `/art/reviser/${BADGE_MONDE[m.n] || "cible"}.png`;
+    const badge = `/art/reviser/${BADGE_MONDE[m.n] || "cible"}.webp`;
     const firstUnread = fm.findIndex((f) => !read[f.code]);
 
     const CHK = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 6" stroke="#5a3406" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
@@ -868,7 +914,7 @@ export async function mount(root, param) {
     root.innerHTML = `${MONDE_STYLE}<div class="wm">
       <div class="wm-hero">
         <button class="wm-back" aria-label="${escAttr(rvcT("back_worlds", "Retour aux mondes"))}">${back}</button>
-        <span class="wm-med"><img src="${badge}" alt="" loading="lazy"></span>
+        <span class="wm-med"><img src="${badge}" alt="" width="512" height="512" loading="lazy" decoding="async"></span>
         <div class="wm-htx">
           <h1 class="wm-name wm-gold">${rvcDisplay(rvcWorld(m, "name"))}</h1>
           <div class="wm-sub">${rvcDisplay(rvcWorld(m, "sub"))}</div>
@@ -886,9 +932,10 @@ export async function mount(root, param) {
       render();
     });
     root.querySelectorAll("[data-code]").forEach((b) =>
-      b.addEventListener("click", () => {
+      b.addEventListener("click", async () => {
         code = b.getAttribute("data-code");
         focusId = null;
+        await Promise.all([ensureFiche(code), ensureFichesI18n()]);
         view = "fiche";
         render();
       }),
@@ -917,7 +964,7 @@ export async function mount(root, param) {
       const fm = fichesByMonde(m.n);
       const done = fm.filter((f) => read[f.code]).length;
       const mpct = fm.length ? Math.round((done / fm.length) * 100) : 0;
-      const badge = `/art/reviser/${BADGE_MONDE[m.n] || "cible"}.png`;
+      const badge = `/art/reviser/${BADGE_MONDE[m.n] || "cible"}.webp`;
       const worldName = rvcWorld(m, "name");
       const worldSub = rvcWorld(m, "sub");
       const bar = `<span class="hub-mbar"><span class="hub-mf" style="width:${done ? Math.max(mpct, 5) : 0}%"></span></span>`;
@@ -928,7 +975,7 @@ export async function mount(root, param) {
         return `<div class="hub-world active">
           <span class="hub-flag"><span class="hub-pulse"></span>${firstEver ? rvcText("to_start", "À commencer") : rvcText("in_progress", "En cours")}</span>
           <button class="hub-ahead" data-monde="${m.n}" aria-label="${escAttr(rvcT("see_all", "Voir toutes les fiches — {name}", { name: worldName }))}">
-            <span class="hub-med"><img src="${badge}" alt="" loading="lazy"></span>
+            <span class="hub-med"><img src="${badge}" alt="" width="512" height="512" loading="lazy" decoding="async"></span>
             <span class="hub-wbody">
               <span class="hub-wname">${rvcDisplay(worldName)}</span>
               <span class="hub-wsub">${rvcDisplay(worldSub)}</span>
@@ -944,7 +991,7 @@ export async function mount(root, param) {
       }
       // Monde normal : la carte entière ouvre la liste de ses fiches.
       return `<button class="hub-world" data-monde="${m.n}">
-        <span class="hub-med"><img src="${badge}" alt="" loading="lazy"></span>
+        <span class="hub-med"><img src="${badge}" alt="" width="512" height="512" loading="lazy" decoding="async"></span>
         <span class="hub-wbody">
           <span class="hub-wname">${rvcDisplay(worldName)}</span>
           <span class="hub-wsub">${rvcDisplay(worldSub)}</span>
@@ -991,9 +1038,10 @@ export async function mount(root, param) {
       track("revision_conduite_faute_open");
       navigate("#/jeu-faute");
     });
-    const openFiche = (e) => {
+    const openFiche = async (e) => {
       code = e.currentTarget.getAttribute("data-code");
       focusId = null;
+      await Promise.all([ensureFiche(code), ensureFichesI18n()]);
       view = "fiche";
       render();
     };
@@ -1272,13 +1320,7 @@ export async function mount(root, param) {
     wireFicheDeck(f, flatSteps, flatStepsTR, coach, rtl);
   }
 
-  function wireFicheDeck(
-    f,
-    flatSteps,
-    flatStepsTR,
-    coach = [],
-    rtl = false,
-  ) {
+  function wireFicheDeck(f, flatSteps, flatStepsTR, coach = [], rtl = false) {
     root.querySelector(".fd-back")?.addEventListener("click", () => {
       view = "home";
       render();
@@ -1400,7 +1442,7 @@ export async function mount(root, param) {
     );
   }
 
-  function startQuiz() {
+  async function startQuiz() {
     // Si cette compétence est un ciblage moniteur non fait (arrivée par le hero
     // « Réviser » en deep-link, ou par navigation normale), on la marquera faite
     // à la fin du quiz — même sans être passé par une liste de devoirs.
@@ -1408,6 +1450,11 @@ export async function mount(root, param) {
       const fx = focuses.find((x) => x.competence_code === code);
       if (fx) focusId = fx.id;
     }
+    await Promise.all([
+      ensureFiche(code),
+      ensureQuiz(code),
+      ensureFichesI18n(),
+    ]);
     view = "quiz";
     render();
   }

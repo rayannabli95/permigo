@@ -44,15 +44,15 @@ export const ASSETS = {
   // ── Avatars par défaut (9 choix au signup) ─────────────────────
   // Skins fournis par Rayan (skin1–6 + dame-noir / alien-cool / pilote-f1)
   avatar: [
-    "/skins/avatars/skin1.png",
-    "/skins/avatars/skin2.png",
-    "/skins/avatars/skin3.png",
-    "/skins/avatars/skin4.png",
-    "/skins/avatars/skin5.png",
-    "/skins/avatars/skin6.png",
-    "/skins/avatars/dame-noir.png",
-    "/skins/avatars/alien-cool.png",
-    "/skins/avatars/pilote-f1.png",
+    "/skins/avatars/skin1.webp",
+    "/skins/avatars/skin2.webp",
+    "/skins/avatars/skin3.webp",
+    "/skins/avatars/skin4.webp",
+    "/skins/avatars/skin5.webp",
+    "/skins/avatars/skin6.webp",
+    "/skins/avatars/dame-noir.webp",
+    "/skins/avatars/alien-cool.webp",
+    "/skins/avatars/pilote-f1.webp",
   ],
 
   // ── Illustrations UI (PNG transparents premium — fournis par Rayan) ──
@@ -72,6 +72,16 @@ export const ASSETS = {
     holographic: "/skins/permis-bg-holographic.webp",
   },
 };
+
+const LEGACY_AVATARS = new Set(
+  ASSETS.avatar.map((url) => url.replace(/\.webp$/, ".png")),
+);
+
+// Les anciens comptes peuvent encore contenir le chemin PNG en base. Le PNG
+// reste servi, mais l'interface utilise son équivalent WebP sans perte.
+export function optimizedAvatarUrl(url) {
+  return LEGACY_AVATARS.has(url) ? url.replace(/\.png$/, ".webp") : url;
+}
 
 /**
  * Renvoie le fond carte permis adapté au nombre de compétences validées.
