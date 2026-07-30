@@ -27,7 +27,6 @@ import { medallion } from "@/utils/medallions.js";
 import { volantImg, volantLabel } from "@/utils/volant.js";
 import { haptic } from "@/utils/haptic.js";
 import { isPushEnabled, optOutPush, optInPush } from "@/services/web-push.js";
-import { mountMoniteurRanking } from "@/components/enseignant/moniteur-ranking.js";
 import { getLang } from "@/utils/lang.js";
 import { toast } from "@/components/common/toast.js";
 
@@ -723,28 +722,28 @@ export async function mount(root) {
   let anneeStats = null;
   if (me.role === "enseignant") {
     const yearStart = `${new Date().getFullYear()}-01-01`;
-    const today = new Date().toISOString().slice(0, 10);
-    const [validationsRes, streakProfileRes, elevesRes] = await Promise.all([
+    // Retrait de la gamification moniteur (30/07/2026) : on ne lit plus
+    // profiles.streak_pro_days (une série de VALIDATIONS, donc gelée à vie), et
+    // « élèves actifs » se mesure sur last_active_at — l'activité RÉELLE des
+    // élèves — au lieu d'être déduite des validations du moniteur.
+    const [validationsRes, elevesRes] = await Promise.all([
       sb
         .from("validations")
         .select("competence_id, eleve_id, validated_at")
         .eq("validated_by", me.id)
         .gte("validated_at", yearStart),
-      sb.from("profiles").select("streak_pro_days").eq("id", me.id).single(),
       sb
         .from("profiles")
-        .select("id")
+        .select("id, last_active_at")
         .eq("role", "eleve")
         .eq("enseignant_id", me.id)
         .is("deleted_at", null),
     ]);
     _reportQueryErrors("statistiques enseignant", [
       ["validations", validationsRes],
-      ["série", streakProfileRes],
       ["élèves", elevesRes],
     ]);
     const valData = _queryData(validationsRes);
-    const streakProfile = _queryData(streakProfileRes);
     const elevesData = _queryData(elevesRes);
 
     const vals = valData || [];
@@ -754,26 +753,16 @@ export async function mount(root) {
     const c3Count = vals.filter((v) =>
       v.competence_id?.startsWith("C3"),
     ).length;
-    const hasValidationToday = vals.some((v) =>
-      v.validated_at?.startsWith(today),
-    );
-    const streakDays = Math.max(
-      streakProfile?.streak_pro_days ?? 0,
-      hasValidationToday ? 1 : 0,
-    );
-    const since30d = new Date(Date.now() - 30 * 86400000)
-      .toISOString()
-      .slice(0, 10);
-    const elevesActifsCount = new Set(
-      vals.filter((v) => v.validated_at >= since30d).map((v) => v.eleve_id),
-    ).size;
+    const since30d = new Date(Date.now() - 30 * 86400000).toISOString();
+    const elevesActifsCount = (elevesData || []).filter(
+      (e) => (e.last_active_at || "") >= since30d,
+    ).length;
 
     anneeStats = {
       totalValidations: vals.length,
       elevesCount,
       elevesActifsCount,
       c3Count,
-      streakDays,
     };
   }
 
@@ -853,7 +842,12 @@ export async function mount(root) {
           label: ptR("stat_students", "Élèves"),
           value: anneeStats.elevesCount,
         },
-        { label: ptR("stat_streak", "Série"), value: anneeStats.streakDays },
+        // « Série » retirée le 30/07/2026 : streak_pro_days comptait des jours
+        // de VALIDATION → gelée à vie. Remplacée par les élèves qui bossent.
+        {
+          label: ptR("stat_active", "Actifs 30 j"),
+          value: anneeStats.elevesActifsCount ?? 0,
+        },
       ],
       shareUrl: window.location.origin,
       shareText: ptR(
@@ -897,10 +891,10 @@ export async function mount(root) {
       : ""
   }
 
-  <!-- Classement moniteur -->
-  ${anneeStats ? `<div id="prf-ranking-host"></div>` : ""}
+  <!-- Retrait de la gamification moniteur (30/07/2026) : le classement des
+       moniteurs (points = validations données) vivait ici. -->
 
-  <!-- Mon année (enseignant) : le dossier de preuve ; la « série » est déjà dans le héro -->
+  <!-- Mon année (enseignant) : le dossier de preuve -->
   ${
     anneeStats
       ? `
@@ -987,13 +981,6 @@ export async function mount(root) {
   if (permisData) {
     const cardHost = root.querySelector("#prf-permis-card");
     if (cardHost) mountPermisCard(cardHost, permisData);
-  }
-
-  // ── Mount ranking moniteur (enseignant) ──────────────────
-  if (me.role === "enseignant") {
-    const rankingHost = root.querySelector("#prf-ranking-host");
-    if (rankingHost)
-      mountMoniteurRanking(rankingHost, { myId: me.id }).catch(() => {});
   }
 
   // ── Wire pseudo + referral (élève) ───────────────────────
@@ -2566,77 +2553,15 @@ function _wireEleveArene(root, me, avatarUrl) {
 //   • OR = prestige uniquement (rang, trophées) ; l'indigo domine
 //   • fond CLAIR, cartes blanches premium (univers moniteur)
 // ═══════════════════════════════════════════════════════════════
-function _rankLabel(r) {
-  if (getLang() === "ar") return String(r);
-  if (getLang() === "en") {
-    const mod100 = r % 100;
-    const suffix =
-      mod100 >= 11 && mod100 <= 13
-        ? "th"
-        : { 1: "st", 2: "nd", 3: "rd" }[r % 10] || "th";
-    return `${r}<sup>${suffix}</sup>`;
-  }
-  return r === 1 ? "1<sup>er</sup>" : `${r}<sup>e</sup>`;
-}
 function _ensInitials(prenom, nom) {
   return (
     ((prenom || "")[0] || "") + ((nom || "")[0] || "") || "?"
   ).toUpperCase();
 }
-function _ensAchievements(v, e, s, rank) {
-  return [
-    {
-      img: "trophy-first-validation",
-      name: ptR("ach_first_validation", "1<sup>re</sup> validation"),
-      need: v >= 1,
-    },
-    {
-      img: "badge-3d-03",
-      name: ptR("ach_50_validations", "50 validations"),
-      need: v >= 50,
-    },
-    {
-      img: "badge-3d-05",
-      name: ptR("ach_100_validations", "100 validations"),
-      need: v >= 100,
-    },
-    {
-      img: "trophy-10-comps",
-      name: ptR("ach_10_students", "10 élèves suivis"),
-      need: e >= 10,
-    },
-    {
-      img: "trophy-streak-7d",
-      name: ptR("ach_streak_7", "Série 7 jours"),
-      need: s >= 7,
-    },
-    {
-      img: "badge-3d-07",
-      name: ptR("ach_top_5", "Top 5 du mois"),
-      need: rank > 0 && rank <= 5,
-    },
-    {
-      img: "badge-3d-08",
-      name: ptR("ach_250_validations", "250 validations"),
-      need: v >= 250,
-    },
-    {
-      img: "trophy-streak-30d",
-      name: ptR("ach_streak_30", "Série 30 jours"),
-      need: s >= 30,
-    },
-    {
-      img: "badge-3d-09",
-      name: ptR("ach_25_students", "25 élèves suivis"),
-      need: e >= 25,
-    },
-    {
-      img: "badge-3d-ultimate",
-      name: ptR("ach_month_number_one", "N°1 du mois"),
-      need: rank === 1,
-    },
-  ].sort((a, b) => (a.need === b.need ? 0 : a.need ? -1 : 1));
-}
+// Retrait de la gamification moniteur (30/07/2026) : `_rankLabel()` (rang
+// mensuel) et `_ensAchievements()` (les 10 trophées, tous conditionnés à des
+// validations, une série ou un rang) vivaient ici. `_ensInitials` est gardée :
+// elle sert encore à l'avatar de repli.
 
 const STYLE_ENS = `<style>
 .enp{
@@ -2785,47 +2710,39 @@ async function mountEnseignantArene(root, me) {
   root.innerHTML = `${STYLE_ENS}<div class="enp"${profileDir()}><div class="skel skel-card" style="height:300px;margin:14px 16px 0;border-radius:30px"></div><div class="skel skel-card" style="height:90px;margin:18px 16px 0;border-radius:20px"></div></div>`;
 
   const yearStart = `${new Date().getFullYear()}-01-01`;
-  const today = new Date().toISOString().slice(0, 10);
-  const month = new Date().toISOString().slice(0, 7) + "-01";
 
-  const [profileRes, validationsRes, elevesRes, rankingRes] = await Promise.all(
-    [
-      sb
-        .from("profiles")
-        .select("email, prenom, nom, created_at, streak_pro_days, avatar_url")
-        .eq("id", me.id)
-        .single(),
-      sb
-        .from("validations")
-        .select("competence_id, eleve_id, validated_at")
-        .eq("validated_by", me.id)
-        .gte("validated_at", yearStart),
-      sb
-        .from("profiles")
-        .select("id")
-        .eq("role", "eleve")
-        .eq("enseignant_id", me.id)
-        .is("deleted_at", null),
-      sb.rpc("get_moniteur_ranking", { p_month: month }).then(
-        (r) => r,
-        (error) => ({ data: null, error }),
-      ),
-    ],
-  );
+  // Retrait de la gamification moniteur (30/07/2026) : plus de classement
+  // mensuel (get_moniteur_ranking) ni de série de validations (streak_pro_days).
+  const [profileRes, validationsRes, elevesRes] = await Promise.all([
+    sb
+      .from("profiles")
+      .select("email, prenom, nom, created_at, avatar_url")
+      .eq("id", me.id)
+      .single(),
+    sb
+      .from("validations")
+      .select("competence_id, eleve_id, validated_at")
+      .eq("validated_by", me.id)
+      .gte("validated_at", yearStart),
+    sb
+      .from("profiles")
+      .select("id, last_active_at")
+      .eq("role", "eleve")
+      .eq("enseignant_id", me.id)
+      .is("deleted_at", null),
+  ]);
   _reportQueryErrors(
     "carte enseignant",
     [
       ["profil", profileRes],
       ["validations", validationsRes],
       ["élèves", elevesRes],
-      ["classement", rankingRes],
     ],
     "Certaines données du profil sont indisponibles.",
   );
   const profile = _queryData(profileRes);
   const valData = _queryData(validationsRes);
   const elevesData = _queryData(elevesRes);
-  const rankingData = _queryData(rankingRes);
 
   // ── Stats Mon Année ───────────────────────────────────────
   const vals = valData || [];
@@ -2834,32 +2751,12 @@ async function mountEnseignantArene(root, me) {
   const elevesCount = elevesIds.size;
   const totalValidations = vals.length;
   const c3Count = vals.filter((v) => v.competence_id?.startsWith("C3")).length;
-  const hasValidationToday = vals.some((v) =>
-    v.validated_at?.startsWith(today),
-  );
-  const streakDays = Math.max(
-    profile?.streak_pro_days ?? 0,
-    hasValidationToday ? 1 : 0,
-  );
-  const since30d = new Date(Date.now() - 30 * 86400000)
-    .toISOString()
-    .slice(0, 10);
-  const elevesActifsCount = new Set(
-    vals.filter((v) => v.validated_at >= since30d).map((v) => v.eleve_id),
-  ).size;
-
-  // ── Classement réel ───────────────────────────────────────
-  const ranking = Array.isArray(rankingData) ? rankingData : [];
-  const myIdx = ranking.findIndex((r) => r.moniteur_id === me.id);
-  const mine = myIdx >= 0 ? ranking[myIdx] : null;
-  const myRank = mine?.rank ?? 0;
-  const myScore = mine?.score_total ?? 0;
-  // 3 lignes autour de moi pour le mini-podium
-  let podium = [];
-  if (myIdx >= 0) {
-    const start = Math.max(0, myIdx - 1);
-    podium = ranking.slice(start, start + 3);
-  }
+  // « Élèves actifs » sur l'activité RÉELLE des élèves (last_active_at) et non
+  // plus déduit des validations du moniteur, qui n'en produit plus.
+  const since30d = new Date(Date.now() - 30 * 86400000).toISOString();
+  const elevesActifsCount = (elevesData || []).filter(
+    (e) => (e.last_active_at || "") >= since30d,
+  ).length;
 
   // ── Identité ──────────────────────────────────────────────
   const name =
@@ -2885,21 +2782,6 @@ async function mountEnseignantArene(root, me) {
       );
   }
 
-  const achievements = _ensAchievements(
-    totalValidations,
-    elevesCount,
-    streakDays,
-    myRank,
-  );
-  const unlocked = achievements.filter((a) => a.need).length;
-  const locked = achievements.length - unlocked;
-  const achievementCount =
-    getLang() === "fr"
-      ? `${unlocked} débloqué${unlocked > 1 ? "s" : ""} · ${locked} à venir`
-      : ptR("unlocked_to_come", "{unlocked} débloqués · {locked} à venir", {
-          unlocked,
-          locked,
-        });
   const [validationsLabel, thisYearLabel] = ptR(
     "validations_this_year",
     "Validations|cette année",
@@ -2915,14 +2797,8 @@ async function mountEnseignantArene(root, me) {
   <h1 class="enp-h1">${pt("h1_title", "Mon profil")}</h1>
 
   <div class="enp-hero">
-    ${
-      myRank > 0
-        ? `<div class="enp-rank">
-        <img src="/skins/trophy-10-comps.webp" alt="" />
-        <span class="rt">${ptR("rank_month", "{rank} ce mois-ci · {score} pts", { rank: _rankLabel(myRank), score: myScore })}</span>
-      </div>`
-        : ""
-    }
+    <!-- Retrait de la gamification moniteur (30/07/2026) : le bandeau de rang
+         mensuel (« #3 ce mois-ci · 120 pts ») vivait ici. -->
     <div class="enp-id">
       <div class="enp-crest">
         <div class="enp-crest-disc"><div class="enp-crest-inner">${avatarUrl ? `<img src="${escAttr(avatarUrl)}" alt="" referrerpolicy="no-referrer" />` : esc(initials)}</div></div>
@@ -2951,69 +2827,16 @@ async function mountEnseignantArene(root, me) {
       <div class="enp-s-lab">${pt("students_supported", "Élèves suivis")}</div>
     </div>
     <div class="enp-stat">
-      <img class="enp-s-ico" src="/skins/permigo-streak-flame-v1.webp" alt="" />
-      <div class="enp-s-num gd">${streakDays}${getLang() === "ar" ? " يوم" : " j"}</div>
-      <div class="enp-s-lab">${pt("pro_streak", "Série pro")}</div>
-    </div>
-    <div class="enp-stat">
       ${medallion("etoile", "gold", { size: 30, cls: "enp-s-ico" })}
       <div class="enp-s-num gd">${c3Count}</div>
       <div class="enp-s-lab">${pt("c3_reached", "C3 Maîtrise")}</div>
     </div>
   </div>
 
-  <div class="enp-ach">
-    <div class="enp-ach-head">
-      <span class="enp-ach-title">${pt("my_achievements", "Mes succès")}</span>
-      <span class="enp-ach-count">${esc(achievementCount)}</span>
-    </div>
-    <div class="enp-ach-scroll" tabindex="0" role="group" aria-label="${ptA("achievements_list", "Tes succès (liste défilante)")}">
-      ${achievements
-        .map(
-          (a) => `
-      <div class="enp-a ${a.need ? "" : "locked"}">
-        <div class="enp-medal">
-          <img src="/skins/${a.img}.webp" alt="" loading="lazy" />
-          ${a.need ? "" : `<span class="enp-alock">${_LOCK_SVG}</span>`}
-        </div>
-        <div class="enp-a-name">${a.name}</div>
-      </div>`,
-        )
-        .join("")}
-    </div>
-  </div>
-
-  <div class="enp-rankcard">
-    <div class="enp-rh">
-      <div class="enp-rh-l">
-        <span class="enp-rh-badge"><img src="/skins/couronne.png" alt="" /></span>
-        <div>
-          <div class="enp-rh-tt">${pt("my_position", "Ma position")}</div>
-          <div class="enp-rh-sub">${pt("monthly_ranking", "Classement du mois")}</div>
-        </div>
-      </div>
-      <a class="enp-rlink" href="#/classement-eleves">${pt("view_ranking", "Voir le classement")}
-        <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14m0 0l-6-6m6 6l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </a>
-    </div>
-    ${
-      podium.length
-        ? `<div class="enp-rlist">
-      ${podium
-        .map(
-          (r) => `
-      <div class="enp-rrow ${r.moniteur_id === me.id ? "me" : ""}">
-        <span class="rp">${_rankLabel(r.rank)}</span>
-        <span class="rav">${esc(_ensInitials(r.moniteur_prenom, r.moniteur_nom))}</span>
-        <span class="rnm">${esc(`${r.moniteur_prenom || ""} ${r.moniteur_nom || ""}`.trim() || ptR("instructor_default", "Enseignant"))}${r.moniteur_id === me.id ? ` — ${pt("you", "toi")}` : ""}</span>
-        <span class="rpt">${r.score_total} <span>${pt("points", "pts")}</span></span>
-      </div>`,
-        )
-        .join("")}
-    </div>`
-        : `<div class="enp-rempty">${pt("ranking_empty", "Ton classement apparaîtra dès tes premières validations ce mois-ci.")}</div>`
-    }
-  </div>
+  <!-- Retrait de la gamification moniteur (30/07/2026, décision Rayan) : les
+       blocs « Mes succès » (10 trophées sur validations / série / rang) et
+       « Ma position · Classement du mois » vivaient ici. Tous mesuraient une
+       action que le moniteur ne peut plus faire. -->
 
   <div class="enp-year">
     <div class="enp-yh">

@@ -85,7 +85,6 @@ const STYLE = `<style>
      de page (ex. « Ton centre d'examen » sur Réviser) ne soient plus masqués. */
   body.has-chrome .ck-banner { bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
   body.ck-open.has-chrome #app { padding-bottom: calc(210px + env(safe-area-inset-bottom, 0px)); }
-  body.ck-open #bn-seance-fab { display: none; }
   .ck-banner.on { transform: translateX(-50%) translateY(0); }
   @media (prefers-reduced-motion: reduce) { .ck-banner { transition: none; } }
   .ck-ttl {

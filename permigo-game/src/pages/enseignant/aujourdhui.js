@@ -24,7 +24,6 @@ const isPretExam = (acquisSet) =>
   !!acquisSet && BASE_COMPS.every((c) => acquisSet.has(c));
 import { fmtName } from "@/utils/fmt-name.js";
 import { openInviteEleveModal } from "@/services/invite-eleve.js";
-import { getMoniteurState } from "@/data/moniteur-levels.js";
 import { startTour } from "@/components/common/guided-tour.js";
 import { haptic } from "@/utils/haptic.js";
 import { onPopupsSettled } from "@/utils/intro-overlays.js";
@@ -492,15 +491,6 @@ async function fetchAllRows(buildQuery) {
   }
 }
 
-function todayISO() {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function yesterdayISO() {
-  const d = new Date(Date.now() - 86400000);
-  return d.toISOString().slice(0, 10);
-}
-
 function initiales(prenom, nom) {
   const p = (prenom || "").trim()[0] || "";
   const n = (nom || "").trim()[0] || "";
@@ -596,17 +586,12 @@ function renderLoadError(root, me, error) {
 }
 
 async function renderInto(root, _me) {
-  const today = todayISO();
-  const yesterday = yesterdayISO();
 
   // ─── Fetch en parallèle ────────────────────────────────────────
   const [
     valsAll,
     elevesAll,
-    todayValsRes,
-    yesterdayValsRes,
     profileRes,
-    totalValsRes,
     provMap,
   ] = await Promise.all([
     // Dernières validations (activité récente) — non utilisées dans ce design
@@ -624,34 +609,12 @@ async function renderInto(root, _me) {
       .select("id, prenom, nom, last_active_at, enseignant_id, avatar_url")
       .eq("role", "eleve"),
 
-    // Validations d'aujourd'hui
-    sb
-      .from("validations")
-      .select("id", { count: "exact", head: true })
-      .eq("validated_by", _me.id)
-      .gte("validated_at", today + "T00:00:00Z")
-      .lt("validated_at", today + "T23:59:59Z"),
-
-    // Validations d'hier
-    sb
-      .from("validations")
-      .select("id", { count: "exact", head: true })
-      .eq("validated_by", _me.id)
-      .gte("validated_at", yesterday + "T00:00:00Z")
-      .lt("validated_at", yesterday + "T23:59:59Z"),
-
     // Profil : prénom
     sb
       .from("profiles")
-      .select("prenom, streak_pro_days")
+      .select("prenom")
       .eq("id", _me.id)
       .maybeSingle(),
-
-    // Total validations cumulées
-    sb
-      .from("validations")
-      .select("id", { count: "exact", head: true })
-      .eq("validated_by", _me.id),
 
     // Provenance CRM (RLS = mes élèves) → Map(eleve_id → {label,color})
     fetchProvenanceMap(),
@@ -662,10 +625,8 @@ async function renderInto(root, _me) {
   const loadError =
     valsAll.error ||
     elevesAll.error ||
-    todayValsRes.error ||
-    yesterdayValsRes.error ||
     profileRes.error ||
-    totalValsRes.error;
+    null;
   if (loadError) {
     renderLoadError(root, _me, loadError);
     return;
@@ -678,8 +639,9 @@ async function renderInto(root, _me) {
   });
 
   const prenom = profileRes?.data?.prenom || "";
-  const totalValsCount = totalValsRes?.count ?? 0;
-  const moniteurState = getMoniteurState(totalValsCount);
+  // Retrait de la gamification moniteur (30/07/2026) : `getMoniteurState()`
+  // calculait son palier (10 paliers à 3, 8, 15… validations). Il ne valide
+  // plus → un palier gelé, inatteignable. Supprimé.
 
   // Élèves que j'ai validé + qui me sont attitrés
   const elevesValidesRes = await fetchAllRows(() =>

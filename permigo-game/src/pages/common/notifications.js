@@ -334,9 +334,11 @@ function notifRoute(n) {
     case "moniteur_recap":
       return "#/profil";
     case "compte_rendu":
-      return d.compte_rendu_id
-        ? `#/compte-rendu/${d.compte_rendu_id}`
-        : "#/parcours";
+      // Retrait du moniteur (lot 4 du pivot, 30/07/2026) : la page
+      // #/compte-rendu/{id} est supprimée. Les notifications DÉJÀ reçues
+      // restent lisibles dans la cloche et retombent sur le hub — jamais sur
+      // un lien mort (le router afficherait « page non chargée »).
+      return "#/mon-permis";
     default:
       // Fallback robuste : honorer un lien explicite posé par la source.
       return d.route || d.link || "#/";

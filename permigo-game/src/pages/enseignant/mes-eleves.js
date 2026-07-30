@@ -347,9 +347,6 @@ const STYLE = `<style>
     display: inline-flex; align-items: center; gap: 3px;
   }
 
-  /* FAB « Séance » retiré ici : le FAB global #bn-seance-fab (nav-bottom)
-     est déjà monté pour l'enseignant sur toutes ses pages. */
-
   /* ── En-tête « Pupitre » : recherche + 3 compteurs vivants (remplace le
      hero « à traiter en priorité » — chaque compteur est une porte) ── */
   .me-counters { display: flex; gap: 9px; margin: 0 0 16px; }
@@ -1446,9 +1443,6 @@ function wire() {
     track("invite.empty.header.clicked");
     openInviteEleveModal(_me);
   });
-
-  // FAB « Séance » : le FAB global #bn-seance-fab (nav-bottom, enseignant)
-  // couvre déjà cette page → on a retiré le doublon local #me-fab.
 
   // Recherche — filtre transversal tous les groupes du pipeline (onglet Liste)
   const searchEl = _root.querySelector(".me-search");
