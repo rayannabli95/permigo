@@ -58,14 +58,14 @@ const STYLES = `
 
 /* ── Content ── */
 .eb-title {
-  font: 700 15px/1.3 'Plus Jakarta Sans', sans-serif;
+  font: 700 15px/1.3 'Archivo', sans-serif;
   /* Fonds pastel clairs codés en dur → texte fixe sombre (sinon var(--ink)
      passe en quasi-blanc en thème sombre = titre illisible sur pastel clair). */
   color: #1a1d2e;
   margin-bottom: 3px;
 }
 .eb-body {
-  font: 500 13px/1.4 'Inter', sans-serif;
+  font: 500 13px/1.4 'Archivo', sans-serif;
   color: #4b5563;
   margin-bottom: 10px;
 }
@@ -74,7 +74,7 @@ const STYLES = `
   align-items: center;
   padding: 7px 14px;
   border-radius: 10px;
-  font: 600 13px/1 'Plus Jakarta Sans', sans-serif;
+  font: 600 13px/1 'Archivo', sans-serif;
   border: 0;
   cursor: pointer;
   min-height: 44px;

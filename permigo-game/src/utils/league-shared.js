@@ -158,11 +158,11 @@ export const LEAGUE_CSS = `
 .lg-badge-none { --lc:var(--mu2); --lb:var(--bg2); --lbr:var(--bo); }
 .lg-badge-ico { flex-shrink: 0; }
 .lg-badge-name {
-  font: 800 16px/1.2 'Plus Jakarta Sans', sans-serif;
+  font: 800 16px/1.2 'Archivo', sans-serif;
   color: var(--lc, var(--ink));
 }
 .lg-badge-pts {
-  font: 500 12px/1 'Inter', sans-serif;
+  font: 500 12px/1 'Archivo', sans-serif;
   color: var(--mu2);
   margin-top: 3px;
 }
@@ -189,12 +189,12 @@ export const LEAGUE_CSS = `
 .lg-row-av { flex-shrink: 0; }
 .lg-row-name {
   flex: 1; min-width: 0;
-  font: 600 14px/1.2 'Inter', sans-serif; color: var(--ink);
+  font: 600 14px/1.2 'Archivo', sans-serif; color: var(--ink);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   display: flex; align-items: center; gap: 6px;
 }
 .lg-row-you {
-  font: 700 10px/1 'Inter', sans-serif; color: var(--a-txt);
+  font: 700 10px/1 'Archivo', sans-serif; color: var(--a-txt);
   background: color-mix(in srgb, var(--a) 10%, transparent); padding: 2px 6px; border-radius: 4px;
   text-transform: uppercase; letter-spacing: .04em;
 }
@@ -212,7 +212,7 @@ export const LEAGUE_CSS = `
 }
 .lg-legend-item {
   display: inline-flex; align-items: center; gap: 5px;
-  font: 500 11px/1 'Inter', sans-serif; color: var(--mu2);
+  font: 500 11px/1 'Archivo', sans-serif; color: var(--mu2);
   padding: 4px 9px; border-radius: 8px;
   background: var(--bg2); border: 1px solid var(--bo);
 }
@@ -220,7 +220,7 @@ export const LEAGUE_CSS = `
 /* ─── Countdown ─── */
 .lg-countdown {
   display: inline-flex; align-items: center; gap: 6px;
-  font: 600 12px/1 'Inter', sans-serif; color: var(--mu2);
+  font: 600 12px/1 'Archivo', sans-serif; color: var(--mu2);
 }
 .lg-countdown-val { color: var(--ink); font-family: 'IBM Plex Mono', monospace; }
 `;

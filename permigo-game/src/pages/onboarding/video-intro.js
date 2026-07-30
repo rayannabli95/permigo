@@ -167,7 +167,7 @@ const STYLE = `<style>
   .vi {
     position: fixed; inset: 0; z-index: 10000;
     display: flex; flex-direction: column;
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-family: 'Archivo', system-ui, sans-serif;
     color: #fff; -webkit-font-smoothing: antialiased;
     background:
       radial-gradient(120% 70% at 50% -8%, rgba(255,206,77,.16) 0%, rgba(255,206,77,0) 46%),
@@ -188,7 +188,7 @@ const STYLE = `<style>
     padding: calc(env(safe-area-inset-top, 0px) + 24px) 26px calc(env(safe-area-inset-bottom, 0px) + 24px);
   }
   .vi-eyebrow {
-    font: 700 14px/1 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+    font: 700 14px/1 'Archivo', sans-serif;
     letter-spacing: 2.4px; text-transform: uppercase;
     color: #cdc2f5; margin-bottom: 10px;
   }
@@ -214,19 +214,19 @@ const STYLE = `<style>
        (base.css : h1,h2,h3,h4 { color: var(--ink) }) rendrait ce <h1> noir
        en thème clair → titre noir sur fond sombre. On force le blanc. */
     color: #fff;
-    font: 800 27px/1.15 'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+    font: 800 27px/1.15 'Archivo', sans-serif;
     letter-spacing: -.3px; margin: 0 0 6px; max-width: 340px;
     text-shadow: 0 2px 10px rgba(0,0,0,.3); outline: none;
   }
   .vi-lead {
-    font: 500 15.5px/1.5 'Plus Jakarta Sans', sans-serif;
+    font: 500 15.5px/1.5 'Archivo', sans-serif;
     color: #cdc2f5; max-width: 300px; margin: 0 0 26px;
   }
   .vi-ok {
     display: inline-flex; align-items: center; gap: 8px;
     border: 0; cursor: pointer; min-height: 56px; padding: 0 30px;
     border-radius: 17px;
-    font: 800 18px/1 'Baloo 2', 'Plus Jakarta Sans', sans-serif; color: #1a1233;
+    font: 800 18px/1 'Archivo', sans-serif; color: #1a1233;
     background: linear-gradient(180deg, #ffe39a, #f0a500);
     box-shadow: 0 5px 0 #b87d00, 0 8px 20px rgba(255,206,77,.35), 0 0 0 1px rgba(255,255,255,.5) inset;
     transition: transform .12s, box-shadow .12s;
@@ -235,7 +235,7 @@ const STYLE = `<style>
   .vi-ok-arr { font-size: 20px; }
   .vi-skip-gate {
     margin-top: 18px; background: none; border: 0; cursor: pointer;
-    color: #9b8fd0; font: 600 14px/1 'Plus Jakarta Sans', sans-serif;
+    color: #9b8fd0; font: 600 14px/1 'Archivo', sans-serif;
     padding: 10px 14px; min-height: 44px;
   }
   .vi-skip-gate:active { color: #fff; }

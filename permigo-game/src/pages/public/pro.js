@@ -21,7 +21,7 @@ const STYLE = `<style>
     --ink:#f4f1ff; --ink-soft:#cdc8ec; --ink-mu:#a49dd6;
     --field:#221a4f; --field-line:#544a97;
     position:relative; min-height:100dvh; color:var(--ink);
-    font-family:'Baloo 2', var(--fb), system-ui, sans-serif;
+    font-family:'Archivo', var(--fb), system-ui, sans-serif;
     -webkit-font-smoothing:antialiased;
     padding: max(28px, env(safe-area-inset-top)) 18px max(48px, calc(24px + env(safe-area-inset-bottom)));
     background:
@@ -35,21 +35,21 @@ const STYLE = `<style>
   .pro-hero { text-align:center; padding: 26px 6px 8px; }
   .pro-logo { width:74px; height:74px; margin:0 auto 14px; display:block;
     filter: drop-shadow(0 4px 10px rgba(0,0,0,.5)) drop-shadow(0 0 18px rgba(88,204,2,.55)); }
-  .pro-eyebrow { font:800 12px/1 'Baloo 2',var(--fb),sans-serif; letter-spacing:.18em;
+  .pro-eyebrow { font:800 12px/1 'Archivo',var(--fb),sans-serif; letter-spacing:.18em;
     text-transform:uppercase; color:var(--a-lt); margin-bottom:14px; }
-  .pro-h1 { font:800 34px/1.12 'Baloo 2',var(--fb),sans-serif; letter-spacing:-.01em;
+  .pro-h1 { font:800 34px/1.12 'Archivo',var(--fb),sans-serif; letter-spacing:-.01em;
     margin:0 0 12px; text-shadow:0 2px 0 rgba(0,0,0,.3); }
   .pro-h1 .hl { color:var(--a-lt); }
-  .pro-lead { font:600 17px/1.5 'Baloo 2',var(--fb),sans-serif; color:var(--ink-soft);
+  .pro-lead { font:600 17px/1.5 'Archivo',var(--fb),sans-serif; color:var(--ink-soft);
     margin:0 auto 22px; max-width:420px; }
   .pro-cta { display:inline-flex; align-items:center; gap:8px; cursor:pointer;
     border:none; padding:16px 30px; border-radius:999px; color:#2a1c00;
-    font:800 17px/1 'Baloo 2',var(--fb),sans-serif;
+    font:800 17px/1 'Archivo',var(--fb),sans-serif;
     background:linear-gradient(180deg,#ffe083,var(--gold) 55%,var(--gold-dp));
     box-shadow: inset 0 1.5px 0 rgba(255,255,255,.7), 0 6px 0 #b47a08, 0 12px 22px rgba(0,0,0,.4);
     transition: transform .12s, box-shadow .12s; }
   .pro-cta:active { transform: translateY(4px); box-shadow: inset 0 1.5px 0 rgba(255,255,255,.7), 0 2px 0 #b47a08, 0 6px 12px rgba(0,0,0,.4); }
-  .pro-tel { display:block; margin-top:14px; font:700 14.5px/1.4 'Baloo 2',var(--fb),sans-serif; color:var(--ink-mu); }
+  .pro-tel { display:block; margin-top:14px; font:700 14.5px/1.4 'Archivo',var(--fb),sans-serif; color:var(--ink-mu); }
   .pro-tel a { color:var(--ink); text-decoration:none; border-bottom:1.5px dotted var(--field-line); }
 
   /* POURQUOI */
@@ -58,20 +58,20 @@ const STYLE = `<style>
     border-radius:18px; background:rgba(255,255,255,.045);
     box-shadow: inset 0 0 0 1.5px rgba(124,111,224,.28); }
   .pro-card .emo { font-size:26px; line-height:1; flex-shrink:0; }
-  .pro-card b { display:block; font:800 16px/1.3 'Baloo 2',var(--fb),sans-serif; margin-bottom:3px; }
-  .pro-card span { font:600 14px/1.45 'Baloo 2',var(--fb),sans-serif; color:var(--ink-soft); }
+  .pro-card b { display:block; font:800 16px/1.3 'Archivo',var(--fb),sans-serif; margin-bottom:3px; }
+  .pro-card span { font:600 14px/1.45 'Archivo',var(--fb),sans-serif; color:var(--ink-soft); }
 
   /* FORMULAIRE */
   .pro-form { margin-top:40px; padding:26px 22px 24px; border-radius:26px;
     background:linear-gradient(180deg,#2c2260 0%,#241b52 60%,#1d1547 100%);
     box-shadow: inset 0 3px 0 rgba(255,255,255,.14), 0 12px 30px rgba(0,0,0,.45), 0 0 0 2px rgba(124,111,224,.3); }
-  .pro-form-t { font:800 24px/1.15 'Baloo 2',var(--fb),sans-serif; text-align:center; margin:0 0 4px; }
-  .pro-form-s { font:600 14px/1.45 'Baloo 2',var(--fb),sans-serif; color:var(--ink-soft); text-align:center; margin:0 0 22px; }
+  .pro-form-t { font:800 24px/1.15 'Archivo',var(--fb),sans-serif; text-align:center; margin:0 0 4px; }
+  .pro-form-s { font:600 14px/1.45 'Archivo',var(--fb),sans-serif; color:var(--ink-soft); text-align:center; margin:0 0 22px; }
   .pro-q { margin-bottom:18px; }
-  .pro-q > label { display:block; font:800 13.5px/1.3 'Baloo 2',var(--fb),sans-serif; margin:0 0 9px; color:var(--ink); }
+  .pro-q > label { display:block; font:800 13.5px/1.3 'Archivo',var(--fb),sans-serif; margin:0 0 9px; color:var(--ink); }
   .pro-opts { display:flex; flex-wrap:wrap; gap:9px; }
   .pro-opt { cursor:pointer; padding:11px 16px; border-radius:13px;
-    font:700 14.5px/1 'Baloo 2',var(--fb),sans-serif; color:var(--ink-soft);
+    font:700 14.5px/1 'Archivo',var(--fb),sans-serif; color:var(--ink-soft);
     background:var(--field); border:2px solid transparent; box-shadow: inset 0 2px 6px rgba(0,0,0,.35);
     transition: all .12s; min-height:44px; display:inline-flex; align-items:center; }
   .pro-opt:active { transform: scale(.97); }
@@ -79,26 +79,26 @@ const STYLE = `<style>
     border-color:rgba(255,255,255,.4); box-shadow: inset 0 1px 0 rgba(255,255,255,.4), 0 4px 12px rgba(108,99,255,.5); }
   .pro-input { width:100%; box-sizing:border-box; padding:14px 15px; border-radius:14px;
     background:var(--field); border:2px solid var(--field-line); color:var(--ink);
-    font:600 16px/1.2 'Baloo 2',var(--fb),sans-serif; outline:none; transition:border-color .15s; }
+    font:600 16px/1.2 'Archivo',var(--fb),sans-serif; outline:none; transition:border-color .15s; }
   .pro-input::placeholder { color:var(--ink-mu); }
   .pro-input:focus { border-color:var(--gold); }
   .pro-input.error { border-color:#ff6b6b; }
   .pro-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
   @media (max-width:420px){ .pro-grid2 { grid-template-columns:1fr; } }
   .pro-submit { width:100%; margin-top:8px; cursor:pointer; border:none; padding:17px; border-radius:16px;
-    color:#2a1c00; font:800 18px/1 'Baloo 2',var(--fb),sans-serif;
+    color:#2a1c00; font:800 18px/1 'Archivo',var(--fb),sans-serif;
     background:linear-gradient(180deg,#ffe083,var(--gold) 55%,var(--gold-dp));
     box-shadow: inset 0 1.5px 0 rgba(255,255,255,.7), 0 6px 0 #b47a08, 0 12px 20px rgba(0,0,0,.4);
     transition: transform .12s, opacity .15s; }
   .pro-submit:disabled { opacity:.5; cursor:not-allowed; }
   .pro-submit:not(:disabled):active { transform: translateY(3px); }
-  .pro-legal { font:600 12px/1.5 'Baloo 2',var(--fb),sans-serif; color:var(--ink-mu); text-align:center; margin:14px 0 0; }
+  .pro-legal { font:600 12px/1.5 'Archivo',var(--fb),sans-serif; color:var(--ink-mu); text-align:center; margin:14px 0 0; }
 
   /* MERCI */
   .pro-thanks { text-align:center; padding:20px 8px; }
   .pro-thanks .emo { font-size:56px; }
-  .pro-thanks h2 { font:800 26px/1.2 'Baloo 2',var(--fb),sans-serif; margin:12px 0 8px; }
-  .pro-thanks p { font:600 16px/1.5 'Baloo 2',var(--fb),sans-serif; color:var(--ink-soft); margin:0 0 6px; }
+  .pro-thanks h2 { font:800 26px/1.2 'Archivo',var(--fb),sans-serif; margin:12px 0 8px; }
+  .pro-thanks p { font:600 16px/1.5 'Archivo',var(--fb),sans-serif; color:var(--ink-soft); margin:0 0 6px; }
 </style>`;
 
 const NB_MON = ["1", "2 à 5", "6 à 10", "Plus de 10"];
@@ -178,11 +178,11 @@ export async function mount(root) {
 
           <div class="pro-q pro-grid2">
             <div>
-              <label for="pro-email" style="display:block;font:800 13.5px/1.3 'Baloo 2',var(--fb),sans-serif;margin:0 0 9px">Email</label>
+              <label for="pro-email" style="display:block;font:800 13.5px/1.3 'Archivo',var(--fb),sans-serif;margin:0 0 9px">Email</label>
               <input class="pro-input" id="pro-email" type="email" autocomplete="email" autocapitalize="off" placeholder="vous@exemple.fr" />
             </div>
             <div>
-              <label for="pro-tel" style="display:block;font:800 13.5px/1.3 'Baloo 2',var(--fb),sans-serif;margin:0 0 9px">Téléphone <span style="font-weight:600;color:var(--ink-mu)">(optionnel)</span></label>
+              <label for="pro-tel" style="display:block;font:800 13.5px/1.3 'Archivo',var(--fb),sans-serif;margin:0 0 9px">Téléphone <span style="font-weight:600;color:var(--ink-mu)">(optionnel)</span></label>
               <input class="pro-input" id="pro-tel" type="tel" autocomplete="tel" placeholder="06 …" />
             </div>
           </div>

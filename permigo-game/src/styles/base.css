@@ -110,9 +110,14 @@
   --ease-spring:cubic-bezier(.34,1.56,.64,1); /* press/pop avec rebond */
   --ease-bounce:cubic-bezier(.5,1.8,.5,1);    /* rebond fort (célébrations) */
 
-  /* ─ Fonts ─ */
-  --fd:'Nunito','Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
-  --fb:'Nunito','Inter',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  /* ─ Fonts — UNE seule voix pour tout ce que l'élève voit.
+     Archivo : la police du hero « Prépare ta leçon », validée comme la bonne
+     (2026-07-30). Avant : 5 familles selon la page (Nunito, Plus Jakarta,
+     Baloo 2, Fredoka, Inter) → on ne reconnaissait plus l'app d'un onglet à
+     l'autre. Titres ET corps partagent la famille, seule la graisse change.
+     L'univers moniteur garde la sienne (--ens-display / enseignant-arcade.css). ─ */
+  --fd:'Archivo',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  --fb:'Archivo',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
   --fn:'JetBrains Mono','IBM Plex Mono','SF Mono',Menlo,monospace;
 
   /* ─ Interligne (respiration). Défaut confortable pour le TEXTE COURANT (éléments
@@ -239,9 +244,12 @@
   }
 }
 
-/* Dark mode: header glass + chrome overrides */
+/* Dark mode: header glass + chrome overrides.
+   --chrome-top d'abord : une page nuit (Réviser, Profil, Cartes…) impose sa
+   teinte même en thème sombre, sinon le bandeau reprend le gris d'app et la
+   couture réapparaît — plus discrète, mais là. */
 [data-theme="dark"] #header-bar {
-  background: rgba(24,27,48,.92) !important;
+  background: color-mix(in srgb, var(--chrome-top, #181b30) 92%, transparent) !important;
 }
 
 * { box-sizing: border-box; }

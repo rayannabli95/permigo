@@ -237,21 +237,21 @@ function _createSoftBanner() {
         from { opacity: 0; transform: translateX(-50%) translateY(20px); }
         to   { opacity: 1; transform: translateX(-50%) translateY(0); }
       }
-      #push-soft-banner .pb-ttl { font: 700 15px/1.3 'Plus Jakarta Sans', sans-serif; color: #fff; }
-      #push-soft-banner .pb-sub { font: 500 13px/1.4 'Inter', sans-serif; color: #94a3b8; margin: 0; }
+      #push-soft-banner .pb-ttl { font: 700 15px/1.3 'Archivo', sans-serif; color: #fff; }
+      #push-soft-banner .pb-sub { font: 500 13px/1.4 'Archivo', sans-serif; color: #94a3b8; margin: 0; }
       #push-soft-banner .pb-btns { display: flex; gap: 10px; }
       #push-soft-banner .pb-ok {
         flex: 1; padding: 12px;
         background: linear-gradient(to bottom, var(--a-lt), var(--a) 55%, var(--adk));
         border: 0; border-radius: 12px; color: var(--a-ink);
-        font: 700 13px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer;
+        font: 700 13px/1 'Archivo', sans-serif; cursor: pointer;
         transition: transform .12s, opacity .12s; min-height: 44px;
       }
       #push-soft-banner .pb-ok:active { transform: scale(.97); opacity: .9; }
       #push-soft-banner .pb-skip {
         padding: 12px 16px; background: rgba(255,255,255,.05);
         border: 1px solid rgba(255,255,255,.1); border-radius: 12px;
-        color: #94a3b8; font: 600 13px/1 'Inter', sans-serif; cursor: pointer;
+        color: #94a3b8; font: 600 13px/1 'Archivo', sans-serif; cursor: pointer;
         transition: background .15s; min-height: 44px;
       }
       #push-soft-banner .pb-skip:active { background: rgba(255,255,255,.1); }

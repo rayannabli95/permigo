@@ -380,7 +380,7 @@ const STYLE = `<style>
   margin: 0 auto;
   padding: 0 0 110px;
   background: var(--bg);
-  font-family: 'Inter', sans-serif;
+  font-family: 'Archivo', sans-serif;
   color: var(--ink);
 }
 
@@ -426,7 +426,7 @@ const STYLE = `<style>
   border-radius: 999px;
   padding: 6px 13px 6px 8px;
   box-shadow: 0 4px 14px rgba(0,0,0,.06);
-  font: 800 16px/1 'Plus Jakarta Sans', sans-serif;
+  font: 800 16px/1 'Archivo', sans-serif;
   color: var(--ink);
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
@@ -514,18 +514,18 @@ const STYLE = `<style>
   gap: 2px;
 }
 .acc2-sos-title {
-  font: 800 14.5px/1.2 'Plus Jakarta Sans', sans-serif;
+  font: 800 14.5px/1.2 'Archivo', sans-serif;
   color: var(--ink);
   letter-spacing: -.01em;
 }
 .acc2-sos-sub {
-  font: 500 12.5px/1.3 'Inter', sans-serif;
+  font: 500 12.5px/1.3 'Archivo', sans-serif;
   color: var(--mu);
 }
 .acc2-sos-arr {
   flex-shrink: 0;
   align-self: center;
-  font: 800 16px/1 'Plus Jakarta Sans', sans-serif;
+  font: 800 16px/1 'Archivo', sans-serif;
   color: color-mix(in srgb, var(--am) 75%, var(--ink));
 }
 .acc2-sos-freeze {
@@ -537,7 +537,7 @@ const STYLE = `<style>
   border: 0;
   border-radius: 16px;
   cursor: pointer;
-  font: 800 12.5px/1 'Plus Jakarta Sans', sans-serif;
+  font: 800 12.5px/1 'Archivo', sans-serif;
   color: #4a2c00;
   background: linear-gradient(180deg, #ffdf8f, #f5b636);
   box-shadow: 0 4px 12px -4px rgba(240,165,0,.5), inset 0 1px 0 rgba(255,255,255,.5);
@@ -635,7 +635,7 @@ const STYLE = `<style>
   align-items: flex-start;
 }
 .acc2-hero-kicker {
-  font: 800 11.5px/1 'Plus Jakarta Sans', sans-serif;
+  font: 800 11.5px/1 'Archivo', sans-serif;
   letter-spacing: .09em;
   color: var(--acc-scene-kick);
   text-transform: uppercase;
@@ -646,7 +646,7 @@ const STYLE = `<style>
    enfantin) manquait de punch sur une photo — ici on veut le coup de poing
    d'un titre de sport. Archivo reste dans la famille de l'app. */
 .acc2-hero-h1 {
-  font: 900 clamp(25px, 7.5vw, 31px)/.92 'Archivo', 'Plus Jakarta Sans', sans-serif;
+  font: 900 clamp(25px, 7.5vw, 31px)/.92 'Archivo', sans-serif;
   letter-spacing: -.035em;
   text-transform: uppercase;
   color: var(--acc-scene-ink);
@@ -656,7 +656,7 @@ const STYLE = `<style>
 }
 .acc2-hero-meta {
   margin-top: 9px;
-  font: 700 12.5px/1.4 'Plus Jakarta Sans', sans-serif;
+  font: 700 12.5px/1.4 'Archivo', sans-serif;
   color: var(--acc-scene-mu);
   text-shadow: var(--acc-scene-sh);
 }
@@ -680,7 +680,7 @@ const STYLE = `<style>
   border: none;
   border-radius: 20px;
   padding: 18px;
-  font: 800 18px/1 'Plus Jakarta Sans', sans-serif;
+  font: 800 18px/1 'Archivo', sans-serif;
   color: #fff;
   /* Dégradé MÊME TEINTE (reflet clair → accent → accent foncé) : on garde le
      relief plastique 3D sans virer de couleur. L'ancien --a-lt → --a faisait
@@ -787,7 +787,7 @@ const STYLE = `<style>
   line-height: 1.15; text-align: left;
 }
 .acc2-prep-pill-tl b {
-  font: 800 13px/1.15 'Plus Jakarta Sans', sans-serif;
+  font: 800 13px/1.15 'Archivo', sans-serif;
   color: inherit;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -795,7 +795,7 @@ const STYLE = `<style>
   overflow: hidden;
 }
 .acc2-prep-pill-tl span {
-  font: 600 10px/1.2 'Inter', sans-serif;
+  font: 600 10px/1.2 'Archivo', sans-serif;
   opacity: .72;
   /* Une seule ligne : sur 2 lignes la pastille devenait un pavé et écrasait
      le chevron — le titre de la compétence doit rester la vedette. */
@@ -879,8 +879,8 @@ const STYLE = `<style>
 .acc2-consol:active { transform: scale(.985); }
 .acc2-consol-ico { font-size: 22px; flex: 0 0 auto; }
 .acc2-consol-txt { flex: 1; min-width: 0; }
-.acc2-consol-t { display: block; font: 800 13.5px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); }
-.acc2-consol-s { display: block; margin-top: 2px; font: 700 11.5px/1.3 'Plus Jakarta Sans', sans-serif; color: var(--mu); }
+.acc2-consol-t { display: block; font: 800 13.5px/1.2 'Archivo', sans-serif; color: var(--ink); }
+.acc2-consol-s { display: block; margin-top: 2px; font: 700 11.5px/1.3 'Archivo', sans-serif; color: var(--mu); }
 .acc2-consol-arr { color: var(--a-txt); font-weight: 800; font-size: 17px; flex: 0 0 auto; }
 
 /* ═══ « Revenons sur ta leçon » — le débrief SANS note ni agenda ═══
@@ -898,19 +898,19 @@ const STYLE = `<style>
   box-shadow: 0 8px 22px -14px color-mix(in srgb, var(--a) 40%, transparent);
 }
 .acc2-debrief-k {
-  font: 800 11px/1 'Plus Jakarta Sans', sans-serif;
+  font: 800 11px/1 'Archivo', sans-serif;
   letter-spacing: .08em;
   text-transform: uppercase;
   color: var(--a-txt);
   margin: 0 0 7px;
 }
 .acc2-debrief-t {
-  font: 800 15.5px/1.3 'Plus Jakarta Sans', sans-serif;
+  font: 800 15.5px/1.3 'Archivo', sans-serif;
   color: var(--ink);
   margin: 0 0 4px;
 }
 .acc2-debrief-s {
-  font: 600 12px/1.45 'Plus Jakarta Sans', sans-serif;
+  font: 600 12px/1.45 'Archivo', sans-serif;
   color: var(--mu);
   margin: 0 0 12px;
 }
@@ -920,7 +920,7 @@ const STYLE = `<style>
   min-height: 44px;
   border-radius: 13px;
   padding: 11px 8px;
-  font: 800 13px/1.2 'Plus Jakarta Sans', sans-serif;
+  font: 800 13px/1.2 'Archivo', sans-serif;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
@@ -946,7 +946,7 @@ const STYLE = `<style>
   padding: 7px;
   border: 0;
   background: none;
-  font: 700 11.5px/1 'Plus Jakarta Sans', sans-serif;
+  font: 700 11.5px/1 'Archivo', sans-serif;
   color: var(--mu);
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -990,11 +990,11 @@ const STYLE = `<style>
 }
 @keyframes prepSheetIn { from { transform: translateY(48px); opacity: .4; } to { transform: none; opacity: 1; } }
 .prep-sheet-grab { width: 40px; height: 4px; border-radius: 999px; background: var(--bo); margin: 0 auto 12px; flex: 0 0 auto; }
-.prep-sheet-h { font: 800 16px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); margin: 0 2px 2px; flex: 0 0 auto; }
-.prep-sheet-s { font: 700 12px/1.4 'Plus Jakarta Sans', sans-serif; color: var(--mu); margin: 0 2px 10px; flex: 0 0 auto; }
+.prep-sheet-h { font: 800 16px/1.2 'Archivo', sans-serif; color: var(--ink); margin: 0 2px 2px; flex: 0 0 auto; }
+.prep-sheet-s { font: 700 12px/1.4 'Archivo', sans-serif; color: var(--mu); margin: 0 2px 10px; flex: 0 0 auto; }
 .prep-sheet-list { overflow-y: auto; min-height: 0; }
 .prep-sheet-monde {
-  font: 800 11px/1 'Plus Jakarta Sans', sans-serif;
+  font: 800 11px/1 'Archivo', sans-serif;
   letter-spacing: .08em;
   text-transform: uppercase;
   color: var(--a-txt);
@@ -1012,7 +1012,7 @@ const STYLE = `<style>
   border: 1px solid var(--bo);
   border-radius: 14px;
   background: var(--su);
-  font: 700 14px/1.25 'Plus Jakarta Sans', sans-serif;
+  font: 700 14px/1.25 'Archivo', sans-serif;
   color: var(--ink);
   text-align: left;
   cursor: pointer;
@@ -1052,19 +1052,19 @@ const STYLE = `<style>
   border-radius: 10px;
   background: linear-gradient(180deg, color-mix(in srgb, var(--a) 85%, #fff), var(--a));
   color: #fff;
-  font: 800 14px/1 'Plus Jakarta Sans', sans-serif;
+  font: 800 14px/1 'Archivo', sans-serif;
   box-shadow: 0 2px 0 var(--adk);
 }
 .prep-sheet-item.sug .sug-t {
   display: block;
-  font: 700 16.5px/1.2 'Fredoka', 'Plus Jakarta Sans', sans-serif;
+  font: 700 16.5px/1.2 'Archivo', sans-serif;
   letter-spacing: -.01em;
   color: var(--ink);
 }
 .prep-sheet-item.sug .sug-r {
   display: block;
   margin-top: 3px;
-  font: 700 11.5px/1.3 'Plus Jakarta Sans', sans-serif;
+  font: 700 11.5px/1.3 'Archivo', sans-serif;
   color: var(--mu);
 }
 .prep-sheet-item.sug .sug-go {
@@ -1082,7 +1082,7 @@ const STYLE = `<style>
   padding: 10px;
   border: 0;
   background: none;
-  font: 700 12.5px/1.3 'Plus Jakarta Sans', sans-serif;
+  font: 700 12.5px/1.3 'Archivo', sans-serif;
   color: var(--mu);
   text-align: center;
   cursor: pointer;
@@ -1122,7 +1122,7 @@ const STYLE = `<style>
 #acc-lb-slot:empty { display: block; min-height: 430px; }
 
 .acc2-section-title {
-  font: 600 12px/1 'Inter', sans-serif;
+  font: 600 12px/1 'Archivo', sans-serif;
   text-transform: uppercase;
   letter-spacing: .1em;
   color: var(--mu2);
@@ -1132,7 +1132,7 @@ const STYLE = `<style>
 
 /* ── Tes ligues — 2 cartes premium (École + Révision) ── */
 .acc-lg-head {
-  font: 800 18px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: -.01em;
+  font: 800 18px/1 'Archivo', sans-serif; letter-spacing: -.01em;
   color: var(--ink); margin: 28px 18px 4px;
   display: flex; align-items: center; gap: 10px;
 }
@@ -1142,7 +1142,7 @@ const STYLE = `<style>
 }
 /* Lève l'ambiguïté « faut-il cliquer ? » : on dit ce que c'est ET que ça s'ouvre. */
 .acc-lg-lead {
-  font: 600 12.5px/1.4 'Inter', sans-serif; color: var(--mu);
+  font: 600 12.5px/1.4 'Archivo', sans-serif; color: var(--mu);
   margin: 0 18px 14px;
 }
 .acc-lg-grid {
@@ -1158,7 +1158,7 @@ const STYLE = `<style>
   cursor: pointer; position: relative; overflow: hidden;
   -webkit-tap-highlight-color: transparent;
   transition: transform .18s var(--ease-spring, cubic-bezier(.34,1.56,.64,1)), box-shadow .18s ease, border-color .18s ease;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Archivo', sans-serif;
   animation: lgCardReveal .42s cubic-bezier(.34,1.56,.64,1) both;
 }
 .acc-lg-card:nth-child(2) { animation-delay: .07s; }
@@ -1210,7 +1210,7 @@ const STYLE = `<style>
 /* ── Tag label ── */
 .acc-lg-tag {
   display: inline-flex; align-items: center; gap: 7px;
-  font: 800 13px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: -.01em;
+  font: 800 13px/1 'Archivo', sans-serif; letter-spacing: -.01em;
   color: var(--acc-vio);
   position: relative; z-index: 1;
   background: color-mix(in srgb, var(--a) 10%, transparent);
@@ -1226,12 +1226,12 @@ const STYLE = `<style>
 /* « Ta place » : micro-label qui donne du sens au gros numéro (sinon « #1 »
    tout seul ne dit pas que c'est ton classement). */
 .acc-lg-kick {
-  font: 800 10px/1 'Plus Jakarta Sans', sans-serif;
+  font: 800 10px/1 'Archivo', sans-serif;
   letter-spacing: .06em; text-transform: uppercase;
   color: var(--mu); margin-top: 9px; position: relative; z-index: 1;
 }
 .acc-lg-rank {
-  font: 800 40px/1 'Plus Jakarta Sans', sans-serif;
+  font: 800 40px/1 'Archivo', sans-serif;
   letter-spacing: -.04em; margin: 2px 0 0; position: relative; z-index: 1;
   color: var(--ink);              /* numéro UNI — fini le dégradé « bicolore » */
   font-variant-numeric: tabular-nums;
@@ -1251,7 +1251,7 @@ const STYLE = `<style>
   position: relative; z-index: 1;
 }
 .acc-lg-sub {
-  font: 600 12.5px/1.3 'Inter', sans-serif; color: var(--mu);
+  font: 600 12.5px/1.3 'Archivo', sans-serif; color: var(--mu);
   min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 /* Pastille chevron violette pleine — affordance forte */
@@ -1303,27 +1303,27 @@ const STYLE = `<style>
 .bs-streak.open { transform: translateY(0) !important; }
 .bs-handle { width: 36px; height: 4px; background: var(--bo); border-radius: 2px; margin: 14px auto 0; }
 .bs-hd { padding: 16px 20px 14px; border-bottom: 1px solid var(--bo2); }
-.bs-hd-title { font: 800 18px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); letter-spacing: -.02em; }
-.bs-hd-sub { font: 500 12px/1.3 'Inter', sans-serif; color: var(--mu2); margin-top: 4px; }
+.bs-hd-title { font: 800 18px/1.2 'Archivo', sans-serif; color: var(--ink); letter-spacing: -.02em; }
+.bs-hd-sub { font: 500 12px/1.3 'Archivo', sans-serif; color: var(--mu2); margin-top: 4px; }
 .bs-hmap-wrap { padding: 16px 16px 8px; }
 .bs-hmap-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
-.bs-hmap-title { font: 700 14px/1 'Plus Jakarta Sans', sans-serif; color: var(--ink); }
-.bs-hmap-sub { font: 500 11px/1 'Inter', sans-serif; color: var(--mu2); }
+.bs-hmap-title { font: 700 14px/1 'Archivo', sans-serif; color: var(--ink); }
+.bs-hmap-sub { font: 500 11px/1 'Archivo', sans-serif; color: var(--mu2); }
 .bs-hmap-wrap .hmap { padding: 0; background: none; border: none; box-shadow: none; }
-.bs-hmap-wrap .hmap-tap-info { margin-top: 10px; min-height: 20px; font: 600 11.5px/1 'Inter', sans-serif; color: var(--mu3); text-align: center; transition: opacity .15s; }
+.bs-hmap-wrap .hmap-tap-info { margin-top: 10px; min-height: 20px; font: 600 11.5px/1 'Archivo', sans-serif; color: var(--mu3); text-align: center; transition: opacity .15s; }
 .bs-freeze-wrap { padding: 0 20px 8px; margin-top: 12px; }
 .bs-freeze-btn {
   display: flex; align-items: center; justify-content: center; gap: 8px;
   width: 100%; padding: 14px 20px;
   background: linear-gradient(135deg,#dbeafe,#e0f2fe);
   border: 1.5px solid #bfdbfe; border-radius: var(--r-lg);
-  color: var(--blk2); font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
+  color: var(--blk2); font: 700 14px/1 'Archivo', sans-serif;
   cursor: pointer; min-height: 52px;
   transition: transform .15s, opacity .15s;
 }
 .bs-freeze-btn:active { transform: scale(.98); opacity: .9; }
 .bs-freeze-btn:disabled { opacity: .55; cursor: default; }
-.bs-freeze-desc { font: 500 11px/1.4 'Inter', sans-serif; color: var(--mu3); text-align: center; margin-top: 7px; }
+.bs-freeze-desc { font: 500 11px/1.4 'Archivo', sans-serif; color: var(--mu3); text-align: center; margin-top: 7px; }
 
 /* ── First-run dominant CTA ── */
 .acc2-action--first-run {
@@ -1404,10 +1404,10 @@ const STYLE = `<style>
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
 }
 .acc2-permis-label2 {
-  font: 800 15px/1 'Plus Jakarta Sans', sans-serif; color: var(--ink);
+  font: 800 15px/1 'Archivo', sans-serif; color: var(--ink);
 }
 .acc2-permis-val {
-  font: 800 16px/1 'Plus Jakarta Sans', sans-serif;
+  font: 800 16px/1 'Archivo', sans-serif;
   color: var(--a-txt); font-variant-numeric: tabular-nums;
 }
 .acc2-permis-bar {
@@ -1421,7 +1421,7 @@ const STYLE = `<style>
   width: 0; transition: width .6s cubic-bezier(.34,1.56,.64,1);
 }
 .acc2-permis-sub {
-  font: 700 11.5px/1.5 'Plus Jakarta Sans', sans-serif; color: var(--mu);
+  font: 700 11.5px/1.5 'Archivo', sans-serif; color: var(--mu);
 }
 @media (prefers-reduced-motion: reduce) {
   .acc2-permis-fill { transition: none; }
@@ -1457,10 +1457,10 @@ const STYLE = `<style>
 }
 .acc2-chest-v2-body { flex: 1; min-width: 0; }
 .acc2-chest-v2-title {
-  display: block; font: 800 14.5px/1 'Plus Jakarta Sans', sans-serif; color: var(--ink);
+  display: block; font: 800 14.5px/1 'Archivo', sans-serif; color: var(--ink);
 }
 .acc2-chest-v2-sub {
-  font: 700 11.5px/1 'Plus Jakarta Sans', sans-serif; color: var(--mu); margin-top: 3px;
+  font: 700 11.5px/1 'Archivo', sans-serif; color: var(--mu); margin-top: 3px;
 }
 .acc2-chest-v2-arr {
   flex: none; display: inline-flex; align-items: center; justify-content: center;
@@ -1476,10 +1476,10 @@ const STYLE = `<style>
   justify-content: space-between; padding: 0 18px 10px;
 }
 .acc2-sec h2 {
-  font: 800 16px/1 'Plus Jakarta Sans', sans-serif; color: var(--ink);
+  font: 800 16px/1 'Archivo', sans-serif; color: var(--ink);
 }
 .acc2-sec a {
-  font: 700 12.5px/1 'Plus Jakarta Sans', sans-serif;
+  font: 700 12.5px/1 'Archivo', sans-serif;
   /* --a-txt = accent assombri pour le texte (l'accent pur fait ~2:1 sur clair, échec AA) */
   color: var(--a-txt); text-decoration: none;
 }
@@ -1988,10 +1988,10 @@ export async function mount(root) {
     maybeStartEleveTour();
   } catch (e) {
     console.error("[accueil] mount failed", e);
-    root.innerHTML = `<div style="padding:60px 24px;text-align:center;color:var(--mu3);font-family:'Inter',sans-serif">
-      <div style="font:800 18px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:8px">${at("err_t", "« Accueil » indisponible")}</div>
+    root.innerHTML = `<div style="padding:60px 24px;text-align:center;color:var(--mu3);font-family:'Archivo',sans-serif">
+      <div style="font:800 18px/1.3 'Archivo',sans-serif;color:var(--ink);margin-bottom:8px">${at("err_t", "« Accueil » indisponible")}</div>
       <p style="font-size:14px;line-height:1.5;margin:0 0 20px">${at("err_s", "Vérifie ta connexion, puis réessaie.")}</p>
-      <button id="acc-reload" style="padding:12px 24px;border:0;background:var(--a);color: var(--a-ink);border-radius:12px;font:700 14px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">${at("err_retry", "Réessayer")}</button>
+      <button id="acc-reload" style="padding:12px 24px;border:0;background:var(--a);color: var(--a-ink);border-radius:12px;font:700 14px/1 'Archivo',sans-serif;cursor:pointer">${at("err_retry", "Réessayer")}</button>
     </div>`;
     root
       .querySelector("#acc-reload")
@@ -2089,9 +2089,9 @@ function render({
     .acc-install-ico{flex:0 0 38px;width:38px;height:38px;display:flex;align-items:center;justify-content:center}
     .acc-install-ico .pg-med{filter:drop-shadow(0 3px 6px rgba(0,0,0,.14))}
     .acc-install-txt{min-width:0;flex:1}
-    .acc-install-t{font:700 13px/1.2 'Plus Jakarta Sans',sans-serif;color:var(--ink)}
-    .acc-install-s{font:500 11px/1.3 'Inter',sans-serif;color:var(--mu);margin-top:2px}
-    .acc-install-btn{flex:0 0 auto;min-height:44px;padding:0 14px;border:0;border-radius:10px;background:linear-gradient(180deg,var(--acc-vio-lt),var(--acc-vio));color:#fff;font:700 12px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer;box-shadow:0 3px 8px -2px color-mix(in srgb, var(--a) 45%, transparent)}
+    .acc-install-t{font:700 13px/1.2 'Archivo',sans-serif;color:var(--ink)}
+    .acc-install-s{font:500 11px/1.3 'Archivo',sans-serif;color:var(--mu);margin-top:2px}
+    .acc-install-btn{flex:0 0 auto;min-height:44px;padding:0 14px;border:0;border-radius:10px;background:linear-gradient(180deg,var(--acc-vio-lt),var(--acc-vio));color:#fff;font:700 12px/1 'Archivo',sans-serif;cursor:pointer;box-shadow:0 3px 8px -2px color-mix(in srgb, var(--a) 45%, transparent)}
     .acc-install-btn:active{transform:scale(.96)}
     </style>
     <div class="acc-install" id="acc-install">
@@ -2239,8 +2239,8 @@ function render({
     @media (hover:hover){.acc2-cover:hover .acc2-cover-img{transform:scale(1.04)}}
     .acc2-cover-veil{position:absolute;inset:0;background:linear-gradient(180deg,rgba(22,12,58,.30) 0%,rgba(22,12,58,.08) 34%,rgba(18,9,48,.58) 74%,rgba(15,7,40,.88) 100%)}
     .acc2-cover-in{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:0 16px 15px}
-    .acc2-cover-t{flex:1;min-width:0;text-align:left;font:900 clamp(21px,6.4vw,30px)/1.03 'Archivo','Baloo 2',system-ui,sans-serif;word-spacing:.06em;text-transform:uppercase;color:#fff;text-shadow:0 3px 0 rgba(88,40,200,.55),0 10px 26px rgba(26,9,68,.85)}
-    .acc2-cover-btn{flex:0 0 auto;background:#fff;color:#24124f;font:800 15px/1 'Archivo','Baloo 2',system-ui,sans-serif;border-radius:999px;padding:13px 24px;box-shadow:0 8px 18px -8px rgba(10,4,32,.8)}
+    .acc2-cover-t{flex:1;min-width:0;text-align:left;font:900 clamp(21px,6.4vw,30px)/1.03 'Archivo',system-ui,sans-serif;word-spacing:.06em;text-transform:uppercase;color:#fff;text-shadow:0 3px 0 rgba(88,40,200,.55),0 10px 26px rgba(26,9,68,.85)}
+    .acc2-cover-btn{flex:0 0 auto;background:#fff;color:#24124f;font:800 15px/1 'Archivo',system-ui,sans-serif;border-radius:999px;padding:13px 24px;box-shadow:0 8px 18px -8px rgba(10,4,32,.8)}
     /* Arabe : l'app reste LTR (cf. lang.js) mais une jaquette se lit dans le
        sens de sa langue → on inverse titre/bouton et on aligne à droite. Le
        titre est agrandi : à taille égale, l'arabe paraît deux fois plus petit

@@ -132,7 +132,7 @@ const STYLE = `<style>
 .pq { position:relative; max-width: 480px; margin: 0 auto; min-height: 100dvh;
   padding: env(safe-area-inset-top, 0px) 18px calc(20px + env(safe-area-inset-bottom, 0px));
   display: flex; flex-direction: column; isolation:isolate;
-  color: #f4f1ff; font-family: 'Fredoka','Inter', sans-serif;
+  color: #f4f1ff; font-family: 'Archivo', sans-serif;
   background:
     radial-gradient(150% 60% at 50% -5%, rgba(255,180,60,.10) 0%, transparent 50%),
     radial-gradient(120% 55% at 50% 22%, rgba(110,70,220,.22) 0%, transparent 60%),
@@ -169,25 +169,25 @@ body.pq-immersive { background: #0c0a26 !important; }
 .pq-seg span.just { animation: pqSegBump .3s cubic-bezier(.23,1,.32,1) both; }
 @keyframes pqSegBump { 0%{transform:scaleY(1)} 40%{transform:scaleY(1.85)} 100%{transform:scaleY(1)} }
 @media (prefers-reduced-motion: reduce){ .pq-seg span.just { animation:none; } }
-.pq-combo { font:800 14px 'Baloo 2','Fredoka',sans-serif; color:#ffd06a; min-width:40px; text-align:right; opacity:0; transition:opacity .2s; text-shadow:0 1px 0 rgba(0,0,0,.4); }
+.pq-combo { font:800 14px 'Archivo',sans-serif; color:#ffd06a; min-width:40px; text-align:right; opacity:0; transition:opacity .2s; text-shadow:0 1px 0 rgba(0,0,0,.4); }
 .pq-combo.on { opacity:1; }
 
 /* Question — gros, aéré, Baloo 2 */
 .pq-mid { flex:1; display:flex; flex-direction:column; justify-content:center; padding:8px 0; }
 .pq-qn { font:700 12px 'IBM Plex Mono',monospace; color:#b9b2e8; margin-bottom:10px; letter-spacing:.04em; }
-.pq-q { font:700 25px/1.25 'Baloo 2','Fredoka',sans-serif; letter-spacing:-.01em; margin-bottom:22px; color:#fff;
+.pq-q { font:700 25px/1.25 'Archivo',sans-serif; letter-spacing:-.01em; margin-bottom:22px; color:#fff;
   text-shadow:0 2px 0 rgba(0,0,0,.3), 0 0 18px rgba(120,90,230,.35); }
 
 /* Options — boutons plastique 3D */
 .pq-opts { display:flex; flex-direction:column; gap:13px; }
 .pq-opt { display:flex; align-items:center; gap:13px; width:100%; text-align:left; cursor:pointer; min-height:58px;
   border:1px solid rgba(255,255,255,.06); border-radius:18px; padding:15px 16px;
-  background:linear-gradient(180deg,#3a3470,#231d4f); color:#ece8ff; font:500 16px/1.3 'Fredoka','Inter',sans-serif;
+  background:linear-gradient(180deg,#3a3470,#231d4f); color:#ece8ff; font:500 16px/1.3 'Archivo',sans-serif;
   box-shadow:0 7px 0 #15113a, 0 12px 16px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.24), inset 0 -2px 6px rgba(0,0,0,.4);
   transition: transform .08s ease, box-shadow .08s ease, opacity .2s; }
 .pq-opt:active:not([disabled]) { transform: translateY(5px); box-shadow:0 2px 0 #15113a, 0 4px 8px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.24); }
 .pq-opt-k { width:36px; height:36px; flex-shrink:0; border-radius:11px; display:flex; align-items:center; justify-content:center;
-  font:800 16px 'Baloo 2','Fredoka',sans-serif; background:linear-gradient(180deg,#2b2560,#1b1545); color:#cfc7ff;
+  font:800 16px 'Archivo',sans-serif; background:linear-gradient(180deg,#2b2560,#1b1545); color:#cfc7ff;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 3px 0 #110d35; }
 .pq-opt.good { background:linear-gradient(180deg,#ffd24a,#ff9c1c); border-color:rgba(255,255,255,.35); color:#3a1d00;
   box-shadow:0 5px 0 #b85e00, 0 10px 20px rgba(255,140,30,.4), inset 0 1px 0 rgba(255,255,255,.65); }
@@ -202,7 +202,7 @@ body.pq-immersive { background: #0c0a26 !important; }
 @keyframes pqUp { from { opacity:0; transform: translateY(14px); } to { opacity:1; transform:none; } }
 .pq-fb.win { background:rgba(255,180,60,.1); border-color:rgba(255,180,60,.3); }
 .pq-fb.lose { background:rgba(129,140,248,.1); border-color:rgba(129,140,248,.32); }
-.pq-fb-h { font:800 14px 'Baloo 2','Fredoka',sans-serif; margin-bottom:3px; }
+.pq-fb-h { font:800 14px 'Archivo',sans-serif; margin-bottom:3px; }
 .pq-fb.win .pq-fb-h { color:#ffd06a; }
 .pq-fb.lose .pq-fb-h { color:#c7d2fe; }
 .pq-fb-t { font-size:14px; line-height:1.5; color:#e2e0ff; }
@@ -216,19 +216,19 @@ body.pq-immersive { background: #0c0a26 !important; }
 .pq-opt.good .pq-fr { color:#5a3200; opacity:.72; }
 .pq-opt.bad .pq-fr { color:#e8c3ad; }
 .pq-next { width:100%; border:0; border-radius:16px; padding:16px; cursor:pointer; margin-top:14px; min-height:54px;
-  font:800 16px 'Baloo 2','Fredoka',sans-serif; color:#3a1d00; background:linear-gradient(180deg,#ffd24a,#ff9c1c);
+  font:800 16px 'Archivo',sans-serif; color:#3a1d00; background:linear-gradient(180deg,#ffd24a,#ff9c1c);
   box-shadow:0 5px 0 #b85e00, 0 8px 18px rgba(255,140,30,.35), inset 0 1px 0 rgba(255,255,255,.5); transition: transform .1s, box-shadow .1s; }
 .pq-next:active { transform: translateY(4px); box-shadow:0 1px 0 #b85e00, inset 0 1px 0 rgba(255,255,255,.5); }
 
 /* Résultat */
 .pq-res { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
 .pq-res-e { font-size:64px; animation: pqUp .4s cubic-bezier(.23,1,.32,1) both; filter: drop-shadow(0 8px 16px rgba(0,0,0,.4)); }
-.pq-res-score { font:700 48px 'Baloo 2','Fredoka',sans-serif; margin:4px 0 0; transition: transform .12s cubic-bezier(.23,1,.32,1);
+.pq-res-score { font:700 48px 'Archivo',sans-serif; margin:4px 0 0; transition: transform .12s cubic-bezier(.23,1,.32,1);
   background:linear-gradient(180deg,#ffe27a,#ff9b1e); -webkit-background-clip:text; background-clip:text; color:transparent; }
-.pq-res-t { font:700 22px 'Baloo 2','Fredoka',sans-serif; margin:6px 0 4px; color:#fff; }
+.pq-res-t { font:700 22px 'Archivo',sans-serif; margin:6px 0 4px; color:#fff; }
 .pq-res-s { color:#cbc6f0; font-size:14px; max-width:300px; line-height:1.5; }
 /* Ligne quête du jour : la règle du « réussi » (≥70 %) dite simplement. */
-.pq-res-quest { margin-top:14px; padding:8px 14px; border-radius:999px; font:600 13px 'Baloo 2','Fredoka',sans-serif; }
+.pq-res-quest { margin-top:14px; padding:8px 14px; border-radius:999px; font:600 13px 'Archivo',sans-serif; }
 .pq-res-quest.is-pass { color:#1c1533; background:linear-gradient(180deg,#ffe27a,#ffce4d); box-shadow:0 3px 0 #d99a00; }
 .pq-res-quest.is-miss { color:#cbc6f0; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14); }
 @media (prefers-reduced-motion: reduce) { .pq *, .pq *::before { transition:none !important; animation:none !important; } }

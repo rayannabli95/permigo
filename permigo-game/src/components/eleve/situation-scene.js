@@ -737,7 +737,7 @@ function vehicleMarkup(v, opts) {
     tag = `<g class="sit-tag">
       <path d="M ${f1(tp.x - 5)} ${f1(tp.y + 10)} l 5 6 l 5 -6 Z" fill="#ffcb3d"/>
       <rect x="${f1(tp.x - w / 2)}" y="${f1(tp.y - 9)}" width="${w}" height="20" rx="10" fill="#ffcb3d"/>
-      <text x="${f1(tp.x)}" y="${f1(tp.y + 5.2)}" text-anchor="middle" font-family="'Baloo 2','Fredoka',sans-serif" font-size="12.5" font-weight="800" fill="#3a1d00">${esc(label)}</text>
+      <text x="${f1(tp.x)}" y="${f1(tp.y + 5.2)}" text-anchor="middle" font-family="'Archivo',sans-serif" font-size="12.5" font-weight="800" fill="#3a1d00">${esc(label)}</text>
     </g>`;
   }
 

@@ -1519,7 +1519,7 @@ const EXB_CSS = `
   background: var(--bg);
   display: flex;
   flex-direction: column;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Archivo', sans-serif;
   color: var(--ink);
   overflow-x: hidden;
 }
@@ -1536,13 +1536,13 @@ const EXB_CSS = `
   padding: 20px 20px 0;
 }
 .exb-sel-title {
-  font: 800 22px/1.2 'Plus Jakarta Sans', sans-serif;
+  font: 800 22px/1.2 'Archivo', sans-serif;
   color: var(--ink);
   margin: 10px 0 4px;
   letter-spacing: -.022em;
 }
 .exb-sel-sub {
-  font: 500 14px/1.5 'Inter', sans-serif;
+  font: 500 14px/1.5 'Archivo', sans-serif;
   color: var(--mu);
   margin: 0 0 20px;
 }
@@ -1571,7 +1571,7 @@ const EXB_CSS = `
   margin-bottom: 6px;
 }
 .exb-pcard-num {
-  font: 700 11px/1 'Inter', sans-serif;
+  font: 700 11px/1 'Archivo', sans-serif;
   color: var(--a-txt);
   letter-spacing: .08em;
   text-transform: uppercase;
@@ -1590,24 +1590,24 @@ const EXB_CSS = `
 }
 /* étoiles nues = ambigu (note ? difficulté ?) → étiquette visible */
 .exb-pcard-stars-lbl {
-  font: 600 10px/1 'Inter', sans-serif;
+  font: 600 10px/1 'Archivo', sans-serif;
   color: var(--mu2);
   letter-spacing: .06em;
   text-transform: uppercase;
 }
 .exb-pcard-nom {
-  font: 700 17px/1.2 'Plus Jakarta Sans', sans-serif;
+  font: 700 17px/1.2 'Archivo', sans-serif;
   color: var(--ink);
   margin-bottom: 4px;
   letter-spacing: -.015em;
 }
 .exb-pcard-ctx {
-  font: 400 13px/1.5 'Inter', sans-serif;
+  font: 400 13px/1.5 'Archivo', sans-serif;
   color: var(--mu);
   margin-bottom: 8px;
 }
 .exb-pcard-meta {
-  font: 600 11px/1 'Inter', sans-serif;
+  font: 600 11px/1 'Archivo', sans-serif;
   color: var(--mu2);
   letter-spacing: .06em;
 }
@@ -1658,13 +1658,13 @@ const EXB_CSS = `
   transition: width .3s cubic-bezier(.23,1,.32,1);
 }
 .exb-progress-label {
-  font: 600 12px/1 'Inter', sans-serif;
+  font: 600 12px/1 'Archivo', sans-serif;
   color: var(--mu);
   white-space: nowrap;
   min-width: 36px;
 }
 .exb-quiz-parcours-name {
-  font: 600 11px/1 'Inter', sans-serif;
+  font: 600 11px/1 'Archivo', sans-serif;
   color: var(--mu2);
   letter-spacing: .06em;
   text-transform: uppercase;
@@ -1691,7 +1691,7 @@ const EXB_CSS = `
 }
 @media (prefers-reduced-motion: reduce) { .exb-mascot, .exb-mascot--pop { animation: none !important } }
 .exb-qnum {
-  font: 700 11px/1 'Inter', sans-serif;
+  font: 700 11px/1 'Archivo', sans-serif;
   color: var(--a-txt);
   text-transform: uppercase;
   letter-spacing: .1em;
@@ -1701,7 +1701,7 @@ const EXB_CSS = `
 .exb-qhead .exb-qtext { margin: 0; flex: 1 1 auto; }
 .exb-qhead .qz-mute:active { transform: scale(.92); }
 .exb-qtext {
-  font: 600 17px/1.5 'Plus Jakarta Sans', sans-serif;
+  font: 600 17px/1.5 'Archivo', sans-serif;
   color: var(--ink);
   margin: 0 0 20px;
   letter-spacing: -.015em;
@@ -1751,11 +1751,11 @@ const EXB_CSS = `
   border-radius: 8px;
   background: color-mix(in srgb, var(--a) 10%, transparent);
   color: var(--a-txt);
-  font: 700 13px/26px 'Inter', sans-serif;
+  font: 700 13px/26px 'Archivo', sans-serif;
   text-align: center;
 }
 .exb-choice-text {
-  font: 500 15px/1.4 'Inter', sans-serif;
+  font: 500 15px/1.4 'Archivo', sans-serif;
   color: var(--ink);
   flex: 1;
 }
@@ -1784,7 +1784,7 @@ const EXB_CSS = `
   border: 1px solid rgba(239,68,68,.3);
   border-radius: 10px;
   padding: 10px 14px;
-  font: 700 13px/1.5 'Inter', sans-serif;
+  font: 700 13px/1.5 'Archivo', sans-serif;
   color: var(--rd-txt);
   display: flex;
   align-items: center;
@@ -1792,7 +1792,7 @@ const EXB_CSS = `
 }
 .exb-faute-banner .pg-med { flex-shrink: 0; }
 .exb-feedback-verdict {
-  font: 700 14px/1.3 'Plus Jakarta Sans', sans-serif;
+  font: 700 14px/1.3 'Archivo', sans-serif;
   padding: 10px 14px;
   border-radius: 10px;
 }
@@ -1805,7 +1805,7 @@ const EXB_CSS = `
   color: var(--rdk);
 }
 .exb-feedback-explication {
-  font: 400 13px/1.6 'Inter', sans-serif;
+  font: 400 13px/1.6 'Archivo', sans-serif;
   color: var(--mu);
   margin: 0;
 }
@@ -1817,7 +1817,7 @@ const EXB_CSS = `
   border: none;
   border-radius: 14px;
   color: var(--a-ink);
-  font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
+  font: 700 15px/1 'Archivo', sans-serif;
   cursor: pointer;
   transition: transform .12s, opacity .12s;
   min-height: 50px;
@@ -1856,22 +1856,22 @@ const EXB_CSS = `
 }
 @media (prefers-reduced-motion: reduce) { .exb-res-ico .pg-med { animation: none !important; } }
 .exb-res-score {
-  font: 800 56px/1 'Plus Jakarta Sans', sans-serif;
+  font: 800 56px/1 'Archivo', sans-serif;
   color: var(--ink);
   letter-spacing: -.04em;
 }
 .exb-res-total { font-size: 28px; color: var(--mu); }
 .exb-res-pct {
-  font: 600 18px/1 'Inter', sans-serif;
+  font: 600 18px/1 'Archivo', sans-serif;
   color: var(--mu);
 }
 .exb-res-verdict {
-  font: 700 17px/1.3 'Plus Jakarta Sans', sans-serif;
+  font: 700 17px/1.3 'Archivo', sans-serif;
   color: var(--ink);
   margin-top: 4px;
 }
 .exb-res-cepc {
-  font: 500 13px/1.5 'Inter', sans-serif;
+  font: 500 13px/1.5 'Archivo', sans-serif;
   color: var(--mu);
   max-width: 280px;
   text-align: center;
@@ -1895,13 +1895,13 @@ const EXB_CSS = `
 }
 .exb-res-bar-fill--pass { background: var(--gr2); }
 .exb-perfect {
-  font: 500 15px/1.5 'Inter', sans-serif;
+  font: 500 15px/1.5 'Archivo', sans-serif;
   color: var(--grk);
   text-align: center;
   margin: 0;
 }
 .exb-recap-title {
-  font: 700 15px/1.2 'Plus Jakarta Sans', sans-serif;
+  font: 700 15px/1.2 'Archivo', sans-serif;
   color: var(--ink);
   margin: 0 0 14px;
 }
@@ -1921,22 +1921,22 @@ const EXB_CSS = `
   gap: 6px;
 }
 .exb-recap-enonce {
-  font: 600 14px/1.4 'Plus Jakarta Sans', sans-serif;
+  font: 600 14px/1.4 'Archivo', sans-serif;
   color: var(--ink);
   margin: 0;
 }
 .exb-recap-wrong {
-  font: 500 13px/1.4 'Inter', sans-serif;
+  font: 500 13px/1.4 'Archivo', sans-serif;
   color: var(--rdk);
   margin: 0;
 }
 .exb-recap-correct {
-  font: 500 13px/1.4 'Inter', sans-serif;
+  font: 500 13px/1.4 'Archivo', sans-serif;
   color: var(--grk);
   margin: 0;
 }
 .exb-recap-explication {
-  font: 400 12px/1.5 'Inter', sans-serif;
+  font: 400 12px/1.5 'Archivo', sans-serif;
   color: var(--mu2);
   margin: 0;
   padding-top: 4px;
@@ -1955,7 +1955,7 @@ const EXB_CSS = `
   border: 1.5px solid var(--bo);
   border-radius: 14px;
   color: var(--ink);
-  font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
+  font: 700 15px/1 'Archivo', sans-serif;
   cursor: pointer;
   min-height: 50px;
   transition: border-color .12s, transform .1s;
@@ -1970,7 +1970,7 @@ const EXB_CSS = `
   border: none;
   border-radius: 14px;
   color: var(--a-ink);
-  font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
+  font: 700 15px/1 'Archivo', sans-serif;
   cursor: pointer;
   min-height: 50px;
   transition: transform .12s, opacity .12s;
@@ -1980,7 +1980,7 @@ const EXB_CSS = `
   background: none;
   border: none;
   color: var(--mu);
-  font: 500 13px/1 'Inter', sans-serif;
+  font: 500 13px/1 'Archivo', sans-serif;
   cursor: pointer;
   padding: 10px;
   min-height: 44px;
@@ -2040,7 +2040,7 @@ const EXB_CSS = `
 
 /* ── Hero « Examen officiel » ── */
 .exb-sel-sub2 {
-  font: 700 11px/1 'Inter', sans-serif;
+  font: 700 11px/1 'Archivo', sans-serif;
   color: var(--mu2);
   letter-spacing: .06em;
   text-transform: uppercase;
@@ -2056,7 +2056,7 @@ const EXB_CSS = `
   padding: 14px 14px 8px;
 }
 .exb-weak-title {
-  font: 800 13px/1 'Plus Jakarta Sans', sans-serif;
+  font: 800 13px/1 'Archivo', sans-serif;
   color: var(--ink);
   margin: 0 0 10px;
   letter-spacing: -.01em;
@@ -2081,9 +2081,9 @@ const EXB_CSS = `
 .exb-weak-btn:active { transform: scale(.98); }
 .exb-weak-btn:hover { border-color: var(--a); }
 .exb-weak-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.exb-weak-nom { font: 700 14px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); }
-.exb-weak-stat { font: 500 12px/1.2 'Inter', sans-serif; color: var(--mu); }
-.exb-weak-cta { flex-shrink: 0; font: 800 12px/1 'Plus Jakarta Sans', sans-serif; color: var(--a-txt); }
+.exb-weak-nom { font: 700 14px/1.2 'Archivo', sans-serif; color: var(--ink); }
+.exb-weak-stat { font: 500 12px/1.2 'Archivo', sans-serif; color: var(--mu); }
+.exb-weak-cta { flex-shrink: 0; font: 800 12px/1 'Archivo', sans-serif; color: var(--a-txt); }
 
 .exo-hero {
   display: flex;
@@ -2114,21 +2114,21 @@ const EXB_CSS = `
 .exo-hero:active { transform: scale(.99); }
 .exo-hero:hover { box-shadow: 0 18px 44px -12px color-mix(in srgb, var(--a) 80%, transparent); }
 .exo-hero-kicker {
-  font: 800 10.5px/1 'Inter', sans-serif;
+  font: 800 10.5px/1 'Archivo', sans-serif;
   letter-spacing: .12em; text-transform: uppercase;
   opacity: .85;
 }
 .exo-hero-title {
-  font: 800 18px/1.2 'Plus Jakarta Sans', sans-serif;
+  font: 800 18px/1.2 'Archivo', sans-serif;
   letter-spacing: -.02em;
 }
 .exo-hero-sub {
-  font: 500 13px/1.45 'Inter', sans-serif;
+  font: 500 13px/1.45 'Archivo', sans-serif;
   opacity: .9;
 }
 .exo-hero-cta {
   margin-top: 10px;
-  font: 800 13px/1 'Plus Jakarta Sans', sans-serif;
+  font: 800 13px/1 'Archivo', sans-serif;
   padding: 9px 16px;
   border-radius: 99px;
   background: rgba(255,255,255,.18);
@@ -2145,7 +2145,7 @@ const EXB_CSS = `
 .exo-hero.is-locked .exo-hero-sub { opacity: .75; }
 .exo-hero-lock {
   position: absolute; top: 12px; right: 12px;
-  font: 800 11px/1 'Plus Jakarta Sans', sans-serif;
+  font: 800 11px/1 'Archivo', sans-serif;
   background: rgba(0,0,0,.18); color: #fff;
   padding: 5px 10px 5px 6px; border-radius: 99px;
   display: inline-flex; align-items: center; gap: 5px;

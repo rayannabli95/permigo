@@ -84,7 +84,7 @@ const STYLE = `<style>
     max-width: 600px;
     margin: 0 auto;
     background: #eef1fb;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Archivo', sans-serif;
     color: #1a1c2e;
     min-height: 100dvh;
   }
@@ -93,12 +93,12 @@ const STYLE = `<style>
   .aj-hi {
     /* #app (has-chrome) compense déjà le header fixe — pas de var(--th) ici */
     padding: 12px 20px 0;
-    font: 700 14px/1.3 'Inter', sans-serif;
+    font: 700 14px/1.3 'Archivo', sans-serif;
     color: #5a6188;
   }
   .aj-hi-name {
     display: block;
-    font: 800 22px/1.15 'Inter', sans-serif;
+    font: 800 22px/1.15 'Archivo', sans-serif;
     color: #1a1c2e;
     letter-spacing: -.02em;
     margin-top: 2px;
@@ -135,14 +135,14 @@ const STYLE = `<style>
   .aj-hero-content { position: relative; z-index: 2; }
 
   .aj-hero-label {
-    font: 700 10.5px/1 'Inter', sans-serif;
+    font: 700 10.5px/1 'Archivo', sans-serif;
     letter-spacing: .11em;
     text-transform: uppercase;
     color: #c9c6ff;
   }
 
   .aj-hero-big {
-    font: 700 64px/1 'Fredoka One', 'Fredoka', sans-serif;
+    font: 700 64px/1 'Archivo', sans-serif;
     color: #fff;
     letter-spacing: -.01em;
     text-shadow: 0 4px 18px rgba(0, 0, 0, .2);
@@ -158,7 +158,7 @@ const STYLE = `<style>
   }
 
   .aj-hero-sub {
-    font: 600 12.5px/1.4 'Inter', sans-serif;
+    font: 600 12.5px/1.4 'Archivo', sans-serif;
     color: #e2e0ff;
     margin-top: 4px;
   }
@@ -187,7 +187,7 @@ const STYLE = `<style>
     background: rgba(255, 255, 255, .17);
     border: 1px solid rgba(255, 255, 255, .3);
     color: #fff;
-    font: 800 10.5px/1 'Inter', sans-serif;
+    font: 800 10.5px/1 'Archivo', sans-serif;
     padding: 5px 11px;
     border-radius: 999px;
   }
@@ -206,12 +206,12 @@ const STYLE = `<style>
     padding: 22px 20px 10px;
   }
   .aj-sec-title {
-    font: 800 13px/1.2 'Inter', sans-serif;
+    font: 800 13px/1.2 'Archivo', sans-serif;
     color: #3a3f63;
     letter-spacing: .005em;
   }
   .aj-sec-link {
-    font: 700 11.5px/1 'Inter', sans-serif;
+    font: 700 11.5px/1 'Archivo', sans-serif;
     color: #4f46e5;
     text-decoration: none;
     background: none;
@@ -254,7 +254,7 @@ const STYLE = `<style>
   .aj-eleve-body { flex: 1; min-width: 0; }
   .aj-eleve-nom-row { display: flex; align-items: center; gap: 6px; min-width: 0; }
   .aj-eleve-nom {
-    font: 700 13.5px/1.25 'Inter', sans-serif;
+    font: 700 13.5px/1.25 'Archivo', sans-serif;
     color: #1a1c2e;
     white-space: nowrap;
     overflow: hidden;
@@ -281,7 +281,7 @@ const STYLE = `<style>
   .aj-pill {
     margin-left: auto;
     flex-shrink: 0;
-    font: 800 10px/1 'Inter', sans-serif;
+    font: 800 10px/1 'Archivo', sans-serif;
     padding: 5px 10px;
     border-radius: 999px;
     white-space: nowrap;
@@ -315,12 +315,12 @@ const STYLE = `<style>
     filter: drop-shadow(0 3px 5px rgba(40, 20, 90, .25));
   }
   .aj-ft-val {
-    font: 800 14px/1.2 'Inter', sans-serif;
+    font: 800 14px/1.2 'Archivo', sans-serif;
     color: #1a1c2e;
     letter-spacing: -.01em;
   }
   .aj-ft-lbl {
-    font: 600 10px/1.2 'Inter', sans-serif;
+    font: 600 10px/1.2 'Archivo', sans-serif;
     color: #646a8c;
     margin-top: 1px;
   }
@@ -338,7 +338,7 @@ const STYLE = `<style>
     background: none;
     border: 1.5px solid #d5d8f0;
     border-radius: 13px;
-    font: 700 13px/1 'Inter', sans-serif;
+    font: 700 13px/1 'Archivo', sans-serif;
     color: #4f46e5;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
@@ -383,18 +383,18 @@ const STYLE = `<style>
   }
 
   /* ── Header salutation enrichi ── */
-  .aj-hi-greet { font: 800 22px/1.15 'Fredoka', 'Plus Jakarta Sans', sans-serif; color: #1a1c2e; letter-spacing: -.01em; }
+  .aj-hi-greet { font: 800 22px/1.15 'Archivo', sans-serif; color: #1a1c2e; letter-spacing: -.01em; }
   .aj-hi-greet .aj-hi-name { display: inline; font: inherit; color: #4f46e5; margin: 0; }
-  .aj-hi-sub { font: 600 13px/1.4 'Inter', sans-serif; color: #5a6188; margin-top: 3px; }
+  .aj-hi-sub { font: 600 13px/1.4 'Archivo', sans-serif; color: #5a6188; margin-top: 3px; }
 
   /* ── Avatar initiales (fallback) ── */
-  .aj-av-ini { border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; flex-shrink: 0; font-family: 'Inter', sans-serif; }
+  .aj-av-ini { border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; flex-shrink: 0; font-family: 'Archivo', sans-serif; }
 
   /* ── Colonnes densité carte élève (visibles en desktop) ── */
   .aj-eleve-pct, .aj-eleve-act { display: none; }
-  .aj-eleve-pct { font: 800 15px/1 'Fredoka', 'Plus Jakarta Sans', sans-serif; color: #3a3f63; font-variant-numeric: tabular-nums; }
+  .aj-eleve-pct { font: 800 15px/1 'Archivo', sans-serif; color: #3a3f63; font-variant-numeric: tabular-nums; }
   .aj-eleve-pct small { font-size: 10px; font-weight: 700; color: #8a90ad; margin-left: 1px; }
-  .aj-eleve-act { font: 600 11.5px/1.2 'Inter', sans-serif; color: #8a90ad; white-space: nowrap; }
+  .aj-eleve-act { font: 600 11.5px/1.2 'Archivo', sans-serif; color: #8a90ad; white-space: nowrap; }
 
   /* ── Radar de relance : panneau vivant (qui décroche) ── */
   .aj-radar { background: #fff; border: 1px solid #e6e9f7; border-radius: 16px; margin: 0 16px 14px; box-shadow: 0 6px 16px -10px rgba(60,50,130,.3); cursor: pointer; overflow: hidden; -webkit-tap-highlight-color: transparent; transition: transform .12s ease; }
@@ -403,13 +403,13 @@ const STYLE = `<style>
   .aj-radar-ic, .aj-radar-chev, .aj-radar-av { flex-shrink: 0; display: flex; }
   .aj-radar-chev { color: #646a8c; }
   .aj-radar-tx { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-  .aj-radar-t { font: 800 14.5px/1.15 'Manrope', 'Plus Jakarta Sans', sans-serif; color: #1a1c2e; }
-  .aj-radar-s { font: 600 12px/1.4 'Inter', sans-serif; color: #5a6188; margin-top: 2px; }
+  .aj-radar-t { font: 800 14.5px/1.15 'Archivo', sans-serif; color: #1a1c2e; }
+  .aj-radar-s { font: 600 12px/1.4 'Archivo', sans-serif; color: #5a6188; margin-top: 2px; }
   .aj-radar-list { border-top: 1px solid #eef0f8; padding: 4px 8px 8px; }
   .aj-radar-row { display: flex; align-items: center; gap: 10px; padding: 8px 7px; }
   .aj-radar-row + .aj-radar-row { border-top: 1px solid #f4f5fb; }
-  .aj-radar-nm { flex: 1; min-width: 0; font: 700 13px/1.2 'Inter', sans-serif; color: #2d3050; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .aj-radar-j { flex-shrink: 0; font: 700 11.5px/1 'Inter', sans-serif; color: #b45309; background: #fef3c7; padding: 4px 8px; border-radius: 999px; }
+  .aj-radar-nm { flex: 1; min-width: 0; font: 700 13px/1.2 'Archivo', sans-serif; color: #2d3050; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .aj-radar-j { flex-shrink: 0; font: 700 11.5px/1 'Archivo', sans-serif; color: #b45309; background: #fef3c7; padding: 4px 8px; border-radius: 999px; }
 
   /* ── Tuile : icône médaillon (unifiée) ── */
   .aj-ft-ic { flex-shrink: 0; display: flex; }
@@ -572,11 +572,11 @@ function renderLoadError(root, me, error) {
     <div class="aj-page">
       <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:72px 24px;text-align:center;">
         ${medallion("cone", "orange", { size: 52 })}
-        <p style="margin:0;font:600 15px/1.5 'Inter',sans-serif;color:#1a1c2e;">
+        <p style="margin:0;font:600 15px/1.5 'Archivo',sans-serif;color:#1a1c2e;">
           « Aujourd’hui » indisponible.<br>
-          <span style="font:500 13px/1.5 'Inter',sans-serif;color:#5a6188;">Vérifie ta connexion, puis réessaie.</span>
+          <span style="font:500 13px/1.5 'Archivo',sans-serif;color:#5a6188;">Vérifie ta connexion, puis réessaie.</span>
         </p>
-        <button id="aj-retry" type="button" style="border:none;border-radius:999px;padding:13px 24px;min-height:44px;background:#4f46e5;color:#fff;font:700 14px/1 'Inter',sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent;">Réessayer</button>
+        <button id="aj-retry" type="button" style="border:none;border-radius:999px;padding:13px 24px;min-height:44px;background:#4f46e5;color:#fff;font:700 14px/1 'Archivo',sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent;">Réessayer</button>
       </div>
     </div>
   `;
@@ -873,7 +873,7 @@ async function renderInto(root, _me) {
 
       ${
         nbElevesActifs === 0
-          ? `<p style="margin:0 16px 12px;font:500 13px/1.5 'Inter',sans-serif;color:#5a6188;padding:16px;background:#fff;border-radius:16px;border:1px solid #e6e9f7;">
+          ? `<p style="margin:0 16px 12px;font:500 13px/1.5 'Archivo',sans-serif;color:#5a6188;padding:16px;background:#fff;border-radius:16px;border:1px solid #e6e9f7;">
             Invite ton premier élève pour commencer.
           </p>`
           : roster.map(renderRosterCard).join("")

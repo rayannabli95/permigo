@@ -245,7 +245,7 @@ function levierSVG(opts = {}) {
     .map(([g, [x, y]]) => {
       const hot = g === opts.knobAt || g === opts.to;
       const dy = y < 84 ? -16 : 24;
-      return `<text x="${x}" y="${y + dy}" text-anchor="middle" font-family="'Baloo 2','Fredoka',sans-serif" font-size="16" font-weight="800" fill="${hot ? C.gold : C.steel}">${g}</text>`;
+      return `<text x="${x}" y="${y + dy}" text-anchor="middle" font-family="'Archivo',sans-serif" font-size="16" font-weight="800" fill="${hot ? C.gold : C.steel}">${g}</text>`;
     })
     .join("");
   const grid = `
@@ -328,7 +328,7 @@ const SIGN_HEADS = {
       <line x1="-30" y1="13" x2="15" y2="-34"/>
     </g>`,
   parking: `<rect x="-40" y="-46" width="80" height="80" rx="14" fill="${C.blue}" stroke="#fff" stroke-width="4"/>
-    <text x="0" y="16" text-anchor="middle" font-family="'Baloo 2','Fredoka',sans-serif" font-size="52" font-weight="800" fill="#fff">P</text>`,
+    <text x="0" y="16" text-anchor="middle" font-family="'Archivo',sans-serif" font-size="52" font-weight="800" fill="#fff">P</text>`,
   zone30: `<rect x="-44" y="-50" width="88" height="88" rx="10" fill="#fff" stroke="#3d4450" stroke-width="3"/>
     <text x="0" y="-28" text-anchor="middle" font-family="Inter,sans-serif" font-size="14" font-weight="800" fill="#3d4450">ZONE</text>
     <circle cx="0" cy="6" r="26" fill="#fff" stroke="${C.redSign}" stroke-width="7"/>

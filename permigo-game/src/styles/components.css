@@ -234,7 +234,7 @@ button:active:not(:disabled),
   border: 0;
   border-radius: 14px;
   color: var(--a-ink);
-  font: 800 14px/1 'Plus Jakarta Sans', sans-serif;
+  font: 800 14px/1 'Archivo', sans-serif;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   background: linear-gradient(to bottom, var(--a-lt) 0%, var(--a) 48%, var(--adk) 100%);

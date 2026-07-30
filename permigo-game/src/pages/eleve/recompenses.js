@@ -6,7 +6,8 @@
 //   1. Hero « La Roue » — tour gratuit dispo (ou reviens demain) + pastilles
 //      « à réclamer maintenant » (coffre, trophée) + ligne « gros lot réel »
 //      (si le moniteur en a configuré) + « prochain coffre » (série).
-//   2. 4 onglets internes : Boutique · Ma collection · Trophées · Ligue.
+//   2. 4 onglets internes : Boutique · Ma collection · Cartes · Classement
+//      (mêmes mots que la barre des 4 pages — cf. components/eleve/recompenses-tabs.js)
 //
 // Réutilisation (ne duplique PAS la grosse logique métier des pages dédiées) :
 //   - Boutique / Ma collection / Trophées → résumé fidèle + « Tout voir »
@@ -98,8 +99,8 @@ const REC_I18N = {
     tabs_aria: "Rewards rooms",
     tab_shop: "Shop",
     tab_col: "My collection",
-    tab_troph: "Trophies",
-    tab_league: "League",
+    tab_troph: "Cards",
+    tab_league: "Leaderboard",
     shop_unavailable: "“Shop” unavailable.",
     open_shop: "Open the shop →",
     nothing: "Nothing to show yet.",
@@ -159,8 +160,8 @@ const REC_I18N = {
     tabs_aria: "غرف المكافآت",
     tab_shop: "المتجر",
     tab_col: "مجموعتي",
-    tab_troph: "الكؤوس",
-    tab_league: "الدوري",
+    tab_troph: "البطاقات",
+    tab_league: "الترتيب",
     shop_unavailable: "«المتجر» غير متاح.",
     open_shop: "افتح المتجر ←",
     nothing: "لا شيء لعرضه حاليًا.",
@@ -279,17 +280,17 @@ const STYLE = `<style>
   --gold-1:#ffe9a8; --gold-2:#ffd24a; --gold-3:#ff9c1c; --gold-deep:#c87d12; --gold-ink:#7a5510;
   --go-1:#7ee83a; --go-2:#58cc02; --go-3:#46a302; --go-deep:#357c00;
   max-width: 480px; margin: 0 auto; padding: 14px 15px 32px;
-  font-family: 'Nunito', system-ui, sans-serif; color: var(--ink);
+  font-family: 'Archivo', system-ui, sans-serif; color: var(--ink);
   background:
     radial-gradient(120% 40% at 22% -6%, color-mix(in srgb, var(--a) 10%, transparent) 0%, transparent 58%),
     radial-gradient(110% 36% at 96% 0%, rgba(255,180,40,.12) 0%, transparent 55%),
     var(--bg);
 }
-.rec-title { font: 800 26px/1.1 'Baloo 2', cursive; letter-spacing: .2px; margin: 4px 2px 12px; }
+.rec-title { font: 800 26px/1.1 'Archivo', system-ui, sans-serif; letter-spacing: .2px; margin: 4px 2px 12px; }
 .rec-partial {
   margin: 0 0 12px; padding: 10px 12px; border-radius: 12px;
   background: var(--amp); border: 1px solid color-mix(in srgb, var(--am) 35%, var(--bo));
-  color: var(--am-txt); font: 700 12px/1.4 'Nunito', sans-serif;
+  color: var(--am-txt); font: 700 12px/1.4 'Archivo', sans-serif;
 }
 
 /* ── Série (statut discret) ── */
@@ -299,8 +300,8 @@ const STYLE = `<style>
   background: rgba(255,210,74,.14); border: 1px solid rgba(231,178,60,.35);
 }
 .rec-serie .pg-med { width: 22px; height: 22px; }
-.rec-serie b { font: 800 12.5px/1 'Nunito', sans-serif; color: var(--gold-ink); }
-.rec-serie i { font: 700 11.5px/1 'Nunito', sans-serif; font-style: normal; color: var(--mu2); }
+.rec-serie b { font: 800 12.5px/1 'Archivo', sans-serif; color: var(--gold-ink); }
+.rec-serie i { font: 700 11.5px/1 'Archivo', sans-serif; font-style: normal; color: var(--mu2); }
 
 /* ══ HERO « La Roue » ══ */
 .rec-hero {
@@ -316,11 +317,11 @@ const STYLE = `<style>
   display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; margin-bottom: 11px;
   background: linear-gradient(180deg, var(--gold-1), var(--gold-2)); border: 1px solid rgba(201,125,18,.4);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.7);
-  font: 600 10px/1 'Fredoka', sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #5e430f;
+  font: 600 10px/1 'Archivo', sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #5e430f;
 }
 .rec-hero-row { display: flex; align-items: center; gap: 14px; }
 .rec-hero-txt { flex: 1; min-width: 0; }
-.rec-hero-t { font: 800 21px/1.08 'Baloo 2', cursive; color: var(--ink); }
+.rec-hero-t { font: 800 21px/1.08 'Archivo', system-ui, sans-serif; color: var(--ink); }
 .rec-hero-t em { font-style: normal; color: var(--gold-deep); }
 .rec-hero-s { margin-top: 6px; font-size: 12.5px; font-weight: 700; color: var(--mu); line-height: 1.4; }
 .rec-hero-s b { color: var(--ink); }
@@ -350,10 +351,15 @@ const STYLE = `<style>
 .rec-hero-cta {
   position: relative; z-index: 2; margin-top: 14px; display: flex; align-items: center; justify-content: center; gap: 9px;
   width: 100%; min-height: 52px; border-radius: 17px; border: 0; cursor: pointer;
-  background: linear-gradient(180deg, var(--go-1) 0%, var(--go-2) 52%, var(--go-3) 100%);
-  box-shadow: inset 0 2px 0 rgba(255,255,255,.55), inset 0 -4px 8px rgba(0,0,0,.22),
-    0 6px 0 var(--go-deep), 0 12px 22px -6px rgba(70,163,2,.45);
-  font: 800 18px/1 'Baloo 2', cursive; color: #fff; text-shadow: 0 2px 0 rgba(35,80,4,.6);
+  /* Bouton principal = LA couleur de l'app. Il était vert pomme alors que le
+     bouton juste en dessous (« Voir en boutique ») est à l'accent : deux
+     couleurs de bouton principal sur le même écran. Le vert reste sur la
+     ROUE elle-même, où il est une part parmi d'autres. */
+  background: linear-gradient(180deg, var(--a-lt) 0%, var(--a) 52%, var(--adk) 100%);
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.42), inset 0 -4px 8px rgba(0,0,0,.22),
+    0 6px 0 color-mix(in srgb, var(--adk) 78%, #000), var(--s-a-lg);
+  font: 800 18px/1 'Archivo', system-ui, sans-serif; color: var(--a-ink);
+  text-shadow: 0 2px 0 color-mix(in srgb, var(--adk) 70%, #000);
   text-decoration: none;
 }
 .rec-hero-cta:active { transform: translateY(2px); }
@@ -367,11 +373,11 @@ const STYLE = `<style>
 }
 .rec-claim .pg-med { flex: none; }
 .rec-claim-b { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; text-align: left; }
-.rec-claim-t { display: block; font: 700 12px/1.15 'Baloo 2', cursive; color: var(--ink); }
+.rec-claim-t { display: block; font: 700 12px/1.15 'Archivo', system-ui, sans-serif; color: var(--ink); }
 .rec-claim-s { display: block; font-size: 9.5px; font-weight: 700; color: var(--mu2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rec-claim-n {
   flex: none; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; display: grid; place-items: center;
-  font: 800 11.5px/1 'Baloo 2', cursive; color: #fff;
+  font: 800 11.5px/1 'Archivo', system-ui, sans-serif; color: #fff;
   background: linear-gradient(180deg,#ff8a8a,#f43f5e 60%,#d92c4b); border: 1px solid rgba(255,255,255,.5);
 }
 
@@ -387,7 +393,7 @@ const STYLE = `<style>
 }
 .rec-tab {
   flex: 1; border: 0; border-radius: 12px; padding: 9px 2px; min-height: 44px; cursor: pointer; text-align: center;
-  font: 600 12px/1.15 'Fredoka', sans-serif; color: var(--mu); background: transparent;
+  font: 600 12px/1.15 'Archivo', sans-serif; color: var(--mu); background: transparent;
   transition: background .16s, color .16s;
 }
 .rec-tab.on { background: var(--su); color: var(--a-txt); box-shadow: 0 2px 8px -4px rgba(20,16,60,.3); }
@@ -397,7 +403,7 @@ const STYLE = `<style>
 @keyframes recPin { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
 
 .rec-sec-h { display: flex; align-items: baseline; justify-content: space-between; margin: 2px 3px 10px; }
-.rec-sec-h h2 { font: 700 15px/1 'Baloo 2', cursive; }
+.rec-sec-h h2 { font: 700 15px/1 'Archivo', system-ui, sans-serif; }
 .rec-sec-h span { font-size: 11px; font-weight: 800; color: var(--mu2); }
 
 /* Vedette boutique / collection head / claim card — même écrin doré */
@@ -413,7 +419,7 @@ const STYLE = `<style>
 .rec-gold-k {
   display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px; border-radius: 999px; margin-bottom: 10px;
   background: linear-gradient(180deg, var(--gold-1), var(--gold-2)); border: 1px solid rgba(201,125,18,.4);
-  font: 600 9.5px/1 'Fredoka', sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #5e430f;
+  font: 600 9.5px/1 'Archivo', sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #5e430f;
 }
 .rec-star-row { display: flex; align-items: center; gap: 13px; }
 .rec-star-img {
@@ -421,12 +427,12 @@ const STYLE = `<style>
   border: 2px solid var(--gold-1); box-shadow: 0 4px 10px -6px rgba(122,74,5,.5);
 }
 .rec-star-txt { flex: 1; min-width: 0; }
-.rec-star-t { font: 800 15.5px/1.15 'Baloo 2', cursive; color: var(--ink); }
+.rec-star-t { font: 800 15.5px/1.15 'Archivo', system-ui, sans-serif; color: var(--ink); }
 .rec-star-s { font-size: 11px; font-weight: 700; color: var(--mu); margin-top: 3px; }
 .rec-star-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; gap: 8px; }
-.rec-star-price { display: inline-flex; align-items: center; gap: 6px; font: 800 13px/1 'Baloo 2', cursive; color: var(--gold-ink); }
+.rec-star-price { display: inline-flex; align-items: center; gap: 6px; font: 800 13px/1 'Archivo', system-ui, sans-serif; color: var(--gold-ink); }
 .rec-go-shop {
-  display: inline-flex; align-items: center; gap: 6px; font: 800 12.5px/1 'Baloo 2', cursive; color: #fff;
+  display: inline-flex; align-items: center; gap: 6px; font: 800 12.5px/1 'Archivo', system-ui, sans-serif; color: #fff;
   padding: 9px 13px; border-radius: 12px; border: 0; cursor: pointer;
   background: linear-gradient(180deg, var(--a-lt), var(--a)); box-shadow: 0 3px 0 var(--adk);
   text-decoration: none; white-space: nowrap;
@@ -447,15 +453,15 @@ const STYLE = `<style>
 .rec-item-vis.locked img { filter: grayscale(1) opacity(.4); }
 .rec-item-b { padding: 9px 11px 11px; }
 .rec-item-t {
-  font: 700 12.5px/1.15 'Baloo 2', cursive; color: var(--ink);
+  font: 700 12.5px/1.15 'Archivo', system-ui, sans-serif; color: var(--ink);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .rec-item-r { font-size: 9.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; margin-top: 2px; color: var(--mu2); }
-.rec-item-p { display: inline-flex; align-items: center; gap: 5px; margin-top: 6px; font: 800 12px/1 'Baloo 2', cursive; color: var(--gold-ink); }
+.rec-item-p { display: inline-flex; align-items: center; gap: 5px; margin-top: 6px; font: 800 12px/1 'Archivo', system-ui, sans-serif; color: var(--gold-ink); }
 .rec-item-owned { display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; font-size: 10px; font-weight: 800; color: var(--grdk); }
 .rec-tag {
   position: absolute; left: 8px; top: 8px; z-index: 2; padding: 3px 9px; border-radius: 999px;
-  font: 600 8.5px/1 'Fredoka', sans-serif; letter-spacing: .06em; text-transform: uppercase; color: #fff;
+  font: 600 8.5px/1 'Archivo', sans-serif; letter-spacing: .06em; text-transform: uppercase; color: #fff;
   background: linear-gradient(180deg, var(--a), var(--adk)); box-shadow: 0 2px 6px rgba(83,72,232,.4);
 }
 .rec-tag.gold { color: #5e430f; background: linear-gradient(180deg, var(--gold-1), var(--gold-2)); box-shadow: 0 2px 6px rgba(201,125,18,.35); }
@@ -466,27 +472,27 @@ const STYLE = `<style>
   background: var(--su); border: 1px solid var(--bo);
 }
 .rec-col-hb { flex: 1; min-width: 0; }
-.rec-col-ht { font: 800 14px/1 'Baloo 2', cursive; color: var(--ink); }
+.rec-col-ht { font: 800 14px/1 'Archivo', system-ui, sans-serif; color: var(--ink); }
 .rec-col-track { margin-top: 6px; height: 8px; border-radius: 5px; background: var(--bg2); overflow: hidden; }
 .rec-col-track i { display: block; height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--adk), var(--a)); }
-.rec-col-hn { flex: none; font: 800 13px/1 'Baloo 2', cursive; color: var(--a-txt); white-space: nowrap; }
+.rec-col-hn { flex: none; font: 800 13px/1 'Archivo', system-ui, sans-serif; color: var(--a-txt); white-space: nowrap; }
 
 /* Trophées grid (dot rareté réutilise RARITY_COLOR d'achievements.js) */
 .rec-tro-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
 .rec-tro { position: relative; border-radius: 16px; padding: 10px 8px 9px; text-align: center; background: var(--su); border: 1px solid var(--bo); }
 .rec-tro img, .rec-tro .pg-med { width: 48px; height: 48px; object-fit: contain; }
-.rec-tro-t { font: 700 10.5px/1.15 'Baloo 2', cursive; margin-top: 5px; color: var(--ink); }
+.rec-tro-t { font: 700 10.5px/1.15 'Archivo', system-ui, sans-serif; margin-top: 5px; color: var(--ink); }
 .rec-tro.locked img { filter: grayscale(1) opacity(.4); }
 .rec-tro.locked .rec-tro-t { color: var(--mu2); }
 .rec-tro-dot { position: absolute; top: 7px; right: 7px; width: 8px; height: 8px; border-radius: 50%; }
 
-.rec-note { text-align: center; color: var(--mu2); font: 600 10.5px/1.4 'Inter', sans-serif; margin: 6px 4px 4px; }
-.rec-empty { text-align: center; padding: 28px 16px; color: var(--mu); font: 600 12.5px/1.5 'Inter', sans-serif; }
+.rec-note { text-align: center; color: var(--mu2); font: 600 10.5px/1.4 'Archivo', sans-serif; margin: 6px 4px 4px; }
+.rec-empty { text-align: center; padding: 28px 16px; color: var(--mu); font: 600 12.5px/1.5 'Archivo', sans-serif; }
 
 .rec-tout-voir {
   display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; min-height: 44px;
   margin-top: 4px; border: 1px solid var(--bo); border-radius: 14px; background: var(--su); color: var(--a-txt);
-  font: 800 12.5px/1 'Fredoka', sans-serif; cursor: pointer; text-decoration: none;
+  font: 800 12.5px/1 'Archivo', sans-serif; cursor: pointer; text-decoration: none;
 }
 
 #rec-ligue-slot .lgh-eyebrow { display: none; } /* déjà annoncé par l'onglet "Ligue" */
@@ -952,8 +958,8 @@ export async function mount(root) {
     <div class="rec-tabs" role="tablist" aria-label="${rt("tabs_aria", "Salles Récompenses")}">
       <button class="rec-tab on" role="tab" aria-selected="true" data-p="boutique">${rt("tab_shop", "Boutique")}</button>
       <button class="rec-tab" role="tab" aria-selected="false" data-p="collection">${rt("tab_col", "Ma collection")}</button>
-      <button class="rec-tab" role="tab" aria-selected="false" data-p="trophees">${rt("tab_troph", "Trophées")}</button>
-      <button class="rec-tab" role="tab" aria-selected="false" data-p="ligue">${rt("tab_league", "Ligue")}</button>
+      <button class="rec-tab" role="tab" aria-selected="false" data-p="trophees">${rt("tab_troph", "Cartes")}</button>
+      <button class="rec-tab" role="tab" aria-selected="false" data-p="ligue">${rt("tab_league", "Classement")}</button>
     </div>
 
     <div class="rec-panel on" id="rec-p-boutique" role="tabpanel">${renderBoutiquePanel(ctx)}</div>

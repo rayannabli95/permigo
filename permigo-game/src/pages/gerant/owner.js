@@ -45,7 +45,7 @@ const STYLE = `<style>
 .ow {
   max-width: 580px; margin: 0 auto; padding: 0 0 110px;
   background: ${BG}; color: ${TEXT};
-  font-family: 'Inter', sans-serif; min-height: 100dvh;
+  font-family: 'Archivo', sans-serif; min-height: 100dvh;
 }
 .ow-skel {
   background: linear-gradient(90deg, ${BG} 0%, ${SURF2} 50%, ${BG} 100%);
@@ -61,9 +61,9 @@ const STYLE = `<style>
   background: ${BG}; border-bottom: 1px solid ${BORD};
   padding: 14px 20px; display: flex; align-items: center; gap: 12px;
 }
-.ow-hd-logo { font: 800 16px/1 'Plus Jakarta Sans', sans-serif; color: ${TEXT}; letter-spacing: -.02em; }
+.ow-hd-logo { font: 800 16px/1 'Archivo', sans-serif; color: ${TEXT}; letter-spacing: -.02em; }
 .ow-hd-tag {
-  font: 800 9.5px/1 'Inter', sans-serif; letter-spacing: .14em; text-transform: uppercase;
+  font: 800 9.5px/1 'Archivo', sans-serif; letter-spacing: .14em; text-transform: uppercase;
   color: var(--a-ink); background: ${ACC}; padding: 4px 8px; border-radius: 6px;
 }
 .ow-hd-spacer { flex: 1; }
@@ -79,7 +79,7 @@ const STYLE = `<style>
 /* Sections */
 .ow-section { padding: 20px 16px 0; }
 .ow-section-hd { display: flex; align-items: baseline; gap: 8px; margin: 0 4px 12px; }
-.ow-section-title { font: 800 12px/1 'Inter', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: ${MUTED}; }
+.ow-section-title { font: 800 12px/1 'Archivo', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: ${MUTED}; }
 
 /* KPI grid */
 .ow-kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -94,9 +94,9 @@ const STYLE = `<style>
 }
 @keyframes owKpiIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .ow-kpi { animation: none; } }
-.ow-kpi-label { font: 700 11px/1.2 'Inter', sans-serif; color: ${MUTED}; margin-bottom: 7px; }
+.ow-kpi-label { font: 700 11px/1.2 'Archivo', sans-serif; color: ${MUTED}; margin-bottom: 7px; }
 .ow-kpi-val {
-  font: 800 27px/1 'Plus Jakarta Sans', sans-serif; color: ${TEXT};
+  font: 800 27px/1 'Archivo', sans-serif; color: ${TEXT};
   font-variant-numeric: tabular-nums; letter-spacing: -.02em;
 }
 .ow-kpi-unit { font-size: 15px; color: ${MUTED}; margin-left: 2px; }
@@ -117,13 +117,13 @@ const STYLE = `<style>
 }
 .ow-school-main { flex: 1; min-width: 0; }
 .ow-school-name {
-  font: 800 14px/1.2 'Plus Jakarta Sans', sans-serif; color: ${TEXT};
+  font: 800 14px/1.2 'Archivo', sans-serif; color: ${TEXT};
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -.01em;
 }
-.ow-school-meta { font: 600 11.5px/1.3 'Inter', sans-serif; color: ${MUTED}; margin-top: 3px; }
+.ow-school-meta { font: 600 11.5px/1.3 'Archivo', sans-serif; color: ${MUTED}; margin-top: 3px; }
 .ow-school-stat { flex-shrink: 0; text-align: right; }
-.ow-school-stat-val { font: 800 16px/1 'Plus Jakarta Sans', sans-serif; color: ${TEXT}; font-variant-numeric: tabular-nums; }
-.ow-school-stat-lbl { font: 600 10px/1 'Inter', sans-serif; color: ${MUTED}; margin-top: 3px; }
+.ow-school-stat-val { font: 800 16px/1 'Archivo', sans-serif; color: ${TEXT}; font-variant-numeric: tabular-nums; }
+.ow-school-stat-lbl { font: 600 10px/1 'Archivo', sans-serif; color: ${MUTED}; margin-top: 3px; }
 
 /* États vides / erreur */
 .ow-empty {
@@ -131,8 +131,8 @@ const STYLE = `<style>
   background: ${SURF2}; border: 1px solid ${BORD}; border-radius: 18px;
 }
 .ow-empty-ico { color: var(--am); margin-bottom: 12px; }
-.ow-empty-t { font: 800 16px/1.3 'Plus Jakarta Sans', sans-serif; color: ${TEXT}; margin-bottom: 8px; }
-.ow-empty-s { font: 500 13px/1.6 'Inter', sans-serif; color: ${MUTED}; }
+.ow-empty-t { font: 800 16px/1.3 'Archivo', sans-serif; color: ${TEXT}; margin-bottom: 8px; }
+.ow-empty-s { font: 500 13px/1.6 'Archivo', sans-serif; color: ${MUTED}; }
 .ow-empty-s code { font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: ${TEXT}; }
 </style>`;
 

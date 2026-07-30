@@ -98,18 +98,18 @@ export function toastAvatar({ title, sub = '', initials = '?', color = 'var(--a)
         width: 36px; height: 36px;
         border-radius: 50%;
         display: flex; align-items: center; justify-content: center;
-        font: 700 13px/1 'Plus Jakarta Sans', sans-serif;
+        font: 700 13px/1 'Archivo', sans-serif;
         color: #fff;
         flex-shrink: 0;
       }
       .toast-rich .ta-body { flex: 1; min-width: 0; }
       .toast-rich .ta-title {
-        font: 600 13.5px/1.3 'Inter', sans-serif;
+        font: 600 13.5px/1.3 'Archivo', sans-serif;
         color: var(--ink);
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       }
       .toast-rich .ta-sub {
-        font: 500 11.5px/1.2 'Inter', sans-serif;
+        font: 500 11.5px/1.2 'Archivo', sans-serif;
         color: var(--mu2);
         margin-top: 2px;
       }
@@ -119,7 +119,7 @@ export function toastAvatar({ title, sub = '', initials = '?', color = 'var(--a)
         background: var(--gr);
         color: #fff;
         display: flex; align-items: center; justify-content: center;
-        font: 700 14px/1 'Inter', sans-serif;
+        font: 700 14px/1 'Archivo', sans-serif;
         flex-shrink: 0;
       }
     </style>

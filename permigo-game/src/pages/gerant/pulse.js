@@ -19,7 +19,7 @@ const STYLE = `<style>
   max-width: 580px;
   margin: 0 auto;
   background: var(--bg);
-  font-family: 'Inter', sans-serif;
+  font-family: 'Archivo', sans-serif;
   color: var(--ink);
 }
 
@@ -30,12 +30,12 @@ const STYLE = `<style>
   background: var(--su);
 }
 .pulse-title {
-  font: 700 22px/1.2 'Plus Jakarta Sans', sans-serif;
+  font: 700 22px/1.2 'Archivo', sans-serif;
   color: var(--ink);
   letter-spacing: -0.022em;
 }
 .pulse-date {
-  font: 500 13px/1 'Inter', sans-serif;
+  font: 500 13px/1 'Archivo', sans-serif;
   color: var(--mu2);
   margin-top: 6px;
   text-transform: capitalize;
@@ -82,13 +82,13 @@ const STYLE = `<style>
   opacity: .9;
 }
 .kpi-val {
-  font: 700 32px/1 'Plus Jakarta Sans', sans-serif;
+  font: 700 32px/1 'Archivo', sans-serif;
   color: var(--ink);
   margin-bottom: 6px;
   letter-spacing: -0.025em;
 }
 .kpi-lbl {
-  font: 500 12px/1.4 'Inter', sans-serif;
+  font: 500 12px/1.4 'Archivo', sans-serif;
   color: var(--mu2);
 }
 
@@ -104,20 +104,20 @@ const STYLE = `<style>
   margin-bottom: 12px;
 }
 .pulse-sec-title {
-  font: 600 11px/1 'Inter', sans-serif;
+  font: 600 11px/1 'Archivo', sans-serif;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--mu2);
 }
 .pulse-sec-sub {
-  font: 500 12px/1 'Inter', sans-serif;
+  font: 500 12px/1 'Archivo', sans-serif;
   color: var(--mu2);
 }
 
 /* Delta KPI (cockpit) */
 .kpi-delta {
   margin-top: 8px;
-  font: 700 10px/1 'Inter', sans-serif;
+  font: 700 10px/1 'Archivo', sans-serif;
   letter-spacing: .04em;
   display: inline-flex;
   align-items: center;
@@ -162,7 +162,7 @@ const STYLE = `<style>
   box-shadow: 0 -2px 8px rgba(245,158,11,.35);
 }
 .spark-lbl {
-  font: 700 10px/1 'Inter', sans-serif;
+  font: 700 10px/1 'Archivo', sans-serif;
   color: var(--mu2);
   letter-spacing: .04em;
 }
@@ -183,7 +183,7 @@ const STYLE = `<style>
 .exam-row:hover { border-color: var(--am); }
 .exam-row:active { transform: scale(.98); }
 .exam-name {
-  font: 700 13px/1.2 'Plus Jakarta Sans', sans-serif;
+  font: 700 13px/1.2 'Archivo', sans-serif;
   color: var(--ink);
   flex: 1;
   min-width: 0;
@@ -234,24 +234,24 @@ const STYLE = `<style>
 .team-av {
   width: 40px; height: 40px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font: 600 14px/1 'Plus Jakarta Sans', sans-serif;
+  font: 600 14px/1 'Archivo', sans-serif;
   color: var(--a-ink);
   flex-shrink: 0;
   background: var(--a);
 }
 .team-info { flex: 1; min-width: 0; }
 .team-name {
-  font: 600 14px/1.3 'Inter', sans-serif;
+  font: 600 14px/1.3 'Archivo', sans-serif;
   color: var(--ink);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .team-sub {
-  font: 500 12px/1 'Inter', sans-serif;
+  font: 500 12px/1 'Archivo', sans-serif;
   color: var(--mu2);
   margin-top: 4px;
 }
 .team-badge {
-  font: 600 12px/1 'Inter', sans-serif;
+  font: 600 12px/1 'Archivo', sans-serif;
   color: var(--a-txt);
   background: color-mix(in srgb, var(--a) 10%, transparent);
   border-radius: var(--r-full);
@@ -280,12 +280,12 @@ const STYLE = `<style>
 }
 .activity-body { flex: 1; min-width: 0; }
 .activity-line {
-  font: 500 13px/1.4 'Inter', sans-serif;
+  font: 500 13px/1.4 'Archivo', sans-serif;
   color: var(--ink);
 }
 .activity-line strong { font-weight: 600; color: var(--ink); }
 .activity-meta {
-  font: 500 12px/1 'Inter', sans-serif;
+  font: 500 12px/1 'Archivo', sans-serif;
   color: var(--mu2);
   margin-top: 4px;
 }
@@ -304,7 +304,7 @@ const STYLE = `<style>
   padding: 24px 16px;
   text-align: center;
   color: var(--mu2);
-  font: 500 13px/1.5 'Inter', sans-serif;
+  font: 500 13px/1.5 'Archivo', sans-serif;
   background: var(--su);
   border: 1px dashed var(--bo);
   border-radius: var(--r);
@@ -321,7 +321,7 @@ const STYLE = `<style>
 .trend-legend {
   display: flex; gap: 14px; flex-wrap: wrap;
   margin-bottom: 14px;
-  font: 600 11px/1 'Inter', sans-serif;
+  font: 600 11px/1 'Archivo', sans-serif;
   letter-spacing: .02em;
 }
 .trend-lg-item { display: inline-flex; align-items: center; gap: 6px; color: var(--mu4); }
@@ -344,7 +344,7 @@ const STYLE = `<style>
   fill: var(--mu2);
 }
 .trend-axis-x {
-  font: 500 9px/1 'Inter', sans-serif;
+  font: 500 9px/1 'Archivo', sans-serif;
   fill: var(--mu2);
 }
 .trend-grid {
@@ -354,7 +354,7 @@ const STYLE = `<style>
 }
 .trend-empty {
   text-align: center; padding: 28px 12px;
-  font: 500 12px/1.5 "Inter", sans-serif;
+  font: 500 12px/1.5 'Archivo', sans-serif;
   color: var(--mu2);
 }
 
@@ -376,11 +376,11 @@ const STYLE = `<style>
 .heat-scroll::-webkit-scrollbar { display: none; }
 .heat-svg { display: block; }
 .heat-month {
-  font: 600 9px/1 "Inter", sans-serif;
+  font: 600 9px/1 'Archivo', sans-serif;
   fill: var(--mu2);
 }
 .heat-day {
-  font: 600 9px/1 "Inter", sans-serif;
+  font: 600 9px/1 'Archivo', sans-serif;
   fill: var(--mu2);
 }
 .heat-legend {
@@ -391,7 +391,7 @@ const STYLE = `<style>
   justify-content: flex-end;
 }
 .heat-leg-lbl {
-  font: 500 10px/1 "Inter", sans-serif;
+  font: 500 10px/1 'Archivo', sans-serif;
   color: var(--mu2);
   margin: 0 2px;
 }
@@ -703,10 +703,10 @@ function render({
     <div style="margin:12px 16px 0;padding:14px 16px;background:linear-gradient(135deg,#fef9e7,#fffbeb);border:1px solid var(--aml);border-radius:var(--r-md);display:flex;align-items:center;gap:12px">
       <div style="width:36px;height:36px;border-radius:50%;background:var(--am);color:#fff;display:grid;place-items:center;flex-shrink:0">${icon("alert-circle", { size: 18 }) || "⚠️"}</div>
       <div style="flex:1">
-        <div style="font:800 13px/1.2 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:2px">${elevesARisque} élève${elevesARisque > 1 ? "s" : ""} à relancer</div>
-        <div style="font:500 12px/1.4 'Inter',sans-serif;color:var(--mu3)">Pas d'activité depuis 14 jours ou plus.</div>
+        <div style="font:800 13px/1.2 'Archivo',sans-serif;color:var(--ink);margin-bottom:2px">${elevesARisque} élève${elevesARisque > 1 ? "s" : ""} à relancer</div>
+        <div style="font:500 12px/1.4 'Archivo',sans-serif;color:var(--mu3)">Pas d'activité depuis 14 jours ou plus.</div>
       </div>
-      <a href="#/eleves" style="font:700 11px/1 'Inter',sans-serif;color:var(--amx);text-decoration:none;padding:17px 12px;margin:-9px 0;background:rgba(245,158,11,.15);border-radius:var(--r-sm);white-space:nowrap">Voir</a>
+      <a href="#/eleves" style="font:700 11px/1 'Archivo',sans-serif;color:var(--amx);text-decoration:none;padding:17px 12px;margin:-9px 0;background:rgba(245,158,11,.15);border-radius:var(--r-sm);white-space:nowrap">Voir</a>
     </div>
   `
       : ""

@@ -97,12 +97,12 @@ function ensureStyle() {
     margin-bottom: 10px; padding: 0 4px;
   }
   .dq-title {
-    font: 800 15px/1 'Plus Jakarta Sans', sans-serif;
+    font: 800 15px/1 'Archivo', sans-serif;
     color: var(--ink); letter-spacing: -.01em;
     display: flex; align-items: center; gap: 7px;
   }
   .dq-count {
-    font: 800 11px/1 'Inter', sans-serif;
+    font: 800 11px/1 'Archivo', sans-serif;
     color: var(--a-txt); background: color-mix(in srgb, var(--a) 12%, transparent);
     border-radius: 99px; padding: 4px 9px;
   }
@@ -150,7 +150,7 @@ function ensureStyle() {
   }
   .dq-body { flex: 1; min-width: 0; }
   .dq-name {
-    font: 700 13.5px/1.2 'Plus Jakarta Sans', sans-serif;
+    font: 700 13.5px/1.2 'Archivo', sans-serif;
     color: var(--ink); margin-bottom: 7px;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
@@ -168,25 +168,25 @@ function ensureStyle() {
     /* --adk (violet profond) et non --a : blanc sur --a (#6c63ff) à 12.5px
        = 4.31:1 (échec AA) ; --adk (#4a3fc9) = ~8:1. */
     background: var(--adk); color: #fff;
-    font: 800 12.5px/1 'Plus Jakarta Sans', sans-serif;
+    font: 800 12.5px/1 'Archivo', sans-serif;
     padding: 10px 14px; border-radius: 12px;
     box-shadow: 0 5px 0 color-mix(in srgb, var(--adk) 55%, #000); white-space: nowrap;
   }
   .dq-card--ready:active .dq-claim { transform: translateY(2px); box-shadow: 0 3px 0 color-mix(in srgb, var(--adk) 55%, #000); }
   .dq-reward {
     display: inline-flex; align-items: center; gap: 4px;
-    font: 800 12px/1 'Plus Jakarta Sans', sans-serif; color: var(--a-txt); white-space: nowrap;
+    font: 800 12px/1 'Archivo', sans-serif; color: var(--a-txt); white-space: nowrap;
   }
   .dq-reward img { width: 17px; height: 17px; }
   .dq-done {
     display: inline-flex; align-items: center; gap: 4px;
-    font: 800 12px/1 'Plus Jakarta Sans', sans-serif; color: #15803d; white-space: nowrap;
+    font: 800 12px/1 'Archivo', sans-serif; color: #15803d; white-space: nowrap;
   }
 
   /* XP popup */
   .dq-xp-pop {
     position: fixed; pointer-events: none; z-index: 9999;
-    font: 800 15px/1 'Plus Jakarta Sans', sans-serif;
+    font: 800 15px/1 'Archivo', sans-serif;
     color: var(--a-txt); text-shadow: 0 1px 8px color-mix(in srgb, var(--a) 35%, transparent);
     animation: dqXpPop .75s cubic-bezier(.23,1,.32,1) forwards;
     white-space: nowrap; transform: translateX(-50%);

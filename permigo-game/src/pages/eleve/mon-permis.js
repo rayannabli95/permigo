@@ -251,13 +251,13 @@ const STYLE = `<style>
 .mp {
   --gold-1:#ffe9a8; --gold-2:#ffd24a; --gold-3:#ff9c1c; --gold-deep:#c87d12; --gold-ink:#7a5510;
   max-width: 480px; margin: 0 auto; padding: 14px 15px 32px;
-  font-family: 'Nunito', system-ui, sans-serif; color: var(--ink);
+  font-family: 'Archivo', system-ui, sans-serif; color: var(--ink);
   background:
     radial-gradient(120% 40% at 22% -6%, color-mix(in srgb, var(--a) 10%, transparent) 0%, transparent 58%),
     radial-gradient(110% 36% at 96% 0%, rgba(255,180,40,.12) 0%, transparent 55%),
     var(--bg);
 }
-.mp-title { font: 800 26px/1.1 'Baloo 2', cursive; letter-spacing: .2px; margin: 4px 2px 14px; }
+.mp-title { font: 800 26px/1.1 'Archivo', system-ui, sans-serif; letter-spacing: .2px; margin: 4px 2px 14px; }
 
 /* ── Chip moniteur : qui suit l'élève (il observe, il ne valide plus) ── */
 .mp-monit {
@@ -267,7 +267,7 @@ const STYLE = `<style>
 }
 .mp-mavatar {
   width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; flex: none;
-  font: 800 12px/1 'Baloo 2', cursive; color: var(--a-ink);
+  font: 800 12px/1 'Archivo', system-ui, sans-serif; color: var(--a-ink);
   background: linear-gradient(180deg, var(--a), var(--adk)); box-shadow: 0 2px 5px color-mix(in srgb, var(--adk) 45%, transparent);
 }
 .mp-monit b { font-size: 12.5px; font-weight: 800; color: var(--a-txt); }
@@ -286,11 +286,11 @@ const STYLE = `<style>
 .mp-hero-k {
   display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; margin-bottom: 11px;
   background: linear-gradient(180deg, var(--a), var(--adk)); box-shadow: inset 0 1px 0 rgba(255,255,255,.35);
-  font: 600 10px/1 'Fredoka', sans-serif; letter-spacing: .14em; text-transform: uppercase; color: var(--a-ink);
+  font: 600 10px/1 'Archivo', sans-serif; letter-spacing: .14em; text-transform: uppercase; color: var(--a-ink);
 }
 .mp-hero-row { display: flex; align-items: center; gap: 14px; }
 .mp-hero-txt { flex: 1; min-width: 0; }
-.mp-hero-t { font: 800 30px/1 'Baloo 2', cursive; color: var(--ink); }
+.mp-hero-t { font: 800 30px/1 'Archivo', system-ui, sans-serif; color: var(--ink); }
 .mp-hero-t small { font-size: 16px; font-weight: 800; color: var(--mu2); }
 .mp-hero-lbl { margin-top: 3px; font-size: 13px; font-weight: 800; color: var(--mu); }
 .mp-hero-s { margin-top: 7px; font-size: 11.5px; font-weight: 700; color: var(--mu2); line-height: 1.4; }
@@ -318,12 +318,12 @@ const STYLE = `<style>
 .mp-step:last-child::before { display: none; }
 .mp-step-num {
   position: absolute; left: 0; top: 0; width: 32px; height: 32px; border-radius: 50%;
-  display: grid; place-items: center; font: 800 15px/1 'Baloo 2', cursive; color: var(--a-ink);
+  display: grid; place-items: center; font: 800 15px/1 'Archivo', system-ui, sans-serif; color: var(--a-ink);
   background: linear-gradient(180deg, var(--a), var(--adk));
   border: 2px solid var(--su); box-shadow: 0 3px 0 var(--adk), 0 8px 14px -6px color-mix(in srgb, var(--adk) 50%, transparent);
 }
 .mp-step-h { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; min-height: 32px; padding-top: 4px; margin-bottom: 10px; }
-.mp-step-t { font: 800 17px/1 'Baloo 2', cursive; }
+.mp-step-t { font: 800 17px/1 'Archivo', system-ui, sans-serif; }
 .mp-step-s { font-size: 10.5px; font-weight: 800; color: var(--mu2); text-align: right; }
 
 /* ── Étape 1 : les 4 blocs C1-C4 ── */
@@ -336,12 +336,12 @@ const STYLE = `<style>
 }
 .mp-comp:active { transform: translateY(2px); }
 .mp-comp-b { flex: 1; min-width: 0; }
-.mp-comp-t { font: 700 14px/1.12 'Baloo 2', cursive; }
+.mp-comp-t { font: 700 14px/1.12 'Archivo', system-ui, sans-serif; }
 .mp-comp-bar { margin-top: 6px; height: 6px; border-radius: 4px; background: var(--bg2); overflow: hidden; }
 .mp-comp-bar i { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--adk), var(--a)); }
 .mp-comp.done .mp-comp-bar i { background: linear-gradient(90deg, var(--grd), var(--gr)); }
 .mp-comp-n { flex: none; text-align: right; }
-.mp-comp-n b { display: block; font: 800 14px/1 'Baloo 2', cursive; color: var(--a-txt); }
+.mp-comp-n b { display: block; font: 800 14px/1 'Archivo', system-ui, sans-serif; color: var(--a-txt); }
 .mp-comp.done .mp-comp-n b { color: var(--gr-txt); }
 .mp-comp.locked .mp-comp-n b { color: var(--mu2); }
 .mp-comp-n span { font-size: 9px; font-weight: 800; color: var(--mu2); text-transform: uppercase; letter-spacing: .06em; }
@@ -381,28 +381,28 @@ const STYLE = `<style>
   flex: none; width: 74px; padding: 9px 4px 7px; border-radius: 15px; text-align: center;
   background: color-mix(in srgb, var(--gold-1) 30%, var(--su)); border: 1px solid color-mix(in srgb, var(--gold-deep) 40%, transparent);
 }
-.mp-exam-cd b { display: block; font: 800 26px/1 'Baloo 2', cursive; color: var(--gold-ink); }
+.mp-exam-cd b { display: block; font: 800 26px/1 'Archivo', system-ui, sans-serif; color: var(--gold-ink); }
 .mp-exam-cd span { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--gold-deep); }
 .mp-exam-tb { flex: 1; min-width: 0; }
-.mp-exam-t { font: 800 15.5px/1.15 'Baloo 2', cursive; }
+.mp-exam-t { font: 800 15.5px/1.15 'Archivo', system-ui, sans-serif; }
 .mp-exam-d { font-size: 11.5px; font-weight: 800; color: var(--mu); margin-top: 3px; }
 .mp-exam-edit {
   display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; padding: 5px 10px; border-radius: 999px;
-  border: 1px solid var(--bo); background: var(--su); cursor: pointer; font: 800 10.5px/1 'Nunito', sans-serif; color: var(--mu);
+  border: 1px solid var(--bo); background: var(--su); cursor: pointer; font: 800 10.5px/1 'Archivo', sans-serif; color: var(--mu);
   min-height: 30px;
 }
 .mp-exam-date-wrap { display: none; margin-top: 10px; align-items: center; gap: 8px; }
 .mp-exam-date-wrap.open { display: flex; }
 .mp-exam-date-input {
-  flex: 1; border: 1.5px solid var(--bo); border-radius: 12px; padding: 9px 12px; font: 500 13px/1 'Inter', sans-serif;
+  flex: 1; border: 1.5px solid var(--bo); border-radius: 12px; padding: 9px 12px; font: 500 13px/1 'Archivo', sans-serif;
   color: var(--ink); background: var(--bg); outline: none; min-height: 44px;
 }
 .mp-exam-date-save {
   padding: 9px 14px; background: var(--a); color: var(--a-ink); border: 0; border-radius: 12px;
-  font: 700 12.5px/1 'Nunito', sans-serif; cursor: pointer; min-height: 44px;
+  font: 700 12.5px/1 'Archivo', sans-serif; cursor: pointer; min-height: 44px;
 }
 .mp-exam-nodate { text-align: center; padding: 6px 0 2px; }
-.mp-exam-nodate p { font: 600 12.5px/1.4 'Inter', sans-serif; color: var(--mu); margin-bottom: 10px; }
+.mp-exam-nodate p { font: 600 12.5px/1.4 'Archivo', sans-serif; color: var(--mu); margin-bottom: 10px; }
 
 .mp-verdict {
   display: flex; align-items: flex-start; gap: 8px; margin-top: 12px; padding: 10px 12px; border-radius: 13px;
@@ -422,7 +422,7 @@ const STYLE = `<style>
 .mp-crit p i { display: block; font-style: normal; font-size: 10px; font-weight: 700; color: var(--mu2); margin-top: 1px; }
 .mp-crit.pass p i { color: var(--gr-txt); opacity: .85; }
 .mp-crit.fail p i { color: var(--am-txt); opacity: .85; }
-.mp-crit-b { flex: none; font: 800 12px/1 'Baloo 2', cursive; padding: 3px 8px; border-radius: 8px; }
+.mp-crit-b { flex: none; font: 800 12px/1 'Archivo', system-ui, sans-serif; padding: 3px 8px; border-radius: 8px; }
 .mp-crit.pass .mp-crit-b { background: var(--grp2); color: var(--grk2); }
 .mp-crit.fail .mp-crit-b { background: #fbe5c4; color: var(--am-txt); }
 .mp-crit.neutral .mp-crit-b { background: var(--bg2); color: var(--mu3); }
@@ -434,16 +434,16 @@ const STYLE = `<style>
 }
 .mp-centre svg { width: 16px; height: 16px; flex: none; color: var(--mu2); }
 .mp-centre-b { flex: 1; min-width: 0; }
-.mp-centre-t { font: 700 14px/1 'Baloo 2', cursive; }
+.mp-centre-t { font: 700 14px/1 'Archivo', system-ui, sans-serif; }
 .mp-centre-s { font-size: 10.5px; font-weight: 700; color: var(--mu2); margin-top: 2px; line-height: 1.35; }
 
 .mp-err {
   padding: 24px 18px; border-radius: 18px; background: var(--su); border: 1px solid var(--bo); text-align: center;
 }
-.mp-err p { font: 600 13px/1.5 'Inter', sans-serif; color: var(--mu3); margin: 8px 0 12px; }
+.mp-err p { font: 600 13px/1.5 'Archivo', sans-serif; color: var(--mu3); margin: 8px 0 12px; }
 .mp-err button {
   padding: 10px 20px; border: 0; border-radius: 12px; background: var(--a); color: var(--a-ink);
-  font: 700 13px/1 'Inter', sans-serif; cursor: pointer; min-height: 44px;
+  font: 700 13px/1 'Archivo', sans-serif; cursor: pointer; min-height: 44px;
 }
 
 /* ── Skeleton ── */

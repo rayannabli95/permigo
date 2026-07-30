@@ -36,11 +36,11 @@ const STYLE = `<style>
     padding: 0 16px calc(110px + env(safe-area-inset-bottom, 0px));
     max-width: 600px;
     margin: 0 auto;
-    font-family: var(--ens-body, 'Inter', sans-serif);
+    font-family: var(--ens-body, 'Archivo', sans-serif);
     color: var(--ink);
   }
   .st-h1 {
-    font: 700 24px/1.15 var(--ens-display, 'Fredoka', sans-serif);
+    font: 700 24px/1.15 var(--ens-display, 'Archivo', sans-serif);
     letter-spacing: -.01em;
     margin: 14px 2px 0;
   }
@@ -54,13 +54,13 @@ const STYLE = `<style>
     margin: 22px 2px 10px;
   }
   .st-sec-lbl {
-    font: 600 13px/1 var(--ens-display, 'Fredoka', sans-serif);
+    font: 600 13px/1 var(--ens-display, 'Archivo', sans-serif);
     letter-spacing: .04em;
     text-transform: uppercase;
     color: var(--ink);
   }
   .st-sec-per {
-    font: 600 11px/1 var(--ens-body, 'Inter', sans-serif);
+    font: 600 11px/1 var(--ens-body, 'Archivo', sans-serif);
     color: var(--mu);
     white-space: nowrap;
   }
@@ -94,7 +94,7 @@ const STYLE = `<style>
   .st-act-med { flex-shrink: 0; margin-top: 2px; }
   .st-act-body { flex: 1; min-width: 0; }
   .st-act-kick {
-    font: 700 9.5px/1 var(--ens-body, 'Inter', sans-serif);
+    font: 700 9.5px/1 var(--ens-body, 'Archivo', sans-serif);
     letter-spacing: .09em;
     text-transform: uppercase;
     margin-bottom: 4px;
@@ -104,11 +104,11 @@ const STYLE = `<style>
   .st-act-kick.red    { color: var(--rd-txt, #9b2c2c); }
   .st-act-kick.indigo { color: var(--a-txt, var(--a)); }
   .st-act-ttl {
-    font: 700 13.5px/1.3 var(--ens-body, 'Inter', sans-serif);
+    font: 700 13.5px/1.3 var(--ens-body, 'Archivo', sans-serif);
     color: var(--ink);
   }
   .st-act-txt {
-    font: 400 12px/1.5 var(--ens-body, 'Inter', sans-serif);
+    font: 400 12px/1.5 var(--ens-body, 'Archivo', sans-serif);
     color: var(--mu);
     margin-top: 2px;
   }
@@ -135,14 +135,14 @@ const STYLE = `<style>
   .st-row:focus-visible { outline: 3px solid var(--a); outline-offset: -2px; border-radius: 10px; }
   .st-row-body { flex: 1; min-width: 0; }
   .st-row-nom {
-    font: 700 13.5px/1.2 var(--ens-body, 'Inter', sans-serif);
+    font: 700 13.5px/1.2 var(--ens-body, 'Archivo', sans-serif);
     color: var(--ink);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
   .st-row-meta {
-    font: 500 11.5px/1.3 var(--ens-body, 'Inter', sans-serif);
+    font: 500 11.5px/1.3 var(--ens-body, 'Archivo', sans-serif);
     color: var(--mu);
     margin-top: 3px;
     white-space: nowrap;
@@ -151,7 +151,7 @@ const STYLE = `<style>
   }
   .st-row-val {
     flex-shrink: 0;
-    font: 700 12.5px/1 var(--ens-body, 'Inter', sans-serif);
+    font: 700 12.5px/1 var(--ens-body, 'Archivo', sans-serif);
     color: var(--ink);
     white-space: nowrap;
   }
@@ -179,7 +179,7 @@ const STYLE = `<style>
   }
   .st-gauge-n {
     flex-shrink: 0;
-    font: 800 12.5px/1 var(--ens-body, 'Inter', sans-serif);
+    font: 800 12.5px/1 var(--ens-body, 'Archivo', sans-serif);
     color: var(--ink);
   }
   .st-gauge-n small { font-weight: 600; color: var(--mu); }
@@ -197,7 +197,7 @@ const STYLE = `<style>
     flex-shrink: 0;
   }
   .st-sil-n {
-    font: 800 15px/1.2 var(--ens-body, 'Inter', sans-serif);
+    font: 800 15px/1.2 var(--ens-body, 'Archivo', sans-serif);
     color: var(--ink);
   }
   .st-more {
@@ -209,7 +209,7 @@ const STYLE = `<style>
     border: 1.5px solid var(--bo);
     border-radius: 12px;
     background: transparent;
-    font: 700 13px/1 var(--ens-body, 'Inter', sans-serif);
+    font: 700 13px/1 var(--ens-body, 'Archivo', sans-serif);
     color: var(--a-txt, var(--a));
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
@@ -218,20 +218,20 @@ const STYLE = `<style>
 
   /* ── Bloc 4 : graphe révisions ── */
   .st-rev-big {
-    font: 700 34px/1 var(--ens-display, 'Fredoka', sans-serif);
+    font: 700 34px/1 var(--ens-display, 'Archivo', sans-serif);
     color: var(--ink);
   }
   .st-rev-big small {
-    font: 600 15px/1 var(--ens-body, 'Inter', sans-serif);
+    font: 600 15px/1 var(--ens-body, 'Archivo', sans-serif);
     color: var(--mu);
   }
   .st-rev-sub {
-    font: 600 12.5px/1.4 var(--ens-body, 'Inter', sans-serif);
+    font: 600 12.5px/1.4 var(--ens-body, 'Archivo', sans-serif);
     color: var(--ink);
     margin-top: 2px;
   }
   .st-rev-hint {
-    font: 400 11px/1.4 var(--ens-body, 'Inter', sans-serif);
+    font: 400 11px/1.4 var(--ens-body, 'Archivo', sans-serif);
     color: var(--mu);
     margin-top: 2px;
   }
@@ -250,7 +250,7 @@ const STYLE = `<style>
     gap: 4px;
   }
   .st-col-n {
-    font: 700 11px/1 var(--ens-body, 'Inter', sans-serif);
+    font: 700 11px/1 var(--ens-body, 'Archivo', sans-serif);
     color: var(--ink);
   }
   .st-col-n.zero { color: var(--mu); opacity: .8; }
@@ -273,7 +273,7 @@ const STYLE = `<style>
     background: var(--bo);
   }
   .st-col-day {
-    font: 600 10px/1 var(--ens-body, 'Inter', sans-serif);
+    font: 600 10px/1 var(--ens-body, 'Archivo', sans-serif);
     color: var(--mu);
     padding-top: 5px;
     border-top: 1px solid var(--bo);
@@ -282,7 +282,7 @@ const STYLE = `<style>
   }
   .st-col-day.auj { color: var(--a-txt, var(--a)); font-weight: 800; }
   .st-felic-lbl {
-    font: 700 10.5px/1 var(--ens-body, 'Inter', sans-serif);
+    font: 700 10.5px/1 var(--ens-body, 'Archivo', sans-serif);
     letter-spacing: .08em;
     text-transform: uppercase;
     color: var(--mu);
@@ -309,24 +309,24 @@ const STYLE = `<style>
     pointer-events: none;
   }
   .st-proof-lbl {
-    font: 700 10.5px/1 var(--ens-body, 'Inter', sans-serif);
+    font: 700 10.5px/1 var(--ens-body, 'Archivo', sans-serif);
     letter-spacing: .1em;
     text-transform: uppercase;
     opacity: .78;
     margin-bottom: 8px;
   }
   .st-proof-big {
-    font: 700 52px/1 var(--ens-display, 'Fredoka', sans-serif);
+    font: 700 52px/1 var(--ens-display, 'Archivo', sans-serif);
   }
   .st-proof-big small { font-size: 26px; }
   .st-proof-sub {
-    font: 600 12.5px/1.4 var(--ens-body, 'Inter', sans-serif);
+    font: 600 12.5px/1.4 var(--ens-body, 'Archivo', sans-serif);
     opacity: .92;
     margin-top: 6px;
   }
   .st-proof-chips { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
   .st-proof-chip {
-    font: 700 11.5px/1 var(--ens-body, 'Inter', sans-serif);
+    font: 700 11.5px/1 var(--ens-body, 'Archivo', sans-serif);
     background: rgba(255,255,255,.16);
     border: 1px solid rgba(255,255,255,.22);
     padding: 8px 12px;
@@ -336,7 +336,7 @@ const STYLE = `<style>
 
   /* ── Bloc 6 : portefeuille ── */
   .st-pf-intro {
-    font: 500 12px/1.4 var(--ens-body, 'Inter', sans-serif);
+    font: 500 12px/1.4 var(--ens-body, 'Archivo', sans-serif);
     color: var(--mu);
     margin-bottom: 12px;
   }
@@ -350,11 +350,11 @@ const STYLE = `<style>
     margin-bottom: 5px;
   }
   .st-pf-name {
-    font: 700 12px/1 var(--ens-body, 'Inter', sans-serif);
+    font: 700 12px/1 var(--ens-body, 'Archivo', sans-serif);
     color: var(--ink);
   }
   .st-pf-range {
-    font: 500 10.5px/1 var(--ens-body, 'Inter', sans-serif);
+    font: 500 10.5px/1 var(--ens-body, 'Archivo', sans-serif);
     color: var(--mu);
   }
   .st-pf-barline { display: flex; align-items: center; gap: 8px; }
@@ -368,7 +368,7 @@ const STYLE = `<style>
   .st-pf-bar.full { background: linear-gradient(90deg, var(--a-lt, #6d6bff), var(--a)); }
   .st-pf-n {
     flex-shrink: 0;
-    font: 800 12px/1 var(--ens-body, 'Inter', sans-serif);
+    font: 800 12px/1 var(--ens-body, 'Archivo', sans-serif);
     color: var(--ink);
   }
   .st-pf-n small { font-weight: 600; color: var(--mu); font-size: 10px; }
@@ -378,12 +378,12 @@ const STYLE = `<style>
     padding: 22px 16px;
     text-align: center;
     color: var(--mu);
-    font: 500 12.5px/1.5 var(--ens-body, 'Inter', sans-serif);
+    font: 500 12.5px/1.5 var(--ens-body, 'Archivo', sans-serif);
   }
   .st-foot {
     margin-top: 26px;
     text-align: center;
-    font: 500 11.5px/1.5 var(--ens-body, 'Inter', sans-serif);
+    font: 500 11.5px/1.5 var(--ens-body, 'Archivo', sans-serif);
     color: var(--mu);
   }
 
@@ -451,8 +451,8 @@ export async function mount(root) {
     toast("Impossible de charger les stats", "error");
     root.innerHTML = `
       <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:64px 24px;text-align:center;color:var(--mu)">
-        <p style="margin:0;font:600 15px/1.4 var(--ens-body,'Inter',sans-serif)">Impossible de charger les stats.</p>
-        <button id="st-retry" type="button" style="border:0;border-radius:999px;padding:12px 22px;min-height:44px;background:var(--a);color:#fff;font:700 14px/1 var(--ens-body,'Inter',sans-serif);cursor:pointer">Réessayer</button>
+        <p style="margin:0;font:600 15px/1.4 var(--ens-body,'Archivo',sans-serif)">Impossible de charger les stats.</p>
+        <button id="st-retry" type="button" style="border:0;border-radius:999px;padding:12px 22px;min-height:44px;background:var(--a);color:#fff;font:700 14px/1 var(--ens-body,'Archivo',sans-serif);cursor:pointer">Réessayer</button>
       </div>`;
     root
       .querySelector("#st-retry")

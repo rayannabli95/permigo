@@ -49,7 +49,7 @@ export function openInviteEleveModal(me) {
         border-radius:28px 28px 0 0;
         padding:8px 20px calc(28px + env(safe-area-inset-bottom,0px));
         animation: meInvSlide .36s cubic-bezier(.32,.72,0,1);
-        font-family:'Inter',sans-serif; color:var(--ink);
+        font-family:'Archivo',sans-serif; color:var(--ink);
         box-shadow:0 -8px 32px rgba(10,13,26,.14);
         /* Clavier mobile : la feuille doit tenir dans le viewport VISIBLE et
            défiler — sinon le clavier recouvre le champ email (saisie à
@@ -65,11 +65,11 @@ export function openInviteEleveModal(me) {
         border-radius:2px; margin:8px auto 18px;
       }
       .me-inv-title {
-        font:800 20px/1.2 'Plus Jakarta Sans',sans-serif;
+        font:800 20px/1.2 'Archivo',sans-serif;
         color:var(--ink); margin:0 0 4px; letter-spacing:-.02em;
       }
       .me-inv-sub {
-        font:500 13px/1.5 'Inter',sans-serif; color:var(--mu,var(--mu3));
+        font:500 13px/1.5 'Archivo',sans-serif; color:var(--mu,var(--mu3));
         margin:0 0 16px;
       }
       /* Bloc code élève — CTA principal */
@@ -80,7 +80,7 @@ export function openInviteEleveModal(me) {
         border:1px solid color-mix(in srgb, var(--a) 22%, transparent);
       }
       .me-inv-code-label {
-        font:700 11px/1 'Inter',sans-serif; color:var(--a-txt);
+        font:700 11px/1 'Archivo',sans-serif; color:var(--a-txt);
         text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px;
       }
       .me-inv-code-value {
@@ -88,12 +88,12 @@ export function openInviteEleveModal(me) {
         letter-spacing:.1em; margin-bottom:6px; user-select:all;
       }
       .me-inv-code-hint {
-        font:500 12px/1.45 'Inter',sans-serif; color:var(--mu,var(--mu3));
+        font:500 12px/1.45 'Archivo',sans-serif; color:var(--mu,var(--mu3));
         margin-bottom:12px;
       }
       .me-inv-code-edit {
         width:100%; margin-top:10px; padding:8px; border:0; background:none;
-        color:var(--mu,var(--mu3)); font:600 12px/1 'Inter',sans-serif;
+        color:var(--mu,var(--mu3)); font:600 12px/1 'Archivo',sans-serif;
         text-decoration:underline; text-underline-offset:2px; cursor:pointer;
         font-family:inherit;
       }
@@ -110,13 +110,13 @@ export function openInviteEleveModal(me) {
         box-shadow:0 0 0 3px color-mix(in srgb, var(--a) 12%, transparent);
       }
       .me-inv-code-msg {
-        font:500 12px/1.4 'Inter',sans-serif; margin-top:8px; min-height:14px;
+        font:500 12px/1.4 'Archivo',sans-serif; margin-top:8px; min-height:14px;
       }
       .me-inv-code-msg.err { color:var(--rd-txt); }
       .me-inv-code-msg.ok { color:var(--grd); }
       .me-inv-or {
         display:flex; align-items:center; gap:10px;
-        font:700 10.5px/1 'Inter',sans-serif; color:var(--mu2);
+        font:700 10.5px/1 'Archivo',sans-serif; color:var(--mu2);
         text-transform:uppercase; letter-spacing:.1em; margin:0 0 14px;
       }
       .me-inv-or::before, .me-inv-or::after {
@@ -126,7 +126,7 @@ export function openInviteEleveModal(me) {
         width:100%; min-height:110px; resize:vertical;
         padding:13px 14px; box-sizing:border-box;
         border:1.5px solid var(--bo); border-radius:14px;
-        font:500 14px/1.55 'Inter',sans-serif; color:var(--ink);
+        font:500 14px/1.55 'Archivo',sans-serif; color:var(--ink);
         background:var(--bg,var(--su2));
         transition:border-color .15s, box-shadow .15s;
         font-family:inherit;
@@ -136,14 +136,14 @@ export function openInviteEleveModal(me) {
         box-shadow:0 0 0 3px color-mix(in srgb, var(--a) 12%, transparent);
       }
       .me-inv-counter {
-        font:500 12px/1 'Inter',sans-serif; color:var(--mu2);
+        font:500 12px/1 'Archivo',sans-serif; color:var(--mu2);
         margin:8px 0 18px; min-height:16px;
       }
       .me-inv-counter.ok { color:var(--grd); }
       .me-inv-actions { display:flex; gap:10px; }
       .me-inv-btn {
         flex:1; padding:15px; border-radius:14px;
-        font:700 14px/1 'Plus Jakarta Sans',sans-serif;
+        font:700 14px/1 'Archivo',sans-serif;
         cursor:pointer; transition:transform .12s, background .12s;
         border:0; font-family:inherit;
       }
@@ -160,13 +160,13 @@ export function openInviteEleveModal(me) {
       .me-inv-go:hover { box-shadow:0 8px 22px -6px color-mix(in srgb, var(--a) 55%, transparent); }
       .me-inv-go:disabled { opacity:.35; cursor:default; box-shadow:none; }
       .me-inv-result-ttl {
-        font:700 15px/1.3 'Plus Jakarta Sans',sans-serif;
+        font:700 15px/1.3 'Archivo',sans-serif;
         color:var(--grd); margin:0 0 16px;
         display:flex; align-items:center; gap:8px;
         animation:meInvTtlIn .34s cubic-bezier(.32,.72,0,1) both;
       }
       .me-inv-result-hint {
-        font:500 12.5px/1.45 'Inter',sans-serif; color:var(--mu,var(--mu3));
+        font:500 12.5px/1.45 'Archivo',sans-serif; color:var(--mu,var(--mu3));
         margin:0 0 16px;
       }
       .me-inv-link-row {
@@ -176,7 +176,7 @@ export function openInviteEleveModal(me) {
       }
       .me-inv-link-row:last-of-type { border-bottom:0; }
       .me-inv-link-email {
-        font:600 12px/1 'Inter',sans-serif; color:var(--mu,var(--mu3));
+        font:600 12px/1 'Archivo',sans-serif; color:var(--mu,var(--mu3));
         text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px;
       }
       .me-inv-link-email.err { color: var(--rd-txt); }
@@ -191,7 +191,7 @@ export function openInviteEleveModal(me) {
       .me-inv-copy {
         flex-shrink:0; padding:9px 14px; border-radius:10px;
         background:color-mix(in srgb, var(--a) 10%, transparent); border:1px solid color-mix(in srgb, var(--a) 20%, transparent);
-        color: var(--a-txt); font:600 12px/1 'Inter',sans-serif;
+        color: var(--a-txt); font:600 12px/1 'Archivo',sans-serif;
         cursor:pointer; white-space:nowrap; transition:background .12s;
       }
       .me-inv-copy:active { background:color-mix(in srgb, var(--a) 20%, transparent); }
@@ -199,7 +199,7 @@ export function openInviteEleveModal(me) {
       .me-inv-share-row { display:flex; gap:8px; margin-top:10px; }
       .me-inv-act {
         flex:1; padding:11px 8px; border-radius:11px; border:0; cursor:pointer;
-        font:700 12.5px/1 'Plus Jakarta Sans',sans-serif; font-family:inherit;
+        font:700 12.5px/1 'Archivo',sans-serif; font-family:inherit;
         display:inline-flex; align-items:center; justify-content:center; gap:6px;
         text-decoration:none; -webkit-tap-highlight-color:transparent;
         transition:transform .12s, filter .12s, background .12s;
@@ -215,14 +215,14 @@ export function openInviteEleveModal(me) {
       .me-inv-act.copy2 { color:var(--ink); background:var(--bg2,var(--bg4)); border:1px solid var(--bo); }
       .me-inv-act.copy2.copied { color:var(--grd); background:rgba(16,185,129,.1); border-color:rgba(16,185,129,.2); }
       .me-inv-err-msg {
-        font:500 12px/1.4 'Inter',sans-serif; color: var(--rd-txt);
+        font:500 12px/1.4 'Archivo',sans-serif; color: var(--rd-txt);
         margin-top:4px;
       }
       .me-inv-close-btn {
         width:100%; margin-top:20px; padding:15px;
         border-radius:14px; border:0;
         background:var(--bg2,var(--bg4)); color:var(--ink);
-        font:700 14px/1 'Plus Jakarta Sans',sans-serif;
+        font:700 14px/1 'Archivo',sans-serif;
         cursor:pointer; font-family:inherit;
         transition:background .12s;
       }

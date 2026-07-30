@@ -28,7 +28,7 @@ const STYLE = `<style>
     min-height: 100dvh;
     background: linear-gradient(180deg, var(--su2, #eef1ff) 0%, #fff 100%);
     padding: 40px 22px max(40px, env(safe-area-inset-bottom));
-    font-family: 'Inter', sans-serif;
+    font-family: 'Archivo', sans-serif;
     color: var(--ink, #11131f);
     display: flex; flex-direction: column; align-items: center;
   }
@@ -38,34 +38,34 @@ const STYLE = `<style>
     animation: a2hsPop .5s cubic-bezier(.2,.9,.3,1.2) both;
   }
   @keyframes a2hsPop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-  .a2hs-title { font: 800 24px/1.2 'Plus Jakarta Sans', sans-serif; text-align: center; margin: 18px 0 6px; }
+  .a2hs-title { font: 800 24px/1.2 'Archivo', sans-serif; text-align: center; margin: 18px 0 6px; }
   .a2hs-sub   { font-size: 15px; line-height: 1.5; text-align: center; color: var(--mu2, #5b6072); max-width: 340px; margin-bottom: 24px; }
   .a2hs-card  { width: 100%; max-width: 400px; background: var(--su); border: 1px solid rgba(0,0,0,.07);
                 border-radius: 20px; padding: 18px; box-shadow: 0 6px 24px rgba(20,20,50,.06); }
   /* Sélecteur plateforme */
   .a2hs-seg { display: flex; gap: 8px; background: var(--su2, #eef1ff); padding: 5px; border-radius: 14px; margin-bottom: 18px; }
   .a2hs-seg-btn { flex: 1; border: 0; background: transparent; padding: 11px 8px; border-radius: 10px;
-                  font: 700 14px/1 'Inter', sans-serif; color: var(--mu2, #5b6072); cursor: pointer; transition: .15s; }
+                  font: 700 14px/1 'Archivo', sans-serif; color: var(--mu2, #5b6072); cursor: pointer; transition: .15s; }
   .a2hs-seg-btn.active { background: var(--su); color: var(--ink, #11131f); box-shadow: 0 2px 8px rgba(20,20,50,.1); }
   /* Étapes */
   .a2hs-step { display: flex; gap: 13px; align-items: flex-start; padding: 11px 0; }
   .a2hs-step + .a2hs-step { border-top: 1px solid rgba(0,0,0,.06); }
   .a2hs-num { flex: 0 0 26px; width: 26px; height: 26px; border-radius: 50%;
-              background: #22c55e; color: #fff; font: 800 14px/26px 'Inter'; text-align: center; }
+              background: #22c55e; color: #fff; font: 800 14px/26px 'Archivo'; text-align: center; }
   .a2hs-step-txt { font-size: 14.5px; line-height: 1.45; padding-top: 2px; }
   .a2hs-glyph { display: inline-flex; vertical-align: -5px; margin: 0 3px; padding: 3px;
                 border-radius: 7px; background: var(--su2, #eef1ff); color: #4f46e5; }
   /* Bouton install natif */
   .a2hs-install { width: 100%; margin: 4px 0 14px; border: 0; border-radius: 14px;
                   background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff;
-                  font: 800 16px/1 'Inter'; padding: 16px; cursor: pointer;
+                  font: 800 16px/1 'Archivo'; padding: 16px; cursor: pointer;
                   box-shadow: 0 8px 20px rgba(34,197,94,.35); }
   .a2hs-install:active { transform: translateY(1px); }
   /* Actions bas */
   .a2hs-continue { width: 100%; max-width: 400px; margin-top: 22px; border: 0; border-radius: 14px;
-                   background: var(--ink, #11131f); color: #fff; font: 800 16px/1 'Inter'; padding: 16px; cursor: pointer; }
+                   background: var(--ink, #11131f); color: #fff; font: 800 16px/1 'Archivo'; padding: 16px; cursor: pointer; }
   .a2hs-later { margin-top: 14px; background: none; border: 0; color: var(--mu2, #5b6072);
-                font: 600 14px/1 'Inter'; text-decoration: underline; cursor: pointer; }
+                font: 600 14px/1 'Archivo'; text-decoration: underline; cursor: pointer; }
 </style>`;
 
 export function renderAddToHome(root, { onDone } = {}) {
@@ -103,9 +103,9 @@ export function renderAddToHome(root, { onDone } = {}) {
   root.innerHTML = `${STYLE}
     <style>
       .a2hs-detected { display: flex; align-items: center; justify-content: space-between; gap: 8px;
-                       padding: 8px 4px 14px; font: 600 13px/1.3 'Inter', sans-serif; color: var(--mu2, #5b6072); }
+                       padding: 8px 4px 14px; font: 600 13px/1.3 'Archivo', sans-serif; color: var(--mu2, #5b6072); }
       .a2hs-switch { background: none; border: 0; padding: 8px 0; color: var(--mu2, #5b6072);
-                     font: 600 12px/1 'Inter', sans-serif; text-decoration: underline; cursor: pointer; }
+                     font: 600 12px/1 'Archivo', sans-serif; text-decoration: underline; cursor: pointer; }
     </style>
     <div class="a2hs">
       <img class="a2hs-badge" src="${BADGE}" alt="PermiGo" />

@@ -14,7 +14,7 @@ const STYLE = `<style>
     max-width: 640px;
     margin: 0 auto;
     background: var(--ink);
-    font-family: 'Inter', sans-serif;
+    font-family: 'Archivo', sans-serif;
     color: var(--bg4);
     min-height: 100dvh;
     padding-bottom: 80px;
@@ -40,21 +40,21 @@ const STYLE = `<style>
     border: 1px solid color-mix(in srgb, var(--a) 30%, transparent);
     border-radius: 99px;
     padding: 5px 14px;
-    font: 600 11px/1 'Inter', sans-serif;
+    font: 600 11px/1 'Archivo', sans-serif;
     color: var(--al);
     letter-spacing: .06em;
     text-transform: uppercase;
     margin-bottom: 20px;
   }
   .ec-hero-title {
-    font: 900 36px/1.1 'Plus Jakarta Sans', sans-serif;
+    font: 900 36px/1.1 'Archivo', sans-serif;
     color: #fff;
     letter-spacing: -.04em;
     margin: 0 0 12px;
   }
   .ec-hero-ville {
     display: inline-flex; align-items: center; gap: 6px;
-    font: 500 15px/1 'Inter', sans-serif;
+    font: 500 15px/1 'Archivo', sans-serif;
     color: var(--mu3);
     margin-bottom: 28px;
   }
@@ -76,7 +76,7 @@ const STYLE = `<style>
     letter-spacing: -.02em;
   }
   .ec-kpi-lbl {
-    font: 500 11px/1 'Inter', sans-serif;
+    font: 500 11px/1 'Archivo', sans-serif;
     color: var(--mu3);
     margin-top: 6px;
     text-transform: uppercase;
@@ -86,7 +86,7 @@ const STYLE = `<style>
   /* ── Section ── */
   .ec-section { padding: 0 20px; margin-bottom: 32px; }
   .ec-section-title {
-    font: 700 11px/1 'Inter', sans-serif;
+    font: 700 11px/1 'Archivo', sans-serif;
     text-transform: uppercase;
     letter-spacing: .1em;
     color: var(--mu4);
@@ -122,12 +122,12 @@ const STYLE = `<style>
   }
   .ec-feature-ico { font-size: 24px; margin-bottom: 10px; display: block; }
   .ec-feature-title {
-    font: 700 13px/1.3 'Plus Jakarta Sans', sans-serif;
+    font: 700 13px/1.3 'Archivo', sans-serif;
     color: var(--bo3);
     margin: 0 0 4px;
   }
   .ec-feature-sub {
-    font: 500 11px/1.4 'Inter', sans-serif;
+    font: 500 11px/1.4 'Archivo', sans-serif;
     color: var(--mu4);
   }
 
@@ -151,18 +151,18 @@ const STYLE = `<style>
     width: 44px; height: 44px;
     border-radius: 14px;
     display: flex; align-items: center; justify-content: center;
-    font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
+    font: 700 15px/1 'Archivo', sans-serif;
     color: #fff;
     flex-shrink: 0;
   }
   .ec-mon-info { flex: 1; min-width: 0; }
   .ec-mon-name {
-    font: 600 14px/1.2 'Inter', sans-serif;
+    font: 600 14px/1.2 'Archivo', sans-serif;
     color: var(--bo3);
     margin-bottom: 3px;
   }
   .ec-mon-tag {
-    font: 500 11px/1 'Inter', sans-serif;
+    font: 500 11px/1 'Archivo', sans-serif;
     color: var(--a-txt);
     background: color-mix(in srgb, var(--a) 12%, transparent);
     padding: 3px 8px;
@@ -189,7 +189,7 @@ const STYLE = `<style>
     font-family: Georgia, serif;
   }
   .ec-temo-text {
-    font: 500 13px/1.6 'Inter', sans-serif;
+    font: 500 13px/1.6 'Archivo', sans-serif;
     color: var(--bo4);
     padding-top: 14px;
     margin-bottom: 12px;
@@ -201,12 +201,12 @@ const STYLE = `<style>
     width: 28px; height: 28px;
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font: 700 10px/1 'Plus Jakarta Sans', sans-serif;
+    font: 700 10px/1 'Archivo', sans-serif;
     color: #fff;
     flex-shrink: 0;
   }
   .ec-temo-name {
-    font: 600 12px/1 'Inter', sans-serif;
+    font: 600 12px/1 'Archivo', sans-serif;
     color: var(--mu2);
   }
   .ec-temo-stars {
@@ -232,14 +232,14 @@ const STYLE = `<style>
     background: radial-gradient(ellipse 60% 60% at 30% 30%, rgba(255,255,255,.12) 0%, transparent 60%);
   }
   .ec-cta-title {
-    font: 800 22px/1.2 'Plus Jakarta Sans', sans-serif;
+    font: 800 22px/1.2 'Archivo', sans-serif;
     color: #fff;
     letter-spacing: -.02em;
     margin: 0 0 8px;
     position: relative;
   }
   .ec-cta-sub {
-    font: 500 13px/1.5 'Inter', sans-serif;
+    font: 500 13px/1.5 'Archivo', sans-serif;
     color: rgba(255,255,255,.8);
     margin: 0 0 22px;
     position: relative;
@@ -251,7 +251,7 @@ const STYLE = `<style>
     border: none;
     border-radius: 14px;
     padding: 16px 28px;
-    font: 700 15px/1 'Plus Jakarta Sans', sans-serif;
+    font: 700 15px/1 'Archivo', sans-serif;
     cursor: pointer;
     position: relative;
     transition: transform .12s, box-shadow .12s;
@@ -278,12 +278,12 @@ const STYLE = `<style>
   }
   .ec-err-ico { font-size: 48px; margin-bottom: 16px; }
   .ec-err-title {
-    font: 700 18px/1.3 'Plus Jakarta Sans', sans-serif;
+    font: 700 18px/1.3 'Archivo', sans-serif;
     color: var(--bo4);
     margin-bottom: 8px;
   }
   .ec-err-sub {
-    font: 500 13px/1.5 'Inter', sans-serif;
+    font: 500 13px/1.5 'Archivo', sans-serif;
     color: var(--mu4);
   }
 </style>`;

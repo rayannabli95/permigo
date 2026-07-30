@@ -94,8 +94,17 @@
   <link rel="preconnect" href="https://arrfmdagdqtrtfbhxlty.supabase.co" crossorigin />
   <link rel="dns-prefetch" href="https://arrfmdagdqtrtfbhxlty.supabase.co" />
 
-  <!-- ╔══ Fonts ══╗ -->
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&family=Nunito:wght@400;600;700;800;900&family=JetBrains+Mono:wght@700&family=Fredoka:wght@500;600;700&family=Baloo+2:wght@600;700;800&family=Archivo:wght@500;600;700;800;900&display=swap" rel="stylesheet" />
+  <!-- ╔══ Fonts ══╗
+       UNE famille de texte pour toute l'app : Archivo, celle du hero
+       « Prépare ta leçon ». Axe 400→900 (un seul fichier variable) : les
+       déclarations demandaient jusqu'à 900 alors que seul 500→800 était
+       chargé, le navigateur fabriquait un faux gras.
+       Les deux monos restent pour les CHIFFRES (compteurs, dates, scores) :
+       chasse fixe = les nombres ne dansent pas quand ils changent.
+       Retirées le 30/07 (plus une seule déclaration dans src/) : Plus Jakarta
+       Sans, Inter, Nunito, Fredoka, Baloo 2 — et Manrope / Fredoka One, que
+       des pages moniteur demandaient sans qu'elles soient chargées ici. -->
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400..900&family=IBM+Plex+Mono:wght@500;600;700&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet" />
 
   <!-- ╔══ Écran de chargement (logo animé) — critical CSS inline ══╗
        Inliné ici (pas dans le bundle) pour s'afficher AVANT que le JS charge.
@@ -127,7 +136,7 @@
        de marque ne couvrent pas. Le fondu était sur 1,6 s démarré à 0,5 s —
        le texte n'atteignait sa pleine opacité qu'une fois le splash parti :
        ramené à 0,3 s démarré à 0,15 s, pour que les mots soient LISIBLES. */
-    #splash .sp-go{font:800 16px/1.35 'Plus Jakarta Sans','Nunito',system-ui,sans-serif;color:#a99cff;letter-spacing:.01em;text-align:center;min-height:1.35em;opacity:0;animation:spGo .3s ease .15s forwards}
+    #splash .sp-go{font:800 16px/1.35 'Archivo',system-ui,sans-serif;color:#a99cff;letter-spacing:.01em;text-align:center;min-height:1.35em;opacity:0;animation:spGo .3s ease .15s forwards}
     @keyframes spFade{from{opacity:0}to{opacity:1}}
     @keyframes spGo{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
     /* Mouvement réduit : pas de vidéo, le logo fixe suffit. */

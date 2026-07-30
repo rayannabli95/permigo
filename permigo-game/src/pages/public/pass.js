@@ -483,7 +483,7 @@ const STYLE = `<style>
   .pv {
     position: relative;
     min-height: 100dvh;
-    font-family: 'Baloo 2', var(--fb), sans-serif;
+    font-family: 'Archivo', var(--fb), sans-serif;
     -webkit-font-smoothing: antialiased;
     --in:#6c63ff;--in-lt:#8e87ff;--in-dp:#4a3fc9;--in-dk:#372fa3;
     --gold:#ffce4d;--gold-dp:#e8a317;--go:#58cc02;--eco:#ffe94d;
@@ -521,21 +521,21 @@ const STYLE = `<style>
     border-radius: 999px; padding: 3px;
   }
   .pv-lang-opt {
-    font: 800 12.5px/1 'Baloo 2', sans-serif; letter-spacing: .04em;
+    font: 800 12.5px/1 'Archivo', sans-serif; letter-spacing: .04em;
     color: rgba(255,255,255,.62); background: none; border: 0;
     border-radius: 999px; padding: 7px 13px; cursor: pointer;
     transition: background .16s ease, color .16s ease;
   }
   .pv-lang-opt.on { color: #1a1030; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.28); }
   .pv-lang-opt:not(.on):active { background: rgba(255,255,255,.14); }
-  .pv-login { font: 700 14px/1 'Baloo 2', sans-serif; color: var(--ink-soft); background: none; border: 0; padding: 10px 8px; cursor: pointer; border-radius: 12px; }
+  .pv-login { font: 700 14px/1 'Archivo', sans-serif; color: var(--ink-soft); background: none; border: 0; padding: 10px 8px; cursor: pointer; border-radius: 12px; }
 
   /* ── Hero ── */
   .pv-hero { text-align: center; padding-top: 20px; }
-  .pv-kicker { font: 700 12px/1 Inter, sans-serif; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-mu); }
-  .pv-h1 { font: 800 clamp(36px, 10vw, 44px)/1.05 'Baloo 2', sans-serif; color: var(--pv-ink); margin: 12px 0 10px; text-shadow: 0 3px 0 rgba(12,7,32,.8); }
+  .pv-kicker { font: 700 12px/1 'Archivo', sans-serif; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-mu); }
+  .pv-h1 { font: 800 clamp(36px, 10vw, 44px)/1.05 'Archivo', sans-serif; color: var(--pv-ink); margin: 12px 0 10px; text-shadow: 0 3px 0 rgba(12,7,32,.8); }
   .pv-h1 em { font-style: normal; color: var(--gold); }
-  .pv-lead { font: 600 15.5px/1.55 'Baloo 2', sans-serif; color: var(--ink-soft); max-width: 330px; margin: 0 auto; }
+  .pv-lead { font: 600 15.5px/1.55 'Archivo', sans-serif; color: var(--ink-soft); max-width: 330px; margin: 0 auto; }
   .pv-lead strong { color: var(--gold); }
 
   /* ── LE billet d'or ── */
@@ -572,17 +572,17 @@ const STYLE = `<style>
   .pv-t-inner { display: flex; position: relative; }
   .pv-t-main { flex: 1; padding: 18px 14px 16px 18px; }
   .pv-t-stub { width: 104px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 12px 6px; text-align: center; }
-  .pv-t-brand { display: flex; align-items: center; gap: 7px; font: 800 14px/1 'Baloo 2', sans-serif; text-shadow: 0 1px 0 rgba(255,255,255,.4); }
+  .pv-t-brand { display: flex; align-items: center; gap: 7px; font: 800 14px/1 'Archivo', sans-serif; text-shadow: 0 1px 0 rgba(255,255,255,.4); }
   .pv-t-brand img { width: 22px; height: 22px; filter: drop-shadow(0 1px 1px rgba(90,60,5,.4)); }
-  .pv-t-title { font: 800 23px/1.05 'Baloo 2', sans-serif; margin: 9px 0 3px; letter-spacing: -.01em; text-shadow: 0 1px 0 rgba(255,255,255,.45), 0 -1px 0 rgba(90,60,5,.3); }
-  .pv-t-sub { font: 600 11.5px/1.4 Inter, sans-serif; color: var(--tik-mu); }
+  .pv-t-title { font: 800 23px/1.05 'Archivo', sans-serif; margin: 9px 0 3px; letter-spacing: -.01em; text-shadow: 0 1px 0 rgba(255,255,255,.45), 0 -1px 0 rgba(90,60,5,.3); }
+  .pv-t-sub { font: 600 11.5px/1.4 'Archivo', sans-serif; color: var(--tik-mu); }
   .pv-t-meta { display: flex; gap: 14px; margin-top: 12px; }
-  .pv-t-meta div b { display: block; font: 700 10px/1 Inter, sans-serif; letter-spacing: .14em; text-transform: uppercase; color: var(--tik-lbl); margin-bottom: 2px; }
+  .pv-t-meta div b { display: block; font: 700 10px/1 'Archivo', sans-serif; letter-spacing: .14em; text-transform: uppercase; color: var(--tik-lbl); margin-bottom: 2px; }
   .pv-t-meta div span { font: 600 13px/1 'IBM Plex Mono', monospace; }
-  .pv-t-stub .n { font: 700 9.5px/1.25 Inter, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--tik-lbl); }
-  .pv-t-strike { font: 700 13px/1 Inter, sans-serif; color: var(--tik-lbl); text-decoration: line-through; }
-  .pv-t-price { font: 800 22px/1 'Baloo 2', sans-serif; text-shadow: 0 1px 0 rgba(255,255,255,.45); }
-  .pv-t-check { font: 800 30px/1 'Baloo 2', sans-serif; text-shadow: 0 1px 0 rgba(255,255,255,.45); }
+  .pv-t-stub .n { font: 700 9.5px/1.25 'Archivo', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--tik-lbl); }
+  .pv-t-strike { font: 700 13px/1 'Archivo', sans-serif; color: var(--tik-lbl); text-decoration: line-through; }
+  .pv-t-price { font: 800 22px/1 'Archivo', sans-serif; text-shadow: 0 1px 0 rgba(255,255,255,.45); }
+  .pv-t-check { font: 800 30px/1 'Archivo', sans-serif; text-shadow: 0 1px 0 rgba(255,255,255,.45); }
   .pv-t-barcode {
     width: 64px; height: 30px; border-radius: 3px; opacity: .85; margin-top: 4px;
     background: repeating-linear-gradient(90deg, #3a2a05 0 2px, transparent 2px 5px, #3a2a05 5px 6px, transparent 6px 10px);
@@ -593,7 +593,7 @@ const STYLE = `<style>
   .pv-cta-hero {
     display: block; width: 100%; max-width: 340px; margin: 26px auto 0;
     border: 0; cursor: pointer; border-radius: 18px; padding: 17px;
-    font: 800 17px/1 'Baloo 2', sans-serif; color: #4a3300; text-shadow: 0 1px 0 rgba(255,255,255,.35);
+    font: 800 17px/1 'Archivo', sans-serif; color: #4a3300; text-shadow: 0 1px 0 rgba(255,255,255,.35);
     background: linear-gradient(180deg, #ffe08a, var(--gold) 55%, var(--gold-dp));
     box-shadow: inset 0 3px 0 rgba(255,255,255,.55), 0 6px 0 #a86e00, 0 12px 26px rgba(0,0,0,.4);
     transition: transform .1s ease, box-shadow .1s ease;
@@ -601,7 +601,7 @@ const STYLE = `<style>
   .pv-cta-hero s { opacity: .55; font-weight: 700; font-size: 14px; margin-right: 2px; }
   .pv-cta-hero:active { transform: translateY(4px); box-shadow: inset 0 3px 0 rgba(255,255,255,.55), 0 2px 0 #a86e00, 0 4px 8px rgba(0,0,0,.3); }
   .pv-cta-hero[disabled] { opacity: .65; cursor: wait; }
-  .pv-cta-note { text-align: center; font: 600 12.5px/1.6 Inter, sans-serif; color: var(--ink-dim); margin: 12px 0 0; }
+  .pv-cta-note { text-align: center; font: 600 12.5px/1.6 'Archivo', sans-serif; color: var(--ink-dim); margin: 12px 0 0; }
   .pv-cta-note b { color: var(--ink-soft); }
   .pv-cta-note small { font-size: 11px; color: #655a97; }
 
@@ -619,17 +619,17 @@ const STYLE = `<style>
   .pv-bulle {
     position: absolute; z-index: 3; right: 0; bottom: 116px;
     background: #fff; color: #231603; border-radius: 16px 16px 4px 16px; padding: 10px 14px;
-    font: 700 13px/1.3 'Baloo 2', sans-serif; box-shadow: 0 8px 20px rgba(0,0,0,.4);
+    font: 700 13px/1.3 'Archivo', sans-serif; box-shadow: 0 8px 20px rgba(0,0,0,.4);
   }
   .pv-bulle small { display: block; color: #8a7a52; font-weight: 600; font-size: 11px; }
 
   /* ── Sections ── */
   .pv-sec-title {
-    text-align: center; font: 800 clamp(24px, 7vw, 28px)/1.15 'Baloo 2', sans-serif;
+    text-align: center; font: 800 clamp(24px, 7vw, 28px)/1.15 'Archivo', sans-serif;
     color: var(--pv-ink); margin: 52px 0 0; text-shadow: 0 3px 0 rgba(12,7,32,.8);
   }
   .pv-sec-title em { font-style: normal; color: var(--gold); }
-  .pv-sec-sub { text-align: center; font: 600 13.5px/1.55 'Baloo 2', sans-serif; color: var(--ink-mu); margin: 8px auto 22px; max-width: 340px; }
+  .pv-sec-sub { text-align: center; font: 600 13.5px/1.55 'Archivo', sans-serif; color: var(--ink-mu); margin: 8px auto 22px; max-width: 340px; }
 
   /* ── Cartes atouts ── */
   .pv-conduite { display: flex; flex-direction: column; gap: 12px; }
@@ -644,15 +644,15 @@ const STYLE = `<style>
   }
   .pv-situ-shot::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(155deg, rgba(255,255,255,.16), transparent 30%); }
   .pv-situ-shot img { display: block; width: 100%; height: auto; }
-  .pv-situ-txt b { display: block; font: 800 16px/1.25 'Baloo 2', sans-serif; margin-bottom: 5px; }
-  .pv-situ-txt span { font: 600 12.5px/1.5 'Baloo 2', sans-serif; color: var(--ink-mu); }
+  .pv-situ-txt b { display: block; font: 800 16px/1.25 'Archivo', sans-serif; margin-bottom: 5px; }
+  .pv-situ-txt span { font: 600 12.5px/1.5 'Archivo', sans-serif; color: var(--ink-mu); }
   .pv-feat {
     display: flex; gap: 13px; align-items: center;
     background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.09); border-radius: 16px; padding: 13px 14px;
   }
   .pv-feat-img { flex: none; width: 46px; height: 46px; object-fit: contain; filter: drop-shadow(0 5px 8px rgba(0,0,0,.45)); }
-  .pv-feat b { display: block; font: 700 15px/1.3 'Baloo 2', sans-serif; }
-  .pv-feat span { font: 600 13px/1.45 'Baloo 2', sans-serif; color: var(--ink-mu); }
+  .pv-feat b { display: block; font: 700 15px/1.3 'Archivo', sans-serif; }
+  .pv-feat span { font: 600 13px/1.45 'Archivo', sans-serif; color: var(--ink-mu); }
 
   /* Bloc non-francophones (version EN uniquement) */
   .pv-franco {
@@ -661,18 +661,18 @@ const STYLE = `<style>
     display: flex; gap: 12px; align-items: flex-start;
   }
   .pv-franco-flag { font-size: 24px; line-height: 1; margin-top: 2px; }
-  .pv-franco b { display: block; font: 800 15.5px/1.3 'Baloo 2', sans-serif; margin-bottom: 4px; }
-  .pv-franco span { font: 600 13px/1.5 'Baloo 2', sans-serif; color: var(--ink-soft); }
+  .pv-franco b { display: block; font: 800 15.5px/1.3 'Archivo', sans-serif; margin-bottom: 4px; }
+  .pv-franco span { font: 600 13px/1.5 'Archivo', sans-serif; color: var(--ink-soft); }
 
   /* ── L'addition ── */
   .pv-maths { margin-top: 22px; border-radius: 20px; padding: 8px 18px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.09); }
-  .pv-maths-row { display: flex; justify-content: space-between; align-items: baseline; padding: 13px 0; font: 500 14px Inter, sans-serif; color: var(--ink-soft); }
+  .pv-maths-row { display: flex; justify-content: space-between; align-items: baseline; padding: 13px 0; font: 500 14px 'Archivo', sans-serif; color: var(--ink-soft); }
   .pv-maths-row + .pv-maths-row { border-top: 1px dashed rgba(255,255,255,.1); }
-  .pv-maths-row b { font: 700 16px 'Baloo 2', sans-serif; color: #fff; }
+  .pv-maths-row b { font: 700 16px 'Archivo', sans-serif; color: #fff; }
   .pv-maths-row.hot { color: var(--gold); }
   .pv-maths-row.hot b { color: var(--gold); font-size: 18px; }
-  .pv-maths-note { text-align: center; font: 600 12.5px/1.6 'Baloo 2', sans-serif; color: var(--ink-dim); margin: 12px 0 0; }
-  .pv-maths-src { text-align: center; font: 500 10.5px/1.5 Inter, sans-serif; color: #655a97; margin: 6px 0 0; }
+  .pv-maths-note { text-align: center; font: 600 12.5px/1.6 'Archivo', sans-serif; color: var(--ink-dim); margin: 12px 0 0; }
+  .pv-maths-src { text-align: center; font: 500 10.5px/1.5 'Archivo', sans-serif; color: #655a97; margin: 6px 0 0; }
 
   /* ── Les 3 billets ── */
   .pv-pass { position: relative; display: flex; border-radius: 18px; margin-bottom: 14px; box-shadow: 0 14px 28px rgba(0,0,0,.4); }
@@ -683,20 +683,20 @@ const STYLE = `<style>
   }
   .pv-pass-std { background: linear-gradient(180deg, #352a6e, #2b2160); box-shadow: inset 0 2px 0 rgba(255,255,255,.12), 0 14px 28px rgba(0,0,0,.4); }
   .pv-pass-std .pv-pass-cut { border-left-color: rgba(255,255,255,.18); background: rgba(0,0,0,.18); }
-  .pv-pass-name { font: 800 17px/1.2 'Baloo 2', sans-serif; }
-  .pv-pass-desc { font: 600 12.5px/1.45 'Baloo 2', sans-serif; color: var(--ink-mu); margin-top: 3px; }
-  .pv-pass-price { font: 800 24px/1 'Baloo 2', sans-serif; }
+  .pv-pass-name { font: 800 17px/1.2 'Archivo', sans-serif; }
+  .pv-pass-desc { font: 600 12.5px/1.45 'Archivo', sans-serif; color: var(--ink-mu); margin-top: 3px; }
+  .pv-pass-price { font: 800 24px/1 'Archivo', sans-serif; }
   .pv-pass-price small { font-size: 12px; color: var(--ink-mu); }
-  .pv-pass-strike { font: 600 12px Inter, sans-serif; color: var(--ink-dim); text-decoration: line-through; }
+  .pv-pass-strike { font: 600 12px 'Archivo', sans-serif; color: var(--ink-dim); text-decoration: line-through; }
   /* Chip d'économie jaune fluo (façon Ornikar) */
   .pv-eco {
-    font: 800 11.5px/1 Inter, sans-serif; color: #231603; background: var(--eco);
+    font: 800 11.5px/1 'Archivo', sans-serif; color: #231603; background: var(--eco);
     padding: 4px 8px; border-radius: 6px; letter-spacing: .02em;
     box-shadow: 0 2px 6px rgba(0,0,0,.3);
   }
   .pv-pass-btn {
     border: 0; cursor: pointer; border-radius: 12px; padding: 11px 14px; width: 100%;
-    font: 800 13.5px 'Baloo 2', sans-serif; color: #fff; text-shadow: 0 1px 0 rgba(0,0,0,.25);
+    font: 800 13.5px 'Archivo', sans-serif; color: #fff; text-shadow: 0 1px 0 rgba(0,0,0,.25);
     background: linear-gradient(180deg, var(--in-lt), var(--in) 55%, var(--in-dp));
     box-shadow: inset 0 2px 0 rgba(255,255,255,.35), 0 4px 0 var(--in-dk);
     transition: transform .1s ease, box-shadow .1s ease;
@@ -722,45 +722,45 @@ const STYLE = `<style>
   }
   .pv-pass-tag {
     position: absolute; top: -11px; left: 16px; z-index: 1;
-    font: 800 10.5px/1 Inter, sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #fff;
+    font: 800 10.5px/1 'Archivo', sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #fff;
     background: #e2513f; padding: 7px 12px; border-radius: 99px; box-shadow: 0 4px 10px rgba(0,0,0,.35);
   }
-  .pv-err { font: 700 13px/1.4 'Baloo 2', sans-serif; color: #ffb4a8; text-align: center; margin: 4px 0 0; display: none; }
+  .pv-err { font: 700 13px/1.4 'Archivo', sans-serif; color: #ffb4a8; text-align: center; margin: 4px 0 0; display: none; }
   .pv-err.on { display: block; }
 
   /* ── Garantie ── */
   .pv-stamp-zone { position: relative; margin-top: 26px; padding: 20px 18px; border-radius: 20px; border: 2px dashed rgba(88,204,2,.5); text-align: center; }
-  .pv-stamp-zone b { display: block; font: 800 16.5px/1.3 'Baloo 2', sans-serif; margin-bottom: 4px; }
-  .pv-stamp-zone span { font: 600 13px/1.55 'Baloo 2', sans-serif; color: var(--ink-soft); }
+  .pv-stamp-zone b { display: block; font: 800 16.5px/1.3 'Archivo', sans-serif; margin-bottom: 4px; }
+  .pv-stamp-zone span { font: 600 13px/1.55 'Archivo', sans-serif; color: var(--ink-soft); }
   .pv-stamp {
     position: absolute; top: -16px; right: 10px; transform: rotate(9deg);
-    font: 800 11px/1 Inter, sans-serif; letter-spacing: .1em; text-transform: uppercase;
+    font: 800 11px/1 'Archivo', sans-serif; letter-spacing: .1em; text-transform: uppercase;
     color: #7ee838; border: 2.5px solid var(--go); border-radius: 8px; padding: 7px 10px;
     background: rgba(20,40,4,.6);
   }
 
   /* ── Preuve ── */
   .pv-proof { margin-top: 20px; }
-  .pv-bar-lbl { display: flex; justify-content: space-between; gap: 12px; font: 600 13px Inter, sans-serif; margin-bottom: 6px; color: var(--ink-soft); }
+  .pv-bar-lbl { display: flex; justify-content: space-between; gap: 12px; font: 600 13px 'Archivo', sans-serif; margin-bottom: 6px; color: var(--ink-soft); }
   .pv-bar { height: 12px; border-radius: 99px; background: rgba(255,255,255,.08); overflow: hidden; margin-bottom: 14px; }
   .pv-bar span { display: block; height: 100%; border-radius: 99px; }
   .pv-bar-go span { background: linear-gradient(90deg, var(--go), #8aec3c); }
   .pv-bar-mu span { background: #5c519f; }
-  .pv-src { text-align: center; font: 500 11px Inter, sans-serif; color: #655a97; margin: 0; }
+  .pv-src { text-align: center; font: 500 11px 'Archivo', sans-serif; color: #655a97; margin: 0; }
 
   /* ── FAQ ── */
   .pv-faq details { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); border-radius: 15px; padding: 0 15px; margin-bottom: 9px; }
   .pv-faq summary {
-    font: 700 14.5px/1.4 'Baloo 2', sans-serif; padding: 14px 0; cursor: pointer; list-style: none;
+    font: 700 14.5px/1.4 'Archivo', sans-serif; padding: 14px 0; cursor: pointer; list-style: none;
     display: flex; justify-content: space-between; align-items: center; gap: 10px;
   }
   .pv-faq summary::-webkit-details-marker { display: none; }
-  .pv-faq summary::after { content: "+"; font: 800 19px/1 'Baloo 2', sans-serif; color: var(--gold); flex: none; }
+  .pv-faq summary::after { content: "+"; font: 800 19px/1 'Archivo', sans-serif; color: var(--gold); flex: none; }
   .pv-faq details[open] summary::after { content: "–"; }
-  .pv-faq p { font: 600 13.5px/1.55 'Baloo 2', sans-serif; color: var(--ink-soft); margin: 0 0 14px; }
+  .pv-faq p { font: 600 13.5px/1.55 'Archivo', sans-serif; color: var(--ink-soft); margin: 0 0 14px; }
   .pv-faq a { color: var(--gold); }
 
-  .pv-foot { text-align: center; padding: 36px 0 10px; font: 600 12px/1.7 'Baloo 2', sans-serif; color: var(--ink-dim); }
+  .pv-foot { text-align: center; padding: 36px 0 10px; font: 600 12px/1.7 'Archivo', sans-serif; color: var(--ink-dim); }
   .pv-foot a { color: var(--ink-soft); }
 
   /* ── Barre CTA collante ── */
@@ -771,11 +771,11 @@ const STYLE = `<style>
     border-top: 1.5px solid rgba(255,206,77,.25);
   }
   .pv-sticky-inner { display: flex; align-items: center; gap: 12px; width: 100%; max-width: 480px; margin: 0 auto; }
-  .pv-sticky-txt { font: 700 12.5px/1.25 'Baloo 2', sans-serif; color: var(--ink-soft); white-space: nowrap; }
+  .pv-sticky-txt { font: 700 12.5px/1.25 'Archivo', sans-serif; color: var(--ink-soft); white-space: nowrap; }
   .pv-sticky-txt b { display: block; color: var(--gold); font-size: 14.5px; }
   .pv-sticky-btn {
     flex: 1; border: 0; cursor: pointer; border-radius: 14px; padding: 13px 14px;
-    font: 800 15px/1 'Baloo 2', sans-serif; color: #4a3300; text-shadow: 0 1px 0 rgba(255,255,255,.35);
+    font: 800 15px/1 'Archivo', sans-serif; color: #4a3300; text-shadow: 0 1px 0 rgba(255,255,255,.35);
     background: linear-gradient(180deg, #ffe08a, var(--gold) 55%, var(--gold-dp));
     box-shadow: inset 0 2px 0 rgba(255,255,255,.55), 0 4px 0 #a86e00;
   }
@@ -783,34 +783,34 @@ const STYLE = `<style>
 
   /* ── Retour checkout ── */
   .pv-result { max-width: 400px; margin: 26px auto 0; filter: drop-shadow(0 30px 40px rgba(0,0,0,.55)); }
-  .pv-result-title { text-align: center; color: var(--pv-ink); font: 800 26px/1.2 'Baloo 2', sans-serif; margin: 26px 0 6px; text-shadow: 0 3px 0 rgba(12,7,32,.8); }
-  .pv-result-intro { text-align: center; font: 600 14px/1.55 'Baloo 2', sans-serif; color: var(--ink-soft); max-width: 340px; margin: 0 auto 20px; }
+  .pv-result-title { text-align: center; color: var(--pv-ink); font: 800 26px/1.2 'Archivo', sans-serif; margin: 26px 0 6px; text-shadow: 0 3px 0 rgba(12,7,32,.8); }
+  .pv-result-intro { text-align: center; font: 600 14px/1.55 'Archivo', sans-serif; color: var(--ink-soft); max-width: 340px; margin: 0 auto 20px; }
   .pv-steps { display: flex; flex-direction: column; gap: 10px; counter-reset: pvstep; max-width: 440px; margin: 0 auto; }
   .pv-step {
     display: flex; gap: 12px; align-items: flex-start; text-align: left;
     background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.09); border-radius: 16px; padding: 13px 14px;
-    font: 600 13.5px/1.5 'Baloo 2', sans-serif; color: var(--ink-mu);
+    font: 600 13.5px/1.5 'Archivo', sans-serif; color: var(--ink-mu);
   }
   .pv-step b { color: var(--pv-ink); }
   .pv-step::before {
     counter-increment: pvstep; content: counter(pvstep);
     flex: none; width: 28px; height: 28px; display: grid; place-items: center;
-    font: 800 14px/1 'Baloo 2', sans-serif; color: #4a3300;
+    font: 800 14px/1 'Archivo', sans-serif; color: #4a3300;
     background: linear-gradient(180deg, #ffe08a, var(--gold) 60%, var(--gold-dp));
     border-radius: 50%; box-shadow: inset 0 1.5px 0 rgba(255,255,255,.55), 0 2.5px 0 #a86e00;
   }
-  .pv-result-guarantee { text-align: center; font: 600 12.5px/1.5 Inter, sans-serif; color: var(--ink-dim); margin: 16px 0 0; }
+  .pv-result-guarantee { text-align: center; font: 600 12.5px/1.5 'Archivo', sans-serif; color: var(--ink-dim); margin: 16px 0 0; }
   .pv-result-cta {
     display: block; width: 100%; max-width: 320px; margin: 20px auto 0;
     border: 0; cursor: pointer; border-radius: 16px; padding: 15px;
-    font: 800 16px/1 'Baloo 2', sans-serif; color: #fff; text-shadow: 0 1.5px 0 rgba(0,0,0,.3);
+    font: 800 16px/1 'Archivo', sans-serif; color: #fff; text-shadow: 0 1.5px 0 rgba(0,0,0,.3);
     background: linear-gradient(180deg, var(--in-lt), var(--in) 55%, var(--in-dp));
     box-shadow: inset 0 2.5px 0 rgba(255,255,255,.35), 0 5px 0 var(--in-dk), 0 9px 16px rgba(0,0,0,.35);
   }
   .pv-cancel-note {
     max-width: 444px; margin: 14px auto 0; padding: 12px 16px;
     background: rgba(255,206,77,.1); border: 1.5px solid rgba(255,206,77,.35); border-radius: 14px;
-    font: 700 13.5px/1.5 'Baloo 2', sans-serif; color: var(--ink-soft); text-align: center;
+    font: 700 13.5px/1.5 'Archivo', sans-serif; color: var(--ink-soft); text-align: center;
   }
 </style>`;
 

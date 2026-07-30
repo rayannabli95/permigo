@@ -327,7 +327,7 @@ function template() {
         position:fixed;inset:0;overflow:auto;overscroll-behavior:contain;
         display:flex;align-items:center;justify-content:center;
         padding:24px 18px calc(24px + env(safe-area-inset-bottom));
-        font-family:'Baloo 2',var(--fb);-webkit-font-smoothing:antialiased;
+        font-family:'Archivo',var(--fb);-webkit-font-smoothing:antialiased;
         /* Jetons DA (scopés) */
         --in:#6c63ff;--in-lt:#8e87ff;--in-dp:#4a3fc9;--in-dk:#372fa3;
         --gold:#ffce4d;--gold-dp:#e8a317;--go:#58cc02;--go-dp:#3a8a01;
@@ -462,7 +462,7 @@ function template() {
       /* Bouton « Continuer avec Google » — blanc officiel, lisible sur la nuit */
       .lg-oauth{width:100%;min-height:52px;margin:2px 0 0;padding:0 16px;border:0;border-radius:15px;
         display:inline-flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;
-        background:#fff;color:#1f1f1f;font:700 15px/1 'Baloo 2',var(--fb),sans-serif;font-family:inherit;
+        background:#fff;color:#1f1f1f;font:700 15px/1 'Archivo',var(--fb),sans-serif;font-family:inherit;
         box-shadow:inset 0 -2px 0 rgba(0,0,0,.08),0 4px 0 rgba(0,0,0,.35),0 8px 16px rgba(0,0,0,.3);
         transition:transform .08s ease,filter .15s}
       .lg-oauth:hover:not(:disabled){filter:brightness(.97)}

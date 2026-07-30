@@ -99,7 +99,7 @@ ${A2HS_STYLE}
   border-top: 1px solid var(--bo);
   box-shadow: var(--s3);
   padding: 10px 20px calc(20px + env(safe-area-inset-bottom, 0px));
-  font-family: 'Inter', sans-serif;
+  font-family: 'Archivo', sans-serif;
   transform: translateY(105%);
   transition: transform .34s cubic-bezier(.32,.72,0,1);
 }
@@ -111,8 +111,8 @@ ${A2HS_STYLE}
 .inn-hd { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
 .inn-badge { width: 52px; height: 52px; object-fit: contain; flex-shrink: 0;
              filter: drop-shadow(0 6px 14px color-mix(in srgb, var(--a) 35%, transparent)); }
-.inn-title { font: 800 17px/1.25 'Plus Jakarta Sans', sans-serif; color: var(--ink); }
-.inn-sub { font: 500 12.5px/1.45 'Inter', sans-serif; color: var(--mu2); margin-top: 3px; }
+.inn-title { font: 800 17px/1.25 'Archivo', sans-serif; color: var(--ink); }
+.inn-sub { font: 500 12.5px/1.45 'Archivo', sans-serif; color: var(--mu2); margin-top: 3px; }
 .inn-close { margin-left: auto; align-self: flex-start; width: 44px; height: 44px; flex-shrink: 0;
              border: 0; border-radius: 50%; background: var(--bg2); color: var(--mu);
              font-size: 18px; line-height: 1; cursor: pointer;
@@ -120,7 +120,7 @@ ${A2HS_STYLE}
 .inn-steps { margin-bottom: 14px; }
 .inn-install { width: 100%; min-height: 50px; border: 0; border-radius: 14px;
                background: linear-gradient(to bottom, var(--a-lt), var(--a) 55%, var(--adk));
-               color: var(--a-ink); font: 800 15px/1 'Plus Jakarta Sans', sans-serif;
+               color: var(--a-ink); font: 800 15px/1 'Archivo', sans-serif;
                cursor: pointer; margin-bottom: 10px;
                box-shadow: 0 6px 16px -4px color-mix(in srgb, var(--a) 55%, transparent);
                -webkit-tap-highlight-color: transparent; }
@@ -128,9 +128,9 @@ ${A2HS_STYLE}
 .inn-install:disabled { opacity: .6; }
 .inn-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .inn-later { flex: 1; min-height: 44px; border: 0; border-radius: 12px; background: var(--bg2);
-             color: var(--mu); font: 700 13px/1 'Inter', sans-serif; cursor: pointer; }
+             color: var(--mu); font: 700 13px/1 'Archivo', sans-serif; cursor: pointer; }
 .inn-never { background: none; border: 0; min-height: 44px; padding: 0 8px; color: var(--mu2);
-             font: 600 11.5px/1 'Inter', sans-serif; text-decoration: underline; cursor: pointer; }
+             font: 600 11.5px/1 'Archivo', sans-serif; text-decoration: underline; cursor: pointer; }
 .inn-close:focus-visible, .inn-install:focus-visible,
 .inn-later:focus-visible, .inn-never:focus-visible {
   outline: 3px solid var(--a); outline-offset: 2px;
@@ -389,7 +389,7 @@ function showOpenInBrowser(me, reason) {
   const host = document.createElement("div");
   host.innerHTML = `${STYLE}
     <style>
-      .inn-oib-step { display:flex; align-items:center; gap:11px; font:600 14px/1.4 'Inter',sans-serif; color:var(--ink); background:var(--bg2); border:1px solid var(--bo2); border-radius:14px; padding:13px 14px; margin:2px 0 12px; }
+      .inn-oib-step { display:flex; align-items:center; gap:11px; font:600 14px/1.4 'Archivo',sans-serif; color:var(--ink); background:var(--bg2); border:1px solid var(--bo2); border-radius:14px; padding:13px 14px; margin:2px 0 12px; }
       .inn-oib-ico { flex-shrink:0; display:flex; color:var(--a-txt); }
       .inn-oib-url { width:100%; box-sizing:border-box; font:600 12.5px/1.3 'IBM Plex Mono',monospace; color:var(--mu); background:var(--bg2); border:1px solid var(--bo); border-radius:10px; padding:10px 12px; margin-top:10px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     </style>

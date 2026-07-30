@@ -31,18 +31,18 @@ export const A2HS_STYLE = `
 .a2s-glyph.plus  { background: var(--su); color: var(--ink); border: 1px solid var(--bo); }
 .a2s-glyph.dots  { background: var(--su); color: var(--ink); border: 1px solid var(--bo); }
 [data-theme="dark"] .a2s-glyph.share { background: rgba(10,132,255,.18); }
-.a2s-txt { font: 600 15px/1.35 'Inter', sans-serif; color: var(--ink); min-width: 0; }
+.a2s-txt { font: 600 15px/1.35 'Archivo', sans-serif; color: var(--ink); min-width: 0; }
 .a2s-txt b { font-weight: 800; }
 .a2s-num {
   margin-left: auto; flex-shrink: 0;
-  font: 800 13px/26px 'Inter', sans-serif; text-align: center;
+  font: 800 13px/26px 'Archivo', sans-serif; text-align: center;
   width: 26px; height: 26px; border-radius: 50%;
   background: var(--a); color: var(--a-ink);
 }
 /* Flèche animée vers l'emplacement réel du bouton */
 .a2s-point {
   display: flex; align-items: center; justify-content: center; gap: 8px;
-  font: 700 13.5px/1.2 'Inter', sans-serif; color: var(--a-txt);
+  font: 700 13.5px/1.2 'Archivo', sans-serif; color: var(--a-txt);
   padding: 2px 0 0;
 }
 .a2s-point svg { display: block; }
