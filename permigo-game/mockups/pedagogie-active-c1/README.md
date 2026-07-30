@@ -5,17 +5,20 @@ Prototype local de quatre méthodes actives appliquées au même objectif :
 
 ## Ouvrir
 
-Depuis `permigo-game/` :
+Depuis le `permigo-game/` du worktree :
 
 ```bash
-npm run dev
+python3 -m http.server 4175 --bind 127.0.0.1
 ```
 
 Puis ouvrir :
 
 ```text
-http://localhost:5173/mockups/pedagogie-active-c1/
+http://127.0.0.1:4175/mockups/pedagogie-active-c1/
 ```
+
+Dans un checkout normal du projet avec les dépendances installées,
+`npm run dev` fonctionne aussi ; l’URL utilise alors le port `5173`.
 
 Les liens directs sont :
 
