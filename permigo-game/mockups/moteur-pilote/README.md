@@ -39,6 +39,13 @@ http://127.0.0.1:4175/mockups/moteur-pilote/
 - `styles.css` — direction visuelle mobile, scènes et retours de jeu.
 - `art-library/` — bibliothèque SVG réutilisable, livrée et validée lot par lot.
 
+## Cartographie des 31 missions
+
+- `CARTOGRAPHIE-31.md` relie chaque compétence C1a–C4g à une mécanique, un
+  assemblage d’assets, sa variante de boîte et ses dépendances ;
+- `MISSION-CLAUDE-C1A.md` est le mandat exécutable pour construire le premier
+  vrai jeu assemblé sans lancer les lots graphiques 4 et 5.
+
 ## Bibliothèque graphique
 
 La planche de contact du lot 1 « pieds et boîte » est disponible à :
