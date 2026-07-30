@@ -1,55 +1,26 @@
 // ═══════════════════════════════════════════════════════════════
-// Ligue RÉVISION — échelle de paliers partagée (élève + enseignant)
-// (Libellée « Révision » côté UI ; identifiants internes restent theory*.)
-// Score = compétences distinctes avec quiz réussi ≥70% (+1 pt)
-//       + parcours d'examen blanc distincts réussis CEPC (+4 pts)
-// Max 30 + 20 = 50 pts. Échelle de progression, PAS de reset hebdo.
-// Dimension SÉPARÉE de la ligue REMC (pratique / validations).
+// Révision travaillée en autonomie — COMPTAGE (plus une ligue).
+//
+// L'échelle de paliers Novice → Révision certifiée et le bloc « +1 pt
+// Révision » ont été RETIRÉS le 30/07/2026 (décision Rayan, du point de vue
+// de l'élève) : ils ne débloquaient rien et s'ajoutaient aux volants, à la
+// mission du jour et à la série sur le même geste. Ne restent ici que le
+// seuil de réussite et le comptage factuel (combien de compétences quizzées,
+// combien d'examens blancs réussis) — lu par la vue moniteur et la sélection
+// des questions du jour.
+//
 // ⚠️ Métier : PermiGo ne couvre PAS le code/ETG — la « révision » ici
 // = connaissances REMC travaillées en autonomie (quiz + exam blanc CEPC).
 // Aucun libellé ne doit mentionner « code » / « ETG ».
 // ═══════════════════════════════════════════════════════════════
 
-// Barème — SOURCE DE VÉRITÉ unique (UI : légende, tuto, animation de gain)
-const THEORY_PTS = { quiz: 1, exam: 4 };
-// Seuil de réussite d'un quiz compétence pour marquer le point théorie
+// Seuil de réussite d'un quiz compétence pour qu'il compte comme travaillé
 export const THEORY_QUIZ_PASS_PCT = 70;
 
-// Échelle monochrome bleue : une seule teinte, 5 nuances du clair (Novice)
-// au profond (maîtrisée). La progression se lit à la saturation, pas à la
-// couleur — plus lisible et premium qu'un arc-en-ciel vert/jaune/violet.
-export const THEORY_LEAGUES = [
-  { n: 1, name: "Novice", color: "#93c5fd", startAt: 1 },
-  { n: 2, name: "Apprenti", color: "#60a5fa", startAt: 8 },
-  { n: 3, name: "Sérieux", color: "#3b82f6", startAt: 18 },
-  { n: 4, name: "Confirmé", color: "#2563eb", startAt: 30 },
-  { n: 5, name: "Révision certifiée", color: "#1d4ed8", startAt: 42 },
-];
-
 /**
- * @param {number} score - score théorique (0-50)
- * @returns {{league: object|null, idx: number, next: object|null, toNext: number, top: boolean}}
- *   league = null → pas encore dans la ligue (0 pt)
- */
-export function theoryLeague(score) {
-  const s = Math.max(0, score || 0);
-  let idx = -1;
-  for (let i = 0; i < THEORY_LEAGUES.length; i++) {
-    if (s >= THEORY_LEAGUES[i].startAt) idx = i;
-  }
-  const league = idx >= 0 ? THEORY_LEAGUES[idx] : null;
-  const next = THEORY_LEAGUES[idx + 1] || null;
-  return {
-    league,
-    idx,
-    next,
-    toNext: next ? next.startAt - s : 0,
-    top: idx === THEORY_LEAGUES.length - 1,
-  };
-}
-
-/**
- * Calcule {score, nComp, nExams} depuis des lignes quiz_attempts.
+ * Calcule {nComp, nExams} depuis des lignes quiz_attempts :
+ * nComp  = compétences distinctes avec un quiz réussi (≥ seuil)
+ * nExams = parcours d'examen blanc distincts réussis
  * @param {Array<{competence_id: string|null, type: string, score: number|null, ref_id: string|null, passed: boolean|null}>} attempts
  */
 export function computeTheoryScore(attempts) {
@@ -62,9 +33,5 @@ export function computeTheoryScore(attempts) {
       comps.add(a.competence_id);
     }
   }
-  return {
-    nComp: comps.size,
-    nExams: exams.size,
-    score: comps.size * THEORY_PTS.quiz + exams.size * THEORY_PTS.exam,
-  };
+  return { nComp: comps.size, nExams: exams.size };
 }

@@ -318,8 +318,8 @@ export async function mount(root, params = {}) {
   // encore réussies. Le focus se propage dans l'enchaînement (cf. renderResult).
   const isUnseen = isRevision && competenceId === "unseen";
 
-  // Session de révision : capture l'état de départ (rang ligue Révision) AVANT
-  // le 1er quiz, pour le récap de fin de session. Idempotent (no-op si déjà active).
+  // Session de révision : ouvre les compteurs de la session (quiz joués /
+  // réussis) pour le récap de fin. Idempotent (no-op si déjà active).
   if (isRevision) {
     import("@/services/revision-session.js")
       .then((m) => m.ensureRevisionSessionStarted())
@@ -809,9 +809,6 @@ function renderResult(
       ? `<div class="qp-daily-streak" role="status"><img class="qp-daily-streak-ico" src="${ASSETS.streakFlame}" alt="" aria-hidden="true" width="16" height="16" /><span${qtRtl()}>${esc(qt("streak_days", `${dailyStreakAfter} jours d'affilée`).replace("{n}", String(dailyStreakAfter)))}</span></div>`
       : "";
 
-  // Slot pour le gain Ligue Revision (injecte de facon asynchrone apres render).
-  const theoryGainSlot = isDaily ? `<div id="qp-theory-gain-slot"></div>` : "";
-
   // Enchaînement libre : « Continue à réviser » devient l'action principale,
   // « Voir mon parcours » passe en secondaire.
   // En mode daily: le bouton principal est "Retour accueil" (la boucle est terminee),
@@ -877,7 +874,6 @@ function renderResult(
         </div>
         <p class="qp-result-msg"${qtRtl()}>${esc(msg)}</p>
         ${dailyStreakHtml}
-        ${theoryGainSlot}
         ${continueBtn}
         ${parcoursBtn}
         ${homeBtn}
@@ -885,26 +881,8 @@ function renderResult(
     </div>
   `;
 
-  // Gain Ligue Revision — injecte de facon asynchrone apres le RPC
-  // (le calcul a deja ete fait dans quiz-engine via computeTheoryGain, mais
-  // pour la question du jour on doit le refaire ici car quiz.js gere le flow
-  // complet et le slot est disponible maintenant).
-  if (isDaily) {
-    const gainSlot = root.querySelector("#qp-theory-gain-slot");
-    if (gainSlot) {
-      Promise.all([import("@/components/eleve/theory-gain.js")])
-        .then(([{ computeTheoryGain, renderTheoryGain }]) =>
-          computeTheoryGain({
-            kind: "quiz",
-            competenceId,
-            scorePct,
-          }).then((gain) => {
-            if (gain && gainSlot.isConnected) renderTheoryGain(gainSlot, gain);
-          }),
-        )
-        .catch(() => {});
-    }
-  }
+  // (Retrait du 30/07/2026 : le bloc « +1 pt Révision » de la question du
+  // jour vivait ici — cf. quiz-engine.js pour le pourquoi.)
 
   const contBtn = root.querySelector("#btn-continue");
   contBtn?.addEventListener("click", async () => {
@@ -938,8 +916,7 @@ function renderResult(
       const btn = e.currentTarget;
       btn.disabled = true;
       const src = await runRevisionRecap();
-      location.hash =
-        src === "secondary" ? "#/classement" : "#/parcours";
+      location.hash = src === "secondary" ? "#/classement" : "#/parcours";
       return;
     }
     location.hash = "#/parcours";

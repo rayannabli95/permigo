@@ -11,7 +11,7 @@ import { navigate } from "@/router.js";
 import { REMC, REMC_TOTAL } from "@/data/remc.js";
 import { icon } from "@/utils/icons.js";
 import { STATUT_CFG } from "@/utils/statut-label.js";
-import { theoryLeague, computeTheoryScore } from "@/utils/theory-league.js";
+import { computeTheoryScore } from "@/utils/theory-league.js";
 import { illus } from "@/components/enseignant/illus.js";
 import { medallion, medStatus } from "@/utils/medallions.js";
 
@@ -344,7 +344,7 @@ let _selfValsMap = {}; // competence_id → auto-validation solo (info seule)
 let _valsRaw = []; // validations brutes (avec validated_at) — pour l'analyse profil
 let _quizAttempts = []; // quiz_attempts (avec completed_at) — pour l'analyse profil
 let _streakEff = 0; // streak RÉEL (vivant seulement si actif aujourd'hui/hier)
-let _theory = null; // { score, nComp, nExams } — ligue Révision (autonomie élève)
+let _theory = null; // { nComp, nExams } — révision faite en autonomie par l'élève
 let _engagement = null; // vue « vautour » : activité/régularité/fiches lues (RPC serveur)
 
 // ─── Entry point ──────────────────────────────────────────────────
@@ -580,14 +580,16 @@ function _renderProfilCard() {
 // Donne au moniteur une vision rapide de l'engagement élève entre les leçons.
 function _renderTheoryRow() {
   if (!_theory) return "";
-  const info = theoryLeague(_theory.score);
-  const label = info.league
-    ? `Niveau ${info.league.n} — ${esc(info.league.name)} · ${_theory.score} pts`
+  // Des FAITS, pas un palier : l'échelle « Niveau 4 — Confirmé » a été retirée
+  // le 30/07/2026 (elle ne débloquait rien et n'existait plus côté élève).
+  const started = _theory.nComp > 0 || _theory.nExams > 0;
+  const label = started
+    ? `${_theory.nComp} quiz réussi${_theory.nComp > 1 ? "s" : ""}`
     : "Pas encore commencé";
-  const detail = info.league
+  const detail = started
     ? `${_theory.nComp} quiz de compétence réussi${_theory.nComp > 1 ? "s" : ""} · ${_theory.nExams} examen${_theory.nExams > 1 ? "s" : ""} blanc${_theory.nExams > 1 ? "s" : ""} réussi${_theory.nExams > 1 ? "s" : ""}`
     : "Pas encore de quiz réussi en autonomie";
-  const dotColor = info.league ? info.league.color : "var(--mu2)";
+  const dotColor = started ? "var(--ens-acc,#4f46e5)" : "var(--mu2)";
   return `
     <div class="lr-kpi-row" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bo2)">
       <span class="lr-kpi-label">Révision (autonomie)</span>
