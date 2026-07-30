@@ -16,10 +16,6 @@ import {
   mascotHTML,
   setMascot,
 } from "@/components/eleve/quiz-ui.js";
-import {
-  computeTheoryGain,
-  renderTheoryGain,
-} from "@/components/eleve/theory-gain.js";
 import { wireQuestionSpeech, stopSpeaking } from "@/utils/speech.js";
 import { getLang } from "@/utils/lang.js";
 import { recordCompetenceAnswer } from "@/utils/weak-points.js";
@@ -223,24 +219,11 @@ export async function lancerQuiz({
       onComplete?.(score, total, answers);
     });
 
-    // Gain ligue théorique — calculé AVANT la persistance (faite par le
-    // caller via submit_competence_quiz). Affiché seulement si le point
-    // est nouveau ; sinon rien (pas d'incitation à re-farmer).
-    computeTheoryGain({
-      kind: "quiz",
-      competenceId,
-      scorePct: Math.round((score / total) * 100),
-    })
-      .then((gain) => {
-        if (!gain || !overlay.isConnected) return;
-        const res = overlay.querySelector(".qz-result");
-        const closeBtn = overlay.querySelector(".qz-cta");
-        if (!res || !closeBtn) return;
-        const slot = document.createElement("div");
-        res.insertBefore(slot, closeBtn);
-        renderTheoryGain(slot, gain);
-      })
-      .catch(() => {});
+    // (Retrait du 30/07/2026 — décision Rayan, du point de vue de l'élève :
+    // le bloc « +1 pt Révision · niveau Sérieux » s'affichait ici. Il ne
+    // débloquait rien et venait s'ajouter aux volants, à la mission du jour
+    // et à la série sur le MÊME geste. Un quiz doit dire une seule chose :
+    // tu as géré, tu peux certifier cette compétence.)
   }
 
   renderQuestion();

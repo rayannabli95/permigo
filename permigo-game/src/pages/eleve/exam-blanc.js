@@ -19,10 +19,6 @@ import {
 } from "@/utils/weak-points.js";
 import { PARCOURS } from "@/data/parcours-quiz-meta.js";
 import { toast } from "@/components/common/toast.js";
-import {
-  computeTheoryGain,
-  renderTheoryGain,
-} from "@/components/eleve/theory-gain.js";
 import { haptic } from "@/utils/haptic.js";
 import {
   quizVisualHTML,
@@ -134,8 +130,7 @@ const EXBS_I18N = {
     verdict_fail: "Not passed · a little more practice",
     cepc_eliminatory:
       "An eliminatory fault means an immediate fail in the exam, whatever the rest of your score.",
-    cepc_pass:
-      "With this score, you would get your licence. Keep it up.",
+    cepc_pass: "With this score, you would get your licence. Keep it up.",
     cepc_fail:
       "You need at least 12/15 with no eliminatory fault. Come back and practise.",
     retry_journey: "Retry this journey",
@@ -211,8 +206,7 @@ const EXBS_I18N = {
     cepc_eliminatory:
       "الخطأ الإقصائي يعني الرسوب المباشر في الامتحان مهما كانت بقية النتيجة.",
     cepc_pass: "بهذه النتيجة كنت ستحصل على رخصتك. واصل هكذا.",
-    cepc_fail:
-      "تحتاج إلى 12/15 على الأقل من دون خطأ إقصائي. عد للتدريب.",
+    cepc_fail: "تحتاج إلى 12/15 على الأقل من دون خطأ إقصائي. عد للتدريب.",
     retry_journey: "إعادة هذا المسار",
     choose_journey: "اختيار مسار آخر",
     home: "← الرئيسية",
@@ -222,8 +216,7 @@ const EXBS_I18N = {
     mistakes: "{count} خطأ · {pct}%",
     official_verdict_pass: "ناجح · أحسنت",
     official_verdict_fail: "راسب · أكثر من 5 أخطاء",
-    official_cepc_pass:
-      "يتطلب الامتحان الحقيقي 35/40. لقد نجحت. واصل هكذا.",
+    official_cepc_pass: "يتطلب الامتحان الحقيقي 35/40. لقد نجحت. واصل هكذا.",
     official_cepc_fail:
       "تحتاج إلى 35/40 على الأقل، أي 5 أخطاء كحد أقصى. عد للتدريب.",
     retry_official: "إعادة امتحان رسمي",
@@ -235,8 +228,7 @@ const EXBS_I18N = {
     centre_traps: "أسئلة {name} الصعبة",
     theme_perfect: "بلا أخطاء في هذا الموضوع. لقد أتقنته.",
     revision_done: "انتهت المراجعة",
-    revision_help:
-      "أعد هذه السلسلة حتى تتقنها، ثم جرّب الامتحان الرسمي.",
+    revision_help: "أعد هذه السلسلة حتى تتقنها، ثم جرّب الامتحان الرسمي.",
     retry: "إعادة",
     back: "رجوع",
   },
@@ -1010,19 +1002,11 @@ function showResults(root, questions, answers, parcours_id) {
     faute_eliminatoire: fauteRatee,
   });
 
-  // Gain ligue théorique — le SELECT part AVANT l'insert ci-dessous pour
-  // mesurer le score « avant ». En cas de course (insert déjà visible),
-  // delta=0 → pas d'animation : fail-safe, jamais de faux +4.
-  const gainPromise = passed
-    ? computeTheoryGain({
-        kind: "exam",
-        refId: parcours_id,
-        scorePct: pct,
-        passed,
-      })
-    : Promise.resolve(null);
+  // (Retrait du 30/07/2026 : le bloc « +4 pts Révision » s'affichait sous le
+  // verdict — cf. quiz-engine.js. L'essai reste enregistré ci-dessous : c'est
+  // lui qui nourrit « Mes fautes », les statistiques et la vue moniteur.)
 
-  // Persistance ligue théorique — fire-and-forget (RLS : élève insère les siens)
+  // Persistance de l'essai — fire-and-forget (RLS : élève insère les siens)
   const me = getCurUser();
   if (me?.id) {
     sb.from("quiz_attempts")
@@ -1129,18 +1113,6 @@ function showResults(root, questions, answers, parcours_id) {
       </div>
     </div>
   `;
-
-  // Injecte le bloc « +4 pts Révision » sous le verdict quand le gain est réel
-  gainPromise
-    .then((gain) => {
-      if (!gain) return;
-      const host = root.querySelector(".exb-res-top");
-      if (!host) return; // l'élève a déjà quitté l'écran
-      const slot = document.createElement("div");
-      host.appendChild(slot);
-      renderTheoryGain(slot, gain);
-    })
-    .catch(() => {});
 
   root.querySelector("#exb-retry")?.addEventListener("click", () => {
     haptic("tap");
@@ -1439,10 +1411,7 @@ async function startCentreRevision(root, slug, knownCentre = null) {
     .map(withShuffledOptions);
   if (!questions.length) {
     toast(
-      exsT(
-        "no_centre_questions",
-        "Pas encore de questions pour ce centre",
-      ),
+      exsT("no_centre_questions", "Pas encore de questions pour ce centre"),
       "info",
     );
     return;

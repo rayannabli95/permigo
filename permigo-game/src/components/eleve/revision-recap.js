@@ -1,11 +1,13 @@
 // ═══════════════════════════════════════════════════════════════
 // Revision Recap — écran plein écran de fin de session « Révision ».
 //
-// Affiche le résumé du jour : X quiz réussis, +P points de révision, mon
-// niveau (Novice → Révision certifiée) et mes points faibles.
-// Ligue unique (30/07/2026) : la révision n'est plus un classement — le
-// visuel de DÉPASSEMENT (mon avatar qui double un rival) a été retiré, il
-// mettait en scène un classement que l'élève ne peut plus voir nulle part.
+// Affiche le résumé du jour : ce que l'élève vient de faire, et ce qu'il a
+// intérêt à retravailler la prochaine fois. Rien d'autre.
+//
+// Retrait du 30/07/2026 (décision Rayan, du point de vue de l'élève) : le
+// visuel de dépassement façon Clash Royale, les points de révision, le
+// niveau et le rang ont été retirés. Ils comptaient une progression qui ne
+// débloquait rien et que l'élève ne pouvait consulter nulle part.
 //
 // Usage :
 //   import { showRevisionRecap } from '@/components/eleve/revision-recap.js';
@@ -13,7 +15,6 @@
 //   (summary = buildRevisionSummary() de @/services/revision-session.js)
 // ═══════════════════════════════════════════════════════════════
 import { esc } from "@/utils/escape.js";
-import { renderUserAvatar } from "@/components/common/avatar.js";
 import { playReward } from "@/utils/sound.js";
 import { getWeakPoints } from "@/utils/weak-points.js";
 import { openShareRecap } from "@/components/eleve/share-recap.js";
@@ -58,6 +59,9 @@ const STYLE = `
   font: 900 clamp(26px, 8.5vw, 38px)/1.04 var(--fd, system-ui), sans-serif;
   font-style: italic; letter-spacing: -.02em; text-transform: uppercase;
   margin: 16px 0 4px; text-wrap: balance;
+  /* Titre en italique dans une colonne flex : sans largeur imposée il prend sa
+     largeur de contenu et déborde à droite (« 1 QUIZ RÉUSSI » coupé). */
+  align-self: stretch; max-width: 100%;
   background: linear-gradient(176deg,#fff 0%,#fff 45%, color-mix(in srgb, var(--rcp-accent) 32%, #fff) 100%);
   -webkit-background-clip: text; background-clip: text; color: transparent;
   opacity: 0; transform: translateY(14px);
@@ -71,93 +75,6 @@ const STYLE = `
   opacity: 0; transition: opacity .4s ease .26s;
 }
 .rcp-overlay.rcp-show .rcp-sub { opacity: 1; }
-
-/* ── Échelle Clash Royale (dépassement) ── */
-.rcp-ladder {
-  position: relative; width: 100%; height: 156px; margin: 22px 0 6px;
-  opacity: 0; transition: opacity .4s ease .3s;
-}
-.rcp-overlay.rcp-show .rcp-ladder { opacity: 1; }
-.rcp-rung {
-  position: absolute; left: 0; right: 0; height: 66px;
-  display: flex; align-items: center; gap: 12px;
-  padding: 0 14px; border-radius: 16px;
-  background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
-  border: 1px solid rgba(255,255,255,.1);
-  transition: transform .85s cubic-bezier(0.62,0.01,0.2,1) .45s, box-shadow .4s ease;
-  will-change: transform;
-}
-.rcp-rung.rival { top: 0; z-index: 1; }
-.rcp-rung.me {
-  top: 90px; z-index: 3;
-  border-color: color-mix(in srgb, var(--rcp-accent) 60%, transparent);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--rcp-accent) 22%, #11131f), color-mix(in srgb, var(--rcp-accent) 8%, #0b0d16));
-  box-shadow: 0 0 0 0 transparent;
-}
-/* swap animé : moi je monte, le rival descend */
-.rcp-overlay.rcp-show .rcp-rung.me    { transform: translateY(-90px); box-shadow: 0 10px 30px color-mix(in srgb, var(--rcp-accent) 35%, transparent); }
-.rcp-overlay.rcp-show .rcp-rung.rival { transform: translateY(90px); opacity: .82; }
-.rcp-overlay.rcp-show .rcp-rung.solo  { transform: none; }
-
-.rcp-rank {
-  flex-shrink: 0; width: 34px; text-align: center;
-  font: 800 17px/1 'IBM Plex Mono', ui-monospace, monospace;
-  color: rgba(255,255,255,.75);
-}
-.rcp-rung.me .rcp-rank { color: #fff; }
-.rcp-av { flex-shrink: 0; }
-.rcp-av-ring { padding: 2px; border-radius: 50%; background: transparent; }
-.rcp-rung.me .rcp-av-ring { background: conic-gradient(from 0deg, var(--rcp-accent), color-mix(in srgb, var(--rcp-accent) 25%, transparent), var(--rcp-accent)); }
-.rcp-name {
-  flex: 1; min-width: 0; text-align: left;
-  font: 800 15px/1.1 var(--fd, system-ui), sans-serif; color: #fff;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.rcp-name small { display: block; font: 600 11px/1.3 var(--fd, system-ui), sans-serif; color: rgba(255,255,255,.5); margin-top: 3px; }
-.rcp-score {
-  flex-shrink: 0; font: 800 15px/1 'IBM Plex Mono', ui-monospace, monospace; color: #fff;
-}
-.rcp-score small { font-size: 10px; opacity: .55; font-weight: 700; letter-spacing: .06em; }
-
-/* Badge +N places qui pop sur l'échelle */
-.rcp-jump {
-  position: absolute; top: 50%; right: -2px; transform: translate(0,-50%) scale(.4);
-  z-index: 4; padding: 6px 11px; border-radius: 999px;
-  font: 900 13px/1 var(--fd, system-ui), sans-serif; letter-spacing: .02em;
-  color: #06070d; background: linear-gradient(135deg, color-mix(in srgb, var(--rcp-accent) 80%, #fff), var(--rcp-accent));
-  box-shadow: 0 6px 18px color-mix(in srgb, var(--rcp-accent) 45%, transparent);
-  opacity: 0;
-}
-.rcp-overlay.rcp-show .rcp-jump { animation: rcpJump .5s cubic-bezier(0.34,1.56,0.64,1) 1.1s both; }
-@keyframes rcpJump { 0% { opacity: 0; transform: translate(0,-50%) scale(.4); } 100% { opacity: 1; transform: translate(0,-50%) scale(1); } }
-
-/* ── Stats ── */
-.rcp-stats {
-  display: flex; width: 100%; margin: 20px 0 0; padding: 14px 4px;
-  background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
-  border: 1px solid rgba(255,255,255,.1); border-radius: 16px;
-  opacity: 0; transform: translateY(12px);
-  transition: opacity .45s ease .5s, transform .55s cubic-bezier(0.23,1,0.32,1) .5s;
-}
-.rcp-overlay.rcp-show .rcp-stats { opacity: 1; transform: translateY(0); }
-.rcp-stat { flex: 1; min-width: 0; padding: 0 6px; }
-.rcp-stat + .rcp-stat { border-left: 1px solid rgba(255,255,255,.12); }
-.rcp-stat-v { display: block; font: 800 22px/1 'IBM Plex Mono', ui-monospace, monospace; color: #fff; }
-.rcp-stat-v small { font-size: 12px; opacity: .55; }
-.rcp-stat-l { display: block; margin-top: 6px; font: 700 9px/1.2 var(--fd, system-ui), sans-serif; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.5); }
-
-/* Chip nouvelle ligue */
-.rcp-league {
-  display: inline-flex; align-items: center; gap: 8px; margin-top: 16px;
-  padding: 8px 14px; border-radius: 999px;
-  font: 800 12px/1 var(--fd, system-ui), sans-serif; letter-spacing: .04em;
-  color: #fff; background: color-mix(in srgb, var(--rcp-accent) 18%, transparent);
-  border: 1px solid color-mix(in srgb, var(--rcp-accent) 45%, transparent);
-  opacity: 0; transform: translateY(8px);
-  transition: opacity .4s ease .6s, transform .5s ease .6s;
-}
-.rcp-overlay.rcp-show .rcp-league { opacity: 1; transform: translateY(0); }
-.rcp-league i { width: 9px; height: 9px; border-radius: 50%; background: var(--rcp-accent); box-shadow: 0 0 10px var(--rcp-accent); }
 
 /* Points faibles — direction concrète pour la prochaine session */
 .rcp-weak {
@@ -206,12 +123,9 @@ const STYLE = `
 .rcp-close:hover { background: rgba(255,255,255,.2); }
 
 @media (prefers-reduced-motion: reduce) {
-  .rcp-overlay, .rcp-kicker, .rcp-title, .rcp-sub, .rcp-ladder, .rcp-rung, .rcp-stats, .rcp-league, .rcp-weak, .rcp-cta, .rcp-second, .rcp-close {
+  .rcp-overlay, .rcp-kicker, .rcp-title, .rcp-sub, .rcp-weak, .rcp-cta, .rcp-second, .rcp-close {
     transition: opacity .2s ease !important; transform: none !important;
   }
-  .rcp-jump { animation: none !important; opacity: 1 !important; transform: translate(0,-50%) !important; }
-  .rcp-overlay.rcp-show .rcp-rung.me { transform: none !important; }
-  .rcp-overlay.rcp-show .rcp-rung.rival { transform: none !important; }
 }
 `;
 
@@ -222,24 +136,6 @@ function ensureStyle() {
   tag.id = STYLE_ID;
   tag.textContent = STYLE;
   document.head.appendChild(tag);
-}
-
-// Ma « marche » : avatar + total de points de révision. Plus de rang ni de
-// rival — la révision n'est plus un classement (ligue unique du 30/07/2026),
-// on ne met donc plus en scène un dépassement invérifiable.
-function rungHtml(row, { style = "" } = {}) {
-  const name = row?.display_name || "Toi";
-  const score = typeof row?.score === "number" ? row.score : 0;
-  const avatar = renderUserAvatar(
-    { avatar_url: row?.avatar, prenom: name },
-    44,
-  );
-  return `
-    <div class="rcp-rung me solo"${style ? ` style="${style}"` : ""}>
-      <span class="rcp-av"><span class="rcp-av-ring">${avatar}</span></span>
-      <span class="rcp-name">${esc(name)}<small>Toi</small></span>
-      <span class="rcp-score">${esc(String(score))}<small>PTS</small></span>
-    </div>`;
 }
 
 /**
@@ -254,11 +150,9 @@ export function showRevisionRecap(summary = {}, opts = {}) {
   ensureStyle();
   const { onCta, onSecondary } = opts;
 
-  const accent = summary.league?.color || "#22c55e";
+  const accent = "#22c55e";
   const nPassed = summary.nPassed ?? 0;
   const nQuiz = summary.nQuiz ?? 0;
-  const pointsGained = summary.pointsGained ?? 0;
-  const totalScore = summary.newScore ?? 0;
 
   const title =
     nPassed > 0
@@ -284,29 +178,10 @@ export function showRevisionRecap(summary = {}, opts = {}) {
         .join("")}</div>`
     : "";
 
-  // Ma marche (avatar + total de points). Plus de dépassement mis en scène :
-  // la révision n'a plus de classement (ligue unique du 30/07/2026).
-  const ladderHtml = summary.me
-    ? rungHtml(summary.me, { style: "top:45px" })
-    : "";
-
-  const stats = [
-    { v: nPassed, suffix: `/${nQuiz || nPassed}`, l: "Réussis" },
-    { v: `+${pointsGained}`, l: pointsGained > 1 ? "Points" : "Point" },
-    { v: totalScore, suffix: "/50", l: "Total" },
-  ];
-  const statsHtml = stats
-    .map(
-      (s) =>
-        `<div class="rcp-stat"><span class="rcp-stat-v">${esc(String(s.v))}${s.suffix ? `<small>${esc(s.suffix)}</small>` : ""}</span><span class="rcp-stat-l">${esc(s.l)}</span></div>`,
-    )
-    .join("");
-
-  const leagueChip = summary.leagueUp
-    ? `<div class="rcp-league"><i></i>Nouveau niveau · ${esc(summary.leagueUp.name)}</div>`
-    : summary.league
-      ? `<div class="rcp-league"><i></i>Niveau ${esc(summary.league.name)}</div>`
-      : "";
+  // (Retrait du 30/07/2026 — décision Rayan : les points de révision, le
+  // niveau et le rang ne sont plus affichés nulle part côté élève. Ils ne
+  // débloquaient rien. Il reste ce qui l'aide vraiment : ce qu'il vient de
+  // faire, et ce qu'il doit retravailler la prochaine fois.)
 
   return new Promise((resolve) => {
     const overlay = document.createElement("div");
@@ -322,10 +197,7 @@ export function showRevisionRecap(summary = {}, opts = {}) {
         <span class="rcp-kicker">Session révision</span>
         <h1 class="rcp-title">${esc(title)}</h1>
         <p class="rcp-sub">${esc(sub)}</p>
-        ${ladderHtml ? `<div class="rcp-ladder">${ladderHtml}</div>` : ""}
-        <div class="rcp-stats">${statsHtml}</div>
         ${weakHtml}
-        ${leagueChip}
         <button class="rcp-cta" type="button">Continuer</button>
         ${nPassed > 0 ? `<button class="rcp-second" data-share type="button">📲 Partager ma session</button>` : ""}
         ${onSecondary ? `<button class="rcp-second" data-secondary type="button">Voir le classement</button>` : ""}
@@ -382,7 +254,7 @@ export function showRevisionRecap(summary = {}, opts = {}) {
       openShareRecap({
         kicker: "Quiz réussis aujourd'hui",
         big: String(nPassed),
-        sub: `+${pointsGained} pt${pointsGained > 1 ? "s" : ""} de révision${summary.league ? ` · niveau ${summary.league.name}` : ""}`,
+        sub: `${nQuiz} quiz joué${nQuiz > 1 ? "s" : ""} dans ma session de révision`,
       });
     });
     overlay
