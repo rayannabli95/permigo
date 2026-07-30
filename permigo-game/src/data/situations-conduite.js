@@ -673,7 +673,10 @@ export const SITUATIONS = [
       kind: "route",
       vehicules: [
         { id: "lead", at: "S", d: 1.35, couleur: "gris" },
-        { id: "moi", at: "S", d: 2.55, couleur: "joueur", label: "Toi" },
+        // d ≥ 2.55 : en dessous, les deux carrosseries se CHEVAUCHENT (une
+        // voiture mesure 1 tuile) — la scène de la distance de sécurité
+        // montrait deux voitures encastrées.
+        { id: "moi", at: "S", d: 2.6, couleur: "joueur", label: "Toi" },
       ],
     },
     question:
@@ -691,7 +694,9 @@ export const SITUATIONS = [
     bonne: "ecart",
     explication:
       "La règle des 2 secondes : compte le temps entre son passage et le tien à un repère fixe. En dessous, tu es trop près pour freiner à temps.",
-    okAnim: [{ veh: "lead" }, { veh: "moi", delai: 200 }],
+    // Le joueur avance MOINS que celui de devant : l'écart se creuse à l'écran,
+    // exactement la règle qu'on vient d'énoncer.
+    okAnim: [{ veh: "lead" }, { veh: "moi", delai: 200, avance: 2.5 }],
   },
 
   // ── Dépassement ──────────────────────────────────────────────
@@ -705,7 +710,7 @@ export const SITUATIONS = [
       ligne: "continue",
       vehicules: [
         { id: "lead", at: "S", d: 1.35, couleur: "gris" },
-        { id: "moi", at: "S", d: 2.55, couleur: "joueur", label: "Toi" },
+        { id: "moi", at: "S", d: 2.6, couleur: "joueur", label: "Toi" },
         { id: "face", at: "N", d: 2.6, couleur: "rouge" },
       ],
     },
@@ -1060,7 +1065,9 @@ export const SITUATIONS = [
       kind: "route",
       vehicules: [
         { id: "lead", at: "S", d: 1.25, type: "camion" },
-        { id: "moi", at: "S", d: 2.75, couleur: "joueur", label: "Toi" },
+        // un camion fait 1,7 tuile : il faut d ≥ 2.6 pour ne pas être DANS
+        // sa remorque.
+        { id: "moi", at: "S", d: 2.9, couleur: "joueur", label: "Toi" },
       ],
     },
     question: "Ce camion te cache tout ce qui se passe devant. Que fais-tu ?",
@@ -1073,7 +1080,8 @@ export const SITUATIONS = [
     bonne: "ecart",
     explication:
       "Plus le véhicule devant est gros, moins tu vois loin : tu allonges ta distance pour retrouver de la visibilité et du temps de réaction.",
-    okAnim: [{ veh: "lead" }, { veh: "moi", delai: 250 }],
+    // Idem : l'écart se creuse à l'écran (le joueur allonge sa distance).
+    okAnim: [{ veh: "lead" }, { veh: "moi", delai: 250, avance: 2.4 }],
   },
 
   // ── Piétons (lot 3) ──────────────────────────────────────────
@@ -1224,7 +1232,13 @@ export const SITUATIONS = [
     explication:
       "Le panneau prime sur la règle de la droite : tu es sur la voie NON prioritaire, tu cèdes aux véhicules des deux côtés — même à ceux qui viennent de gauche.",
     focus: { veh: "v1" },
-    okAnim: [{ veh: "v1" }, { veh: "moi", delai: 1200 }],
+    // Un camion fait 1,7 tuile : il lui faut une course plus longue pour
+    // DÉGAGER le carrefour, et au joueur plus de temps avant de s'engager —
+    // sinon le joueur finissait dans la remorque.
+    okAnim: [
+      { veh: "v1", avance: 4.4 },
+      { veh: "moi", delai: 1900 },
+    ],
   },
   {
     id: "cede-deux-sens",
@@ -1436,7 +1450,7 @@ export const SITUATIONS = [
       kind: "route",
       vehicules: [
         { id: "lead", at: "S", d: 1.35, couleur: "gris" },
-        { id: "moi", at: "S", d: 2.55, couleur: "joueur", label: "Toi" },
+        { id: "moi", at: "S", d: 2.6, couleur: "joueur", label: "Toi" },
       ],
     },
     question:
@@ -1465,7 +1479,7 @@ export const SITUATIONS = [
       kind: "route",
       vehicules: [
         { id: "lead", at: "S", d: 1.35, couleur: "gris" },
-        { id: "moi", at: "S", d: 2.55, couleur: "joueur", label: "Toi" },
+        { id: "moi", at: "S", d: 2.6, couleur: "joueur", label: "Toi" },
         { id: "face", at: "N", d: 1.9, couleur: "rouge" },
       ],
     },
@@ -1847,7 +1861,9 @@ export const SITUATIONS = [
     bonne: "accelere",
     explication:
       "La voie d'accélération sert à atteindre la vitesse du flux AVANT de t'insérer. T'y traîner ou t'y arrêter oblige à repartir de zéro face à des voitures à 130.",
-    okAnim: [{ veh: "moi", clign: "gauche" }],
+    // avance bornée : le joueur reste DANS la zone d'insertion (y ≤ 1.4) au
+    // lieu de finir sa course sur la bande d'arrêt d'urgence.
+    okAnim: [{ veh: "moi", clign: "gauche", avance: 1.5 }],
   },
   {
     id: "bretelle-clignotant",
