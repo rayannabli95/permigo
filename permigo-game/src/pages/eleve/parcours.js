@@ -81,9 +81,6 @@ const PRC_I18N = {
     themesw_aria: "Display: light or dark",
     theme_dark: "Dark",
     theme_light: "Light",
-    exam_t: "Prepare your exam",
-    exam_s: "Your countdown and where you stand",
-    exam_aria: "See My licence — your exam",
     main_aria: "Your journey — chapter view",
     close: "Close",
     fiche_chap: "CHAPTER {n} · {name}",
@@ -146,9 +143,6 @@ const PRC_I18N = {
     themesw_aria: "العرض: فاتح أو داكن",
     theme_dark: "داكن",
     theme_light: "فاتح",
-    exam_t: "استعدّ لامتحانك",
-    exam_s: "عدّك التنازلي وأين وصلت",
-    exam_aria: "اعرض رخصتي — امتحانك",
     main_aria: "مسارك — عرض الفصل",
     close: "إغلاق",
     fiche_chap: "الفصل {n} · {name}",
@@ -810,25 +804,6 @@ const STYLE = `<style>
     box-shadow: 0 2px 8px -2px color-mix(in srgb, var(--a) 35%, transparent) !important;
   }
 }
-
-/* ══ Lien « Prépare ton jour J » (porte Mon permis → #/examen) ══ */
-.prc-cv-exam {
-  position:relative; z-index:2;
-  display:flex; align-items:center; gap:12px;
-  margin:18px 16px 0; padding:14px 16px; border-radius:16px;
-  background:color-mix(in srgb, var(--su,#fff) 86%, transparent);
-  border:1px solid var(--bo,rgba(120,120,160,.28));
-  backdrop-filter:blur(6px);
-  text-decoration:none; color:var(--ink,#1c1e2e);
-  box-shadow:0 10px 24px -14px rgba(10,10,30,.35);
-  transition:transform .16s cubic-bezier(.23,1,.32,1);
-}
-.prc-cv-exam:active { transform:scale(.98); }
-.prc-cv-exam-ic { font-size:24px; flex:none; }
-.prc-cv-exam-tx { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
-.prc-cv-exam-tx b { font:700 14.5px/1.2 'Archivo',sans-serif; }
-.prc-cv-exam-tx small { font:500 12px/1.5 'Archivo',sans-serif; color:var(--mu,#6b7089); }
-.prc-cv-exam-go { font:800 18px/1 'Archivo',sans-serif; color:var(--a,#6366f1); flex:none; }
 
 /* ══ Décor immersif : panneaux de signalisation (fond, gouttières) ══ */
 .prc-signs { position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
@@ -2643,19 +2618,6 @@ function renderChapterView(
     ${routeHTML}
     ${chestHTML}
     ${gateHTML}
-    <!-- Porte vers le hub « Mon permis » (chantier nav simplifiée) : le jeu
-         (ici, #/parcours) et le sérieux sont séparés — cette carte renvoie
-         vers l'étape ③ « L'examen » du hub (?scroll=exam), pas directement
-         vers l'ancienne page #/examen autonome (qui reste joignable en
-         direct/deep-link, cf. router.js). -->
-    <a href="#/mon-permis?scroll=exam" class="prc-cv-exam" aria-label="${prcT("exam_aria", "Voir Mon permis — ton examen")}">
-      <span class="prc-cv-exam-ic" aria-hidden="true">🎓</span>
-      <span class="prc-cv-exam-tx">
-        <b>${prcD("exam_t", "Prépare ton examen")}</b>
-        <small>${prcD("exam_s", "Ton compte à rebours et où tu en es")}</small>
-      </span>
-      <span class="prc-cv-exam-go" aria-hidden="true">→</span>
-    </a>
     <div style="height:40px"></div>
   </div>
 </div>`;
