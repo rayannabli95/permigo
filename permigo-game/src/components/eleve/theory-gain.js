@@ -1,5 +1,8 @@
 // ═══════════════════════════════════════════════════════════════
-// Gain Ligue Révision — feedback « +N pts Révision » sur les écrans
+// Gain de PROGRESSION Révision — feedback « +N pts Révision » sur les écrans
+// (« ligue » depuis le 30/07/2026 = uniquement le classement des compétences
+// certifiées ; la révision est une échelle de niveaux personnelle, pas un
+// classement — cf. pages/eleve/classement.js)
 // de résultat (quiz compétence réussi / parcours d'examen réussi).
 // Honnêteté : le bloc ne s'affiche QUE si le point est réellement
 // nouveau (compétence / parcours pas déjà compté) → on valorise la
@@ -169,20 +172,20 @@ export function renderTheoryGain(host, gain) {
     const span = to.next.startAt - start;
     fillNew = Math.max(0, Math.min(100, ((after - start) / span) * 100));
     fillOld = Math.max(0, Math.min(100, ((before - start) / span) * 100));
-    progLine = `Plus que <strong>${to.toNext}</strong> pt${to.toNext > 1 ? "s" : ""} avant la Ligue ${to.next.n} — <strong>${esc(to.next.name)}</strong>`;
+    progLine = `Plus que <strong>${to.toNext}</strong> pt${to.toNext > 1 ? "s" : ""} avant le niveau ${to.next.n} — <strong>${esc(to.next.name)}</strong>`;
   }
 
   const upHtml = leveledUp
     ? `<div class="tg-up">
          <img src="/skins/mascot-celebrate.png" alt="" aria-hidden="true" />
-         <span>${to.league.n === 1 && before === 0 ? "Tu entres dans la ligue !" : `Ligue ${to.league.n} — ${esc(to.league.name)} atteinte !`}</span>
+         <span>${to.league.n === 1 && before === 0 ? "Tu démarres ta progression !" : `Niveau ${to.league.n} — ${esc(to.league.name)} atteint !`}</span>
        </div>`
     : "";
 
   host.innerHTML = `
     <div class="tg-block" role="status">
       <div class="tg-pts tg-pop">+<span class="tg-n">1</span> pt${delta > 1 ? "s" : ""} Révision</div>
-      <div class="tg-sub">Ligue Révision</div>
+      <div class="tg-sub">Ta progression Révision</div>
       <div class="tg-league">${progLine}</div>
       <div class="tg-bar"><div class="tg-fill" style="width:${fillOld}%"></div></div>
       ${upHtml}

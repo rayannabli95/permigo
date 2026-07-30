@@ -1,9 +1,11 @@
 // ═══════════════════════════════════════════════════════════════
 // Revision Recap — écran plein écran de fin de session « Révision ».
 //
-// Affiche le résumé du jour : X quiz réussis, +N places gagnées, +P points,
-// avec un VISUEL DE DÉPASSEMENT façon Clash Royale (mon avatar passe au-dessus
-// d'un autre élève sur l'échelle de la ligue Révision).
+// Affiche le résumé du jour : X quiz réussis, +P points de révision, mon
+// niveau (Novice → Révision certifiée) et mes points faibles.
+// Ligue unique (30/07/2026) : la révision n'est plus un classement — le
+// visuel de DÉPASSEMENT (mon avatar qui double un rival) a été retiré, il
+// mettait en scène un classement que l'élève ne peut plus voir nulle part.
 //
 // Usage :
 //   import { showRevisionRecap } from '@/components/eleve/revision-recap.js';
@@ -222,19 +224,20 @@ function ensureStyle() {
   document.head.appendChild(tag);
 }
 
-function rungHtml(row, { me = false, rank, solo = false, style = "" } = {}) {
-  const name = row?.display_name || (me ? "Toi" : "Élève");
+// Ma « marche » : avatar + total de points de révision. Plus de rang ni de
+// rival — la révision n'est plus un classement (ligue unique du 30/07/2026),
+// on ne met donc plus en scène un dépassement invérifiable.
+function rungHtml(row, { style = "" } = {}) {
+  const name = row?.display_name || "Toi";
   const score = typeof row?.score === "number" ? row.score : 0;
   const avatar = renderUserAvatar(
     { avatar_url: row?.avatar, prenom: name },
     44,
   );
-  const cls = `rcp-rung ${me ? "me" : "rival"}${solo ? " solo" : ""}`;
   return `
-    <div class="${cls}"${style ? ` style="${style}"` : ""}>
-      <span class="rcp-rank">#${esc(String(rank ?? row?.rang ?? "—"))}</span>
+    <div class="rcp-rung me solo"${style ? ` style="${style}"` : ""}>
       <span class="rcp-av"><span class="rcp-av-ring">${avatar}</span></span>
-      <span class="rcp-name">${esc(name)}${me ? "<small>Toi</small>" : ""}</span>
+      <span class="rcp-name">${esc(name)}<small>Toi</small></span>
       <span class="rcp-score">${esc(String(score))}<small>PTS</small></span>
     </div>`;
 }
@@ -254,9 +257,8 @@ export function showRevisionRecap(summary = {}, opts = {}) {
   const accent = summary.league?.color || "#22c55e";
   const nPassed = summary.nPassed ?? 0;
   const nQuiz = summary.nQuiz ?? 0;
-  const ranksGained = summary.ranksGained ?? 0;
   const pointsGained = summary.pointsGained ?? 0;
-  const hasOvertake = ranksGained > 0 && summary.rival;
+  const totalScore = summary.newScore ?? 0;
 
   const title =
     nPassed > 0
@@ -282,36 +284,16 @@ export function showRevisionRecap(summary = {}, opts = {}) {
         .join("")}</div>`
     : "";
 
-  // Échelle : dépassement (rival + moi) ou solo (pas de dépassement)
-  let ladderHtml;
-  if (hasOvertake) {
-    ladderHtml = `
-      ${rungHtml(summary.rival, { me: false, rank: summary.rival.rang })}
-      ${rungHtml(summary.me, { me: true, rank: summary.newRang })}
-      <div class="rcp-jump">+${esc(String(ranksGained))} place${ranksGained > 1 ? "s" : ""}</div>`;
-  } else if (summary.me) {
-    ladderHtml = rungHtml(summary.me, {
-      me: true,
-      rank: summary.newRang,
-      solo: true,
-      style: "top:45px",
-    });
-  } else {
-    ladderHtml = "";
-  }
+  // Ma marche (avatar + total de points). Plus de dépassement mis en scène :
+  // la révision n'a plus de classement (ligue unique du 30/07/2026).
+  const ladderHtml = summary.me
+    ? rungHtml(summary.me, { style: "top:45px" })
+    : "";
 
   const stats = [
     { v: nPassed, suffix: `/${nQuiz || nPassed}`, l: "Réussis" },
     { v: `+${pointsGained}`, l: pointsGained > 1 ? "Points" : "Point" },
-    {
-      v:
-        ranksGained > 0
-          ? `+${ranksGained}`
-          : summary.newRang
-            ? `#${summary.newRang}`
-            : "—",
-      l: ranksGained > 0 ? "Places" : "Rang",
-    },
+    { v: totalScore, suffix: "/50", l: "Total" },
   ];
   const statsHtml = stats
     .map(
@@ -321,9 +303,9 @@ export function showRevisionRecap(summary = {}, opts = {}) {
     .join("");
 
   const leagueChip = summary.leagueUp
-    ? `<div class="rcp-league"><i></i>Nouvelle ligue · ${esc(summary.leagueUp.name)}</div>`
+    ? `<div class="rcp-league"><i></i>Nouveau niveau · ${esc(summary.leagueUp.name)}</div>`
     : summary.league
-      ? `<div class="rcp-league"><i></i>Ligue ${esc(summary.league.name)}</div>`
+      ? `<div class="rcp-league"><i></i>Niveau ${esc(summary.league.name)}</div>`
       : "";
 
   return new Promise((resolve) => {
@@ -400,7 +382,7 @@ export function showRevisionRecap(summary = {}, opts = {}) {
       openShareRecap({
         kicker: "Quiz réussis aujourd'hui",
         big: String(nPassed),
-        sub: `+${pointsGained} pt${pointsGained > 1 ? "s" : ""} en ligue Révision${ranksGained > 0 ? ` · +${ranksGained} place${ranksGained > 1 ? "s" : ""}` : ""}`,
+        sub: `+${pointsGained} pt${pointsGained > 1 ? "s" : ""} de révision${summary.league ? ` · niveau ${summary.league.name}` : ""}`,
       });
     });
     overlay

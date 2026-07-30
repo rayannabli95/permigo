@@ -1,12 +1,15 @@
 // ═══════════════════════════════════════════════════════════════
 // Héros « Ta Ligue » — carte Arène (nuit) posée sur l'accueil.
-// LIGUE UNIQUE depuis le pivot 17/07 (décision Rayan).
+// LIGUE UNIQUE depuis le pivot 17/07 (décision Rayan), assise sur les
+// COMPÉTENCES CERTIFIÉES depuis le 30/07 (get_eleve_leaderboard) : l'ancienne
+// saison hebdo de révision ne fait plus classement (cf. classement.js).
 // CARTE RÉDUITE (demande Rayan 17/07) : on ne montre plus le podium, ni le
 // texte « comment ça marche », ni la barre de progression. Juste :
 //  · TA PLACE (gros rang doré) + ton école · N élèves
-//  · le compte à rebours de fin de saison (chip)
-//  · UNE ligne d'objectif (« plus que X pts pour passer Nᵉ »)
-// Le détail complet (podium, points, comment monter) vit dans la page
+//  · ton avancement /31 (chip — remplace le compte à rebours de saison,
+//    qui n'a plus de sens sur une ligue sans reset)
+//  · UNE ligne d'objectif (« plus que X compétences pour passer Nᵉ »)
+// Le détail complet (podium, paliers, comment monter) vit dans la page
 // « Voir le classement » (toute la carte est tappable → #/classement).
 // Carte toujours sombre (skin Arène) ; or réservé au rang.
 // Données : lignes leaderboard { rang, display_name, score, is_me, avatar }.
@@ -15,45 +18,45 @@ import { esc, escAttr } from "@/utils/escape.js";
 import { icon } from "@/utils/icons.js";
 import { navigate } from "@/router.js";
 import { track } from "@/services/analytics.js";
-import { msToNextMonday, fmtCountdown } from "@/utils/league-shared.js";
 import { getLang } from "@/utils/lang.js";
+
+const TOTAL_COMPETENCES = 31;
 
 // ── i18n de la COQUE (EN/AR) — dict local, repli FR (règle coque validée 3×).
 const LGH_I18N = {
   en: {
     eyebrow: "Your league",
-    season: "Season ends · ",
+    progress: "{n}/{t} skills",
     place: "Your rank",
     school: "Your school",
     solo: "PermiGo learners",
     of_students: "{org} · {n} learner{s}",
-    aria: "Your league this week — {st} — see the leaderboard",
+    aria: "Your league — {st} — see the leaderboard",
     aria_rank: "you're {r} of {n}",
-    aria_empty: "no points yet this week",
-    invite:
-      "Answer questions this week — every right answer puts you in the race.",
+    aria_empty: "no certified skill yet",
+    invite: "Certify your first skill to enter the race.",
     top: "You're in the lead — keep your spot",
     gap: "Only <b>{g} {u}</b> to overtake {w}",
     first_place: "1st place",
-    pt: "pt",
-    pts: "pts",
+    pt: "skill",
+    pts: "skills",
   },
   ar: {
     eyebrow: "دوريك",
-    season: "نهاية الموسم · ",
+    progress: "{n}/{t} مهارة",
     place: "مركزك",
     school: "مدرستك",
     solo: "طلاب بيرميغو",
     of_students: "{org} · {n} طالبًا",
-    aria: "دوريك هذا الأسبوع — {st} — عرض الترتيب",
+    aria: "دوريك — {st} — عرض الترتيب",
     aria_rank: "أنت في المركز {r} من أصل {n}",
-    aria_empty: "لا نقاط بعد هذا الأسبوع",
-    invite: "أجب عن أسئلة هذا الأسبوع — كل إجابة صحيحة تُدخلك السباق.",
+    aria_empty: "لم تثبّت أي مهارة بعد",
+    invite: "ثبّت أول مهارة لتدخل السباق.",
     top: "أنت في الصدارة — حافظ على مركزك",
     gap: "تفصلك <b>{g} {u}</b> عن تجاوز {w}",
     first_place: "المركز الأول",
-    pt: "نقطة",
-    pts: "نقاط",
+    pt: "مهارة",
+    pts: "مهارات",
   },
 };
 function lgt(key, fr) {
@@ -63,23 +66,6 @@ function lgt(key, fr) {
 // Isolation RTL par span (l'app reste LTR — cf. utils/lang.js).
 function lgRtl(html) {
   return getLang() === "ar" ? `<span dir="rtl">${html}</span>` : html;
-}
-// Compte à rebours localisé (fmtCountdown écrit « 2j 5h » en FR).
-function lgCountdown(ms) {
-  const l = getLang();
-  if (l === "fr") return fmtCountdown(ms);
-  const s = Math.floor(ms / 1000);
-  const d = Math.floor(s / 86400);
-  const h = Math.floor((s % 86400) / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  if (l === "ar") {
-    if (d > 0) return `${d} يوم ${h} س`;
-    if (h > 0) return `${h} س ${m} د`;
-    return `${m} د`;
-  }
-  if (d > 0) return `${d}d ${h}h`;
-  if (h > 0) return `${h}h ${m}min`;
-  return `${m}min`;
 }
 
 // Vue-modèle d'une ligue à partir des lignes de classement.
@@ -100,13 +86,14 @@ function buildModel(rows) {
 // UNE ligne d'objectif — jamais culpabilisante, toujours « voilà comment monter ».
 function nudgeLine(m) {
   if (!m.classed) {
-    return `<div class="lgh-nudge lgh-nudge-invite">${lgRtl(esc(lgt("invite", "Réponds à des questions cette semaine — chaque bonne réponse te fait entrer dans la course.")))}</div>`;
+    return `<div class="lgh-nudge lgh-nudge-invite">${lgRtl(esc(lgt("invite", "Certifie ta première compétence pour entrer dans la course.")))}</div>`;
   }
   if (m.mine.rang === 1) {
     return `<div class="lgh-nudge"><span class="lgh-up" aria-hidden="true">👑</span> ${lgRtl(esc(lgt("top", "Tu es en tête — garde ta place")))}</div>`;
   }
   if (m.above) {
-    const unit = m.gap > 1 ? lgt("pts", "pts") : lgt("pt", "pt");
+    const unit =
+      m.gap > 1 ? lgt("pts", "compétences") : lgt("pt", "compétence");
     const who =
       m.mine.rang - 1 === 1
         ? esc(lgt("first_place", "la 1ʳᵉ place"))
@@ -121,11 +108,11 @@ function nudgeLine(m) {
   return "";
 }
 
-function renderHero(models, solo) {
-  const m = models.revision;
+function renderHero(m, solo) {
   const rankBig = m.classed
     ? `<span class="lgh-hash">#</span>${m.mine.rang}`
     : "—";
+  const myScore = Math.max(0, m.mine?.score ?? 0);
   const org = solo ? lgt("solo", "Élèves PermiGo") : lgt("school", "Ton école");
   const lang = getLang();
   const ofTxt = m.classed
@@ -140,16 +127,21 @@ function renderHero(models, solo) {
     ? lgt("aria_rank", "tu es {r}ᵉ sur {n}")
         .replace("{r}", m.mine.rang)
         .replace("{n}", m.total)
-    : lgt("aria_empty", "pas encore de points cette semaine");
+    : lgt("aria_empty", "pas encore de compétence certifiée");
+  // Chip d'avancement : remplace l'ancien compte à rebours de saison — la
+  // ligue ne se remet plus à zéro le lundi, elle suit le parcours.
+  const progress = lgt("progress", "{n}/{t} compétences")
+    .replace("{n}", String(myScore))
+    .replace("{t}", String(TOTAL_COMPETENCES));
 
   return `<div class="lgh-eyebrow">${lgRtl(esc(lgt("eyebrow", "Ta ligue")))}</div>
   <div class="lgh" role="button" tabindex="0"
-       aria-label="${escAttr(lgt("aria", "Ta ligue de la semaine — {st} — voir le classement").replace("{st}", ariaSt))}">
+       aria-label="${escAttr(lgt("aria", "Ta ligue — {st} — voir le classement").replace("{st}", ariaSt))}">
     <span class="lgh-glow lgh-glow-a" aria-hidden="true"></span>
     <span class="lgh-glow lgh-glow-b" aria-hidden="true"></span>
 
     <div class="lgh-head">
-      <span class="lgh-season">${icon("clock", { size: 12, strokeWidth: 2.6 })} ${lgRtl(`${esc(lgt("season", "Fin de saison · "))}<b>${esc(lgCountdown(msToNextMonday()))}</b>`)}</span>
+      <span class="lgh-season">${icon("shield", { size: 12, strokeWidth: 2.6 })} ${lgRtl(`<b>${esc(progress)}</b>`)}</span>
     </div>
 
     <div class="lgh-core">
@@ -168,22 +160,19 @@ function renderHero(models, solo) {
 /**
  * Monte le héros (ligue unique) dans un slot.
  * @param {HTMLElement} slot
- * @param {{conduite: Array, revision: Array, solo?: boolean}} data
- *   revision = LA ligue (saison hebdo) · conduite = source du grade x/31.
+ * @param {{rows: Array, solo?: boolean}} data
+ *   rows = lignes de get_eleve_leaderboard (compétences certifiées, /31).
  *   solo : élève sans moniteur → libellé « Élèves PermiGo » (pas d'école).
  */
-export function mountLeagueHero(slot, { conduite, revision, solo } = {}) {
-  const models = {
-    conduite: buildModel(conduite),
-    revision: buildModel(revision),
-  };
+export function mountLeagueHero(slot, { rows, solo } = {}) {
+  const model = buildModel(rows);
 
   const go = () => {
-    track("league_hero.open", { ligue: "semaine" });
-    navigate("#/classement/revision");
+    track("league_hero.open", { ligue: "competences" });
+    navigate("#/classement");
   };
 
-  slot.innerHTML = renderHero(models, solo);
+  slot.innerHTML = renderHero(model, solo);
   const card = slot.querySelector(".lgh");
   card?.addEventListener("click", go);
   card?.addEventListener("keydown", (e) => {

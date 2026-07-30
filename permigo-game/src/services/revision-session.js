@@ -42,8 +42,8 @@ export function isRevisionSessionActive() {
 }
 
 /**
- * Démarre la session si besoin et capture l'état de départ (rang + score
- * dans la ligue Révision), AVANT que le 1er quiz n'affecte le score.
+ * Démarre la session si besoin et capture le score de départ (progression
+ * Révision), AVANT que le 1er quiz ne l'affecte.
  * Idempotent : no-op si une session est déjà active.
  */
 export async function ensureRevisionSessionStarted() {
@@ -53,7 +53,6 @@ export async function ensureRevisionSessionStarted() {
     startedAt: Date.now(),
     nQuiz: 0,
     nPassed: 0,
-    oldRang: null,
     oldScore: null,
     snapshotReady: false,
   });
@@ -65,7 +64,6 @@ export async function ensureRevisionSessionStarted() {
     const mine = (data || []).find((r) => r.is_me);
     const cur = read();
     if (cur?.active) {
-      cur.oldRang = mine?.rang ?? null;
       cur.oldScore = mine?.score ?? 0;
       cur.snapshotReady = true;
       write(cur);
@@ -93,14 +91,17 @@ export function clearRevisionSession() {
 }
 
 /**
- * Construit le résumé de fin de session : compteurs + delta de rang/score
- * dans la ligue Révision + élève(s) dépassé(s).
+ * Construit le résumé de fin de session : compteurs + points gagnés dans la
+ * progression Révision (niveaux Novice → Révision certifiée).
+ *
+ * Ligue unique (30/07/2026) : la révision n'est plus un CLASSEMENT — le récap
+ * ne met donc plus en scène de rang ni d'élève dépassé (ce classement-là
+ * n'existe plus nulle part dans l'app). Il célèbre l'effort et le niveau.
+ *
  * @returns {Promise<null | {
  *   nQuiz:number, nPassed:number,
  *   oldScore:number, newScore:number, pointsGained:number,
- *   oldRang:number|null, newRang:number|null, ranksGained:number,
- *   me:object|null, rival:object|null, overtaken:Array,
- *   league:object|null, leagueUp:object|null
+ *   me:object|null, league:object|null, leagueUp:object|null
  * }>}
  */
 export async function buildRevisionSummary() {
@@ -115,33 +116,13 @@ export async function buildRevisionSummary() {
     });
     rows = data || [];
   } catch {
-    /* on dégrade : récap sans leaderboard */
+    /* on dégrade : récap sans score serveur */
   }
 
   const mine = rows.find((r) => r.is_me) || null;
   const newScore = mine?.score ?? s.oldScore ?? 0;
-  const newRang = mine?.rang ?? s.oldRang ?? null;
   const oldScore = typeof s.oldScore === "number" ? s.oldScore : newScore;
-  const oldRang =
-    typeof s.oldRang === "number" && s.oldRang != null ? s.oldRang : newRang;
-
-  const ranksGained =
-    oldRang != null && newRang != null ? Math.max(0, oldRang - newRang) : 0;
   const pointsGained = Math.max(0, newScore - oldScore);
-
-  // Élèves dépassés = ceux désormais SOUS moi qui étaient AU-DESSUS avant.
-  let overtaken = [];
-  if (newRang != null && oldRang != null && ranksGained > 0) {
-    overtaken = rows
-      .filter((r) => !r.is_me && r.rang > newRang && r.rang <= oldRang)
-      .sort((a, b) => a.rang - b.rang);
-  }
-  // Le rival mis en scène = l'élève juste au-dessus duquel on vient de passer.
-  const rival =
-    overtaken[0] ||
-    (newRang != null
-      ? rows.find((r) => !r.is_me && r.rang === newRang + 1) || null
-      : null);
 
   const { theoryLeague } = await import("@/utils/theory-league.js");
   const lgBefore = theoryLeague(oldScore);
@@ -154,12 +135,7 @@ export async function buildRevisionSummary() {
     oldScore,
     newScore,
     pointsGained,
-    oldRang,
-    newRang,
-    ranksGained,
     me: mine,
-    rival,
-    overtaken,
     league: lgAfter.league,
     leagueUp,
   };
