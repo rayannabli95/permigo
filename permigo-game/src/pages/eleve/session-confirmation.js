@@ -34,7 +34,7 @@ const SC_I18N = {
     refuse: "Refuse",
     loading: "Processing…",
     confirmed: "Lesson confirmed.",
-    confirm_failed: "Unable to confirm — {message}",
+    confirm_failed: "Unable to confirm · {message}",
     retry_later: "try again in a moment",
     error_already_decided: "this lesson has already been processed",
     error_not_found: "lesson not found",
@@ -45,7 +45,7 @@ const SC_I18N = {
     refuse_yes: "Yes, refuse it",
     cancel: "Cancel",
     refused: "Lesson refused",
-    refuse_failed: "Unable to refuse — {message}",
+    refuse_failed: "Unable to refuse · {message}",
   },
   ar: {
     back: "رجوع",
@@ -66,7 +66,7 @@ const SC_I18N = {
     refuse: "رفض",
     loading: "جارٍ التنفيذ…",
     confirmed: "تم تأكيد الحصة.",
-    confirm_failed: "تعذّر التأكيد — {message}",
+    confirm_failed: "تعذّر التأكيد · {message}",
     retry_later: "أعد المحاولة بعد قليل",
     error_already_decided: "تمت معالجة هذه الحصة من قبل",
     error_not_found: "حصة القيادة غير موجودة",
@@ -77,7 +77,7 @@ const SC_I18N = {
     refuse_yes: "نعم، ارفضها",
     cancel: "إلغاء",
     refused: "تم رفض الحصة",
-    refuse_failed: "تعذّر الرفض — {message}",
+    refuse_failed: "تعذّر الرفض · {message}",
   },
 };
 
@@ -623,7 +623,7 @@ function wire(root, { sessionId, monPrenom }) {
           translateSessionError(err?.message) ||
           sct("retry_later", "réessaie dans un instant");
         toast(
-          sct("confirm_failed", "Confirmation impossible — {message}", {
+          sct("confirm_failed", "Confirmation impossible · {message}", {
             message: msg,
           }),
           "error",
@@ -706,7 +706,7 @@ function showRefuseModal(root, sessionId, monPrenom) {
           translateSessionError(err?.message) ||
           sct("retry_later", "réessaie dans un instant");
         toast(
-          sct("refuse_failed", "Impossible de refuser — {message}", {
+          sct("refuse_failed", "Impossible de refuser · {message}", {
             message: msg,
           }),
           "error",

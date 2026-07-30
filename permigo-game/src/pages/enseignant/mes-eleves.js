@@ -793,7 +793,7 @@ async function loadData() {
       validations: e2 || null,
       examens: e3 || null,
     });
-    toast("Progression des élèves indisponible — réessaie.", "error");
+    toast("Progression des élèves indisponible · réessaie.", "error");
     _eleves = [];
     return false;
   }
@@ -1366,7 +1366,7 @@ function renderBandRow(eleve, opts = {}) {
 
   return `
     <div class="me-row" data-eleve-id="${escAttr(eleve.id)}" role="listitem" tabindex="0"
-         aria-label="Ouvrir le livret de ${fullNom} — ${eleve.acquis}/${eleve.total} competences acquises${eleve.readiness === "recu" ? ", examen reussi" : eleve.readiness === "rate" ? ", examen a repasser" : eleve.readiness === "planifie" ? ", examen prevu" : eleve.readiness === "pret" ? ", pret pour l'examen" : eleve.aRelancer ? ", a relancer" : ""}">
+         aria-label="Ouvrir le livret de ${fullNom}. ${eleve.acquis}/${eleve.total} competences acquises${eleve.readiness === "recu" ? ", examen reussi" : eleve.readiness === "rate" ? ", examen a repasser" : eleve.readiness === "planifie" ? ", examen prevu" : eleve.readiness === "pret" ? ", pret pour l'examen" : eleve.aRelancer ? ", a relancer" : ""}">
       <div class="me-av" style="flex-shrink:0">${renderUserAvatar({ avatar_url: eleve.avatar_url, prenom: eleve.prenom, nom: eleve.nom }, 36)}</div>
       <span class="me-nom">${fullNom}</span>
       ${engDot(eleve)}

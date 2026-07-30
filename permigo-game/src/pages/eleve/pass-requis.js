@@ -19,9 +19,9 @@ const PRQ_I18N = {
   en: {
     kick: "Just one more step",
     title: "Choose your Pass to<br>start training",
-    sub: "All the content, your progress, your rewards — unlocked right away.",
-    guarantee: "Money-back guarantee — 3 days. Zero risk.",
-    or: "— or —",
+    sub: "All the content, your progress, your rewards. Unlocked right away.",
+    guarantee: "Money-back guarantee · 3 days. Zero risk.",
+    or: "or,",
     code_lab: "I have a code from my instructor",
     code_help: "Your instructor pays for you: enter their code, it's free.",
     code_ph: "E.G. PERMIS75",
@@ -31,7 +31,7 @@ const PRQ_I18N = {
     code_ok: "All set! Signing you in…",
     code_invalid: "Invalid code. Check with your instructor.",
     launch_price: "launch price",
-    checkout_err: "Payment unavailable right now — try again in a moment.",
+    checkout_err: "Payment unavailable right now. Try again in a moment.",
     logout: "Log out",
     tier_pass3_nom: "Gold Pass",
     tier_pass3_sous: "3 months",
@@ -46,9 +46,9 @@ const PRQ_I18N = {
   ar: {
     kick: "خطوة أخيرة فقط",
     title: "اختر باقتك لتبدأ<br>تدريبك",
-    sub: "كل المحتوى وتقدّمك ومكافآتك — مفتوحة فوراً.",
-    guarantee: "استرداد المال مضمون — 3 أيام. دون أي مخاطرة.",
-    or: "— أو —",
+    sub: "كل المحتوى وتقدّمك ومكافآتك · مفتوحة فوراً.",
+    guarantee: "استرداد المال مضمون. 3 أيام. دون أي مخاطرة.",
+    or: "أو,",
     code_lab: "لديّ رمز من مدرّبي",
     code_help: "مدرّبك يدفع عنك: أدخِل رمزه، والاشتراك مجاني.",
     code_ph: "مثال: PERMIS75",
@@ -58,7 +58,7 @@ const PRQ_I18N = {
     code_ok: "تمّ! جارٍ تسجيل دخولك…",
     code_invalid: "رمز غير صالح. تحقّق مع مدرّبك.",
     launch_price: "سعر الإطلاق",
-    checkout_err: "الدفع غير متاح حالياً — أعد المحاولة بعد لحظات.",
+    checkout_err: "الدفع غير متاح حالياً · أعد المحاولة بعد لحظات.",
     logout: "تسجيل الخروج",
     tier_pass3_nom: "الباقة الذهبية",
     tier_pass3_sous: "3 أشهر",
@@ -181,11 +181,11 @@ export async function mount(root, me) {
     <div class="prq-head">
       <div class="prq-kick">${pt("kick", "Plus qu'une étape")}</div>
       <h1 class="prq-title">${ptR("title", "Choisis ton Pass pour<br>commencer ton entraînement")}</h1>
-      <p class="prq-sub">${pt("sub", "Tout le contenu, ta progression, tes récompenses — débloqués tout de suite.")}</p>
+      <p class="prq-sub">${pt("sub", "Tout le contenu, ta progression, tes récompenses · débloqués tout de suite.")}</p>
     </div>
     <div class="prq-tiers">${tiers}</div>
-    <div class="prq-guar">${SHIELD} ${pt("guarantee", "Satisfait ou remboursé — 3 jours. Zéro risque.")}</div>
-    <div class="prq-or">${pt("or", "— ou —")}</div>
+    <div class="prq-guar">${SHIELD} ${pt("guarantee", "Satisfait ou remboursé · 3 jours. Zéro risque.")}</div>
+    <div class="prq-or">${pt("or", "ou,")}</div>
     <div class="prq-code">
       <div class="prq-code-lab">${pt("code_lab", "J'ai un code de mon moniteur")}</div>
       <div class="prq-code-help">${pt("code_help", "Ton moniteur paie pour toi : entre son code, c'est gratuit.")}</div>
@@ -210,7 +210,7 @@ export async function mount(root, me) {
         toast(
           ptR(
             "checkout_err",
-            "Paiement indisponible pour le moment — réessaie dans un instant.",
+            "Paiement indisponible pour le moment. Réessaie dans un instant.",
           ),
           "error",
           4500,

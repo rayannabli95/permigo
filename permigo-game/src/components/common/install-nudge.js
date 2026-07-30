@@ -250,7 +250,7 @@ function show(me) {
     "sub",
     tu
       ? "Ouvre l'app d'un geste, garde ta série 🔥 et reçois tes rappels."
-      : "Vos validations à confirmer en 1 tap — comme une vraie app, sans store.",
+      : "Vos validations à confirmer en 1 tap. Comme une vraie app, sans store.",
   );
 
   const host = document.createElement("div");

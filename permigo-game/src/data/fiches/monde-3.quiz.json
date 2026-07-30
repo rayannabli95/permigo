@@ -46,7 +46,11 @@
   {
     "code": "C3b",
     "q": "Sous la pluie, tu multiplies ta distance de sécurité par combien ?",
-    "options": ["Par 2", "Tu gardes la même", "Par 1,5"],
+    "options": [
+      "Par 2",
+      "Tu gardes la même",
+      "Par 1,5"
+    ],
     "correct": 0,
     "explication": "Sol mouillé = freinage doublé : on passe de 2 à 4 secondes d'écart."
   },
@@ -75,7 +79,11 @@
   {
     "code": "C3b",
     "q": "Sur autoroute limitée à 130, il se met à pleuvoir. Ta vitesse max ?",
-    "options": ["130 km/h", "110 km/h", "120 km/h"],
+    "options": [
+      "130 km/h",
+      "110 km/h",
+      "120 km/h"
+    ],
     "correct": 1,
     "explication": "Sous la pluie le 130 passe à 110 : moins d'adhérence, on lève le pied."
   },
@@ -148,7 +156,11 @@
   {
     "code": "C3d",
     "q": "Un obstacle est pile devant toi en freinage d'urgence. Tu regardes où ?",
-    "options": ["L'obstacle", "Ton échappatoire libre", "Tes rétroviseurs"],
+    "options": [
+      "L'obstacle",
+      "Ton échappatoire libre",
+      "Tes rétroviseurs"
+    ],
     "correct": 1,
     "explication": "La voiture suit le regard : viser l'espace libre t'y emmène, fixer l'obstacle t'y envoie."
   },

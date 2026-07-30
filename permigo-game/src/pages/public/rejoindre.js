@@ -239,7 +239,7 @@ const SG_I18N = {
     submitting: "Creating…",
     have_account: "Already have an account? ",
     login_link: "Log in",
-    toast_code_invalid: "Invalid instructor code — check it again.",
+    toast_code_invalid: "Invalid instructor code · check it again.",
     code_notfound_short: "✗ Code not found.",
     toast_already_school:
       "This account is already linked to an instructor. Please log in.",
@@ -294,7 +294,7 @@ const SG_I18N = {
     submitting: "جارٍ الإنشاء…",
     have_account: "لديك حساب بالفعل؟ ",
     login_link: "تسجيل الدخول",
-    toast_code_invalid: "رمز المدرّب غير صالح — تحقّق منه مجدّداً.",
+    toast_code_invalid: "رمز المدرّب غير صالح · تحقّق منه مجدّداً.",
     code_notfound_short: "✗ الرمز غير موجود.",
     toast_already_school: "هذا الحساب مرتبط بمدرّب بالفعل. سجّل الدخول.",
     toast_parent_required: "أدخِل بريد أحد الوالدين صحيحاً",
@@ -707,7 +707,7 @@ export async function mount(root) {
               toast(
                 sgtR(
                   "toast_code_invalid",
-                  "Code moniteur invalide — revérifie-le.",
+                  "Code moniteur invalide · revérifie-le.",
                 ),
                 "error",
                 4000,

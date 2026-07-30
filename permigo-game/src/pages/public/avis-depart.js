@@ -139,8 +139,8 @@ export async function mount(root) {
       <h1>${fromSettings ? "Gérer ton abonnement" : "Tu pars ? Aide-nous à comprendre."}</h1>
       <p class="cf-sub">${
         fromSettings
-          ? "Avant de résilier, dis-nous en un mot ce qui coince (ça nous aide vraiment). Tu peux aussi résilier directement en bas — sans passer par ce formulaire."
-          : "2 clics, 20 secondes. Chaque réponse améliore l'app pour les suivants — et si tu veux un remboursement (3 premiers jours), on le traite direct derrière."
+          ? "Avant de résilier, dis-nous en un mot ce qui coince (ça nous aide vraiment). Tu peux aussi résilier directement en bas, sans passer par ce formulaire."
+          : "2 clics, 20 secondes. Chaque réponse améliore l'app pour les suivants, et si tu veux un remboursement (3 premiers jours), on le traite direct derrière."
       }</p>
 
       <div id="cf-opts">

@@ -478,7 +478,7 @@ function renderPaymentStep(root, prenom) {
         4500,
       );
       payBtn.disabled = false;
-      payBtn.textContent = "Activer mon abonnement — 9,99 €/mois";
+      payBtn.textContent = "Activer mon abonnement · 9,99 €/mois";
     }
   });
 }

@@ -56,12 +56,12 @@ const STR = {
     secCodeSub: "PermiGo t'entraîne sur tout ce qui compte le jour J :",
     situTitle: "Mini-jeux « En situation »",
     situTxt:
-      "Une scène, une décision : qui passe en premier ? Priorités, distances, insertions — comme au volant.",
+      "Une scène, une décision : qui passe en premier ? Priorités, distances, insertions · comme au volant.",
     situAlt:
       "Mini-jeu En situation : un croisement, à toi de décider qui passe",
     centreTitle: "Ton centre d'examen décortiqué",
     centreTxt:
-      "Difficulté, accès, réputation des examinateurs et pièges du parcours — centre par centre (Cergy, Argenteuil, Bobigny…).",
+      "Difficulté, accès, réputation des examinateurs et pièges du parcours. Centre par centre (Cergy, Argenteuil, Bobigny…).",
     centreAlt:
       "Fiche du centre d'examen de Cergy : difficulté 3/5, accès, pièges du parcours",
     feats: [
@@ -120,7 +120,7 @@ const STR = {
     err: "Le paiement n'a pas pu démarrer. Réessaie.",
     btnWait: "Ouverture du paiement…",
     stampTag: "Garanti",
-    stampT: "Satisfait ou remboursé — 3 jours d'essai",
+    stampT: "Satisfait ou remboursé · 3 jours d'essai",
     stampD:
       "Teste tout pendant 3 jours. Pas convaincu ? Remboursé. Ensuite, le mensuel s'annule à tout moment, en un clic.",
     secProof: "S'entraîner régulièrement, ça paie",
@@ -131,24 +131,24 @@ const STR = {
     proofBVal: "56,8 %",
     proofBW: 56.8,
     proofSrc:
-      "Bilan des examens du permis de conduire 2022 — Sécurité routière.",
+      "Bilan des examens du permis de conduire 2022. Sécurité routière.",
     secFaq: "Questions fréquentes",
     faq: [
       [
         "C'est une app de code ?",
-        "Non. Le code est inclus (quiz, examens blancs), mais la vraie différence : on t'entraîne à la <strong>conduite</strong> — mini-jeux, fiches de leçon, simulations d'examen, centres d'examen.",
+        "Non. Le code est inclus (quiz, examens blancs), mais la vraie différence : on t'entraîne à la <strong>conduite</strong>. Mini-jeux, fiches de leçon, simulations d'examen, centres d'examen.",
       ],
       [
         "Qu'attend l'inspecteur le jour de l'examen ?",
-        "Une conduite <strong>autonome, responsable et sûre</strong> : connaître le code, maîtriser le véhicule, respecter les règles, anticiper les risques et adapter ta conduite à ce qui t'entoure. Ton attitude compte aussi : rester calme, confiant, décider au bon moment. PermiGo t'entraîne exactement là-dessus — simulation d'examen incluse.",
+        "Une conduite <strong>autonome, responsable et sûre</strong> : connaître le code, maîtriser le véhicule, respecter les règles, anticiper les risques et adapter ta conduite à ce qui t'entoure. Ton attitude compte aussi : rester calme, confiant, décider au bon moment. PermiGo t'entraîne exactement là-dessus · simulation d'examen incluse.",
       ],
       [
         "Ça marche avec mon auto-école ?",
-        "Oui. Tu gardes tes leçons — PermiGo bosse entre. Si ton moniteur l'utilise, ta progression se synchronise avec lui.",
+        "Oui. Tu gardes tes leçons. PermiGo bosse entre. Si ton moniteur l'utilise, ta progression se synchronise avec lui.",
       ],
       [
         "Je galère avec le français, ça ira ?",
-        "Oui. Phrases courtes, mots simples, mini-jeux visuels — et cette page existe en anglais (bouton EN en haut). Par message, on t'aide pas à pas.",
+        "Oui. Phrases courtes, mots simples, mini-jeux visuels, et cette page existe en anglais (bouton EN en haut). Par message, on t'aide pas à pas.",
       ],
       [
         "Je peux annuler ou être remboursé ?",
@@ -160,18 +160,18 @@ const STR = {
     stickyPrice: "24,99 € · essai 3 jours",
     stickyBtn: "Réserver ma place",
     cancelNote:
-      "Paiement annulé — rien n'a été débité. Ton billet t'attend juste en dessous. 👇",
+      "Paiement annulé. Rien n'a été débité. Ton billet t'attend juste en dessous. 👇",
     successT: "Bienvenue dans l'aventure ! 🚀",
     successIntro: (label) =>
       `${label} réservé. Ton reçu et ta facture arrivent par email.`,
     successSteps: [
-      "<b>Crée ton compte maintenant</b> — 2 minutes, avec le même email que ton paiement → accès immédiat.",
+      "<b>Crée ton compte maintenant</b>. 2 minutes, avec le même email que ton paiement → accès immédiat.",
       "<b>Installe l'app sur ton téléphone</b> pour recevoir les rappels de révision : iPhone → Safari → Partager → « Sur l'écran d'accueil ». Android → Chrome → menu ⋮ → « Installer l'application ».",
       "<b>Besoin d'aide ?</b> Écris-nous : on t'aide pas à pas.",
     ],
     successGuarantee: "Et bien sûr : satisfait ou remboursé pendant 3 jours.",
     successCta: "Ouvrir PermiGo",
-    successCtaSolo: "Créer mon compte — accès immédiat",
+    successCtaSolo: "Créer mon compte · accès immédiat",
   },
   en: {
     login: "Log in",
@@ -196,11 +196,11 @@ const STR = {
     secCodeSub: "PermiGo trains you on everything that counts on test day:",
     situTitle: "“On the road” mini-games",
     situTxt:
-      "One scene, one decision: who goes first? Right of way, distances, merging — like behind the wheel.",
+      "One scene, one decision: who goes first? Right of way, distances, merging. Like behind the wheel.",
     situAlt: "On-the-road mini-game: a crossroads, you decide who goes first",
     centreTitle: "Your test centre, decoded",
     centreTxt:
-      "Difficulty, access, examiner reputation and the known traps of the route — centre by centre.",
+      "Difficulty, access, examiner reputation and the known traps of the route. Centre by centre.",
     centreAlt: "Cergy test-centre sheet: difficulty 3/5, access, route traps",
     feats: [
       {
@@ -221,7 +221,7 @@ const STR = {
     ],
     nonFranco: {
       title: "New to French? We've got you.",
-      txt: "The exam is in French — so the app trains you in short, simple French: the exact words you'll need on test day. Mini-games are visual first. And we answer your messages in English, step by step.",
+      txt: "The exam is in French. So the app trains you in short, simple French: the exact words you'll need on test day. Mini-games are visual first. And we answer your messages in English, step by step.",
     },
     mathsRows: [
       ["1 hour of driving lessons", "€55"],
@@ -272,24 +272,24 @@ const STR = {
     proofB: "Standard route",
     proofBVal: "56.8%",
     proofBW: 56.8,
-    proofSrc: "French driving-test results 2022 — Sécurité routière.",
+    proofSrc: "French driving-test results 2022 · Sécurité routière.",
     secFaq: "Frequently asked",
     faq: [
       [
         "Is this a code-test app?",
-        "No. The code test is included (quizzes, mock tests), but the real difference: we train your <strong>driving</strong> — mini-games, lesson sheets, exam simulations, test-centre guides.",
+        "No. The code test is included (quizzes, mock tests), but the real difference: we train your <strong>driving</strong>. Mini-games, lesson sheets, exam simulations, test-centre guides.",
       ],
       [
         "Is the app in English?",
-        "This page and our support are. The app itself is in <strong>simple French</strong> — on purpose: your exam will be in French, and training in the exact words you'll hear on test day is what gets you through. Mini-games are visual first, so basic French is enough.",
+        "This page and our support are. The app itself is in <strong>simple French</strong>. On purpose: your exam will be in French, and training in the exact words you'll hear on test day is what gets you through. Mini-games are visual first, so basic French is enough.",
       ],
       [
         "What does the examiner expect on test day?",
-        "<strong>Autonomous, responsible, safe driving</strong>: knowing the code, controlling the car, following the rules, anticipating risks and adapting to your environment. Attitude counts too: stay calm, confident, decide at the right moment. That's exactly what PermiGo trains — exam simulation included.",
+        "<strong>Autonomous, responsible, safe driving</strong>: knowing the code, controlling the car, following the rules, anticipating risks and adapting to your environment. Attitude counts too: stay calm, confident, decide at the right moment. That's exactly what PermiGo trains. Exam simulation included.",
       ],
       [
         "Does it work with my driving school?",
-        "Yes. Keep your lessons — PermiGo works in between. If your instructor uses PermiGo, your progress syncs with them.",
+        "Yes. Keep your lessons. PermiGo works in between. If your instructor uses PermiGo, your progress syncs with them.",
       ],
       [
         "Can I cancel or get a refund?",
@@ -301,18 +301,18 @@ const STR = {
     stickyPrice: "€24.99 · 3-day trial",
     stickyBtn: "Book my seat",
     cancelNote:
-      "Payment cancelled — nothing was charged. Your ticket is waiting below. 👇",
+      "Payment cancelled. Nothing was charged. Your ticket is waiting below. 👇",
     successT: "Welcome aboard! 🚀",
     successIntro: (label) =>
       `${label} booked. Your receipt and invoice are on their way by email.`,
     successSteps: [
-      "<b>Create your account now</b> — 2 minutes, with the same email as your payment → instant access.",
+      "<b>Create your account now</b>. 2 minutes, with the same email as your payment → instant access.",
       "<b>Install the app on your phone</b> to get revision reminders: iPhone → Safari → Share → “Add to Home Screen”. Android → Chrome → ⋮ menu → “Install app”.",
-      "<b>Need help?</b> Message us — we'll walk you through it, step by step.",
+      "<b>Need help?</b> Message us. We'll walk you through it, step by step.",
     ],
     successGuarantee: "And of course: 3-day money-back guarantee.",
     successCta: "Open PermiGo",
-    successCtaSolo: "Create my account — instant access",
+    successCtaSolo: "Create my account · instant access",
   },
   ar: {
     login: "تسجيل الدخول",
@@ -337,12 +337,12 @@ const STR = {
     secCodeSub: "يدرّبك PermiGo على كل ما يهمّ يوم الامتحان:",
     situTitle: "ألعاب «على الطريق» المصغّرة",
     situTxt:
-      "مشهد واحد، قرار واحد: من يمرّ أولاً؟ أولوية المرور، المسافات، الاندماج — كما خلف المقود.",
+      "مشهد واحد، قرار واحد: من يمرّ أولاً؟ أولوية المرور، المسافات، الاندماج · كما خلف المقود.",
     situAlt:
       "لعبة مصغّرة على الطريق: مفترق طرق، أنت تقرّر من يمرّ أولاً",
     centreTitle: "مركز امتحانك، مفصّلاً",
     centreTxt:
-      "الصعوبة، الوصول، سمعة الممتحنين والفخاخ المعروفة في المسار — مركزاً تلو الآخر.",
+      "الصعوبة، الوصول، سمعة الممتحنين والفخاخ المعروفة في المسار. مركزاً تلو الآخر.",
     centreAlt: "بطاقة مركز امتحان Cergy: الصعوبة 3/5، الوصول، فخاخ المسار",
     feats: [
       {
@@ -363,7 +363,7 @@ const STR = {
     ],
     nonFranco: {
       title: "لغتك الفرنسية ضعيفة؟ نحن معك.",
-      txt: "الامتحان بالفرنسية — لذلك يدرّبك التطبيق بفرنسية قصيرة وبسيطة: الكلمات نفسها التي ستحتاجها يوم الامتحان. الألعاب المصغّرة بصرية أولاً. ونجيب على رسائلك، خطوة بخطوة.",
+      txt: "الامتحان بالفرنسية. لذلك يدرّبك التطبيق بفرنسية قصيرة وبسيطة: الكلمات نفسها التي ستحتاجها يوم الامتحان. الألعاب المصغّرة بصرية أولاً. ونجيب على رسائلك، خطوة بخطوة.",
     },
     mathsRows: [
       ["ساعة قيادة واحدة", "€55"],
@@ -404,7 +404,7 @@ const STR = {
     err: "تعذّر بدء الدفع. يُرجى المحاولة مرة أخرى.",
     btnWait: "جارٍ فتح صفحة الدفع…",
     stampTag: "مضمون",
-    stampT: "مضمون أو استرداد أموالك — تجربة 3 أيام",
+    stampT: "مضمون أو استرداد أموالك · تجربة 3 أيام",
     stampD:
       "جرّب كل شيء لمدة 3 أيام. غير مقتنع؟ تُستردّ أموالك. بعد ذلك، يُلغى الاشتراك الشهري في أي وقت، بنقرة واحدة.",
     secProof: "التدرّب المنتظم يؤتي ثماره",
@@ -414,24 +414,24 @@ const STR = {
     proofB: "المسار التقليدي",
     proofBVal: "56.8%",
     proofBW: 56.8,
-    proofSrc: "حصيلة امتحانات رخصة القيادة الفرنسية 2022 — Sécurité routière.",
+    proofSrc: "حصيلة امتحانات رخصة القيادة الفرنسية 2022. Sécurité routière.",
     secFaq: "الأسئلة الشائعة",
     faq: [
       [
         "هل هذا تطبيق لاختبار الكود؟",
-        "لا. اختبار الكود مُضمَّن (اختبارات قصيرة، امتحانات تجريبية)، لكن الفرق الحقيقي: نحن ندرّبك على <strong>القيادة</strong> — ألعاب مصغّرة، بطاقات الدروس، محاكاة الامتحان، أدلّة مراكز الامتحان.",
+        "لا. اختبار الكود مُضمَّن (اختبارات قصيرة، امتحانات تجريبية)، لكن الفرق الحقيقي: نحن ندرّبك على <strong>القيادة</strong>. ألعاب مصغّرة، بطاقات الدروس، محاكاة الامتحان، أدلّة مراكز الامتحان.",
       ],
       [
         "هل التطبيق باللغة العربية؟",
-        "هذه الصفحة نعم. أمّا التطبيق نفسه فهو <strong>بفرنسية بسيطة</strong> — وذلك عن قصد: امتحانك سيكون بالفرنسية، والتدرّب على الكلمات نفسها التي ستسمعها يوم الامتحان هو ما يساعدك على النجاح. الألعاب المصغّرة بصرية أولاً، لذا تكفي فرنسية أساسية.",
+        "هذه الصفحة نعم. أمّا التطبيق نفسه فهو <strong>بفرنسية بسيطة</strong>. وذلك عن قصد: امتحانك سيكون بالفرنسية، والتدرّب على الكلمات نفسها التي ستسمعها يوم الامتحان هو ما يساعدك على النجاح. الألعاب المصغّرة بصرية أولاً، لذا تكفي فرنسية أساسية.",
       ],
       [
         "ماذا يتوقّع الممتحن يوم الامتحان؟",
-        "<strong>قيادة مستقلّة ومسؤولة وآمنة</strong>: معرفة الكود، التحكّم في السيارة، احترام القواعد، توقّع المخاطر والتكيّف مع محيطك. سلوكك مهمّ أيضاً: ابقَ هادئاً وواثقاً، وقرّر في الوقت المناسب. هذا بالضبط ما يدرّبك عليه PermiGo — مع محاكاة الامتحان.",
+        "<strong>قيادة مستقلّة ومسؤولة وآمنة</strong>: معرفة الكود، التحكّم في السيارة، احترام القواعد، توقّع المخاطر والتكيّف مع محيطك. سلوكك مهمّ أيضاً: ابقَ هادئاً وواثقاً، وقرّر في الوقت المناسب. هذا بالضبط ما يدرّبك عليه PermiGo. مع محاكاة الامتحان.",
       ],
       [
         "هل يعمل مع مدرسة تعليم القيادة التي أتدرّب فيها؟",
-        "نعم. احتفظ بدروسك — يعمل PermiGo في ما بينها. وإذا كان مدرّبك يستخدم PermiGo، يتزامن تقدّمك معه.",
+        "نعم. احتفظ بدروسك. يعمل PermiGo في ما بينها. وإذا كان مدرّبك يستخدم PermiGo، يتزامن تقدّمك معه.",
       ],
       [
         "هل يمكنني الإلغاء أو استرداد أموالي؟",
@@ -443,18 +443,18 @@ const STR = {
     stickyPrice: "€24.99 · تجربة 3 أيام",
     stickyBtn: "احجز مقعدي",
     cancelNote:
-      "تمّ إلغاء الدفع — لم يُخصم أي مبلغ. تذكرتك في انتظارك أدناه. 👇",
+      "تمّ إلغاء الدفع. لم يُخصم أي مبلغ. تذكرتك في انتظارك أدناه. 👇",
     successT: "مرحباً بك على متن الرحلة! 🚀",
     successIntro: (label) =>
       `تمّ حجز ${label}. سيصلك إيصالك وفاتورتك عبر البريد الإلكتروني.`,
     successSteps: [
-      "<b>أنشئ حسابك الآن</b> — دقيقتان، بنفس البريد الإلكتروني المستخدَم في الدفع ← وصول فوري.",
+      "<b>أنشئ حسابك الآن</b>. دقيقتان، بنفس البريد الإلكتروني المستخدَم في الدفع ← وصول فوري.",
       "<b>ثبّت التطبيق على هاتفك</b> لتصلك تذكيرات المراجعة: آيفون ← Safari ← مشاركة ← «إضافة إلى الشاشة الرئيسية». أندرويد ← Chrome ← قائمة ⋮ ← «تثبيت التطبيق».",
-      "<b>تحتاج مساعدة؟</b> راسلنا — سنرافقك خطوة بخطوة.",
+      "<b>تحتاج مساعدة؟</b> راسلنا · سنرافقك خطوة بخطوة.",
     ],
     successGuarantee: "وبالطبع: مضمون أو استرداد أموالك خلال 3 أيام.",
     successCta: "افتح PermiGo",
-    successCtaSolo: "أنشئ حسابي — وصول فوري",
+    successCtaSolo: "أنشئ حسابي · وصول فوري",
   },
 };
 

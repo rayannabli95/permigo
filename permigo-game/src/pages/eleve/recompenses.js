@@ -94,7 +94,7 @@ const REC_I18N = {
     cap2_serie: "-day streak",
     cap2_left: "to go:",
     cap2_full:
-      "Next chest: <b>{days}-day streak</b> — {remaining} {day_word} to go",
+      "Next chest: <b>{days}-day streak</b> · {remaining} {day_word} to go",
     tabs_aria: "Rewards rooms",
     tab_shop: "Shop",
     tab_col: "My collection",
@@ -155,7 +155,7 @@ const REC_I18N = {
     cap2_serie: "سلسلة أيام:",
     cap2_left: "المتبقي:",
     cap2_full:
-      "الصندوق التالي: <b>سلسلة {days} أيام</b> — بقي {remaining} {day_word}",
+      "الصندوق التالي: <b>سلسلة {days} أيام</b> · بقي {remaining} {day_word}",
     tabs_aria: "غرف المكافآت",
     tab_shop: "المتجر",
     tab_col: "مجموعتي",
@@ -581,7 +581,7 @@ function renderHero(ctx) {
     ? rrtl(
         rtR(
           "cap2_full",
-          "Prochain coffre : <b>série {days} jours</b> — encore {remaining} {day_word}",
+          "Prochain coffre : <b>série {days} jours</b>. Encore {remaining} {day_word}",
           {
             days: next.days,
             remaining: next.remaining,

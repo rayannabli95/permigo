@@ -821,7 +821,7 @@ function renderAll(root, data) {
       <p class="st-foot">${
         data.saisies7j > 0
           ? `Tu as mis à jour ${data.saisies7j} compétence${data.saisies7j > 1 ? "s" : ""} chez tes élèves ces 7 derniers jours.`
-          : "Aucune validation saisie depuis 7 jours — pense à saisir tes séances pour garder une photo fidèle."
+          : "Aucune validation saisie depuis 7 jours. Pense à saisir tes séances pour garder une photo fidèle."
       }</p>
     </div>
   `;
@@ -920,7 +920,7 @@ function renderPrets({ prets }) {
         : "livret complet";
       return `
       <div class="st-row" role="button" tabindex="0" data-eleve-id="${escAttr(e.id)}"
-           aria-label="Livret de ${nomAttr(e)} — ${e.acquis} compétence${e.acquis > 1 ? "s" : ""} acquise${e.acquis > 1 ? "s" : ""} sur ${REMC_TOTAL}">
+           aria-label="Livret de ${nomAttr(e)}. ${e.acquis} compétence${e.acquis > 1 ? "s" : ""} acquise${e.acquis > 1 ? "s" : ""} sur ${REMC_TOTAL}">
         <div style="flex-shrink:0">${renderUserAvatar(e, 36)}</div>
         <div class="st-row-body">
           <div class="st-row-nom">${nm}</div>
@@ -953,7 +953,7 @@ function renderSilencieux({ silencieux }) {
         e.daysAgo != null ? `depuis ${e.daysAgo} j` : "jamais vu sur l'app";
       return `
       <div class="st-row" role="button" tabindex="0" data-eleve-id="${escAttr(e.id)}"
-           aria-label="Livret de ${nomAttr(e)} — silencieux ${escAttr(depuis)}">
+           aria-label="Livret de ${nomAttr(e)} · silencieux ${escAttr(depuis)}">
         <div style="flex-shrink:0">${renderUserAvatar(e, 36)}</div>
         <div class="st-row-body"><div class="st-row-nom">${nm}</div></div>
         <span class="st-row-val">${esc(depuis)}</span>
@@ -1013,7 +1013,7 @@ function renderRevisions({
       const nm = nomCourt(e);
       return `
       <div class="st-row" role="button" tabindex="0" data-eleve-id="${escAttr(e.id)}"
-           aria-label="Livret de ${nomAttr(e)} — ${e.nQuiz} quiz ces 7 derniers jours">
+           aria-label="Livret de ${nomAttr(e)}. ${e.nQuiz} quiz ces 7 derniers jours">
         <div style="flex-shrink:0">${renderUserAvatar(e, 36)}</div>
         <div class="st-row-body"><div class="st-row-nom">${nm}</div></div>
         <span class="st-row-val">${e.nQuiz} <small>quiz</small></span>

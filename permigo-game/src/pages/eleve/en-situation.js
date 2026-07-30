@@ -73,8 +73,8 @@ const SI_I18N = {
     sub_flawless: "You read the road like a pro.",
     sub_good: "A few more reflexes and you’ll have it locked in.",
     sub_keep: "Every mistake you catch here is one less on the real road.",
-    cap_max: "Today’s reward maxed out — come back tomorrow",
-    zero_next: "0 {word} — next one’s the one",
+    cap_max: "Today’s reward maxed out · come back tomorrow",
+    zero_next: "0 {word} · next one’s the one",
     cap_note: "Daily cap reached. Your {word} refill tomorrow.",
     collection: "Collection · {a}/{b} scenes seen",
     to_review: "To review",
@@ -109,8 +109,8 @@ const SI_I18N = {
     sub_flawless: "تقرأ الطريق كالمحترفين.",
     sub_good: "بضعة ردود أفعال أخرى وستتقنها تمامًا.",
     sub_keep: "كل خطأ تتعرّف عليه هنا هو خطأ أقل في درسك الحقيقي.",
-    cap_max: "بلغت مكافأة اليوم حدّها الأقصى — عد غدًا",
-    zero_next: "0 {word} — المحاولة القادمة ستكون الصحيحة",
+    cap_max: "بلغت مكافأة اليوم حدّها الأقصى. عد غدًا",
+    zero_next: "0 {word} · المحاولة القادمة ستكون الصحيحة",
     cap_note: "بلغت السقف اليومي. تتجدد {word} غدًا.",
     collection: "المجموعة · {a}/{b} مشهد تمت مشاهدته",
     to_review: "للمراجعة",
@@ -550,8 +550,8 @@ export async function mount(root, param) {
             credites > 0
               ? `${volantImg(20, { drop: true })} <b>+${credites}</b>&nbsp;${esc(sitVolantWord(credites))}`
               : gagnes > 0 && plafonne
-                ? `${volantImg(20)} ${esc(sit("cap_max", "Récompense du jour au max — reviens demain"))}`
-                : `${volantImg(20)} ${esc(sit("zero_next", "0 volant — la prochaine est la bonne").replace("{word}", sitVolantWord(0)))}`
+                ? `${volantImg(20)} ${esc(sit("cap_max", "Récompense du jour au max. Reviens demain"))}`
+                : `${volantImg(20)} ${esc(sit("zero_next", "0 volant. La prochaine est la bonne").replace("{word}", sitVolantWord(0)))}`
           }
         </div>
         ${

@@ -18,7 +18,7 @@ const COPY = {
     kick: "Mode découverte",
     emoji: "🎉",
     title: "Tu as goûté PermiGo aujourd'hui",
-    sub: "Reviens demain pour une nouvelle dose — ou débloque tout ton parcours maintenant, sans attendre.",
+    sub: "Reviens demain pour une nouvelle dose, ou débloque tout ton parcours maintenant, sans attendre.",
   },
   route: {
     kick: "Mode découverte",

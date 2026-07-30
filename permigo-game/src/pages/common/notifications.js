@@ -65,14 +65,14 @@ const NF_I18N = {
       Info: "Info",
     },
     consolidation_title: "Consolidation quiz 🧠",
-    consolidation_body: "Time to consolidate your skill — 2 quick questions!",
+    consolidation_body: "Time to consolidate your skill. 2 quick questions!",
     flash_title: "⚡ Flash quiz from your instructor",
     flash_body: "You have 5 minutes to answer 3 questions",
     streak_title: "🔥 Your streak is waiting",
     streak_body: "Don't lose your {n}-day streak! A quick session is enough.",
     session_conf_title: "Confirm your session with {name}",
     comp_title: "Skill validated ✅",
-    comp_body: "{code} — validated by your instructor",
+    comp_body: "{code} · validated by your instructor",
     pvq_title: "New skill to validate!",
     pvq_suffix: "Take the quiz in 30 sec",
     cr_title: "Your lesson report 📋",
@@ -123,14 +123,14 @@ const NF_I18N = {
       Info: "معلومة",
     },
     consolidation_title: "اختبار ترسيخ 🧠",
-    consolidation_body: "حان وقت ترسيخ مهارتك — سؤالان سريعان!",
+    consolidation_body: "حان وقت ترسيخ مهارتك · سؤالان سريعان!",
     flash_title: "⚡ اختبار خاطف من مدرّبك",
     flash_body: "لديك 5 دقائق للإجابة عن 3 أسئلة",
     streak_title: "🔥 سلسلتك تنتظرك",
     streak_body: "لا تفقد سلسلتك ({n} أيام)! حصة سريعة تكفي.",
     session_conf_title: "أكّد حصتك مع {name}",
     comp_title: "مهارة مُثبتة ✅",
-    comp_body: "{code} — أثبتها مدرّبك",
+    comp_body: "{code} · أثبتها مدرّبك",
     pvq_title: "مهارة جديدة للتثبيت!",
     pvq_suffix: "أنجز الاختبار في 30 ثانية",
     cr_title: "تقرير درسك 📋",
@@ -158,7 +158,7 @@ function nfRtl(html) {
 // (texte 100 % libre) absents ici → repli FR. Traductions relues (adversarial).
 const EMO_I18N = {
   en: {
-    come_back_7d: { title: "💙 Thinking of you", body: "A whole week without you. Come back whenever you like — we're right here." },
+    come_back_7d: { title: "💙 Thinking of you", body: "A whole week without you. Come back whenever you like. We're right here." },
     come_back_3d: { title: "👋 Your journey is waiting for you", body: "It's been 3 days. Just 5 minutes is enough to get back into the rhythm" },
     palier_1: { title: "⚡ Just one skill", body: "Just one skill stands between you and level {0} 💪" },
     achievement_comp_5: { title: "🎯 First roots", body: "5 skills validated. You're off to a strong start!" },
@@ -166,7 +166,7 @@ const EMO_I18N = {
     week_summary: { title: "✨ Great week", body: "You completed {0} skills this week. Well done" },
     palier_2: { title: "🔥 You're almost there!", body: "Just {0} more skills to reach tier {1}" },
     smart_reengagement_near_28: { title: "🎓 Only {0} to go before the mock exam", body: "You're so close, {name}! {0}/{1} secured. One last stretch." },
-    recap_quiet_week: { title: "💫 Your week on PermiGo", body: "A quiet week. Pick it back up whenever you like — just 5 minutes is enough to get your momentum going again." },
+    recap_quiet_week: { title: "💫 Your week on PermiGo", body: "A quiet week. Pick it back up whenever you like. Just 5 minutes is enough to get your momentum going again." },
     achievement_quiz_10: { title: "🧠 {0} quizzes", body: "You're becoming a quiz pro" },
     recap_strong_week: { title: "🔥 What a week!", body: "You completed {0} skills and played {1} quizzes. Keep it up!" },
     achievement_comp_10: { title: "🌱 {0}/{1}", body: "You've done a third of the course. Great momentum!" },
@@ -186,7 +186,7 @@ const EMO_I18N = {
     week_summary: { title: "✨ أسبوع رائع", body: "أنجزتَ {0} مهارات هذا الأسبوع. أحسنت" },
     palier_2: { title: "🔥 أوشكت على الوصول!", body: "لم يتبقَّ سوى {0} مهارات للوصول إلى المستوى {1}" },
     smart_reengagement_near_28: { title: "🎓 لم يتبقَّ سوى {0} قبل الامتحان التجريبي", body: "أنت قريب جدًا، {name}! أنجزت {0}/{1}. بقي الشوط الأخير." },
-    recap_quiet_week: { title: "💫 أسبوعك على PermiGo", body: "أسبوع هادئ. عُد متى شئت — 5 دقائق تكفي لتستعيد إيقاعك من جديد." },
+    recap_quiet_week: { title: "💫 أسبوعك على PermiGo", body: "أسبوع هادئ. عُد متى شئت. 5 دقائق تكفي لتستعيد إيقاعك من جديد." },
     achievement_quiz_10: { title: "🧠 {0} اختبار", body: "أنت تصبح محترفًا في الاختبارات" },
     recap_strong_week: { title: "🔥 يا له من أسبوع!", body: "أنجزت {0} مهارات ولعبت {1} اختبارات. واصل هكذا!" },
     achievement_comp_10: { title: "🌱 {0}/{1}", body: "أنجزت ثلث المسار. زخم رائع!" },
@@ -919,7 +919,7 @@ function wireItems(root, me, initialUnread) {
           wrap.style.overflow = "";
           const item = wrap.querySelector(".nf2-item");
           if (item) item.style.transform = "";
-          toast("Suppression impossible — réessaie", "error");
+          toast("Suppression impossible · réessaie", "error");
           return;
         }
         setTimeout(() => wrap.remove(), 350);

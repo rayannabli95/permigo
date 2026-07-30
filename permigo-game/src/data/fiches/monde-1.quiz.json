@@ -2,7 +2,11 @@
   {
     "code": "C1a",
     "q": "Tu veux mettre le clignotant. Quel commodo ?",
-    "options": ["Celui de droite", "Celui de gauche", "Le bouton au centre"],
+    "options": [
+      "Celui de droite",
+      "Celui de gauche",
+      "Le bouton au centre"
+    ],
     "correct": 1,
     "explication": "Mémo de pro : clignotant à gauche, balais à droite. Tu ne te trompes plus."
   },
@@ -152,7 +156,11 @@
   {
     "code": "C1d",
     "q": "Tu freines pour t'arrêter complètement. Quand débrayes-tu ?",
-    "options": ["Juste avant l'arrêt", "Tout de suite", "Après l'arrêt"],
+    "options": [
+      "Juste avant l'arrêt",
+      "Tout de suite",
+      "Après l'arrêt"
+    ],
     "correct": 0,
     "explication": "Trop tôt = roue libre, trop tard = tu cales pile avant de t'arrêter."
   },
@@ -214,7 +222,11 @@
   {
     "code": "C1f",
     "q": "Tu changes de vitesse. Tu regardes où ?",
-    "options": ["Le levier", "La route, toujours", "Le compteur"],
+    "options": [
+      "Le levier",
+      "La route, toujours",
+      "Le compteur"
+    ],
     "correct": 1,
     "explication": "Tu sens les rapports à la main, paume sur le pommeau, sans quitter la route."
   },
@@ -243,7 +255,11 @@
   {
     "code": "C1f",
     "q": "Tu t'arrêtes à un stop. En quelle vitesse ?",
-    "options": ["En 1ère", "En 2e", "Au point mort"],
+    "options": [
+      "En 1ère",
+      "En 2e",
+      "Au point mort"
+    ],
     "correct": 1,
     "explication": "On s'arrête en 2e, puis on repasse la 1ère pour repartir. Plus fluide."
   },

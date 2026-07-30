@@ -551,7 +551,7 @@ function _trophRow(troResults) {
       const isNew = t.unlocked && !seen.has(t.id);
       const newCls = isNew ? " new-badge" : "";
       const label = t.name || t.id;
-      return `<div class="mb-tcell${lockCls}${newCls}" role="button" tabindex="0" data-key="${escAttr(t.id)}" aria-label="${escAttr(label)}${t.unlocked ? " — débloqué" : " — verrouillé"} — voir le détail">
+      return `<div class="mb-tcell${lockCls}${newCls}" role="button" tabindex="0" data-key="${escAttr(t.id)}" aria-label="${escAttr(label)}${t.unlocked ? " — débloqué" : " — verrouillé"} · voir le détail">
         <img src="${badgeSrc(t.id)}" alt="" width="46" height="46" loading="lazy">
       </div>`;
     })

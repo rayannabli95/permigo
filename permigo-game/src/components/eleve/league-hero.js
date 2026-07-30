@@ -27,12 +27,12 @@ const LGH_I18N = {
     school: "Your school",
     solo: "PermiGo learners",
     of_students: "{org} · {n} learner{s}",
-    aria: "Your league this week — {st} — see the leaderboard",
+    aria: "Your league this week. {st} · see the leaderboard",
     aria_rank: "you're {r} of {n}",
     aria_empty: "no points yet this week",
     invite:
-      "Answer questions this week — every right answer puts you in the race.",
-    top: "You're in the lead — keep your spot",
+      "Answer questions this week. Every right answer puts you in the race.",
+    top: "You're in the lead · keep your spot",
     gap: "Only <b>{g} {u}</b> to overtake {w}",
     first_place: "1st place",
     pt: "pt",
@@ -45,11 +45,11 @@ const LGH_I18N = {
     school: "مدرستك",
     solo: "طلاب بيرميغو",
     of_students: "{org} · {n} طالبًا",
-    aria: "دوريك هذا الأسبوع — {st} — عرض الترتيب",
+    aria: "دوريك هذا الأسبوع. {st} · عرض الترتيب",
     aria_rank: "أنت في المركز {r} من أصل {n}",
     aria_empty: "لا نقاط بعد هذا الأسبوع",
-    invite: "أجب عن أسئلة هذا الأسبوع — كل إجابة صحيحة تُدخلك السباق.",
-    top: "أنت في الصدارة — حافظ على مركزك",
+    invite: "أجب عن أسئلة هذا الأسبوع. كل إجابة صحيحة تُدخلك السباق.",
+    top: "أنت في الصدارة · حافظ على مركزك",
     gap: "تفصلك <b>{g} {u}</b> عن تجاوز {w}",
     first_place: "المركز الأول",
     pt: "نقطة",
@@ -100,10 +100,10 @@ function buildModel(rows) {
 // UNE ligne d'objectif — jamais culpabilisante, toujours « voilà comment monter ».
 function nudgeLine(m) {
   if (!m.classed) {
-    return `<div class="lgh-nudge lgh-nudge-invite">${lgRtl(esc(lgt("invite", "Réponds à des questions cette semaine — chaque bonne réponse te fait entrer dans la course.")))}</div>`;
+    return `<div class="lgh-nudge lgh-nudge-invite">${lgRtl(esc(lgt("invite", "Réponds à des questions cette semaine. Chaque bonne réponse te fait entrer dans la course.")))}</div>`;
   }
   if (m.mine.rang === 1) {
-    return `<div class="lgh-nudge"><span class="lgh-up" aria-hidden="true">👑</span> ${lgRtl(esc(lgt("top", "Tu es en tête — garde ta place")))}</div>`;
+    return `<div class="lgh-nudge"><span class="lgh-up" aria-hidden="true">👑</span> ${lgRtl(esc(lgt("top", "Tu es en tête · garde ta place")))}</div>`;
   }
   if (m.above) {
     const unit = m.gap > 1 ? lgt("pts", "pts") : lgt("pt", "pt");

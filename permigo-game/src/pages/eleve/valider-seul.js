@@ -56,7 +56,7 @@ const VS_I18N = {
     retry: "Try again",
     comp_fallback: "Skill",
     blocked:
-      "Your instructor already validated this skill — nothing to do here.",
+      "Your instructor already validated this skill. Nothing to do here.",
     hero_p:
       "Your instructor validated it in a lesson, or you already own this move? Prove it in 2 steps.",
     already_t: "Already certified",
@@ -68,11 +68,11 @@ const VS_I18N = {
     step2_s: "{n} questions · you need at least {s}% to validate.",
     cta_retry: "Retake the quiz",
     cta_start: "Start the validation quiz",
-    hint: "Be honest with yourself — this quiz never replaces a real driving lesson.",
-    toast_noq: "No questions on this skill yet — try again later.",
-    toast_nopressure: "No pressure — come back when you feel it.",
-    toast_valerr: "Something went wrong while validating — try again.",
-    toast_neterr: "Network error — try again.",
+    hint: "Be honest with yourself. This quiz never replaces a real driving lesson.",
+    toast_noq: "No questions on this skill yet. Try again later.",
+    toast_nopressure: "No pressure. Come back when you feel it.",
+    toast_valerr: "Something went wrong while validating. Try again.",
+    toast_neterr: "Network error · try again.",
     ok_kick: "Certified by you",
     ok_title: "Skill certified!",
     ok_p: "“{n}” is now done in your journey.",
@@ -82,7 +82,7 @@ const VS_I18N = {
     fail_kick: "Not yet",
     fail_title: "Almost!",
     fail_p:
-      "{p}% on “{n}” — you need {s}% to validate. Re-read the sheet and try again.",
+      "{p}% on “{n}”. You need {s}% to validate. Re-read the sheet and try again.",
     fail_retry: "Re-read the sheet and retry",
     fail_back: "Back to the journey",
     cf_kick: "Quiz passed at {p}%",
@@ -101,7 +101,7 @@ const VS_I18N = {
     load_body: "تعذّر التحقق من هذه المهارة. افحص اتصالك وحاول مجددًا.",
     retry: "أعد المحاولة",
     comp_fallback: "مهارة",
-    blocked: "سبق أن صادق مدرّبك على هذه المهارة — لا شيء تفعله هنا.",
+    blocked: "سبق أن صادق مدرّبك على هذه المهارة. لا شيء تفعله هنا.",
     hero_p:
       "صادق عليها مدرّبك في درس، أو أنت تتقن هذه الحركة أصلًا؟ أثبت ذلك في خطوتين.",
     already_t: "مُصادَق عليها سابقًا",
@@ -113,11 +113,11 @@ const VS_I18N = {
     step2_s: "{n} أسئلة · تحتاج إلى {s}% على الأقل للمصادقة.",
     cta_retry: "أعد الاختبار",
     cta_start: "ابدأ اختبار المصادقة",
-    hint: "كن صادقًا مع نفسك — هذا الاختبار لا يعوّض درس قيادة حقيقيًا.",
-    toast_noq: "لا أسئلة على هذه المهارة بعد — أعد المحاولة لاحقًا.",
-    toast_nopressure: "لا ضغط — عد متى شعرت بالجاهزية.",
-    toast_valerr: "حدث خطأ أثناء المصادقة — أعد المحاولة.",
-    toast_neterr: "خطأ في الشبكة — أعد المحاولة.",
+    hint: "كن صادقًا مع نفسك. هذا الاختبار لا يعوّض درس قيادة حقيقيًا.",
+    toast_noq: "لا أسئلة على هذه المهارة بعد. أعد المحاولة لاحقًا.",
+    toast_nopressure: "لا ضغط · عد متى شعرت بالجاهزية.",
+    toast_valerr: "حدث خطأ أثناء المصادقة · أعد المحاولة.",
+    toast_neterr: "خطأ في الشبكة · أعد المحاولة.",
     ok_kick: "صادقت عليها بنفسك",
     ok_title: "تمت المصادقة على المهارة!",
     ok_p: "«{n}» أصبحت الآن مكتملة في مسارك.",
@@ -127,7 +127,7 @@ const VS_I18N = {
     fail_kick: "ليس بعد",
     fail_title: "اقتربت!",
     fail_p:
-      "{p}% في «{n}» — تحتاج إلى {s}% للمصادقة. أعد قراءة البطاقة وحاول مجددًا.",
+      "{p}% في «{n}». تحتاج إلى {s}% للمصادقة. أعد قراءة البطاقة وحاول مجددًا.",
     fail_retry: "أعد قراءة البطاقة وحاول مجددًا",
     fail_back: "العودة إلى المسار",
     cf_kick: "نجحت في الاختبار بنسبة {p}%",
@@ -284,7 +284,7 @@ function blockedScreen(sub) {
     ${topBar(sub?.n || vsTR("comp_fallback", "Compétence"))}
     <div class="vs-card vs-warn">
       ${icon("alert-circle", { size: 20 })}
-      <p>${vsD("blocked", "Ton moniteur a déjà validé cette compétence — rien à faire ici.")}</p>
+      <p>${vsD("blocked", "Ton moniteur a déjà validé cette compétence. Rien à faire ici.")}</p>
     </div>
   </div>`;
 }
@@ -358,7 +358,7 @@ function introScreen(sub, cat, already, fiche) {
     </div>
 
     <button class="vs-cta" id="vs-start-quiz" type="button">${icon("zap", { size: 18 })} ${already ? vsD("cta_retry", "Repasser le quiz") : vsD("cta_start", "Commencer le quiz de validation")}</button>
-    <p class="vs-hint">${vsD("hint", "Sois honnête avec toi-même — ce quiz ne remplace pas une vraie leçon de conduite.")}</p>
+    <p class="vs-hint">${vsD("hint", "Sois honnête avec toi-même. Ce quiz ne remplace pas une vraie leçon de conduite.")}</p>
   </div>`;
 }
 
@@ -482,7 +482,7 @@ function wireIntro(root, me, compId, sub, cat) {
       toast(
         vsTR(
           "toast_noq",
-          "Pas encore de questions sur cette compétence — réessaie plus tard.",
+          "Pas encore de questions sur cette compétence · réessaie plus tard.",
         ),
         "info",
       );
@@ -543,7 +543,7 @@ async function handleComplete(
   root.querySelector("#vs-not-yet")?.addEventListener("click", () => {
     track("valider_seul.not_yet", { competence_id: compId });
     toast(
-      vsTR("toast_nopressure", "Aucune pression — reviens quand tu le sens."),
+      vsTR("toast_nopressure", "Aucune pression. Reviens quand tu le sens."),
       "info",
     );
     navigate("#/parcours");
@@ -575,7 +575,7 @@ async function certify(root, me, compId, sub, cat, scorePct, answers) {
         error || data?.error,
       );
       toast(
-        vsTR("toast_valerr", "Erreur lors de la validation — réessaie."),
+        vsTR("toast_valerr", "Erreur lors de la validation. Réessaie."),
         "error",
       );
       root.innerHTML = failScreen(sub, scorePct);
@@ -623,7 +623,7 @@ async function certify(root, me, compId, sub, cat, scorePct, answers) {
     wireResult(root, me, compId, sub, cat);
   } catch (e) {
     console.warn("[valider-seul] self_validate_competence", e);
-    toast(vsTR("toast_neterr", "Erreur réseau — réessaie."), "error");
+    toast(vsTR("toast_neterr", "Erreur réseau · réessaie."), "error");
     root.innerHTML = failScreen(sub, scorePct);
     wireResult(root, me, compId, sub, cat);
   }

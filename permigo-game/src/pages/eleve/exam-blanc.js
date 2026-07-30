@@ -261,12 +261,12 @@ function exsRtl() {
 const PARCOURS_I18N = {
   en: {
     1: {
-      nom: "Cergy — roundabouts",
+      nom: "Cergy · roundabouts",
       contexte:
         "Leaving Cergy-Saint-Christophe station, heavy traffic, many roundabouts (giratoires) and 30 km/h zones.",
     },
     2: {
-      nom: "Paris — heavy traffic",
+      nom: "Paris · heavy traffic",
       contexte:
         "Crossing central Paris, 50 km/h boulevards, cycle boxes (sas vélos), lots of pedestrians.",
     },
@@ -276,7 +276,7 @@ const PARCOURS_I18N = {
         "Country roads with no road markings, unmarked intersections, farm tractors.",
     },
     4: {
-      nom: "Lyon — 30 zone",
+      nom: "Lyon · 30 zone",
       contexte:
         "Residential area in Lyon, 30 km/h zone (zone 30), tramway, lots of cyclists and pedestrians.",
     },
@@ -323,12 +323,12 @@ const PARCOURS_I18N = {
   },
   ar: {
     1: {
-      nom: "سيرجي — الدوارات",
+      nom: "سيرجي · الدوارات",
       contexte:
         "الخروج من محطة سيرجي-سان-كريستوف، حركة مرور كثيفة، دوّارات (giratoires) عديدة ومناطق سرعة 30.",
     },
     2: {
-      nom: "باريس — حركة كثيفة",
+      nom: "باريس · حركة كثيفة",
       contexte:
         "عبور وسط باريس، شوارع بسرعة 50 كم/سا، مربعات انتظار الدراجات (sas vélos)، مشاة بكثرة.",
     },
@@ -338,7 +338,7 @@ const PARCOURS_I18N = {
         "طرق ريفية بلا علامات أرضية، تقاطعات غير مؤشَّرة، جرارات زراعية.",
     },
     4: {
-      nom: "ليون — منطقة 30",
+      nom: "ليون · منطقة 30",
       contexte:
         "حي سكني في ليون، منطقة سرعة 30 (zone 30)، ترام، دراجات ومشاة بكثرة.",
     },

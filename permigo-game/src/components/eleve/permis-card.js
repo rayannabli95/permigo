@@ -458,7 +458,7 @@ function showBgMilestoneToast(card, tier) {
   const labels = {
     1: {
       title: "Fond Route débloqué",
-      sub: "Tu progresses bien — déjà 10 compétences acquises.",
+      sub: "Tu progresses bien · déjà 10 compétences acquises.",
     },
     2: {
       title: "Fond Holographic débloqué",
@@ -579,7 +579,7 @@ export function renderPermisMini({
 
   return `${MINI_STYLE}
 <div class="pcm s-${state.key}" role="button" tabindex="0"
-     aria-label="${escAttr(`Mon permis virtuel — ${state.label}, ${pct}% de progression. Voir mon parcours.`)}">
+     aria-label="${escAttr(`Mon permis virtuel. ${state.label}, ${pct}% de progression. Voir mon parcours.`)}">
   <div class="pcm-bg" style="${escAttr(`background-image:url("${safeBgUrl}")`)}"></div>
   <div class="pcm-top">
     <div class="pcm-flag" aria-hidden="true"></div>

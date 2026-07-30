@@ -35,7 +35,7 @@ const TOUR_KEY = "pg-tour-moniteur-v1";
 const MONITEUR_TOUR_STEPS = [
   {
     title: "Bienvenue sur PermiGo",
-    text: "Tes élèves préparent chaque leçon dans l’app. Toi, tu vois qui s’entraîne, qui avance, qui décroche — d’un coup d’œil.",
+    text: "Tes élèves préparent chaque leçon dans l’app. Toi, tu vois qui s’entraîne, qui avance, qui décroche. D’un coup d’œil.",
   },
   {
     sel: "#aj-act-invite",

@@ -46,11 +46,11 @@ const GAL_I18N = {
     title: "My collection",
     sub_all: "Everything you can unlock.",
     loading: "Loading…",
-    conn_unstable: "Unstable connection — counters unavailable",
+    conn_unstable: "Unstable connection · counters unavailable",
     unlocked_hd: "Unlocked",
     locked_hd: "To unlock",
     empty_hint:
-      "No trophy unlocked yet — validate your first skill to get started!",
+      "No trophy unlocked yet. Validate your first skill to get started!",
     see_troph: "See the trophy",
     locked_troph: "Locked trophy:",
     locked_meta: "Locked",
@@ -75,10 +75,10 @@ const GAL_I18N = {
     title: "مجموعتي",
     sub_all: "كل ما يمكنك فتحه.",
     loading: "جارٍ التحميل…",
-    conn_unstable: "اتصال غير مستقر — العدادات غير متاحة",
+    conn_unstable: "اتصال غير مستقر · العدادات غير متاحة",
     unlocked_hd: "مفتوحة",
     locked_hd: "للفتح",
-    empty_hint: "لا كؤوس مفتوحة بعد — تحقّق من مهارتك الأولى للبدء!",
+    empty_hint: "لا كؤوس مفتوحة بعد. تحقّق من مهارتك الأولى للبدء!",
     see_troph: "عرض الكأس",
     locked_troph: "كأس مقفلة:",
     locked_meta: "مقفلة",
@@ -408,7 +408,7 @@ export async function mount(root) {
     import("@/components/common/toast.js")
       .then(({ toast }) =>
         toast(
-          gtR("conn_unstable", "Connexion instable — compteurs indisponibles"),
+          gtR("conn_unstable", "Connexion instable · compteurs indisponibles"),
           "info",
         ),
       )
@@ -500,7 +500,7 @@ export async function mount(root) {
           ? `
         <div class="gal-empty-hint">
           <div class="gal-empty-hint-emoji">${medallion("trophee", "gold", { size: 44 })}</div>
-          <div class="gal-empty-hint-txt">${gtD("empty_hint", "Aucun trophée débloqué pour l'instant — valide ta première compétence pour commencer !")}</div>
+          <div class="gal-empty-hint-txt">${gtD("empty_hint", "Aucun trophée débloqué pour l'instant. Valide ta première compétence pour commencer !")}</div>
         </div>
       `
           : ""

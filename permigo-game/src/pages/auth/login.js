@@ -41,7 +41,7 @@ function activeLang(stored = getLang()) {
 const I18N = {
   fr: {
     title: "Content de te revoir",
-    subtitle: "Élève, moniteur ou gérant — retrouve ton espace",
+    subtitle: "Élève, moniteur ou gérant · retrouve ton espace",
     email: "Email",
     email_ph: "toi@exemple.fr",
     pwd: "Mot de passe",
@@ -64,21 +64,21 @@ const I18N = {
     foot2_link: "Rejoins ton moniteur",
     err_email: "Email requis",
     err_pwd: "Mot de passe requis",
-    err_attempts: "Trop d'essais — réessaye dans {t}",
-    err_requests: "Trop de demandes — réessaye dans {t}",
-    err_bot: "Vérification anti-bot échouée — réessaye",
+    err_attempts: "Trop d'essais · réessaye dans {t}",
+    err_requests: "Trop de demandes · réessaye dans {t}",
+    err_bot: "Vérification anti-bot échouée · réessaye",
     err_creds: "Identifiants invalides",
     err_send: "Erreur envoi",
     err_code: "Code invalide",
     err_code6: "Code à 6 chiffres requis",
     email_first: "Saisis ton email d'abord",
     code_resent: "Nouveau code envoyé",
-    code_sent: "Code envoyé — vérifie ta boîte mail",
+    code_sent: "Code envoyé · vérifie ta boîte mail",
     hello: "Bonjour",
     g_fail: "Connexion Google impossible",
     g_err: "Erreur de connexion Google",
     g_off:
-      "Connexion Google pas encore activée — utilise ton email en attendant.",
+      "Connexion Google pas encore activée. Utilise ton email en attendant.",
     auth_off: "Auth non configurée",
     lang_group: "Langue",
     demo_accounts: "Comptes démo",
@@ -87,7 +87,7 @@ const I18N = {
     role_instructor: "Enseignant",
     role_manager: "Gérant",
     auth_invalid_credentials: "Identifiants invalides.",
-    auth_email_unconfirmed: "Email non confirmé — vérifie ta boîte mail.",
+    auth_email_unconfirmed: "Email non confirmé · vérifie ta boîte mail.",
     auth_user_not_found: "Aucun compte trouvé pour cet email.",
     auth_invalid_otp: "Code invalide ou expiré.",
     auth_expired_token: "Le lien a expiré. Demande un nouveau code.",
@@ -96,8 +96,8 @@ const I18N = {
       "Le mot de passe doit contenir au moins 6 caractères.",
     auth_user_registered: "Un compte existe déjà pour cet email.",
     auth_email_rate:
-      "Trop de tentatives — réessaie dans quelques minutes.",
-    auth_code_rate: "Trop de codes envoyés — réessaie dans 60 secondes.",
+      "Trop de tentatives · réessaie dans quelques minutes.",
+    auth_code_rate: "Trop de codes envoyés · réessaie dans 60 secondes.",
     auth_wait_code: "Attends 60 secondes avant de renvoyer un code.",
     auth_otp_signup:
       "Cette adresse email n'est pas enregistrée. Vérifie l'adresse saisie.",
@@ -105,7 +105,7 @@ const I18N = {
   },
   en: {
     title: "Welcome back",
-    subtitle: "Student, instructor or manager — back to your space",
+    subtitle: "Student, instructor or manager · back to your space",
     email: "Email",
     email_ph: "you@example.com",
     pwd: "Password",
@@ -128,20 +128,20 @@ const I18N = {
     foot2_link: "Join your instructor",
     err_email: "Email required",
     err_pwd: "Password required",
-    err_attempts: "Too many attempts — try again in {t}",
-    err_requests: "Too many requests — try again in {t}",
-    err_bot: "Anti-bot check failed — try again",
+    err_attempts: "Too many attempts · try again in {t}",
+    err_requests: "Too many requests · try again in {t}",
+    err_bot: "Anti-bot check failed · try again",
     err_creds: "Invalid credentials",
     err_send: "Couldn't send the code",
     err_code: "Invalid code",
     err_code6: "6-digit code required",
     email_first: "Enter your email first",
     code_resent: "New code sent",
-    code_sent: "Code sent — check your inbox",
+    code_sent: "Code sent · check your inbox",
     hello: "Hello",
     g_fail: "Google sign-in failed",
     g_err: "Google sign-in error",
-    g_off: "Google sign-in isn't enabled yet — use your email for now.",
+    g_off: "Google sign-in isn't enabled yet. Use your email for now.",
     auth_off: "Auth not configured",
     lang_group: "Language",
     demo_accounts: "Demo accounts",
@@ -150,15 +150,15 @@ const I18N = {
     role_instructor: "Instructor",
     role_manager: "Manager",
     auth_invalid_credentials: "Invalid email or password.",
-    auth_email_unconfirmed: "Email not confirmed — check your inbox.",
+    auth_email_unconfirmed: "Email not confirmed · check your inbox.",
     auth_user_not_found: "No account found for this email.",
     auth_invalid_otp: "Invalid or expired code.",
     auth_expired_token: "The link expired. Request a new code.",
     auth_password_required: "Password required.",
     auth_password_short: "Password must be at least 6 characters.",
     auth_user_registered: "An account already exists for this email.",
-    auth_email_rate: "Too many attempts — try again in a few minutes.",
-    auth_code_rate: "Too many codes sent — try again in 60 seconds.",
+    auth_email_rate: "Too many attempts. Try again in a few minutes.",
+    auth_code_rate: "Too many codes sent. Try again in 60 seconds.",
     auth_wait_code: "Wait 60 seconds before requesting a new code.",
     auth_otp_signup:
       "This email address is not registered. Check the address you typed.",
@@ -166,7 +166,7 @@ const I18N = {
   },
   ar: {
     title: "أهلًا بعودتك",
-    subtitle: "طالب، مدرّب أو مدير — عد إلى مساحتك",
+    subtitle: "طالب، مدرّب أو مدير · عد إلى مساحتك",
     email: "البريد الإلكتروني",
     email_ph: "you@example.com",
     pwd: "كلمة المرور",
@@ -189,20 +189,20 @@ const I18N = {
     foot2_link: "انضم إلى مدرّبك",
     err_email: "البريد الإلكتروني مطلوب",
     err_pwd: "كلمة المرور مطلوبة",
-    err_attempts: "محاولات كثيرة — حاول مجددًا بعد {t}",
-    err_requests: "طلبات كثيرة — حاول مجددًا بعد {t}",
-    err_bot: "فشل التحقق من أنك لست روبوتًا — حاول مجددًا",
+    err_attempts: "محاولات كثيرة · حاول مجددًا بعد {t}",
+    err_requests: "طلبات كثيرة · حاول مجددًا بعد {t}",
+    err_bot: "فشل التحقق من أنك لست روبوتًا. حاول مجددًا",
     err_creds: "بيانات الدخول غير صحيحة",
     err_send: "تعذّر إرسال الرمز",
     err_code: "رمز غير صالح",
     err_code6: "مطلوب رمز من 6 أرقام",
     email_first: "أدخل بريدك الإلكتروني أولًا",
     code_resent: "تم إرسال رمز جديد",
-    code_sent: "تم إرسال الرمز — تحقق من بريدك",
+    code_sent: "تم إرسال الرمز · تحقق من بريدك",
     hello: "مرحبًا",
     g_fail: "تعذّر تسجيل الدخول عبر Google",
     g_err: "خطأ في تسجيل الدخول عبر Google",
-    g_off: "تسجيل الدخول عبر Google غير مفعّل بعد — استخدم بريدك حاليًا.",
+    g_off: "تسجيل الدخول عبر Google غير مفعّل بعد. استخدم بريدك حاليًا.",
     auth_off: "المصادقة غير مهيأة",
     lang_group: "اللغة",
     demo_accounts: "حسابات تجريبية",
@@ -212,15 +212,15 @@ const I18N = {
     role_manager: "مدير",
     auth_invalid_credentials:
       "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
-    auth_email_unconfirmed: "البريد غير مؤكّد — تحقق من صندوق بريدك.",
+    auth_email_unconfirmed: "البريد غير مؤكّد · تحقق من صندوق بريدك.",
     auth_user_not_found: "لا يوجد حساب لهذا البريد الإلكتروني.",
     auth_invalid_otp: "الرمز غير صالح أو منتهي الصلاحية.",
     auth_expired_token: "انتهت صلاحية الرابط. اطلب رمزًا جديدًا.",
     auth_password_required: "كلمة المرور مطلوبة.",
     auth_password_short: "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل.",
     auth_user_registered: "يوجد حساب مسجّل بهذا البريد الإلكتروني.",
-    auth_email_rate: "محاولات كثيرة — حاول مجددًا بعد دقائق.",
-    auth_code_rate: "أُرسلت رموز كثيرة — حاول مجددًا بعد 60 ثانية.",
+    auth_email_rate: "محاولات كثيرة · حاول مجددًا بعد دقائق.",
+    auth_code_rate: "أُرسلت رموز كثيرة. حاول مجددًا بعد 60 ثانية.",
     auth_wait_code: "انتظر 60 ثانية قبل طلب رمز جديد.",
     auth_otp_signup:
       "هذا البريد الإلكتروني غير مسجّل. تحقق من العنوان الذي أدخلته.",
@@ -571,7 +571,7 @@ function template() {
               <span class="lg-emblem-fb" aria-hidden="true"><b>P</b></span>
             </div>
             <h1 class="lg-title"${rtlAttr()}>${text("title", "Content de te revoir")}</h1>
-            <p class="lg-subtitle"${rtlAttr()}>${text("subtitle", "Élève, moniteur ou gérant — retrouve ton espace")}</p>
+            <p class="lg-subtitle"${rtlAttr()}>${text("subtitle", "Élève, moniteur ou gérant · retrouve ton espace")}</p>
           </div>
 
           <div class="lg-field" id="lg-email-field">
@@ -974,7 +974,7 @@ function wire(root) {
           return softFail(
             t(
               "g_off",
-              "Connexion Google pas encore activée — utilise ton email en attendant.",
+              "Connexion Google pas encore activée. Utilise ton email en attendant.",
             ),
           );
         }
@@ -1042,7 +1042,7 @@ function wire(root) {
       if (isTurnstileEnabled() && !captchaToken) {
         errEl.textContent = t(
           "err_bot",
-          "Vérification anti-bot échouée — réessaye",
+          "Vérification anti-bot échouée · réessaye",
         );
         shake();
         return;
@@ -1085,7 +1085,7 @@ function wire(root) {
           return;
         }
         toast(
-          t("code_sent", "Code envoyé — vérifie ta boîte mail"),
+          t("code_sent", "Code envoyé · vérifie ta boîte mail"),
           "success",
         );
         setMode("otp-verify");

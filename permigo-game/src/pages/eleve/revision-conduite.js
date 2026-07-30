@@ -100,7 +100,7 @@ const RVC_I18N = {
     world_4_sub: "On your own, safely and economically",
     to_start: "To start",
     in_progress: "In progress",
-    see_all: "See all the cards — {name}",
+    see_all: "See all the cards · {name}",
     start: "Start",
     reread: "Read again",
     continue: "Continue",
@@ -119,14 +119,14 @@ const RVC_I18N = {
     cert_done_kicker: "Already in My licence",
     cert_done_title: "Already self-certified",
     cert_done_body:
-      "“{title}” is already acquired in your journey. Great job — keep reviewing whenever you like.",
+      "“{title}” is already acquired in your journey. Great job. Keep reviewing whenever you like.",
     cert_keep: "Keep reviewing",
     cert_review: "Review in My licence →",
     my_licence: "My licence",
     quiz_passed: "Quiz passed",
     cert_prompt: "Ready to certify this skill?",
     cert_prompt_body:
-      "You have just reviewed “{title}”. Certify it to move it forward in {product} — an official five-question quiz confirms you have acquired it.",
+      "You have just reviewed “{title}”. Certify it to move it forward in {product}. An official five-question quiz confirms you have acquired it.",
     certify: "Certify this skill",
     later: "Later",
   },
@@ -147,7 +147,7 @@ const RVC_I18N = {
     world_4_sub: "بمفردك وبأمان واقتصاد",
     to_start: "للبدء",
     in_progress: "قيد التقدم",
-    see_all: "عرض جميع البطاقات — {name}",
+    see_all: "عرض جميع البطاقات · {name}",
     start: "ابدأ",
     reread: "اقرأ مجدداً",
     continue: "واصل",
@@ -166,14 +166,14 @@ const RVC_I18N = {
     cert_done_kicker: "موجودة بالفعل في رخصتي",
     cert_done_title: "سبق أن اعتمدتها بنفسك",
     cert_done_body:
-      "« {title} » مكتسبة بالفعل في مسارك. أحسنت — يمكنك متابعة مراجعتها متى شئت.",
+      "« {title} » مكتسبة بالفعل في مسارك. أحسنت. يمكنك متابعة مراجعتها متى شئت.",
     cert_keep: "واصل المراجعة",
     cert_review: "← عرضها في رخصتي",
     my_licence: "رخصتي",
     quiz_passed: "نجحت في الاختبار",
     cert_prompt: "هل أنت مستعد لاعتماد هذه المهارة؟",
     cert_prompt_body:
-      "لقد راجعت للتو « {title} ». اعتمدها لتتقدم في « {product} » — ويؤكد اختبار رسمي من خمسة أسئلة أنك أتقنتها.",
+      "لقد راجعت للتو « {title} ». اعتمدها لتتقدم في « {product} ». ويؤكد اختبار رسمي من خمسة أسئلة أنك أتقنتها.",
     certify: "اعتماد هذه المهارة",
     later: "لاحقاً",
   },
@@ -1650,7 +1650,7 @@ export async function mount(root, param) {
         <div class="pont-med">${CHECK}</div>
         <span class="pont-kick">${rvcText("cert_done_kicker", "Déjà dans Mon permis")}</span>
         <h1 class="pont-ttl">${rvcText("cert_done_title", "Déjà certifiée par toi")}</h1>
-        <p class="pont-p">${rvcRich("cert_done_body", "« {title} » est déjà acquise dans ton parcours. Beau boulot — continue à réviser quand tu veux.", { title: titre })}</p>
+        <p class="pont-p">${rvcRich("cert_done_body", "« {title} » est déjà acquise dans ton parcours. Beau boulot. Continue à réviser quand tu veux.", { title: titre })}</p>
         <button class="pont-cta" data-continue type="button">${rvcText("cert_keep", "Continuer à réviser")}</button>
         <button class="pont-link" data-revoir type="button">${rvcText("cert_review", "Revoir dans Mon permis →")}</button>
       </div>`;
@@ -1660,7 +1660,7 @@ export async function mount(root, param) {
         <div class="pont-med">${BOUCLIER}</div>
         <span class="pont-kick">${rvcText("quiz_passed", "Quiz réussi")}</span>
         <h1 class="pont-ttl">${rvcText("cert_prompt", "Prêt·e à certifier cette compétence ?")}</h1>
-        <p class="pont-p">${rvcRich("cert_prompt_body", "Tu viens de réviser « {title} ». Certifie-la pour la faire avancer dans {product} — un quiz officiel de 5 questions confirme que c'est acquis.", { title: titre, product: rvcT("my_licence", "Mon permis") })}</p>
+        <p class="pont-p">${rvcRich("cert_prompt_body", "Tu viens de réviser « {title} ». Certifie-la pour la faire avancer dans {product}. Un quiz officiel de 5 questions confirme que c'est acquis.", { title: titre, product: rvcT("my_licence", "Mon permis") })}</p>
         <button class="pont-cta" data-certify type="button">${rvcText("certify", "Certifier cette compétence")}</button>
         <button class="pont-ghost" data-continue type="button">${rvcText("later", "Plus tard")}</button>
       </div>`;

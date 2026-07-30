@@ -44,7 +44,7 @@ const RV_I18N = {
     fav: "Students' favourite",
     hero_alt: "A scene from the game: an intersection, one decision to make",
     hero_title: "One scene, one decision",
-    hero_sub: "3 min, just like the road — not theory.",
+    hero_sub: "3 min, just like the road. Not theory.",
     hero_cta: "Play a scene",
     rail: "More ways to practise",
     exam_t: "Mock exam",
@@ -69,7 +69,7 @@ const RV_I18N = {
     fav: "المفضّل لدى الطلاب",
     hero_alt: "مشهد من اللعبة: تقاطع يتطلب قرارًا",
     hero_title: "مشهد واحد، قرار واحد",
-    hero_sub: "3 دقائق، كما على الطريق — وليس النظري.",
+    hero_sub: "3 دقائق، كما على الطريق. وليس النظري.",
     hero_cta: "العب مشهدًا",
     rail: "طرق أخرى للتدرّب",
     exam_t: "امتحان تجريبي",
@@ -243,7 +243,7 @@ function render({
       </span>
       <span class="rv4-hbody">
         <h2 class="rv4-htitle"${R}>${rv("hero_title", "Une scène, une décision")}</h2>
-        <p class="rv4-hsub"${R}>${rv("hero_sub", "3 min, comme sur la route — pas du code.")}</p>
+        <p class="rv4-hsub"${R}>${rv("hero_sub", "3 min, comme sur la route. Pas du code.")}</p>
         <span class="rv4-cta">${SVG.play}<span${R}>${rv("hero_cta", "Jouer une scène")}</span></span>
       </span>
     </button>

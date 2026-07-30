@@ -43,10 +43,10 @@ const FQ_I18N = {
     back_home: "Back home",
     not_found: "This flash quiz can't be found.",
     already_answered: "You've already answered this flash quiz.",
-    expired: "Too late — this flash quiz has expired.",
+    expired: "Too late. This flash quiz has expired.",
     no_questions: "Questions unavailable. Try again later.",
     unavailable: "Quiz unavailable. Check your connection, then try again.",
-    time_up: "Time's up — this flash quiz has expired.",
+    time_up: "Time's up. This flash quiz has expired.",
   },
   ar: {
     loading: "جارٍ التحميل…",
@@ -55,10 +55,10 @@ const FQ_I18N = {
     back_home: "العودة للرئيسية",
     not_found: "تعذّر العثور على هذا الاختبار الخاطف.",
     already_answered: "لقد أجبت بالفعل على هذا الاختبار الخاطف.",
-    expired: "فات الأوان — انتهت صلاحية هذا الاختبار الخاطف.",
+    expired: "فات الأوان. انتهت صلاحية هذا الاختبار الخاطف.",
     no_questions: "الأسئلة غير متاحة. حاول مرة أخرى لاحقًا.",
     unavailable: "الاختبار غير متاح. تحقّق من اتصالك، ثم أعد المحاولة.",
-    time_up: "انتهى الوقت — انتهت صلاحية الاختبار الخاطف.",
+    time_up: "انتهى الوقت · انتهت صلاحية الاختبار الخاطف.",
   },
 };
 function fqt(key, fr) {
@@ -166,7 +166,7 @@ export async function mount(root, flashQuizId) {
     if (new Date(quiz.expires_at).getTime() <= Date.now()) {
       return renderClosed(
         root,
-        fqt("expired", "Trop tard — ce quiz éclair est expiré."),
+        fqt("expired", "Trop tard. Ce quiz éclair est expiré."),
       );
     }
 
@@ -251,7 +251,7 @@ function runQuiz(root, { quiz, pool, lang = "fr" }) {
       stopSpeaking();
       renderClosed(
         root,
-        fqt("time_up", "Temps écoulé — le quiz éclair est expiré."),
+        fqt("time_up", "Temps écoulé. Le quiz éclair est expiré."),
       );
     }
   }
@@ -348,7 +348,7 @@ function runQuiz(root, { quiz, pool, lang = "fr" }) {
         if (/expired/i.test(error.message || "")) {
           return renderClosed(
             root,
-            fqt("time_up", "Temps écoulé — le quiz éclair est expiré."),
+            fqt("time_up", "Temps écoulé. Le quiz éclair est expiré."),
           );
         }
       }

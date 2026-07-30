@@ -145,7 +145,7 @@ function renderForm(root, req, token) {
       toast(
         /invalid_or_used/i.test(e?.message || "")
           ? "Ce lien a déjà été utilisé."
-          : "Erreur — réessaie.",
+          : "Erreur · réessaie.",
         "error",
         4000,
       );

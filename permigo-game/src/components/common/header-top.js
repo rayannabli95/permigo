@@ -123,7 +123,7 @@ export async function mountHeader() {
     <div id="ht-right">
       ${
         me?.role === "eleve"
-          ? `<button class="ht-volant" id="ht-volant-btn" type="button" data-volant-balance aria-label="Tes volants — ouvrir la boutique" title="Tes volants">
+          ? `<button class="ht-volant" id="ht-volant-btn" type="button" data-volant-balance aria-label="Tes volants · ouvrir la boutique" title="Tes volants">
                ${volantImg(18, { drop: true })}
                <span class="ht-volant-v" data-volant-count>${getGemmes()}</span>
              </button>`

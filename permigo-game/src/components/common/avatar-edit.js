@@ -48,7 +48,7 @@ async function persistAvatar(userId, url) {
     .eq("id", userId);
   if (error) {
     const { toast } = await import("@/components/common/toast.js");
-    toast("Photo non enregistrée — réessaie", "error");
+    toast("Photo non enregistrée · réessaie", "error");
     return false;
   }
   setEquippedAsset("avatar", url); // header + getEquippedAsset immédiats

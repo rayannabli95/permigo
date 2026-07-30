@@ -73,12 +73,12 @@ const PQ_I18N = {
     great_t: "You've got this!",
     great_s: "Great score. Keep it up, show your instructor.",
     good_t: "Nice work",
-    good_pass_s: "Quiz passed — do it again to lock it in.",
-    good_mid_s: "Almost there — try two or three more and it'll click.",
+    good_pass_s: "Quiz passed. Do it again to lock it in.",
+    good_mid_s: "Almost there. Try two or three more and it'll click.",
     low_t: "Getting there",
     low_s: "Re-read the sheet, then try again. It'll sink in.",
     quest_pass: "✓ This counts for your daily quest",
-    quest_miss: "Daily quest: get {needed}/{total} right — try again anytime",
+    quest_miss: "Daily quest: get {needed}/{total} right · try again anytime",
   },
   ar: {
     praises: [
@@ -107,13 +107,13 @@ const PQ_I18N = {
     great_t: "أنت بارع!",
     great_s: "نتيجة رائعة. حافظ على هذا المستوى وأرِه لمعلمك.",
     good_t: "أحسنت",
-    good_pass_s: "اجتزت الاختبار — أعِده لترسيخ الحركة.",
-    good_mid_s: "أوشكت — أعِد المحاولة مرتين أو ثلاثًا وستثبت في ذهنك.",
+    good_pass_s: "اجتزت الاختبار · أعِده لترسيخ الحركة.",
+    good_mid_s: "أوشكت. أعِد المحاولة مرتين أو ثلاثًا وستثبت في ذهنك.",
     low_t: "الأمر قادم",
     low_s: "أعد قراءة البطاقة بهدوء، ثم أعد المحاولة. ستفهمها جيدًا.",
     quest_pass: "✓ هذا يُحتسب ضمن مهمتك اليومية",
     quest_miss:
-      "مهمة اليوم: أجب عن {needed}/{total} بشكل صحيح — أعد المحاولة متى شئت",
+      "مهمة اليوم: أجب عن {needed}/{total} بشكل صحيح. أعد المحاولة متى شئت",
   },
 };
 function pqT(key, fr) {
@@ -413,14 +413,14 @@ export function mountPremiumQuiz(
       t = pqT("good_t", "Bien joué");
       s = pqT(
         "good_pass_s",
-        "Quiz réussi — refais-en pour verrouiller le geste.",
+        "Quiz réussi. Refais-en pour verrouiller le geste.",
       );
     } else if (pct >= 0.5) {
       e = "🔥";
       t = pqT("good_t", "Bien joué");
       s = pqT(
         "good_mid_s",
-        "Presque — refais-en deux-trois et c'est verrouillé.",
+        "Presque. Refais-en deux-trois et c'est verrouillé.",
       );
     } else {
       e = "💪";
@@ -431,7 +431,7 @@ export function mountPremiumQuiz(
       ? ""
       : passed
         ? `<div class="pq-res-quest is-pass">${esc(pqT("quest_pass", "✓ Ça compte pour ta quête du jour"))}</div>`
-        : `<div class="pq-res-quest is-miss">${esc(pqT("quest_miss", "Quête du jour : réussis {needed}/{total} — retente quand tu veux").replace("{needed}", String(needed)).replace("{total}", String(total)))}</div>`;
+        : `<div class="pq-res-quest is-miss">${esc(pqT("quest_miss", "Quête du jour : réussis {needed}/{total} · retente quand tu veux").replace("{needed}", String(needed)).replace("{total}", String(total)))}</div>`;
     root.innerHTML = `${STYLE}<div class="pq">
       <div class="pq-top"><button class="pq-x" aria-label="${pqT("close", "Fermer")}">✕</button><div class="pq-seg">${segHTML()}</div><div class="pq-combo"></div></div>
       <div class="pq-res">

@@ -1113,7 +1113,7 @@ async function sendCompteRendu(text) {
   // Aucun numéro d'élève n'est stocké (charte) → le moniteur choisit le contact.
   try {
     await navigator.clipboard.writeText(text);
-    toast("Compte-rendu copié — colle-le à ton élève", "info");
+    toast("Compte-rendu copié · colle-le à ton élève", "info");
   } catch {
     /* clipboard indispo */
   }

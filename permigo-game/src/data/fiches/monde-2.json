@@ -17,7 +17,7 @@
     "questions": [
       {
         "q": "Tu roules en ligne droite en ville. Où doit se poser ton regard en priorité ?",
-        "reponse": "Loin devant, à mi-hauteur du pare-brise — pas sur le capot.",
+        "reponse": "Loin devant, à mi-hauteur du pare-brise. Pas sur le capot.",
         "explication": "Le regard loin te donne le temps d'anticiper ; le regard court te fait subir la route."
       },
       {
@@ -39,7 +39,7 @@
     "monde": 2,
     "competence": "Circulation",
     "methode": [
-      "Va chercher la signalisation le plus loin possible : limitation, école, marché, virage, zone de travaux, sortie de véhicules. Même quand c'est calme, tu continues à lire les panneaux — c'est ton échauffement avant les zones chargées.",
+      "Va chercher la signalisation le plus loin possible : limitation, école, marché, virage, zone de travaux, sortie de véhicules. Même quand c'est calme, tu continues à lire les panneaux. C'est ton échauffement avant les zones chargées.",
       "Lève le pied AVANT la zone, pas une fois dedans. Souvent il suffit de relâcher l'accélérateur et de laisser la voiture décélérer toute seule, sans freinage brusque.",
       "Mesure ta distance avec celui de devant : règle des 2 secondes (au passage de l'arrière de sa voiture à un repère fixe, tu dois passer ce même repère au moins 2 s après).",
       "Double cette distance par temps de pluie ou de nuit (au moins 4 secondes).",
@@ -74,13 +74,13 @@
     "competence": "Circulation",
     "methode": [
       "Roule au milieu de ta voie, ni collé à droite, ni mordant sur le centre.",
-      "Sers-toi de repères concrets : avec tes rétros, vérifie l'écart à gauche (ligne médiane) et à droite (bordure) ; et jette un petit coup d'œil bas pour situer la bordure de droite — un repère répandu : elle « arrive » à peu près au milieu de ton pare-brise.",
+      "Sers-toi de repères concrets : avec tes rétros, vérifie l'écart à gauche (ligne médiane) et à droite (bordure) ; et jette un petit coup d'œil bas pour situer la bordure de droite. Un repère répandu : elle « arrive » à peu près au milieu de ton pare-brise.",
       "Garde une distance latérale d'au moins une portière avec les voitures garées (risque d'ouverture de porte ou de piéton qui surgit).",
       "Sur route étroite ou avec cyclistes, décale-toi légèrement vers la gauche, après avoir vérifié que c'est libre, pour laisser l'écart de sécurité quand tu croises ou dépasses.",
       "Reste centré et constant dans une file ou une voie balisée : pas de zigzag."
     ],
     "pourquoi": "Une voiture bien placée est lisible : les autres comprennent où tu vas. Et surtout, un débutant a presque toujours l'impression que sa voiture est trop large, qu'« ça ne passe pas » : c'est une illusion d'optique. Une voiture fait environ 1,80 m (≈ 2 m rétros compris) ; une voie fait au moins 3 m. Même en croisant un bus sur une route étroite, l'espace existe. Tu te fies à tes repères, pas à ta sensation.",
-    "erreur": "Se coller à droite « pour être prudent » et frôler les voitures garées, la bordure ou les cyclistes. Trop à droite est aussi dangereux que trop au centre. Autre piège : fixer le rétroviseur en virage pour se guider — il ment (l'arrière de ta voiture est plus loin de la bordure que l'avant), tu corriges à tort et tu tapes le trottoir.",
+    "erreur": "Se coller à droite « pour être prudent » et frôler les voitures garées, la bordure ou les cyclistes. Trop à droite est aussi dangereux que trop au centre. Autre piège : fixer le rétroviseur en virage pour se guider. Il ment (l'arrière de ta voiture est plus loin de la bordure que l'avant), tu corriges à tort et tu tapes le trottoir.",
     "bva": null,
     "questions": [
       {
@@ -110,11 +110,11 @@
       "Prépare ton regard tôt : dès que tu vois le virage, tes yeux partent vers la sortie (là où la route se rouvre). Penche-toi un peu, tourne la tête si les montants du pare-brise gênent.",
       "Freine et ralentis AVANT d'entrer, sur la portion encore droite. Si besoin, rétrograde pour avoir le bon rapport.",
       "Reste bien sur ta voie : tu ne mords pas la ligne du milieu et tu ne coupes pas le virage.",
-      "Tire le volant d'une seule main : main droite pour un virage à droite, main gauche pour un virage à gauche — sans forcer des deux mains (tu compromettrais ta trajectoire), le regard toujours posé loin.",
+      "Tire le volant d'une seule main : main droite pour un virage à droite, main gauche pour un virage à gauche, sans forcer des deux mains (tu compromettrais ta trajectoire), le regard toujours posé loin.",
       "Accélère doucement une fois la sortie en vue.",
       "Trajectoire de sécurité : tu restes sur ta voie (sans couper ni mordre la ligne). La trajectoire « extérieur → intérieur → extérieur » est une ligne de course, hors-sujet au permis."
     ],
-    "pourquoi": "On freine en ligne droite, là où la voiture est stable. Freiner en plein virage la déséquilibre et fait perdre l'adhérence. La vitesse se règle AVANT, le volant se gère PENDANT. Et la trajectoire suit le regard : un moniteur le dit cash — « ma tête va à gauche et ma main suit en même temps ». Si tu regardes le bord, tu vas vers le bord.",
+    "pourquoi": "On freine en ligne droite, là où la voiture est stable. Freiner en plein virage la déséquilibre et fait perdre l'adhérence. La vitesse se règle AVANT, le volant se gère PENDANT. Et la trajectoire suit le regard : un moniteur le dit cash : « ma tête va à gauche et ma main suit en même temps ». Si tu regardes le bord, tu vas vers le bord.",
     "erreur": "Entrer trop vite et freiner au milieu du virage. Signe que tu as mal anticipé : la prochaine fois, ralentis plus tôt. Autre erreur fréquente : aborder le virage en sous-régime (rapport trop haut). La voiture peine, broute, et tu risques de caler en pleine courbe. Tu rétrogrades AVANT pour avoir de la force.",
     "bva": null,
     "questions": [
@@ -142,7 +142,7 @@
     "monde": 2,
     "competence": "Circulation",
     "methode": [
-      "Pour DÉPASSER — Vérifie que c'est autorisé : pas de ligne continue, pas de virage, pas de sommet de côte, pas de visibilité réduite.",
+      "Pour DÉPASSER. Vérifie que c'est autorisé : pas de ligne continue, pas de virage, pas de sommet de côte, pas de visibilité réduite.",
       "Assure-toi d'avoir la visibilité : tu dois voir loin et libre devant le véhicule à doubler.",
       "Enchaîne les contrôles : rétro intérieur → rétro extérieur gauche → clignotant à gauche → contrôle de l'angle mort → action. Personne ne te dépasse déjà.",
       "Déboîte, dépasse franchement en laissant l'écart latéral (au moins 1 m en ville, 1,50 m hors agglomération pour un cycliste ou deux-roues).",
@@ -150,7 +150,7 @@
       "Pour CROISER sur route étroite : ralentis, serre à droite (sans frôler le bas-côté), puis reprends ta place une fois croisé."
     ],
     "pourquoi": "Un dépassement, c'est un moment où tu roules dans la voie d'en face : tout doit être sûr AVANT, car une fois lancé tu ne peux plus reculer. Un moniteur insiste sur l'intérêt du clignotant même en dépassant un cycliste : il prévient ceux de derrière ET montre à l'inspecteur que tu as analysé la situation. Et la décision doit être nette : on choisit franchement de doubler ou de renoncer, on ne reste pas à hésiter au milieu.",
-    "erreur": "Dépasser « parce que ça va passer » sans visibilité complète (virage, côte), ou céder à la pression d'une voiture qui te colle. Le bon réflexe quand le doute s'installe : tu lèves le pied, tu rétrogrades, tu renonces — et si l'inspecteur te demande pourquoi tu as ralenti, tu te justifies (« j'avais un doute sur le comportement du cycliste, je ne voyais pas assez loin »).",
+    "erreur": "Dépasser « parce que ça va passer » sans visibilité complète (virage, côte), ou céder à la pression d'une voiture qui te colle. Le bon réflexe quand le doute s'installe : tu lèves le pied, tu rétrogrades, tu renonces, et si l'inspecteur te demande pourquoi tu as ralenti, tu te justifies (« j'avais un doute sur le comportement du cycliste, je ne voyais pas assez loin »).",
     "bva": null,
     "questions": [
       {
@@ -177,20 +177,20 @@
     "monde": 2,
     "competence": "Circulation",
     "methode": [
-      "Aux intersections — Repérer une intersection avant la priorité : cherche les indices — un passage piéton, l'arrondi du trottoir au loin (une rue débouche), une ouverture entre les voitures garées ou entre les bâtiments, des panneaux de direction.",
-      "Aux intersections — À une intersection, identifie le type EN ARRIVANT : feu, stop, cédez-le-passage, ou rien.",
-      "Aux intersections — Si c'est sans aucune signalisation, c'est une priorité à droite : tout ce qui débouche de ta droite passe avant toi.",
-      "Aux intersections — Adapte ton allure à la visibilité : un coup d'œil au rétro intérieur, puis tu reviens en 2e ; si tu ne vois rien à droite, tu reviens même en 1re pour avoir le temps de bien regarder. L'inspecteur ne t'en voudra jamais de ralentir pour bien observer.",
-      "Aux intersections — Ne t'arrête jamais brusquement sur une intersection (risque de te faire emboutir) : tu ralentis tôt et en douceur.",
-      "Aux intersections — Ne t'engage que si tu peux dégager : on ne se bloque jamais au milieu d'un carrefour.",
-      "Priorité à droite — Refus de priorité à droite : si la voiture venant de droite est obligée de ralentir ou de s'arrêter pour te laisser passer, c'est déjà un refus de priorité — même sans accrochage. Ce n'est jamais à elle de freiner pour toi.",
-      "Priorité à droite — Faux positifs : une sortie de parking, une résidence privée (panneau « privé »), un trottoir surélevé = pas une priorité à droite. Ceux qui en sortent ne sont pas prioritaires (mais tu restes prudent).",
-      "Au giratoire — Au carrefour à sens giratoire (panneau « Cédez le passage ») : en approchant, contrôle derrière, ralentis et rétrograde (souvent 2e). Choisis ta voie : voie de droite par défaut sur un petit giratoire / pour sortir tôt ; voie adaptée à ta sortie sur un grand giratoire.",
-      "Au giratoire — Cède le passage : ceux déjà sur l'anneau sont prioritaires. Prends ton temps — ne te précipite pas tant que tu n'as pas bien jaugé la distance ET la vitesse de ceux qui tournent. Dans le doute, tu attends ; tu peux même refaire un tour.",
-      "Au giratoire — Engage-toi dans un trou suffisant, sans clignotant à gauche pour entrer (sauf si tu tournes nettement à gauche / fais le tour).",
-      "Au giratoire — Approche de ta sortie : clignotant à DROITE juste avant celle-ci. Comme il s'efface parfois entre deux sorties, n'hésite pas à le remettre.",
-      "Au giratoire — Avant de sortir : contrôle de l'angle mort gauche (au cas où quelqu'un te coupe la route), un œil à droite pour vélos / bande cyclable, puis tu sors et coupes le clignotant. Attention au passage piéton en sortie : tu n'accélères pas tant que tu n'as pas vérifié.",
-      "Au giratoire — « Rond-point » ≠ « carrefour à sens giratoire » : la différence se lit à l'entrée. Giratoire = « Cédez le passage » à l'entrée → celui qui entre n'est PAS prioritaire, il laisse passer ceux déjà sur l'anneau. Rond-point (rare, sans panneau à l'entrée) → priorité à droite → celui qui entre est prioritaire sur ceux déjà dedans."
+      "Aux intersections. Repérer une intersection avant la priorité : cherche les indices. Un passage piéton, l'arrondi du trottoir au loin (une rue débouche), une ouverture entre les voitures garées ou entre les bâtiments, des panneaux de direction.",
+      "Aux intersections. À une intersection, identifie le type EN ARRIVANT : feu, stop, cédez-le-passage, ou rien.",
+      "Aux intersections. Si c'est sans aucune signalisation, c'est une priorité à droite : tout ce qui débouche de ta droite passe avant toi.",
+      "Aux intersections. Adapte ton allure à la visibilité : un coup d'œil au rétro intérieur, puis tu reviens en 2e ; si tu ne vois rien à droite, tu reviens même en 1re pour avoir le temps de bien regarder. L'inspecteur ne t'en voudra jamais de ralentir pour bien observer.",
+      "Aux intersections. Ne t'arrête jamais brusquement sur une intersection (risque de te faire emboutir) : tu ralentis tôt et en douceur.",
+      "Aux intersections. Ne t'engage que si tu peux dégager : on ne se bloque jamais au milieu d'un carrefour.",
+      "Priorité à droite. Refus de priorité à droite : si la voiture venant de droite est obligée de ralentir ou de s'arrêter pour te laisser passer, c'est déjà un refus de priorité. Même sans accrochage. Ce n'est jamais à elle de freiner pour toi.",
+      "Priorité à droite. Faux positifs : une sortie de parking, une résidence privée (panneau « privé »), un trottoir surélevé = pas une priorité à droite. Ceux qui en sortent ne sont pas prioritaires (mais tu restes prudent).",
+      "Au giratoire. Au carrefour à sens giratoire (panneau « Cédez le passage ») : en approchant, contrôle derrière, ralentis et rétrograde (souvent 2e). Choisis ta voie : voie de droite par défaut sur un petit giratoire / pour sortir tôt ; voie adaptée à ta sortie sur un grand giratoire.",
+      "Au giratoire. Cède le passage : ceux déjà sur l'anneau sont prioritaires. Prends ton temps. Ne te précipite pas tant que tu n'as pas bien jaugé la distance ET la vitesse de ceux qui tournent. Dans le doute, tu attends ; tu peux même refaire un tour.",
+      "Au giratoire. Engage-toi dans un trou suffisant, sans clignotant à gauche pour entrer (sauf si tu tournes nettement à gauche / fais le tour).",
+      "Au giratoire. Approche de ta sortie : clignotant à DROITE juste avant celle-ci. Comme il s'efface parfois entre deux sorties, n'hésite pas à le remettre.",
+      "Au giratoire. Avant de sortir : contrôle de l'angle mort gauche (au cas où quelqu'un te coupe la route), un œil à droite pour vélos / bande cyclable, puis tu sors et coupes le clignotant. Attention au passage piéton en sortie : tu n'accélères pas tant que tu n'as pas vérifié.",
+      "Au giratoire : « Rond-point » ≠ « carrefour à sens giratoire » : la différence se lit à l'entrée. Giratoire = « Cédez le passage » à l'entrée → celui qui entre n'est PAS prioritaire, il laisse passer ceux déjà sur l'anneau. Rond-point (rare, sans panneau à l'entrée) → priorité à droite → celui qui entre est prioritaire sur ceux déjà dedans."
     ],
     "pourquoi": "Une intersection est l'endroit où les trajectoires se croisent : 99 % du travail, c'est savoir QUI PASSE EN PREMIER avant d'y être. Le clignotant droit en sortie de giratoire prévient les autres que tu quittes l'anneau, ce qui débloque ceux qui attendent d'entrer.",
     "erreur": "Deux grands classiques : oublier le clignotant à droite avant de sortir du giratoire (les usagers en attente restent bloqués ou s'engagent en pensant que tu continues) ; et ne pas détecter l'intersection à temps, d'où le refus de priorité à droite parce qu'on « pensait avoir le temps de passer ».",
@@ -221,14 +221,14 @@
     "competence": "Circulation",
     "methode": [
       "Anticipe ton action (tourner, changer de voie, t'arrêter) AVANT de la faire.",
-      "Mets ton clignotant suffisamment tôt, avant de changer de direction — assez en avance pour laisser le temps aux autres de comprendre (repère ~3 s).",
+      "Mets ton clignotant suffisamment tôt, avant de changer de direction. Assez en avance pour laisser le temps aux autres de comprendre (repère ~3 s).",
       "Place-toi dès que c'est possible une fois ton intention signalée : tu ne signales pas puis attends 50 m pour te décaler.",
       "Cherche le contact visuel aux passages piétons et carrefours : un regard échangé vaut mieux qu'un pari.",
-      "Coupe ton clignotant une fois la manœuvre finie (s'il ne se coupe pas seul — en giratoire il s'efface souvent trop tôt, remets-le).",
+      "Coupe ton clignotant une fois la manœuvre finie (s'il ne se coupe pas seul. En giratoire il s'efface souvent trop tôt, remets-le).",
       "Réserve le klaxon à l'avertissement d'un danger, jamais à l'énervement."
     ],
     "pourquoi": "La route est un dialogue. Les autres ne devinent pas tes intentions : si tu préviens tôt et clairement, tout le monde s'adapte sans à-coup. Un moniteur le montre bien : un clignotant adverse mis trop tard crée le doute (« il fait quoi ? un demi-tour ? »). À l'inverse, un clignotant en évidence quand tu attends de t'engager rassure et fait avancer la situation. Prévenir trop tard ne sert plus à rien.",
-    "erreur": "Mettre le clignotant en même temps qu'on tourne (ou pas du tout) — il doit prévenir AVANT, pas accompagner le geste. Et son cousin : signaler son intention puis se déporter beaucoup trop tard, ce qui surprend ceux de derrière.",
+    "erreur": "Mettre le clignotant en même temps qu'on tourne (ou pas du tout). Il doit prévenir AVANT, pas accompagner le geste. Et son cousin : signaler son intention puis se déporter beaucoup trop tard, ce qui surprend ceux de derrière.",
     "bva": null,
     "questions": [
       {
@@ -257,11 +257,11 @@
     "methode": [
       "Avant de partir, visualise ton itinéraire : les rues, les changements de direction, les zones difficiles.",
       "Mets en boucle les réflexes du monde 2 : regard loin et mobile (C2a), vitesse adaptée (C2b), bon placement (C2c).",
-      "Structure chaque manœuvre, ne la bâcle pas : « on prend le temps de bien faire » — exécuter les gestes dans l'ordre (contrôle → clignotant → angle mort → action), c'est justement ce qui rend la conduite fluide et sûre.",
+      "Structure chaque manœuvre, ne la bâcle pas : « on prend le temps de bien faire ». Exécuter les gestes dans l'ordre (contrôle → clignotant → angle mort → action), c'est justement ce qui rend la conduite fluide et sûre.",
       "Annonce tes intentions tôt (clignotants, C2g) et gère les priorités (C2f) sans hésiter.",
-      "Reste calme sur l'imprévu : si tu te trompes de voie ou de rue, tu continues — quitte à refaire un tour de giratoire — et tu reprends plus loin. Jamais de manœuvre dangereuse pour « rattraper »."
+      "Reste calme sur l'imprévu : si tu te trompes de voie ou de rue, tu continues. Quitte à refaire un tour de giratoire, et tu reprends plus loin. Jamais de manœuvre dangereuse pour « rattraper »."
     ],
-    "pourquoi": "Le monde 2 est validé quand tous les gestes deviennent automatiques et que ta tête est libre pour décider, plus pour piloter. Un repère parlant : les bons élèves contrôlent leurs rétros « sans même s'en rendre compte », par habitude. Tu enchaînes une longue séquence sans intervention du moniteur — y compris dans les zones piégeuses (commerçantes, parkings encombrés) où tu ne te laisses pas presser par les autres.",
+    "pourquoi": "Le monde 2 est validé quand tous les gestes deviennent automatiques et que ta tête est libre pour décider, plus pour piloter. Un repère parlant : les bons élèves contrôlent leurs rétros « sans même s'en rendre compte », par habitude. Tu enchaînes une longue séquence sans intervention du moniteur. Y compris dans les zones piégeuses (commerçantes, parkings encombrés) où tu ne te laisses pas presser par les autres.",
     "erreur": "Paniquer sur un imprévu (rue barrée, mauvaise voie au giratoire, erreur d'itinéraire) et faire un geste dangereux pour « corriger » (demi-tour brusque, marche arrière, changement de voie en force). On reste calme, on continue dans la voie où on est, on reprend après en sécurité.",
     "bva": null,
     "questions": [

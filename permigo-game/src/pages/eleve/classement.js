@@ -73,7 +73,7 @@ const CL_I18N = {
     tab_conduite_sub: "in the car",
     tab_revision: "Revision",
     tab_revision_sub: "on your own",
-    sub_revision: "Your effort this week — quizzes & mock exams",
+    sub_revision: "Your effort this week · quizzes & mock exams",
     sub_conduite_solo: "Driving skills validated",
     sub_conduite_moniteur: "Validated in a lesson with your instructor",
     link_pseudo_t: "Choose your public nickname",
@@ -117,7 +117,7 @@ const CL_I18N = {
     tab_conduite_sub: "داخل السيارة",
     tab_revision: "المراجعة",
     tab_revision_sub: "بمفردك",
-    sub_revision: "مجهودك هذا الأسبوع — اختبارات ومحاكاة الامتحان",
+    sub_revision: "مجهودك هذا الأسبوع · اختبارات ومحاكاة الامتحان",
     sub_conduite_solo: "مهارات القيادة المثبَّتة",
     sub_conduite_moniteur: "مثبَّت في حصة مع مدرّبك",
     link_pseudo_t: "اختر اسمك المستعار العام",
@@ -456,7 +456,7 @@ function _renderArena(state, data) {
   const sub = xD(
     esc(
       state.ligue === "revision"
-        ? xt("sub_revision", "Ton effort de la semaine — quiz & examens blancs")
+        ? xt("sub_revision", "Ton effort de la semaine. Quiz & examens blancs")
         : state.solo
           ? xt("sub_conduite_solo", "Compétences de conduite validées")
           : xt("sub_conduite_moniteur", "Validé en leçon avec ton moniteur"),

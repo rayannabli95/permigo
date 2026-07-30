@@ -829,7 +829,7 @@ function renderFeatured(def, unlockData, stats = { compCount: 0, streak: 0 }) {
       : "";
   return `
     <div class="tr2-feat ${isU ? rar2 : "locked"}" data-key="${escAttr(def.key)}" role="button" tabindex="0"
-      aria-label="${escAttr(trTitle(def))} — ${rar(rar2)}${isU ? tt("aria_unlocked", ", débloqué") : tt("aria_locked", ", à débloquer")}">
+      aria-label="${escAttr(trTitle(def))} · ${rar(rar2)}${isU ? tt("aria_unlocked", ", débloqué") : tt("aria_locked", ", à débloquer")}">
       <div class="tr2-feat-kick"><span class="pin" aria-hidden="true"></span>${esc(kicker)}</div>
       <div class="tr2-feat-stage">
         <span class="tr2-feat-halo" aria-hidden="true"></span>

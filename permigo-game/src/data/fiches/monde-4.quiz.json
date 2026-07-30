@@ -178,7 +178,11 @@
   {
     "code": "C4e",
     "q": "Tu dépasses un cycliste en ville. Quel écart ?",
-    "options": ["Au moins 1 mètre", "Au ras, ça passe", "30 centimètres"],
+    "options": [
+      "Au moins 1 mètre",
+      "Au ras, ça passe",
+      "30 centimètres"
+    ],
     "correct": 0,
     "explication": "1 m en ville, 1,5 m hors agglo : la marge s'il fait un écart soudain."
   },
@@ -262,14 +266,22 @@
   {
     "code": "C4g",
     "q": "Permis classique en poche. Vitesse max sur autoroute ?",
-    "options": ["130 km/h comme tout le monde", "110 km/h", "90 km/h"],
+    "options": [
+      "130 km/h comme tout le monde",
+      "110 km/h",
+      "90 km/h"
+    ],
     "correct": 1,
     "explication": "En probatoire : 110 autoroute, 100 voie rapide, 80 route, les 3 premières années."
   },
   {
     "code": "C4g",
     "q": "Le disque A à l'arrière, tu le gardes combien de temps ?",
-    "options": ["3 ans (2 ans si conduite accompagnée)", "6 mois", "À vie"],
+    "options": [
+      "3 ans (2 ans si conduite accompagnée)",
+      "6 mois",
+      "À vie"
+    ],
     "correct": 0,
     "explication": "Il prévient les autres que tu débutes, pour qu'ils te laissent de la marge."
   },

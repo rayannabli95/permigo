@@ -978,7 +978,7 @@ function renderMonde(cat) {
     cat.subs.length > 0 ? Math.round((acquis / cat.subs.length) * 100) : 0;
 
   return `
-    <div class="lr-monde" role="group" aria-label="${escAttr(cat.name)} — ${acquis}/${cat.subs.length} acquises">
+    <div class="lr-monde" role="group" aria-label="${escAttr(cat.name)}. ${acquis}/${cat.subs.length} acquises">
       <div class="lr-monde-hd" style="background:${col.bg}; border-color:${col.border};">
         <span class="lr-monde-med">${medallion(...(MONDE_MED[cat.id] || MONDE_MED.C1), { size: 30 })}</span>
         <span class="lr-monde-nm">${esc(cat.name)}</span>
@@ -1012,7 +1012,7 @@ function renderComp(sub) {
   // ce geste seul (quiz ≥80 %), et peut confirmer en séance.
   const selfVal = !statut ? _selfValsMap[sub.c] : null;
   const badge = selfVal
-    ? `<span class="lr-comp-badge ens-chip lr-comp-auto" title="Validée en autonomie (quiz ${Math.round(selfVal.score)}%) avant rattachement — à confirmer en séance">Auto-validée</span>`
+    ? `<span class="lr-comp-badge ens-chip lr-comp-auto" title="Validée en autonomie (quiz ${Math.round(selfVal.score)}%) avant rattachement · à confirmer en séance">Auto-validée</span>`
     : `<span class="lr-comp-badge ens-chip ${chipMod}">${cfg.label}</span>`;
 
   const medKey = STATUT_MED[statut];

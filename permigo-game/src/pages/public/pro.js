@@ -293,7 +293,7 @@ export async function mount(root) {
     } catch (e) {
       console.error("[pro] devis insert failed", e);
       const msg = /rate|too many|limit/i.test(e?.message || "")
-        ? "Trop de demandes d'un coup — réessayez dans un instant, ou appelez-nous."
+        ? "Trop de demandes d'un coup. Réessayez dans un instant, ou appelez-nous."
         : "Oups, l'envoi a échoué. Réessayez, ou appelez-nous au " + TEL + ".";
       toast(msg, "error", 4500);
       submitBtn.disabled = false;
