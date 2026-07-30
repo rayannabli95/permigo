@@ -44,18 +44,18 @@ export const VEHICLE_FLUIDS = Object.freeze([
 
 export const LOT_THREE_ELEMENTS = Object.freeze([
   Object.freeze({
-    type: "car-front-three-quarter",
+    type: "car-front",
     number: 10,
     title: "Voiture de face",
-    shortTitle: "Trois-quarts avant",
-    ariaLabel: "Voiture vue de trois-quarts avant",
+    shortTitle: "Vue frontale",
+    ariaLabel: "Voiture vue de face",
   }),
   Object.freeze({
-    type: "car-rear-three-quarter",
+    type: "car-rear",
     number: 11,
     title: "Voiture de dos",
-    shortTitle: "Trois-quarts arrière",
-    ariaLabel: "Voiture vue de trois-quarts arrière",
+    shortTitle: "Vue arrière",
+    ariaLabel: "Voiture vue de dos",
   }),
   Object.freeze({
     type: "car-profile",
@@ -119,24 +119,30 @@ function wheel(id, x, y, scale = 1, className = "") {
     </g>`;
 }
 
-function frontCar(id, options) {
+function carFront(id, options) {
   const lit = options.lit === true;
   const drawing = svgShell(
     id,
     `
-      <ellipse class="pg-contact-shadow" cx="83" cy="88" rx="65" ry="7" fill="url(#${id}-contact)"/>
-      ${wheel(id, 39, 73, 0.82, "pg-car-wheel-far")}
-      ${wheel(id, 116, 76, 1.02, "pg-car-wheel-near")}
-      <path class="pg-car-body" d="M19 63 30 40 66 27 113 34 142 54 137 76 118 83 83 78 48 77 25 72Z" fill="url(#${id}-gloss)"/>
-      <path class="pg-car-side" d="M83 48 114 40 142 55 137 76 117 82 83 77Z" fill="url(#${id}-matte)"/>
-      <path class="pg-car-windshield" d="M40 41 68 30 84 48 52 54Z" fill="url(#${id}-glass)"/>
-      <path class="pg-car-side-glass" d="M72 30 108 36 84 47Z" fill="url(#${id}-glass)"/>
-      <path class="pg-car-hood" d="M21 62 52 53 83 48 83 68 48 73Z" fill="${ART_PALETTE.n3}"/>
-      <path class="pg-car-grille" d="M83 68 137 59 136 73 116 78 84 75Z" fill="${ART_PALETTE.night}"/>
-      <path class="pg-car-grille-detail" d="M94 67 127 62M93 71 124 67" fill="none" stroke="${ART_PALETTE.accent}" stroke-opacity=".42" stroke-width="1.4" stroke-linecap="round"/>
-      <path class="pg-car-lamp pg-car-lamp-front ${lit ? "is-lit" : "is-off"}" d="M87 53 112 47 127 54 105 60Z" fill="${lit ? ART_PALETTE.gold : ART_PALETTE.accent}"/>
-      <path class="pg-car-lamp pg-car-lamp-front pg-car-lamp-far ${lit ? "is-lit" : "is-off"}" d="M28 56 48 51 54 56 34 61Z" fill="${lit ? ART_PALETTE.gold : ART_PALETTE.accent}"/>
-      <path class="pg-focus-edge" d="M20 62 30 40 67 27 113 34 142 54" fill="none" stroke="${ART_PALETTE.accent}" stroke-width="2" stroke-linecap="round"/>
+      <ellipse class="pg-contact-shadow" cx="80" cy="91" rx="62" ry="6" fill="url(#${id}-contact)"/>
+      ${wheel(id, 34, 79, 0.88, "pg-car-wheel-front")}
+      ${wheel(id, 126, 79, 0.88, "pg-car-wheel-front")}
+      <path class="pg-car-mirror" d="M31 40 18 42 13 48 31 49ZM129 40 142 42 147 48 129 49Z" fill="url(#${id}-metal)"/>
+      <path class="pg-car-body" d="M61 14Q80 8 99 14L115 30Q128 36 130 44L134 72Q133 79 124 81H36Q27 79 26 72L30 44Q32 36 45 30Z" fill="url(#${id}-gloss)"/>
+      <path class="pg-car-roof" d="M61 14Q80 8 99 14L105 22H55Z" fill="url(#${id}-matte)"/>
+      <path class="pg-car-windshield" d="M60 21Q80 17 100 21L112 43H48Z" fill="url(#${id}-glass)"/>
+      <path class="pg-focus-edge pg-car-hood-edge" d="M43 49Q80 42 117 49" fill="none" stroke="${ART_PALETTE.accent}" stroke-width="2.2" stroke-linecap="round"/>
+      <path class="pg-car-lamp pg-car-lamp-front ${lit ? "is-lit" : "is-off"}" d="M35 54 61 51 58 63 35 64Z" fill="${lit ? ART_PALETTE.gold : ART_PALETTE.accent}"/>
+      <path class="pg-car-lamp pg-car-lamp-front ${lit ? "is-lit" : "is-off"}" d="M125 54 99 51 102 63 125 64Z" fill="${lit ? ART_PALETTE.gold : ART_PALETTE.accent}"/>
+      <rect class="pg-car-grille" x="64" y="54" width="32" height="16" rx="4" fill="${ART_PALETTE.night}"/>
+      <path class="pg-car-grille-detail" d="M70 58H90M68 62H92M70 66H90" fill="none" stroke="${ART_PALETTE.accent}" stroke-opacity=".58" stroke-width="1.7" stroke-linecap="round"/>
+      <path class="pg-car-bumper" d="M29 70Q80 76 131 70L128 80Q80 85 32 80Z" fill="url(#${id}-matte)"/>
+      <g class="pg-silhouette-only">
+        <path fill="${ART_PALETTE.night}" fill-rule="evenodd" d="M61 14Q80 8 99 14L115 30Q128 36 130 44L134 72Q133 79 124 81H36Q27 79 26 72L30 44Q32 36 45 30ZM60 21Q80 17 100 21L112 43H48ZM35 54 61 51 58 63 35 64ZM125 54 99 51 102 63 125 64ZM68 56H92V59H68ZM68 62H92V65H68ZM70 68H90V70H70Z"/>
+        <path d="M31 40 18 42 13 48 31 49ZM129 40 142 42 147 48 129 49Z" fill="${ART_PALETTE.night}"/>
+        <ellipse cx="34" cy="82" rx="12" ry="10" fill="${ART_PALETTE.night}"/>
+        <ellipse cx="126" cy="82" rx="12" ry="10" fill="${ART_PALETTE.night}"/>
+      </g>
     `,
     "pg-drawing-vehicle",
     { viewBox: "0 0 160 100" },
@@ -144,23 +150,33 @@ function frontCar(id, options) {
   return { drawing, labels: "" };
 }
 
-function rearCar(id, options) {
+function carRear(id, options) {
   const lit = options.lit === true;
   const drawing = svgShell(
     id,
     `
-      <ellipse class="pg-contact-shadow" cx="78" cy="88" rx="65" ry="7" fill="url(#${id}-contact)"/>
-      ${wheel(id, 45, 76, 1.02, "pg-car-wheel-near")}
-      ${wheel(id, 124, 72, 0.82, "pg-car-wheel-far")}
-      <path class="pg-car-body" d="M17 55 45 35 92 28 128 41 141 64 136 74 111 79 76 78 42 83 22 75Z" fill="url(#${id}-gloss)"/>
-      <path class="pg-car-side" d="M17 55 45 38 77 48 76 78 42 83 22 75Z" fill="url(#${id}-matte)"/>
-      <path class="pg-car-rear-glass" d="M50 37 91 31 119 42 78 48Z" fill="url(#${id}-glass)"/>
-      <path class="pg-car-trunk" d="M77 49 119 43 138 62 77 69Z" fill="${ART_PALETTE.n3}"/>
-      <path class="pg-car-bumper" d="M76 69 139 62 136 74 111 79 76 78Z" fill="${ART_PALETTE.night}"/>
-      <path class="pg-car-lamp pg-car-lamp-rear ${lit ? "is-lit" : "is-off"}" d="M84 53 102 50 105 60 85 63Z" fill="${ART_PALETTE.red}"/>
-      <path class="pg-car-lamp pg-car-lamp-rear pg-car-lamp-far ${lit ? "is-lit" : "is-off"}" d="M119 48 132 54 136 62 112 61Z" fill="${ART_PALETTE.red}"/>
-      <rect class="pg-car-plate" x="107" y="65" width="18" height="6" rx="2" fill="${ART_PALETTE.accent}"/>
-      <path class="pg-focus-edge" d="M18 55 45 35 92 28 128 41 141 64" fill="none" stroke="${ART_PALETTE.accent}" stroke-width="2" stroke-linecap="round"/>
+      <ellipse class="pg-contact-shadow" cx="80" cy="91" rx="62" ry="6" fill="url(#${id}-contact)"/>
+      ${wheel(id, 34, 79, 0.88, "pg-car-wheel-rear")}
+      ${wheel(id, 126, 79, 0.88, "pg-car-wheel-rear")}
+      <path class="pg-car-mirror" d="M31 40 18 42 13 48 31 49ZM129 40 142 42 147 48 129 49Z" fill="url(#${id}-metal)"/>
+      <path class="pg-car-body" d="M61 14Q80 8 99 14L115 30Q128 36 130 44L134 72Q133 79 124 81H36Q27 79 26 72L30 44Q32 36 45 30Z" fill="url(#${id}-gloss)"/>
+      <path class="pg-car-roof" d="M61 14Q80 8 99 14L105 22H55Z" fill="url(#${id}-matte)"/>
+      <path class="pg-car-rear-glass" d="M58 21Q80 17 102 21L112 44H48Z" fill="url(#${id}-glass)"/>
+      <path class="pg-car-wiper" d="M58 39 84 33 94 35" fill="none" stroke="url(#${id}-metal)" stroke-width="2.4" stroke-linecap="round"/>
+      <path class="pg-focus-edge pg-car-trunk-edge" d="M42 49Q80 43 118 49" fill="none" stroke="${ART_PALETTE.accent}" stroke-width="2.2" stroke-linecap="round"/>
+      <path class="pg-car-lamp pg-car-lamp-rear ${lit ? "is-lit" : "is-off"}" d="M35 53 61 51 59 65 35 64Z" fill="${ART_PALETTE.red}"/>
+      <path class="pg-car-lamp pg-car-lamp-rear ${lit ? "is-lit" : "is-off"}" d="M125 53 99 51 101 65 125 64Z" fill="${ART_PALETTE.red}"/>
+      <rect class="pg-car-plate" x="66" y="54" width="28" height="13" rx="3" fill="${ART_PALETTE.gold}"/>
+      <path class="pg-car-bumper" d="M29 70Q80 76 131 70L128 80Q80 85 32 80Z" fill="url(#${id}-matte)"/>
+      <path class="pg-car-exhaust" d="M35 79H49V85H39ZM125 79H111V85H121Z" fill="url(#${id}-metal)"/>
+      <g class="pg-silhouette-only">
+        <path fill="${ART_PALETTE.night}" fill-rule="evenodd" d="M61 14Q80 8 99 14L115 30Q128 36 130 44L134 72Q133 79 124 81H36Q27 79 26 72L30 44Q32 36 45 30ZM58 21Q80 17 102 21L112 44H48ZM35 53 61 51 59 65 35 64ZM125 53 99 51 101 65 125 64ZM66 54H94V67H66Z"/>
+        <path d="M31 40 18 42 13 48 31 49ZM129 40 142 42 147 48 129 49Z" fill="${ART_PALETTE.night}"/>
+        <path d="M58 39 84 33 94 35" fill="none" stroke="${ART_PALETTE.night}" stroke-width="3" stroke-linecap="round"/>
+        <ellipse cx="34" cy="82" rx="12" ry="10" fill="${ART_PALETTE.night}"/>
+        <ellipse cx="126" cy="82" rx="12" ry="10" fill="${ART_PALETTE.night}"/>
+        <path d="M35 79H49V86H39ZM125 79H111V86H121Z" fill="${ART_PALETTE.night}"/>
+      </g>
     `,
     "pg-drawing-vehicle",
     { viewBox: "0 0 160 100" },
@@ -312,10 +328,10 @@ function hood(id, options) {
   );
   const labels = VEHICLE_FLUIDS.map((item) => {
     const positions = {
-      oil: ["23%", "90%"],
-      coolant: ["77%", "90%"],
-      brake: ["33%", "49%"],
-      washer: ["12%", "45%"],
+      oil: ["18%", "93%"],
+      coolant: ["82%", "93%"],
+      brake: ["82%", "7%"],
+      washer: ["18%", "7%"],
     };
     const [x, y] = positions[item.id];
     const label = options.labels?.[item.id] || item.shortLabel;
@@ -331,8 +347,8 @@ function hood(id, options) {
 }
 
 function renderByType(type, id, options) {
-  if (type === "car-front-three-quarter") return frontCar(id, options);
-  if (type === "car-rear-three-quarter") return rearCar(id, options);
+  if (type === "car-front") return carFront(id, options);
+  if (type === "car-rear") return carRear(id, options);
   if (type === "car-profile") return profileCar(id, options);
   if (type === "tyre-wear") return tyre(id, options);
   if (type === "headlight-front") return frontLight(id, options);
@@ -343,7 +359,7 @@ function renderByType(type, id, options) {
 /**
  * Produit le HTML d'un élément du lot 3.
  *
- * @param {"car-front-three-quarter"|"car-rear-three-quarter"|"car-profile"|"tyre-wear"|"headlight-front"|"taillight-rear"|"hood-levels"} type
+ * @param {"car-front"|"car-rear"|"car-profile"|"tyre-wear"|"headlight-front"|"taillight-rear"|"hood-levels"} type
  * @param {object} options
  * @param {"idle"|"active"|"found"|"error"} [options.state="idle"]
  * @param {boolean} [options.lit=false]

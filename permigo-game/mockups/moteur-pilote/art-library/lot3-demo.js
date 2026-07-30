@@ -210,13 +210,17 @@ function appTemplate() {
         <div class="al-section-heading">
           <div>
             <p>Contrôle qualité</p>
-            <h2 id="silhouette-title">Éléments à 40</h2>
+            <h2 id="silhouette-title">Silhouettes à 40</h2>
           </div>
-          <span>7 / 7 lisibles</span>
+          <span data-pair-status>21 / 21 distinctes</span>
         </div>
         <div class="al-silhouette-row al-silhouette-row-lot3">
           ${LOT_THREE_ELEMENTS.map(renderElementSilhouette).join("")}
         </div>
+        <p class="al-silhouette-comparison" data-silhouette-comparison>
+          <strong>Comparaison croisée</strong>
+          <span>Chaque forme diffère des six autres à 40 px.</span>
+        </p>
       </section>
 
       <section class="al-recipes" aria-labelledby="recipes-title">

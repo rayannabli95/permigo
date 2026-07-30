@@ -39,9 +39,45 @@ try {
   await page.goto(url, { waitUntil: "networkidle" });
 
   assert.equal(await page.locator("[data-card]").count(), 7);
+  assert.equal(await page.locator('[data-card="car-front"]').count(), 1);
+  assert.equal(await page.locator('[data-card="car-rear"]').count(), 1);
+  assert.equal(
+    await page.locator(
+      '[data-card="car-front-three-quarter"], [data-card="car-rear-three-quarter"]',
+    ).count(),
+    0,
+  );
   assert.equal(await page.locator("svg text").count(), 0);
   assert.equal(await page.locator("img").count(), 0);
   assert.equal(await page.locator(".pg-element button").count(), 0);
+  assert.equal(
+    await page.locator('[data-card="car-front"] .pg-car-lamp-front').count(),
+    2,
+  );
+  assert.equal(
+    await page.locator('[data-card="car-front"] .pg-car-wheel-front').count(),
+    2,
+  );
+  assert.equal(
+    await page.locator('[data-card="car-front"] .pg-car-grille').count(),
+    1,
+  );
+  assert.equal(
+    await page.locator('[data-card="car-rear"] .pg-car-lamp-rear').count(),
+    2,
+  );
+  assert.equal(
+    await page.locator('[data-card="car-rear"] .pg-car-wheel-rear').count(),
+    2,
+  );
+  assert.equal(
+    await page.locator('[data-card="car-rear"] .pg-car-plate').count(),
+    1,
+  );
+  assert.equal(
+    await page.locator('[data-card="car-rear"] .pg-car-wiper').count(),
+    1,
+  );
 
   const touchTargets = await page
     .locator("button, input[type=range]")
@@ -126,6 +162,35 @@ try {
     );
   }
 
+  const labelOverlaps = await page
+    .locator('[data-card="hood-levels"] .pg-element')
+    .evaluate((hood) => {
+      const labels = [...hood.querySelectorAll("[data-fluid-label]")];
+      const vessels = [...hood.querySelectorAll("[data-fluid-vessel]")];
+      return labels.flatMap((label) => {
+        const labelRect = label.getBoundingClientRect();
+        return vessels
+          .filter((vessel) => {
+            const vesselRect = vessel.getBoundingClientRect();
+            return !(
+              labelRect.right <= vesselRect.left ||
+              labelRect.left >= vesselRect.right ||
+              labelRect.bottom <= vesselRect.top ||
+              labelRect.top >= vesselRect.bottom
+            );
+          })
+          .map((vessel) => ({
+            label: label.dataset.fluidLabel,
+            vessel: vessel.dataset.fluidVessel,
+          }));
+      });
+    });
+  assert.deepEqual(
+    labelOverlaps,
+    [],
+    `Une étiquette recouvre un bidon : ${JSON.stringify(labelOverlaps)}`,
+  );
+
   const silhouettes = await page
     .locator(".al-silhouette-frame")
     .evaluateAll((frames) =>
@@ -144,6 +209,122 @@ try {
       ({ width, height }) => width === 40 && height === 40,
     ),
     "Les silhouettes ne sont pas rendues à 40",
+  );
+  assert.equal(
+    (await page.locator("[data-pair-status]").textContent()).trim(),
+    "21 / 21 distinctes",
+  );
+  assert.equal(await page.locator("[data-silhouette-comparison]").count(), 1);
+
+  const silhouettePairs = await page.evaluate(async () => {
+    const frames = [...document.querySelectorAll(".al-silhouette-frame")];
+
+    async function rasterize(frame) {
+      const source = frame.querySelector("svg");
+      const clone = source.cloneNode(true);
+      clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+      clone.setAttribute("width", "40");
+      clone.setAttribute("height", "40");
+      clone.removeAttribute("class");
+      clone.style.cssText = "display:block;width:40px;height:40px;filter:none";
+
+      const sourceNodes = [source, ...source.querySelectorAll("*")];
+      const cloneNodes = [clone, ...clone.querySelectorAll("*")];
+      const definitionTags = new Set([
+        "defs",
+        "lineargradient",
+        "radialgradient",
+        "stop",
+      ]);
+
+      sourceNodes.forEach((sourceNode, index) => {
+        const cloneNode = cloneNodes[index];
+        if (!cloneNode || index === 0) return;
+        const tag = sourceNode.tagName.toLowerCase();
+        if (definitionTags.has(tag)) return;
+        const style = getComputedStyle(sourceNode);
+        if (
+          style.display === "none" ||
+          style.visibility === "hidden" ||
+          Number(style.opacity) === 0
+        ) {
+          cloneNode.remove();
+          return;
+        }
+
+        cloneNode.removeAttribute("class");
+        cloneNode.style.display = "inline";
+        cloneNode.style.visibility = "visible";
+        cloneNode.style.opacity = "1";
+        cloneNode.style.filter = "none";
+        cloneNode.setAttribute(
+          "fill",
+          style.fill === "none" ? "none" : "#000000",
+        );
+        cloneNode.setAttribute(
+          "stroke",
+          style.stroke === "none" ? "none" : "#000000",
+        );
+      });
+
+      const markup = new XMLSerializer().serializeToString(clone);
+      const blob = new Blob([markup], { type: "image/svg+xml" });
+      const objectUrl = URL.createObjectURL(blob);
+      try {
+        const image = new Image();
+        image.src = objectUrl;
+        await image.decode();
+        const canvas = document.createElement("canvas");
+        canvas.width = 40;
+        canvas.height = 40;
+        const context = canvas.getContext("2d", { willReadFrequently: true });
+        context.drawImage(image, 0, 0, 40, 40);
+        const pixels = context.getImageData(0, 0, 40, 40).data;
+        return Array.from(
+          { length: 1600 },
+          (_, pixel) => pixels[pixel * 4 + 3] > 24,
+        );
+      } finally {
+        URL.revokeObjectURL(objectUrl);
+      }
+    }
+
+    const masks = await Promise.all(frames.map(rasterize));
+    const types = frames.map(
+      (frame) => frame.querySelector(".pg-element").dataset.drivingElement,
+    );
+    const pairs = [];
+    for (let left = 0; left < masks.length; left += 1) {
+      for (let right = left + 1; right < masks.length; right += 1) {
+        let union = 0;
+        let difference = 0;
+        for (let pixel = 0; pixel < masks[left].length; pixel += 1) {
+          const a = masks[left][pixel];
+          const b = masks[right][pixel];
+          if (a || b) union += 1;
+          if (a !== b) difference += 1;
+        }
+        pairs.push({
+          left: types[left],
+          right: types[right],
+          differenceRatio: union ? difference / union : 0,
+        });
+      }
+    }
+    return pairs;
+  });
+  assert.equal(silhouettePairs.length, 21);
+  const silhouetteThreshold = 0.015;
+  const duplicatePairs = silhouettePairs.filter(
+    ({ differenceRatio }) => differenceRatio < silhouetteThreshold,
+  );
+  assert.deepEqual(
+    duplicatePairs,
+    [],
+    `Silhouettes trop proches à 40 : ${JSON.stringify(duplicatePairs)}`,
+  );
+  const leastDistinctPair = silhouettePairs.reduce((least, pair) =>
+    pair.differenceRatio < least.differenceRatio ? pair : least
   );
 
   const animatedNodesPerElement = await page
@@ -227,7 +408,7 @@ try {
   }
 
   console.log(
-    "LOT3_VALIDATION_OK widths=320,390,520 states=4 vehicles=7 lights=off/on wear=0..100 fluids=4 levels=0..100 silhouettes=7 axe=0 console=0",
+    `LOT3_VALIDATION_OK widths=320,390,520 states=4 vehicles=7 lights=off/on wear=0..100 fluids=4 levels=0..100 silhouettes=7 pairs=21 min-difference=${leastDistinctPair.differenceRatio.toFixed(3)} axe=0 console=0`,
   );
 } finally {
   await context.close();

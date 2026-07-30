@@ -29,7 +29,8 @@ PILOTE_ART_CAPTURE=/tmp/mode-pilote-lot3.png \
 
 Le contrôle vérifie les largeurs 320, 390 et 520, les quatre états, les feux
 éteints/allumés, l’usure, les quatre fluides, le niveau, les zones tactiles,
-le mouvement réduit, les silhouettes à 40, la console et l’accessibilité.
+le mouvement réduit, les silhouettes à 40, les 21 comparaisons deux à deux,
+la console et l’accessibilité.
 
 ## API
 
@@ -45,7 +46,7 @@ import {
 Exemples :
 
 ```js
-renderVehicleElement("car-front-three-quarter", {
+renderVehicleElement("car-front", {
   state: "active",
   lit: true,
 });
@@ -66,8 +67,8 @@ renderVehicleElement("hood-levels", {
 
 | Type | Élément | Options particulières |
 |---|---|---|
-| `car-front-three-quarter` | voiture trois-quarts avant | `lit` |
-| `car-rear-three-quarter` | voiture trois-quarts arrière | `lit` |
+| `car-front` | voiture vue de face | `lit` |
+| `car-rear` | voiture vue de dos | `lit` |
 | `car-profile` | voiture de profil | `lit` |
 | `tyre-wear` | pneu et témoin d’usure | `wear` de 0 à 100 |
 | `headlight-front` | bloc optique avant | `lit` |

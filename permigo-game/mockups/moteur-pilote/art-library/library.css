@@ -1072,9 +1072,11 @@ svg {
 }
 
 .pg-drawing-hood {
-  inset: 2%;
+  inset: auto;
+  top: 12%;
+  left: 2%;
   width: 96%;
-  height: 96%;
+  height: 76%;
 }
 
 .pg-car-body,
@@ -1204,7 +1206,7 @@ svg {
 }
 
 .pg-fluid-label {
-  max-width: 25%;
+  max-width: 29%;
   overflow: hidden;
   padding: 1.8% 2.4%;
   border-radius: 99rem;
@@ -1228,6 +1230,34 @@ svg {
 .al-silhouette-row-lot3 {
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 0.2rem;
+}
+
+.al-silhouette-comparison {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  margin: 0.72rem 0 0;
+  padding: 0.55rem 0.62rem;
+  border: 0.08rem solid rgb(56 217 148 / 28%);
+  border-radius: 0.7rem;
+  color: var(--al-accent);
+  background: var(--al-night);
+  font-size: 0.52rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.al-silhouette-comparison strong {
+  flex: 0 0 auto;
+  color: var(--al-green);
+  font-size: 0.54rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.al-silhouette-comparison span {
+  text-align: right;
 }
 
 .pg-element-vehicle.is-silhouette .pg-car-grille-detail,
@@ -1263,6 +1293,11 @@ svg {
 
 .pg-element-vehicle.is-silhouette .pg-silhouette-only {
   display: block;
+}
+
+.pg-element-car-front.is-silhouette .pg-drawing > :not(defs):not(.pg-silhouette-only),
+.pg-element-car-rear.is-silhouette .pg-drawing > :not(defs):not(.pg-silhouette-only) {
+  display: none;
 }
 
 .al-warning-test {
