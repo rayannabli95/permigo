@@ -6,7 +6,8 @@
 //   1. Hero « La Roue » — tour gratuit dispo (ou reviens demain) + pastilles
 //      « à réclamer maintenant » (coffre, trophée) + ligne « gros lot réel »
 //      (si le moniteur en a configuré) + « prochain coffre » (série).
-//   2. 4 onglets internes : Boutique · Ma collection · Trophées · Ligue.
+//   2. 4 onglets internes : Boutique · Ma collection · Cartes · Classement
+//      (mêmes mots que la barre des 4 pages — cf. components/eleve/recompenses-tabs.js)
 //
 // Réutilisation (ne duplique PAS la grosse logique métier des pages dédiées) :
 //   - Boutique / Ma collection / Trophées → résumé fidèle + « Tout voir »
@@ -98,8 +99,8 @@ const REC_I18N = {
     tabs_aria: "Rewards rooms",
     tab_shop: "Shop",
     tab_col: "My collection",
-    tab_troph: "Trophies",
-    tab_league: "League",
+    tab_troph: "Cards",
+    tab_league: "Leaderboard",
     shop_unavailable: "“Shop” unavailable.",
     open_shop: "Open the shop →",
     nothing: "Nothing to show yet.",
@@ -159,8 +160,8 @@ const REC_I18N = {
     tabs_aria: "غرف المكافآت",
     tab_shop: "المتجر",
     tab_col: "مجموعتي",
-    tab_troph: "الكؤوس",
-    tab_league: "الدوري",
+    tab_troph: "البطاقات",
+    tab_league: "الترتيب",
     shop_unavailable: "«المتجر» غير متاح.",
     open_shop: "افتح المتجر ←",
     nothing: "لا شيء لعرضه حاليًا.",
@@ -952,8 +953,8 @@ export async function mount(root) {
     <div class="rec-tabs" role="tablist" aria-label="${rt("tabs_aria", "Salles Récompenses")}">
       <button class="rec-tab on" role="tab" aria-selected="true" data-p="boutique">${rt("tab_shop", "Boutique")}</button>
       <button class="rec-tab" role="tab" aria-selected="false" data-p="collection">${rt("tab_col", "Ma collection")}</button>
-      <button class="rec-tab" role="tab" aria-selected="false" data-p="trophees">${rt("tab_troph", "Trophées")}</button>
-      <button class="rec-tab" role="tab" aria-selected="false" data-p="ligue">${rt("tab_league", "Ligue")}</button>
+      <button class="rec-tab" role="tab" aria-selected="false" data-p="trophees">${rt("tab_troph", "Cartes")}</button>
+      <button class="rec-tab" role="tab" aria-selected="false" data-p="ligue">${rt("tab_league", "Classement")}</button>
     </div>
 
     <div class="rec-panel on" id="rec-p-boutique" role="tabpanel">${renderBoutiquePanel(ctx)}</div>

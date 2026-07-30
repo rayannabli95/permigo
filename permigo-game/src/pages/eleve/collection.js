@@ -57,6 +57,9 @@ ${chromeNight("#181241", "#0b0a1c")}
 
 /* Barre de progression + pastilles par monde */
 .col-prog { margin:10px 0 4px; }
+.col-hd { margin:2px 0 12px; }
+.col-title { margin:0; font:800 24px/1.1 'Archivo',sans-serif; letter-spacing:-.02em; color:#fff; }
+.col-sub { margin:4px 0 0; font:600 12.5px/1.35 'Archivo',sans-serif; color:#cabfef; }
 .col-prog-lbl { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:7px; }
 .col-prog-lbl b { font:800 14px/1 'Archivo',sans-serif; color:#fff; }
 .col-prog-lbl span { font:600 12px/1 'Archivo',sans-serif; color:#cabfef; }
@@ -189,7 +192,12 @@ ${chromeNight("#181241", "#0b0a1c")}
 </style>`;
 
 function header() {
-  return recompensesTabs("cartes", { dark: true });
+  // Un titre, comme ses 3 sœurs (Boutique, Ma collection, Classement) : cette
+  // page était la seule sans, donc sans repère à l'œil ni pour le lecteur
+  // d'écran (le router cherche un h1 pour annoncer la page).
+  return `${recompensesTabs("cartes", { dark: true })}
+    <div class="col-hd"><h1 class="col-title">Cartes</h1>
+    <p class="col-sub">Une carte par compétence certifiée.</p></div>`;
 }
 
 function progress(nbUnlocked) {
