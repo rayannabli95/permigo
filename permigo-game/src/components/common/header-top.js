@@ -30,8 +30,8 @@ const STYLE = `
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-left: 16px;
-    padding-right: 12px;
+    padding-left: calc(16px + env(safe-area-inset-left, 0px));
+    padding-right: calc(12px + env(safe-area-inset-right, 0px));
     z-index: 300;
   }
   .pg-logo-btn {
@@ -66,7 +66,7 @@ const STYLE = `
   .ht-volant:active { transform: scale(.94); }
   .ht-volant .ht-volant-v { display: inline-block; min-width: 8px; }
   .ht-icon-btn {
-    width: 36px; height: 36px;
+    width: 44px; height: 44px;
     border-radius: 8px;
     border: 1px solid var(--bo);
     background: var(--su, #fff);
@@ -78,8 +78,6 @@ const STYLE = `
     -webkit-tap-highlight-color: transparent;
     position: relative;
   }
-  /* Hit-area 44x44 sans grossir le visuel */
-  .ht-icon-btn::before { content: ''; position: absolute; inset: -4px; }
   .ht-icon-btn:active { transform: scale(.92); background: var(--bg2, color-mix(in srgb, var(--a) 8%, transparent)); }
   /* Réglages ouverts → l'icône prend la couleur du thème */
   .ht-icon-btn.active {
@@ -88,7 +86,7 @@ const STYLE = `
     background: color-mix(in srgb, var(--a) 10%, transparent);
   }
   .ht-avatar-btn {
-    width: 36px; height: 36px;
+    width: 44px; height: 44px;
     padding: 0;
     border: 0;
     background: none;
@@ -100,8 +98,6 @@ const STYLE = `
     flex-shrink: 0;
     position: relative;
   }
-  /* Hit-area 44x44 sans grossir le visuel */
-  .ht-avatar-btn::before { content: ''; position: absolute; inset: -4px; }
   .ht-avatar-btn:active { transform: scale(.92); }
   .ht-avatar-btn > * { pointer-events: none; }
 `;

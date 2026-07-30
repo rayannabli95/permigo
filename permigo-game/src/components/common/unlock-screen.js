@@ -311,7 +311,7 @@ const STYLE = `
 
 .cu-close {
   position: absolute; top: max(18px, env(safe-area-inset-top)); right: 18px;
-  width: 38px; height: 38px; border-radius: 50%;
+  width: 44px; height: 44px; border-radius: 50%;
   background: rgba(255,255,255,.1); color: #fff; border: 0; cursor: pointer;
   font-size: 20px; line-height: 1; display: grid; place-items: center;
   z-index: 5; opacity: 0; transition: opacity .3s ease .8s, background .15s;

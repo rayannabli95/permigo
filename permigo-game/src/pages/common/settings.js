@@ -42,6 +42,11 @@ const SET_I18N = {
     sub_group: "Subscription",
     sub_loading: "Loading…",
     sub_cta: "Subscribe — €9.99/month",
+    sub_manage: "Manage my subscription",
+    sub_mine: "My subscription",
+    partial_load_err: "Some preferences could not be loaded",
+    dnd_start_aria: "Do not disturb: start time",
+    dnd_end_aria: "Do not disturb: end time",
     notif_group: "Notifications",
     notif_push: "Push notifications",
     notif_push_sub: "Reminders and updates in your browser",
@@ -106,6 +111,41 @@ const SET_I18N = {
     load_err_sub: "Check your connection, then try again.",
     retry: "Try again",
     prefs_saved: "Preferences saved",
+    checkout_success: "Thank you! Your subscription is being activated.",
+    checkout_cancel: "Payment cancelled.",
+    sub_ends: "{base} — ends on {date}",
+    sub_next_charge: "{base} — next payment on {date}",
+    sub_monthly_active: "Monthly subscription active",
+    sub_active: "Subscription active",
+    sub_pro_desc:
+      "PermiGo Pro — digital REMC booklet, student tracking, no ads.",
+    redirecting: "Redirecting…",
+    checkout_failed:
+      "Unable to open payment. Try again or contact us: contact@permigo.fr",
+    push_install:
+      "First install PermiGo on your home screen to enable notifications.",
+    push_blocked:
+      "Notifications are blocked — allow them in your phone settings.",
+    push_enabled: "Notifications enabled ✓",
+    save_error: "Save error",
+    dnd_saved: "Do not disturb period saved",
+    firstname_empty: "The first name cannot be empty",
+    firstname_updated: "First name updated: {name}",
+    export_failed: "Unable to export",
+    download_started: "Download started",
+    export_error: "Error while exporting",
+    marketing_enabled: "Marketing emails enabled",
+    marketing_disabled: "Marketing emails disabled",
+    connection_error: "Connection error",
+    delete_action: "This action is",
+    irreversible: "irreversible",
+    delete_confirm_instruction: "To confirm, type exactly:",
+    confirmation: "Confirmation",
+    cancel: "Cancel",
+    delete_auth_note:
+      "To erase the authentication account, contact",
+    delete_failed: "Unable to delete — contact dpo@permigo.fr",
+    delete_error: "Error — contact dpo@permigo.fr",
   },
   ar: {
     back: "رجوع",
@@ -121,6 +161,11 @@ const SET_I18N = {
     sub_group: "الاشتراك",
     sub_loading: "جارٍ التحميل…",
     sub_cta: "اشترك — 9,99 € / شهر",
+    sub_manage: "إدارة اشتراكي",
+    sub_mine: "اشتراكي",
+    partial_load_err: "تعذّر تحميل بعض الإعدادات",
+    dnd_start_aria: "عدم الإزعاج: وقت البدء",
+    dnd_end_aria: "عدم الإزعاج: وقت الانتهاء",
     notif_group: "الإشعارات",
     notif_push: "الإشعارات الفورية",
     notif_push_sub: "تذكيرات وتحديثات في المتصفح",
@@ -185,14 +230,64 @@ const SET_I18N = {
     load_err_sub: "تحقّق من اتصالك ثم أعد المحاولة.",
     retry: "أعد المحاولة",
     prefs_saved: "تم حفظ الإعدادات",
+    checkout_success: "شكرًا! جارٍ تفعيل اشتراكك.",
+    checkout_cancel: "تم إلغاء الدفع.",
+    sub_ends: "{base} — ينتهي في {date}",
+    sub_next_charge: "{base} — الدفعة التالية في {date}",
+    sub_monthly_active: "الاشتراك الشهري مفعّل",
+    sub_active: "الاشتراك مفعّل",
+    sub_pro_desc:
+      "بيرميغو برو — دفتر REMC رقمي، متابعة الطلاب، بلا إعلانات.",
+    redirecting: "جارٍ التحويل…",
+    checkout_failed:
+      "تعذّر فتح الدفع. أعد المحاولة أو راسلنا: contact@permigo.fr",
+    push_install:
+      "ثبّت بيرميغو أولًا على شاشتك الرئيسية لتفعيل الإشعارات.",
+    push_blocked:
+      "الإشعارات محظورة — اسمح بها في إعدادات الهاتف.",
+    push_enabled: "تم تفعيل الإشعارات ✓",
+    save_error: "خطأ في الحفظ",
+    dnd_saved: "تم حفظ فترة عدم الإزعاج",
+    firstname_empty: "لا يمكن أن يكون الاسم فارغًا",
+    firstname_updated: "تم تحديث الاسم: {name}",
+    export_failed: "تعذّر التصدير",
+    download_started: "بدأ التنزيل",
+    export_error: "خطأ أثناء التصدير",
+    marketing_enabled: "تم تفعيل الرسائل التسويقية",
+    marketing_disabled: "تم تعطيل الرسائل التسويقية",
+    connection_error: "خطأ في الاتصال",
+    delete_action: "هذا الإجراء",
+    irreversible: "لا رجعة فيه",
+    delete_confirm_instruction: "للتأكيد، اكتب العبارة التالية حرفيًا:",
+    confirmation: "التأكيد",
+    cancel: "إلغاء",
+    delete_auth_note: "لمحو حساب المصادقة، تواصل مع",
+    delete_failed: "تعذّر الحذف — تواصل مع dpo@permigo.fr",
+    delete_error: "خطأ — تواصل مع dpo@permigo.fr",
   },
 };
 // Traduit-ou-français, avec esc() intégré (sûr en texte et en attribut ""). En
 // 'fr' ou si la clé manque → le français passé en 2e argument (jamais de vide).
-function st(key, fr) {
+function stR(key, fr, vars) {
   const l = getLang();
   const v = l !== "fr" ? SET_I18N[l]?.[key] : null;
-  return esc(v || fr);
+  let value = v || fr;
+  if (vars)
+    for (const [name, replacement] of Object.entries(vars))
+      value = value.split(`{${name}}`).join(String(replacement));
+  return value;
+}
+function st(key, fr, vars) {
+  return esc(stR(key, fr, vars));
+}
+function stA(key, fr, vars) {
+  return escAttr(stR(key, fr, vars));
+}
+function settingsDir() {
+  return getLang() === "ar" ? ' dir="rtl" lang="ar"' : "";
+}
+function settingsDateLocale() {
+  return { fr: "fr-FR", en: "en-GB", ar: "ar" }[getLang()] || "fr-FR";
 }
 
 const STYLE = `<style>
@@ -348,7 +443,7 @@ const STYLE = `<style>
   flex: 1; padding: 9px 4px; border: none; border-radius: var(--r-sm);
   background: transparent; font: 700 12.5px/1 'Inter', sans-serif; color: var(--mu);
   cursor: pointer; transition: background .15s cubic-bezier(.23,1,.32,1), color .15s, box-shadow .15s;
-  white-space: nowrap; min-height: 40px; font-family: inherit;
+  white-space: nowrap; min-height: 44px; font-family: inherit;
   display: inline-flex; align-items: center; justify-content: center; gap: 5px;
 }
 .st-theme-btn svg { width: 15px; height: 15px; }
@@ -357,7 +452,7 @@ const STYLE = `<style>
 /* Accent color swatches */
 .st-accent-row { display: flex; gap: 12px; flex-wrap: wrap; }
 .st-accent-sw {
-  width: 42px; height: 42px; border-radius: 50%;
+  width: 44px; height: 44px; border-radius: 50%;
   border: 0; cursor: pointer; padding: 0;
   background: var(--sw);
   box-shadow: 0 2px 8px -2px color-mix(in srgb, var(--sw) 55%, transparent), inset 0 1.5px 0 rgba(255,255,255,.3);
@@ -468,7 +563,7 @@ export async function mount(root, param) {
   // Squelette immédiat : l'écran ne reste plus figé sur la page précédente
   // le temps du réseau
   root.innerHTML = `${STYLE}
-<div class="st">
+<div class="st"${settingsDir()}>
   ${renderHeader()}
   <div class="st-skel-block" style="height:120px"></div>
   <div class="st-skel-block" style="height:180px"></div>
@@ -498,7 +593,7 @@ export async function mount(root, param) {
   // toggles pré-remplis de défauts trompeurs (risque d'écraser les vraies prefs)
   if (profileFailed) {
     root.innerHTML = `${STYLE}
-<div class="st">
+<div class="st"${settingsDir()}>
   ${renderHeader()}
   <div class="st-section" style="margin-top:20px;padding:28px 20px;text-align:center">
     <div style="margin-bottom:10px;color:var(--mu3)">${icon("alert-circle", { size: 30 })}</div>
@@ -516,7 +611,14 @@ export async function mount(root, param) {
     return;
   }
   if (prefsFailed) {
-    toast("Certaines préférences n'ont pas pu être chargées", "error", 2500);
+    toast(
+      stR(
+        "partial_load_err",
+        "Certaines préférences n'ont pas pu être chargées",
+      ),
+      "error",
+      2500,
+    );
   }
 
   const prefs = {
@@ -553,7 +655,7 @@ export async function mount(root, param) {
 function renderHeader() {
   return `
   <div class="st-header">
-    <button class="st-back" id="st-back" aria-label="${st("back", "Retour")}">
+    <button class="st-back" id="st-back" aria-label="${stA("back", "Retour")}">
       <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="15 18 9 12 15 6"/>
       </svg>
@@ -567,7 +669,7 @@ const _CHEV = `<svg class="st-chev" viewBox="0 0 24 24" fill="none" stroke="curr
 
 function render(root, me, prefs) {
   root.innerHTML = `${STYLE}
-<div class="st anim-slide-up">
+<div class="st anim-slide-up"${settingsDir()}>
   ${renderHeader()}
   <div class="st-body">
 ${
@@ -578,7 +680,7 @@ ${
   <div>
     <div class="st-glabel">${st("app_group", "Application")}</div>
     <div class="st-section">
-      <div class="st-row tap" id="st-install-row" role="button" tabindex="0" aria-label="${st("app_add_home_aria", "Ajouter PermiGo à l'écran d'accueil")}">
+      <div class="st-row tap" id="st-install-row" role="button" tabindex="0" aria-label="${stA("app_add_home_aria", "Ajouter PermiGo à l'écran d'accueil")}">
         <span class="st-ic" aria-hidden="true">${medallion("fusee", "cyan", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
           <div class="st-row-title">${st("app_add_home", "Ajouter à l'écran d'accueil")}</div>
@@ -596,7 +698,7 @@ ${
   <div>
     <div class="st-glabel">${st("ens_group", "Tes élèves")}</div>
     <div class="st-section">
-      <div class="st-row tap" id="st-recompenses-row" role="button" tabindex="0" aria-label="${st("ens_wheel_aria", "Régler ta roue de récompenses")}">
+      <div class="st-row tap" id="st-recompenses-row" role="button" tabindex="0" aria-label="${stA("ens_wheel_aria", "Régler ta roue de récompenses")}">
         <span class="st-ic" aria-hidden="true">${medallion("cadeau", "orange", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
           <div class="st-row-title">${st("ens_wheel", "Ta roue de récompenses")}</div>
@@ -620,7 +722,7 @@ ${
         <div class="st-rhead">
           <span class="st-ic" aria-hidden="true">${medallion("etoile", "gold", { size: 32, shape: "tile" })}</span>
           <div class="st-row-left">
-            <div class="st-row-title">${me.role === "enseignant" ? "PermiGo Pro" : "Mon abonnement"}</div>
+            <div class="st-row-title">${me.role === "enseignant" ? "PermiGo Pro" : st("sub_mine", "Mon abonnement")}</div>
             <div class="st-row-sub" id="st-sub-status">${st("sub_loading", "Chargement…")}</div>
           </div>
         </div>
@@ -643,7 +745,7 @@ ${
           <div class="st-row-sub">${st("notif_push_sub", "Rappels et mises à jour dans le navigateur")}</div>
         </div>
         <div class="st-row-action">
-          <label class="st-tgl" aria-label="${st("notif_push_aria", "Activer notifications push")}">
+          <label class="st-tgl" aria-label="${stA("notif_push_aria", "Activer notifications push")}">
             <input type="checkbox" id="tgl-push" ${prefs.notifPush ? "checked" : ""}>
             <span class="st-tgl-t"></span>
           </label>
@@ -656,7 +758,7 @@ ${
           <div class="st-row-sub">${st("notif_email_sub", "Résumé hebdomadaire par email")}</div>
         </div>
         <div class="st-row-action">
-          <label class="st-tgl" aria-label="${st("notif_email_aria", "Activer notifications email")}">
+          <label class="st-tgl" aria-label="${stA("notif_email_aria", "Activer notifications email")}">
             <input type="checkbox" id="tgl-email" ${prefs.notifEmail ? "checked" : ""}>
             <span class="st-tgl-t"></span>
           </label>
@@ -672,9 +774,9 @@ ${
         </div>
         <div class="st-dnd st-expand">
           <label for="inp-dnd-start">${st("dnd_from", "De")}</label>
-          <input class="st-inp time" id="inp-dnd-start" type="time" step="60" value="${prefs.dndStart}" aria-label="Ne pas déranger : heure de début" style="flex:1">
+          <input class="st-inp time" id="inp-dnd-start" type="time" step="60" value="${prefs.dndStart}" aria-label="${stA("dnd_start_aria", "Ne pas déranger : heure de début")}" style="flex:1">
           <label for="inp-dnd-end">${st("dnd_to", "à")}</label>
-          <input class="st-inp time" id="inp-dnd-end" type="time" step="60" value="${prefs.dndEnd}" aria-label="Ne pas déranger : heure de fin" style="flex:1">
+          <input class="st-inp time" id="inp-dnd-end" type="time" step="60" value="${prefs.dndEnd}" aria-label="${stA("dnd_end_aria", "Ne pas déranger : heure de fin")}" style="flex:1">
         </div>
       </div>
     </div>
@@ -691,7 +793,7 @@ ${
           <div class="st-row-sub">${st("priv_rank_sub", "Apparaître dans les classements de ton école")}</div>
         </div>
         <div class="st-row-action">
-          <label class="st-tgl" aria-label="${st("priv_rank_aria", "Apparaître dans le classement")}">
+          <label class="st-tgl" aria-label="${stA("priv_rank_aria", "Apparaître dans le classement")}">
             <input type="checkbox" id="tgl-ranking" ${prefs.showInRanking ? "checked" : ""}>
             <span class="st-tgl-t"></span>
           </label>
@@ -713,7 +815,7 @@ ${
           </div>
         </div>
         <div class="st-inp-line st-expand">
-          <input class="st-inp" id="inp-prenom" type="text" value="${escAttr(prefs.prenom)}" maxlength="30" placeholder="${st("account_firstname_ph", "Ton prénom")}" autocomplete="given-name" style="flex:1">
+          <input class="st-inp" id="inp-prenom" type="text" value="${escAttr(prefs.prenom)}" maxlength="30" placeholder="${stA("account_firstname_ph", "Ton prénom")}" autocomplete="given-name" style="flex:1">
           <button class="st-save-btn" id="btn-save-prenom">${st("save", "Enregistrer")}</button>
         </div>
       </div>
@@ -742,7 +844,7 @@ ${
             <div class="st-row-sub">${st("theme_sub", "Apparence de l'application")}</div>
           </div>
         </div>
-        <div class="st-theme-seg st-expand" id="theme-seg" role="group" aria-label="${st("theme_aria", "Choisir le thème")}">
+        <div class="st-theme-seg st-expand" id="theme-seg" role="group" aria-label="${stA("theme_aria", "Choisir le thème")}">
           <button class="st-theme-btn ${prefs.theme === "light" ? "active" : ""}" data-set-theme="light" aria-pressed="${prefs.theme === "light"}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg> ${st("theme_light", "Clair")}</button>
           <button class="st-theme-btn ${prefs.theme === "dark" ? "active" : ""}" data-set-theme="dark" aria-pressed="${prefs.theme === "dark"}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg> ${st("theme_dark", "Sombre")}</button>
           <button class="st-theme-btn ${prefs.theme === "auto" ? "active" : ""}" data-set-theme="auto" aria-pressed="${prefs.theme === "auto"}">${st("theme_auto", "Système")}</button>
@@ -756,7 +858,7 @@ ${
             <div class="st-row-sub">${st("lang_sub", "Les questions s'affichent dans ta langue, le français gardé dessous.")}</div>
           </div>
         </div>
-        <div class="st-theme-seg st-expand" id="lang-seg" role="group" aria-label="${st("lang_aria", "Choisir la langue")}">
+        <div class="st-theme-seg st-expand" id="lang-seg" role="group" aria-label="${stA("lang_aria", "Choisir la langue")}">
           <button class="st-theme-btn ${prefs.language === "fr" ? "active" : ""}" data-set-lang="fr" aria-pressed="${prefs.language === "fr"}">Français</button>
           <button class="st-theme-btn ${prefs.language === "en" ? "active" : ""}" data-set-lang="en" aria-pressed="${prefs.language === "en"}">English</button>
           <button class="st-theme-btn ${prefs.language === "ar" ? "active" : ""}" data-set-lang="ar" aria-pressed="${prefs.language === "ar"}" lang="ar">العربية</button>
@@ -770,7 +872,7 @@ ${
             <div class="st-row-sub">${st("accent_sub", "Le vert ne te plaît pas ? Choisis ta couleur.")}</div>
           </div>
         </div>
-        <div class="st-accent-row st-expand" id="accent-row" role="group" aria-label="${st("accent_aria", "Choisir la couleur d'accent")}">
+        <div class="st-accent-row st-expand" id="accent-row" role="group" aria-label="${stA("accent_aria", "Choisir la couleur d'accent")}">
           ${ACCENTS.map((p) => `<button class="st-accent-sw" type="button" data-accent="${p.id}" aria-pressed="${getAccent() === p.id}" aria-label="${escAttr(p.name)}" title="${escAttr(p.name)}" style="--sw:${p.a}"></button>`).join("")}
         </div>
       </div>
@@ -781,7 +883,7 @@ ${
           <div class="st-row-sub">${st("sound_sub", "Retours sonores sur les actions et récompenses")}</div>
         </div>
         <div class="st-row-action">
-          <label class="st-tgl" aria-label="${st("sound_aria", "Activer les sons d'interface")}">
+          <label class="st-tgl" aria-label="${stA("sound_aria", "Activer les sons d'interface")}">
             <input type="checkbox" id="tgl-sound" ${isSoundEnabled() ? "checked" : ""}>
             <span class="st-tgl-t"></span>
           </label>
@@ -832,7 +934,7 @@ ${
           <div class="st-row-sub">${st("marketing_sub", "Conseils, nouveautés et offres PermiGo")}</div>
         </div>
         <div class="st-row-action">
-          <label class="st-tgl" aria-label="${st("marketing_aria", "Recevoir les emails marketing")}">
+          <label class="st-tgl" aria-label="${stA("marketing_aria", "Recevoir les emails marketing")}">
             <input type="checkbox" id="tgl-marketing" ${prefs.marketingOptin ? "checked" : ""}>
             <span class="st-tgl-t"></span>
           </label>
@@ -928,8 +1030,15 @@ function wire(root, me, prefs) {
       .find((p) => p.startsWith("checkout="))
       ?.split("=")[1];
     if (checkout === "success")
-      toast("Merci ! Ton abonnement est en cours d'activation.", "success");
-    else if (checkout === "cancel") toast("Paiement annulé.", "info");
+      toast(
+        stR(
+          "checkout_success",
+          "Merci ! Ton abonnement est en cours d'activation.",
+        ),
+        "success",
+      );
+    else if (checkout === "cancel")
+      toast(stR("checkout_cancel", "Paiement annulé."), "info");
 
     // « Gérer mon abonnement » → étape de rétention DANS l'app (questionnaire),
     // qui débouche sur la résiliation en ligne via le portail Stripe.
@@ -941,12 +1050,20 @@ function wire(root, me, prefs) {
     // Libellé « abonnement actif » enrichi de la période Stripe (si connue).
     const activeLabel = (sub, base) => {
       const until = sub?.current_period_end
-        ? new Date(sub.current_period_end).toLocaleDateString("fr-FR")
+        ? new Date(sub.current_period_end).toLocaleDateString(
+            settingsDateLocale(),
+          )
         : null;
       return sub?.cancel_at_period_end
-        ? `${base} — se termine le ${until}`
+        ? stR("sub_ends", "{base} — se termine le {date}", {
+            base,
+            date: until,
+          })
         : until
-          ? `${base} — prochain prélèvement le ${until}`
+          ? stR("sub_next_charge", "{base} — prochain prélèvement le {date}", {
+              base,
+              date: until,
+            })
           : base;
     };
 
@@ -963,7 +1080,10 @@ function wire(root, me, prefs) {
         }
         if (!hasMonthly) return; // rien de neuf pour un élève sans abo mensuel
         const sub = await getSubscription();
-        subStatus.textContent = activeLabel(sub, "Abonnement mensuel actif");
+        subStatus.textContent = activeLabel(
+          sub,
+          stR("sub_monthly_active", "Abonnement mensuel actif"),
+        );
         if (manageBtn) manageBtn.style.display = "";
         if (subGroup) subGroup.style.display = "";
       })();
@@ -971,12 +1091,17 @@ function wire(root, me, prefs) {
       // Moniteur : bloc toujours visible. Abonné → gérer ; sinon → s'abonner.
       getSubscription().then((sub) => {
         if (isActive(sub)) {
-          subStatus.textContent = activeLabel(sub, "Abonnement actif");
+          subStatus.textContent = activeLabel(
+            sub,
+            stR("sub_active", "Abonnement actif"),
+          );
           if (subBtn) subBtn.style.display = "none";
           if (manageBtn) manageBtn.style.display = "";
         } else {
-          subStatus.textContent =
-            "PermiGo Pro — livret REMC numérique, suivi élèves, sans pub.";
+          subStatus.textContent = stR(
+            "sub_pro_desc",
+            "PermiGo Pro — livret REMC numérique, suivi élèves, sans pub.",
+          );
           if (subBtn) subBtn.style.display = "";
           if (manageBtn) manageBtn.style.display = "none";
         }
@@ -984,19 +1109,25 @@ function wire(root, me, prefs) {
 
       subBtn?.addEventListener("click", async () => {
         subBtn.disabled = true;
-        subBtn.textContent = "Redirection…";
+        subBtn.textContent = stR("redirecting", "Redirection…");
         track("billing.checkout_start", { role: me?.role });
         try {
           await startCheckout(); // redirige vers Stripe si OK
         } catch (e) {
           console.error("[settings] checkout", e);
           toast(
-            "Impossible d'ouvrir le paiement. Réessaie ou écris-nous : contact@permigo.fr",
+            stR(
+              "checkout_failed",
+              "Impossible d'ouvrir le paiement. Réessaie ou écris-nous : contact@permigo.fr",
+            ),
             "error",
             6000,
           );
           subBtn.disabled = false;
-          subBtn.textContent = "S'abonner — 9,99 €/mois";
+          subBtn.textContent = stR(
+            "sub_cta",
+            "S'abonner — 9,99 €/mois",
+          );
         }
       });
     }
@@ -1041,7 +1172,10 @@ function wire(root, me, prefs) {
           // iOS hors PWA : pas d'API notif tant que l'app n'est pas installée.
           pushTgl.checked = false;
           toast(
-            "Installe d'abord PermiGo sur ton écran d'accueil pour activer les notifications.",
+            stR(
+              "push_install",
+              "Installe d'abord PermiGo sur ton écran d'accueil pour activer les notifications.",
+            ),
             "info",
             4500,
           );
@@ -1054,13 +1188,20 @@ function wire(root, me, prefs) {
           pushTgl.checked = false;
           if (Notification.permission === "denied")
             toast(
-              "Notifications bloquées — autorise-les dans les réglages du téléphone.",
+              stR(
+                "push_blocked",
+                "Notifications bloquées — autorise-les dans les réglages du téléphone.",
+              ),
               "error",
               4500,
             );
           return;
         }
-        toast("Notifications activées ✓", "success", 2000);
+        toast(
+          stR("push_enabled", "Notifications activées ✓"),
+          "success",
+          2000,
+        );
       } else {
         await optOutPush();
       }
@@ -1080,9 +1221,13 @@ function wire(root, me, prefs) {
       .update({ dnd_start: start, dnd_end: end })
       .eq("id", me.id);
     if (error) {
-      toast("Erreur de sauvegarde", "error", 2000);
+      toast(stR("save_error", "Erreur de sauvegarde"), "error", 2000);
     } else {
-      toast("Plage Ne pas déranger enregistrée", "success", 2000);
+      toast(
+        stR("dnd_saved", "Plage Ne pas déranger enregistrée"),
+        "success",
+        2000,
+      );
       track("settings.dnd_saved", {});
     }
   };
@@ -1095,7 +1240,10 @@ function wire(root, me, prefs) {
     ?.addEventListener("click", async () => {
       const val = root.querySelector("#inp-prenom")?.value?.trim();
       if (!val) {
-        toast("Le prénom ne peut pas être vide", "error");
+        toast(
+          stR("firstname_empty", "Le prénom ne peut pas être vide"),
+          "error",
+        );
         return;
       }
       const btn = root.querySelector("#btn-save-prenom");
@@ -1106,12 +1254,17 @@ function wire(root, me, prefs) {
         .update({ prenom: val })
         .eq("id", me.id);
       btn.disabled = false;
-      btn.textContent = "Enregistrer";
+      btn.textContent = stR("save", "Enregistrer");
       if (error) {
-        toast("Erreur de sauvegarde", "error");
+        toast(stR("save_error", "Erreur de sauvegarde"), "error");
         return;
       }
-      toast(`Prénom mis à jour : ${esc(val)}`, "success");
+      toast(
+        stR("firstname_updated", "Prénom mis à jour : {name}", {
+          name: esc(val),
+        }),
+        "success",
+      );
       track("settings.prenom_updated", {});
     });
 
@@ -1193,7 +1346,10 @@ function wire(root, me, prefs) {
       try {
         const { data, error } = await sb.rpc("export_my_data");
         if (error || data?.error) {
-          toast(data?.error || "Export impossible", "error");
+          toast(
+            data?.error || stR("export_failed", "Export impossible"),
+            "error",
+          );
           return;
         }
         const blob = new Blob([JSON.stringify(data, null, 2)], {
@@ -1208,13 +1364,17 @@ function wire(root, me, prefs) {
         a.click();
         a.remove();
         URL.revokeObjectURL(url);
-        toast("Téléchargement lancé", "success", 3000);
+        toast(
+          stR("download_started", "Téléchargement lancé"),
+          "success",
+          3000,
+        );
         track("rgpd.data_exported", {});
       } catch (e) {
         console.error("[settings] export", e);
-        toast("Erreur lors de l'export", "error");
+        toast(stR("export_error", "Erreur lors de l'export"), "error");
       } finally {
-        btn.textContent = "Exporter →";
+        btn.textContent = stR("export_arrow", "Exporter →");
         btn.style.pointerEvents = "";
       }
     });
@@ -1229,17 +1389,19 @@ function wire(root, me, prefs) {
           p_data: { marketing_optin: val },
         });
         if (error) {
-          toast("Erreur de sauvegarde", "error");
+          toast(stR("save_error", "Erreur de sauvegarde"), "error");
           return;
         }
         toast(
-          val ? "Emails marketing activés" : "Emails marketing désactivés",
+          val
+            ? stR("marketing_enabled", "Emails marketing activés")
+            : stR("marketing_disabled", "Emails marketing désactivés"),
           "success",
           2000,
         );
         track("rgpd.marketing_optin_changed", { value: val });
       } catch {
-        toast("Erreur de connexion", "error");
+        toast(stR("connection_error", "Erreur de connexion"), "error");
       }
     });
 
@@ -1279,22 +1441,24 @@ const CONFIRM_TEXT = "SUPPRIMER MON COMPTE";
 function _showDeleteModal(root, me) {
   const overlay = document.createElement("div");
   overlay.className = "st-modal-overlay";
+  overlay.dir = getLang() === "ar" ? "rtl" : "ltr";
+  if (getLang() === "ar") overlay.lang = "ar";
   overlay.innerHTML = `
 <div class="st-modal-box" role="dialog" aria-modal="true" aria-labelledby="del-modal-title">
   <div class="st-modal-handle"></div>
-  <div class="st-modal-title" id="del-modal-title">Supprimer mon compte</div>
+  <div class="st-modal-title" id="del-modal-title">${st("delete_account", "Supprimer mon compte")}</div>
   <div class="st-modal-body">
-    Cette action est <strong>irréversible</strong>.
+    ${st("delete_action", "Cette action est")} <strong>${st("irreversible", "irréversible")}</strong>.
     ${st("delete_modal_transparency", "Tes données personnelles sont supprimées ou anonymisées : ton prénom, ton email et ta photo disparaissent, tes statistiques deviennent anonymes. Ton compte ne pourra pas être récupéré.")}
-    <br><br>Pour confirmer, tape exactement :<br><strong>${CONFIRM_TEXT}</strong>
+    <br><br>${st("delete_confirm_instruction", "Pour confirmer, tape exactement :")}<br><strong>${CONFIRM_TEXT}</strong>
   </div>
-  <div class="st-modal-label">Confirmation</div>
-  <input class="st-modal-inp" id="del-confirm-inp" type="text" placeholder="${CONFIRM_TEXT}" autocomplete="off" spellcheck="false">
+  <div class="st-modal-label">${st("confirmation", "Confirmation")}</div>
+  <input class="st-modal-inp" id="del-confirm-inp" type="text" placeholder="${escAttr(CONFIRM_TEXT)}" autocomplete="off" spellcheck="false">
   <div class="st-modal-actions">
-    <button class="st-modal-cancel" id="del-cancel">Annuler</button>
-    <button class="st-modal-confirm" id="del-confirm" disabled>Supprimer</button>
+    <button class="st-modal-cancel" id="del-cancel">${st("cancel", "Annuler")}</button>
+    <button class="st-modal-confirm" id="del-confirm" disabled>${st("delete", "Supprimer")}</button>
   </div>
-  <p class="st-dpo-note">Pour l'effacement côté authentification, contacte <a href="mailto:dpo@permigo.fr">dpo@permigo.fr</a></p>
+  <p class="st-dpo-note">${st("delete_auth_note", "Pour l'effacement côté authentification, contacte")} <a href="mailto:dpo@permigo.fr">dpo@permigo.fr</a></p>
 </div>`;
 
   document.body.appendChild(overlay);
@@ -1329,7 +1493,11 @@ function _showDeleteModal(root, me) {
       });
       if (error || data?.error) {
         toast(
-          data?.error || "Suppression impossible — contacte dpo@permigo.fr",
+          data?.error ||
+            stR(
+              "delete_failed",
+              "Suppression impossible — contacte dpo@permigo.fr",
+            ),
           "error",
           6000,
         );
@@ -1342,7 +1510,11 @@ function _showDeleteModal(root, me) {
       location.reload();
     } catch (e) {
       console.error("[settings] delete_account", e);
-      toast("Erreur — contacte dpo@permigo.fr", "error", 6000);
+      toast(
+        stR("delete_error", "Erreur — contacte dpo@permigo.fr"),
+        "error",
+        6000,
+      );
       overlay.remove();
     }
   });

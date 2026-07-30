@@ -16,7 +16,7 @@ const LEAGUE_MED = {
 };
 
 // 4 ligues ordonnées du plus haut au plus bas
-export const LEAGUES = [
+const LEAGUES = [
   {
     id: "diamant",
     name: "Diamant",
@@ -60,7 +60,7 @@ export const LEAGUES = [
 ];
 
 /** Retourne la ligue correspondant aux points, ou null si 0 pts. */
-export function getLeague(pts) {
+function getLeague(pts) {
   if (!pts || pts <= 0) return null;
   return LEAGUES.find((l) => pts >= l.minPts) ?? null;
 }

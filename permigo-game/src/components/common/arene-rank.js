@@ -9,19 +9,34 @@
 // Usage :
 //   root.innerHTML = `${ARENE_CSS}<div class="arn" style="${areneAccent('violet')}"> … </div>`;
 //   arenePodium(top3, { fmtScore }) · areneRow({...}) · areneMeRow({...})
+//   fmtScore renvoie { value, suffix } : aucun fragment HTML appelant.
 //   arenePaliers({ items, doneCount, targetIdx, title, goal })
 // ═══════════════════════════════════════════════════════════════
 import { esc, escAttr } from "@/utils/escape.js";
 import { getLang } from "@/utils/lang.js";
+import { medallion } from "@/utils/medallions.js";
 // i18n coque (EN/AR), repli FR.
-function arYou() { const l = getLang(); return l === "en" ? "You" : l === "ar" ? "أنت" : "Toi"; }
-function arRank(n) { const l = getLang(); return l === "en" ? `Rank ${n}` : l === "ar" ? `المرتبة ${n}` : `Rang ${n}`; }
-function arMyRank(n) { const l = getLang(); return l === "en" ? `Your rank: ${n}` : l === "ar" ? `مركزك: ${n}` : `Ta place : ${n}`; }
+function arYou() {
+  const l = getLang();
+  return l === "en" ? "You" : l === "ar" ? "أنت" : "Toi";
+}
+function arRank(n) {
+  const l = getLang();
+  return l === "en" ? `Rank ${n}` : l === "ar" ? `المرتبة ${n}` : `Rang ${n}`;
+}
+function arMyRank(n) {
+  const l = getLang();
+  return l === "en"
+    ? `Your rank: ${n}`
+    : l === "ar"
+      ? `مركزك: ${n}`
+      : `Ta place : ${n}`;
+}
 import { renderUserAvatar } from "@/components/common/avatar.js";
 
 // Presets d'accent (couleur, clair, foncé). On peut aussi passer un objet
 // { acc, lt, dk } à areneAccent() pour un accent sur-mesure.
-export const ARENE_ACCENTS = {
+const ARENE_ACCENTS = {
   violet: { acc: "#6d4dff", lt: "#a78bff", dk: "#4a2fc4" }, // Conduite (élève)
   bleu: { acc: "#2563eb", lt: "#60a5fa", dk: "#1d4ed8" }, // Révision (élève)
   indigo: { acc: "#4f46e5", lt: "#8b8bff", dk: "#3730c4" }, // Moniteur
@@ -29,8 +44,7 @@ export const ARENE_ACCENTS = {
 
 /** Renvoie la chaîne `style` qui fixe l'accent actif de l'arène. */
 export function areneAccent(preset) {
-  const p = typeof preset === "string" ? ARENE_ACCENTS[preset] : preset || null;
-  const a = p || ARENE_ACCENTS.violet;
+  const a = ARENE_ACCENTS[preset] || ARENE_ACCENTS.violet;
   return `--acc:${a.acc};--acc-lt:${a.lt};--acc-dk:${a.dk}`;
 }
 
@@ -46,7 +60,7 @@ export const ARENE_CSS = `<style>
   --bronze:#cd8b5b; --bronze-dk:#a96a3c;
   --aink:#f4f2ff; --asoft:#c7c2e8; --amute:#9a93c8; --aup:#3ddc84;
   position:relative; isolation:isolate;
-  min-height:100vh; max-width:520px;
+  min-height:100dvh; max-width:520px;
   /* Remonte de la hauteur déjà comptée par #app : le fond nuit glisse sous le
      header verre (pattern livret), le contenu reste sous le header. */
   margin:calc(-1 * (var(--th,52px) + env(safe-area-inset-top,0px))) auto 0;
@@ -251,64 +265,102 @@ const CROWN_SVG = `<svg class="arn-crown" viewBox="0 0 30 22" fill="none" aria-h
   <defs><linearGradient id="arnCg" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ffe08a"/><stop offset="1" stop-color="#f7b32b"/></linearGradient></defs>
 </svg>`;
 
+function safeInteger(value, fallback = 0) {
+  const number = Number(value);
+  return Number.isFinite(number) ? Math.trunc(number) : fallback;
+}
+
+function scoreHtml(fmtScore, row) {
+  const score = fmtScore?.(row);
+  if (score && typeof score === "object") {
+    const value = esc(score.value ?? "");
+    const suffix = score.suffix
+      ? `<span class="of">${esc(score.suffix)}</span>`
+      : "";
+    return `${value}${suffix}`;
+  }
+  return esc(score ?? "");
+}
+
+function streakChip(value) {
+  const streak = Math.max(0, safeInteger(value));
+  const active = streak > 0;
+  const medal = medallion("flamme", active ? "orange" : "slate", {
+    size: 16,
+  });
+  const title = active
+    ? `Actif ${streak} jour${streak > 1 ? "s" : ""} de suite`
+    : "Inactif récemment";
+  return `<span class="arn-chip flame${active ? "" : " off"}" title="${escAttr(title)}">${medal} ${streak}j</span>`;
+}
+
 /**
  * Podium top-3. Ordre visuel 2 · 1 · 3, couronne sur le 1er.
  * @param {Array<{rang:number, display_name:string, avatar?:string, is_me?:boolean}>} top3
- * @param {{ fmtScore:(r)=>string, meLabel?:string, attrsOf?:(r)=>string }} opts
- *   attrsOf → attributs bruts par colonne (role/tabindex/data-…) pour la
- *   rendre cliquable (ex. moniteur : tap → livret de l'élève).
+ * @param {{ fmtScore:(r)=>({value:string|number,suffix?:string}), meLabel?:string, clickable?:boolean }} opts
  */
 export function arenePodium(
   top3,
-  { fmtScore, meLabel = arYou(), attrsOf = null } = {},
+  { fmtScore, meLabel = arYou(), clickable = false } = {},
 ) {
-  const by = {};
-  top3.forEach((r) => (by[r.rang] = r));
+  const by = Object.create(null);
+  top3.forEach((r) => {
+    const rank = safeInteger(r.rang);
+    if (rank >= 1 && rank <= 3) by[rank] = { ...r, rang: rank };
+  });
   const order = [by[2], by[1], by[3]]; // gauche · centre · droite
   return `<div class="arn-podium-wrap"><div class="arn-podium-glow" aria-hidden="true"></div><div class="arn-podium">${order
     .map((r) => {
       if (!r) return `<div class="arn-pcol" aria-hidden="true"></div>`;
-      const isFirst = r.rang === 1;
-      const metal = METAL[r.rang];
+      const rank = safeInteger(r.rang);
+      const isFirst = rank === 1;
+      const metal = METAL[rank] || "bronze";
       const avSize = isFirst ? 74 : 56;
       const av = renderUserAvatar(
         { avatar_url: r.avatar, prenom: r.display_name },
         avSize,
       );
       const nameHtml = r.is_me
-        ? `${meLabel} <span class="arn-youtag">${esc(r.display_name)}</span>`
+        ? `${esc(meLabel)} <span class="arn-youtag">${esc(r.display_name)}</span>`
         : esc(r.display_name);
-      const extra = attrsOf ? attrsOf(r) : "";
-      return `<div class="arn-pcol${extra ? " clickable" : ""}" ${extra}>
+      const interactive = clickable && r.id != null;
+      const attrs = interactive
+        ? ` role="button" tabindex="0" data-eleve-id="${escAttr(String(r.id))}"`
+        : "";
+      return `<div class="arn-pcol${interactive ? " clickable" : ""}"${attrs}>
         ${isFirst ? CROWN_SVG : ""}
         <div class="arn-pav m-${metal}${r.is_me ? " is-me" : ""}">
           ${av}
-          <span class="arn-medal ${metal}" aria-label="${arRank(r.rang)}">${r.rang}</span>
+          <span class="arn-medal ${metal}" aria-label="${escAttr(arRank(rank))}">${rank}</span>
         </div>
         <div class="arn-pname${r.is_me ? " me" : ""}">${nameHtml}</div>
-        <div class="arn-pscore${r.is_me ? " me" : ""}">${fmtScore(r)}</div>
-        <div class="arn-ped p${r.rang}${isFirst && r.is_me ? " me-ped" : ""}">${r.rang}</div>
+        <div class="arn-pscore${r.is_me ? " me" : ""}">${scoreHtml(fmtScore, r)}</div>
+        <div class="arn-ped p${rank}${isFirst && r.is_me ? " me-ped" : ""}">${rank}</div>
       </div>`;
     })
     .join("")}</div></div>`;
 }
 
 /**
- * Ligne dense de classement (4e →). `rightHtml` = contenu optionnel avant
- * le score (ex. chip de série côté moniteur). `attrs` = attributs bruts
- * (role/tabindex/data-…) pour rendre la ligne cliquable.
+ * Ligne dense de classement (4e →). Le composant ne reçoit plus de fragment
+ * HTML ni d'attributs bruts : il rend uniquement ses données connues.
  * @param {{ rang:number, display_name:string, avatar?:string, is_me?:boolean }} r
  */
 export function areneRow(
   r,
-  { fmtScore, idx = 0, rightHtml = "", attrs = "", clickable = false } = {},
+  { fmtScore, idx = 0, showStreak = false, clickable = false } = {},
 ) {
-  return `<div class="arn-row${clickable ? " clickable" : ""}" style="--i:${idx}" ${attrs}>
-    <span class="arn-rk" aria-label="${arRank(r.rang)}">${r.rang}</span>
+  const rank = safeInteger(r.rang);
+  const interactive = clickable && r.id != null;
+  const attrs = interactive
+    ? ` role="button" tabindex="0" data-eleve-id="${escAttr(String(r.id))}"`
+    : "";
+  return `<div class="arn-row${interactive ? " clickable" : ""}" style="--i:${Math.max(0, safeInteger(idx))}"${attrs}>
+    <span class="arn-rk" aria-label="${escAttr(arRank(rank))}">${rank}</span>
     <span class="arn-av">${renderUserAvatar({ avatar_url: r.avatar, prenom: r.display_name }, 38)}</span>
     <span class="arn-nm">${esc(r.display_name)}</span>
-    ${rightHtml}
-    <span class="arn-sc">${fmtScore(r)}</span>
+    ${showStreak ? streakChip(r.streak) : ""}
+    <span class="arn-sc">${scoreHtml(fmtScore, r)}</span>
   </div>`;
 }
 
@@ -320,11 +372,12 @@ export function areneMeRow(
   mine,
   { fmtScore, palier = "", meLabel = arYou() } = {},
 ) {
-  return `<div class="arn-merow" aria-label="${escAttr(arMyRank(String(mine.rang)))}">
-    <span class="arn-rk">#${mine.rang}</span>
+  const rank = safeInteger(mine.rang);
+  return `<div class="arn-merow" aria-label="${escAttr(arMyRank(String(rank)))}">
+    <span class="arn-rk">#${rank}</span>
     <span class="arn-av">${renderUserAvatar({ avatar_url: mine.avatar, prenom: mine.display_name }, 42)}</span>
-    <span class="arn-nm">${meLabel} · ${esc(mine.display_name)}${palier ? `<span class="pal">${esc(palier)}</span>` : ""}</span>
-    <span class="arn-sc">${fmtScore(mine)}</span>
+    <span class="arn-nm">${esc(meLabel)} · ${esc(mine.display_name)}${palier ? `<span class="pal">${esc(palier)}</span>` : ""}</span>
+    <span class="arn-sc">${scoreHtml(fmtScore, mine)}</span>
   </div>`;
 }
 

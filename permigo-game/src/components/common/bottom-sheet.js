@@ -18,7 +18,7 @@
 //   const { overlay, sheet, close } = openBottomSheet({
 //     bgClass: "bo2-modal-bg",      // classe de l'overlay (backdrop) — CSS de la page
 //     sheetSelector: ".bo2-modal",  // sélecteur de la feuille à l'intérieur
-//     html: `<div class="bo2-modal">…</div>`,
+//     html: trustedBottomSheetHtml(`<div class="bo2-modal">…</div>`),
 //     onClose,                      // optionnel
 //     labelledBy,                   // optionnel — id du titre dans la feuille
 //     initialFocus,                 // optionnel — sélecteur ou Element cible du focus
@@ -28,6 +28,20 @@
 // ═══════════════════════════════════════════════════════════════
 import { enableSheetSwipe } from "@/utils/sheet-swipe.js";
 import { haptic } from "@/utils/haptic.js";
+
+const TRUSTED_SHEET_HTML = Symbol("PermiGoTrustedBottomSheetHtml");
+
+/**
+ * Marque explicitement un gabarit interne déjà échappé comme HTML de confiance.
+ * `openBottomSheet` refuse désormais toute chaîne brute : les appelants doivent
+ * donc auditer leurs interpolations au point de construction.
+ */
+export function trustedBottomSheetHtml(value) {
+  return Object.freeze({
+    [TRUSTED_SHEET_HTML]: true,
+    value: String(value ?? ""),
+  });
+}
 
 /** Sélecteur de tous les éléments focusables dans un conteneur. */
 const FOCUSABLE =
@@ -52,7 +66,12 @@ export function openBottomSheet({
 
   const overlay = document.createElement("div");
   overlay.className = bgClass;
-  overlay.innerHTML = html;
+  if (!html?.[TRUSTED_SHEET_HTML]) {
+    throw new TypeError(
+      "openBottomSheet attend trustedBottomSheetHtml(...) et refuse le HTML brut",
+    );
+  }
+  overlay.innerHTML = html.value;
   document.body.appendChild(overlay);
 
   const sheet = overlay.querySelector(sheetSelector);

@@ -8,7 +8,7 @@ import { icon } from "@/utils/icons.js";
 import { medallion } from "@/utils/medallions.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { isSoloEleve } from "@/utils/league-bots.js";
-import { esc, escAttr } from "@/utils/escape.js";
+import { esc, escAttr, safeCssColor } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { toast } from "@/components/common/toast.js";
 import { haptic } from "@/utils/haptic.js";
@@ -21,7 +21,10 @@ import {
   getEquippedAsset,
   getGemmes,
 } from "@/utils/game-state.js";
-import { openBottomSheet } from "@/components/common/bottom-sheet.js";
+import {
+  openBottomSheet,
+  trustedBottomSheetHtml,
+} from "@/components/common/bottom-sheet.js";
 import { volantImg } from "@/utils/volant.js";
 import { bumpVolantPill } from "@/components/eleve/volant-reward.js";
 import { showPurchaseReveal } from "@/components/eleve/purchase-reveal.js";
@@ -897,8 +900,18 @@ export async function mount(root) {
     sb.rpc("get_items_catalog"),
   ]);
 
+  const profileError =
+    profileRes.status === "rejected"
+      ? profileRes.reason || new Error("Chargement du solde rejeté")
+      : profileRes.value?.error;
+  if (profileError) {
+    // Le solde local reste utilisable ; l'achat renverra ensuite le solde
+    // serveur canonique. On ne transforme pas silencieusement la panne en 0.
+    console.error("[boutique] chargement du solde", profileError);
+  }
+
   // Si le serveur renvoie un solde plus récent, on prend le serveur.
-  const serverBalance = profileRes.value?.data?.gemmes;
+  const serverBalance = profileError ? null : profileRes.value?.data?.gemmes;
   if (typeof serverBalance === "number") {
     gemmes = serverBalance;
     // Met à jour localStorage + notifie le header.
@@ -1527,6 +1540,7 @@ function showDetailModal(item, gemmes, me, onConfirm, triggerEl) {
 
   const isLegendary = item.rarity === "legendaire";
   const haloRingClass = `bo2-halo-ring${isLegendary ? " legendary" : ""}`;
+  const pillStyle = `background:${safeCssColor(r.c, "#3b82f6")};color:${isLegendary ? "#5e430f" : "#fff"}`;
 
   const html = `
     <div class="bo2-modal" role="document">
@@ -1537,7 +1551,7 @@ function showDetailModal(item, gemmes, me, onConfirm, triggerEl) {
         </div>
       </div>
       <div class="bo2-modal-body">
-        <div class="bo2-modal-pill" style="background:${esc(r.c)};color:${item.rarity === "legendaire" ? "#5e430f" : "#fff"}" id="bo2-modal-title">${esc(rLabel(item))}</div>
+        <div class="bo2-modal-pill" style="${escAttr(pillStyle)}" id="bo2-modal-title">${esc(rLabel(item))}</div>
         <div class="bo2-modal-name">${brtl(esc(iName(item)))}</div>
         ${item.description ? `<div class="bo2-modal-desc">${brtl(esc(iDesc(item)))}</div>` : ""}
       </div>
@@ -1552,7 +1566,7 @@ function showDetailModal(item, gemmes, me, onConfirm, triggerEl) {
   const { overlay, close } = openBottomSheet({
     bgClass: "bo2-modal-bg",
     sheetSelector: ".bo2-modal",
-    html,
+    html: trustedBottomSheetHtml(html),
     labelledBy: "bo2-modal-title",
     triggerEl,
   });
@@ -1663,7 +1677,7 @@ async function doPurchase(item) {
       return null;
     }
     if (data?.error === "insufficient_gemmes") {
-      toast("Pas assez de volants", "error");
+      toast(btR("not_enough", "Pas assez de volants"), "error");
       return null;
     }
     if (data?.error === "already_owned") {

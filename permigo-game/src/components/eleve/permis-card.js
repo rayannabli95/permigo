@@ -4,7 +4,7 @@
 // Couleurs + sceau changent selon le % de compétences validées
 // Pas de NEPH, pas de mention "République" (règle PermiGo)
 // ═══════════════════════════════════════════════════════════════
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr, safeAssetUrl } from "@/utils/escape.js";
 import { getPermisBg } from "@/utils/assets.js";
 import { getEquippedAsset } from "@/utils/game-state.js";
 
@@ -361,7 +361,7 @@ function formatDate(iso) {
  * @param {number} opts.validated  - nb compétences validées
  * @param {number} opts.total      - total compétences REMC (31)
  */
-export function renderPermisCard({
+function renderPermisCard({
   prenom = "",
   nom = "",
   created_at = null,
@@ -373,11 +373,12 @@ export function renderPermisCard({
   const ini = initials(prenom, nom);
   const bgUrl =
     getEquippedAsset("permis_bg") || getPermisBg(validated, "eleve");
+  const safeBgUrl = safeAssetUrl(bgUrl, getPermisBg(validated, "eleve"));
 
   return `${STYLE}
 <div class="pc-wrap">
-  <div class="pc s-${state.key}" role="img" aria-label="Carte permis - ${esc(state.label)}">
-    <div class="pc-bg" style="background-image:url('${esc(bgUrl)}')"></div>
+  <div class="pc s-${state.key}" role="img" aria-label="${escAttr(`Carte permis - ${state.label}`)}">
+    <div class="pc-bg" style="${escAttr(`background-image:url("${safeBgUrl}")`)}"></div>
     <div class="pc-inner">
 
       <div class="pc-top">
@@ -573,12 +574,13 @@ export function renderPermisMini({
   const state = getState(pct);
   const bgUrl =
     getEquippedAsset("permis_bg") || getPermisBg(validated, "eleve");
+  const safeBgUrl = safeAssetUrl(bgUrl, getPermisBg(validated, "eleve"));
   const fullName = [prenom, nom].filter(Boolean).join(" ") || "—";
 
   return `${MINI_STYLE}
 <div class="pcm s-${state.key}" role="button" tabindex="0"
-     aria-label="Mon permis virtuel — ${esc(state.label)}, ${pct}% de progression. Voir mon parcours.">
-  <div class="pcm-bg" style="background-image:url('${esc(bgUrl)}')"></div>
+     aria-label="${escAttr(`Mon permis virtuel — ${state.label}, ${pct}% de progression. Voir mon parcours.`)}">
+  <div class="pcm-bg" style="${escAttr(`background-image:url("${safeBgUrl}")`)}"></div>
   <div class="pcm-top">
     <div class="pcm-flag" aria-hidden="true"></div>
     <div class="pcm-label">Permis de conduire · B</div>

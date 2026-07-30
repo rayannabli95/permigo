@@ -41,7 +41,7 @@ function _setCookie(value) {
 }
 
 /** @returns {'all'|'essential'|null} */
-export function getConsent() {
+function getConsent() {
   try {
     return localStorage.getItem(KEY) || _getCookie();
   } catch {

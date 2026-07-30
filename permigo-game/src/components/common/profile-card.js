@@ -224,7 +224,7 @@ const STYLE = `<style>
  * @param {{pct:number,current:number,total:number,label:string}} [opts.progress]
  *        barre de progression RÉELLE (élève uniquement)
  */
-export function renderProfileCard({
+function renderProfileCard({
   me,
   avatarUrl,
   bannerUrl,

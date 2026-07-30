@@ -19,7 +19,11 @@
 //   });
 // ═══════════════════════════════════════════════════════════════
 import { volantImg } from "@/utils/volant.js";
-import { esc, escAttr } from "@/utils/escape.js";
+import {
+  esc,
+  escAttr,
+  safeAssetUrl,
+} from "@/utils/escape.js";
 import { haptic } from "@/utils/haptic.js";
 import { flyVolants } from "@/components/eleve/volant-reward.js";
 
@@ -150,10 +154,11 @@ export function showPurchaseReveal({ item, balanceBadge, cost, onClose } = {}) {
   _ensureCss();
 
   const rColor = rarityColor(item?.rarity);
+  const assetUrl = safeAssetUrl(item?.asset_url);
 
   // Rendu de l'asset (image ou emoji fallback)
-  const assetHtml = item?.asset_url
-    ? `<img src="${escAttr(item.asset_url)}" alt="${escAttr(item?.name ?? "")}" loading="lazy">`
+  const assetHtml = assetUrl
+    ? `<img src="${escAttr(assetUrl)}" alt="${escAttr(item?.name ?? "")}" loading="lazy">`
     : `<span class="pr-asset-emoji">${_typeEmoji(item?.type)}</span>`;
 
   const el = document.createElement("div");
@@ -166,7 +171,7 @@ export function showPurchaseReveal({ item, balanceBadge, cost, onClose } = {}) {
     <div class="pr-kick">Débloqué !</div>
     <div class="pr-ring-wrap">
       <span class="pr-ring" aria-hidden="true"></span>
-      <div class="pr-asset-wrap" style="box-shadow:0 0 48px ${esc(rColor)}55">
+      <div class="pr-asset-wrap">
         ${assetHtml}
       </div>
     </div>
@@ -175,6 +180,8 @@ export function showPurchaseReveal({ item, balanceBadge, cost, onClose } = {}) {
     ${cost ? `<div class="pr-cost">${volantImg(16)} −${cost} volants dépensés</div>` : ""}
     <button class="pr-cta" id="pr-cta" type="button">Super !</button>
   `;
+  el.querySelector(".pr-asset-wrap").style.boxShadow =
+    `0 0 48px ${rColor}55`;
   document.body.appendChild(el);
 
   // Focus sur le CTA (accessibilité)

@@ -242,17 +242,17 @@ export async function mount(root, initialTab) {
     await Promise.all([
       sb.rpc("get_eleve_leaderboard", { p_scope: scope, p_limit: LIMIT }).then(
         (r) => r,
-        () => ({ data: null }),
+        (error) => ({ data: null, error }),
       ),
       sb
         .rpc("get_eleve_leaderboard", { p_scope: "national", p_limit: LIMIT })
         .then(
           (r) => r,
-          () => ({ data: null }),
+          (error) => ({ data: null, error }),
         ),
       sb.rpc("get_theory_leaderboard", { p_scope: scope, p_limit: LIMIT }).then(
         (r) => r,
-        () => ({ data: null }),
+        (error) => ({ data: null, error }),
       ),
       sb
         .rpc("get_theory_leaderboard_weekly", {
@@ -261,13 +261,27 @@ export async function mount(root, initialTab) {
         })
         .then(
           (r) => r,
-          () => ({ data: null }),
+          (error) => ({ data: null, error }),
         ),
       sb.rpc("get_hall_of_fame", { p_scope: scope, p_limit: 100 }).then(
         (r) => r,
-        () => ({ data: null }),
+        (error) => ({ data: null, error }),
       ),
     ]);
+
+  const rankingErrors = [
+    ["école", ecoleRes.error],
+    ["national", nationalRes.error],
+    ["théorie", theorieRes.error],
+    ["théorie hebdomadaire", theorieWeeklyRes.error],
+    ["hall of fame", hofRes.error],
+  ].filter(([, error]) => error);
+  if (rankingErrors.length) {
+    console.error(
+      "[classement] chargement partiel",
+      Object.fromEntries(rankingErrors),
+    );
+  }
 
   // Panne totale (réseau/RPC) ≠ « pas encore classé » : on affiche un vrai
   // état d'erreur avec Réessayer au lieu d'un faux classement vide.
@@ -345,7 +359,7 @@ function _myRow(rows) {
 }
 function _fmtScore(ligue) {
   const of = OF[ligue];
-  return (r) => `${r.score ?? 0}<span class="of">/${of}</span>`;
+  return (r) => ({ value: r.score ?? 0, suffix: `/${of}` });
 }
 
 // Palier courant (pour la ligne « Toi ») + rail des paliers.

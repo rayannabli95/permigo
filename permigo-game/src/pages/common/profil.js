@@ -26,13 +26,10 @@ import { icon } from "@/utils/icons.js";
 import { medallion } from "@/utils/medallions.js";
 import { volantImg, volantLabel } from "@/utils/volant.js";
 import { haptic } from "@/utils/haptic.js";
-import {
-  isPushEnabled,
-  optOutPush,
-  optInPush,
-} from "@/services/web-push.js";
+import { isPushEnabled, optOutPush, optInPush } from "@/services/web-push.js";
 import { mountMoniteurRanking } from "@/components/enseignant/moniteur-ranking.js";
 import { getLang } from "@/utils/lang.js";
+import { toast } from "@/components/common/toast.js";
 
 // ─── Labels rôle ─────────────────────────────────────────────
 let _areneEscHandler = null;
@@ -45,6 +42,29 @@ export function unmount() {
     document.removeEventListener("keydown", _areneEscHandler);
     _areneEscHandler = null;
   }
+}
+
+function _queryError(result) {
+  if (result?.status === "rejected") {
+    return result.reason || new Error("Requête Supabase rejetée");
+  }
+  if (result?.status === "fulfilled") return result.value?.error || null;
+  return result?.error || null;
+}
+
+function _queryData(result) {
+  if (_queryError(result)) return null;
+  return result?.status === "fulfilled" ? result.value?.data : result?.data;
+}
+
+function _reportQueryErrors(scope, entries, toastMessage = "") {
+  const errors = entries
+    .map(([label, result]) => [label, _queryError(result)])
+    .filter(([, error]) => error);
+  if (!errors.length) return false;
+  console.error(`[profil] ${scope}`, Object.fromEntries(errors));
+  if (toastMessage) toast(toastMessage, "error");
+  return true;
 }
 
 const ROLE_LABELS = {
@@ -645,33 +665,44 @@ export async function mount(root) {
   root.innerHTML = `${STYLE}<div class="prf"><div class="skel skel-card" style="height:220px;margin:0 0 10px"></div><div class="skel skel-card" style="height:80px;margin:0 16px 10px"></div><div class="skel skel-card" style="height:140px;margin:0 16px"></div></div>`;
 
   // ── Fetch profil complet ──────────────────────────────────
-  const { data: profile } = await sb
+  const { data: profile, error: profileError } = await sb
     .from("profiles")
     .select(
       "email, prenom, nom, xp, streak_pro_days, created_at, avatar_url, banner_url, username",
     )
     .eq("id", me.id)
     .single();
+  if (profileError) {
+    console.error("[profil] profil principal", profileError);
+    toast("Certaines données du profil sont indisponibles.", "error");
+  }
 
   // ── Fetch élève : validations + streak + parrainage ───────
   let permisData = null;
   let eleveStreak = 0;
   let referralStats = null;
   if (me.role === "eleve") {
-    const [{ data: valData }, { data: streakRow }, { data: rStats }] =
-      await Promise.all([
-        sb
-          .from("validations")
-          .select("competence_id")
-          .eq("eleve_id", me.id)
-          .eq("statut", "acquis"),
-        sb
-          .from("streaks")
-          .select("current_streak, last_activity_date")
-          .eq("user_id", me.id)
-          .maybeSingle(),
-        sb.rpc("get_my_referral_stats"),
-      ]);
+    const [valRes, streakRes, referralRes] = await Promise.all([
+      sb
+        .from("validations")
+        .select("competence_id")
+        .eq("eleve_id", me.id)
+        .eq("statut", "acquis"),
+      sb
+        .from("streaks")
+        .select("current_streak, last_activity_date")
+        .eq("user_id", me.id)
+        .maybeSingle(),
+      sb.rpc("get_my_referral_stats"),
+    ]);
+    _reportQueryErrors("données élève", [
+      ["validations", valRes],
+      ["série", streakRes],
+      ["parrainage", referralRes],
+    ]);
+    const valData = _queryData(valRes);
+    const streakRow = _queryData(streakRes);
+    const rStats = _queryData(referralRes);
     const _yStrE = yesterdayKey();
     // Série d'activité : périmée si dernière activité < hier (cf. accueil).
     eleveStreak =
@@ -693,21 +724,28 @@ export async function mount(root) {
   if (me.role === "enseignant") {
     const yearStart = `${new Date().getFullYear()}-01-01`;
     const today = new Date().toISOString().slice(0, 10);
-    const [{ data: valData }, { data: streakProfile }, { data: elevesData }] =
-      await Promise.all([
-        sb
-          .from("validations")
-          .select("competence_id, eleve_id, validated_at")
-          .eq("validated_by", me.id)
-          .gte("validated_at", yearStart),
-        sb.from("profiles").select("streak_pro_days").eq("id", me.id).single(),
-        sb
-          .from("profiles")
-          .select("id")
-          .eq("role", "eleve")
-          .eq("enseignant_id", me.id)
-          .is("deleted_at", null),
-      ]);
+    const [validationsRes, streakProfileRes, elevesRes] = await Promise.all([
+      sb
+        .from("validations")
+        .select("competence_id, eleve_id, validated_at")
+        .eq("validated_by", me.id)
+        .gte("validated_at", yearStart),
+      sb.from("profiles").select("streak_pro_days").eq("id", me.id).single(),
+      sb
+        .from("profiles")
+        .select("id")
+        .eq("role", "eleve")
+        .eq("enseignant_id", me.id)
+        .is("deleted_at", null),
+    ]);
+    _reportQueryErrors("statistiques enseignant", [
+      ["validations", validationsRes],
+      ["série", streakProfileRes],
+      ["élèves", elevesRes],
+    ]);
+    const valData = _queryData(validationsRes);
+    const streakProfile = _queryData(streakProfileRes);
+    const elevesData = _queryData(elevesRes);
 
     const vals = valData || [];
     const elevesIds = new Set((elevesData || []).map((e) => e.id));
@@ -755,10 +793,13 @@ export async function mount(root) {
   if (profile?.created_at) {
     const d = new Date(profile.created_at);
     if (!isNaN(d)) {
-      memberSince = d.toLocaleDateString("fr-FR", {
-        month: "long",
-        year: "numeric",
-      });
+      memberSince = d.toLocaleDateString(
+        { fr: "fr-FR", en: "en-GB", ar: "ar" }[getLang()] || "fr-FR",
+        {
+          month: "long",
+          year: "numeric",
+        },
+      );
     }
   }
 
@@ -770,7 +811,7 @@ export async function mount(root) {
       me: { ...me, prenom: profile?.prenom || "", nom: profile?.nom || "" },
       avatarUrl: getEquippedAsset("avatar") || profile?.avatar_url || null,
       bannerUrl: profile?.banner_url || null,
-      bio: "Apprenti permis B",
+      bio: ptR("student_bio", "Apprenti permis B"),
       // Barre de progression RÉELLE vers le permis (remplace le badge prestige + l'XP arc-en-ciel)
       progress: {
         pct: REMC_TOTAL ? (permisData.validated / REMC_TOTAL) * 100 : 0,
@@ -779,32 +820,53 @@ export async function mount(root) {
         label: `${permisData.validated} / ${REMC_TOTAL}`,
       },
       stats: [
-        { label: "Compétences", value: permisData.validated },
-        { label: "Série", value: eleveStreak },
-        { label: "Restantes", value: restantes },
+        {
+          label: ptR("stat_skills", "Compétences"),
+          value: permisData.validated,
+        },
+        { label: ptR("stat_streak", "Série"), value: eleveStreak },
+        { label: ptR("stat_remaining", "Restantes"), value: restantes },
       ],
       shareUrl: window.location.origin,
-      shareText: `Je suis à ${permisData.validated}/${REMC_TOTAL} compétences validées sur PermiGo`,
+      shareText: ptR(
+        "share_student",
+        "Je suis à {current}/{total} compétences validées sur PermiGo",
+        { current: permisData.validated, total: REMC_TOTAL },
+      ),
     };
   } else if (me.role === "enseignant" && anneeStats) {
     profileCardData = {
       me: { ...me, prenom: profile?.prenom || "", nom: profile?.nom || "" },
       avatarUrl: profile?.avatar_url || null,
       bannerUrl: profile?.banner_url || null,
-      bio: `${anneeStats.elevesCount} élève${anneeStats.elevesCount > 1 ? "s" : ""} suivi${anneeStats.elevesCount > 1 ? "s" : ""} · cette année`,
+      bio: ptR(
+        "instructor_bio",
+        `${anneeStats.elevesCount} élève${anneeStats.elevesCount > 1 ? "s" : ""} suivi${anneeStats.elevesCount > 1 ? "s" : ""} · cette année`,
+        { count: anneeStats.elevesCount },
+      ),
       stats: [
-        { label: "Validations", value: anneeStats.totalValidations },
-        { label: "Élèves", value: anneeStats.elevesCount },
-        { label: "Série", value: anneeStats.streakDays },
+        {
+          label: ptR("valid_lab", "Validations"),
+          value: anneeStats.totalValidations,
+        },
+        {
+          label: ptR("stat_students", "Élèves"),
+          value: anneeStats.elevesCount,
+        },
+        { label: ptR("stat_streak", "Série"), value: anneeStats.streakDays },
       ],
       shareUrl: window.location.origin,
-      shareText: `${anneeStats.totalValidations} validations sur PermiGo cette année`,
+      shareText: ptR(
+        "share_instructor",
+        "{count} validations sur PermiGo cette année",
+        { count: anneeStats.totalValidations },
+      ),
     };
   }
 
   // ── Render HTML ──────────────────────────────────────────
   root.innerHTML = `${STYLE}
-<div class="prf anim-slide-up">
+<div class="prf anim-slide-up"${profileDir()}>
 
   <!-- 1. Héro d'identité unique (ProfileCard ou fallback gérant) -->
   <div class="prf-hero">
@@ -814,7 +876,7 @@ export async function mount(root) {
         : `<div style="padding:8px 16px 0;display:flex;flex-direction:column;align-items:center;gap:12px;padding-bottom:20px">
           <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--a),var(--adk));display:flex;align-items:center;justify-content:center;font:700 32px/1 'Plus Jakarta Sans',sans-serif;color:var(--a-ink);box-shadow:0 8px 24px color-mix(in srgb,var(--a) 25%,transparent)">${esc(initials)}</div>
           <div style="font:700 22px/1.2 'Plus Jakarta Sans',sans-serif;color:var(--ink);letter-spacing:-0.022em">${esc(displayName)}</div>
-          <span style="font:600 11px/1 'Inter',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--a-txt);background:color-mix(in srgb,var(--a) 10%,transparent);border-radius:99px;padding:6px 12px">${esc(ROLE_LABELS[me.role] || me.role)}</span>
+          <span style="font:600 11px/1 'Inter',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--a-txt);background:color-mix(in srgb,var(--a) 10%,transparent);border-radius:99px;padding:6px 12px">${esc(profileRoleLabel(me.role) || me.role)}</span>
         </div>`
     }
   </div>
@@ -827,9 +889,9 @@ export async function mount(root) {
   ${
     me.role === "eleve"
       ? `
-  <a class="prf-linkrow" href="#/galerie" aria-label="Voir ma galerie">
+  <a class="prf-linkrow" href="#/galerie" aria-label="${ptA("view_gallery", "Voir ma galerie")}">
     <span class="prf-linkrow-ico" aria-hidden="true">${icon("image", { size: 17 })}</span>
-    <span class="prf-linkrow-lbl">Voir ma galerie</span>
+    <span class="prf-linkrow-lbl">${pt("view_gallery", "Voir ma galerie")}</span>
     <span class="prf-linkrow-chev" aria-hidden="true">›</span>
   </a>`
       : ""
@@ -843,17 +905,17 @@ export async function mount(root) {
     anneeStats
       ? `
   <div class="prf-annee">
-    <h2 class="prf-annee-ttl">Mon année ${new Date().getFullYear()}</h2>
+    <h2 class="prf-annee-ttl">${pt("my_year", "Mon année {year}", { year: new Date().getFullYear() })}</h2>
     <div class="prf-annee-grid">
-      <div class="prf-kpi"><span class="prf-kpi-n">${anneeStats.totalValidations}</span><div class="prf-kpi-lbl">compétences validées</div></div>
-      <div class="prf-kpi"><span class="prf-kpi-n">${anneeStats.elevesCount}</span><div class="prf-kpi-lbl">élèves suivis</div></div>
-      <div class="prf-kpi"><span class="prf-kpi-n">${anneeStats.c3Count}</span><div class="prf-kpi-lbl">C3 Maîtrise atteints</div></div>
-      <div class="prf-kpi"><span class="prf-kpi-n">${anneeStats.elevesActifsCount ?? 0}</span><div class="prf-kpi-lbl">élèves actifs (30 j)</div></div>
+      <div class="prf-kpi"><span class="prf-kpi-n">${anneeStats.totalValidations}</span><div class="prf-kpi-lbl">${pt("skills_validated", "compétences validées")}</div></div>
+      <div class="prf-kpi"><span class="prf-kpi-n">${anneeStats.elevesCount}</span><div class="prf-kpi-lbl">${pt("students_supported", "élèves suivis")}</div></div>
+      <div class="prf-kpi"><span class="prf-kpi-n">${anneeStats.c3Count}</span><div class="prf-kpi-lbl">${pt("c3_reached", "C3 Maîtrise atteints")}</div></div>
+      <div class="prf-kpi"><span class="prf-kpi-n">${anneeStats.elevesActifsCount ?? 0}</span><div class="prf-kpi-lbl">${pt("active_students", "élèves actifs (30 j)")}</div></div>
     </div>
   </div>
-  <a class="prf-linkrow" href="#/boutique" aria-label="Voir la boutique">
+  <a class="prf-linkrow" href="#/boutique" aria-label="${ptA("view_store", "Voir la boutique")}">
     <span class="prf-linkrow-ico" aria-hidden="true">${icon("car", { size: 17 })}</span>
-    <span class="prf-linkrow-lbl">Voir la boutique</span>
+    <span class="prf-linkrow-lbl">${pt("view_store", "Voir la boutique")}</span>
     <span class="prf-linkrow-chev" aria-hidden="true">›</span>
   </a>`
       : ""
@@ -870,14 +932,14 @@ export async function mount(root) {
   }
 
   <!-- ═══ RÉGLAGES ══════════════════════════════ -->
-  <h2 class="prf-sec-ttl">Réglages</h2>
+  <h2 class="prf-sec-ttl">${pt("settings", "Réglages")}</h2>
 
   <!-- Compte : email + membre depuis (UUID et rôle retirés — du bruit) -->
   <div class="prf-section">
     <div class="prf-row">
       <span class="prf-row-ico" aria-hidden="true">${icon("mail", { size: 16 })}</span>
       <div class="prf-row-body">
-        <div class="prf-row-lbl">Email</div>
+        <div class="prf-row-lbl">${pt("email", "Email")}</div>
         <div class="prf-row-val">${esc(profile?.email || me.email || "—")}</div>
       </div>
     </div>
@@ -887,7 +949,7 @@ export async function mount(root) {
     <div class="prf-row">
       <span class="prf-row-ico" aria-hidden="true">${icon("user", { size: 16 })}</span>
       <div class="prf-row-body">
-        <div class="prf-row-lbl">Membre depuis</div>
+        <div class="prf-row-lbl">${pt("member_since", "Membre depuis")}</div>
         <div class="prf-row-val">${esc(memberSince)}</div>
       </div>
     </div>`
@@ -904,12 +966,12 @@ export async function mount(root) {
       me.role === "eleve"
         ? `
     <button class="prf-btn-tour" id="btn-replay-tour" type="button">
-      ${icon("graduation-cap", { size: 16 })} Revoir le tour de bienvenue
+      ${icon("graduation-cap", { size: 16 })} ${pt("replay_tour", "Revoir le tour de bienvenue")}
     </button>`
         : ""
     }
-    <button class="prf-btn-logout" id="btn-logout">Se déconnecter</button>
-    ${me.role === "eleve" ? `<button class="prf-btn-delete" id="btn-delete">Supprimer mon compte</button>` : ""}
+    <button class="prf-btn-logout" id="btn-logout">${pt("logout", "Se déconnecter")}</button>
+    ${me.role === "eleve" ? `<button class="prf-btn-delete" id="btn-delete">${pt("delete_account", "Supprimer mon compte")}</button>` : ""}
   </div>
 
   <div class="prf-version">PermiGo v7 · Sprint 2</div>
@@ -949,7 +1011,10 @@ export async function mount(root) {
     } catch (e) {
       console.error("[profil] logout failed", e);
       const { toast } = await import("@/components/common/toast.js");
-      toast("Déconnexion impossible — réessaie", "error");
+      toast(
+        ptR("toast_logout_err", "Déconnexion impossible — réessaie"),
+        "error",
+      );
     }
   });
 
@@ -997,19 +1062,21 @@ function _openDeleteSheet(root, me) {
   overlay.setAttribute("role", "dialog");
   overlay.setAttribute("aria-modal", "true");
   overlay.setAttribute("aria-labelledby", "prf-delete-title");
+  overlay.dir = getLang() === "ar" ? "rtl" : "ltr";
+  if (getLang() === "ar") overlay.lang = "ar";
   overlay.innerHTML = `
     <div class="prf-sheet">
       <div class="prf-sheet-handle" aria-hidden="true"></div>
       <div class="prf-sheet-ico" aria-hidden="true">🗑️</div>
-      <h2 class="prf-sheet-title" id="prf-delete-title">Supprimer mon compte</h2>
+      <h2 class="prf-sheet-title" id="prf-delete-title">${pt("delete_sheet_title", "Supprimer mon compte")}</h2>
       <p class="prf-sheet-body">
-        La suppression est <strong>immédiate et irréversible</strong> (RGPD, art. 17).
+        ${pt("delete_sheet_prefix", "La suppression est")} <strong>${pt("delete_sheet_immediate", "immédiate et irréversible")}</strong> ${pt("delete_sheet_law", "(RGPD, art. 17).")}
         ${pt("delete_sheet_transparency", "Tes données personnelles sont supprimées ou anonymisées : ton prénom, ton email et ta photo disparaissent, tes statistiques deviennent anonymes. Ton compte ne pourra pas être récupéré.")}<br><br>
-        Question ou demande par écrit&nbsp;? <a href="mailto:dpo@permigo.fr">dpo@permigo.fr</a>
-        (traitée sous 30 jours).
+        ${pt("delete_sheet_question", "Question ou demande par écrit ?")} <a href="mailto:dpo@permigo.fr">dpo@permigo.fr</a>
+        ${pt("delete_sheet_processed", "(traitée sous 30 jours).")}
       </p>
-      <button class="prf-sheet-cta" id="prf-delete-contact">Supprimer mon compte</button>
-      <button class="prf-sheet-cancel" id="prf-delete-cancel">Annuler</button>
+      <button class="prf-sheet-cta" id="prf-delete-contact">${pt("delete_account", "Supprimer mon compte")}</button>
+      <button class="prf-sheet-cancel" id="prf-delete-cancel">${pt("cancel", "Annuler")}</button>
     </div>`;
 
   document.body.appendChild(overlay);
@@ -1044,13 +1111,13 @@ function _openDeleteSheet(root, me) {
 function _renderPseudo(username) {
   return `
 <div class="prf-pseudo">
-  <h2 class="prf-pseudo-ttl">Pseudo public</h2>
-  <p class="prf-pseudo-help">Visible dans le classement. Laisse vide pour rester anonyme. 3 à 16 caractères, lettres/chiffres/_</p>
+  <h2 class="prf-pseudo-ttl">${pt("public_username", "Pseudo public")}</h2>
+  <p class="prf-pseudo-help">${pt("public_username_help", "Visible dans le classement. Laisse vide pour rester anonyme. 3 à 16 caractères, lettres/chiffres/_")}</p>
   <div class="prf-pseudo-row">
     <input class="prf-pseudo-input" id="prf-pseudo-input" type="text" inputmode="text"
            placeholder="ex: speedy_lea" maxlength="16" autocomplete="off" spellcheck="false"
            value="${escAttr(username || "")}">
-    <button class="prf-pseudo-save" id="prf-pseudo-save">Enregistrer</button>
+    <button class="prf-pseudo-save" id="prf-pseudo-save">${pt("save", "Enregistrer")}</button>
   </div>
   <div class="prf-pseudo-err" id="prf-pseudo-err" aria-live="polite"></div>
 </div>`;
@@ -1075,11 +1142,16 @@ function _wirePseudo(root, me) {
     const raw = input.value.trim();
     if (raw !== "") {
       if (!PSEUDO_RE.test(raw)) {
-        showErr("3 à 16 caractères : lettres, chiffres ou _ uniquement.");
+        showErr(
+          ptR(
+            "pseudo_format_err",
+            "3 à 16 caractères : lettres, chiffres ou _ uniquement.",
+          ),
+        );
         return;
       }
       if (_isBlocked(raw)) {
-        showErr("Ce pseudo n'est pas autorisé.");
+        showErr(ptR("pseudo_not_allowed", "Ce pseudo n'est pas autorisé."));
         return;
       }
     }
@@ -1094,26 +1166,34 @@ function _wirePseudo(root, me) {
       const { toast } = await import("@/components/common/toast.js");
       if (error) {
         if (error.code === "23505") {
-          showErr("Ce pseudo est déjà pris.");
-          toast("Ce pseudo est déjà pris", "error");
+          showErr(ptR("pseudo_taken_err", "Ce pseudo est déjà pris."));
+          toast(ptR("toast_pseudo_taken", "Ce pseudo est déjà pris"), "error");
         } else if (error.code === "23514") {
-          showErr("Format invalide.");
+          showErr(ptR("pseudo_invalid", "Format invalide."));
         } else {
-          toast("Impossible d'enregistrer le pseudo", "error");
+          toast(
+            ptR("toast_pseudo_save_err", "Impossible d'enregistrer le pseudo"),
+            "error",
+          );
         }
       } else {
         showErr("");
         haptic("success");
         track("pseudo.updated", { has_pseudo: value !== null });
-        toast(value ? "Pseudo enregistré" : "Pseudo retiré", "success");
+        toast(
+          value
+            ? ptR("toast_pseudo_saved", "Pseudo enregistré")
+            : ptR("toast_pseudo_removed", "Pseudo retiré"),
+          "success",
+        );
       }
     } catch (e) {
       console.error("[profil] pseudo", e);
       const { toast } = await import("@/components/common/toast.js");
-      toast("Erreur de connexion", "error");
+      toast(ptR("toast_conn_err", "Erreur de connexion"), "error");
     } finally {
       btn.disabled = false;
-      btn.textContent = "Enregistrer";
+      btn.textContent = ptR("save", "Enregistrer");
     }
   });
 }
@@ -1128,9 +1208,9 @@ function _renderReferral(stats) {
 <div class="prf-ref">
   <div class="prf-ref-header">
     <span class="prf-ref-ico" aria-hidden="true">${medallion("cadeau", "pink", { size: 32 })}</span>
-    <h2 class="prf-ref-ttl">Parrainage</h2>
-    <div class="prf-ref-volant-badge" aria-label="+50 volants par filleul">
-      ${volantImg(14, { drop: true })} +50 ${volantLabel(50)} par filleul
+    <h2 class="prf-ref-ttl">${pt("referral", "Parrainage")}</h2>
+    <div class="prf-ref-volant-badge" aria-label="${ptA("referral_reward", "+50 volants par filleul")}">
+      ${volantImg(14, { drop: true })} ${pt("referral_reward", `+50 ${volantLabel(50)} par filleul`)}
     </div>
   </div>
 
@@ -1138,34 +1218,35 @@ function _renderReferral(stats) {
     code
       ? `
   <div class="prf-ref-code-wrap">
-    <span class="prf-ref-code" id="prf-ref-code" aria-label="Mon code parrainage : ${esc(code)}">${esc(code)}</span>
-    <button class="prf-ref-copy-btn" id="prf-ref-copy" title="Copier le code" aria-label="Copier mon code parrainage">
+    <span class="prf-ref-code" id="prf-ref-code" aria-label="${ptA("referral_code_aria", "Mon code parrainage : {code}", { code })}">${esc(code)}</span>
+    <button class="prf-ref-copy-btn" id="prf-ref-copy" title="${ptA("referral_copy_title", "Copier le code")}" aria-label="${ptA("referral_copy_aria", "Copier mon code parrainage")}">
+
       ${icon("copy", { size: 18 })}
     </button>
   </div>
   <div class="prf-ref-stats">
     <div class="prf-ref-stat">
       <span class="prf-ref-stat-n">${nRefs}</span>
-      <div class="prf-ref-stat-lbl">filleul${nRefs !== 1 ? "s" : ""}</div>
+      <div class="prf-ref-stat-lbl">${pt("referrals_count", `filleul${nRefs !== 1 ? "s" : ""}`)}</div>
     </div>
     <div class="prf-ref-stat">
       <span class="prf-ref-stat-n">${volantImg(16, { drop: true })} ${volantsEarned}</span>
-      <div class="prf-ref-stat-lbl">${volantLabel(volantsEarned)} gagnés</div>
+      <div class="prf-ref-stat-lbl">${pt("steering_wheels_earned", `${volantLabel(volantsEarned)} gagnés`)}</div>
     </div>
   </div>
   <button class="prf-ref-share-btn" id="prf-ref-share">
-    ${icon("share", { size: 15 })} Partager mon code
+    ${icon("share", { size: 15 })} ${pt("share_code", "Partager mon code")}
   </button>
   `
       : `
-  <button class="prf-ref-gen-btn" id="prf-ref-gen">Générer mon code de parrainage</button>
+  <button class="prf-ref-gen-btn" id="prf-ref-gen">${pt("generate_code", "Générer mon code de parrainage")}</button>
   `
   }
 
   <div class="prf-ref-apply">
     <input class="prf-ref-apply-input" id="prf-ref-input" type="text"
-           placeholder="Code d'un ami…" maxlength="12" autocomplete="off">
-    <button class="prf-ref-apply-btn" id="prf-ref-apply-btn">Appliquer</button>
+           placeholder="${ptA("friend_code_placeholder", "Code d'un ami…")}" maxlength="12" autocomplete="off">
+    <button class="prf-ref-apply-btn" id="prf-ref-apply-btn">${pt("apply", "Appliquer")}</button>
   </div>
 </div>`;
 }
@@ -1206,8 +1287,12 @@ function _wireReferral(root, me) {
       if (navigator.share) {
         try {
           await navigator.share({
-            title: "Rejoins PermiGo !",
-            text: `Utilise mon code ${code} sur PermiGo et gagne 50 volants`,
+            title: ptR("referral_share_title", "Rejoins PermiGo !"),
+            text: ptR(
+              "referral_share_text",
+              "Utilise mon code {code} sur PermiGo et gagne 50 volants",
+              { code },
+            ),
             url: window.location.origin,
           });
           track("referral.shared", { code });
@@ -1217,10 +1302,13 @@ function _wireReferral(root, me) {
       } else {
         try {
           await navigator.clipboard.writeText(
-            `Mon code PermiGo : ${code} — ${window.location.origin}`,
+            ptR("referral_clipboard", "Mon code PermiGo : {code} — {url}", {
+              code,
+              url: window.location.origin,
+            }),
           );
           const { toast } = await import("@/components/common/toast.js");
-          toast("Lien copié", "success");
+          toast(ptR("link_copied", "Lien copié"), "success");
         } catch {
           /* unavailable */
         }
@@ -1233,14 +1321,21 @@ function _wireReferral(root, me) {
     if (!btn) return;
     haptic("select");
     btn.disabled = true;
-    btn.textContent = "Génération…";
+    btn.textContent = ptR("generating", "Génération…");
     try {
       const { data, error } = await sb.rpc("generate_referral_code");
       if (error || data?.error) {
         const { toast } = await import("@/components/common/toast.js");
-        toast(data?.error || "Impossible de générer le code", "error");
+        toast(
+          data?.error ||
+            ptR("generate_failed", "Impossible de générer le code"),
+          "error",
+        );
         btn.disabled = false;
-        btn.textContent = "Générer mon code de parrainage";
+        btn.textContent = ptR(
+          "generate_code",
+          "Générer mon code de parrainage",
+        );
         return;
       }
       track("referral.code_generated", {});
@@ -1251,7 +1346,7 @@ function _wireReferral(root, me) {
       }
     } catch {
       btn.disabled = false;
-      btn.textContent = "Générer mon code de parrainage";
+      btn.textContent = ptR("generate_code", "Générer mon code de parrainage");
     }
   });
 
@@ -1268,19 +1363,27 @@ function _wireReferral(root, me) {
       const { data, error } = await sb.rpc("apply_referral", { p_code: code });
       const { toast } = await import("@/components/common/toast.js");
       if (error || data?.error) {
-        toast(data?.error || "Code invalide ou déjà utilisé", "error");
+        toast(
+          data?.error ||
+            ptR("referral_invalid", "Code invalide ou déjà utilisé"),
+          "error",
+        );
       } else {
         haptic("success");
-        toast("Code appliqué ! +50 volants", "success", 4000);
+        toast(
+          ptR("referral_applied", "Code appliqué ! +50 volants"),
+          "success",
+          4000,
+        );
         track("referral.applied", { code });
         if (applyInput) applyInput.value = "";
       }
     } catch {
       const { toast } = await import("@/components/common/toast.js");
-      toast("Erreur de connexion", "error");
+      toast(ptR("toast_conn_err", "Erreur de connexion"), "error");
     } finally {
       applyBtn.disabled = false;
-      applyBtn.textContent = "Appliquer";
+      applyBtn.textContent = ptR("apply", "Appliquer");
     }
   });
 }
@@ -1295,14 +1398,14 @@ function _renderNotifToggle() {
   return `
   <div class="prf-section">
     <div class="prf-notif-row" id="prf-notif-row" role="button" tabindex="0"
-         aria-pressed="${enabled}" aria-label="Notifications ${enabled ? "activées" : "désactivées"}">
+         aria-pressed="${enabled}" aria-label="${escAttr(`${ptR("notifications", "Notifications")} ${enabled ? ptR("notifications_enabled", "activées") : ptR("notifications_disabled", "désactivées")}`)}">
       <span class="prf-notif-ico" aria-hidden="true">${icon("bell", { size: 18 })}</span>
       <div class="prf-notif-body">
-        <div class="prf-notif-lbl">Notifications</div>
+        <div class="prf-notif-lbl">${pt("notifications", "Notifications")}</div>
         ${
           denied
-            ? `<div class="prf-notif-denied">Bloquées par le navigateur — autorise-les dans les réglages</div>`
-            : `<div class="prf-notif-sub">${enabled ? "Quiz et streak actifs" : "Désactivées"}</div>`
+            ? `<div class="prf-notif-denied">${pt("notif_browser_help", "Bloquées par le navigateur — autorise-les dans les réglages")}</div>`
+            : `<div class="prf-notif-sub">${enabled ? pt("notif_quiz_streak", "Quiz et streak actifs") : pt("notif_off", "Désactivées")}</div>`
         }
       </div>
       ${!denied ? `<div class="prf-toggle ${enabled ? "on" : ""}" aria-hidden="true"></div>` : ""}
@@ -1321,19 +1424,28 @@ function _wireNotifToggle(root) {
     haptic("tap");
     const nowEnabled = isPushEnabled();
     row.setAttribute("aria-pressed", String(!nowEnabled));
+    row.setAttribute(
+      "aria-label",
+      `${ptR("notifications", "Notifications")} ${
+        !nowEnabled
+          ? ptR("notifications_enabled", "activées")
+          : ptR("notifications_disabled", "désactivées")
+      }`,
+    );
     if (nowEnabled) {
       await optOutPush();
       toggle?.classList.remove("on");
-      if (sub) sub.textContent = "Désactivées";
+      if (sub) sub.textContent = ptR("notif_off", "Désactivées");
     } else {
       const granted = await optInPush();
       if (granted) {
         haptic("success");
         toggle?.classList.add("on");
-        if (sub) sub.textContent = "Quiz et streak actifs";
+        if (sub)
+          sub.textContent = ptR("notif_quiz_streak", "Quiz et streak actifs");
       } else if (Notification.permission === "denied") {
         if (sub)
-          sub.outerHTML = `<div class="prf-notif-denied">Bloquées par le navigateur — autorise-les dans les réglages</div>`;
+          sub.outerHTML = `<div class="prf-notif-denied">${pt("notif_browser_help", "Bloquées par le navigateur — autorise-les dans les réglages")}</div>`;
         toggle?.remove();
       }
     }
@@ -1600,6 +1712,7 @@ const STYLE_ARENE = `<style>
 .arn-modal-head{position:relative;padding:14px 18px;text-align:center;background:linear-gradient(180deg,rgba(255,255,255,.22),transparent 44%),linear-gradient(180deg,var(--gd-pale) 0%,var(--gd) 46%,var(--gd-2) 80%,var(--gd-deep) 100%);box-shadow:inset 0 2px 0 rgba(255,255,255,.6),0 4px 0 var(--gd-deep)}
 .arn-modal-head h3{font-family:'Fredoka',sans-serif;font-weight:600;font-size:18px;color:var(--gd-ink);margin:0;text-shadow:0 1px 0 rgba(255,255,255,.35)}
 .arn-modal-close{position:absolute;right:13px;top:11px;width:30px;height:30px;border:0;border-radius:9px;cursor:pointer;background:rgba(60,30,5,.22);color:var(--gd-ink);font-weight:800;font-size:16px;line-height:1}
+.arn-modal-close::before{content:"";position:absolute;inset:-7px}
 .arn-modal-body{padding:20px 18px 22px}
 .arn-modal-tip{font-size:12.5px;font-weight:600;color:var(--tx-dim);text-align:center;line-height:1.55;margin:0 0 16px}
 .arn-field{display:flex;align-items:center;gap:8px;background:#120d33;border-radius:16px;padding:0 14px;box-shadow:inset 0 2px 5px rgba(0,0,0,.5),inset 0 0 0 1.5px rgba(124,92,255,.3)}
@@ -1618,15 +1731,11 @@ const STYLE_ARENE = `<style>
 
 const _LOCK_SVG = medallion("cadenas", "slate", { size: 18 });
 
-// ── i18n de la COQUE du profil ÉLÈVE (EN/AR) — pour les élèves non-
-// francophones. Dict LOCAL au composant (pas de fichier partagé → évite les
-// collisions multi-session). pt(key, fr) = traduit-ou-français avec esc intégré
-// (sûr en texte ET en attribut), ptR = version brute (textContent / toasts /
-// interpolation). En 'fr' ou clé absente → français, byte-identique (esc ne
-// touche pas les apostrophes). Uniquement appelé depuis le chemin ÉLÈVE
-// (mountEleveArene / _wireEleveArene / _areneAchievements) → moniteur & gérant
-// restent 100 % en français. On NE traduit PAS le contenu REMC dynamique
-// (nom/rang de compétence, sous-compétence) : laissé à sa source (comme accueil).
+// ── i18n des coques profil (EN/AR) : élève, moniteur et composants communs.
+// Dict LOCAL au composant. pt() échappe le contenu HTML, ptA() les attributs et
+// ptR() sert aux textContent, toasts et interpolations contrôlées. En français
+// ou si une clé manque, le littéral FR passé à l'appel reste le repli. Le
+// contenu REMC dynamique conserve sa langue source, comme sur l'accueil.
 const PROF_I18N = {
   en: {
     h1_title: "My profile",
@@ -1675,6 +1784,94 @@ const PROF_I18N = {
     toast_pseudo_saved: "Username saved",
     toast_pseudo_removed: "Username removed",
     toast_conn_err: "Connection error",
+    role_student: "Student",
+    role_instructor: "Instructor",
+    role_manager: "Manager",
+    role_platform: "Platform",
+    student_bio: "Category B learner",
+    stat_skills: "Skills",
+    share_student: "I have validated {current}/{total} skills on PermiGo",
+    instructor_bio: "{count} student(s) supported · this year",
+    stat_students: "Students",
+    share_instructor: "{count} validations on PermiGo this year",
+    view_gallery: "View my gallery",
+    my_year: "My year {year}",
+    skills_validated: "Skills validated",
+    students_supported: "Students supported",
+    c3_reached: "C3 Mastery reached",
+    active_students: "Active students (30 d)",
+    view_store: "View the store",
+    email: "Email",
+    replay_tour: "Replay the welcome tour",
+    delete_sheet_title: "Delete my account",
+    delete_sheet_prefix: "Deletion is",
+    delete_sheet_immediate: "immediate and irreversible",
+    delete_sheet_law: "(GDPR, Art. 17).",
+    delete_sheet_question: "Question or written request?",
+    delete_sheet_processed: "(processed within 30 days).",
+    cancel: "Cancel",
+    public_username: "Public username",
+    public_username_help:
+      "Visible in the ranking. Leave blank to remain anonymous. 3 to 16 characters: letters, numbers or _",
+    save: "Save",
+    pseudo_format_err: "3 to 16 characters: letters, numbers or _ only.",
+    pseudo_invalid: "Invalid format.",
+    referral: "Referrals",
+    referral_reward: "+50 steering wheels per referral",
+    referral_code_aria: "My referral code: {code}",
+    referral_copy_title: "Copy code",
+    referral_copy_aria: "Copy my referral code",
+    referrals_count: "referral(s)",
+    steering_wheels_earned: "steering wheels earned",
+    share_code: "Share my code",
+    generate_code: "Generate my referral code",
+    friend_code_placeholder: "A friend's code…",
+    apply: "Apply",
+    referral_share_title: "Join PermiGo!",
+    referral_share_text:
+      "Use my code {code} on PermiGo and earn 50 steering wheels",
+    referral_clipboard: "My PermiGo code: {code} — {url}",
+    link_copied: "Link copied",
+    generating: "Generating…",
+    generate_failed: "Unable to generate the code",
+    referral_invalid: "Invalid or already used code",
+    referral_applied: "Code applied! +50 steering wheels",
+    notifications: "Notifications",
+    notifications_enabled: "enabled",
+    notifications_disabled: "disabled",
+    notif_browser_help: "Blocked by the browser — allow them in the settings",
+    notif_quiz_streak: "Quiz and streak active",
+    licence_b: "Category B licence",
+    instructor_default: "Instructor",
+    rank_month: "{rank} this month · {score} pts",
+    validations_this_year: "Validations|this year",
+    students_activity:
+      "{students} student(s) supported · {active} active over 30 days",
+    pro_streak: "Pro streak",
+    my_achievements: "My achievements",
+    unlocked_to_come: "{unlocked} unlocked · {locked} to come",
+    achievements_list: "Your achievements (scrollable list)",
+    my_position: "My position",
+    monthly_ranking: "Monthly ranking",
+    view_ranking: "View ranking",
+    you: "you",
+    points: "pts",
+    ranking_empty:
+      "Your ranking will appear after your first validations this month.",
+    account_settings: "Account settings",
+    teacher_notif_sub: "Validations, lessons, messages",
+    validations_followups: "Validations & follow-ups",
+    theme_subscription_security: "Theme, subscription, security",
+    ach_first_validation: "1st validation",
+    ach_50_validations: "50 validations",
+    ach_100_validations: "100 validations",
+    ach_10_students: "10 students supported",
+    ach_streak_7: "7-day streak",
+    ach_top_5: "Top 5 this month",
+    ach_250_validations: "250 validations",
+    ach_streak_30: "30-day streak",
+    ach_25_students: "25 students supported",
+    ach_month_number_one: "No. 1 this month",
   },
   ar: {
     h1_title: "ملفي الشخصي",
@@ -1723,16 +1920,118 @@ const PROF_I18N = {
     toast_pseudo_saved: "تم حفظ اللقب",
     toast_pseudo_removed: "تمت إزالة اللقب",
     toast_conn_err: "خطأ في الاتصال",
+    role_student: "طالب",
+    role_instructor: "مدرّب",
+    role_manager: "مدير",
+    role_platform: "المنصة",
+    student_bio: "متعلم رخصة الفئة B",
+    stat_skills: "المهارات",
+    share_student: "اعتمدت {current}/{total} مهارة على بيرميغو",
+    instructor_bio: "متابعة {count} طالب · هذا العام",
+    stat_students: "الطلاب",
+    share_instructor: "{count} اعتمادًا على بيرميغو هذا العام",
+    view_gallery: "عرض معرضي",
+    my_year: "عامي {year}",
+    skills_validated: "المهارات المعتمدة",
+    students_supported: "الطلاب المتابَعون",
+    c3_reached: "تم بلوغ إتقان C3",
+    active_students: "الطلاب النشطون (30 يومًا)",
+    view_store: "عرض المتجر",
+    email: "البريد الإلكتروني",
+    replay_tour: "إعادة جولة الترحيب",
+    delete_sheet_title: "حذف حسابي",
+    delete_sheet_prefix: "الحذف",
+    delete_sheet_immediate: "فوري ولا رجعة فيه",
+    delete_sheet_law: "(المادة 17 من اللائحة العامة لحماية البيانات).",
+    delete_sheet_question: "لديك سؤال أو طلب كتابي؟",
+    delete_sheet_processed: "(تتم المعالجة خلال 30 يومًا).",
+    cancel: "إلغاء",
+    public_username: "اللقب العام",
+    public_username_help:
+      "يظهر في التصنيف. اتركه فارغًا لتبقى مجهولًا. من 3 إلى 16 حرفًا: أحرف أو أرقام أو _",
+    save: "حفظ",
+    pseudo_format_err: "من 3 إلى 16 حرفًا: أحرف أو أرقام أو _ فقط.",
+    pseudo_invalid: "تنسيق غير صالح.",
+    referral: "الإحالات",
+    referral_reward: "+50 مقودًا لكل إحالة",
+    referral_code_aria: "رمز إحالتي: {code}",
+    referral_copy_title: "نسخ الرمز",
+    referral_copy_aria: "نسخ رمز إحالتي",
+    referrals_count: "إحالة",
+    steering_wheels_earned: "مقودًا مكتسبًا",
+    share_code: "مشاركة رمزي",
+    generate_code: "إنشاء رمز الإحالة",
+    friend_code_placeholder: "رمز صديق…",
+    apply: "تطبيق",
+    referral_share_title: "انضم إلى بيرميغو!",
+    referral_share_text: "استخدم رمزي {code} على بيرميغو واربح 50 مقودًا",
+    referral_clipboard: "رمزي على بيرميغو: {code} — {url}",
+    link_copied: "تم نسخ الرابط",
+    generating: "جارٍ الإنشاء…",
+    generate_failed: "تعذّر إنشاء الرمز",
+    referral_invalid: "الرمز غير صالح أو مستخدم من قبل",
+    referral_applied: "تم تطبيق الرمز! +50 مقودًا",
+    notifications: "الإشعارات",
+    notifications_enabled: "مفعّلة",
+    notifications_disabled: "معطّلة",
+    notif_browser_help: "محظورة من المتصفح — اسمح بها في الإعدادات",
+    notif_quiz_streak: "الاختبارات والسلسلة مفعّلة",
+    licence_b: "رخصة الفئة B",
+    instructor_default: "مدرّب",
+    rank_month: "{rank} هذا الشهر · {score} نقطة",
+    validations_this_year: "الاعتمادات|هذا العام",
+    students_activity: "متابعة {students} طالب · {active} نشط خلال 30 يومًا",
+    pro_streak: "السلسلة المهنية",
+    my_achievements: "إنجازاتي",
+    unlocked_to_come: "{unlocked} مفتوحة · {locked} قادمة",
+    achievements_list: "إنجازاتك (قائمة قابلة للتمرير)",
+    my_position: "مركزي",
+    monthly_ranking: "تصنيف الشهر",
+    view_ranking: "عرض التصنيف",
+    you: "أنت",
+    points: "نقطة",
+    ranking_empty: "سيظهر تصنيفك بعد أول اعتماداتك هذا الشهر.",
+    account_settings: "إعدادات الحساب",
+    teacher_notif_sub: "الاعتمادات، الحصص، الرسائل",
+    validations_followups: "الاعتمادات والمتابعات",
+    theme_subscription_security: "السمة، الاشتراك، الأمان",
+    ach_first_validation: "أول اعتماد",
+    ach_50_validations: "50 اعتمادًا",
+    ach_100_validations: "100 اعتماد",
+    ach_10_students: "متابعة 10 طلاب",
+    ach_streak_7: "سلسلة 7 أيام",
+    ach_top_5: "أفضل 5 هذا الشهر",
+    ach_250_validations: "250 اعتمادًا",
+    ach_streak_30: "سلسلة 30 يومًا",
+    ach_25_students: "متابعة 25 طالبًا",
+    ach_month_number_one: "الأول هذا الشهر",
   },
 };
 
-function pt(key, fr) {
-  const l = getLang();
-  return esc((l !== "fr" && PROF_I18N[l]?.[key]) || fr);
+function pt(key, fr, vars) {
+  return esc(ptR(key, fr, vars));
 }
-function ptR(key, fr) {
+function ptA(key, fr, vars) {
+  return escAttr(ptR(key, fr, vars));
+}
+function ptR(key, fr, vars) {
   const l = getLang();
-  return (l !== "fr" && PROF_I18N[l]?.[key]) || fr;
+  let value = (l !== "fr" && PROF_I18N[l]?.[key]) || fr;
+  if (vars)
+    for (const [name, replacement] of Object.entries(vars))
+      value = value.split(`{${name}}`).join(String(replacement));
+  return value;
+}
+function profileDir() {
+  return getLang() === "ar" ? ' dir="rtl" lang="ar"' : "";
+}
+function profileRoleLabel(role) {
+  return {
+    eleve: ptR("role_student", ROLE_LABELS.eleve),
+    enseignant: ptR("role_instructor", ROLE_LABELS.enseignant),
+    gerant: ptR("role_manager", ROLE_LABELS.gerant),
+    owner: ptR("role_platform", ROLE_LABELS.owner),
+  }[role];
 }
 
 // Noms des succès (« Tes succès ») — même métaphore automobile que le FR, une
@@ -1775,7 +2074,7 @@ function ptAch(key, fr) {
 }
 
 async function mountEleveArene(root, me) {
-  root.innerHTML = `${STYLE_ARENE}<div class="arn"><div class="skel skel-card" style="height:300px;margin:14px 16px 0;border-radius:28px"></div><div class="skel skel-card" style="height:90px;margin:18px 16px 0;border-radius:18px"></div></div>`;
+  root.innerHTML = `${STYLE_ARENE}<div class="arn"${profileDir()}><div class="skel skel-card" style="height:300px;margin:14px 16px 0;border-radius:28px"></div><div class="skel skel-card" style="height:90px;margin:18px 16px 0;border-radius:18px"></div></div>`;
 
   // ── Fetch réel ─────────────────────────────────────────────
   // get_my_achievements = MÊME source que la salle des trophées → « Tes
@@ -1804,13 +2103,24 @@ async function mountEleveArene(root, me) {
       sb.from("self_validations").select("competence_id").eq("eleve_id", me.id),
     ]);
 
-  const profile = profileRes.value?.data;
-  const streakRow = streakRes.value?.data;
-  const validatedSet = new Set(
-    (valRes.value?.data || []).map((v) => v.competence_id),
+  _reportQueryErrors(
+    "carte élève",
+    [
+      ["profil", profileRes],
+      ["validations", valRes],
+      ["série", streakRes],
+      ["trophées", achRes],
+      ["auto-validations", selfValRes],
+    ],
+    "Certaines données du profil sont indisponibles.",
   );
-  for (const s of selfValRes.value?.data || [])
-    validatedSet.add(s.competence_id);
+  const profile = _queryData(profileRes);
+  const streakRow = _queryData(streakRes);
+  const valData = _queryData(valRes);
+  const selfValData = _queryData(selfValRes);
+  const achData = _queryData(achRes);
+  const validatedSet = new Set((valData || []).map((v) => v.competence_id));
+  for (const s of selfValData || []) validatedSet.add(s.competence_id);
   const validated = validatedSet.size;
   const _yStrS = yesterdayKey();
   // Série d'activité : périmée si dernière activité < hier (cf. accueil).
@@ -1858,10 +2168,8 @@ async function mountEleveArene(root, me) {
       });
   }
 
-  const achOk = !achRes.value?.error && Array.isArray(achRes.value?.data);
-  const unlockedKeys = new Set(
-    (achRes.value?.data || []).map((u) => u.achievement_key),
-  );
+  const achOk = Array.isArray(achData);
+  const unlockedKeys = new Set((achData || []).map((u) => u.achievement_key));
   const achievements = _areneAchievements(
     unlockedKeys,
     achOk,
@@ -1873,11 +2181,12 @@ async function mountEleveArene(root, me) {
   const _lg = getLang();
   const _toCome = achievements.length - unlocked;
   const achCountTxt =
-    _lg === "en"
-      ? `${unlocked} unlocked · ${_toCome} to come`
-      : _lg === "ar"
-        ? `${unlocked} مفتوحة · ${_toCome} قادمة`
-        : `${unlocked} débloqué${unlocked > 1 ? "s" : ""} · ${_toCome} à venir`;
+    _lg === "fr"
+      ? `${unlocked} débloqué${unlocked > 1 ? "s" : ""} · ${_toCome} à venir`
+      : ptR("unlocked_to_come", "{unlocked} débloqués · {locked} à venir", {
+          unlocked,
+          locked: _toCome,
+        });
   const daysSuffix = _lg === "en" ? " d" : _lg === "ar" ? " يوم" : " j";
 
   // ── Notifications : état réel ──────────────────────────────
@@ -1887,7 +2196,7 @@ async function mountEleveArene(root, me) {
 
   // ── Render ─────────────────────────────────────────────────
   root.innerHTML = `${STYLE_ARENE}
-<div class="arn anim-slide-up">
+<div class="arn anim-slide-up"${profileDir()}>
   <h1 class="arn-h1">${pt("h1_title", "Mon profil")}</h1>
 
   <div class="arn-card">
@@ -1897,7 +2206,7 @@ async function mountEleveArene(root, me) {
     <div class="arn-banner">
       <div class="arn-pseudo-row">
         <span class="arn-pseudo ${pseudo ? "" : "unset"}" id="arn-pseudo"><span class="at">@</span>${esc(pseudo || ptR("pseudo_ph", "ton_pseudo"))}</span>
-        <button class="arn-edit" id="arn-edit-pseudo" aria-label="${pt("pseudo_edit_aria", "Changer de pseudo")}">
+        <button class="arn-edit" id="arn-edit-pseudo" aria-label="${ptA("pseudo_edit_aria", "Changer de pseudo")}">
           ${icon("edit", { size: 14, strokeWidth: 2.2 })}
         </button>
       </div>
@@ -1907,10 +2216,10 @@ async function mountEleveArene(root, me) {
     <div class="arn-body">
       <div class="arn-crest">
         <div class="arn-crest-disc"><div class="arn-crest-inner">${avatarUrl ? `<img src="${escAttr(avatarUrl)}" alt="" referrerpolicy="no-referrer" />` : esc(initials)}</div></div>
-        <button class="arn-crest-edit" id="arn-edit-avatar" aria-label="${pt("photo_edit", "Changer ma photo")}" title="${pt("photo_edit", "Changer ma photo")}">${icon("image", { size: 14, strokeWidth: 2.2 })}</button>
+        <button class="arn-crest-edit" id="arn-edit-avatar" aria-label="${ptA("photo_edit", "Changer ma photo")}" title="${ptA("photo_edit", "Changer ma photo")}">${icon("image", { size: 14, strokeWidth: 2.2 })}</button>
       </div>
       <div class="arn-meta">
-        <span class="arn-permis"><span class="dot"></span>Permis B</span>
+        <span class="arn-permis"><span class="dot"></span>${pt("licence_b", "Permis B")}</span>
         <div class="arn-comp">
           <span class="arn-comp-emblem"><img src="${emblem}" alt="" /></span>
           <div class="arn-comp-txt">
@@ -1964,7 +2273,7 @@ async function mountEleveArene(root, me) {
       <span class="arn-ach-title">${pt("ach_title", "Tes succès")}</span>
       <span class="arn-ach-count">${achCountTxt}</span>
     </div>
-    <div class="arn-ach-scroll" tabindex="0" role="group" aria-label="${pt("ach_list_aria", "Tes succès (liste défilante)")}">
+    <div class="arn-ach-scroll" tabindex="0" role="group" aria-label="${ptA("ach_list_aria", "Tes succès (liste défilante)")}">
       ${achievements
         .map(
           (a) => `
@@ -2030,11 +2339,11 @@ async function mountEleveArene(root, me) {
   <div class="arn-since">${memberSince ? `${pt("member_since", "Membre depuis")} ${esc(memberSince)}` : ""}</div>
 
   <!-- modale changer de pseudo -->
-  <div class="arn-modal-scrim" id="arn-modal" role="dialog" aria-modal="true" aria-label="${pt("pseudo_edit_aria", "Changer de pseudo")}">
+  <div class="arn-modal-scrim" id="arn-modal" role="dialog" aria-modal="true" aria-label="${ptA("pseudo_edit_aria", "Changer de pseudo")}">
     <div class="arn-modal">
       <div class="arn-modal-head">
         <h3>${pt("modal_title", "Choisis ton nom de joueur")}</h3>
-        <button class="arn-modal-close" id="arn-modal-close" aria-label="${pt("modal_close", "Fermer")}">✕</button>
+        <button class="arn-modal-close" id="arn-modal-close" aria-label="${ptA("modal_close", "Fermer")}">✕</button>
       </div>
       <div class="arn-modal-body">
         <p class="arn-modal-tip">${pt("modal_tip", "C'est le nom que voient les autres élèves au classement de l'arène.")}</p>
@@ -2258,6 +2567,15 @@ function _wireEleveArene(root, me, avatarUrl) {
 //   • fond CLAIR, cartes blanches premium (univers moniteur)
 // ═══════════════════════════════════════════════════════════════
 function _rankLabel(r) {
+  if (getLang() === "ar") return String(r);
+  if (getLang() === "en") {
+    const mod100 = r % 100;
+    const suffix =
+      mod100 >= 11 && mod100 <= 13
+        ? "th"
+        : { 1: "st", 2: "nd", 3: "rd" }[r % 10] || "th";
+    return `${r}<sup>${suffix}</sup>`;
+  }
   return r === 1 ? "1<sup>er</sup>" : `${r}<sup>e</sup>`;
 }
 function _ensInitials(prenom, nom) {
@@ -2269,18 +2587,54 @@ function _ensAchievements(v, e, s, rank) {
   return [
     {
       img: "trophy-first-validation",
-      name: "1<sup>re</sup> validation",
+      name: ptR("ach_first_validation", "1<sup>re</sup> validation"),
       need: v >= 1,
     },
-    { img: "badge-3d-03", name: "50 validations", need: v >= 50 },
-    { img: "badge-3d-05", name: "100 validations", need: v >= 100 },
-    { img: "trophy-10-comps", name: "10 élèves suivis", need: e >= 10 },
-    { img: "trophy-streak-7d", name: "Série 7 jours", need: s >= 7 },
-    { img: "badge-3d-07", name: "Top 5 du mois", need: rank > 0 && rank <= 5 },
-    { img: "badge-3d-08", name: "250 validations", need: v >= 250 },
-    { img: "trophy-streak-30d", name: "Série 30 jours", need: s >= 30 },
-    { img: "badge-3d-09", name: "25 élèves suivis", need: e >= 25 },
-    { img: "badge-3d-ultimate", name: "N°1 du mois", need: rank === 1 },
+    {
+      img: "badge-3d-03",
+      name: ptR("ach_50_validations", "50 validations"),
+      need: v >= 50,
+    },
+    {
+      img: "badge-3d-05",
+      name: ptR("ach_100_validations", "100 validations"),
+      need: v >= 100,
+    },
+    {
+      img: "trophy-10-comps",
+      name: ptR("ach_10_students", "10 élèves suivis"),
+      need: e >= 10,
+    },
+    {
+      img: "trophy-streak-7d",
+      name: ptR("ach_streak_7", "Série 7 jours"),
+      need: s >= 7,
+    },
+    {
+      img: "badge-3d-07",
+      name: ptR("ach_top_5", "Top 5 du mois"),
+      need: rank > 0 && rank <= 5,
+    },
+    {
+      img: "badge-3d-08",
+      name: ptR("ach_250_validations", "250 validations"),
+      need: v >= 250,
+    },
+    {
+      img: "trophy-streak-30d",
+      name: ptR("ach_streak_30", "Série 30 jours"),
+      need: s >= 30,
+    },
+    {
+      img: "badge-3d-09",
+      name: ptR("ach_25_students", "25 élèves suivis"),
+      need: e >= 25,
+    },
+    {
+      img: "badge-3d-ultimate",
+      name: ptR("ach_month_number_one", "N°1 du mois"),
+      need: rank === 1,
+    },
   ].sort((a, b) => (a.need === b.need ? 0 : a.need ? -1 : 1));
 }
 
@@ -2428,39 +2782,50 @@ const STYLE_ENS = `<style>
 </style>`;
 
 async function mountEnseignantArene(root, me) {
-  root.innerHTML = `${STYLE_ENS}<div class="enp"><div class="skel skel-card" style="height:300px;margin:14px 16px 0;border-radius:30px"></div><div class="skel skel-card" style="height:90px;margin:18px 16px 0;border-radius:20px"></div></div>`;
+  root.innerHTML = `${STYLE_ENS}<div class="enp"${profileDir()}><div class="skel skel-card" style="height:300px;margin:14px 16px 0;border-radius:30px"></div><div class="skel skel-card" style="height:90px;margin:18px 16px 0;border-radius:20px"></div></div>`;
 
   const yearStart = `${new Date().getFullYear()}-01-01`;
   const today = new Date().toISOString().slice(0, 10);
   const month = new Date().toISOString().slice(0, 7) + "-01";
 
-  const [
-    { data: profile },
-    { data: valData },
-    { data: elevesData },
-    rankingRes,
-  ] = await Promise.all([
-    sb
-      .from("profiles")
-      .select("email, prenom, nom, created_at, streak_pro_days, avatar_url")
-      .eq("id", me.id)
-      .single(),
-    sb
-      .from("validations")
-      .select("competence_id, eleve_id, validated_at")
-      .eq("validated_by", me.id)
-      .gte("validated_at", yearStart),
-    sb
-      .from("profiles")
-      .select("id")
-      .eq("role", "eleve")
-      .eq("enseignant_id", me.id)
-      .is("deleted_at", null),
-    sb.rpc("get_moniteur_ranking", { p_month: month }).then(
-      (r) => r,
-      () => ({ data: null }),
-    ),
-  ]);
+  const [profileRes, validationsRes, elevesRes, rankingRes] = await Promise.all(
+    [
+      sb
+        .from("profiles")
+        .select("email, prenom, nom, created_at, streak_pro_days, avatar_url")
+        .eq("id", me.id)
+        .single(),
+      sb
+        .from("validations")
+        .select("competence_id, eleve_id, validated_at")
+        .eq("validated_by", me.id)
+        .gte("validated_at", yearStart),
+      sb
+        .from("profiles")
+        .select("id")
+        .eq("role", "eleve")
+        .eq("enseignant_id", me.id)
+        .is("deleted_at", null),
+      sb.rpc("get_moniteur_ranking", { p_month: month }).then(
+        (r) => r,
+        (error) => ({ data: null, error }),
+      ),
+    ],
+  );
+  _reportQueryErrors(
+    "carte enseignant",
+    [
+      ["profil", profileRes],
+      ["validations", validationsRes],
+      ["élèves", elevesRes],
+      ["classement", rankingRes],
+    ],
+    "Certaines données du profil sont indisponibles.",
+  );
+  const profile = _queryData(profileRes);
+  const valData = _queryData(validationsRes);
+  const elevesData = _queryData(elevesRes);
+  const rankingData = _queryData(rankingRes);
 
   // ── Stats Mon Année ───────────────────────────────────────
   const vals = valData || [];
@@ -2484,7 +2849,7 @@ async function mountEnseignantArene(root, me) {
   ).size;
 
   // ── Classement réel ───────────────────────────────────────
-  const ranking = Array.isArray(rankingRes?.data) ? rankingRes.data : [];
+  const ranking = Array.isArray(rankingData) ? rankingData : [];
   const myIdx = ranking.findIndex((r) => r.moniteur_id === me.id);
   const mine = myIdx >= 0 ? ranking[myIdx] : null;
   const myRank = mine?.rank ?? 0;
@@ -2501,7 +2866,7 @@ async function mountEnseignantArene(root, me) {
     `${profile?.prenom || ""} ${profile?.nom || ""}`.trim() ||
     profile?.email ||
     me.email ||
-    "Enseignant";
+    ptR("instructor_default", "Enseignant");
   const initials = _ensInitials(profile?.prenom, profile?.nom);
   // Photo de profil : même source que le header. Repli initiales si absente.
   const avatarUrl = getEquippedAsset("avatar") || profile?.avatar_url || null;
@@ -2511,10 +2876,13 @@ async function mountEnseignantArene(root, me) {
   if (profile?.created_at) {
     const d = new Date(profile.created_at);
     if (!isNaN(d))
-      memberSince = d.toLocaleDateString("fr-FR", {
-        month: "long",
-        year: "numeric",
-      });
+      memberSince = d.toLocaleDateString(
+        { fr: "fr-FR", en: "en-GB", ar: "ar" }[getLang()] || "fr-FR",
+        {
+          month: "long",
+          year: "numeric",
+        },
+      );
   }
 
   const achievements = _ensAchievements(
@@ -2524,6 +2892,18 @@ async function mountEnseignantArene(root, me) {
     myRank,
   );
   const unlocked = achievements.filter((a) => a.need).length;
+  const locked = achievements.length - unlocked;
+  const achievementCount =
+    getLang() === "fr"
+      ? `${unlocked} débloqué${unlocked > 1 ? "s" : ""} · ${locked} à venir`
+      : ptR("unlocked_to_come", "{unlocked} débloqués · {locked} à venir", {
+          unlocked,
+          locked,
+        });
+  const [validationsLabel, thisYearLabel] = ptR(
+    "validations_this_year",
+    "Validations|cette année",
+  ).split("|");
 
   const notifSupported = "Notification" in window;
   const notifDenied = notifSupported && Notification.permission === "denied";
@@ -2531,36 +2911,36 @@ async function mountEnseignantArene(root, me) {
 
   // ── Render ────────────────────────────────────────────────
   root.innerHTML = `${STYLE_ENS}
-<div class="enp anim-slide-up">
-  <h1 class="enp-h1">Mon profil</h1>
+<div class="enp anim-slide-up"${profileDir()}>
+  <h1 class="enp-h1">${pt("h1_title", "Mon profil")}</h1>
 
   <div class="enp-hero">
     ${
       myRank > 0
         ? `<div class="enp-rank">
         <img src="/skins/trophy-10-comps.webp" alt="" />
-        <span class="rt">${_rankLabel(myRank)} ce mois-ci · <b>${myScore} pts</b></span>
+        <span class="rt">${ptR("rank_month", "{rank} ce mois-ci · {score} pts", { rank: _rankLabel(myRank), score: myScore })}</span>
       </div>`
         : ""
     }
     <div class="enp-id">
       <div class="enp-crest">
         <div class="enp-crest-disc"><div class="enp-crest-inner">${avatarUrl ? `<img src="${escAttr(avatarUrl)}" alt="" referrerpolicy="no-referrer" />` : esc(initials)}</div></div>
-        <button class="enp-crest-edit" id="enp-edit-avatar" aria-label="Changer ma photo" title="Changer ma photo">${icon("image", { size: 14, strokeWidth: 2.2 })}</button>
+        <button class="enp-crest-edit" id="enp-edit-avatar" aria-label="${ptA("photo_edit", "Changer ma photo")}" title="${ptA("photo_edit", "Changer ma photo")}">${icon("image", { size: 14, strokeWidth: 2.2 })}</button>
       </div>
       <div class="enp-nm">
         <div class="nn">${esc(name)}</div>
-        <span class="tg"><span class="dot"></span>Enseignant</span>
+        <span class="tg"><span class="dot"></span>${pt("role_instructor", "Enseignant")}</span>
       </div>
     </div>
     <div class="enp-metric">
       <span class="em-emb"><img src="/skins/trophy-permis-virtuel.webp" alt="" /></span>
       <div class="em-num">${totalValidations}</div>
-      <div class="em-lab"><div class="l1">Validations</div><div class="l2">cette année</div></div>
+      <div class="em-lab"><div class="l1">${esc(validationsLabel)}</div><div class="l2">${esc(thisYearLabel)}</div></div>
     </div>
     <div class="enp-sub">
       <svg viewBox="0 0 24 24" fill="none"><path d="M16 19v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="9" cy="7" r="3.2" stroke="currentColor" stroke-width="2"/><path d="M22 19v-2a4 4 0 00-3-3.9M16 3.1A4 4 0 0116 11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      <span><b>${elevesCount} élève${elevesCount > 1 ? "s" : ""}</b> suivi${elevesCount > 1 ? "s" : ""} · <b>${elevesActifsCount} actif${elevesActifsCount > 1 ? "s" : ""}</b> sur 30 jours</span>
+      <span>${pt("students_activity", `${elevesCount} élève${elevesCount > 1 ? "s" : ""} suivi${elevesCount > 1 ? "s" : ""} · ${elevesActifsCount} actif${elevesActifsCount > 1 ? "s" : ""} sur 30 jours`, { students: elevesCount, active: elevesActifsCount })}</span>
     </div>
   </div>
 
@@ -2568,26 +2948,26 @@ async function mountEnseignantArene(root, me) {
     <div class="enp-stat">
       <svg class="enp-s-ico" viewBox="0 0 24 24" fill="none" style="width:30px"><path d="M16 19v-1.5a3.5 3.5 0 00-3.5-3.5h-5A3.5 3.5 0 004 17.5V19" stroke="#4f46e5" stroke-width="2" stroke-linecap="round"/><circle cx="10" cy="7.5" r="3" stroke="#4f46e5" stroke-width="2"/><path d="M19 8l1.6 1.6L23 6.6" stroke="#18a558" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <div class="enp-s-num">${elevesCount}</div>
-      <div class="enp-s-lab">Élèves suivis</div>
+      <div class="enp-s-lab">${pt("students_supported", "Élèves suivis")}</div>
     </div>
     <div class="enp-stat">
       <img class="enp-s-ico" src="/skins/permigo-streak-flame-v1.webp" alt="" />
-      <div class="enp-s-num gd">${streakDays} j</div>
-      <div class="enp-s-lab">Série pro</div>
+      <div class="enp-s-num gd">${streakDays}${getLang() === "ar" ? " يوم" : " j"}</div>
+      <div class="enp-s-lab">${pt("pro_streak", "Série pro")}</div>
     </div>
     <div class="enp-stat">
       ${medallion("etoile", "gold", { size: 30, cls: "enp-s-ico" })}
       <div class="enp-s-num gd">${c3Count}</div>
-      <div class="enp-s-lab">C3 Maîtrise</div>
+      <div class="enp-s-lab">${pt("c3_reached", "C3 Maîtrise")}</div>
     </div>
   </div>
 
   <div class="enp-ach">
     <div class="enp-ach-head">
-      <span class="enp-ach-title">Mes succès</span>
-      <span class="enp-ach-count">${unlocked} débloqué${unlocked > 1 ? "s" : ""} · ${achievements.length - unlocked} à venir</span>
+      <span class="enp-ach-title">${pt("my_achievements", "Mes succès")}</span>
+      <span class="enp-ach-count">${esc(achievementCount)}</span>
     </div>
-    <div class="enp-ach-scroll" tabindex="0" role="group" aria-label="Tes succès (liste défilante)">
+    <div class="enp-ach-scroll" tabindex="0" role="group" aria-label="${ptA("achievements_list", "Tes succès (liste défilante)")}">
       ${achievements
         .map(
           (a) => `
@@ -2608,11 +2988,11 @@ async function mountEnseignantArene(root, me) {
       <div class="enp-rh-l">
         <span class="enp-rh-badge"><img src="/skins/couronne.png" alt="" /></span>
         <div>
-          <div class="enp-rh-tt">Ma position</div>
-          <div class="enp-rh-sub">Classement du mois</div>
+          <div class="enp-rh-tt">${pt("my_position", "Ma position")}</div>
+          <div class="enp-rh-sub">${pt("monthly_ranking", "Classement du mois")}</div>
         </div>
       </div>
-      <a class="enp-rlink" href="#/classement-eleves">Voir le classement
+      <a class="enp-rlink" href="#/classement-eleves">${pt("view_ranking", "Voir le classement")}
         <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14m0 0l-6-6m6 6l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </a>
     </div>
@@ -2625,35 +3005,35 @@ async function mountEnseignantArene(root, me) {
       <div class="enp-rrow ${r.moniteur_id === me.id ? "me" : ""}">
         <span class="rp">${_rankLabel(r.rank)}</span>
         <span class="rav">${esc(_ensInitials(r.moniteur_prenom, r.moniteur_nom))}</span>
-        <span class="rnm">${esc(`${r.moniteur_prenom || ""} ${r.moniteur_nom || ""}`.trim() || "Enseignant")}${r.moniteur_id === me.id ? " — toi" : ""}</span>
-        <span class="rpt">${r.score_total} <span>pts</span></span>
+        <span class="rnm">${esc(`${r.moniteur_prenom || ""} ${r.moniteur_nom || ""}`.trim() || ptR("instructor_default", "Enseignant"))}${r.moniteur_id === me.id ? ` — ${pt("you", "toi")}` : ""}</span>
+        <span class="rpt">${r.score_total} <span>${pt("points", "pts")}</span></span>
       </div>`,
         )
         .join("")}
     </div>`
-        : `<div class="enp-rempty">Ton classement apparaîtra dès tes premières validations ce mois-ci.</div>`
+        : `<div class="enp-rempty">${pt("ranking_empty", "Ton classement apparaîtra dès tes premières validations ce mois-ci.")}</div>`
     }
   </div>
 
   <div class="enp-year">
     <div class="enp-yh">
       <span class="enp-yh-ico"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="2.5" stroke="currentColor" stroke-width="2"/><path d="M3 9h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
-      <h2>Mon année ${year}</h2>
+      <h2>${pt("my_year", "Mon année {year}", { year })}</h2>
     </div>
     <div class="enp-ygrid">
-      <div class="enp-kpi"><div class="kn">${totalValidations}</div><div class="kl">Compétences validées</div></div>
-      <div class="enp-kpi"><div class="kn">${elevesCount}</div><div class="kl">Élèves suivis</div></div>
-      <div class="enp-kpi"><div class="kn gd">${c3Count}</div><div class="kl">C3 Maîtrise atteints</div></div>
-      <div class="enp-kpi"><div class="kn gr">${elevesActifsCount}</div><div class="kl">Élèves actifs (30 j)</div></div>
+      <div class="enp-kpi"><div class="kn">${totalValidations}</div><div class="kl">${pt("skills_validated", "Compétences validées")}</div></div>
+      <div class="enp-kpi"><div class="kn">${elevesCount}</div><div class="kl">${pt("students_supported", "Élèves suivis")}</div></div>
+      <div class="enp-kpi"><div class="kn gd">${c3Count}</div><div class="kl">${pt("c3_reached", "C3 Maîtrise atteints")}</div></div>
+      <div class="enp-kpi"><div class="kn gr">${elevesActifsCount}</div><div class="kl">${pt("active_students", "Élèves actifs (30 j)")}</div></div>
     </div>
   </div>
 
   <div class="enp-set">
-    <p class="enp-set-title">Réglages</p>
+    <p class="enp-set-title">${pt("settings", "Réglages")}</p>
     <div class="enp-set-list">
       <a class="enp-row" href="#/notifications">
         <span class="enp-row-ico">${medallion("message", "blue", { size: 30, shape: "tile" })}</span>
-        <span class="enp-row-lab">Mes notifications<small>Validations, séances, messages</small></span>
+        <span class="enp-row-lab">${pt("row_notifs", "Mes notifications")}<small>${pt("teacher_notif_sub", "Validations, séances, messages")}</small></span>
         <span class="enp-chev"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </a>
       ${
@@ -2661,14 +3041,14 @@ async function mountEnseignantArene(root, me) {
           ? `
       <button class="enp-row" id="enp-notif" type="button" aria-pressed="${notifOn}">
         <span class="enp-row-ico">${medallion("cloche", "orange", { size: 30, shape: "tile" })}</span>
-        <span class="enp-row-lab">Notifications<small id="enp-notif-sub">${notifDenied ? "Bloquées par le navigateur" : notifOn ? "Validations & relances" : "Désactivées"}</small></span>
+        <span class="enp-row-lab">${pt("notifications", "Notifications")}<small id="enp-notif-sub">${notifDenied ? pt("notif_blocked", "Bloquées par le navigateur") : notifOn ? pt("validations_followups", "Validations & relances") : pt("notif_off", "Désactivées")}</small></span>
         ${notifDenied ? "" : `<span class="enp-tog ${notifOn ? "on" : ""}" id="enp-notif-tog"><span class="knob"></span></span>`}
       </button>`
           : ""
       }
       <a class="enp-row" href="#/settings">
         <span class="enp-row-ico">${medallion("reglages", "slate", { size: 30, shape: "tile" })}</span>
-        <span class="enp-row-lab">Réglages du compte<small>Thème, abonnement, sécurité</small></span>
+        <span class="enp-row-lab">${pt("account_settings", "Réglages du compte")}<small>${pt("theme_subscription_security", "Thème, abonnement, sécurité")}</small></span>
         <span class="enp-chev"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </a>
     </div>
@@ -2676,10 +3056,10 @@ async function mountEnseignantArene(root, me) {
 
   <button class="enp-logout" id="enp-logout">
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 12H4m0 0l4-4m-4 4l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 3h8a2 2 0 012 2v14a2 2 0 01-2 2H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    Se déconnecter
+    ${pt("logout", "Se déconnecter")}
   </button>
 
-  <div class="enp-since">${memberSince ? `Membre depuis ${esc(memberSince)}` : ""}</div>
+  <div class="enp-since">${memberSince ? `${pt("member_since", "Membre depuis")} ${esc(memberSince)}` : ""}</div>
 </div>`;
 
   // ── Wire ──────────────────────────────────────────────────
@@ -2691,7 +3071,10 @@ async function mountEnseignantArene(root, me) {
     } catch (e) {
       console.error("[profil] logout", e);
       const { toast } = await import("@/components/common/toast.js");
-      toast("Déconnexion impossible — réessaie", "error");
+      toast(
+        ptR("toast_logout_err", "Déconnexion impossible — réessaie"),
+        "error",
+      );
     }
   });
 
@@ -2712,7 +3095,7 @@ async function mountEnseignantArene(root, me) {
       haptic("success");
       track("profile.avatar_updated", { user_role: me.role });
       const { toast } = await import("@/components/common/toast.js");
-      toast("Photo mise à jour ✓", "success", 2500);
+      toast(ptR("toast_photo", "Photo mise à jour ✓"), "success", 2500);
     });
 
   const notifRow = root.querySelector("#enp-notif");
@@ -2725,16 +3108,24 @@ async function mountEnseignantArene(root, me) {
         await optOutPush();
         tog?.classList.remove("on");
         notifRow.setAttribute("aria-pressed", "false");
-        if (sub) sub.textContent = "Désactivées";
+        if (sub) sub.textContent = ptR("notif_off", "Désactivées");
       } else {
         const ok = await optInPush();
         if (ok) {
           haptic("success");
           tog?.classList.add("on");
           notifRow.setAttribute("aria-pressed", "true");
-          if (sub) sub.textContent = "Validations & relances";
+          if (sub)
+            sub.textContent = ptR(
+              "validations_followups",
+              "Validations & relances",
+            );
         } else if (Notification.permission === "denied") {
-          if (sub) sub.textContent = "Bloquées par le navigateur";
+          if (sub)
+            sub.textContent = ptR(
+              "notif_blocked",
+              "Bloquées par le navigateur",
+            );
           tog?.remove();
         }
       }

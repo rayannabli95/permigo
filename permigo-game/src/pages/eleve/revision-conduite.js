@@ -37,6 +37,150 @@ import {
 const LS_KEY = "rvc_revised_v1"; // { [code]: isoDate }
 const LS_READ_KEY = "rvc_read_v1"; // { [code]: 1 } — fiche déjà déroulée (relecture = tout affiché)
 
+const RVC_I18N = {
+  en: {
+    empty_title: "Review your driving",
+    empty_body:
+      "The review cards are almost ready. Come back in a moment.",
+    back: "Back",
+    unread: "To read",
+    back_worlds: "Back to the worlds",
+    read_count: "{done}/{total} read",
+    world_1_name: "Vehicle control",
+    world_1_sub: "Get to know the car",
+    world_2_name: "Driving in traffic",
+    world_2_sub: "Drive in normal conditions",
+    world_3_name: "Difficult conditions",
+    world_3_sub: "Night, weather and sharing the road",
+    world_4_name: "Independent driving",
+    world_4_sub: "On your own, safely and economically",
+    to_start: "To start",
+    in_progress: "In progress",
+    see_all: "See all the cards — {name}",
+    start: "Start",
+    reread: "Read again",
+    continue: "Continue",
+    back_review: "Back to Review",
+    page_title: "Review your driving",
+    four_worlds: "Your 4 worlds",
+    daily_challenge: "Daily challenge",
+    one_min: "1 min",
+    find_fault: "Find the mistake",
+    spot_error: "Spot the error",
+    order_done: "Perfect order!",
+    order_done_body: "All {count} steps of “{title}”: done.",
+    back_card: "Back to the card",
+    order_hint: "Put them in the right order. Your turn.",
+    skill_fallback: "this skill",
+    cert_done_kicker: "Already in My licence",
+    cert_done_title: "Already self-certified",
+    cert_done_body:
+      "“{title}” is already acquired in your journey. Great job — keep reviewing whenever you like.",
+    cert_keep: "Keep reviewing",
+    cert_review: "Review in My licence →",
+    my_licence: "My licence",
+    quiz_passed: "Quiz passed",
+    cert_prompt: "Ready to certify this skill?",
+    cert_prompt_body:
+      "You have just reviewed “{title}”. Certify it to move it forward in {product} — an official five-question quiz confirms you have acquired it.",
+    certify: "Certify this skill",
+    later: "Later",
+  },
+  ar: {
+    empty_title: "راجع قيادتك",
+    empty_body: "ستتوفر بطاقات المراجعة قريباً جداً. عد بعد قليل.",
+    back: "رجوع",
+    unread: "للقراءة",
+    back_worlds: "الرجوع إلى العوالم",
+    read_count: "{done}/{total} مقروءة",
+    world_1_name: "التحكم في المركبة",
+    world_1_sub: "التعرّف على السيارة",
+    world_2_name: "السير",
+    world_2_sub: "القيادة في الظروف العادية",
+    world_3_name: "ظروف صعبة",
+    world_3_sub: "الليل والطقس وتقاسم الطريق",
+    world_4_name: "القيادة المستقلة",
+    world_4_sub: "بمفردك وبأمان واقتصاد",
+    to_start: "للبدء",
+    in_progress: "قيد التقدم",
+    see_all: "عرض جميع البطاقات — {name}",
+    start: "ابدأ",
+    reread: "اقرأ مجدداً",
+    continue: "واصل",
+    back_review: "العودة إلى المراجعة",
+    page_title: "راجع قيادتك",
+    four_worlds: "عوالمك الأربعة",
+    daily_challenge: "تحدي اليوم",
+    one_min: "دقيقة واحدة",
+    find_fault: "اعثر على الخطأ",
+    spot_error: "اكتشف الخطأ",
+    order_done: "ترتيب ممتاز!",
+    order_done_body: "رتّبت خطوات « {title} » وعددها {count}.",
+    back_card: "العودة إلى البطاقة",
+    order_hint: "رتّبها بالترتيب الصحيح. دورك.",
+    skill_fallback: "هذه المهارة",
+    cert_done_kicker: "موجودة بالفعل في رخصتي",
+    cert_done_title: "سبق أن اعتمدتها بنفسك",
+    cert_done_body:
+      "« {title} » مكتسبة بالفعل في مسارك. أحسنت — يمكنك متابعة مراجعتها متى شئت.",
+    cert_keep: "واصل المراجعة",
+    cert_review: "← عرضها في رخصتي",
+    my_licence: "رخصتي",
+    quiz_passed: "نجحت في الاختبار",
+    cert_prompt: "هل أنت مستعد لاعتماد هذه المهارة؟",
+    cert_prompt_body:
+      "لقد راجعت للتو « {title} ». اعتمدها لتتقدم في « {product} » — ويؤكد اختبار رسمي من خمسة أسئلة أنك أتقنتها.",
+    certify: "اعتماد هذه المهارة",
+    later: "لاحقاً",
+  },
+};
+
+function rvcT(key, fr, vars) {
+  const lang = getLang();
+  let value = (lang !== "fr" && RVC_I18N[lang]?.[key]) || fr;
+  if (vars)
+    for (const [name, replacement] of Object.entries(vars))
+      value = value.split(`{${name}}`).join(String(replacement));
+  return value;
+}
+
+function rvcDisplay(value) {
+  const safe = esc(value);
+  return getLang() === "ar"
+    ? `<span dir="rtl" lang="ar">${safe}</span>`
+    : safe;
+}
+
+function rvcText(key, fr, vars) {
+  return rvcDisplay(rvcT(key, fr, vars));
+}
+
+// Variante riche limitée à des valeurs dynamiques en gras. Le texte et chaque
+// interpolation sont échappés séparément avant de réintroduire les balises.
+function rvcRich(key, fr, vars) {
+  let value = rvcT(key, fr);
+  const replacements = [];
+  for (const [name, replacement] of Object.entries(vars || {})) {
+    const marker = `\uE000${replacements.length}\uE001`;
+    value = value.split(`{${name}}`).join(marker);
+    replacements.push([marker, replacement]);
+  }
+  let safe = esc(value);
+  for (const [marker, replacement] of replacements)
+    safe = safe.split(marker).join(`<b>${esc(replacement)}</b>`);
+  return getLang() === "ar"
+    ? `<span dir="rtl" lang="ar">${safe}</span>`
+    : safe;
+}
+
+function rvcWorld(m, field) {
+  return rvcT(`world_${m.n}_${field}`, field === "name" ? m.nom : m.sous);
+}
+
+function rvcFicheTitle(f) {
+  return ficheTr(f.code, getLang())?.titre || f.titre;
+}
+
 function loadRead() {
   try {
     return JSON.parse(localStorage.getItem(LS_READ_KEY) || "{}") || {};
@@ -228,7 +372,7 @@ const STYLE = `<style>
 .rvc { max-width: 480px; margin: 0 auto; padding: 0 16px calc(110px + env(safe-area-inset-bottom));
   background: var(--bg); color: var(--ink); font-family: 'Inter', sans-serif; }
 .rvc-top { display:flex; align-items:center; gap:10px; padding:16px 0 8px; }
-.rvc-back { width:38px; height:38px; border-radius:11px; border:0; cursor:pointer;
+.rvc-back { width:44px; height:44px; border-radius:11px; border:0; cursor:pointer;
   background: var(--su, #fff); color: var(--ink); font-size:20px; line-height:1;
   box-shadow: 0 1px 4px rgba(0,0,0,.08); flex-shrink:0; }
 .rvc-back:active { transform: scale(0.95); }
@@ -281,7 +425,7 @@ const FD_STYLE = `<style>
 
 .fd-hero{ position:relative; padding:16px 18px 20px; }
 .fd-topbar{ display:flex; align-items:center; gap:12px; }
-.fd-back{ width:42px; height:42px; flex:0 0 42px; border-radius:14px; cursor:pointer;
+.fd-back{ width:44px; height:44px; flex:0 0 44px; border-radius:14px; cursor:pointer;
   background:linear-gradient(180deg,#ffffff,#efecff); border:1px solid #e6e2fb; border-top-color:#fff;
   box-shadow:0 4px 0 rgba(20,12,60,.35), inset 0 1px 0 rgba(255,255,255,.9);
   display:flex; align-items:center; justify-content:center; }
@@ -449,7 +593,7 @@ const MONDE_STYLE = `<style>
 .wm-gold{ background:linear-gradient(180deg,#fff2cf 0%,#ffe093 38%,#f4b24a 72%,#e0921f 100%);
   -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent; }
 .wm-hero{ display:flex; align-items:center; gap:12px; padding:16px 18px 4px; }
-.wm-back{ flex:0 0 38px; width:38px; height:38px; border-radius:12px; cursor:pointer;
+.wm-back{ flex:0 0 44px; width:44px; height:44px; border-radius:12px; cursor:pointer;
   background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.14); display:flex; align-items:center; justify-content:center; }
 .wm-back:active{ transform:scale(.95); }
@@ -497,7 +641,7 @@ const HUB_STYLE = `<style>
   -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent; }
 
 .hub-hero{ display:flex; align-items:center; gap:10px; padding:16px 18px 6px; }
-.hub-back{ flex:0 0 38px; width:38px; height:38px; border-radius:12px; cursor:pointer;
+.hub-back{ flex:0 0 44px; width:44px; height:44px; border-radius:12px; cursor:pointer;
   background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.14); display:flex; align-items:center; justify-content:center; }
 .hub-back:active{ transform:scale(.95); }
@@ -618,9 +762,9 @@ export async function mount(root, param) {
   // Garde-fou : si les données ne sont pas chargées (build/JSON), on n'explose pas.
   if (!FICHES.length) {
     root.innerHTML = `${STYLE}<div class="rvc"><div class="rvc-top">
-      <button class="rvc-back" aria-label="Retour">←</button>
-      <h1 class="rvc-h1">Révise ta conduite</h1></div>
-      <p class="rvc-sub" style="margin-top:20px">Les fiches arrivent très vite. Reviens dans un instant.</p></div>`;
+      <button class="rvc-back" aria-label="${escAttr(rvcT("back", "Retour"))}">←</button>
+      <h1 class="rvc-h1">${rvcText("empty_title", "Révise ta conduite")}</h1></div>
+      <p class="rvc-sub" style="margin-top:20px">${rvcText("empty_body", "Les fiches arrivent très vite. Reviens dans un instant.")}</p></div>`;
     root
       .querySelector(".rvc-back")
       ?.addEventListener("click", () => navigate("#/"));
@@ -711,10 +855,11 @@ export async function mount(root, param) {
       .map((f, i) => {
         const on = !!read[f.code];
         const next = i === firstUnread;
+        const title = rvcFicheTitle(f);
         return `<button class="wm-fiche${on ? " done" : ""}${next ? " next" : ""}" data-code="${escAttr(f.code)}">
-          ${next ? `<span class="wm-nextflag">à lire</span>` : ""}
+          ${next ? `<span class="wm-nextflag">${rvcText("unread", "à lire")}</span>` : ""}
           <span class="wm-chk ${on ? "filled" : "empty"}">${on ? CHK : ""}</span>
-          <span class="wm-ft">${esc(f.titre)}</span>
+          <span class="wm-ft">${rvcDisplay(title)}</span>
           <span class="wm-arw">${chev}</span>
         </button>`;
       })
@@ -722,16 +867,16 @@ export async function mount(root, param) {
 
     root.innerHTML = `${MONDE_STYLE}<div class="wm">
       <div class="wm-hero">
-        <button class="wm-back" aria-label="Retour aux mondes">${back}</button>
+        <button class="wm-back" aria-label="${escAttr(rvcT("back_worlds", "Retour aux mondes"))}">${back}</button>
         <span class="wm-med"><img src="${badge}" alt="" loading="lazy"></span>
         <div class="wm-htx">
-          <h1 class="wm-name wm-gold">${esc(m.nom)}</h1>
-          <div class="wm-sub">${esc(m.sous)}</div>
+          <h1 class="wm-name wm-gold">${rvcDisplay(rvcWorld(m, "name"))}</h1>
+          <div class="wm-sub">${rvcDisplay(rvcWorld(m, "sub"))}</div>
         </div>
       </div>
       <div class="wm-prog">
         <div class="wm-bar"><div class="wm-fill" style="width:${done ? Math.max(p, 5) : 0}%"></div></div>
-        <span class="wm-px">${done}/${fm.length} lues</span>
+        <span class="wm-px">${rvcText("read_count", "{done}/{total} lues", { done, total: fm.length })}</span>
       </div>
       <div class="wm-list">${items}</div>
     </div>`;
@@ -773,24 +918,26 @@ export async function mount(root, param) {
       const done = fm.filter((f) => read[f.code]).length;
       const mpct = fm.length ? Math.round((done / fm.length) * 100) : 0;
       const badge = `/art/reviser/${BADGE_MONDE[m.n] || "cible"}.png`;
+      const worldName = rvcWorld(m, "name");
+      const worldSub = rvcWorld(m, "sub");
       const bar = `<span class="hub-mbar"><span class="hub-mf" style="width:${done ? Math.max(mpct, 5) : 0}%"></span></span>`;
       const xn = `<span class="hub-wxn">${done ? `<b>${done}</b>/` : "0/"}${fm.length}</span>`;
 
       if (curMonde === m.n && nextF) {
         // Monde en cours : agrandi, porte le bouton « Continuer ».
         return `<div class="hub-world active">
-          <span class="hub-flag"><span class="hub-pulse"></span>${firstEver ? "À commencer" : "En cours"}</span>
-          <button class="hub-ahead" data-monde="${m.n}" aria-label="Voir toutes les fiches — ${escAttr(m.nom)}">
+          <span class="hub-flag"><span class="hub-pulse"></span>${firstEver ? rvcText("to_start", "À commencer") : rvcText("in_progress", "En cours")}</span>
+          <button class="hub-ahead" data-monde="${m.n}" aria-label="${escAttr(rvcT("see_all", "Voir toutes les fiches — {name}", { name: worldName }))}">
             <span class="hub-med"><img src="${badge}" alt="" loading="lazy"></span>
             <span class="hub-wbody">
-              <span class="hub-wname">${esc(m.nom)}</span>
-              <span class="hub-wsub">${esc(m.sous)}</span>
+              <span class="hub-wname">${rvcDisplay(worldName)}</span>
+              <span class="hub-wsub">${rvcDisplay(worldSub)}</span>
               <span class="hub-wprog">${bar}${xn}</span>
             </span>
           </button>
           <button class="hub-resume" ${firstEver ? "data-first" : "data-next"} data-code="${escAttr(nextF.code)}">
             <span class="hub-play"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5-11-6.5z" fill="#5a3406"/></svg></span>
-            <span class="hub-rtxt"><span class="hub-rlab">${firstEver ? "Commencer" : read[nextF.code] ? "Relire" : "Continuer"}</span><span class="hub-rttl">${esc(nextF.titre)}</span></span>
+            <span class="hub-rtxt"><span class="hub-rlab">${firstEver ? rvcText("start", "Commencer") : read[nextF.code] ? rvcText("reread", "Relire") : rvcText("continue", "Continuer")}</span><span class="hub-rttl">${rvcDisplay(rvcFicheTitle(nextF))}</span></span>
             <span class="hub-arw">${arw("#5a3406")}</span>
           </button>
         </div>`;
@@ -799,8 +946,8 @@ export async function mount(root, param) {
       return `<button class="hub-world" data-monde="${m.n}">
         <span class="hub-med"><img src="${badge}" alt="" loading="lazy"></span>
         <span class="hub-wbody">
-          <span class="hub-wname">${esc(m.nom)}</span>
-          <span class="hub-wsub">${esc(m.sous)}</span>
+          <span class="hub-wname">${rvcDisplay(worldName)}</span>
+          <span class="hub-wsub">${rvcDisplay(worldSub)}</span>
           <span class="hub-wprog">${bar}${xn}</span>
         </span>
         <span class="hub-arw">${arw("#b8afd6")}</span>
@@ -813,18 +960,18 @@ export async function mount(root, param) {
 
     root.innerHTML = `${HUB_STYLE}<div class="hub">
       <div class="hub-hero">
-        <button class="hub-back" aria-label="Retour à Réviser">${back}</button>
-        <h1 class="hub-title hub-gold">Révise ta conduite</h1>
+        <button class="hub-back" aria-label="${escAttr(rvcT("back_review", "Retour à Réviser"))}">${back}</button>
+        <h1 class="hub-title hub-gold">${rvcText("page_title", "Révise ta conduite")}</h1>
         <div class="hub-gauge">
           <span class="hub-ring" style="background:conic-gradient(#f4b24a 0 ${pct}%, rgba(20,12,60,.5) ${pct}% 100%)"></span>
           <span><b class="hub-gold">${lues}</b><small> / ${totalF}</small></span>
         </div>
       </div>
-      <div class="hub-kick">Tes 4 mondes</div>
+      <div class="hub-kick">${rvcText("four_worlds", "Tes 4 mondes")}</div>
       <div class="hub-worlds">${worlds}</div>
       <div class="hub-extra">
-        ${pf ? `<button class="hub-chip" data-pf="${escAttr(pf.code)}"><span class="hub-ci">${lightning}</span><span class="hub-ct"><b>Défi du jour</b><span>1 min</span></span></button>` : ""}
-        <button class="hub-chip" data-faute><span class="hub-ci">${loupe}</span><span class="hub-ct"><b>Trouve la faute</b><span>Repère l’erreur</span></span></button>
+        ${pf ? `<button class="hub-chip" data-pf="${escAttr(pf.code)}"><span class="hub-ci">${lightning}</span><span class="hub-ct"><b>${rvcText("daily_challenge", "Défi du jour")}</b><span>${rvcText("one_min", "1 min")}</span></span></button>` : ""}
+        <button class="hub-chip" data-faute><span class="hub-ci">${loupe}</span><span class="hub-ct"><b>${rvcText("find_fault", "Trouve la faute")}</b><span>${rvcText("spot_error", "Repère l’erreur")}</span></span></button>
       </div>
     </div>`;
     wireHome();
@@ -937,6 +1084,9 @@ export async function mount(root, param) {
         groups.every((g, i) => g2[i] && g.steps.length === g2[i].steps.length);
       if (aligned) groupsTR = g2;
     }
+    const flatStepsTR = grouped
+      ? groupsTR?.flatMap((g) => g.steps) || null
+      : stepsTR;
 
     const doneSet = new Set(
       (loadGestes()[f.code] || []).filter((i) => i < total),
@@ -1119,10 +1269,16 @@ export async function mount(root, param) {
       </div>
     </div>`;
 
-    wireFicheDeck(f, flatSteps, coach, rtl);
+    wireFicheDeck(f, flatSteps, flatStepsTR, coach, rtl);
   }
 
-  function wireFicheDeck(f, flatSteps, coach = [], rtl = false) {
+  function wireFicheDeck(
+    f,
+    flatSteps,
+    flatStepsTR,
+    coach = [],
+    rtl = false,
+  ) {
     root.querySelector(".fd-back")?.addEventListener("click", () => {
       view = "home";
       render();
@@ -1167,8 +1323,10 @@ export async function mount(root, param) {
     root.querySelector("[data-order]")?.addEventListener("click", () => {
       orderPlaced = [];
       const flat = flatSteps && flatSteps.length ? flatSteps : f.methode || [];
+      const translated =
+        flatStepsTR && flatStepsTR.length === flat.length ? flatStepsTR : null;
       orderPool = flat
-        .map((t, i) => ({ i, t }))
+        .map((t, i) => ({ i, t: translated ? translated[i] : t }))
         .sort(() => Math.random() - 0.5);
       view = "order";
       render();
@@ -1178,6 +1336,7 @@ export async function mount(root, param) {
   function renderOrder() {
     const f = getFiche(code);
     const steps = (f && f.methode) || [];
+    const title = f ? rvcFicheTitle(f) : "";
     if (!f || steps.length < 2) {
       view = "fiche";
       return render();
@@ -1187,9 +1346,9 @@ export async function mount(root, param) {
       haptic("success");
       root.innerHTML = `${STYLE}<div class="rvc"><div class="rvc-done">
         <div class="rvc-done-e">${medallion("check", "green", { size: 64 })}</div>
-        <div class="rvc-done-t">Dans l’ordre, nickel !</div>
-        <p class="rvc-sub">Les ${steps.length} étapes de « ${esc(f.titre)} » : pliées.</p>
-        <button class="rvc-go" data-next>Continuer</button>
+        <div class="rvc-done-t">${rvcText("order_done", "Dans l’ordre, nickel !")}</div>
+        <p class="rvc-sub">${rvcText("order_done_body", "Les {count} étapes de « {title} » : pliées.", { count: steps.length, title })}</p>
+        <button class="rvc-go" data-next>${rvcText("continue", "Continuer")}</button>
       </div></div>`;
       root.querySelector("[data-next]").addEventListener("click", () => {
         view = "fiche";
@@ -1200,22 +1359,22 @@ export async function mount(root, param) {
     const placed = orderPlaced
       .map(
         (p, idx) =>
-          `<div class="rvc-oslot"><span class="rvc-onum">${idx + 1}</span><span>${esc(p.t)}</span></div>`,
+          `<div class="rvc-oslot"><span class="rvc-onum">${idx + 1}</span><span>${rvcDisplay(p.t)}</span></div>`,
       )
       .join("");
     const pool = orderPool
       .map(
         (p) =>
-          `<button class="rvc-ochip" data-oi="${p.i}">${esc(p.t)}</button>`,
+          `<button class="rvc-ochip" data-oi="${p.i}">${rvcDisplay(p.t)}</button>`,
       )
       .join("");
     root.innerHTML = `${STYLE}<div class="rvc">
       <div class="rvc-top">
-        <button class="rvc-back" aria-label="Retour à la fiche">←</button>
-        <h1 class="rvc-h1" style="font-size:17px">${esc(f.titre)}</h1>
+        <button class="rvc-back" aria-label="${escAttr(rvcT("back_card", "Retour à la fiche"))}">←</button>
+        <h1 class="rvc-h1" style="font-size:17px">${rvcDisplay(title)}</h1>
       </div>
       <div class="rvc-prog">${orderPlaced.length + 1} / ${steps.length}</div>
-      <p class="rvc-ohint">Dans le bon ordre. À toi.</p>
+      <p class="rvc-ohint">${rvcText("order_hint", "Dans le bon ordre. À toi.")}</p>
       ${placed}
       <div class="rvc-opool">${pool}</div>
     </div>`;
@@ -1386,7 +1545,9 @@ export async function mount(root, param) {
   async function showCertBridge(compId, good, total) {
     const { moniteur, certified } = await certState(compId);
     const f = getFiche(compId);
-    const titre = f ? f.titre : "cette compétence";
+    const titre = f
+      ? rvcFicheTitle(f)
+      : rvcT("skill_fallback", "cette compétence");
     const done = moniteur || certified;
     track("revision_conduite_cert_bridge", { code: compId, done });
 
@@ -1398,21 +1559,21 @@ export async function mount(root, param) {
       // certification à faire — juste un petit lien pour la revoir dans Mon permis.
       root.innerHTML = `${PONT_STYLE}<div class="pont anim-slide-up">
         <div class="pont-med">${CHECK}</div>
-        <span class="pont-kick">Déjà dans Mon permis</span>
-        <h1 class="pont-ttl">Déjà certifiée par toi</h1>
-        <p class="pont-p">« <b>${esc(titre)}</b> » est déjà acquise dans ton parcours. Beau boulot — continue à réviser quand tu veux.</p>
-        <button class="pont-cta" data-continue type="button">Continuer à réviser</button>
-        <button class="pont-link" data-revoir type="button">Revoir dans Mon permis →</button>
+        <span class="pont-kick">${rvcText("cert_done_kicker", "Déjà dans Mon permis")}</span>
+        <h1 class="pont-ttl">${rvcText("cert_done_title", "Déjà certifiée par toi")}</h1>
+        <p class="pont-p">${rvcRich("cert_done_body", "« {title} » est déjà acquise dans ton parcours. Beau boulot — continue à réviser quand tu veux.", { title: titre })}</p>
+        <button class="pont-cta" data-continue type="button">${rvcText("cert_keep", "Continuer à réviser")}</button>
+        <button class="pont-link" data-revoir type="button">${rvcText("cert_review", "Revoir dans Mon permis →")}</button>
       </div>`;
     } else {
       // Non certifiée : on propose de la certifier via le quiz officiel.
       root.innerHTML = `${PONT_STYLE}<div class="pont anim-slide-up">
         <div class="pont-med">${BOUCLIER}</div>
-        <span class="pont-kick">Quiz réussi</span>
-        <h1 class="pont-ttl">Prêt·e à certifier cette compétence ?</h1>
-        <p class="pont-p">Tu viens de réviser « <b>${esc(titre)}</b> ». Certifie-la pour la faire avancer dans <b>Mon permis</b> — un quiz officiel de 5 questions confirme que c'est acquis.</p>
-        <button class="pont-cta" data-certify type="button">Certifier cette compétence</button>
-        <button class="pont-ghost" data-continue type="button">Plus tard</button>
+        <span class="pont-kick">${rvcText("quiz_passed", "Quiz réussi")}</span>
+        <h1 class="pont-ttl">${rvcText("cert_prompt", "Prêt·e à certifier cette compétence ?")}</h1>
+        <p class="pont-p">${rvcRich("cert_prompt_body", "Tu viens de réviser « {title} ». Certifie-la pour la faire avancer dans {product} — un quiz officiel de 5 questions confirme que c'est acquis.", { title: titre, product: rvcT("my_licence", "Mon permis") })}</p>
+        <button class="pont-cta" data-certify type="button">${rvcText("certify", "Certifier cette compétence")}</button>
+        <button class="pont-ghost" data-continue type="button">${rvcText("later", "Plus tard")}</button>
       </div>`;
     }
 

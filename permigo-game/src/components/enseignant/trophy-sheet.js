@@ -12,7 +12,10 @@
 // nav SANS redirection ni masquage manuel. Cliquer un trophée du rail ouvre donc
 // son détail directement, en place (plus de navigation « page en flou »).
 // ═══════════════════════════════════════════════════════════════
-import { openBottomSheet } from "@/components/common/bottom-sheet.js";
+import {
+  openBottomSheet,
+  trustedBottomSheetHtml,
+} from "@/components/common/bottom-sheet.js";
 import { esc } from "@/utils/escape.js";
 import { icon } from "@/utils/icons.js";
 import { haptic } from "@/utils/haptic.js";
@@ -56,7 +59,7 @@ export const TIERS = {
 export const TIER_ORDER = ["bronze", "argent", "or", "platine", "diamant"];
 
 // ─── Les 12 trophées (jalons pédagogiques) ───────────────────────
-export const TROPHEES = [
+const TROPHEES = [
   // ─ Bronze
   {
     id: "premiere_seance",
@@ -188,7 +191,7 @@ export const TROPHEES = [
 ];
 
 // Badge 3D par jalon (assets public/skins/badge-3d-*.webp).
-export const BADGE_IMG = {
+const BADGE_IMG = {
   premiere_seance: "badge-3d-01",
   dix_comps: "badge-3d-02",
   premier_eleve: "badge-3d-03",
@@ -398,7 +401,7 @@ export function openTrophySheet(t, opts = {}) {
   const { overlay, close } = openBottomSheet({
     bgClass: "trsh-bg",
     sheetSelector: ".trsh",
-    html: _sheetHtml(t, cfg),
+    html: trustedBottomSheetHtml(_sheetHtml(t, cfg)),
     labelledBy: "trsh-title",
     triggerEl: opts.triggerEl,
   });

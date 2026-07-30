@@ -60,7 +60,7 @@ export function recompensesTabs(active, { dark = false } = {}) {
   border: 1px solid var(--bo);
 }
 .rct-tab {
-  flex: 1; border: 0; border-radius: 12px; padding: 8px 4px; min-height: 34px;
+  flex: 1; border: 0; border-radius: 12px; padding: 8px 4px; min-height: 44px;
   cursor: pointer; text-align: center; background: transparent;
   font: 600 12.5px/1 'Fredoka', sans-serif; color: var(--mu);
   transition: background .16s cubic-bezier(.23,1,.32,1), color .16s;

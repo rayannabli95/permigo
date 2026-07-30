@@ -50,6 +50,10 @@ const VS_I18N = {
     loading: "Loading…",
     nf_title: "Skill not found",
     nf_body: "This skill doesn't exist. Go back to your journey to pick one.",
+    load_title: "Verification unavailable",
+    load_body:
+      "We couldn't verify this skill. Check your connection and try again.",
+    retry: "Try again",
     comp_fallback: "Skill",
     blocked:
       "Your instructor already validated this skill — nothing to do here.",
@@ -93,6 +97,9 @@ const VS_I18N = {
     loading: "جارٍ التحميل…",
     nf_title: "المهارة غير موجودة",
     nf_body: "هذه المهارة غير موجودة. عد إلى مسارك لاختيار واحدة.",
+    load_title: "التحقق غير متاح",
+    load_body: "تعذّر التحقق من هذه المهارة. افحص اتصالك وحاول مجددًا.",
+    retry: "أعد المحاولة",
     comp_fallback: "مهارة",
     blocked: "سبق أن صادق مدرّبك على هذه المهارة — لا شيء تفعله هنا.",
     hero_p:
@@ -158,7 +165,7 @@ const STYLE = `<style>
 .vs { max-width: 480px; margin: 0 auto; padding: 0 16px calc(110px + env(safe-area-inset-bottom));
   font-family: 'Inter', sans-serif; color: var(--ink); }
 .vs-top { display:flex; align-items:center; gap:10px; padding:16px 0 8px; }
-.vs-back { width:38px; height:38px; border-radius:11px; border:0; cursor:pointer;
+.vs-back { width:44px; height:44px; border-radius:11px; border:0; cursor:pointer;
   background: var(--su, #fff); color: var(--ink); font-size:20px; line-height:1;
   box-shadow: 0 1px 4px rgba(0,0,0,.08); flex-shrink:0; }
 .vs-back:active { transform: scale(0.95); }
@@ -282,7 +289,22 @@ function blockedScreen(sub) {
   </div>`;
 }
 
+function loadErrorScreen(sub) {
+  return `${STYLE}<div class="vs">
+    ${topBar(sub?.n || vsTR("comp_fallback", "Compétence"))}
+    <div class="vs-card vs-warn">
+      ${icon("alert-circle", { size: 20 })}
+      <div>
+        <b>${vsD("load_title", "Vérification indisponible")}</b>
+        <p>${vsD("load_body", "Impossible de vérifier cette compétence. Vérifie ta connexion, puis réessaie.")}</p>
+        <button class="vs-ghost" id="vs-retry-load" type="button">${vsD("retry", "Réessayer")}</button>
+      </div>
+    </div>
+  </div>`;
+}
+
 function introScreen(sub, cat, already) {
+  const ficheHref = `#/revision-conduite/${encodeURIComponent(String(sub.c ?? ""))}`;
   const fiche = getFiche(sub.c);
   const steps = (fiche?.methode || []).slice(0, 4);
   const ficheList = steps.length
@@ -324,7 +346,7 @@ function introScreen(sub, cat, already) {
           <b>${vsD("step1_t", "Relis la méthode")}</b>
           <span>${vsD("step1_s", "Un rappel rapide de ce qu'il faut maîtriser.")}</span>
           <div class="vs-step-fiche">${ficheList}</div>
-          <a class="vs-fiche-link" href="#/revision-conduite/${esc(sub.c)}">${icon("book", { size: 14 })} ${vsD("fiche_link", "Voir la fiche complète")}</a>
+          <a class="vs-fiche-link" href="${escAttr(ficheHref)}">${icon("book", { size: 14 })} ${vsD("fiche_link", "Voir la fiche complète")}</a>
         </div>
       </div>
       <div class="vs-step">
@@ -404,10 +426,31 @@ export async function mount(root, param) {
       .maybeSingle(),
   ]);
 
+  const valError =
+    valRes.status === "rejected"
+      ? valRes.reason || new Error("Lecture des validations rejetée")
+      : valRes.value?.error;
+  const selfError =
+    selfRes.status === "rejected"
+      ? selfRes.reason || new Error("Lecture des auto-validations rejetée")
+      : selfRes.value?.error;
+  if (valError || selfError) {
+    console.error("[valider-seul] vérification initiale", {
+      validations: valError || null,
+      selfValidations: selfError || null,
+    });
+    root.innerHTML = loadErrorScreen(sub);
+    wireBack(root);
+    root
+      .querySelector("#vs-retry-load")
+      ?.addEventListener("click", () => mount(root, compId));
+    return;
+  }
+
   const acquisMoniteur =
-    valRes.status === "fulfilled" && valRes.value.data?.statut === "acquis";
+    valRes.value.data?.statut === "acquis";
   const already =
-    selfRes.status === "fulfilled" ? selfRes.value.data || null : null;
+    selfRes.value.data || null;
 
   if (acquisMoniteur) {
     root.innerHTML = blockedScreen(sub);

@@ -18,7 +18,7 @@ import {
 // ─── Texte ───────────────────────────────────────────────────────
 
 // Esc + **mot** → <strong> + auto-bold des chiffres/unités/mots-pièges
-export function richEsc(str) {
+function richEsc(str) {
   return esc(String(str ?? ""))
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
     .replace(
@@ -175,14 +175,14 @@ function pickVaried(pool, last) {
   return i;
 }
 
-export function pickPraise(lang = getLang()) {
+function pickPraise(lang = getLang()) {
   _lastPraise = pickVaried(PRAISES, _lastPraise);
   return (
     (lang !== "fr" && PRAISES_I18N[lang]?.[_lastPraise]) || PRAISES[_lastPraise]
   );
 }
 
-export function pickCoachHead(lang = getLang()) {
+function pickCoachHead(lang = getLang()) {
   _lastCoach = pickVaried(COACH_HEADS, _lastCoach);
   return (
     (lang !== "fr" && COACH_HEADS_I18N[lang]?.[_lastCoach]) ||
@@ -209,7 +209,7 @@ const RESULT_MSGS = {
   ],
 };
 
-export function pickResultMsg({ perfect, passed }, lang = getLang()) {
+function pickResultMsg({ perfect, passed }, lang = getLang()) {
   const key = perfect ? "perfect" : passed ? "passed" : "learn";
   const pool = RESULT_MSGS[key];
   const i = Math.floor(Math.random() * pool.length);
@@ -221,7 +221,7 @@ export function pickResultMsg({ perfect, passed }, lang = getLang()) {
 const KEYS = ["A", "B", "C", "D", "E", "F"];
 
 // Pips segmentés (1 par question) — remplace la barre fine
-export function pipsHTML(idx, total) {
+function pipsHTML(idx, total) {
   const pips = Array.from({ length: total }, (_, i) => {
     const cls = i < idx ? "done" : i === idx ? "cur" : "";
     return `<span class="qz-pip ${cls}"></span>`;
@@ -340,15 +340,21 @@ export function resultHTML({ score, total, ctaLabel = "Continuer" }) {
 }
 
 // Mascotte d'angle (état pensif/célébration/coach)
+const MASCOT_STATES = new Set(["think", "celebrate", "coach", "hello"]);
+function safeMascotState(state) {
+  return MASCOT_STATES.has(state) ? state : "think";
+}
+
 export function mascotHTML(state = "think") {
-  return `<img class="qz-mascot" src="/skins/mascot-${esc(state)}.png" alt="" aria-hidden="true" />`;
+  const safeState = safeMascotState(state);
+  return `<img class="qz-mascot" src="/skins/mascot-${safeState}.png" alt="" aria-hidden="true" />`;
 }
 
 export function setMascot(container, state) {
   const img = container.querySelector(".qz-mascot");
   if (!img) return;
   // Swap src only if actually different (avoids spurious reflow)
-  const next = `/skins/mascot-${state}.png`;
+  const next = `/skins/mascot-${safeMascotState(state)}.png`;
   if (img.src.endsWith(next.replace(/^\//, ""))) return;
   img.src = next;
   // Micro-pop on state change: remove + force reflow + re-add so the

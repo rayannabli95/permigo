@@ -65,7 +65,7 @@ const STYLE = `<style>
   padding: 0 0 calc(96px + env(safe-area-inset-bottom, 0px));
   background: var(--bg); color: var(--ink);
   font-family: var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
-  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* ── En-tête : titre + Partager ── */
@@ -325,8 +325,13 @@ async function _loadData(me) {
         : Promise.resolve({ data: null }),
     ]);
 
-  if (valsRes.error) throw valsRes.error;
-  if (elevesRes.error) throw elevesRes.error;
+  const loadError =
+    valsRes.error ||
+    profileRes.error ||
+    elevesRes.error ||
+    activeRes.error ||
+    ecoleRes.error;
+  if (loadError) throw loadError;
 
   const eleveIds = (elevesRes.data || []).map((e) => e.id);
   const studentsTotal = eleveIds.length;

@@ -7,7 +7,7 @@
 // tip      : conseil du coach (astuce mémo ou erreur courante)
 // ═══════════════════════════════════════════════════════════════
 
-export const REMC_DETAILS = {
+const REMC_DETAILS = {
   // ─── MONDE 1 — Maîtrise du véhicule ──────────────────────────
   C1a: {
     summary:

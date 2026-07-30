@@ -3,10 +3,41 @@
 // Monté par main.js avant le chrome tant que parental_consent_required
 // est vrai et parental_consent_given_at est null.
 // ═══════════════════════════════════════════════════════════════
-import { escAttr } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { icon } from "@/utils/icons.js";
 import { track } from "@/services/analytics.js";
 import { logout } from "@/auth/auth.js";
+import { getLang } from "@/utils/lang.js";
+
+const CB_I18N = {
+  en: {
+    title: "Waiting for your parent's approval",
+    subtitle:
+      "You are under 15: a parent or guardian must approve your registration before you can use PermiGo. Send them the link below again if needed.",
+    copy_link: "Copy the link for my parent",
+    no_link: "Ask your driving school to send the approval request again.",
+    logout: "Log out",
+    copied: "✓ Link copied",
+  },
+  ar: {
+    title: "بانتظار موافقة ولي أمرك",
+    subtitle:
+      "عمرك أقل من 15 عامًا: يجب أن يوافق أحد والديك أو الوصي عليك على تسجيلك قبل أن تتمكن من استخدام بيرميغو. أرسل إليه الرابط أدناه مرة أخرى عند الحاجة.",
+    copy_link: "نسخ الرابط لولي أمري",
+    no_link: "اطلب من مدرسة تعليم القيادة إعادة إرسال طلب الموافقة.",
+    logout: "تسجيل الخروج",
+    copied: "✓ تم نسخ الرابط",
+  },
+};
+
+function cbt(key, fr) {
+  const lang = getLang();
+  return esc((lang !== "fr" && CB_I18N[lang]?.[key]) || fr);
+}
+
+function cbDir() {
+  return getLang() === "ar" ? ' dir="rtl" lang="ar"' : "";
+}
 
 const STYLE = `<style>
   .cb { position:fixed; inset:0; z-index:9000; overflow-y:auto;
@@ -38,28 +69,28 @@ export function mountConsentBlocked(root, me) {
     : "";
 
   root.innerHTML = `${STYLE}
-    <div class="cb">
+    <div class="cb"${cbDir()}>
       <div class="cb-ico">${icon("users", { size: 34 })}</div>
-      <h1 class="cb-title">En attente de l'accord de ton parent</h1>
-      <p class="cb-sub">Tu as moins de 15 ans : un parent ou tuteur doit valider ton inscription avant que tu puisses utiliser PermiGo. Renvoie-lui le lien ci-dessous si besoin.</p>
+      <h1 class="cb-title">${cbt("title", "En attente de l'accord de ton parent")}</h1>
+      <p class="cb-sub">${cbt("subtitle", "Tu as moins de 15 ans : un parent ou tuteur doit valider ton inscription avant que tu puisses utiliser PermiGo. Renvoie-lui le lien ci-dessous si besoin.")}</p>
       ${
         link
           ? `
         <div class="cb-link-row"><input class="cb-input" id="cb-link" type="text" readonly value="${escAttr(link)}" /></div>
-        <button class="cb-btn cb-btn-primary" id="cb-copy" type="button">${icon("copy", { size: 16 })} Copier le lien pour mon parent</button>
+        <button class="cb-btn cb-btn-primary" id="cb-copy" type="button">${icon("copy", { size: 16 })} ${cbt("copy_link", "Copier le lien pour mon parent")}</button>
       `
-          : `<p class="cb-sub">Demande à ton auto-école de relancer la validation.</p>`
+          : `<p class="cb-sub">${cbt("no_link", "Demande à ton auto-école de relancer la validation.")}</p>`
       }
-      <button class="cb-btn cb-btn-ghost" id="cb-logout" type="button">Se déconnecter</button>
+      <button class="cb-btn cb-btn-ghost" id="cb-logout" type="button">${cbt("logout", "Se déconnecter")}</button>
     </div>`;
 
   root.querySelector("#cb-copy")?.addEventListener("click", async () => {
     try {
       await navigator.clipboard.writeText(link);
       const b = root.querySelector("#cb-copy");
-      b.textContent = "✓ Lien copié";
+      b.textContent = cbt("copied", "✓ Lien copié");
       setTimeout(() => {
-        b.textContent = "Copier le lien pour mon parent";
+        b.innerHTML = `${icon("copy", { size: 16 })} ${cbt("copy_link", "Copier le lien pour mon parent")}`;
       }, 2000);
     } catch {
       root.querySelector("#cb-link")?.select();

@@ -13,7 +13,7 @@ import { playReward } from "@/utils/sound.js";
 import { haptic } from "@/utils/haptic.js";
 
 // Drapeau lu par roue.js après le tour pour pitcher l'install au bon moment.
-export const INSTALL_AFTER_ROUE_KEY = "pg-install-after-roue";
+const INSTALL_AFTER_ROUE_KEY = "pg-install-after-roue";
 
 const CSS = `
   .fqr{position:fixed;inset:0;z-index:8600;display:flex;flex-direction:column;align-items:center;justify-content:center;

@@ -156,6 +156,10 @@ const STYLE = `<style>
   color: var(--ink);
   margin-bottom: 4px;
 }
+.bl-kpi-val.score-neutral { color: var(--mu2); }
+.bl-kpi-val.score-good { color: var(--grk); }
+.bl-kpi-val.score-watch { color: #a16207; }
+.bl-kpi-val.score-low { color: var(--rdk); }
 .bl-kpi-val .bl-kpi-unit { font-size: .55em; color: var(--mu2); font-family: var(--ens-body, 'Inter'); }
 .bl-kpi-streak { grid-column: 1 / -1; }
 .bl-kpi-streak .bl-kpi-val { display: inline-flex; align-items: center; gap: 8px; }
@@ -389,13 +393,13 @@ function renderKPI(kpi) {
   // Donnée vide ≠ échec : aucun quiz fait → état neutre, pas un 0 % rouge
   // (le bilan est montrable aux parents).
   const noQuiz = !kpi.quiz_total;
-  const scoreColor = noQuiz
-    ? "var(--mu2)"
+  const scoreTone = noQuiz
+    ? "score-neutral"
     : kpi.score_moyen >= 70
-      ? "var(--grk)"
+      ? "score-good"
       : kpi.score_moyen >= 50
-        ? "#a16207"
-        : "var(--rdk)";
+        ? "score-watch"
+        : "score-low";
 
   return `
 <div class="bl-kpi-grid">
@@ -405,7 +409,7 @@ function renderKPI(kpi) {
     <span class="bl-kpi-delta flat">Validées au total</span>
   </div>
   <div class="bl-kpi">
-    <div class="bl-kpi-val" style="color:${esc(scoreColor)}">${noQuiz ? "—" : kpi.score_moyen != null ? kpi.score_moyen + "%" : "—"}</div>
+    <div class="bl-kpi-val ${scoreTone}">${noQuiz ? "—" : kpi.score_moyen != null ? kpi.score_moyen + "%" : "—"}</div>
     <div class="bl-kpi-label">Score moyen en Révision</div>
     <span class="bl-kpi-delta ${!noQuiz && kpi.score_moyen >= 70 ? "up" : "flat"}">${noQuiz ? "Aucun quiz fait" : `${kpi.quiz_reussis ?? 0}/${kpi.quiz_total} réussis`}</span>
   </div>
@@ -541,8 +545,16 @@ export async function mount(root, eleveId) {
     bilanRes.status === "fulfilled"
       ? bilanRes.value
       : { data: null, error: bilanRes.reason };
+  const ecoleError =
+    ecoleRes.status === "rejected"
+      ? ecoleRes.reason || new Error("Lecture de l'école rejetée")
+      : ecoleRes.value?.error;
+  if (ecoleError) {
+    // Le bilan reste utilisable : seul le nom d'école repasse sur « PermiGo ».
+    console.error("[bilan] nom de l'école", ecoleError);
+  }
   const ecoleNom =
-    (ecoleRes.status === "fulfilled" && ecoleRes.value?.data?.nom) || "PermiGo";
+    (!ecoleError && ecoleRes.value?.data?.nom) || "PermiGo";
 
   if (error || !data) {
     toast("« Bilan » indisponible", "error");

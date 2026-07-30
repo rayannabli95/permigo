@@ -146,6 +146,7 @@ const STYLE = `<style>
     font-family: inherit;
     flex-shrink: 0;
   }
+  .me-search-clear::before { content: ''; position: absolute; inset: -11px; }
   .me-search-clear.visible { display: flex; }
 
   /* ── Pipeline : groupes par statut ── */
@@ -267,7 +268,7 @@ const STYLE = `<style>
   .me-more {
     flex-shrink: 0;
     align-self: center;
-    width: 36px; height: 36px;
+    width: 44px; height: 44px;
     margin-right: -4px;
     display: flex; align-items: center; justify-content: center;
     border: none; background: transparent; border-radius: 8px;
@@ -375,7 +376,7 @@ const STYLE = `<style>
   }
   .me-tab {
     flex: 1; position: relative; border: 0; border-radius: 11px; padding: 10px 2px;
-    min-height: 40px; cursor: pointer; text-align: center;
+    min-height: 44px; cursor: pointer; text-align: center;
     font: 700 12.5px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: .1px;
     color: #6f6e92; background: transparent; transition: background .16s, color .16s;
     -webkit-tap-highlight-color: transparent;
@@ -395,7 +396,7 @@ const STYLE = `<style>
 
   /* Bouton cloche sur une ligne « à relancer » (grouped view) → onglet Relances */
   .me-bell {
-    width: 34px; height: 34px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
     border-radius: 11px; margin-right: -4px; border: 0; cursor: pointer;
     color: #b45309; background: #fef3c7; box-shadow: inset 0 0 0 1px rgba(217,119,6,.25);
     -webkit-tap-highlight-color: transparent; transition: transform .1s;
@@ -418,7 +419,7 @@ const STYLE = `<style>
   /* ── Panneau Classement (léger, raccord Pupitre — pas le skin Arène nuit) ── */
   .me-cl-seg { display: flex; gap: 4px; margin: 0 0 14px; padding: 4px; background: #eef0f6; border-radius: 13px; }
   .me-cl-seg button {
-    flex: 1; min-height: 40px; padding: 8px 4px; border: 0; border-radius: 10px; background: transparent;
+    flex: 1; min-height: 44px; padding: 8px 4px; border: 0; border-radius: 10px; background: transparent;
     color: #5a6188; font: 700 12px/1 'Inter', sans-serif; cursor: pointer; -webkit-tap-highlight-color: transparent;
   }
   .me-cl-seg button.on { background: #fff; color: #4f46e5; box-shadow: 0 2px 6px -2px rgba(60,50,130,.25); }
@@ -466,7 +467,7 @@ const STYLE = `<style>
   /* flex:1 0 auto → remplit si large, scrolle horizontalement si trop étroit (5 items). */
   .me-seg { display: flex; gap: 4px; padding: 4px; margin: 0 0 14px; background: #eef0f6; border-radius: 13px; overflow-x: auto; scrollbar-width: none; }
   .me-seg::-webkit-scrollbar { display: none; }
-  .me-seg-btn { flex: 1 0 auto; min-height: 40px; padding: 8px 12px; border: 0; border-radius: 10px; background: transparent; color: #5a6188; font: 700 12px/1 'Inter', sans-serif; cursor: pointer; transition: background .15s, color .15s, box-shadow .15s, transform .1s; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
+  .me-seg-btn { flex: 1 0 auto; min-height: 44px; padding: 8px 12px; border: 0; border-radius: 10px; background: transparent; color: #5a6188; font: 700 12px/1 'Inter', sans-serif; cursor: pointer; transition: background .15s, color .15s, box-shadow .15s, transform .1s; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
   .me-seg-btn.on { background: #fff; color: #4f46e5; box-shadow: 0 2px 6px -2px rgba(60,50,130,.25); }
   .me-seg-btn:active { transform: scale(.96); }
   .me-seg-btn:focus-visible { outline: 2px solid #4f46e5; outline-offset: 1px; }
@@ -658,7 +659,27 @@ export async function mount(root) {
     return;
   }
 
-  await loadData();
+  const loaded = await loadData();
+  if (!loaded) {
+    root.innerHTML = `
+      ${STYLE}
+      <div class="me-page anim-slide-up">
+        <div class="me-hero">
+          <div class="me-hero-content">
+            <p class="me-hero-kicker">Suivi des élèves</p>
+            <h1 class="me-hero-title">« Mes élèves » indisponible</h1>
+            <p class="me-hero-sub">Vérifie ta connexion, puis réessaie.</p>
+            <div class="me-hero-actions">
+              <button id="me-retry" type="button">Réessayer</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    root
+      .querySelector("#me-retry")
+      ?.addEventListener("click", () => mount(root));
+    return;
+  }
   // Onglet Classement en entrée (deep-link/legacy) → charge AVANT le 1er
   // rendu pour éviter un flash « chargement » supplémentaire.
   if (_tab === "classement") await ensureRanking(_clMode);
@@ -715,8 +736,17 @@ async function loadData() {
     // Best-effort : si la RPC n'est pas déployée, la liste marche sans étiquette.
     sb
       .rpc("get_eleves_engagement")
-      .then((r) => r.data || [])
-      .catch(() => []),
+      .then((r) => {
+        if (r.error) {
+          console.error("[mes-eleves] engagement", r.error);
+          return [];
+        }
+        return r.data || [];
+      })
+      .catch((error) => {
+        console.error("[mes-eleves] engagement", error);
+        return [];
+      }),
   ]);
   const engMap = new Map();
   (engRows || []).forEach((r) => engMap.set(r.eleve_id, r));
@@ -726,7 +756,7 @@ async function loadData() {
     console.error("[mes-eleves] query error", e1);
     toast("Vérifie ta connexion, puis réessaie.", "error");
     _eleves = [];
-    return;
+    return false;
   }
 
   if (!elevesRaw || elevesRaw.length === 0) {
@@ -757,8 +787,16 @@ async function loadData() {
   //    seule contribution du moniteur courant (sinon 0/31 trompeur pour un
   //    élève suivi par un collègue). RLS partage déjà les validations école.
   const { data: valsRaw, error: e2 } = valsRes;
-
-  if (e2) console.error("[mes-eleves] validations query error", e2);
+  const { data: examsRaw, error: e3 } = examsRes;
+  if (e2 || e3) {
+    console.error("[mes-eleves] données de progression", {
+      validations: e2 || null,
+      examens: e3 || null,
+    });
+    toast("Progression des élèves indisponible — réessaie.", "error");
+    _eleves = [];
+    return false;
+  }
 
   // Map : eleve_id → Set des competence_id acquis (total école).
   // Le Set alimente à la fois le count et la liste des compétences manquantes.
@@ -780,10 +818,6 @@ async function loadData() {
   });
 
   // 3. Dernier examen par élève (le plus récent fait foi).
-  const { data: examsRaw, error: e3 } = examsRes;
-
-  if (e3) console.error("[mes-eleves] examens query error", e3);
-
   const lastExamByEleve = {};
   (examsRaw || []).forEach((ex) => {
     // ordonné desc → la première ligne vue par élève est la plus récente
@@ -833,6 +867,7 @@ async function loadData() {
         return touchedEleves.has(a.id) ? -1 : 1;
       return (a.prenom || "").localeCompare(b.prenom || "");
     });
+  return true;
 }
 
 // ─── Drill mode : élèves bloqués sur une compétence ──────────────
@@ -2166,7 +2201,7 @@ function showUndoSnackbar(msg, onUndo, duration = 6000) {
       .me-undo-msg { flex: 1; min-width: 0; }
       .me-undo-btn {
         flex-shrink: 0; border: 0; cursor: pointer;
-        padding: 8px 14px; min-height: 36px; border-radius: var(--r);
+        padding: 8px 14px; min-height: 44px; border-radius: var(--r);
         background: rgba(255,255,255,.16); color: #fff;
         font: 700 13px/1 'Plus Jakarta Sans', sans-serif;
         -webkit-tap-highlight-color: transparent;

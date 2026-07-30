@@ -116,13 +116,21 @@ export async function verifyOtp(email, token) {
   });
   if (error) return { ok: false, error: error.message };
   // Recupère le profil après succès
-  const { data: profile } = await sb
+  const { data: profile, error: profileError } = await sb
     .from("profiles")
     .select(
       "id, auth_id, role, nom, prenom, username, date_naissance, email, auto_ecole_id, join_code, avatar_url, avatar_preset, unlocked_avatars, first_value_action_at, gemmes, parental_consent_required, parental_consent_given_at, parental_consent_token",
     )
     .eq("auth_id", data.user.id)
     .maybeSingle();
+  if (profileError) {
+    console.error("[auth] profil après OTP", profileError);
+    await sb.auth.signOut();
+    return {
+      ok: false,
+      error: "Impossible de charger le profil — réessaie",
+    };
+  }
   if (!profile) {
     await sb.auth.signOut();
     return { ok: false, error: "Profil introuvable — contacter l'admin" };

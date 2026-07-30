@@ -348,11 +348,12 @@ export async function mount(root, slugOrId) {
     await renderEcole(root, slugOrId);
   } catch (err) {
     console.error("[ecole] load error", err);
+    const notFound = err?.code === "ECOLE_NOT_FOUND";
     root.innerHTML = `${STYLE}<div class="ec">
       <div class="ec-err">
         <div class="ec-err-ico" aria-hidden="true">${icon("school", { size: 34 })}</div>
-        <div class="ec-err-title">École introuvable</div>
-        <div class="ec-err-sub">Vérifie l'URL ou reviens plus tard.</div>
+        <div class="ec-err-title">${notFound ? "École introuvable" : "Page temporairement indisponible"}</div>
+        <div class="ec-err-sub">${notFound ? "Vérifie l'URL de cette auto-école." : "Vérifie ta connexion ou reviens plus tard."}</div>
       </div>
     </div>`;
   }
@@ -365,38 +366,50 @@ async function renderEcole(root, slugOrId) {
 
   // Fetch école — essaie slug, puis id
   let ecole = null;
-  const { data: bySlug } = await sb
+  const { data: bySlug, error: bySlugError } = await sb
     .from("auto_ecoles")
     .select("id, nom, slug, ville")
     .eq("slug", slugOrId)
     .maybeSingle();
+  if (bySlugError) throw bySlugError;
   ecole = bySlug;
 
-  if (!ecole) {
-    const { data: byId } = await sb
+  const isUuid =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      slugOrId,
+    );
+  if (!ecole && isUuid) {
+    const { data: byId, error: byIdError } = await sb
       .from("auto_ecoles")
       .select("id, nom, slug, ville")
       .eq("id", slugOrId)
       .maybeSingle();
+    if (byIdError) throw byIdError;
     ecole = byId;
   }
 
-  if (!ecole) throw new Error("not found");
+  if (!ecole) {
+    const notFoundError = new Error("École introuvable");
+    notFoundError.code = "ECOLE_NOT_FOUND";
+    throw notFoundError;
+  }
 
   // Fetch moniteurs (aucune PII sensible)
-  const { data: moniteurs } = await sb
+  const { data: moniteurs, error: moniteursError } = await sb
     .from("profiles")
     .select("id, prenom, nom")
     .eq("auto_ecole_id", ecole.id)
     .in("role", ["enseignant", "moniteur"])
     .limit(6);
+  if (moniteursError) throw moniteursError;
 
   // Fetch stats : nb élèves actifs
-  const { count: nbEleves } = await sb
+  const { count: nbEleves, error: elevesError } = await sb
     .from("profiles")
     .select("id", { count: "exact", head: true })
     .eq("auto_ecole_id", ecole.id)
     .eq("role", "eleve");
+  if (elevesError) throw elevesError;
 
   const nbMoniteurs = (moniteurs || []).length;
   const nom = ecole.nom || "Auto-école";

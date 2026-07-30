@@ -112,6 +112,12 @@ const ROUE_I18N = {
     already_toast: "لقد أدرت العجلة اليوم. عد غدًا!",
   },
 };
+const ROUE_FR_RICH = {
+  note_solo:
+    "Les volants se gagnent en jouant, <b>jamais</b> avec de l’argent.",
+  note:
+    "Un <b>gros lot</b> peut tomber (rare !) si ton moniteur en a mis en jeu. Tu le récupères en vrai avec ton code. Les volants se gagnent en jouant, <b>jamais</b> avec de l’argent.",
+};
 function wtR(key, fr) {
   const l = getLang();
   return (l !== "fr" && ROUE_I18N[l]?.[key]) || fr;
@@ -182,7 +188,7 @@ const STYLE = `<style>
 }
 .roue-top { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
 .roue-back {
-  width: 40px; height: 40px; flex: none; border-radius: 13px;
+  width: 44px; height: 44px; flex: none; border-radius: 13px;
   border: 1px solid var(--line); background: rgba(255,255,255,.06);
   color: #fff; display: grid; place-items: center; cursor: pointer;
 }
@@ -520,7 +526,7 @@ export async function mount(root) {
 
   <div class="roue-note">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
-    <p>${solo ? wrtl(wtR("note_solo", "Les volants se gagnent en jouant, <b>jamais</b> avec de l’argent.")) : wrtl(wtR("note", `Un <b>gros lot</b> peut tomber (rare !) si ton moniteur en a mis en jeu. Tu le récupères en vrai avec ton code. Les volants se gagnent en jouant, <b>jamais</b> avec de l’argent.`))}</p>
+    <p>${solo ? wrtl(wtR("note_solo", ROUE_FR_RICH.note_solo)) : wrtl(wtR("note", ROUE_FR_RICH.note))}</p>
   </div>
 </div>`;
 

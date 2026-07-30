@@ -70,7 +70,7 @@ const VOYANT_GLYPHS = {
   frein: `<circle cx="0" cy="0" r="4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M 0 -2.2 v 2.8 M 0 2 v .01 M -6.5 -3.5 q -2 3.5 0 7 M 6.5 -3.5 q 2 3.5 0 7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>`,
 };
 
-export function cockpitSVG(opts = {}) {
+function cockpitSVG(opts = {}) {
   const hl = opts.hl || [];
   const has = (k) => hl.includes(k);
 
@@ -196,7 +196,7 @@ export function cockpitSVG(opts = {}) {
 
 // ── Brique 2 : pédalier (gros plan embrayage / frein / accél.) ──
 // opts: { hl:"embrayage"|"frein"|"accel", press:"frein"|…, vibr:bool }
-export function pedalesSVG(opts = {}) {
+function pedalesSVG(opts = {}) {
   const pedal = (key, x, w, h, label) => {
     const isHl = opts.hl === key;
     const isPress = opts.press === key;
@@ -232,7 +232,7 @@ export function pedalesSVG(opts = {}) {
 
 // ── Brique 3 : levier de vitesses (grille en H) ─────────────────
 // opts: { knobAt:"2", from:"4", to:"3" }
-export function levierSVG(opts = {}) {
+function levierSVG(opts = {}) {
   const POS = {
     1: [120, 52],
     2: [120, 116],
@@ -279,7 +279,7 @@ export function levierSVG(opts = {}) {
 
 // ── Brique 4 : feu tricolore vedette ────────────────────────────
 // etat: rouge | orange | vert | orange-clign | rouge-clign
-export function feuSVG(etat = "orange") {
+function feuSVG(etat = "orange") {
   const blink = etat.endsWith("-clign");
   const base = etat.replace("-clign", "");
   const lamp = (cy, key, col, dim) => {
@@ -346,7 +346,7 @@ const SIGN_HEADS = {
     <rect x="-26" y="-14" width="52" height="9" rx="4" fill="#fff"/>`,
 };
 
-export function panneauSVG(type) {
+function panneauSVG(type) {
   const head = SIGN_HEADS[type] || SIGN_HEADS.triangle;
   const flat = type === "agglo" || type === "agglo-fin";
   return `<svg class="qzv-svg" viewBox="0 0 360 190" focusable="false">

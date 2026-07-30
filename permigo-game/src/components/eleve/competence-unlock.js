@@ -66,7 +66,7 @@ function cwnD(key, fr, vars) {
 }
 
 /** Volants crédités à chaque compétence validée. */
-export const COMPETENCE_VOLANT_REWARD = 25;
+const COMPETENCE_VOLANT_REWARD = 25;
 
 // Catégorie REMC → monde (nom). C1→1, C2→2, …
 function worldForCategory(catId) {

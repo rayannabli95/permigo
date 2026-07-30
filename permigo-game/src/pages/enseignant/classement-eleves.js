@@ -74,7 +74,15 @@ export async function fetchRanking(me, { isTheorie = false } = {}) {
     sb.from("streaks").select("user_id, current_streak, last_activity_date"),
   ]);
 
-  if (elevesRes.error) {
+  const loadError =
+    elevesRes.error || valsRes.error || examsRes.error || streaksRes.error;
+  if (loadError) {
+    console.error("[classement-eleves] chargement", {
+      eleves: elevesRes.error || null,
+      validations: valsRes.error || null,
+      examens: examsRes.error || null,
+      series: streaksRes.error || null,
+    });
     return { error: true, ranked: [], hof: [], isTheorie };
   }
 
@@ -221,8 +229,8 @@ export async function mount(root, mode) {
 
   // ── Mapping vers la forme attendue par le skin Arène ──
   const fmt = isTheorie
-    ? (r) => `${r.score}<span class="of">quiz</span>`
-    : (r) => `${r.score}<span class="of">/${REMC_TOTAL}</span>`;
+    ? (r) => ({ value: r.score, suffix: "quiz" })
+    : (r) => ({ value: r.score, suffix: `/${REMC_TOTAL}` });
   const mapped = ranked.map((e, i) => ({
     rang: i + 1,
     id: e.id,
@@ -233,13 +241,13 @@ export async function mount(root, mode) {
     streak: e.streak,
   }));
 
-  const attrsOf = (r) =>
-    `role="button" tabindex="0" data-eleve-id="${escAttr(String(r.id))}"`;
   const top = mapped.slice(0, 3);
   const rest = mapped.slice(3);
   const hasPodium = top.length >= 3;
 
-  const podium = hasPodium ? arenePodium(top, { fmtScore: fmt, attrsOf }) : "";
+  const podium = hasPodium
+    ? arenePodium(top, { fmtScore: fmt, clickable: true })
+    : "";
   const listRows = hasPodium ? rest : mapped;
   const list = listRows.length
     ? `<div class="arn-list-head"><span class="lbl">${hasPodium ? "À partir du 4ᵉ" : "Classement"}</span><span class="rule"></span></div>
@@ -249,8 +257,7 @@ export async function mount(root, mode) {
              fmtScore: fmt,
              idx: i,
              clickable: true,
-             attrs: attrsOf(r),
-             rightHtml: _streakChip(r.streak),
+             showStreak: true,
            }),
          )
          .join("")}</div>`
@@ -282,16 +289,6 @@ function _header(isTheorie, n) {
       <button data-mode="theorie" role="tab" aria-selected="${isTheorie}">Révision <span class="sub">quiz 30 j</span></button>
     </div>
     ${effectif}`;
-}
-
-function _streakChip(s) {
-  // Mini-médaillon flamme : orange quand la série est vivante, gris (grammaire
-  // « inactif ») quand elle est éteinte — on garde la lecture on/off d'origine.
-  const med =
-    s > 0
-      ? medallion("flamme", "orange", { size: 16 })
-      : medallion("flamme", "slate", { size: 16 });
-  return `<span class="arn-chip flame${s > 0 ? "" : " off"}" title="${s > 0 ? `Actif ${s} jour${s > 1 ? "s" : ""} de suite` : "Inactif récemment"}">${med} ${s}j</span>`;
 }
 
 function _hofSection(hof) {

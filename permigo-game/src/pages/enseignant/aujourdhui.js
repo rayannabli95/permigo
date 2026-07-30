@@ -87,7 +87,7 @@ const STYLE = `<style>
     background: #eef1fb;
     font-family: 'Inter', sans-serif;
     color: #1a1c2e;
-    min-height: 100vh;
+    min-height: 100dvh;
   }
 
   /* ── Salutation ── */
@@ -574,6 +574,27 @@ export async function mount(root) {
 }
 
 // ─── Render principal ─────────────────────────────────────────────
+function renderLoadError(root, me, error) {
+  console.error("[aujourdhui] chargement", error);
+  toast("« Aujourd’hui » indisponible", "error");
+  root.innerHTML = `
+    ${STYLE}
+    <div class="aj-page">
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:72px 24px;text-align:center;">
+        ${medallion("cone", "orange", { size: 52 })}
+        <p style="margin:0;font:600 15px/1.5 'Inter',sans-serif;color:#1a1c2e;">
+          « Aujourd’hui » indisponible.<br>
+          <span style="font:500 13px/1.5 'Inter',sans-serif;color:#5a6188;">Vérifie ta connexion, puis réessaie.</span>
+        </p>
+        <button id="aj-retry" type="button" style="border:none;border-radius:999px;padding:13px 24px;min-height:44px;background:#4f46e5;color:#fff;font:700 14px/1 'Inter',sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent;">Réessayer</button>
+      </div>
+    </div>
+  `;
+  root
+    .querySelector("#aj-retry")
+    ?.addEventListener("click", () => renderInto(root, me));
+}
+
 async function renderInto(root, _me) {
   const today = todayISO();
   const yesterday = yesterdayISO();
@@ -638,26 +659,15 @@ async function renderInto(root, _me) {
 
   // Erreur bloquante (réseau, RLS…) → vrai état d'erreur récupérable.
   // Avant : un toast de 3s puis un dashboard « normal mais vide » trompeur.
-  const loadError = valsAll.error || elevesAll.error || todayValsRes.error;
+  const loadError =
+    valsAll.error ||
+    elevesAll.error ||
+    todayValsRes.error ||
+    yesterdayValsRes.error ||
+    profileRes.error ||
+    totalValsRes.error;
   if (loadError) {
-    console.error("[aujourdhui] chargement", loadError);
-    toast("« Aujourd’hui » indisponible", "error");
-    root.innerHTML = `
-      ${STYLE}
-      <div class="aj-page">
-        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:72px 24px;text-align:center;">
-          ${medallion("cone", "orange", { size: 52 })}
-          <p style="margin:0;font:600 15px/1.5 'Inter',sans-serif;color:#1a1c2e;">
-            « Aujourd’hui » indisponible.<br>
-            <span style="font:500 13px/1.5 'Inter',sans-serif;color:#5a6188;">Vérifie ta connexion, puis réessaie.</span>
-          </p>
-          <button id="aj-retry" type="button" style="border:none;border-radius:999px;padding:13px 24px;min-height:44px;background:#4f46e5;color:#fff;font:700 14px/1 'Inter',sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent;">Réessayer</button>
-        </div>
-      </div>
-    `;
-    root.querySelector("#aj-retry")?.addEventListener("click", () => {
-      renderInto(root, _me);
-    });
+    renderLoadError(root, _me, loadError);
     return;
   }
 
@@ -672,17 +682,27 @@ async function renderInto(root, _me) {
   const moniteurState = getMoniteurState(totalValsCount);
 
   // Élèves que j'ai validé + qui me sont attitrés
-  const { data: elevesValides } = await fetchAllRows(() =>
+  const elevesValidesRes = await fetchAllRows(() =>
     sb.from("validations").select("eleve_id").eq("validated_by", _me.id),
   );
+  if (elevesValidesRes.error) {
+    renderLoadError(root, _me, elevesValidesRes.error);
+    return;
+  }
+  const elevesValides = elevesValidesRes.data;
   const validatedByMe = new Set((elevesValides || []).map((v) => v.eleve_id));
 
-  const { data: acquisAll } = await fetchAllRows(() =>
+  const acquisRes = await fetchAllRows(() =>
     sb
       .from("validations")
       .select("eleve_id, competence_id")
       .eq("statut", "acquis"),
   );
+  if (acquisRes.error) {
+    renderLoadError(root, _me, acquisRes.error);
+    return;
+  }
+  const acquisAll = acquisRes.data;
   const acquisSetByEleve = {};
   (acquisAll || []).forEach((v) => {
     if (!v.competence_id) return;
@@ -692,12 +712,17 @@ async function renderInto(root, _me) {
   // Élèves ayant OBTENU le permis (dernier examen = 'recu') → ils sortent de la
   // formation active : ils ne doivent PLUS compter comme « prêts » ni encombrer
   // le roster (sinon un reçu très avancé reste affiché « Prête » à tort).
-  const { data: examsAll } = await fetchAllRows(() =>
+  const examsRes = await fetchAllRows(() =>
     sb
       .from("examens")
       .select("eleve_id, statut, created_at")
       .order("created_at", { ascending: false }),
   );
+  if (examsRes.error) {
+    renderLoadError(root, _me, examsRes.error);
+    return;
+  }
+  const examsAll = examsRes.data;
   const recuByEleve = new Set();
   const lastExamSeen = new Set();
   (examsAll || []).forEach((ex) => {

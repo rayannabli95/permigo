@@ -33,6 +33,9 @@ const NF_I18N = {
     load_err_toast: "Couldn't load notifications",
     update_err: "Update error",
     delete: "Delete",
+    mark_all_success: "All notifications marked as read",
+    deleted: "Notification deleted",
+    cancel: "Undo",
     refreshing: "Refreshing…",
     unread_one: "1 unread",
     unread_many: "{n} unread",
@@ -88,6 +91,9 @@ const NF_I18N = {
     load_err_toast: "تعذّر تحميل الإشعارات",
     update_err: "خطأ في التحديث",
     delete: "حذف",
+    mark_all_success: "تم تعليم كل الإشعارات كمقروءة",
+    deleted: "تم حذف الإشعار",
+    cancel: "تراجع",
     refreshing: "جارٍ التحديث…",
     unread_one: "غير مقروء",
     unread_many: "{n} غير مقروء",
@@ -768,7 +774,7 @@ async function loadNotifs(root, me) {
       const actionable = route && route !== "#/";
       html += `
         <div class="nf2-item-wrap" data-id="${escAttr(n.id)}">
-          <div class="nf2-delete-bg" aria-label="Supprimer">
+          <div class="nf2-delete-bg" aria-label="${escAttr(nt("delete", "Supprimer"))}">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
             ${esc(nt("delete", "Suppr."))}
           </div>
@@ -859,7 +865,11 @@ function wireItems(root, me, initialUnread) {
       unreadCount = 0;
       updateBadge();
       markAllBtn.textContent = nt("mark_all", "Tout lu");
-      toast("Toutes les notifications lues", "success", 2000);
+      toast(
+        nt("mark_all_success", "Toutes les notifications lues"),
+        "success",
+        2000,
+      );
       track("notifications.mark_all_read", {});
     });
   }
@@ -872,7 +882,9 @@ function wireItems(root, me, initialUnread) {
       const undoEl = document.createElement("div");
       undoEl.style.cssText =
         "position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;font:600 13px/1 Inter,sans-serif;z-index:999;display:flex;align-items:center;gap:12px;box-shadow:0 8px 24px rgba(0,0,0,.3)";
-      undoEl.innerHTML = `<span>Notification supprimée</span><button style="background:none;border:none;color:var(--a);font:700 12px/1 Inter,sans-serif;cursor:pointer;padding:0">Annuler</button>`;
+      undoEl.dir = getLang() === "ar" ? "rtl" : "ltr";
+      if (getLang() === "ar") undoEl.lang = "ar";
+      undoEl.innerHTML = `<span>${esc(nt("deleted", "Notification supprimée"))}</span><button style="background:none;border:none;color:var(--a);font:700 12px/1 Inter,sans-serif;cursor:pointer;padding:0">${esc(nt("cancel", "Annuler"))}</button>`;
       document.body.appendChild(undoEl);
 
       let undone = false;
@@ -893,7 +905,23 @@ function wireItems(root, me, initialUnread) {
         wrap.style.height = "0";
         wrap.style.opacity = "0";
         wrap.style.overflow = "hidden";
-        await sb.from("notifications").delete().eq("id", id);
+        try {
+          const { error } = await sb
+            .from("notifications")
+            .delete()
+            .eq("id", id);
+          if (error) throw error;
+        } catch (error) {
+          console.error("[notifications] suppression", error);
+          wrap.style.transition = "";
+          wrap.style.height = "";
+          wrap.style.opacity = "";
+          wrap.style.overflow = "";
+          const item = wrap.querySelector(".nf2-item");
+          if (item) item.style.transform = "";
+          toast("Suppression impossible — réessaie", "error");
+          return;
+        }
         setTimeout(() => wrap.remove(), 350);
         if (wrap.querySelector(".nf2-item.unread")) {
           unreadCount = Math.max(0, unreadCount - 1);
