@@ -121,7 +121,13 @@
     #splash .sp-logo img{opacity:0}
     #splash.is-fallback .sp-logo img{opacity:1}
     #splash.is-fallback .sp-logo video{display:none}
-    #splash .sp-go{font:800 16px/1 'Plus Jakarta Sans','Nunito',sans-serif;color:#a99cff;letter-spacing:.01em;opacity:0;animation:spGo 1.6s ease .5s forwards}
+    /* Le « bonjour » défile dans toutes les langues : hauteur figée (les
+       glyphes arabes, tamouls ou CJK sont plus hauts que le latin, sinon le
+       logo sautille) et repli system-ui pour les écritures que les polices
+       de marque ne couvrent pas. Le fondu était sur 1,6 s démarré à 0,5 s —
+       le texte n'atteignait sa pleine opacité qu'une fois le splash parti :
+       ramené à 0,3 s démarré à 0,15 s, pour que les mots soient LISIBLES. */
+    #splash .sp-go{font:800 16px/1.35 'Plus Jakarta Sans','Nunito',system-ui,sans-serif;color:#a99cff;letter-spacing:.01em;text-align:center;min-height:1.35em;opacity:0;animation:spGo .3s ease .15s forwards}
     @keyframes spFade{from{opacity:0}to{opacity:1}}
     @keyframes spGo{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
     /* Mouvement réduit : pas de vidéo, le logo fixe suffit. */
@@ -144,7 +150,7 @@
       <video src="%BASE_URL%splash-permigo.mp4"
              autoplay muted playsinline disablepictureinpicture preload="auto"></video>
     </div>
-    <div class="sp-go" aria-hidden="true">C'est parti</div>
+    <div class="sp-go" dir="auto" aria-hidden="true">Bonjour</div>
   </div>
   <script>
     /* Pilotage du splash — inline pour démarrer la vidéo au plus tôt.
@@ -160,9 +166,42 @@
       var CAP = 2000;     // filet : le splash ne retarde jamais plus le boot
       var closed = false;
 
+      /* « Bonjour » défile dans toutes les langues et se POSE sur celle de
+         l'élève. C'est la promesse du produit en une seconde : PermiGo
+         s'adresse d'abord à ceux qui ne parlent pas (encore) français.
+         Liste choisie sur les langues réellement parlées par les élèves en
+         France, fr/en/ar (les 3 de l'app) toujours dedans. */
+      var go = sp.querySelector('.sp-go');
+      var HI = [
+        ['fr', 'Bonjour'], ['ar', 'مرحبا'], ['en', 'Hello'], ['pt', 'Olá'],
+        ['es', 'Hola'], ['tr', 'Merhaba'], ['ro', 'Bună'], ['ru', 'Привет'],
+        ['zh', '你好'], ['it', 'Ciao'], ['pl', 'Cześć'], ['vi', 'Xin chào'],
+        ['de', 'Hallo'], ['hi', 'नमस्ते'], ['ta', 'வணக்கம்'], ['sw', 'Jambo']
+      ];
+      // La langue de l'élève : sa préférence enregistrée, sinon celle du
+      // téléphone, sinon le français.
+      var mine = (function () {
+        var l = '';
+        try { l = localStorage.getItem('permigo_lang') || ''; } catch (e) { /* privé */ }
+        l = (l || navigator.language || 'fr').slice(0, 2).toLowerCase();
+        for (var i = 0; i < HI.length; i++) if (HI[i][0] === l) return HI[i];
+        return HI[0];
+      })();
+      var landed = false;
+      function say(pair) {
+        go.textContent = pair[1];
+        go.setAttribute('lang', pair[0]);
+      }
+      function land() {                 // on finit TOUJOURS sur sa langue
+        landed = true;
+        say(mine);
+      }
+      say(HI[0]);
+
       function close() {
         if (closed) return;
         closed = true;
+        land();                         // le dernier mot lu est le sien
         sp.classList.add('is-out');
         var drop = function () { sp.remove(); };
         sp.addEventListener('transitionend', drop, { once: true });
@@ -176,9 +215,10 @@
 
       var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
       if (reduce || !v) {
-        setTimeout(close, 700);
+        setTimeout(close, 700);         // mouvement réduit : pas de défilé
         return;
       }
+
 
       try { v.playbackRate = RATE; } catch (e) { /* refusé → vitesse normale */ }
       v.addEventListener('ended', close, { once: true });
@@ -195,11 +235,25 @@
 
       /* On se cale sur le temps de la VIDÉO, pas sur un setTimeout : pendant le
          boot le thread principal est saturé et les timers dérivent (mesuré :
-         +400 ms sur un cap de 1 750 ms). `currentTime`, lui, ne dérive pas. */
+         +400 ms sur un cap de 1 750 ms). `currentTime`, lui, ne dérive pas.
+         La même boucle fait défiler les « bonjour » — un setInterval dérivait
+         tellement qu'on n'en voyait que 4 sur les 16. */
       var t0 = performance.now();
+      var STEP = 100;                   // un « bonjour » toutes les 100 ms
+      var LAND = 0.35;                  // sa langue se pose 0,35 s avant la fin
+      var next = 0, hi = 0;
       (function watch() {
         if (closed) return;
-        if (v.currentTime >= SEEN || performance.now() - t0 >= CAP) return close();
+        var el = performance.now() - t0;
+        if (v.currentTime >= SEEN || el >= CAP) return close();
+        // On se pose sur sa langue AVANT le fondu, pour qu'il ait le temps de
+        // la lire en pleine opacité.
+        if (!landed && (v.currentTime >= SEEN - LAND || el >= CAP - LAND * 1000)) land();
+        else if (!landed && el >= next) {
+          next = el + STEP;
+          hi = (hi + 1) % HI.length;
+          say(HI[hi]);
+        }
         requestAnimationFrame(watch);
       })();
     })();
