@@ -117,7 +117,10 @@ const STYLE = `<style>
 .prq *{ box-sizing:border-box; }
 .prq-head{ text-align:center; margin-bottom:20px; }
 .prq-kick{ font-weight:800; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#b6a8ec; margin-bottom:8px; }
-.prq-title{ font-family:'Baloo 2',cursive; font-weight:800; font-size:25px; line-height:1.14; margin:0 0 8px; }
+/* color:inherit obligatoire — base.css pose une couleur sur h1..h4 et une règle
+   directe bat la couleur héritée : sans ça le titre passe en encre sombre sur ce
+   fond violet foncé (illisible en thème clair). */
+.prq-title{ color:inherit; font-family:'Baloo 2',cursive; font-weight:800; font-size:25px; line-height:1.14; margin:0 0 8px; }
 .prq-sub{ font-size:13.5px; font-weight:600; color:#c3bdf0; margin:0 auto; max-width:330px; line-height:1.5; }
 .prq-tiers{ display:flex; flex-direction:column; gap:11px; margin-bottom:16px; }
 .prq-tier{ display:flex; align-items:center; gap:13px; width:100%; text-align:left; cursor:pointer;

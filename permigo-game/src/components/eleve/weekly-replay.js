@@ -369,13 +369,18 @@ function ensureStyles() {
       animation:wrep-em-bob 2.2s ease-in-out infinite;
     }
     @keyframes wrep-em-bob{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-6px) rotate(-3deg)}}
+    /* color:inherit obligatoire sur ces titres — base.css pose une couleur sur
+       h1..h4 et une règle directe bat la couleur héritée du parent : sans ça ils
+       passent en encre sombre sur ce fond sombre (invisibles en thème clair). */
     .wrep-title{
+      color:inherit;
       font-family:var(--fd);font-weight:900;
       font-size:clamp(36px,10vw,52px);
       letter-spacing:-.03em;line-height:1.05;margin:0;
       text-shadow:0 4px 20px rgba(0,0,0,.4);
     }
     .wrep-h2{
+      color:inherit;
       font-family:var(--fd);font-weight:900;font-size:32px;
       letter-spacing:-.02em;margin:8px 0 6px;
     }
