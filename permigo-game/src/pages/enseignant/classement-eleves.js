@@ -280,7 +280,7 @@ function _header(isTheorie, n) {
     : "Classés par compétences de conduite validées";
   const effectif =
     n > 0
-      ? `<div class="arn-scopebar"><span style="font:600 12px/1 'Inter',sans-serif;color:var(--amute)">Tes élèves</span><span class="arn-effectif">${n} classé${n > 1 ? "s" : ""}</span></div>`
+      ? `<div class="arn-scopebar"><span style="font:600 12px/1 'Archivo',sans-serif;color:var(--amute)">Tes élèves</span><span class="arn-effectif">${n} classé${n > 1 ? "s" : ""}</span></div>`
       : "";
   return `
     <div class="arn-hd"><h1>Classement élèves</h1><p class="arn-sub">${sub}</p></div>

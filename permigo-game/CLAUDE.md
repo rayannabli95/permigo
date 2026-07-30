@@ -68,10 +68,14 @@ Si un écran, un bouton ou une mécanique ne renforce pas cette boucle, on ne le
 Chaque rôle a son univers. **Côté moniteur : liberté totale** (aucune règle ne bride — fais le plus beau et le plus pro possible).
 
 - **élève** : **violet** (accent `--a`) + premium ludique. Le **quizz est en « Arène 3D »** (nuit-violet + or, boutons plastique 3D, mascotte — esprit Clash Royale / Supercell). Accueil & boutique = clair premium.
-- **moniteur** : **indigo `#4f46e5`** premium (Néo-arcade : Fredoka, panneaux routiers en fond, trophée 3D, classement local/national). Aucune contrainte de ton ou de mécanique.
+- **moniteur** : **indigo `#4f46e5`** premium (Néo-arcade : panneaux routiers en fond, trophée 3D, classement local/national). Aucune contrainte de ton ou de mécanique.
 - **gérant / owner** : **command-center** (tableau de bord, agrégats).
 
+**🔤 UNE SEULE POLICE, PARTOUT : `Archivo`** (décision Rayan, 30/07/2026 — celle du hero « Prépare ta leçon »). Elle est chargée seule dans `index.html`, avec l'axe de graisses `400..900`.
+⚠️ **N'introduis JAMAIS une 2e famille de texte**, y compris côté moniteur : c'est exactement ce qu'on vient de défaire (5 familles selon la page côté élève, 6 côté moniteur — dont 2 jamais téléchargées). Passe par `var(--fd)` / `var(--fb)`, ou écris `'Archivo'`. Les deux monos (`--fn`) restent, mais **pour les chiffres uniquement** (compteurs, scores, dates) : chasse fixe = les nombres ne dansent pas quand ils changent.
+
 **Tokens couleur (theme-aware, dans `base.css`)** : accent = `--a` / `--adk` / `--a-lt` / `--a-ink` / `--a-txt` · neutres = `--su` / `--mu` / `--bo` / `--ink` / `--gr-txt`.
+**Pages « nuit »** (fond sombre plein écran) : colle `${chromeNight(hautHex, basHex)}` (`src/utils/chrome-night.js`) dans le `<style>` de la page — sinon le bandeau du haut et la barre du bas restent blancs et on voit la couture. À poser au niveau de la **vue**, pas du fichier : une page qui a aussi une vue claire (squelette, erreur) ne doit pas teinter le chrome pour tout le monde.
 ⚠️ **N'invente JAMAIS** `--surface` / `--border` / `--muted` → bug blanc-sur-blanc en dark mode. Pour du texte sur fond accent, utilise `--a-txt`.
 
 ---

@@ -26,7 +26,7 @@ const STYLE = `<style>
   margin: 0 auto;
   background: var(--bg);
   color: var(--ink);
-  font-family: var(--ens-body, 'Inter'), sans-serif;
+  font-family: var(--ens-body, 'Archivo'), sans-serif;
 }
 .bl-body {
   padding: 20px 16px 0;
@@ -60,20 +60,20 @@ const STYLE = `<style>
 }
 .bl-hero-content { position: relative; z-index: 2; }
 .bl-hero-kicker {
-  font: 700 11px/1 var(--ens-body, 'Inter'), sans-serif;
+  font: 700 11px/1 var(--ens-body, 'Archivo'), sans-serif;
   color: rgba(255,255,255,.65);
   text-transform: uppercase;
   letter-spacing: .12em;
   margin: 0 0 8px;
 }
 .bl-hero-title {
-  font: 700 clamp(22px, 6.5vw, 28px)/1.1 var(--ens-display, 'Fredoka'), sans-serif;
+  font: 700 clamp(22px, 6.5vw, 28px)/1.1 var(--ens-display, 'Archivo'), sans-serif;
   color: #fff;
   margin: 0 0 4px;
   letter-spacing: -.01em;
 }
 .bl-hero-sub {
-  font: 500 13px/1.4 var(--ens-body, 'Inter'), sans-serif;
+  font: 500 13px/1.4 var(--ens-body, 'Archivo'), sans-serif;
   color: rgba(255,255,255,.75);
   margin: 0 0 14px;
 }
@@ -93,7 +93,7 @@ const STYLE = `<style>
   background: rgba(255,255,255,.12);
   border: 1.5px solid rgba(255,255,255,.25);
   border-radius: var(--ens-pill, 999px);
-  font: 600 13px/1 var(--ens-body, 'Inter'), sans-serif;
+  font: 600 13px/1 var(--ens-body, 'Archivo'), sans-serif;
   color: #fff;
   cursor: pointer;
   min-height: 44px;
@@ -113,7 +113,7 @@ const STYLE = `<style>
   background: var(--ens-go, #18a558);
   border: none;
   border-radius: var(--ens-pill, 999px);
-  font: 700 13px/1 var(--ens-body, 'Inter'), sans-serif;
+  font: 700 13px/1 var(--ens-body, 'Archivo'), sans-serif;
   color: #fff;
   cursor: pointer;
   min-height: 44px;
@@ -129,7 +129,7 @@ const STYLE = `<style>
 
 /* ── École logo ── */
 .bl-school-logo {
-  font: 700 10px/1 var(--ens-body, 'Inter'), sans-serif;
+  font: 700 10px/1 var(--ens-body, 'Archivo'), sans-serif;
   text-transform: uppercase;
   letter-spacing: .12em;
   color: rgba(255,255,255,.5);
@@ -152,7 +152,7 @@ const STYLE = `<style>
 }
 /* Grands chiffres → Fredoka pour cohérence arcade */
 .bl-kpi-val {
-  font: 800 28px/1 var(--ens-display, 'Fredoka'), sans-serif;
+  font: 800 28px/1 var(--ens-display, 'Archivo'), sans-serif;
   color: var(--ink);
   margin-bottom: 4px;
 }
@@ -160,11 +160,11 @@ const STYLE = `<style>
 .bl-kpi-val.score-good { color: var(--grk); }
 .bl-kpi-val.score-watch { color: #a16207; }
 .bl-kpi-val.score-low { color: var(--rdk); }
-.bl-kpi-val .bl-kpi-unit { font-size: .55em; color: var(--mu2); font-family: var(--ens-body, 'Inter'); }
+.bl-kpi-val .bl-kpi-unit { font-size: .55em; color: var(--mu2); font-family: var(--ens-body, 'Archivo'); }
 .bl-kpi-streak { grid-column: 1 / -1; }
 .bl-kpi-streak .bl-kpi-val { display: inline-flex; align-items: center; gap: 8px; }
 .bl-kpi-label {
-  font: 500 11px/1.4 var(--ens-body, 'Inter'), sans-serif;
+  font: 500 11px/1.4 var(--ens-body, 'Archivo'), sans-serif;
   color: var(--mu3);
   text-transform: uppercase;
   letter-spacing: .04em;
@@ -174,7 +174,7 @@ const STYLE = `<style>
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font: 600 11px/1 var(--ens-body, 'Inter'), sans-serif;
+  font: 600 11px/1 var(--ens-body, 'Archivo'), sans-serif;
   padding: 3px 9px;
   border-radius: var(--ens-pill, 999px);
   margin-top: 6px;
@@ -201,14 +201,14 @@ const STYLE = `<style>
   line-height: 1;
 }
 .bl-comment-label {
-  font: 700 11px/1 var(--ens-body, 'Inter'), sans-serif;
+  font: 700 11px/1 var(--ens-body, 'Archivo'), sans-serif;
   text-transform: uppercase;
   letter-spacing: .08em;
   color: var(--ens-go, #18a558);
   margin-bottom: 8px;
 }
 .bl-comment-txt {
-  font: 500 14px/1.6 var(--ens-body, 'Inter'), sans-serif;
+  font: 500 14px/1.6 var(--ens-body, 'Archivo'), sans-serif;
   color: var(--ink5);
   padding-left: 4px;
 }
@@ -229,7 +229,7 @@ const STYLE = `<style>
   margin-bottom: 14px;
 }
 .bl-section-title {
-  font: 700 15px/1 var(--ens-display, 'Fredoka'), sans-serif;
+  font: 700 15px/1 var(--ens-display, 'Archivo'), sans-serif;
   color: var(--ink);
   display: flex;
   align-items: center;
@@ -265,7 +265,7 @@ const STYLE = `<style>
   font-weight: 700;
 }
 .bl-comp-name {
-  font: 500 13px/1.3 var(--ens-body, 'Inter'), sans-serif;
+  font: 500 13px/1.3 var(--ens-body, 'Archivo'), sans-serif;
   color: var(--ink5);
   flex: 1; min-width: 0;
 }
@@ -275,7 +275,7 @@ const STYLE = `<style>
   flex-shrink: 0;
 }
 .bl-comp-none {
-  font: 500 13px/1.4 var(--ens-body, 'Inter'), sans-serif;
+  font: 500 13px/1.4 var(--ens-body, 'Archivo'), sans-serif;
   color: var(--mu2);
   text-align: center;
   padding: 12px 0;
@@ -292,7 +292,7 @@ const STYLE = `<style>
   transition: height .3s var(--ease-snap, cubic-bezier(.23,1,.32,1));
 }
 .bl-bar-lbl {
-  font: 500 9px/1 var(--ens-body, 'Inter'), sans-serif;
+  font: 500 9px/1 var(--ens-body, 'Archivo'), sans-serif;
   color: var(--mu2);
   text-align: center;
   white-space: nowrap;
@@ -308,7 +308,7 @@ const STYLE = `<style>
   text-align: center;
   padding: 40px 20px;
   color: var(--mu2);
-  font: 500 14px/1.5 var(--ens-body, 'Inter'), sans-serif;
+  font: 500 14px/1.5 var(--ens-body, 'Archivo'), sans-serif;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -612,7 +612,7 @@ export async function mount(root, eleveId) {
   </div>
 
   <!-- Mention légale (écran + impression) — ce document n'est PAS officiel -->
-  <div class="bl-disclaimer" style="margin:14px 16px 0;padding:12px 14px;border:1px solid #e6e9ef;border-radius:12px;background:#f7f8fc;font:500 11px/1.5 'Inter',sans-serif;color:#5a6188;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+  <div class="bl-disclaimer" style="margin:14px 16px 0;padding:12px 14px;border:1px solid #e6e9ef;border-radius:12px;background:#f7f8fc;font:500 11px/1.5 'Archivo',sans-serif;color:#5a6188;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
     <strong style="color:#1a1c2e;font-weight:700;">Document de suivi</strong> à la marque de ${esc(ecoleNom)}. Ce n’est <strong>pas</strong> le livret d’apprentissage ni l’attestation de fin de formation <strong>officiels</strong>, et il ne remplace aucun document légal.
   </div>
 

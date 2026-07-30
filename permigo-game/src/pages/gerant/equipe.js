@@ -18,7 +18,7 @@ const STYLE = `<style>
   margin: 0 auto;
   background: var(--bg);
   padding-bottom: 100px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Archivo', sans-serif;
   color: var(--ink);
 }
 
@@ -34,12 +34,12 @@ const STYLE = `<style>
   justify-content: space-between;
 }
 .eq-title {
-  font: 700 22px/1.2 'Plus Jakarta Sans', sans-serif;
+  font: 700 22px/1.2 'Archivo', sans-serif;
   color: var(--ink);
   letter-spacing: -0.022em;
 }
 .eq-count {
-  font: 600 12px/1 'Inter', sans-serif;
+  font: 600 12px/1 'Archivo', sans-serif;
   color: var(--a-txt);
   background: color-mix(in srgb, var(--a) 10%, transparent);
   padding: 6px 12px;
@@ -68,7 +68,7 @@ const STYLE = `<style>
   border-radius: var(--r);
   background: var(--bg);
   color: var(--ink);
-  font: 500 14px/1 'Inter', sans-serif;
+  font: 500 14px/1 'Archivo', sans-serif;
   outline: none;
   box-sizing: border-box;
   transition: border-color .15s ease, background .15s ease;
@@ -105,19 +105,19 @@ const STYLE = `<style>
   width: 44px; height: 44px;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font: 600 16px/1 'Plus Jakarta Sans', sans-serif;
+  font: 600 16px/1 'Archivo', sans-serif;
   color: var(--a-ink);
   flex-shrink: 0;
   background: var(--a);
 }
 .eq-info { flex: 1; min-width: 0; }
 .eq-name {
-  font: 600 15px/1.3 'Inter', sans-serif;
+  font: 600 15px/1.3 'Archivo', sans-serif;
   color: var(--ink);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .eq-email {
-  font: 500 12px/1 'Inter', sans-serif;
+  font: 500 12px/1 'Archivo', sans-serif;
   color: var(--mu2);
   margin-top: 4px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -130,7 +130,7 @@ const STYLE = `<style>
   flex-wrap: wrap;
 }
 .eq-stat {
-  font: 500 12px/1 'Inter', sans-serif;
+  font: 500 12px/1 'Archivo', sans-serif;
   color: var(--mu);
   background: var(--bg);
   border: 1px solid var(--bo);
@@ -142,7 +142,7 @@ const STYLE = `<style>
   font-weight: 600;
 }
 .eq-badge {
-  font: 600 11px/1 'Inter', sans-serif;
+  font: 600 11px/1 'Archivo', sans-serif;
   padding: 5px 10px;
   border-radius: var(--r-full);
   letter-spacing: .2px;
@@ -172,7 +172,7 @@ const STYLE = `<style>
   border-radius: var(--r);
   background: transparent;
   color: var(--mu);
-  font: 600 14px/1 'Inter', sans-serif;
+  font: 600 14px/1 'Archivo', sans-serif;
   cursor: pointer;
   transition: border-color .15s ease, background .15s ease, color .15s ease;
 }
@@ -188,7 +188,7 @@ const STYLE = `<style>
   padding: 32px 20px;
   text-align: center;
   color: var(--mu2);
-  font: 500 13px/1.6 'Inter', sans-serif;
+  font: 500 13px/1.6 'Archivo', sans-serif;
   background: var(--su);
   border: 1px dashed var(--bo);
   border-radius: var(--r);
@@ -214,12 +214,12 @@ const STYLE = `<style>
   background: rgba(239,68,68,.1);
 }
 .eq-error-title {
-  font: 700 15px/1.3 'Plus Jakarta Sans', sans-serif;
+  font: 700 15px/1.3 'Archivo', sans-serif;
   color: var(--ink);
   margin-bottom: 6px;
 }
 .eq-error-sub {
-  font: 500 13px/1.5 'Inter', sans-serif;
+  font: 500 13px/1.5 'Archivo', sans-serif;
   color: var(--mu2);
   margin-bottom: 18px;
 }
@@ -233,7 +233,7 @@ const STYLE = `<style>
   border-radius: var(--r);
   background: var(--a);
   color: var(--a-ink);
-  font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
+  font: 700 14px/1 'Archivo', sans-serif;
   cursor: pointer;
   transition: transform .12s ease, background .15s ease;
 }
@@ -406,15 +406,15 @@ function openInviteModal(me) {
     <style>
       @keyframes invFadeIn { from { opacity: 0; } to { opacity: 1; } }
       @keyframes invSlideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-      .inv-sheet { width:100%; max-width:480px; background:var(--su); border-radius:32px 32px 0 0; padding:24px 24px max(32px, env(safe-area-inset-bottom)); animation: invSlideUp .3s var(--ease-out); font-family:'Inter',sans-serif; }
+      .inv-sheet { width:100%; max-width:480px; background:var(--su); border-radius:32px 32px 0 0; padding:24px 24px max(32px, env(safe-area-inset-bottom)); animation: invSlideUp .3s var(--ease-out); font-family:'Archivo',sans-serif; }
       .inv-handle { width:36px; height:4px; background:var(--bo); border-radius:2px; margin:0 auto 20px; }
-      .inv-title { font:800 22px/1.2 'Plus Jakarta Sans',sans-serif; color:var(--ink); margin:0 0 6px; letter-spacing:-.02em; }
-      .inv-sub { font:500 14px/1.4 'Inter',sans-serif; color:var(--mu3); margin:0 0 20px; }
-      .inv-label { display:block; font:600 12px/1 'Inter',sans-serif; color:var(--mu3); text-transform:uppercase; letter-spacing:.08em; margin:14px 0 6px; }
-      .inv-input { width:100%; padding:14px 16px; border:1.5px solid var(--bo); border-radius:var(--r-md); font:500 16px/1.3 'Inter',sans-serif; color:var(--ink); transition:border-color .15s; font-family:inherit; }
+      .inv-title { font:800 22px/1.2 'Archivo',sans-serif; color:var(--ink); margin:0 0 6px; letter-spacing:-.02em; }
+      .inv-sub { font:500 14px/1.4 'Archivo',sans-serif; color:var(--mu3); margin:0 0 20px; }
+      .inv-label { display:block; font:600 12px/1 'Archivo',sans-serif; color:var(--mu3); text-transform:uppercase; letter-spacing:.08em; margin:14px 0 6px; }
+      .inv-input { width:100%; padding:14px 16px; border:1.5px solid var(--bo); border-radius:var(--r-md); font:500 16px/1.3 'Archivo',sans-serif; color:var(--ink); transition:border-color .15s; font-family:inherit; }
       .inv-input:focus { outline:0; border-color:var(--a); }
       .inv-actions { display:flex; gap:10px; margin-top:24px; }
-      .inv-btn { flex:1; padding:16px; border-radius:var(--r-md); font:700 14px/1 'Plus Jakarta Sans',sans-serif; cursor:pointer; transition:transform .12s, background .15s; font-family:inherit; }
+      .inv-btn { flex:1; padding:16px; border-radius:var(--r-md); font:700 14px/1 'Archivo',sans-serif; cursor:pointer; transition:transform .12s, background .15s; font-family:inherit; }
       .inv-btn:active { transform: scale(.97); }
       .inv-btn-cancel { background:var(--su2); border:1.5px solid var(--bo); color:var(--mu4); }
       .inv-btn-cancel:hover { background:var(--bg3); }

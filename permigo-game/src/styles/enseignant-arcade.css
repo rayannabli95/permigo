@@ -6,14 +6,20 @@
    On respecte les antipatterns moniteur (cf. CLAUDE.md) :
      · pas de mascotte « bravo champion », pas de confetti enfantin,
        pas de monnaie virtuelle.
-   L'énergie vient de la TYPO (Fredoka), des PANNEAUX en fond, des
-   COULEURS de signalisation et des ombres tactiles — pas du ton.
+   L'énergie vient des PANNEAUX en fond, des COULEURS de signalisation et
+   des ombres tactiles — pas du ton.
+
+   ⚠ La typo n'en fait PLUS partie (décision Rayan, 30/07) : toute l'app,
+   moniteur compris, parle en Archivo. Le moniteur garde son indigo, ses
+   panneaux et son relief — c'est là que se joue sa différence, pas dans
+   une 6e police. (Avant : Fredoka + Plus Jakarta + Inter + Manrope +
+   Nunito + Fredoka One sur 9 écrans, dont 2 jamais téléchargées.)
 ═══════════════════════════════════════════════════════════════ */
 
 [data-role="enseignant"] {
   /* — Polices arcade — */
-  --ens-display: "Fredoka", "Plus Jakarta Sans", system-ui, sans-serif;
-  --ens-body: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+  --ens-display: 'Archivo', system-ui, sans-serif;
+  --ens-body: 'Archivo', system-ui, sans-serif;
 
   /* — Palette signalisation (panneaux routiers) — */
   --ens-go: #18a558; /* feu vert / acquis */
