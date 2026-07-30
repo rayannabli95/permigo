@@ -74,17 +74,27 @@ const STYLE = `<style>
 /* conteneur qui pivote (recto ↔ verso) */
 .col-flip { position:absolute; inset:0; transform-style:preserve-3d; transition:transform .55s cubic-bezier(.4,0,.2,1); will-change:transform; }
 .col-card.flipped .col-flip { transform:rotateY(180deg); }
+/* Le backface-visibility seul ne suffit pas : selon le navigateur, les ENFANTS
+   d'une face (titre, pastilles) continuent d'être peints et le recto apparaît
+   en miroir au verso. On échange donc franchement les deux faces à MI-rotation
+   (transition d'opacité de durée nulle, retardée à la moitié des .55s). */
 .col-face { position:absolute; inset:0; border-radius:24px; overflow:hidden; -webkit-backface-visibility:hidden; backface-visibility:hidden;
   background:#0a0a10;
-  box-shadow: 0 22px 45px -18px rgba(0,0,0,.65), inset 0 0 0 2.5px color-mix(in srgb, var(--rc) 82%, transparent); }
-.col-back { transform:rotateY(180deg); background:#0a0a10; isolation:isolate; }
+  box-shadow: 0 22px 45px -18px rgba(0,0,0,.65), inset 0 0 0 2.5px color-mix(in srgb, var(--rc) 82%, transparent);
+  transition: opacity 0s linear .28s; }
+.col-back { transform:rotateY(180deg); background:#0a0a10; isolation:isolate; opacity:0; }
+.col-card.flipped .col-front { opacity:0; }
+.col-card.flipped .col-back { opacity:1; }
 
 .col-card-img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; }
 .col-card-shade { position:absolute; inset:0; background:linear-gradient(180deg,transparent 42%,rgba(6,7,20,.15) 60%,rgba(6,7,20,.86) 100%); }
 .col-card-meta { position:absolute; left:0; right:0; bottom:0; padding:15px 16px 16px; color:#fff; z-index:2; }
 .col-card-world { display:inline-flex; align-items:center; gap:6px; font:800 9.5px/1 'Inter',sans-serif; letter-spacing:.14em; text-transform:uppercase;
   padding:5px 10px; border-radius:99px; background:rgba(255,255,255,.16); backdrop-filter:blur(4px); margin-bottom:9px; }
-.col-card-name { font:800 19px/1.15 'Plus Jakarta Sans',sans-serif; margin:0 0 4px; text-shadow:0 2px 12px rgba(0,0,0,.5); }
+/* color explicite : base.css pose une couleur sur h1..h4, et une règle directe
+   bat TOUJOURS la couleur héritée du parent. Sans ça le titre passe en encre
+   sombre sur la carte (illisible en thème clair). */
+.col-card-name { font:800 19px/1.15 'Plus Jakarta Sans',sans-serif; margin:0 0 4px; color:#fff; text-shadow:0 2px 12px rgba(0,0,0,.5); }
 .col-card-idx { font:700 11px/1 'IBM Plex Mono',monospace; opacity:.8; }
 .col-card-date { display:inline-flex; align-items:center; gap:5px; font:600 11px/1 'Inter',sans-serif; color:#8ef0b0; margin-top:8px; }
 
@@ -170,6 +180,9 @@ const STYLE = `<style>
   .col-card.is-anim { transition:none; }
   .col-card.reveal { animation:none; }
   .col-card-gloss { animation:none; }
+  /* pas de rotation → l'échange des faces doit être immédiat, sans délai */
+  .col-flip { transition:none; }
+  .col-face { transition:none; }
 }
 </style>`;
 
