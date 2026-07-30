@@ -13,12 +13,16 @@
 //     zones[] : { id, label, aide, at:{x,y} }   x/y en % du décor
 //     ordre[] : les ids dans l'ordre attendu
 //
-//   "route"   — vue de dessus. Des véhicules arrivent sur une carte et
-//               l'élève désigne qui passe en premier.
-//     map        : "crossroad" | "tourne-a-gauche"
-//     vehicules[]: { id, couleur, de:"nord|sud|est|ouest", va:"tout_droit|gauche|droite", moi? }
-//     reponse    : l'id du véhicule qui passe en premier
-//     regle      : la règle de circulation rappelée après la réponse
+//   "route"   — vue de dessus isométrique. Le décor est celui du mini-jeu
+//               « En situation » : le preset décrit son `plateau` EXACTEMENT
+//               comme une scène de src/data/situations-conduite.js, et le
+//               moteur de src/components/eleve/situation-scene.js le dessine.
+//               Rien à redessiner, et l'élève retrouve un décor qu'il connaît.
+//     plateau : { kind, signal?, passage?, pieton?, arbres?, vehicules[] }
+//     alt     : description de la scène pour lecteur d'écran
+//     reponse : l'id du véhicule qui passe en premier
+//     focus   : { veh } — qui recevoir le halo doré une fois trouvé
+//     regle   : la règle de circulation rappelée après la réponse
 //
 // Champs communs : titre, intro, consigne, explication, phraseMoniteur,
 // motCle. Tous en { fr, en, ar } — le moteur retombe sur `fr` si une
@@ -63,11 +67,15 @@ export const PRESETS = [
       ar: "تحقّق من النقطة العمياء.",
     },
     motCle: { fr: "angle mort", en: "blind spot", ar: "النقطة العمياء" },
+    // Séquence du déboîtement, voiture à conduite à gauche : rétroviseur
+    // intérieur, puis rétroviseur extérieur GAUCHE, puis coup d'œil par-dessus
+    // l'épaule GAUCHE. Les trois zones sont donc du même côté que le
+    // conducteur : c'est ce qu'il fait vraiment.
     ordre: ["retroInterieur", "retroExterieur", "angleMort"],
     zones: [
       {
         id: "retroInterieur",
-        at: { x: 50, y: 17 },
+        at: { x: 50, y: 12 },
         icone: "retro-int",
         label: {
           fr: "Rétroviseur intérieur",
@@ -82,7 +90,7 @@ export const PRESETS = [
       },
       {
         id: "retroExterieur",
-        at: { x: 19, y: 41 },
+        at: { x: 12, y: 56 },
         icone: "retro-ext",
         label: {
           fr: "Rétroviseur extérieur",
@@ -97,7 +105,7 @@ export const PRESETS = [
       },
       {
         id: "angleMort",
-        at: { x: 76, y: 64 },
+        at: { x: 13, y: 86 },
         icone: "epaule",
         label: { fr: "Angle mort", en: "Blind spot", ar: "النقطة العمياء" },
         aide: {
@@ -114,7 +122,11 @@ export const PRESETS = [
     id: "priorite-a-droite",
     competence: "C2d",
     scene: "route",
-    map: "crossroad",
+    alt: {
+      fr: "Croisement sans panneau ni feu. Une voiture rouge arrive par ta droite.",
+      en: "Junction with no sign and no lights. A red car is coming from your right.",
+      ar: "تقاطع بلا لافتة ولا إشارة. سيارة حمراء تأتي عن يمينك.",
+    },
     titre: {
       fr: "La priorité à droite",
       en: "Priority to the right",
@@ -145,11 +157,20 @@ export const PRESETS = [
       en: "priority to the right",
       ar: "أولوية اليمين",
     },
-    vehicules: [
-      { id: "moi", couleur: "bleu", de: "sud", va: "tout_droit", moi: true },
-      { id: "v1", couleur: "rouge", de: "est", va: "tout_droit" },
-    ],
+    etiquette: { fr: "Toi", en: "You", ar: "أنت" },
+    plateau: {
+      kind: "croisement",
+      arbres: [
+        [-2.6, 2.3],
+        [2.7, -2.5],
+      ],
+      vehicules: [
+        { id: "moi", at: "S", d: 1.9, couleur: "joueur", label: "Toi" },
+        { id: "v1", at: "E", d: 1.75, couleur: "rouge" },
+      ],
+    },
     reponse: "v1",
+    focus: { veh: "v1" },
     regle: {
       fr: "La voiture rouge arrive sur ta droite : elle passe avant toi.",
       en: "The red car comes from your right: it goes before you.",

@@ -1,22 +1,52 @@
+/* ═══════════════════════════════════════════════════════════════
+   LE LABO DE LA CONDUITE — habillage.
+
+   La DA n'est pas inventée ici : c'est celle de « En situation », le
+   mini-jeu de l'app (src/pages/eleve/en-situation.js). Mêmes fonds nuit
+   violets, même or #ffcb3d, mêmes boutons « plastique » qui s'enfoncent,
+   mêmes polices (Baloo 2 pour les titres, Inter pour le texte). Le labo
+   doit avoir l'air d'une pièce de PermiGo, pas d'une page à part.
+
+   Une seule règle de couleur : le violet porte le décor, l'or porte
+   l'action. Rien d'autre ne brille.
+═══════════════════════════════════════════════════════════════ */
+
 .labo-page {
-  --su: #ffffff;
-  --mu: #626b83;
-  --bo: #dfe5ef;
-  --ink: #16192c;
-  --a: #665cf2;
-  --a-lt: #8d83ff;
-  --a-ink: #ffffff;
-  --gr: #16a778;
+  --or: #ffcb3d;
+  --or-bas: #ff9c1c;
+  --or-tranche: #b85e00;
+  --btn-haut: #3a3470;
+  --btn-bas: #231d4f;
+  --btn-tranche: #15113a;
+  --txt: #ece8ff;
+  --txt-doux: #b9b3e6;
+  --vitre: rgba(255, 255, 255, 0.07);
+  --vitre-bord: rgba(255, 255, 255, 0.14);
+
   margin: 0;
   min-width: 320px;
   min-height: 100dvh;
   overflow-x: hidden;
+  color: var(--txt);
   background:
-    radial-gradient(circle at 50% -10%, rgba(131, 226, 226, 0.46), transparent 36%),
-    linear-gradient(180deg, #e5f9ff 0%, #f7f6ff 54%, #f1f2fa 100%);
-  color: var(--ink);
+    radial-gradient(
+      150% 60% at 50% -5%,
+      rgba(255, 180, 60, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      120% 55% at 50% 22%,
+      rgba(110, 70, 220, 0.22) 0%,
+      transparent 60%
+    ),
+    linear-gradient(180deg, #181241 0%, #0c0a26 60%, #08071c 100%);
+  background-attachment: fixed;
   font-family:
-    Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Inter",
+    ui-sans-serif,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
     sans-serif;
   -webkit-font-smoothing: antialiased;
 }
@@ -28,1019 +58,199 @@
 
 .labo-page button {
   font: inherit;
+  color: inherit;
+  touch-action: manipulation;
 }
 
 .labo {
-  width: 100%;
+  display: flex;
+  flex-direction: column;
   min-height: 100dvh;
-  padding:
-    max(16px, env(safe-area-inset-top))
-    16px
-    max(20px, env(safe-area-inset-bottom));
-  direction: ltr;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: calc(env(safe-area-inset-top, 0px) + 12px) 16px
+    calc(env(safe-area-inset-bottom, 0px) + 18px);
+  gap: 12px;
 }
 
+/* ─── En-tête ──────────────────────────────────────────────── */
+
 .lb-entete {
-  position: relative;
-  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: min(100%, 460px);
-  min-height: 48px;
-  margin: 0 auto 12px;
   gap: 12px;
+  min-height: 44px;
 }
 
 .lb-marque {
   display: flex;
   align-items: center;
-  gap: 8px;
-  color: var(--ink);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
+  gap: 9px;
+  font:
+    700 14px/1.1 "Baloo 2",
+    "Fredoka",
+    sans-serif;
+  color: var(--txt);
 }
 
 .lb-marque strong {
-  color: var(--a);
+  color: var(--or);
+  font-weight: 800;
 }
 
+/* Fiole du labo : un rond violet, une goutte d'or. */
 .lb-marque-pastille {
   position: relative;
-  width: 26px;
-  height: 26px;
-  flex: 0 0 auto;
-  border-radius: 8px;
-  background: linear-gradient(145deg, #2ad39c, #15916e);
-  box-shadow: 0 6px 14px rgba(22, 167, 120, 0.24);
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  border-radius: 11px;
+  background: linear-gradient(180deg, #4a3f8f, #241e56);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    0 3px 0 #15113a,
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
 
 .lb-marque-pastille::before,
 .lb-marque-pastille::after {
-  position: absolute;
   content: "";
-  background: var(--su);
+  position: absolute;
+  border-radius: 999px;
 }
 
 .lb-marque-pastille::before {
-  top: 7px;
-  left: 6px;
-  width: 14px;
-  height: 4px;
-  border-radius: 999px;
-  transform: rotate(-24deg);
+  inset: 9px 11px 6px;
+  border-radius: 0 0 7px 7px;
+  background: var(--or);
+  box-shadow: 0 0 10px rgba(255, 203, 61, 0.55);
 }
 
 .lb-marque-pastille::after {
-  top: 11px;
+  top: 5px;
   left: 10px;
-  width: 4px;
-  height: 9px;
-  border-radius: 999px;
-  transform: rotate(-24deg);
+  width: 10px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.75);
 }
 
+/* Sélecteur de langue : un segment de verre. */
 .lb-langues {
   display: flex;
-  flex: 0 0 auto;
   gap: 2px;
   padding: 3px;
-  border: 1px solid rgba(255, 255, 255, 0.74);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.55);
-  box-shadow: 0 8px 22px rgba(56, 59, 94, 0.08);
-  backdrop-filter: blur(14px);
+  border-radius: 999px;
+  background: var(--vitre);
+  border: 1px solid var(--vitre-bord);
 }
 
 .lb-langue {
-  min-width: 44px;
-  min-height: 44px;
-  padding: 0 8px;
+  min-width: 40px;
+  min-height: 32px;
+  padding: 0 11px;
   border: 0;
-  border-radius: 9px;
-  background: transparent;
-  color: var(--mu);
+  border-radius: 999px;
+  background: none;
+  color: var(--txt-doux);
+  font:
+    700 12.5px/1 "Baloo 2",
+    "Fredoka",
+    sans-serif;
+  letter-spacing: 0.03em;
   cursor: pointer;
-  font-size: 11px;
-  font-weight: 800;
   transition:
-    color 160ms ease,
-    background 160ms ease,
-    box-shadow 160ms ease;
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .lb-langue.est-active {
-  background: var(--su);
-  color: var(--a);
-  box-shadow: 0 3px 10px rgba(62, 55, 143, 0.12);
+  color: #2a1d00;
+  background: linear-gradient(180deg, var(--or), var(--or-bas));
+  box-shadow: 0 2px 6px rgba(255, 140, 30, 0.35);
 }
 
+/* ─── Coque de l'écran ─────────────────────────────────────── */
+
 .lb-scene {
-  position: relative;
   display: flex;
-  width: min(100%, 460px);
-  min-height: calc(100dvh - 92px - env(safe-area-inset-top));
-  margin: 0 auto;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.82);
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.78);
-  box-shadow:
-    0 22px 65px rgba(55, 60, 105, 0.14),
-    inset 0 1px 0 rgba(255, 255, 255, 0.94);
-  backdrop-filter: blur(18px);
+  flex: 1;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .lb-progression {
-  position: absolute;
-  z-index: 4;
-  top: 16px;
-  right: 16px;
-  left: 16px;
-  display: grid;
-  grid-template-columns: auto minmax(80px, 1fr);
+  display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .lb-progression-txt {
-  color: var(--mu);
-  font-size: 11px;
-  font-weight: 700;
+  font:
+    700 12px/1 "Baloo 2",
+    "Fredoka",
+    sans-serif;
+  color: var(--txt-doux);
   white-space: nowrap;
 }
 
 .lb-progression-rail {
-  height: 4px;
-  overflow: hidden;
+  flex: 1;
+  height: 8px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--bo) 72%, transparent);
+  background: rgba(255, 255, 255, 0.14);
+  overflow: hidden;
 }
 
 .lb-progression-rail span {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--gr), var(--a));
-  transition: width 350ms ease;
+  background: linear-gradient(90deg, var(--or), var(--or-bas));
+  transition: width 0.35s ease;
 }
 
 .lb-retour {
-  position: absolute;
-  z-index: 5;
-  top: 38px;
-  left: 12px;
+  align-self: flex-start;
   display: inline-flex;
   align-items: center;
-  min-width: 44px;
-  min-height: 44px;
-  padding: 0 10px 0 6px;
-  gap: 2px;
+  gap: 5px;
+  min-height: 40px;
+  padding: 0 12px 0 6px;
   border: 0;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.7);
-  color: var(--mu);
+  border-radius: 999px;
+  background: none;
+  color: var(--txt-doux);
+  font:
+    600 13.5px/1 "Inter",
+    sans-serif;
   cursor: pointer;
-  font-size: 11px;
-  font-weight: 700;
+}
+
+.lb-retour:hover {
+  color: var(--txt);
 }
 
 .lb-retour svg {
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
   fill: none;
   stroke: currentColor;
+  stroke-width: 2.4;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke-width: 2;
 }
 
 .lb-ecran {
-  position: relative;
-  z-index: 2;
   display: flex;
   flex: 1;
   flex-direction: column;
-  align-items: stretch;
-  min-width: 0;
-  padding: 62px 20px 24px;
-  animation: lb-ecran-in 420ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
-}
-
-.lb-ecran h1 {
-  margin: 0;
-  color: var(--ink);
-  font-family:
-    "Plus Jakarta Sans", ui-rounded, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", sans-serif;
-  font-size: clamp(25px, 8vw, 34px);
-  line-height: 1.08;
-  letter-spacing: -0.045em;
-  text-wrap: balance;
-}
-
-.lb-ecran h1[dir="rtl"] {
-  letter-spacing: 0;
-  line-height: 1.25;
-}
-
-.lb-ecran p {
-  margin: 0;
-}
-
-.lb-copie {
-  position: relative;
-  z-index: 2;
-  display: grid;
   gap: 12px;
-  text-align: center;
+  animation: lbEntree 0.32s cubic-bezier(0.34, 1.4, 0.64, 1) both;
 }
 
-.lb-copie > p {
-  color: var(--mu);
-  font-size: 15px;
-  font-weight: 600;
-  line-height: 1.55;
-}
-
-.lb-copie-serree {
-  max-width: 340px;
-  margin: 20px auto 12px;
-}
-
-.lb-copie-serree h1 {
-  font-size: clamp(24px, 7vw, 30px);
-}
-
-.lb-kicker {
-  align-self: center;
-  margin: 10px 0 2px;
-  padding: 7px 12px;
-  border: 1px solid rgba(102, 92, 242, 0.15);
-  border-radius: 999px;
-  background: rgba(102, 92, 242, 0.07);
-  color: var(--a);
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.lb-intro .lb-copie {
-  margin-top: -12px;
-}
-
-.lb-ile {
-  position: relative;
-  width: 100%;
-  max-width: 390px;
-  height: clamp(255px, 35dvh, 315px);
-  min-height: 255px;
-  margin: 0 auto;
-}
-
-.lb-ile::after {
-  position: absolute;
-  right: 12%;
-  bottom: 12%;
-  left: 12%;
-  height: 18px;
-  border-radius: 50%;
-  background: rgba(57, 49, 131, 0.16);
-  content: "";
-  filter: blur(12px);
-}
-
-.lb-ile svg {
-  position: absolute;
-  z-index: 2;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-
-.lb-ile-bloc {
-  transform-origin: 50% 70%;
-  animation: lb-float 4.5s ease-in-out infinite;
-}
-
-.lb-voiture {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: lb-voiture-breathe 2.8s ease-in-out infinite;
-  filter: drop-shadow(0 7px 7px rgba(25, 24, 55, 0.25));
-}
-
-.lb-soleil {
-  position: absolute;
-  top: 20%;
-  right: 13%;
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background: #ffd76d;
-  box-shadow:
-    0 0 0 12px rgba(255, 215, 109, 0.14),
-    0 0 45px rgba(255, 199, 65, 0.36);
-}
-
-.lb-nuage {
-  position: absolute;
-  z-index: 1;
-  width: 54px;
-  height: 13px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.8);
-  filter: blur(0.2px);
-}
-
-.lb-nuage::before,
-.lb-nuage::after {
-  position: absolute;
-  bottom: 0;
-  border-radius: 50%;
-  background: inherit;
-  content: "";
-}
-
-.lb-nuage::before {
-  left: 10px;
-  width: 22px;
-  height: 22px;
-}
-
-.lb-nuage::after {
-  right: 8px;
-  width: 16px;
-  height: 16px;
-}
-
-.lb-nuage-1 {
-  top: 24%;
-  left: 7%;
-}
-
-.lb-nuage-2 {
-  top: 43%;
-  right: 4%;
-  opacity: 0.62;
-  transform: scale(0.7);
-}
-
-.lb-cta,
-.lb-secondaire {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  min-height: 54px;
-  margin-top: auto;
-  padding: 14px 18px;
-  gap: 8px;
-  border-radius: 14px;
-  cursor: pointer;
-  font-weight: 800;
-  transition:
-    transform 160ms ease,
-    box-shadow 160ms ease,
-    opacity 160ms ease;
-}
-
-.lb-cta {
-  border: 0;
-  background: linear-gradient(135deg, var(--a), var(--a-lt));
-  box-shadow:
-    0 5px 0 #473da9,
-    0 14px 30px rgba(80, 70, 202, 0.25);
-  color: var(--a-ink);
-}
-
-.lb-cta svg {
-  width: 20px;
-  height: 20px;
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 2.5;
-}
-
-.lb-cta:active:not(:disabled) {
-  transform: translateY(3px);
-  box-shadow:
-    0 2px 0 #473da9,
-    0 8px 18px rgba(80, 70, 202, 0.22);
-}
-
-.lb-cta:disabled {
-  cursor: not-allowed;
-  opacity: 0.44;
-  box-shadow: 0 3px 0 #9a97b8;
-}
-
-.lb-cockpit {
-  position: relative;
-  width: 100%;
-  height: clamp(270px, 38dvh, 320px);
-  min-height: 270px;
-  margin: 4px auto 12px;
-  overflow: hidden;
-  border: 1px solid rgba(86, 79, 161, 0.15);
-  border-radius: 20px;
-  background: linear-gradient(180deg, #dff6ff 0 56%, #333650 57%);
-  box-shadow:
-    0 16px 30px rgba(43, 47, 83, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
-}
-
-.lb-parebrise {
-  position: absolute;
-  inset: 0 0 42%;
-  overflow: hidden;
-  background:
-    linear-gradient(164deg, transparent 0 68%, rgba(91, 173, 150, 0.18) 69%),
-    linear-gradient(180deg, #c9f1ff, #f7fbff);
-}
-
-.lb-horizon {
-  position: absolute;
-  right: -6%;
-  bottom: 2px;
-  left: -6%;
-  height: 40%;
-  background:
-    linear-gradient(155deg, transparent 0 24%, #b3d8cd 25% 38%, transparent 39%),
-    linear-gradient(205deg, transparent 0 30%, #9fcbbf 31% 48%, transparent 49%);
-}
-
-.lb-route-loin {
-  position: absolute;
-  right: 36%;
-  bottom: -34px;
-  width: 28%;
-  height: 90px;
-  background: #f7f8fc;
-  clip-path: polygon(40% 0, 60% 0, 100% 100%, 0 100%);
-}
-
-.lb-planche {
-  position: absolute;
-  right: -8%;
-  bottom: -25%;
-  left: -8%;
-  height: 57%;
-  border-radius: 50% 50% 0 0;
-  background: linear-gradient(180deg, #3e425f, #22243b 78%);
-  box-shadow: inset 0 5px 0 rgba(255, 255, 255, 0.05);
-}
-
-.lb-volant {
-  position: absolute;
-  z-index: 1;
-  bottom: -34px;
-  left: 50%;
-  width: 112px;
-  height: 112px;
-  border: 12px solid #151728;
-  border-radius: 50%;
-  transform: translateX(-50%);
-}
-
-.lb-volant::before,
-.lb-volant::after,
-.lb-volant span {
-  position: absolute;
-  top: 39px;
-  left: 39px;
-  width: 48px;
-  height: 9px;
-  border-radius: 999px;
-  background: #151728;
-  content: "";
-  transform-origin: left center;
-}
-
-.lb-volant::before {
-  transform: rotate(150deg);
-}
-
-.lb-volant::after {
-  transform: rotate(30deg);
-}
-
-.lb-volant span {
-  top: 37px;
-  width: 35px;
-  height: 35px;
-  border-radius: 50%;
-  transform: translate(-1px, -1px);
-}
-
-.lb-zone {
-  position: absolute;
-  z-index: 3;
-  transform: translate(-50%, -50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 64px;
-  min-height: 64px;
-  padding: 6px;
-  border: 2px solid rgba(255, 255, 255, 0.86);
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.83);
-  box-shadow:
-    0 10px 22px rgba(42, 45, 81, 0.16),
-    0 0 0 3px rgba(102, 92, 242, 0.08);
-  color: var(--a);
-  cursor: pointer;
-  transition:
-    transform 180ms ease,
-    color 180ms ease,
-    background 180ms ease,
-    box-shadow 180ms ease;
-  backdrop-filter: blur(8px);
-}
-
-.lb-zone svg {
-  width: 48px;
-  height: 42px;
-  fill: rgba(102, 92, 242, 0.08);
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 2.4;
-}
-
-.lb-zone .lb-shine {
-  fill: none;
-  opacity: 0.54;
-  stroke: var(--su);
-  stroke-width: 3;
-}
-
-/* La position vient du preset (left/top en %, posés en style inline) et le
-   bloc est centré sur ce point. Un seul jeu de règles pour toutes les zones,
-   quel que soit le décor : c'est ce qui permet d'ajouter une compétence sans
-   écrire de CSS. */
-.lb-zone[data-icone="epaule"] svg {
-  width: 46px;
-  height: 46px;
-}
-
-.lb-zone-nom {
-  position: absolute;
-  top: calc(100% + 7px);
-  left: 50%;
-  width: max-content;
-  max-width: 145px;
-  padding: 5px 8px;
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  border-radius: 8px;
-  background: rgba(26, 29, 52, 0.88);
-  color: var(--su);
-  font-size: 10px;
-  font-weight: 750;
-  line-height: 1.2;
-  opacity: 0;
-  pointer-events: none;
-  transform: translate(-50%, -3px);
-  transition:
-    opacity 180ms ease,
-    transform 180ms ease;
-}
-
-.lb-zone.is-reperee .lb-zone-nom,
-.lb-zone.is-faite .lb-zone-nom,
-.lb-zone:focus-visible .lb-zone-nom {
-  opacity: 1;
-  transform: translate(-50%, 0);
-}
-
-.lb-zone.is-reperee,
-.lb-zone.is-faite {
-  background: rgba(229, 255, 248, 0.94);
-  box-shadow:
-    0 10px 24px rgba(22, 167, 120, 0.2),
-    0 0 0 4px rgba(22, 167, 120, 0.12);
-  color: var(--gr);
-  transform: scale(1.04);
-}
-
-.lb-zone-interiorMirror.is-reperee,
-.lb-zone-interiorMirror.is-faite {
-  transform: translateX(-50%) scale(1.04);
-}
-
-.lb-zone-ok {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  display: grid;
-  width: 23px;
-  height: 23px;
-  place-items: center;
-  border: 2px solid var(--su);
-  border-radius: 50%;
-  background: var(--gr);
-  color: var(--su);
-  font-size: 12px;
-  font-weight: 900;
-  opacity: 0;
-  transform: scale(0.4);
-}
-
-.lb-zone.is-reperee .lb-zone-ok,
-.lb-zone.is-faite .lb-zone-ok {
-  opacity: 1;
-  transform: scale(1);
-  transition: 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.lb-zone.a-regarder {
-  animation: lb-attention 420ms ease-in-out 2;
-}
-
-.lb-zone-interiorMirror.a-regarder {
-  animation: lb-attention 420ms ease-in-out 2;
-}
-
-.lb-etat,
-.lb-retour-info {
-  min-height: 42px;
-  margin: 0 auto 12px;
-  padding: 9px 12px;
-  color: var(--mu);
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1.35;
-  text-align: center;
-}
-
-.lb-retour-info.a-de-l-aide {
-  border: 1px solid rgba(102, 92, 242, 0.14);
-  border-radius: 12px;
-  background: rgba(102, 92, 242, 0.06);
-  color: #453e9e;
-}
-
-.lb-retour-info.is-faite {
-  color: #0d7453;
-}
-
-.lb-jetons {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  min-height: 32px;
-  margin: -4px 0 4px;
-  gap: 5px;
-}
-
-.lb-jeton {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 7px 4px 4px;
-  gap: 5px;
-  border: 1px solid rgba(22, 167, 120, 0.15);
-  border-radius: 999px;
-  background: rgba(22, 167, 120, 0.07);
-  color: #0d7453;
-  font-size: 9px;
-  font-weight: 750;
-  animation: lb-jeton-in 300ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
-}
-
-.lb-jeton > span:first-child {
-  display: grid;
-  width: 19px;
-  height: 19px;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--gr);
-  color: var(--su);
-}
-
-.lb-symbole,
-.lb-symbole-audio {
-  position: relative;
-  display: grid;
-  width: 76px;
-  height: 76px;
-  margin: 20px auto 2px;
-  place-items: center;
-  border: 1px solid rgba(102, 92, 242, 0.12);
-  border-radius: 20px;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(228, 225, 255, 0.72));
-  box-shadow: 0 14px 28px rgba(72, 65, 161, 0.13);
-  color: var(--a);
-}
-
-.lb-symbole > span {
-  position: absolute;
-  width: 48px;
-  height: 48px;
-  border: 2px dashed rgba(102, 92, 242, 0.34);
-  border-radius: 50%;
-  animation: lb-orbite-anim 8s linear infinite;
-}
-
-.lb-symbole svg,
-.lb-symbole-audio svg {
-  width: 48px;
-  height: 48px;
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 2.5;
-}
-
-.lb-bilingue {
-  display: grid;
-  margin: 8px 0 12px;
-  gap: 10px;
-}
-
-.lb-texte-principal {
-  padding: 18px;
-  border: 1px solid rgba(102, 92, 242, 0.13);
-  border-radius: 16px;
-  background: rgba(102, 92, 242, 0.07);
-  color: var(--ink);
-  font-size: 17px;
-  font-weight: 750;
-  line-height: 1.5;
-  text-align: start;
-}
-
-.lb-texte-principal[dir="rtl"] {
-  line-height: 1.75;
-}
-
-.lb-vo {
-  padding: 13px 15px;
-  border: 1px solid var(--bo);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.72);
-}
-
-.lb-vo > span,
-.lb-traduction > span {
-  display: block;
-  margin-bottom: 5px;
-  color: var(--mu);
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.lb-vo p {
-  color: var(--mu);
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 1.5;
-}
-
-.lb-mot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-  padding: 10px 12px;
-  gap: 12px;
-  border: 1px solid rgba(22, 167, 120, 0.15);
-  border-radius: 12px;
-  background: rgba(22, 167, 120, 0.07);
-}
-
-.lb-mot-libelle {
-  color: var(--mu);
-  font-size: 10px;
-  font-weight: 700;
-}
-
-.lb-mot strong {
-  color: #0d7453;
-  font-size: 12px;
-  text-align: end;
-}
-
-.lb-symbole-audio {
-  color: var(--gr);
-}
-
-.lb-phrase {
-  margin: 10px 0 12px;
-  padding: 18px 16px;
-  border: 1px solid rgba(22, 167, 120, 0.15);
-  border-radius: 16px;
-  background: rgba(22, 167, 120, 0.07);
-  color: var(--ink);
-  font-family:
-    "Plus Jakarta Sans", ui-rounded, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", sans-serif;
-  font-size: clamp(20px, 6vw, 25px);
-  font-weight: 800;
-  line-height: 1.3;
-  text-align: center;
-}
-
-.lb-traduction {
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--bo);
-  text-align: center;
-}
-
-.lb-traduction p {
-  color: var(--mu);
-  font-size: 13px;
-  font-weight: 650;
-  line-height: 1.55;
-}
-
-.lb-audio-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  margin-top: 12px;
-  gap: 8px;
-}
-
-.lb-audio {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 48px;
-  padding: 10px;
-  gap: 7px;
-  border: 1px solid rgba(102, 92, 242, 0.18);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.78);
-  color: var(--a);
-  cursor: pointer;
-  font-size: 11px;
-  font-weight: 800;
-}
-
-.lb-audio svg {
-  width: 20px;
-  height: 20px;
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 2;
-}
-
-.lb-audio:disabled {
-  cursor: not-allowed;
-  opacity: 0.46;
-}
-
-.lb-audio-etat {
-  min-height: 30px;
-  padding: 7px 4px;
-  color: var(--mu);
-  font-size: 10px;
-  font-weight: 600;
-  line-height: 1.4;
-  text-align: center;
-}
-
-.lb-fin {
-  justify-content: center;
-}
-
-.lb-fin .lb-ile {
-  height: 265px;
-  min-height: 245px;
-  margin-top: -22px;
-}
-
-.lb-ile.est-reussi .lb-ile-bloc {
-  animation-duration: 3.4s;
-}
-
-.lb-coche {
-  position: relative;
-  z-index: 5;
-  display: grid;
-  width: 58px;
-  height: 58px;
-  margin: -72px auto 14px;
-  place-items: center;
-  border: 5px solid var(--su);
-  border-radius: 50%;
-  background: var(--gr);
-  box-shadow: 0 10px 24px rgba(22, 167, 120, 0.3);
-  color: var(--su);
-  animation: lb-fin-pop 500ms cubic-bezier(0.34, 1.56, 0.64, 1) 200ms both;
-}
-
-.lb-coche svg {
-  width: 30px;
-  height: 30px;
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 2.6;
-}
-
-.lb-validation {
-  max-width: 330px;
-  margin: 0 auto !important;
-  color: var(--mu) !important;
-}
-
-.lb-fin h1 {
-  font-size: clamp(28px, 8vw, 36px);
-}
-
-.lb-orbite,
-.lb-etoile {
-  display: none;
-}
-
-.est-reussi .lb-orbite {
-  position: absolute;
-  z-index: 1;
-  top: 54%;
-  left: 50%;
-  display: block;
-  width: 220px;
-  height: 64px;
-  border: 2px solid rgba(22, 167, 120, 0.24);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  animation: lb-orbite 2.8s ease-in-out infinite;
-}
-
-.est-reussi .lb-etoile {
-  position: absolute;
-  z-index: 4;
-  display: block;
-  color: #e8a918;
-  animation: lb-etoile-anim 2.2s ease-in-out infinite;
-}
-
-.est-reussi .lb-etoile-one {
-  top: 28%;
-  left: 14%;
-}
-
-.est-reussi .lb-etoile-two {
-  top: 21%;
-  right: 20%;
-  animation-delay: 400ms;
-}
-
-.est-reussi .lb-etoile-three {
-  right: 10%;
-  bottom: 24%;
-  animation-delay: 800ms;
-}
-
-.lb-secondaire {
-  border: 1px solid var(--bo);
-  background: rgba(255, 255, 255, 0.76);
-  color: var(--a);
-  box-shadow: 0 8px 20px rgba(62, 57, 120, 0.08);
-}
-
-.lb-secondaire svg {
-  width: 20px;
-  height: 20px;
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 2;
-}
-
-.lb-langue:hover,
-.lb-retour:hover,
-.lb-zone:hover,
-.lb-audio:hover:not(:disabled),
-.lb-secondaire:hover {
-  filter: brightness(0.98);
-}
-
-.lb-langue:focus-visible,
-.lb-retour:focus-visible,
-.lb-zone:focus-visible,
-.lb-cta:focus-visible,
-.lb-audio:focus-visible,
-.lb-secondaire:focus-visible {
-  outline: 3px solid #0f7658;
-  outline-offset: 3px;
-}
-
-@keyframes lb-ecran-in {
+@keyframes lbEntree {
   from {
     opacity: 0;
     transform: translateY(10px);
@@ -1051,43 +261,256 @@
   }
 }
 
-@keyframes lb-float {
-  0%,
-  100% {
-    transform: translateY(0) rotate(-0.5deg);
-  }
-  50% {
-    transform: translateY(-7px) rotate(0.5deg);
-  }
+/* Le décor absorbe l'espace libre : le titre reste en haut, le CTA en bas,
+   et l'illustration se centre au lieu de laisser un trou sous le contenu. */
+.lb-cockpit,
+.lb-plateau {
+  margin-block: auto;
 }
 
-@keyframes lb-voiture-breathe {
-  0%,
-  100% {
+/* Les écrans sans décor n'ont rien pour absorber ce vide : leur contenu se
+   tasse en haut. Une marge auto de chaque côté du bloc et il se centre. */
+[data-ecran="expliquer"] > :first-child,
+[data-ecran="ecouter"] > :first-child {
+  margin-top: auto;
+}
+
+/* ─── Textes ───────────────────────────────────────────────── */
+
+.lb-copie {
+  text-align: center;
+}
+
+.lb-ecran h1 {
+  margin: 0;
+  font:
+    800 27px/1.12 "Baloo 2",
+    "Fredoka",
+    sans-serif;
+  color: #fff;
+  text-wrap: balance;
+}
+
+.lb-copie-serree h1 {
+  font-size: 22px;
+}
+
+.lb-ecran p {
+  margin: 6px auto 0;
+  max-width: 320px;
+  font:
+    400 14.5px/1.45 "Inter",
+    sans-serif;
+  color: #cfc9f2;
+}
+
+.lb-kicker {
+  align-self: center;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font:
+    800 10.5px/1 "Baloo 2",
+    "Fredoka",
+    sans-serif;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--or);
+  background: rgba(255, 203, 61, 0.12);
+  border: 1px solid rgba(255, 203, 61, 0.3);
+}
+
+/* ─── Boutons ──────────────────────────────────────────────── */
+
+.lb-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 54px;
+  margin-top: auto;
+  padding: 14px 26px;
+  border: 0;
+  border-radius: 16px;
+  cursor: pointer;
+  color: #3a1d00;
+  font:
+    800 16px/1 "Baloo 2",
+    "Fredoka",
+    sans-serif;
+  background: linear-gradient(180deg, var(--or), var(--or-bas));
+  box-shadow:
+    0 5px 0 var(--or-tranche),
+    0 8px 18px rgba(255, 140, 30, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  transition:
+    transform 0.1s ease,
+    box-shadow 0.1s ease,
+    opacity 0.2s ease;
+}
+
+.lb-cta svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.lb-cta:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow:
+    0 1px 0 var(--or-tranche),
+    0 3px 8px rgba(255, 140, 30, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.lb-cta:disabled {
+  cursor: default;
+  opacity: 0.4;
+  box-shadow:
+    0 5px 0 var(--or-tranche),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.lb-secondaire {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 20px;
+  border: 1px solid var(--vitre-bord);
+  border-radius: 999px;
+  background: var(--vitre);
+  color: var(--txt);
+  font:
+    600 14px/1 "Inter",
+    sans-serif;
+  cursor: pointer;
+}
+
+.lb-secondaire svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ─── Intro : l'île flottante ──────────────────────────────── */
+
+.lb-intro {
+  justify-content: center;
+  text-align: center;
+  gap: 6px;
+}
+
+.lb-ile {
+  position: relative;
+  margin: 4px 0 2px;
+  isolation: isolate;
+}
+
+.lb-ile svg {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 30dvh;
+  animation: lbFlotte 7s ease-in-out infinite alternate;
+}
+
+.lb-ile-bloc {
+  filter: drop-shadow(0 28px 30px rgba(0, 0, 0, 0.45));
+}
+
+/* Lueur violette sous l'île : elle décolle le décor du fond nuit. */
+.lb-lueur {
+  position: absolute;
+  z-index: 0;
+  inset: 12% 6% 4%;
+  border-radius: 50%;
+  background: radial-gradient(
+    60% 50% at 50% 50%,
+    rgba(139, 123, 240, 0.4),
+    transparent 70%
+  );
+  filter: blur(14px);
+}
+
+.lb-etoile {
+  position: absolute;
+  z-index: 2;
+  color: var(--or);
+  font-size: 13px;
+  opacity: 0.9;
+  animation: lbScintille 3.2s ease-in-out infinite;
+}
+
+.lb-etoile-one {
+  top: 12%;
+  left: 12%;
+}
+.lb-etoile-two {
+  top: 26%;
+  right: 14%;
+  animation-delay: 1.1s;
+}
+.lb-etoile-three {
+  bottom: 16%;
+  left: 22%;
+  font-size: 10px;
+  animation-delay: 2s;
+}
+
+.lb-voiture {
+  animation: lbRoule 5.5s ease-in-out infinite alternate;
+}
+
+.lb-ile.est-reussi .lb-ile-bloc {
+  animation: lbPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes lbFlotte {
+  from {
     transform: translateY(0);
   }
-  50% {
-    transform: translateY(-2px);
+  to {
+    transform: translateY(-7px);
   }
 }
 
-@keyframes lb-attention {
+@keyframes lbRoule {
+  from {
+    transform: translate(-6px, 3px);
+  }
+  to {
+    transform: translate(8px, -4px);
+  }
+}
+
+@keyframes lbScintille {
   0%,
   100% {
-    transform: translate(-50%, -50%);
+    opacity: 0.25;
+    transform: scale(0.85);
   }
-  33% {
-    transform: translate(calc(-50% - 5px), -50%);
-  }
-  66% {
-    transform: translate(calc(-50% + 5px), -50%);
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
   }
 }
 
-@keyframes lb-jeton-in {
+@keyframes lbPop {
   from {
     opacity: 0;
-    transform: scale(0.72);
+    transform: scale(0.8);
   }
   to {
     opacity: 1;
@@ -1095,227 +518,690 @@
   }
 }
 
-@keyframes lb-orbite-anim {
+/* ─── Décor « cockpit » ────────────────────────────────────── */
+
+.lb-cockpit {
+  position: relative;
+  border-radius: 22px;
+  overflow: hidden;
+  background: #0e0b28;
+  border: 1px solid var(--vitre-bord);
+  box-shadow:
+    0 18px 34px -16px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.lb-hab {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Le volant vibre à peine : la voiture roule. */
+.lb-volant {
+  transform-origin: 180px 258px;
+  animation: lbVolant 9s ease-in-out infinite alternate;
+}
+
+@keyframes lbVolant {
+  from {
+    transform: rotate(-1.4deg);
+  }
   to {
-    transform: rotate(360deg);
+    transform: rotate(1.4deg);
   }
 }
 
-@keyframes lb-fin-pop {
+/* Une zone = une pastille de verre + son libellé. Le libellé se range du
+   côté où il y a de la place (classe posée par scenes.js), sinon il sort
+   du cadre sur les zones collées aux bords. */
+/* left/top du preset visent la PASTILLE, pas le bouton entier : sinon un
+   libellé long pousse la pastille hors du cadre. D'où un recalage par
+   variante, sur la moitié de la pastille (50px / 2). */
+.lb-zone {
+  --lb-cx: -25px;
+  --lb-cy: -50%;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  transform: translate(var(--lb-cx), var(--lb-cy));
+  cursor: pointer;
+  animation: lbFondu 0.4s ease both;
+  animation-delay: var(--lb-delai, 0s);
+}
+
+.lb-zone--gauche {
+  --lb-cx: calc(-100% + 25px);
+  flex-direction: row-reverse;
+}
+
+.lb-zone--bas {
+  --lb-cx: -50%;
+  --lb-cy: -25px;
+  flex-direction: column;
+  gap: 6px;
+}
+
+@keyframes lbFondu {
   from {
     opacity: 0;
-    transform: scale(0.4) rotate(-12deg);
   }
   to {
     opacity: 1;
-    transform: scale(1) rotate(0);
   }
 }
 
-@keyframes lb-orbite {
+.lb-zone-pastille {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  flex: 0 0 50px;
+  border-radius: 50%;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.22),
+    rgba(255, 255, 255, 0.07)
+  );
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(3px);
+  animation: lbPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation-delay: var(--lb-delai, 0s);
+  transition:
+    transform 0.12s ease,
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.lb-zone:active .lb-zone-pastille {
+  transform: scale(0.92);
+}
+
+.lb-zone-pastille svg {
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.lb-zone-pastille .lb-shine {
+  stroke-width: 2.4;
+  opacity: 0.55;
+}
+
+.lb-zone-nom {
+  padding: 6px 11px;
+  border-radius: 999px;
+  font:
+    700 11.5px/1.1 "Baloo 2",
+    "Fredoka",
+    sans-serif;
+  color: var(--txt);
+  white-space: nowrap;
+  background: rgba(12, 10, 38, 0.82);
+  border: 1px solid var(--vitre-bord);
+  backdrop-filter: blur(4px);
+}
+
+/* Repérée / faite : la pastille passe à l'or, la coche apparaît. */
+.lb-zone.is-reperee .lb-zone-pastille,
+.lb-zone.is-faite .lb-zone-pastille {
+  background: linear-gradient(180deg, var(--or), var(--or-bas));
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow:
+    0 6px 18px rgba(255, 140, 30, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.lb-zone.is-reperee .lb-zone-pastille svg,
+.lb-zone.is-faite .lb-zone-pastille svg {
+  stroke: #3a1d00;
+}
+
+/* Le libellé reste sombre : trois pastilles d'or + un CTA d'or, ça suffit.
+   C'est la coche verte qui dit « fait ». */
+.lb-zone.is-reperee .lb-zone-nom,
+.lb-zone.is-faite .lb-zone-nom {
+  border-color: rgba(255, 203, 61, 0.5);
+}
+
+.lb-zone-ok {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  display: grid;
+  place-items: center;
+  width: 21px;
+  height: 21px;
+  border-radius: 50%;
+  background: #22c55e;
+  border: 2px solid #0e0b28;
+  opacity: 0;
+  transform: scale(0.5);
+  transition:
+    opacity 0.2s ease,
+    transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.lb-zone-ok svg {
+  width: 12px;
+  height: 12px;
+  stroke: #fff;
+  stroke-width: 3.4;
+}
+
+.lb-zone.is-reperee .lb-zone-ok,
+.lb-zone.is-faite .lb-zone-ok {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Zone attendue pendant la séquence : elle respire. Zone signalée après une
+   erreur : elle insiste. */
+.lb-cockpit.est-interactif
+  .lb-zone.est-attendue:not(.is-faite)
+  .lb-zone-pastille {
+  animation: lbAppel 1.6s ease-in-out infinite;
+}
+
+.lb-zone.a-regarder .lb-zone-pastille {
+  animation: lbAppel 0.7s ease-in-out 3;
+  border-color: var(--or);
+}
+
+@keyframes lbAppel {
   0%,
   100% {
-    opacity: 0.45;
-    transform: translate(-50%, -50%) scale(0.96);
+    box-shadow:
+      0 6px 16px rgba(0, 0, 0, 0.45),
+      0 0 0 0 rgba(255, 203, 61, 0.55),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5);
   }
   50% {
-    opacity: 0.8;
-    transform: translate(-50%, -50%) scale(1.06);
+    box-shadow:
+      0 6px 16px rgba(0, 0, 0, 0.45),
+      0 0 0 11px rgba(255, 203, 61, 0),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5);
   }
 }
 
-@keyframes lb-etoile-anim {
+/* ─── Décor « route » (moteur isométrique de « En situation ») ── */
+
+.lb-plateau {
+  margin: 0 -8px;
+}
+
+.lb-plateau svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 34dvh;
+  animation: lbFlotte 7s ease-in-out infinite alternate;
+  filter: drop-shadow(0 22px 26px rgba(0, 0, 0, 0.45));
+}
+
+.lb-plateau.est-interactif .sit-hit {
+  cursor: pointer;
+}
+
+/* Le véhicule choisi reste marqué pendant l'explication. */
+.lb-plateau .sit-veh[data-choisi] {
+  filter: drop-shadow(0 0 7px rgba(255, 203, 61, 0.9));
+}
+
+/* Retour visuel de correction, repris tel quel du mini-jeu. */
+.lb-plateau .sit-halo {
+  animation: lbHalo 1.15s ease-in-out infinite;
+}
+
+.lb-plateau .sit-chev {
+  opacity: 0;
+  animation: lbChev 1.4s ease-in-out infinite;
+}
+
+.lb-plateau .sit-tag {
+  animation: lbTag 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes lbHalo {
   0%,
   100% {
-    opacity: 0.45;
-    transform: scale(0.8) rotate(0);
+    opacity: 0.95;
   }
   50% {
+    opacity: 0.4;
+  }
+}
+
+@keyframes lbChev {
+  0%,
+  70%,
+  100% {
+    opacity: 0;
+  }
+  25%,
+  45% {
     opacity: 1;
-    transform: scale(1.15) rotate(20deg);
   }
 }
 
-@media (min-width: 700px) {
-  .labo {
-    padding-top: 24px;
+@keyframes lbTag {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
   }
-
-  .lb-scene {
-    min-height: min(780px, calc(100dvh - 112px));
-  }
-}
-
-@media (max-width: 360px) {
-  .labo {
-    padding-right: 10px;
-    padding-left: 10px;
-  }
-
-  .lb-marque strong {
-    display: none;
-  }
-
-  .lb-langue {
-    min-width: 44px;
-  }
-
-  .lb-ecran {
-    padding-right: 15px;
-    padding-left: 15px;
-  }
-
-  .lb-cockpit {
-    height: 270px;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-@media (max-height: 760px) {
-  .lb-ile {
-    height: 240px;
-    min-height: 225px;
-  }
+/* ─── Retours d'état ───────────────────────────────────────── */
 
-  .lb-ecran {
-    padding-bottom: 18px;
-  }
+.lb-etat,
+.lb-retour-info {
+  text-align: center;
+  font:
+    600 13.5px/1.4 "Inter",
+    sans-serif;
+  color: var(--txt-doux);
+  min-height: 20px;
+}
 
-  .lb-copie-serree {
-    margin-top: 14px;
-  }
+.lb-retour-info.a-de-l-aide {
+  color: var(--or);
+}
 
-  .lb-cockpit {
-    height: 255px;
-    min-height: 245px;
-  }
+.lb-retour-info.est-fini {
+  color: #9ef06a;
+}
 
-  .lb-symbole,
-  .lb-symbole-audio {
-    width: 64px;
-    height: 64px;
-    margin-top: 12px;
-  }
+.lb-jetons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
 
-  .lb-symbole svg,
-  .lb-symbole-audio svg {
-    width: 40px;
-    height: 40px;
-  }
+.lb-jeton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px 6px 6px;
+  border-radius: 999px;
+  font:
+    600 12px/1 "Inter",
+    sans-serif;
+  color: var(--txt);
+  background: var(--vitre);
+  border: 1px solid var(--vitre-bord);
+  animation: lbPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.lb-jeton > span:first-child {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, var(--or), var(--or-bas));
+  color: #3a1d00;
+  font:
+    800 11px/1 "Baloo 2",
+    "Fredoka",
+    sans-serif;
+}
+
+/* ─── Explication + écoute ─────────────────────────────────── */
+
+.lb-symbole {
+  align-self: center;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, var(--btn-haut), var(--btn-bas));
+  border: 1px solid var(--vitre-bord);
+  box-shadow:
+    0 5px 0 var(--btn-tranche),
+    0 10px 18px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  animation: lbPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.lb-symbole svg {
+  width: 32px;
+  height: 32px;
+  fill: none;
+  stroke: var(--or);
+  stroke-width: 3.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.lb-symbole > span {
+  display: none;
+}
+
+.lb-bilingue {
+  padding: 15px 17px;
+  border-radius: 18px;
+  background: var(--vitre);
+  border: 1px solid var(--vitre-bord);
+}
+
+.lb-texte-principal {
+  margin: 0;
+  font:
+    400 15.5px/1.5 "Inter",
+    sans-serif;
+  color: #e6e2ff;
+}
+
+.lb-vo {
+  margin-top: 11px;
+  padding-top: 11px;
+  border-top: 1px solid var(--vitre-bord);
+}
+
+.lb-vo > span {
+  display: block;
+  font:
+    800 10.5px/1 "Baloo 2",
+    "Fredoka",
+    sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--txt-doux);
+}
+
+.lb-vo p {
+  margin: 5px 0 0;
+  font:
+    400 14px/1.45 "Inter",
+    sans-serif;
+  color: #cfc9f2;
+  opacity: 0.85;
+}
+
+.lb-regle {
+  margin: 0;
+  padding: 13px 15px;
+  border-radius: 16px;
+  font:
+    500 14px/1.45 "Inter",
+    sans-serif;
+  color: #e6e2ff;
+  background: rgba(255, 203, 61, 0.08);
+  border: 1px solid rgba(255, 203, 61, 0.32);
+}
+
+/* Le mot à reconnaître : c'est le cœur du labo, il est traité comme une
+   pièce à collectionner. */
+.lb-mot {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 14px 17px;
+  border-radius: 18px;
+  text-align: center;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 203, 61, 0.16),
+    rgba(255, 156, 28, 0.06)
+  );
+  border: 1px solid rgba(255, 203, 61, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+.lb-mot-libelle {
+  font:
+    800 10.5px/1 "Baloo 2",
+    "Fredoka",
+    sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--or);
+}
+
+.lb-mot strong {
+  font:
+    800 21px/1.2 "Baloo 2",
+    "Fredoka",
+    sans-serif;
+  color: #fff;
+}
+
+.lb-phrase {
+  margin: 0;
+  padding: 17px 19px;
+  border-radius: 18px;
+  font:
+    700 19px/1.4 "Baloo 2",
+    "Fredoka",
+    sans-serif;
+  color: #fff;
+  text-align: center;
+  background: linear-gradient(180deg, var(--btn-haut), var(--btn-bas));
+  border: 1px solid var(--vitre-bord);
+  box-shadow:
+    0 5px 0 var(--btn-tranche),
+    0 10px 18px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.lb-traduction {
+  text-align: center;
+}
+
+.lb-traduction > span {
+  font:
+    800 10.5px/1 "Baloo 2",
+    "Fredoka",
+    sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--txt-doux);
+}
+
+.lb-traduction p {
+  margin: 5px 0 0;
+  font:
+    500 15px/1.4 "Inter",
+    sans-serif;
+  color: #e6e2ff;
+}
+
+.lb-audio-actions {
+  display: flex;
+  justify-content: center;
+  gap: 9px;
+}
+
+.lb-audio {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 0 17px;
+  border: 1px solid var(--vitre-bord);
+  border-radius: 999px;
+  background: var(--vitre);
+  color: var(--txt);
+  font:
+    600 13.5px/1 "Inter",
+    sans-serif;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.lb-audio:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.lb-audio svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: var(--or);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.lb-audio:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.lb-audio-etat {
+  margin: 0;
+  text-align: center;
+  font:
+    400 12px/1.4 "Inter",
+    sans-serif;
+  color: var(--txt-doux);
+}
+
+/* ─── Fin ──────────────────────────────────────────────────── */
+
+.lb-fin {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+}
+
+.lb-fin .lb-ile {
+  width: 100%;
+}
+
+.lb-coche {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #34d399, #15803d);
+  box-shadow:
+    0 5px 0 #0b5c2c,
+    0 10px 20px rgba(34, 197, 94, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  animation: lbPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s both;
+}
+
+.lb-coche svg {
+  width: 30px;
+  height: 30px;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.lb-validation {
+  margin: 0 auto;
+  max-width: 300px;
+  font:
+    400 14px/1.45 "Inter",
+    sans-serif;
+  color: #cfc9f2;
+}
+
+.lb-fin h1 {
+  margin-top: 4px;
+  font-size: 30px;
+}
+
+.lb-autres {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.lb-autres > span {
+  font:
+    800 10.5px/1 "Baloo 2",
+    "Fredoka",
+    sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--txt-doux);
+}
+
+.lb-autre {
+  width: 100%;
+  min-height: 50px;
+  padding: 12px 18px;
+  border: 1px solid var(--vitre-bord);
+  border-radius: 16px;
+  background: linear-gradient(180deg, var(--btn-haut), var(--btn-bas));
+  color: var(--txt);
+  font:
+    600 14.5px/1.25 "Inter",
+    sans-serif;
+  cursor: pointer;
+  box-shadow:
+    0 5px 0 var(--btn-tranche),
+    0 9px 14px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.08s ease;
+}
+
+.lb-autre:active {
+  transform: translateY(4px);
+  box-shadow:
+    0 1px 0 var(--btn-tranche),
+    0 3px 7px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* ─── Accessibilité ────────────────────────────────────────── */
+
+.lb-cta:focus-visible,
+.lb-secondaire:focus-visible,
+.lb-audio:focus-visible,
+.lb-langue:focus-visible,
+.lb-retour:focus-visible,
+.lb-autre:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+.lb-zone:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 4px;
+  border-radius: 999px;
+}
+
+#lb-titre:focus {
+  outline: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .labo-page *,
   .labo-page *::before,
   .labo-page *::after {
-    scroll-behavior: auto !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
-  }
-}
-
-/* ─── Décor « vue de dessus » ───────────────────────────────────
-   Même grammaire que le cockpit : un cadre arrondi, une ombre douce.
-   Les véhicules sont dessinés à partir des données du preset, donc une
-   voiture reste strictement identique d'un exercice à l'autre. */
-.lb-route {
-  position: relative;
-  width: 100%;
-  max-width: 390px;
-  margin: 4px auto 12px;
-  overflow: hidden;
-  border: 1px solid rgba(86, 79, 161, 0.15);
-  border-radius: 20px;
-  box-shadow:
-    0 18px 40px rgba(45, 43, 92, 0.16),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
-}
-
-.lb-route svg {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.lb-veh.est-cliquable {
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.lb-route.est-interactif .lb-veh.est-cliquable {
-  animation: lb-veh-appel 2.4s ease-in-out infinite;
-}
-
-.lb-veh.est-cliquable:focus-visible {
-  outline: 3px solid var(--a-lt);
-  outline-offset: 3px;
-}
-
-.lb-veh.est-choisie {
-  animation: none;
-  filter: drop-shadow(0 0 9px rgba(22, 167, 120, 0.85));
-}
-
-@keyframes lb-veh-appel {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.72;
-  }
-}
-
-/* Règle de circulation rappelée après la bonne réponse. */
-.lb-regle {
-  margin: 10px 0 0;
-  padding: 12px 14px;
-  border: 1px solid rgba(22, 167, 120, 0.22);
-  border-radius: 14px;
-  background: rgba(22, 167, 120, 0.08);
-  color: #0f6f56;
-  font-size: 13.5px;
-  font-weight: 600;
-  line-height: 1.5;
-}
-
-/* Passer à un autre exercice depuis l'écran de fin. */
-.lb-autres {
-  display: grid;
-  gap: 8px;
-  width: 100%;
-  margin-top: 14px;
-}
-
-.lb-autres > span {
-  color: var(--mu);
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.lb-autre {
-  min-height: 48px;
-  padding: 0 14px;
-  border: 1px solid var(--bo);
-  border-radius: 14px;
-  background: var(--su);
-  color: var(--ink);
-  cursor: pointer;
-  font-size: 13.5px;
-  font-weight: 700;
-  line-height: 1.3;
-  text-align: left;
-  transition: transform 120ms ease;
-}
-
-.lb-autre:active {
-  transform: scale(0.98);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .lb-route.est-interactif .lb-veh.est-cliquable {
-    animation: none;
   }
 }

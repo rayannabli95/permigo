@@ -171,6 +171,7 @@ function charger() {
     signale: "",
     choisi: "",
     juste: null,
+    ecoute: false,
     presetId: s.presetId || PRESETS[0].id,
   };
 }
@@ -239,8 +240,17 @@ function boutonRetour() {
 }
 
 function cta(action, libelle) {
+  return ctaVerrouille(action, libelle, false);
+}
+
+/**
+ * Même bouton, mais grisé tant que l'étape n'est pas finie. On l'affiche
+ * quand même : s'il n'apparaissait qu'à la fin, toute la page se décalerait
+ * d'un coup au dernier clic.
+ */
+function ctaVerrouille(action, libelle, verrouille) {
   return `
-    <button class="lb-cta" type="button" data-action="${action}">
+    <button class="lb-cta" type="button" data-action="${action}"${verrouille ? " disabled" : ""}>
       <span ${attrsLangue()}>${esc(libelle)}</span>
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
     </button>`;
@@ -305,7 +315,7 @@ function ecranRefaire() {
       })}
       <div class="lb-jetons">${jetons}</div>
       <div class="lb-retour-info${etat.aide ? " a-de-l-aide" : ""}${fini ? " est-fini" : ""}" aria-live="polite" ${attrsLangue()}>${esc(message)}</div>
-      ${fini ? cta("expliquer", t(T.comprendre)) : ""}
+      ${ctaVerrouille("expliquer", t(T.comprendre), !fini)}
     </section>`;
 }
 
@@ -326,9 +336,10 @@ function ecranDecider() {
         langue: etat.langue,
         selectionnable: !etat.juste,
         choisi: etat.choisi,
+        juste: etat.juste,
       })}
       <div class="lb-retour-info${repondu && !etat.juste ? " a-de-l-aide" : ""}${etat.juste ? " est-fini" : ""}" aria-live="polite" ${attrsLangue()}>${esc(message)}</div>
-      ${etat.juste ? cta("expliquer", t(T.comprendre)) : ""}
+      ${ctaVerrouille("expliquer", t(T.comprendre), !etat.juste)}
     </section>`;
 }
 
@@ -392,13 +403,9 @@ function ecranEcouter() {
         <p ${attrsLangue()}>${esc(trad)}</p>
       </div>
       <div class="lb-audio-actions">
-        <button class="lb-audio" type="button" data-audio="1" ${ok ? "" : "disabled"}>
+        <button id="lb-audio-btn" class="lb-audio" type="button" data-audio="1" ${ok ? "" : "disabled"}>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9v6h4l5 4V5l-5 4Zm12 0c2 2 2 4 0 6"/></svg>
-          <span ${attrsLangue()}>${esc(t(T.ecouter))}</span>
-        </button>
-        <button class="lb-audio" type="button" data-audio="1" ${ok ? "" : "disabled"}>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2 6M20 4v7h-7"/></svg>
-          <span ${attrsLangue()}>${esc(t(T.reecouter))}</span>
+          <span ${attrsLangue()}>${esc(t(etat.ecoute ? T.reecouter : T.ecouter))}</span>
         </button>
       </div>
       <p id="lb-audio-etat" class="lb-audio-etat" aria-live="polite" ${attrsLangue()}>${esc(t(ok ? T.audioLibre : T.audioAbsent))}</p>
@@ -517,6 +524,10 @@ function majAudio(dico) {
 
 function direPhrase() {
   if (!audioDispo()) return majAudio(T.audioAbsent);
+  // Une seule touche : elle devient « Réécouter » après la première lecture.
+  etat.ecoute = true;
+  const btn = racine?.querySelector("#lb-audio-btn span");
+  if (btn) btn.textContent = t(T.reecouter);
   const synth = window.speechSynthesis;
   const voix = synth.getVoices?.() || [];
   const fr =
@@ -577,8 +588,10 @@ export function monter(el, presetId) {
     if (r) return repererZone(r.dataset.repere);
     const s = e.target.closest("[data-sequence]");
     if (s) return jouerSequence(s.dataset.sequence);
-    const v = e.target.closest("[data-vehicule]");
-    if (v) return repondreVehicule(v.dataset.vehicule);
+    // data-hit : la zone de clic posée sur les véhicules par le moteur
+    // isométrique de « En situation ».
+    const v = e.target.closest("[data-vehicule],[data-hit]");
+    if (v) return repondreVehicule(v.dataset.vehicule || v.dataset.hit);
     const a = e.target.closest("[data-audio]");
     if (a && !a.disabled) return direPhrase();
     const b = e.target.closest("[data-action]");
