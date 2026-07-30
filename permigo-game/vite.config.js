@@ -8,6 +8,7 @@ const base = process.env.VITE_BASE || "/";
 // ajoutées au build Rollup. Ces réécritures ne s'appliquent qu'au serveur Vite.
 function localLabRoutes() {
   const routes = {
+    "/lab/labo": "/lab/labo/index.html",
     "/lab/bridge-angle-mort": "/lab/bridge-angle-mort/index.html",
   };
 
