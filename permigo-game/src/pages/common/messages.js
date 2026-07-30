@@ -433,7 +433,7 @@ function renderStyles() {
      s'inverse en dark mode (fond clair + texte #fff = illisible). Palette figée
      + textes clairs fixes ci-dessous → cohérent dans les deux thèmes (a11y). */
   background: #0b0d1a;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Archivo', sans-serif;
   color: #fff;
 }
 /* l'empty-state partagé suppose un fond CLAIR (texte var(--ink)/var(--mu)) :
@@ -455,7 +455,7 @@ function renderStyles() {
   border-bottom: 1px solid rgba(255,255,255,.06);
 }
 .msg-title {
-  font: 700 22px/1 'Plus Jakarta Sans', sans-serif;
+  font: 700 22px/1 'Archivo', sans-serif;
   margin: 0;
   flex: 1;
 }
@@ -488,7 +488,7 @@ function renderStyles() {
   display: flex;
   align-items: center;
   justify-content: center;
-  font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
+  font: 700 14px/1 'Archivo', sans-serif;
   color: var(--a-ink);
   flex-shrink: 0;
 }
@@ -500,7 +500,7 @@ function renderStyles() {
   margin-bottom: 4px;
 }
 .msg-thread-name {
-  font: 600 15px/1 'Plus Jakarta Sans', sans-serif;
+  font: 600 15px/1 'Archivo', sans-serif;
   color: #e8ecf5;
   white-space: nowrap;
   overflow: hidden;
@@ -518,7 +518,7 @@ function renderStyles() {
   gap: 8px;
 }
 .msg-thread-last {
-  font: 400 13px/1 'Inter', sans-serif;
+  font: 400 13px/1 'Archivo', sans-serif;
   color: #9aa3bd;
   white-space: nowrap;
   overflow: hidden;
@@ -567,7 +567,7 @@ function renderStyles() {
 .msg-back-btn::before { content: ''; position: absolute; inset: -4px; }
 .msg-back-btn:active { background: rgba(255,255,255,.15); }
 .msg-conv-name {
-  font: 700 16px/1 'Plus Jakarta Sans', sans-serif;
+  font: 700 16px/1 'Archivo', sans-serif;
   color: #e8ecf5;
   flex: 1;
   white-space: nowrap;
@@ -599,7 +599,7 @@ function renderStyles() {
   border: 1.5px solid rgba(255,255,255,.08);
   border-radius: 24px;
   color: #e8ecf5;
-  font: 400 15px/1 'Inter', sans-serif;
+  font: 400 15px/1 'Archivo', sans-serif;
   outline: none;
   transition: border-color 140ms;
   min-height: 44px;
@@ -636,7 +636,7 @@ function renderStyles() {
 .msg-bubble {
   padding: 10px 14px;
   border-radius: 18px;
-  font: 400 14px/1.5 'Inter', sans-serif;
+  font: 400 14px/1.5 'Archivo', sans-serif;
   word-break: break-word;
 }
 .msg-bubble--other {
@@ -669,15 +669,15 @@ function renderStyles() {
 }
 .msg-empty-ico { font-size: 40px; margin-bottom: 8px; }
 .msg-empty-txt {
-  font: 600 16px/1.3 'Plus Jakarta Sans', sans-serif;
+  font: 600 16px/1.3 'Archivo', sans-serif;
   color: #e8ecf5;
 }
 .msg-empty-sub {
-  font: 400 14px/1.5 'Inter', sans-serif;
+  font: 400 14px/1.5 'Archivo', sans-serif;
   color: #9aa3bd;
 }
 .msg-conv-empty, .msg-conv-err {
-  font: 400 14px/1.5 'Inter', sans-serif;
+  font: 400 14px/1.5 'Archivo', sans-serif;
   color: #9aa3bd;
 }
 .msg-retry-btn {
@@ -687,7 +687,7 @@ function renderStyles() {
   border: 1px solid color-mix(in srgb, var(--a) 30%, transparent);
   border-radius: 10px;
   color: var(--al);
-  font: 600 14px/1 'Inter', sans-serif;
+  font: 600 14px/1 'Archivo', sans-serif;
   cursor: pointer;
   min-height: 44px;
 }

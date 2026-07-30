@@ -162,7 +162,7 @@ const STYLE = `<style>
   padding: 0 0 108px;
   min-height: 100dvh;
   color: var(--ar-ink);
-  font-family: 'Inter', sans-serif;
+  font-family: 'Archivo', sans-serif;
   background:
     radial-gradient(120% 70% at 50% -8%, #34206a 0%, transparent 52%),
     radial-gradient(90% 55% at 88% 12%, rgba(255,156,28,.10) 0%, transparent 48%),
@@ -203,13 +203,13 @@ const STYLE = `<style>
   margin-bottom: 14px; gap: 10px;
 }
 .tr2-hero-title {
-  font: 800 clamp(21px, 6vw, 25px)/1 'Baloo 2', cursive;
+  font: 800 clamp(21px, 6vw, 25px)/1 'Archivo', system-ui, sans-serif;
   color: #fff; letter-spacing: -.01em;
   text-shadow: 0 2px 0 rgba(0,0,0,.25), 0 0 22px rgba(168,85,247,.45);
 }
 .tr2-hero-count {
   flex: none;
-  font: 800 13px/1 'Baloo 2', cursive;
+  font: 800 13px/1 'Archivo', system-ui, sans-serif;
   color: #1a1208;
   background: linear-gradient(180deg, var(--ar-gold1), var(--ar-gold2) 55%, var(--ar-gold3));
   border: 1px solid rgba(255,255,255,.35);
@@ -238,7 +238,7 @@ const STYLE = `<style>
   border-radius: var(--r-full);
 }
 .tr2-progress-hint {
-  font: 600 12px/1.5 'Inter', sans-serif;
+  font: 600 12px/1.5 'Archivo', sans-serif;
   color: var(--ar-mu);
 }
 
@@ -264,7 +264,7 @@ const STYLE = `<style>
 .tr2-feat-kick {
   position: relative; z-index: 2;
   display: inline-flex; align-items: center; gap: 6px;
-  font: 800 9.5px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: .14em; text-transform: uppercase;
+  font: 800 9.5px/1 'Archivo', sans-serif; letter-spacing: .14em; text-transform: uppercase;
   color: var(--fc);
 }
 .tr2-feat-kick .pin { width: 5px; height: 5px; border-radius: 50%; background: var(--fc); box-shadow: 0 0 8px var(--fc); }
@@ -305,11 +305,11 @@ const STYLE = `<style>
 .tr2-feat-spark.b { bottom: 18px; left: 30px; width: 6px; height: 6px; animation-delay: 1.3s; }
 @keyframes tr2Spark { 0%,100%{opacity:0;transform:scale(.4) rotate(0)} 50%{opacity:1;transform:scale(1) rotate(45deg)} }
 .tr2-feat-foot { position: relative; z-index: 2; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
-.tr2-feat-name { font: 800 21px/1.08 'Baloo 2', cursive; color: #fff; letter-spacing: -.01em; text-shadow: 0 1px 0 rgba(0,0,0,.3); }
-.tr2-feat-sub { margin-top: 4px; font: 600 12px/1.4 'Inter', sans-serif; color: var(--ar-mu); }
+.tr2-feat-name { font: 800 21px/1.08 'Archivo', system-ui, sans-serif; color: #fff; letter-spacing: -.01em; text-shadow: 0 1px 0 rgba(0,0,0,.3); }
+.tr2-feat-sub { margin-top: 4px; font: 600 12px/1.4 'Archivo', sans-serif; color: var(--ar-mu); }
 .tr2-feat-chip {
   flex: none; align-self: center;
-  font: 800 10px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: .08em; text-transform: uppercase;
+  font: 800 10px/1 'Archivo', sans-serif; letter-spacing: .08em; text-transform: uppercase;
   color: #fff; background: color-mix(in srgb, var(--fc) 30%, rgba(0,0,0,.3));
   border: 1px solid color-mix(in srgb, var(--fc) 55%, transparent);
   box-shadow: 0 0 14px -2px color-mix(in srgb, var(--fc) 60%, transparent);
@@ -336,14 +336,14 @@ const STYLE = `<style>
   box-shadow: inset 0 0 0 1px rgba(168,85,247,.3);
 }
 .tr2-galerie-tx { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.tr2-galerie-t { font: 800 15px/1.1 'Baloo 2', cursive; color: #fff; letter-spacing: -.01em; }
-.tr2-galerie-s { font: 500 12px/1.2 'Inter', sans-serif; color: var(--ar-mu); }
+.tr2-galerie-t { font: 800 15px/1.1 'Archivo', system-ui, sans-serif; color: #fff; letter-spacing: -.01em; }
+.tr2-galerie-s { font: 500 12px/1.2 'Archivo', sans-serif; color: var(--ar-mu); }
 .tr2-galerie-arrow { flex-shrink: 0; color: var(--ar-mu2); display: flex; }
 
 /* ── Section label ── */
 .tr2-group-label {
   padding: 22px 16px 10px;
-  font: 800 11px/1 'Plus Jakarta Sans', sans-serif;
+  font: 800 11px/1 'Archivo', sans-serif;
   letter-spacing: .12em; text-transform: uppercase;
   color: var(--ar-mu2);
 }
@@ -369,7 +369,7 @@ const STYLE = `<style>
 .tr2-new-dot {
   position: absolute; top: 7px; left: 7px; z-index: 3;
   background: var(--rdx); color: #fff;
-  font: 800 7.5px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: .06em;
+  font: 800 7.5px/1 'Archivo', sans-serif; letter-spacing: .06em;
   padding: 4px 7px; border-radius: var(--r-full);
   box-shadow: 0 3px 10px rgba(239,68,68,.6);
   animation: tr2NewPulse 1.4s ease-in-out infinite;
@@ -415,7 +415,7 @@ const STYLE = `<style>
 .tr2-card-emoji span { font-size: 40px; }
 .tr2-card:not(.locked):active .tr2-card-emoji { transform: scale(1.12); }
 .tr2-card-name {
-  font: 700 10.5px/1.2 'Plus Jakarta Sans', sans-serif;
+  font: 700 10.5px/1.2 'Archivo', sans-serif;
   text-align: center; letter-spacing: -.005em;
   overflow: hidden; display: -webkit-box;
   -webkit-line-clamp: 2; -webkit-box-orient: vertical;
@@ -467,7 +467,7 @@ const STYLE = `<style>
 .tr2-modal-spark.s3 { bottom: 38px; left: 36%; width: 7px; height: 7px; animation-delay: 1.5s; }
 .tr2-rarity-chip {
   position: relative; z-index: 2;
-  font: 800 11px/1 'Plus Jakarta Sans', sans-serif; letter-spacing: .1em; text-transform: uppercase;
+  font: 800 11px/1 'Archivo', sans-serif; letter-spacing: .1em; text-transform: uppercase;
   color: #fff; background: color-mix(in srgb, var(--mc) 30%, rgba(0,0,0,.35));
   border: 1px solid color-mix(in srgb, var(--mc) 60%, transparent);
   box-shadow: 0 0 16px -2px color-mix(in srgb, var(--mc) 70%, transparent);
@@ -476,19 +476,19 @@ const STYLE = `<style>
 .tr2-rarity-chip.legendaire { color: #1a1208; background: linear-gradient(180deg, var(--ar-gold1), var(--ar-gold2)); border-color: var(--ar-gold3); }
 .tr2-rarity-chip.locked { color: var(--ar-mu); background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.14); box-shadow: none; }
 .tr2-modal-body { padding: 18px 22px 8px; }
-.tr2-modal-title { font: 800 24px/1.12 'Baloo 2', cursive; color: #fff; letter-spacing: -.01em; margin-bottom: 8px; text-align: center; }
-.tr2-modal-desc { font: 500 14px/1.55 'Inter', sans-serif; color: var(--ar-mu); margin-bottom: 16px; text-align: center; }
+.tr2-modal-title { font: 800 24px/1.12 'Archivo', system-ui, sans-serif; color: #fff; letter-spacing: -.01em; margin-bottom: 8px; text-align: center; }
+.tr2-modal-desc { font: 500 14px/1.55 'Archivo', sans-serif; color: var(--ar-mu); margin-bottom: 16px; text-align: center; }
 .tr2-modal-meta { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 18px; }
 .tr2-modal-chip { display: flex; align-items: center; gap: 5px; padding: 7px 13px; border-radius: var(--r-full); font: 700 12px/1 'IBM Plex Mono', monospace; }
 .tr2-modal-chip.gems { background: rgba(255,210,74,.14); color: var(--ar-gold2); border: 1px solid rgba(255,210,74,.25); }
 .tr2-modal-chip.date { background: rgba(255,255,255,.06); color: var(--ar-mu); border: 1px solid rgba(255,255,255,.1); }
-.tr2-modal-social { font: 500 12.5px/1.5 'Inter', sans-serif; color: var(--ar-mu2); text-align: center; margin-bottom: 20px; }
+.tr2-modal-social { font: 500 12.5px/1.5 'Archivo', sans-serif; color: var(--ar-mu2); text-align: center; margin-bottom: 20px; }
 .tr2-modal-actions { display: flex; gap: 8px; padding: 0 22px; }
 .tr2-modal-share {
   flex: 1; padding: 15px; min-height: 52px; border: none; border-radius: var(--r-md);
   display: inline-flex; align-items: center; justify-content: center; gap: 7px;
   background: linear-gradient(180deg, var(--ar-violet), var(--ar-violet2));
-  color: #fff; font: 800 14px/1 'Plus Jakarta Sans', sans-serif; cursor: pointer;
+  color: #fff; font: 800 14px/1 'Archivo', sans-serif; cursor: pointer;
   box-shadow: 0 4px 0 #5b34c0, 0 8px 18px -6px rgba(124,77,255,.6);
   transition: transform .12s, box-shadow .12s;
 }
@@ -498,7 +498,7 @@ const STYLE = `<style>
 .tr2-modal-close {
   padding: 15px 20px; min-height: 52px; background: rgba(255,255,255,.06);
   border: 1px solid rgba(255,255,255,.12); border-radius: var(--r-md);
-  color: var(--ar-mu); font: 700 14px/1 'Inter', sans-serif; cursor: pointer;
+  color: var(--ar-mu); font: 700 14px/1 'Archivo', sans-serif; cursor: pointer;
   transition: background .12s;
 }
 .tr2-modal-close:active { background: rgba(255,255,255,.12); }
@@ -605,8 +605,8 @@ export async function mount(root, openKey = null) {
     root.querySelector("#tr2-body").innerHTML = `
       <div style="text-align:center;padding:56px 24px;color:var(--ar-mu)">
         <div style="margin-bottom:12px;color:var(--ar-gold2)">${icon("trophy", { size: 44 })}</div>
-        <div style="font:800 16px/1.3 'Baloo 2',cursive;color:#fff;margin-bottom:6px">${ttD("unavailable", "« Trophées » indisponible")}</div>
-        <div style="font:500 13px/1.5 'Inter',sans-serif">${ttD("check_conn", "Vérifie ta connexion, puis réessaie.")}</div>
+        <div style="font:800 16px/1.3 'Archivo', system-ui, sans-serif;color:#fff;margin-bottom:6px">${ttD("unavailable", "« Trophées » indisponible")}</div>
+        <div style="font:500 13px/1.5 'Archivo',sans-serif">${ttD("check_conn", "Vérifie ta connexion, puis réessaie.")}</div>
       </div>`;
   }
 }

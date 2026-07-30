@@ -80,22 +80,22 @@ export function showLevelUp({ level, onClose } = {}) {
       .lvlup__rays{position:absolute;inset:-30%;background:
         conic-gradient(from 0deg,rgba(255,210,120,.18) 0 12deg,transparent 12deg 30deg);
         animation:lvlupSpin 14s linear infinite;pointer-events:none}
-      .lvlup__kick{position:relative;font:800 13px/1 'Plus Jakarta Sans',system-ui,sans-serif;
+      .lvlup__kick{position:relative;font:800 13px/1 'Archivo',system-ui,sans-serif;
         letter-spacing:.24em;text-transform:uppercase;color:#ffd27a;margin-bottom:2px}
       .lvlup__coin{position:relative;width:118px;height:118px;object-fit:contain;
         filter:drop-shadow(0 14px 26px rgba(120,80,10,.55));animation:lvlupPop .5s cubic-bezier(.34,1.56,.64,1) both .08s}
       .lvlup__ring{position:absolute;top:50%;left:50%;width:118px;height:118px;border-radius:50%;
         transform:translate(-50%,-50%);box-shadow:0 0 0 0 rgba(255,210,120,.5);animation:lvlupRing 1.1s ease-out .2s both}
-      .lvlup__big{position:relative;font:900 76px/1 'Plus Jakarta Sans',system-ui,sans-serif;
+      .lvlup__big{position:relative;font:900 76px/1 'Archivo',system-ui,sans-serif;
         color:#fff;letter-spacing:-.03em;margin-top:8px;
         text-shadow:0 4px 24px rgba(167,139,250,.5);animation:lvlupPop .5s cubic-bezier(.34,1.56,.64,1) both .14s}
-      .lvlup__lbl{position:relative;font:800 16px/1.3 'Plus Jakarta Sans',system-ui,sans-serif;
+      .lvlup__lbl{position:relative;font:800 16px/1.3 'Archivo',system-ui,sans-serif;
         color:#cfc6ff;letter-spacing:.02em}
-      .lvlup__sub{position:relative;font:500 14px/1.5 'Inter',system-ui,sans-serif;
+      .lvlup__sub{position:relative;font:500 14px/1.5 'Archivo',system-ui,sans-serif;
         color:rgba(255,255,255,.7);max-width:300px;margin-top:8px}
       .lvlup__cta{position:relative;margin-top:26px;padding:15px 40px;border:0;border-radius:16px;
         background:linear-gradient(180deg,#a78bfa,#7c4dff);color:#fff;cursor:pointer;
-        font:800 15px 'Plus Jakarta Sans',system-ui,sans-serif;letter-spacing:-.01em;
+        font:800 15px 'Archivo',system-ui,sans-serif;letter-spacing:-.01em;
         box-shadow:0 8px 22px -6px rgba(124,77,255,.6),0 2px 0 rgba(0,0,0,.18);
         animation:lvlupPop .4s cubic-bezier(.34,1.56,.64,1) both .3s;-webkit-tap-highlight-color:transparent}
       .lvlup__cta:active{transform:translateY(2px)}

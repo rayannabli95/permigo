@@ -27,7 +27,7 @@ const STYLE = `<style>
     position: relative;
     min-height: 100dvh;
     padding: 32px 18px max(60px, calc(24px + env(safe-area-inset-bottom)));
-    font-family: 'Baloo 2', var(--fb), sans-serif;
+    font-family: 'Archivo', var(--fb), sans-serif;
     -webkit-font-smoothing: antialiased;
     display: flex;
     flex-direction: column;
@@ -91,14 +91,14 @@ const STYLE = `<style>
     box-shadow: inset 0 2px 3px rgba(255,255,255,.5), 0 4px 8px rgba(0,0,0,.4); }
   .sg-logo-fb b { color:#fff; font-size:38px; font-weight:800; text-shadow:0 2px 2px rgba(0,0,0,.35); }
   .sg-title {
-    font: 800 24px/1.15 'Baloo 2', var(--fb), sans-serif;
+    font: 800 24px/1.15 'Archivo', var(--fb), sans-serif;
     color: var(--sg-ink);
     text-align: center;
     margin: 6px 0 4px;
     text-shadow: 0 2px 0 rgba(0,0,0,.35);
   }
   .sg-sub {
-    font: 600 14.5px/1.5 'Baloo 2', var(--fb), sans-serif;
+    font: 600 14.5px/1.5 'Archivo', var(--fb), sans-serif;
     color: var(--ink-soft);
     text-align: center;
     margin: 0 0 18px;
@@ -111,14 +111,14 @@ const STYLE = `<style>
     background: linear-gradient(180deg, var(--gold), var(--gold-dp));
     color: #3a2600;
     border-radius: 99px;
-    font: 800 11px/1 'Baloo 2', var(--fb), sans-serif;
+    font: 800 11px/1 'Archivo', var(--fb), sans-serif;
     text-transform: uppercase;
     letter-spacing: .08em;
     box-shadow: inset 0 1px 1px rgba(255,255,255,.6), 0 3px 8px rgba(0,0,0,.35);
   }
   .sg-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
   .sg-label {
-    font: 700 13px/1 'Baloo 2', var(--fb), sans-serif;
+    font: 700 13px/1 'Archivo', var(--fb), sans-serif;
     color: var(--ink-soft);
     letter-spacing: .04em;
     text-transform: uppercase;
@@ -130,7 +130,7 @@ const STYLE = `<style>
     height: 52px;
     border: 0;
     border-radius: 15px;
-    font: 600 16px/1.3 'Baloo 2', var(--fb), sans-serif;
+    font: 600 16px/1.3 'Archivo', var(--fb), sans-serif;
     color: var(--sg-ink);
     background: var(--field);
     box-shadow: inset 0 2px 5px rgba(0,0,0,.5), inset 0 0 0 1.5px var(--field-line);
@@ -144,14 +144,14 @@ const STYLE = `<style>
   }
   .sg-input.error { box-shadow: inset 0 2px 5px rgba(0,0,0,.5), inset 0 0 0 2px #ff8d8d; }
   .sg-help {
-    font: 600 11.5px/1.4 'Baloo 2', var(--fb), sans-serif;
+    font: 600 11.5px/1.4 'Archivo', var(--fb), sans-serif;
     color: var(--ink-mu);
     margin-top: 2px;
     margin-left: 4px;
   }
   .sg-help.error { color: #ffb3b3; }
   .sg-italic {
-    font: italic 500 12px/1.45 'Baloo 2', var(--fb), sans-serif;
+    font: italic 500 12px/1.45 'Archivo', var(--fb), sans-serif;
     color: var(--ink-mu);
     margin-top: 4px;
     margin-left: 4px;
@@ -175,7 +175,7 @@ const STYLE = `<style>
     color: #fff;
     border: 0;
     border-radius: 17px;
-    font: 800 18px/1 'Baloo 2', var(--fb), sans-serif;
+    font: 800 18px/1 'Archivo', var(--fb), sans-serif;
     letter-spacing: .2px;
     cursor: pointer;
     background: linear-gradient(180deg, var(--in-lt) 0%, var(--in) 55%, var(--in-dp) 100%);
@@ -212,13 +212,13 @@ const STYLE = `<style>
     background: linear-gradient(90deg, transparent, rgba(124,111,224,.4), transparent); }
 
   /* Lien se connecter */
-  .sg-login-row { text-align: center; margin-top: 16px; font: 600 13.5px/1.4 'Baloo 2', var(--fb), sans-serif; color: var(--ink-soft); }
+  .sg-login-row { text-align: center; margin-top: 16px; font: 600 13.5px/1.4 'Archivo', var(--fb), sans-serif; color: var(--ink-soft); }
   .sg-login-row a { color: var(--gold); font-weight: 800; text-decoration: underline; text-underline-offset: 2px; }
   .sg-login-row a:hover { color: #ffe39a; }
   .sg-login-row a:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 6px; }
   .sg-trust { display: flex; flex-wrap: wrap; gap: 8px 14px; justify-content: center; margin-top: 14px; }
   .sg-trust span {
-    font: 700 11.5px/1 'Baloo 2', var(--fb), sans-serif;
+    font: 700 11.5px/1 'Archivo', var(--fb), sans-serif;
     color: var(--ink-soft);
     display: inline-flex; align-items: center; gap: 5px;
   }
@@ -247,7 +247,7 @@ export async function mount(root) {
   const connectedBanner = connected
     ? `<div id="sg-connected" style="display:flex;align-items:center;gap:10px;margin:0 0 18px;padding:12px 14px;border-radius:14px;background:rgba(255,206,77,.12);box-shadow:inset 0 0 0 1.5px rgba(255,206,77,.4)">
         <span style="flex-shrink:0;color:var(--gold);display:flex">${icon("alert-circle", { size: 20, strokeWidth: 2 })}</span>
-        <span style="font:700 13px/1.4 'Baloo 2',var(--fb),sans-serif;color:var(--sg-ink)">Tu es déjà connecté en tant que <strong style="color:var(--gold)">${esc(connected.prenom || connected.username || connected.email || "quelqu'un")}</strong>.
+        <span style="font:700 13px/1.4 'Archivo',var(--fb),sans-serif;color:var(--sg-ink)">Tu es déjà connecté en tant que <strong style="color:var(--gold)">${esc(connected.prenom || connected.username || connected.email || "quelqu'un")}</strong>.
           <a href="#" id="sg-switch" style="color:var(--gold);font-weight:800">Se déconnecter pour créer un compte</a></span>
       </div>`
     : "";
@@ -449,15 +449,15 @@ function renderPaymentStep(root, prenom) {
         <h1 class="sg-title">Ton compte est prêt${prenom ? `, ${esc(prenom)}` : ""} !</h1>
         <p class="sg-sub">Dernière étape : active ton abonnement pour lancer ton espace moniteur.</p>
         <div style="text-align:left;margin:0 0 18px;padding:16px;border-radius:16px;background:rgba(255,206,77,.1);box-shadow:inset 0 0 0 1.5px rgba(255,206,77,.35)">
-          <div style="font:800 22px/1.2 'Baloo 2',var(--fb),sans-serif;color:var(--gold);margin-bottom:8px">9,99 €/mois</div>
-          <div style="display:flex;flex-direction:column;gap:7px;font:600 13.5px/1.4 'Baloo 2',var(--fb),sans-serif;color:var(--ink-soft)">
+          <div style="font:800 22px/1.2 'Archivo',var(--fb),sans-serif;color:var(--gold);margin-bottom:8px">9,99 €/mois</div>
+          <div style="display:flex;flex-direction:column;gap:7px;font:600 13.5px/1.4 'Archivo',var(--fb),sans-serif;color:var(--ink-soft)">
             <span style="display:flex;gap:7px;align-items:center">${icon("check", { size: 14, strokeWidth: 2.5 })} Jusqu'à 100 élèves — gratuit pour eux</span>
             <span style="display:flex;gap:7px;align-items:center">${icon("check", { size: 14, strokeWidth: 2.5 })} Sans engagement, résiliable en ligne à tout moment</span>
             <span style="display:flex;gap:7px;align-items:center">${icon("check", { size: 14, strokeWidth: 2.5 })} Ta marque, ton code élève, ton suivi</span>
           </div>
         </div>
         <button class="sg-btn" id="sg-pay" type="button" style="margin-top:0">Activer mon abonnement — 9,99 €/mois</button>
-        <p style="margin:14px 0 0;font:600 12px/1.5 'Baloo 2',var(--fb),sans-serif;color:var(--ink-mu)">Paiement sécurisé Stripe. Résiliable en ligne à tout moment, sans frais.</p>
+        <p style="margin:14px 0 0;font:600 12px/1.5 'Archivo',var(--fb),sans-serif;color:var(--ink-mu)">Paiement sécurisé Stripe. Résiliable en ligne à tout moment, sans frais.</p>
       </div>
     </div>`;
 

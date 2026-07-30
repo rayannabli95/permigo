@@ -521,7 +521,7 @@ const STYLE = `<style>
 .nf2 {
   max-width: 480px; margin: 0 auto;
   background: var(--bg); min-height: 100dvh;
-  padding-bottom: 80px; font-family: 'Inter', sans-serif;
+  padding-bottom: 80px; font-family: 'Archivo', sans-serif;
 }
 
 /* ── Header ── */
@@ -544,14 +544,14 @@ const STYLE = `<style>
 /* Hit-area 44x44 sans grossir le visuel */
 .nf2-back::before { content: ''; position: absolute; inset: -4px; }
 .nf2-back:active { background: var(--bg); }
-.nf2-title { font: 800 16px/1.2 'Plus Jakarta Sans', sans-serif; letter-spacing: -.02em; color: var(--ink); flex: 1; }
+.nf2-title { font: 800 16px/1.2 'Archivo', sans-serif; letter-spacing: -.02em; color: var(--ink); flex: 1; }
 .nf2-unread-badge {
   font: 700 11px/1 'IBM Plex Mono', monospace;
   color: var(--a-txt); background: color-mix(in srgb, var(--a) 10%, transparent);
   border-radius: 99px; padding: 4px 8px; flex-shrink: 0;
 }
 .nf2-mark-all {
-  font: 700 12px/1 'Inter', sans-serif; color: var(--a-txt);
+  font: 700 12px/1 'Archivo', sans-serif; color: var(--a-txt);
   background: none; border: none; cursor: pointer; padding: 8px 4px;
   border-radius: 6px; transition: background .12s; font-family: inherit;
 }
@@ -563,7 +563,7 @@ const STYLE = `<style>
 .nf2-ptr {
   height: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;
   transition: height .2s ease;
-  font: 600 12px/1 'Inter', sans-serif; color: var(--mu); gap: 8px;
+  font: 600 12px/1 'Archivo', sans-serif; color: var(--mu); gap: 8px;
 }
 .nf2-ptr.visible { height: 48px; }
 .nf2-ptr-ico {
@@ -575,7 +575,7 @@ const STYLE = `<style>
 /* ── Group label ── */
 .nf2-group-label {
   padding: 22px 20px 8px;
-  font: 700 11.5px/1 'Inter', sans-serif; letter-spacing: .06em;
+  font: 700 11.5px/1 'Archivo', sans-serif; letter-spacing: .06em;
   text-transform: uppercase; color: var(--mu2);
 }
 
@@ -600,7 +600,7 @@ const STYLE = `<style>
   position: absolute; right: 0; top: 0; bottom: 0;
   width: 72px; background: var(--rd);
   display: flex; align-items: center; justify-content: center;
-  color: #fff; font: 600 11px/1 'Inter', sans-serif; gap: 4px;
+  color: #fff; font: 600 11px/1 'Archivo', sans-serif; gap: 4px;
   flex-direction: column;
   opacity: 0;
 }
@@ -628,17 +628,17 @@ const STYLE = `<style>
 }
 .nf2-item-body { flex: 1; min-width: 0; }
 .nf2-item-eyebrow {
-  font: 700 10.5px/1 'Inter', sans-serif;
+  font: 700 10.5px/1 'Archivo', sans-serif;
   letter-spacing: .06em; text-transform: uppercase;
   display: flex; align-items: baseline; gap: 6px;
   margin-bottom: 4px;
 }
 .nf2-item-eyebrow .nf2-when {
-  font: 600 10.5px/1 'Inter', sans-serif;
+  font: 600 10.5px/1 'Archivo', sans-serif;
   letter-spacing: 0; text-transform: none; color: var(--mu2);
 }
 .nf2-item-title {
-  font: 700 15px/1.3 'Plus Jakarta Sans', sans-serif;
+  font: 700 15px/1.3 'Archivo', sans-serif;
   color: var(--ink); letter-spacing: -.01em;
   overflow: hidden; display: -webkit-box;
   -webkit-line-clamp: 2; -webkit-box-orient: vertical;
@@ -646,7 +646,7 @@ const STYLE = `<style>
 .nf2-item.unread .nf2-item-title { color: var(--ink); }
 .nf2-item:not(.unread) .nf2-item-title { font-weight: 600; color: color-mix(in srgb, var(--ink) 80%, var(--mu)); }
 .nf2-item-desc {
-  font: 500 13px/1.45 'Inter', sans-serif; color: var(--mu); margin-top: 3px;
+  font: 500 13px/1.45 'Archivo', sans-serif; color: var(--mu); margin-top: 3px;
   overflow: hidden; display: -webkit-box;
   -webkit-line-clamp: 2; -webkit-box-orient: vertical;
 }
@@ -658,14 +658,14 @@ const STYLE = `<style>
 }
 .nf2-empty-ico { font-size: 52px; margin-bottom: 14px; }
 .nf2-empty-title {
-  font: 800 18px/1.3 'Plus Jakarta Sans', sans-serif;
+  font: 800 18px/1.3 'Archivo', sans-serif;
   color: var(--ink); letter-spacing: -.02em; margin-bottom: 6px;
 }
-.nf2-empty-sub { font: 500 13px/1.5 'Inter', sans-serif; color: var(--mu); margin-bottom: 24px; }
+.nf2-empty-sub { font: 500 13px/1.5 'Archivo', sans-serif; color: var(--mu); margin-bottom: 24px; }
 .nf2-empty-cta {
   display: inline-block; padding: 12px 24px;
   background: color-mix(in srgb, var(--a) 8%, transparent); border: 1.5px solid color-mix(in srgb, var(--a) 20%, transparent);
-  border-radius: 12px; color: var(--a-txt); font: 600 13px/1 'Inter', sans-serif;
+  border-radius: 12px; color: var(--a-txt); font: 600 13px/1 'Archivo', sans-serif;
   cursor: pointer; min-height: 44px; transition: background .12s;
 }
 .nf2-empty-cta:active { background: color-mix(in srgb, var(--a) 15%, transparent); }
@@ -887,10 +887,10 @@ function wireItems(root, me, initialUnread) {
       const id = wrap.dataset.id;
       const undoEl = document.createElement("div");
       undoEl.style.cssText =
-        "position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;font:600 13px/1 Inter,sans-serif;z-index:999;display:flex;align-items:center;gap:12px;box-shadow:0 8px 24px rgba(0,0,0,.3)";
+        "position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;font:600 13px/1 'Archivo',sans-serif;z-index:999;display:flex;align-items:center;gap:12px;box-shadow:0 8px 24px rgba(0,0,0,.3)";
       undoEl.dir = getLang() === "ar" ? "rtl" : "ltr";
       if (getLang() === "ar") undoEl.lang = "ar";
-      undoEl.innerHTML = `<span>${esc(nt("deleted", "Notification supprimée"))}</span><button style="background:none;border:none;color:var(--a);font:700 12px/1 Inter,sans-serif;cursor:pointer;padding:0">${esc(nt("cancel", "Annuler"))}</button>`;
+      undoEl.innerHTML = `<span>${esc(nt("deleted", "Notification supprimée"))}</span><button style="background:none;border:none;color:var(--a);font:700 12px/1 'Archivo',sans-serif;cursor:pointer;padding:0">${esc(nt("cancel", "Annuler"))}</button>`;
       document.body.appendChild(undoEl);
 
       let undone = false;

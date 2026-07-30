@@ -22,6 +22,7 @@ import { burstConfetti } from "@/components/common/confetti.js";
 import { recompensesTabs } from "@/components/eleve/recompenses-tabs.js";
 import { CARTES, CARTES_TOTAL } from "@/data/cartes.js";
 import { getFiche } from "@/data/fiches-conduite.js";
+import { chromeNight } from "@/utils/chrome-night.js";
 
 const SWIPE_COMMIT = 90; // px de drag avant de valider le swipe
 const SEEN_KEY = "pg-cartes-seen"; // cartes déjà regardées (badge « Nouveau »)
@@ -46,8 +47,9 @@ function markSeen(id) {
 }
 
 const STYLE = `<style>
+${chromeNight("#181241", "#0b0a1c")}
 .col { max-width: 480px; margin: 0 auto; padding: 14px 16px calc(96px + env(safe-area-inset-bottom));
-  min-height: calc(100dvh - 52px); font-family:'Inter',sans-serif; color:#f2f0fa;
+  min-height: calc(100dvh - 52px); font-family:'Archivo',sans-serif; color:#f2f0fa;
   background:
     radial-gradient(120% 40% at 50% -5%, rgba(255,190,70,.10) 0%, transparent 55%),
     radial-gradient(120% 55% at 50% 30%, rgba(110,70,220,.22) 0%, transparent 62%),
@@ -55,9 +57,12 @@ const STYLE = `<style>
 
 /* Barre de progression + pastilles par monde */
 .col-prog { margin:10px 0 4px; }
+.col-hd { margin:2px 0 12px; }
+.col-title { margin:0; font:800 24px/1.1 'Archivo',sans-serif; letter-spacing:-.02em; color:#fff; }
+.col-sub { margin:4px 0 0; font:600 12.5px/1.35 'Archivo',sans-serif; color:#cabfef; }
 .col-prog-lbl { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:7px; }
-.col-prog-lbl b { font:800 14px/1 'Plus Jakarta Sans',sans-serif; color:#fff; }
-.col-prog-lbl span { font:600 12px/1 'Inter',sans-serif; color:#cabfef; }
+.col-prog-lbl b { font:800 14px/1 'Archivo',sans-serif; color:#fff; }
+.col-prog-lbl span { font:600 12px/1 'Archivo',sans-serif; color:#cabfef; }
 .col-prog-bar { height:8px; border-radius:99px; background:rgba(255,255,255,.12); overflow:hidden; }
 .col-prog-fill { height:100%; border-radius:99px; background:linear-gradient(90deg,#f0a93f,#eab308); transition:width .6s cubic-bezier(.34,1.4,.64,1); }
 
@@ -89,19 +94,19 @@ const STYLE = `<style>
 .col-card-img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; }
 .col-card-shade { position:absolute; inset:0; background:linear-gradient(180deg,transparent 42%,rgba(6,7,20,.15) 60%,rgba(6,7,20,.86) 100%); }
 .col-card-meta { position:absolute; left:0; right:0; bottom:0; padding:15px 16px 16px; color:#fff; z-index:2; }
-.col-card-world { display:inline-flex; align-items:center; gap:6px; font:800 9.5px/1 'Inter',sans-serif; letter-spacing:.14em; text-transform:uppercase;
+.col-card-world { display:inline-flex; align-items:center; gap:6px; font:800 9.5px/1 'Archivo',sans-serif; letter-spacing:.14em; text-transform:uppercase;
   padding:5px 10px; border-radius:99px; background:rgba(255,255,255,.16); backdrop-filter:blur(4px); margin-bottom:9px; }
 /* color explicite : base.css pose une couleur sur h1..h4, et une règle directe
    bat TOUJOURS la couleur héritée du parent. Sans ça le titre passe en encre
    sombre sur la carte (illisible en thème clair). */
-.col-card-name { font:800 19px/1.15 'Plus Jakarta Sans',sans-serif; margin:0 0 4px; color:#fff; text-shadow:0 2px 12px rgba(0,0,0,.5); }
+.col-card-name { font:800 19px/1.15 'Archivo',sans-serif; margin:0 0 4px; color:#fff; text-shadow:0 2px 12px rgba(0,0,0,.5); }
 .col-card-idx { font:700 11px/1 'IBM Plex Mono',monospace; opacity:.8; }
-.col-card-date { display:inline-flex; align-items:center; gap:5px; font:600 11px/1 'Inter',sans-serif; color:#8ef0b0; margin-top:8px; }
+.col-card-date { display:inline-flex; align-items:center; gap:5px; font:600 11px/1 'Archivo',sans-serif; color:#8ef0b0; margin-top:8px; }
 
 /* pastille de rareté (haut gauche) + badge Nouveau (haut droite) */
-.col-rar { position:absolute; top:12px; left:12px; z-index:3; font:800 8.5px/1 'Inter',sans-serif; letter-spacing:.12em; text-transform:uppercase;
+.col-rar { position:absolute; top:12px; left:12px; z-index:3; font:800 8.5px/1 'Archivo',sans-serif; letter-spacing:.12em; text-transform:uppercase;
   padding:5px 9px; border-radius:99px; color:#fff; background:color-mix(in srgb, var(--rc) 48%, rgba(6,7,20,.55)); border:1px solid color-mix(in srgb, var(--rc) 80%, transparent); }
-.col-new { position:absolute; top:12px; right:12px; z-index:3; font:800 8.5px/1 'Inter',sans-serif; letter-spacing:.1em; text-transform:uppercase;
+.col-new { position:absolute; top:12px; right:12px; z-index:3; font:800 8.5px/1 'Archivo',sans-serif; letter-spacing:.1em; text-transform:uppercase;
   padding:5px 9px; border-radius:99px; color:#1a1030; background:linear-gradient(180deg,#ffe9b0,#f5b73d); box-shadow:0 3px 10px rgba(245,183,61,.5); }
 
 /* gloss permanent : la carte débloquée devient un objet brillant qu'on veut posséder.
@@ -134,16 +139,16 @@ const STYLE = `<style>
   color:#fff; }
 .col-back-top { display:flex; align-items:center; justify-content:space-between; gap:8px;
   padding-bottom:11px; border-bottom:1px solid rgba(255,255,255,.12); }
-.col-back-lbl { font:700 8.5px/1 'Inter',sans-serif; letter-spacing:.22em; text-transform:uppercase; color:rgba(255,255,255,.45); }
+.col-back-lbl { font:700 8.5px/1 'Archivo',sans-serif; letter-spacing:.22em; text-transform:uppercase; color:rgba(255,255,255,.45); }
 .col-back-dot { width:6px; height:6px; border-radius:50%; background:var(--rc); box-shadow:0 0 8px var(--rc); flex-shrink:0; }
-.col-back-ttl { font:800 19px/1.2 'Plus Jakarta Sans',sans-serif; margin:15px 0 4px; color:#fff; letter-spacing:-.01em; }
-.col-back-sub { font:600 9px/1 'Inter',sans-serif; letter-spacing:.2em; text-transform:uppercase; color:rgba(255,255,255,.4); margin-bottom:17px; }
+.col-back-ttl { font:800 19px/1.2 'Archivo',sans-serif; margin:15px 0 4px; color:#fff; letter-spacing:-.01em; }
+.col-back-sub { font:600 9px/1 'Archivo',sans-serif; letter-spacing:.2em; text-transform:uppercase; color:rgba(255,255,255,.4); margin-bottom:17px; }
 .col-back-list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0; }
 .col-back-list li { display:flex; gap:12px; align-items:flex-start; padding:11px 0;
-  border-top:1px solid rgba(255,255,255,.08); font:500 12.5px/1.45 'Inter',sans-serif; color:rgba(255,255,255,.88); }
+  border-top:1px solid rgba(255,255,255,.08); font:500 12.5px/1.45 'Archivo',sans-serif; color:rgba(255,255,255,.88); }
 .col-back-list li:first-child { border-top:0; }
-.col-back-list li b { color:var(--rc); font:800 10px/1.6 'Inter',sans-serif; letter-spacing:.08em; flex-shrink:0; width:14px; }
-.col-back-hint { margin-top:auto; padding-top:14px; font:700 8.5px/1 'Inter',sans-serif; letter-spacing:.18em;
+.col-back-list li b { color:var(--rc); font:800 10px/1.6 'Archivo',sans-serif; letter-spacing:.08em; flex-shrink:0; width:14px; }
+.col-back-hint { margin-top:auto; padding-top:14px; font:700 8.5px/1 'Archivo',sans-serif; letter-spacing:.18em;
   text-transform:uppercase; color:rgba(255,255,255,.3); text-align:center; }
 
 /* carte verrouillée */
@@ -154,11 +159,11 @@ const STYLE = `<style>
   align-items:center; justify-content:center; text-align:center; padding:20px; color:#fff; z-index:2; }
 .col-lock-ring { width:58px; height:58px; border-radius:50%; display:flex; align-items:center; justify-content:center;
   background:rgba(255,255,255,.1); border:1.5px solid rgba(255,255,255,.22); margin-bottom:14px; }
-.col-lock-ttl { font:800 15px/1.25 'Plus Jakarta Sans',sans-serif; margin:0; }
+.col-lock-ttl { font:800 15px/1.25 'Archivo',sans-serif; margin:0; }
 
 /* indices de swipe qui apparaissent au drag */
 .col-hint-l, .col-hint-r { position:absolute; top:18px; display:flex; align-items:center; gap:6px; padding:8px 12px; border-radius:12px;
-  font:800 11px/1 'Plus Jakarta Sans',sans-serif; opacity:0; transition:opacity .12s; pointer-events:none; z-index:5;
+  font:800 11px/1 'Archivo',sans-serif; opacity:0; transition:opacity .12s; pointer-events:none; z-index:5;
   border:2px solid; text-transform:uppercase; letter-spacing:.05em; }
 .col-hint-l { left:16px; color:#8ef0b0; border-color:#8ef0b0; transform:rotate(-12deg); }
 .col-hint-r { right:16px; color:#ffd76e; border-color:#ffd76e; transform:rotate(12deg); }
@@ -173,8 +178,8 @@ const STYLE = `<style>
   background:rgba(255,255,255,.09); border:1px solid rgba(255,255,255,.16); color:#fff;
   box-shadow:0 6px 18px -6px rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; }
 .col-arrow:active { transform:scale(.92); }
-.col-counter { font:800 14px/1 'Plus Jakarta Sans',sans-serif; min-width:74px; text-align:center; color:#cabfef; }
-.col-swipe-tip { text-align:center; margin:12px 0 0; font:600 12px/1.4 'Inter',sans-serif; color:rgba(255,255,255,.5); }
+.col-counter { font:800 14px/1 'Archivo',sans-serif; min-width:74px; text-align:center; color:#cabfef; }
+.col-swipe-tip { text-align:center; margin:12px 0 0; font:600 12px/1.4 'Archivo',sans-serif; color:rgba(255,255,255,.5); }
 
 @media (prefers-reduced-motion: reduce) {
   .col-card.is-anim { transition:none; }
@@ -187,7 +192,12 @@ const STYLE = `<style>
 </style>`;
 
 function header() {
-  return recompensesTabs("cartes", { dark: true });
+  // Un titre, comme ses 3 sœurs (Boutique, Ma collection, Classement) : cette
+  // page était la seule sans, donc sans repère à l'œil ni pour le lecteur
+  // d'écran (le router cherche un h1 pour annoncer la page).
+  return `${recompensesTabs("cartes", { dark: true })}
+    <div class="col-hd"><h1 class="col-title">Cartes</h1>
+    <p class="col-sub">Une carte par compétence certifiée.</p></div>`;
 }
 
 function progress(nbUnlocked) {
@@ -214,7 +224,7 @@ function backFace(carte) {
           (s, i) => `<li><b>${i + 1}</b><span>${esc(shorten(s))}</span></li>`,
         )
         .join("")}</ul>`
-    : `<p style="font:500 13px/1.5 'Inter',sans-serif;color:#cfc9ea">Compétence certifiée de ton parcours.</p>`;
+    : `<p style="font:500 13px/1.5 'Archivo',sans-serif;color:#cfc9ea">Compétence certifiée de ton parcours.</p>`;
   // L'illustration reste visible derrière, floutée et assombrie : le dos
   // garde l'identité de la carte au lieu d'un aplat noir.
   return `<img class="col-back-bg" src="${esc(carte.img)}" alt="" loading="lazy" draggable="false">

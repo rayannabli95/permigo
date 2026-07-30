@@ -329,7 +329,7 @@ export async function mount(root, param = "privacy") {
   padding: 0 0 80px;
   background: var(--bg);
   min-height: 100svh;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Archivo', sans-serif;
   color: var(--ink);
 }
 .legal-header {
@@ -357,7 +357,7 @@ export async function mount(root, param = "privacy") {
   font-size: 16px;
 }
 .legal-header-title {
-  font: 700 16px/1.2 'Plus Jakarta Sans', sans-serif;
+  font: 700 16px/1.2 'Archivo', sans-serif;
   color: var(--ink);
 }
 .legal-body { padding: 20px 16px; display: flex; flex-direction: column; gap: 16px; }
@@ -368,17 +368,17 @@ export async function mount(root, param = "privacy") {
   padding: 16px 18px;
 }
 .legal-section-title {
-  font: 700 14px/1.3 'Plus Jakarta Sans', sans-serif;
+  font: 700 14px/1.3 'Archivo', sans-serif;
   color: var(--ink);
   margin-bottom: 6px;
 }
 .legal-section-body {
-  font: 400 13px/1.65 'Inter', sans-serif;
+  font: 400 13px/1.65 'Archivo', sans-serif;
   color: var(--mu);
 }
 .legal-footer {
   text-align: center;
-  font: 400 11px/1.5 'Inter', sans-serif;
+  font: 400 11px/1.5 'Archivo', sans-serif;
   color: var(--mu2);
   padding: 16px;
 }

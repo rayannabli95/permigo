@@ -122,14 +122,14 @@ const STYLE = `<style>
   max-width: 480px;
   margin: 0 auto;
   background: var(--bg);
-  font-family: 'Inter', sans-serif;
+  font-family: 'Archivo', sans-serif;
 }
 .gal-hd {
   padding: 20px 20px 12px;
   background: var(--bg);
 }
-.gal-title { font: 800 24px/1.1 'Plus Jakarta Sans', sans-serif; color: var(--ink); letter-spacing: -.025em; margin: 0; }
-.gal-sub   { font: 500 13px/1.4 'Inter', sans-serif; color: var(--mu3); margin: 4px 0 0; }
+.gal-title { font: 800 24px/1.1 'Archivo', sans-serif; color: var(--ink); letter-spacing: -.025em; margin: 0; }
+.gal-sub   { font: 500 13px/1.4 'Archivo', sans-serif; color: var(--mu3); margin: 4px 0 0; }
 
 /* Tabs */
 .gal-tabs {
@@ -144,7 +144,7 @@ const STYLE = `<style>
   background: transparent;
   border: 1.5px solid transparent;
   border-radius: 12px;
-  font: 700 12px/1 'Inter', sans-serif;
+  font: 700 12px/1 'Archivo', sans-serif;
   color: var(--mu);
   letter-spacing: .04em;
   text-transform: uppercase;
@@ -166,8 +166,8 @@ const STYLE = `<style>
   display: flex; align-items: center; justify-content: space-between;
   padding: 14px 20px 8px;
 }
-.gal-section-title { font: 700 13px/1 'Inter', sans-serif; color: var(--mu3); letter-spacing: .08em; text-transform: uppercase; }
-.gal-section-count { font: 700 12px/1 'Inter', sans-serif; color: var(--a-txt); background: color-mix(in srgb, var(--a) 10%, transparent); border-radius: 20px; padding: 3px 10px; }
+.gal-section-title { font: 700 13px/1 'Archivo', sans-serif; color: var(--mu3); letter-spacing: .08em; text-transform: uppercase; }
+.gal-section-count { font: 700 12px/1 'Archivo', sans-serif; color: var(--a-txt); background: color-mix(in srgb, var(--a) 10%, transparent); border-radius: 20px; padding: 3px 10px; }
 
 /* Grid */
 .gal-grid {
@@ -208,13 +208,13 @@ const STYLE = `<style>
 .gal-card-visual .gal-emoji { font-size: 28px; line-height: 1; }
 
 .gal-card-nom {
-  font: 700 11px/1.3 'Plus Jakarta Sans', sans-serif;
+  font: 700 11px/1.3 'Archivo', sans-serif;
   color: var(--ink);
   margin-bottom: 4px;
   letter-spacing: -.005em;
 }
 .gal-card-meta {
-  font: 600 9.5px/1 'Inter', sans-serif;
+  font: 600 9.5px/1 'Archivo', sans-serif;
   color: var(--mu2);
   letter-spacing: .04em;
   text-transform: uppercase;
@@ -261,8 +261,8 @@ const STYLE = `<style>
 }
 .gal-permis-card.locked .gal-permis-preview { filter: grayscale(.85) brightness(.92); }
 .gal-permis-info { flex: 1; min-width: 0; }
-.gal-permis-nom { font: 800 14px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); margin-bottom: 4px; letter-spacing: -.01em; }
-.gal-permis-cond { font: 500 12px/1.4 'Inter', sans-serif; color: var(--mu3); }
+.gal-permis-nom { font: 800 14px/1.2 'Archivo', sans-serif; color: var(--ink); margin-bottom: 4px; letter-spacing: -.01em; }
+.gal-permis-cond { font: 500 12px/1.4 'Archivo', sans-serif; color: var(--mu3); }
 .gal-permis-status { flex-shrink: 0; }
 
 /* Hint footer */
@@ -275,7 +275,7 @@ const STYLE = `<style>
   border-radius: 14px;
 }
 .gal-empty-hint-emoji { font-size: 28px; margin-bottom: 6px; }
-.gal-empty-hint-txt { font: 500 12.5px/1.5 'Inter', sans-serif; color: var(--mu2); font-style: italic; }
+.gal-empty-hint-txt { font: 500 12.5px/1.5 'Archivo', sans-serif; color: var(--mu2); font-style: italic; }
 
 /* ── Modal agrandissement trophée ── */
 .gal-modal-bg {
@@ -321,18 +321,18 @@ const STYLE = `<style>
 .gal-modal-visual .gal-emoji { font-size: 72px; line-height: 1; }
 .gal-modal-rarity {
   display: inline-block;
-  font: 800 10px/1 'Inter', sans-serif;
+  font: 800 10px/1 'Archivo', sans-serif;
   letter-spacing: .1em; text-transform: uppercase;
   padding: 5px 12px; border-radius: 99px;
   margin-bottom: 10px;
   color: var(--rarity-color, var(--mu2));
   background: color-mix(in srgb, var(--rarity-color, var(--mu2)) 16%, transparent);
 }
-.gal-modal-nom { font: 800 21px/1.2 'Plus Jakarta Sans', sans-serif; color: var(--ink); letter-spacing: -.02em; margin-bottom: 8px; }
-.gal-modal-desc { font: 500 14px/1.5 'Inter', sans-serif; color: var(--mu); margin-bottom: 16px; }
+.gal-modal-nom { font: 800 21px/1.2 'Archivo', sans-serif; color: var(--ink); letter-spacing: -.02em; margin-bottom: 8px; }
+.gal-modal-desc { font: 500 14px/1.5 'Archivo', sans-serif; color: var(--mu); margin-bottom: 16px; }
 .gal-modal-foot {
   display: flex; align-items: center; justify-content: center; gap: 8px;
-  font: 700 12px/1 'Inter', sans-serif;
+  font: 700 12px/1 'Archivo', sans-serif;
 }
 .gal-modal-xp { color: var(--a-txt); background: color-mix(in srgb, var(--a) 10%, transparent); padding: 6px 12px; border-radius: 99px; }
 .gal-modal-state { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 99px; }
@@ -556,8 +556,8 @@ export async function mount(root) {
             <div class="gal-permis-status">
               ${
                 t.unlocked
-                  ? `<span style="font:700 10px/1 'Inter',sans-serif;color:var(--grdk);background:rgba(16,185,129,.12);padding:5px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:.06em">${gt("acquis", "Acquis")}</span>`
-                  : `<span style="font:700 10px/1 'Inter',sans-serif;color:var(--mu2);background:var(--bg3);padding:5px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:.06em">${icon("lock", { size: 11 })} ${esc(`${t.min}`)} ${gt("comp_word", "comp")}</span>`
+                  ? `<span style="font:700 10px/1 'Archivo',sans-serif;color:var(--grdk);background:rgba(16,185,129,.12);padding:5px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:.06em">${gt("acquis", "Acquis")}</span>`
+                  : `<span style="font:700 10px/1 'Archivo',sans-serif;color:var(--mu2);background:var(--bg3);padding:5px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:.06em">${icon("lock", { size: 11 })} ${esc(`${t.min}`)} ${gt("comp_word", "comp")}</span>`
               }
             </div>
           </div>

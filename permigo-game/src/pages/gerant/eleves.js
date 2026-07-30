@@ -19,7 +19,7 @@ const STYLE = `<style>
   margin: 0 auto;
   background: var(--bg);
   padding-bottom: 100px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Archivo', sans-serif;
   color: var(--ink);
 }
 
@@ -35,12 +35,12 @@ const STYLE = `<style>
   justify-content: space-between;
 }
 .el-title {
-  font: 700 22px/1.2 'Plus Jakarta Sans', sans-serif;
+  font: 700 22px/1.2 'Archivo', sans-serif;
   color: var(--ink);
   letter-spacing: -0.022em;
 }
 .el-count {
-  font: 600 12px/1 'Inter', sans-serif;
+  font: 600 12px/1 'Archivo', sans-serif;
   color: var(--a-txt);
   background: color-mix(in srgb, var(--a) 10%, transparent);
   padding: 6px 12px;
@@ -69,7 +69,7 @@ const STYLE = `<style>
   border-radius: var(--r);
   background: var(--bg);
   color: var(--ink);
-  font: 500 14px/1 'Inter', sans-serif;
+  font: 500 14px/1 'Archivo', sans-serif;
   outline: none;
   box-sizing: border-box;
   transition: border-color .15s ease, background .15s ease;
@@ -96,7 +96,7 @@ const STYLE = `<style>
   border: none;
   background: transparent;
   color: var(--mu);
-  font: 600 13px/1 'Inter', sans-serif;
+  font: 600 13px/1 'Archivo', sans-serif;
   border-radius: var(--r-sm);
   cursor: pointer;
   transition: background .15s ease, color .15s ease, box-shadow .15s ease;
@@ -134,14 +134,14 @@ const STYLE = `<style>
   width: 44px; height: 44px;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font: 600 16px/1 'Plus Jakarta Sans', sans-serif;
+  font: 600 16px/1 'Archivo', sans-serif;
   color: var(--a-ink);
   flex-shrink: 0;
   background: var(--a);
 }
 .el-info { flex: 1; min-width: 0; }
 .el-name {
-  font: 600 15px/1.3 'Inter', sans-serif;
+  font: 600 15px/1.3 'Archivo', sans-serif;
   color: var(--ink);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
@@ -151,7 +151,7 @@ const STYLE = `<style>
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font: 600 11px/1 'Inter', sans-serif;
+  font: 600 11px/1 'Archivo', sans-serif;
   color: var(--a-txt);
   background: color-mix(in srgb, var(--a) 10%, transparent);
   border-radius: var(--r-full);
@@ -174,11 +174,11 @@ const STYLE = `<style>
   margin-bottom: 6px;
 }
 .el-remc-lbl {
-  font: 500 11px/1 'Inter', sans-serif;
+  font: 500 11px/1 'Archivo', sans-serif;
   color: var(--mu2);
 }
 .el-remc-val {
-  font: 600 11px/1 'Inter', sans-serif;
+  font: 600 11px/1 'Archivo', sans-serif;
   color: var(--ink);
 }
 .el-remc-bar {
@@ -197,7 +197,7 @@ const STYLE = `<style>
 
 /* Derniere validation */
 .el-last {
-  font: 500 11px/1 'Inter', sans-serif;
+  font: 500 11px/1 'Archivo', sans-serif;
   color: var(--mu2);
   margin-top: 8px;
 }
@@ -207,7 +207,7 @@ const STYLE = `<style>
   padding: 32px 20px;
   text-align: center;
   color: var(--mu2);
-  font: 500 13px/1.6 'Inter', sans-serif;
+  font: 500 13px/1.6 'Archivo', sans-serif;
   background: var(--su);
   border: 1px dashed var(--bo);
   border-radius: var(--r);
@@ -473,13 +473,13 @@ async function openQuickView(eleveId, anchorCard) {
   overlay.innerHTML = `
     <style>
       @keyframes elqvIn { from { opacity:0; } to { opacity:1; } }
-      .elqv-card { width:100%; max-width:420px; background:var(--su); border-radius:var(--rx); padding:24px; font-family:'Inter',sans-serif; }
-      .elqv-card h3 { font:800 18px/1.2 'Plus Jakarta Sans',sans-serif; color:var(--ink); margin:0 0 10px; }
-      .elqv-row { display:flex; justify-content:space-between; padding:10px 0; border-top:1px solid var(--bo); font:500 13px/1.4 'Inter',sans-serif; }
+      .elqv-card { width:100%; max-width:420px; background:var(--su); border-radius:var(--rx); padding:24px; font-family:'Archivo',sans-serif; }
+      .elqv-card h3 { font:800 18px/1.2 'Archivo',sans-serif; color:var(--ink); margin:0 0 10px; }
+      .elqv-row { display:flex; justify-content:space-between; padding:10px 0; border-top:1px solid var(--bo); font:500 13px/1.4 'Archivo',sans-serif; }
       .elqv-row:first-of-type { border-top:0; }
       .elqv-row .l { color:var(--mu); }
       .elqv-row .v { color:var(--ink); font-weight:700; }
-      .elqv-btn { width:100%; margin-top:16px; padding:14px; background:var(--a); color: var(--a-ink); border:0; border-radius:var(--r-md); font:700 14px/1 'Plus Jakarta Sans',sans-serif; cursor:pointer; transition:transform .12s; }
+      .elqv-btn { width:100%; margin-top:16px; padding:14px; background:var(--a); color: var(--a-ink); border:0; border-radius:var(--r-md); font:700 14px/1 'Archivo',sans-serif; cursor:pointer; transition:transform .12s; }
       .elqv-btn:active { transform: scale(.97); }
     </style>
     <div class="elqv-card">

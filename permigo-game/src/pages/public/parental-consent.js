@@ -13,23 +13,23 @@ import { track } from "@/services/analytics.js";
 
 const STYLE = `<style>
   .pc { min-height:100dvh; background:linear-gradient(180deg,var(--su2) 0%,#fff 100%);
-    padding:32px 20px max(60px,env(safe-area-inset-bottom)); font-family:'Inter',sans-serif;
+    padding:32px 20px max(60px,env(safe-area-inset-bottom)); font-family:'Archivo',sans-serif;
     color:var(--ink); display:flex; flex-direction:column; align-items:center; justify-content:center; }
   .pc-card { width:100%; max-width:460px; background:var(--su); border:1px solid var(--bo);
     border-radius:24px; padding:28px 24px; box-shadow:0 4px 24px rgba(10,13,26,.06); }
   .pc-ico { font-size:42px; text-align:center; margin-bottom:10px; }
-  .pc-title { font:800 21px/1.25 'Plus Jakarta Sans',sans-serif; color:var(--ink); text-align:center; margin:0 0 6px; letter-spacing:-.02em; }
-  .pc-sub { font:500 14px/1.55 'Inter',sans-serif; color:var(--mu); text-align:center; margin:0 0 20px; }
+  .pc-title { font:800 21px/1.25 'Archivo',sans-serif; color:var(--ink); text-align:center; margin:0 0 6px; letter-spacing:-.02em; }
+  .pc-sub { font:500 14px/1.55 'Archivo',sans-serif; color:var(--mu); text-align:center; margin:0 0 20px; }
   .pc-info { background:var(--bg); border-radius:14px; padding:14px 16px; margin-bottom:16px; }
-  .pc-info-row { display:flex; gap:8px; font:500 13.5px/1.5 'Inter',sans-serif; color:var(--ink); margin-bottom:8px; }
+  .pc-info-row { display:flex; gap:8px; font:500 13.5px/1.5 'Archivo',sans-serif; color:var(--ink); margin-bottom:8px; }
   .pc-info-row:last-child { margin-bottom:0; }
   .pc-info-row b { color:var(--mu); font-weight:700; min-width:120px; flex-shrink:0; }
-  .pc-legal { font:500 12px/1.5 'Inter',sans-serif; color:var(--mu2); margin:0 0 18px; }
+  .pc-legal { font:500 12px/1.5 'Archivo',sans-serif; color:var(--mu2); margin:0 0 18px; }
   .pc-check { display:flex; align-items:flex-start; gap:10px; margin-bottom:18px; cursor:pointer; }
   .pc-check input { width:22px; height:22px; flex-shrink:0; margin-top:1px; accent-color:var(--a); }
-  .pc-check span { font:500 14px/1.45 'Inter',sans-serif; color:var(--ink); }
+  .pc-check span { font:500 14px/1.45 'Archivo',sans-serif; color:var(--ink); }
   .pc-btn { width:100%; padding:16px; background:var(--a); color: var(--a-ink); border:0; border-radius:14px;
-    font:800 15px/1 'Plus Jakarta Sans',sans-serif; cursor:pointer; box-shadow:0 8px 24px color-mix(in srgb, var(--a) 35%, transparent);
+    font:800 15px/1 'Archivo',sans-serif; cursor:pointer; box-shadow:0 8px 24px color-mix(in srgb, var(--a) 35%, transparent);
     transition:transform .12s,opacity .15s; min-height:54px; }
   .pc-btn:active { transform:scale(.98); }
   .pc-btn:disabled { opacity:.4; cursor:default; box-shadow:none; }
@@ -102,7 +102,7 @@ function renderForm(root, req, token) {
           <div class="pc-info-row"><b>Inscrit le</b><span>${esc(inscritLe)}</span></div>
         </div>
 
-        <p class="pc-reassure" style="font:600 13px/1.55 'Inter',sans-serif;color:var(--ink);background:color-mix(in srgb, var(--gr, #22c55e) 9%, transparent);border:1px solid color-mix(in srgb, var(--gr, #22c55e) 24%, transparent);border-radius:12px;padding:12px 14px;margin:0 0 14px">
+        <p class="pc-reassure" style="font:600 13px/1.55 'Archivo',sans-serif;color:var(--ink);background:color-mix(in srgb, var(--gr, #22c55e) 9%, transparent);border:1px solid color-mix(in srgb, var(--gr, #22c55e) 24%, transparent);border-radius:12px;padding:12px 14px;margin:0 0 14px">
           PermiGo, c'est un cahier de révision numérique — rien de plus. On garde seulement le <strong>prénom</strong> et la <strong>progression</strong> de votre enfant. <strong>Aucun numéro de téléphone, aucune adresse, aucune donnée bancaire.</strong>
         </p>
 

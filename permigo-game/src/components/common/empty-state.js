@@ -41,14 +41,14 @@ const SHARED_STYLES = `
 
 /* ── Text ── */
 .es-title {
-  font: 700 17px/1.3 'Plus Jakarta Sans', sans-serif;
+  font: 700 17px/1.3 'Archivo', sans-serif;
   color: var(--ink);
   margin-bottom: 6px;
 }
 .es-compact .es-title { font-size: 14px; margin-bottom: 4px; }
 
 .es-sub {
-  font: 500 13px/1.4 'Inter', sans-serif;
+  font: 500 13px/1.4 'Archivo', sans-serif;
   color: var(--mu3);
   margin-bottom: 18px;
   max-width: 280px;
@@ -65,7 +65,7 @@ const SHARED_STYLES = `
   color: var(--a-ink);
   border: 0;
   border-radius: 14px;
-  font: 600 14px/1 'Plus Jakarta Sans', sans-serif;
+  font: 600 14px/1 'Archivo', sans-serif;
   cursor: pointer;
   text-decoration: none;
   min-height: 44px;
@@ -117,8 +117,8 @@ export function emptyState({ image, title, body, cta }) {
       <img src="${img}" alt="" loading="lazy"
            style="width:140px;height:140px;object-fit:contain;opacity:.92"
            onerror="this.style.display='none'">
-      <div style="font:700 18px/1.2 'Plus Jakarta Sans',sans-serif;color:var(--ink)">${esc(title)}</div>
-      <div style="font:500 14px/1.5 'Inter',sans-serif;color:var(--mu);max-width:280px">${esc(body)}</div>
+      <div style="font:700 18px/1.2 'Archivo',sans-serif;color:var(--ink)">${esc(title)}</div>
+      <div style="font:500 14px/1.5 'Archivo',sans-serif;color:var(--mu);max-width:280px">${esc(body)}</div>
       ${cta ?? ""}
     </div>
   `;

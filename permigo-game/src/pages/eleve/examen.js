@@ -141,7 +141,7 @@ const STYLE = `<style>
   margin: 0 auto;
   background: var(--bg);
   color: var(--ink);
-  font-family: 'Inter', sans-serif;
+  font-family: 'Archivo', sans-serif;
 }
 @keyframes examSlideUp {
   from { opacity:0; transform:translateY(14px); }
@@ -184,8 +184,8 @@ const STYLE = `<style>
 .exam-hd-ico .pg-med {
   filter: drop-shadow(0 5px 12px color-mix(in srgb, var(--adk, #f08a12) 30%, transparent));
 }
-.exam-hd-title { font: 700 22px/1.2 'Plus Jakarta Sans',sans-serif; color: var(--ink); }
-.exam-hd-sub { font: 500 13px/1.4 'Inter',sans-serif; color: var(--mu3); margin-top: 2px; }
+.exam-hd-title { font: 700 22px/1.2 'Archivo',sans-serif; color: var(--ink); }
+.exam-hd-sub { font: 500 13px/1.4 'Archivo',sans-serif; color: var(--mu3); margin-top: 2px; }
 
 /* ── Shared card ── */
 .exam-card {
@@ -197,7 +197,7 @@ const STYLE = `<style>
   box-shadow: 0 1px 2px rgba(10,13,26,.04), 0 1px 3px rgba(10,13,26,.06);
 }
 .exam-card-title {
-  font: 700 13px/1 'Plus Jakarta Sans',sans-serif;
+  font: 700 13px/1 'Archivo',sans-serif;
   text-transform: uppercase;
   letter-spacing: .04em;
   color: var(--mu2);
@@ -225,7 +225,7 @@ const STYLE = `<style>
   display: block;
 }
 .exam-tile-lbl {
-  font: 500 10px/1 'Inter',sans-serif;
+  font: 500 10px/1 'Archivo',sans-serif;
   color: var(--mu2);
   text-transform: uppercase;
   letter-spacing: .06em;
@@ -249,7 +249,7 @@ const STYLE = `<style>
   border: 1.5px solid var(--bo);
   border-radius: 12px;
   padding: 10px 14px;
-  font: 500 14px/1 'Inter',sans-serif;
+  font: 500 14px/1 'Archivo',sans-serif;
   color: var(--ink);
   background: var(--bg);
   outline: none;
@@ -263,7 +263,7 @@ const STYLE = `<style>
   color: var(--a-ink);
   border: 0;
   border-radius: 12px;
-  font: 600 14px/1 'Plus Jakarta Sans',sans-serif;
+  font: 600 14px/1 'Archivo',sans-serif;
   cursor: pointer;
   min-height: 44px;
   transition: transform .16s cubic-bezier(.23,1,.32,1), background .16s;
@@ -280,7 +280,7 @@ const STYLE = `<style>
   padding: 8px 0 4px;
 }
 .exam-no-date-emoji { font-size: 36px; display: block; margin-bottom: 8px; }
-.exam-no-date-txt { font: 500 14px/1.4 'Inter',sans-serif; color: var(--mu3); margin-bottom: 16px; }
+.exam-no-date-txt { font: 500 14px/1.4 'Archivo',sans-serif; color: var(--mu3); margin-bottom: 16px; }
 .exam-choose-btn {
   display: inline-flex;
   align-items: center;
@@ -291,7 +291,7 @@ const STYLE = `<style>
   color: var(--a-ink);
   border: 0;
   border-radius: 14px;
-  font: 600 14px/1 'Plus Jakarta Sans',sans-serif;
+  font: 600 14px/1 'Archivo',sans-serif;
   cursor: pointer;
   min-height: 44px;
   transition: transform .16s cubic-bezier(.23,1,.32,1), filter .16s;
@@ -334,8 +334,8 @@ const STYLE = `<style>
   filter: drop-shadow(0 3px 6px rgba(10,13,26,.18));
 }
 .exam-check-body { flex: 1; min-width: 0; }
-.exam-check-label { font: 600 14px/1.3 'Plus Jakarta Sans',sans-serif; color: var(--ink); }
-.exam-check-sub { font: 500 12px/1.5 'Inter',sans-serif; color: var(--mu); margin-top: 2px; }
+.exam-check-label { font: 600 14px/1.3 'Archivo',sans-serif; color: var(--ink); }
+.exam-check-sub { font: 500 12px/1.5 'Archivo',sans-serif; color: var(--mu); margin-top: 2px; }
 .exam-check-badge {
   font: 700 12px/1 'IBM Plex Mono',monospace;
   padding: 4px 8px;
@@ -358,7 +358,7 @@ const STYLE = `<style>
   margin-top: -2px;
   margin-bottom: 4px;
 }
-.exam-score-lbl { font: 600 14px/1 'Plus Jakarta Sans',sans-serif; color: var(--adk); }
+.exam-score-lbl { font: 600 14px/1 'Archivo',sans-serif; color: var(--adk); }
 .exam-score-val { font: 800 18px/1 'IBM Plex Mono',monospace; color: var(--adk); }
 
 /* ── Tips ── */
@@ -377,7 +377,7 @@ const STYLE = `<style>
 .exam-tip:nth-child(4) { animation-delay:.34s; }
 .exam-tip-ico { margin-bottom: 8px; display: flex; }
 .exam-tip-ico .pg-med { filter: drop-shadow(0 4px 8px rgba(10,13,26,.16)); }
-.exam-tip-txt { font: 500 13px/1.4 'Inter',sans-serif; color: var(--ink5); }
+.exam-tip-txt { font: 500 13px/1.4 'Archivo',sans-serif; color: var(--ink5); }
 
 /* ── Predict card ── */
 .exam-predict {
@@ -393,8 +393,8 @@ const STYLE = `<style>
   display: flex; align-items: center; justify-content: center;
 }
 .exam-predict-body { flex: 1; min-width: 0; }
-.exam-predict-title { font: 700 14px/1.2 'Plus Jakarta Sans',sans-serif; color: var(--ink); }
-.exam-predict-sub { font: 500 12px/1.4 'Inter',sans-serif; color: var(--mu3); margin-top: 3px; }
+.exam-predict-title { font: 700 14px/1.2 'Archivo',sans-serif; color: var(--ink); }
+.exam-predict-sub { font: 500 12px/1.4 'Archivo',sans-serif; color: var(--mu3); margin-top: 3px; }
 .exam-predict-track {
   height: 6px; background: var(--bo);
   border-radius: 3px; overflow: hidden; margin: 10px 0 5px;
@@ -402,7 +402,7 @@ const STYLE = `<style>
 .exam-predict-fill { height: 100%; border-radius: 3px; background: var(--a); transition: width .5s ease; }
 .exam-predict-labels {
   display: flex; justify-content: space-between;
-  font: 500 10px/1 'Inter',sans-serif; color: var(--mu2);
+  font: 500 10px/1 'Archivo',sans-serif; color: var(--mu2);
 }
 .exam-predict-ready {
   display: flex; align-items: center; gap: 12px;
@@ -423,7 +423,7 @@ const STYLE = `<style>
   border-radius: 14px;
   margin-top: -2px;
   margin-bottom: 16px;
-  font: 600 13px/1.5 'Plus Jakarta Sans',sans-serif;
+  font: 600 13px/1.5 'Archivo',sans-serif;
 }
 .exam-readiness.high { background: var(--grp2); color: var(--grk2); }
 .exam-readiness.mid  { background: #fef9c3; color: #a16207; }
@@ -637,8 +637,8 @@ function renderCountdown(examDate) {
     return `
 <div style="text-align:center;padding:8px 0">
   <div style="margin-bottom:8px;color:var(--gr)">${icon("check-circle", { size: 34 })}</div>
-  <div style="font:700 16px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:4px"${xRtl()}>${esc(xt("passed_title", "Ton examen est passé"))}</div>
-  <div style="font:500 13px/1.5 'Inter',sans-serif;color:var(--mu3);margin-bottom:16px"${xRtl()}>${esc(xt("passed_sub", "Bonne chance pour les résultats."))}</div>
+  <div style="font:700 16px/1.3 'Archivo',sans-serif;color:var(--ink);margin-bottom:4px"${xRtl()}>${esc(xt("passed_title", "Ton examen est passé"))}</div>
+  <div style="font:500 13px/1.5 'Archivo',sans-serif;color:var(--mu3);margin-bottom:16px"${xRtl()}>${esc(xt("passed_sub", "Bonne chance pour les résultats."))}</div>
   <button class="exam-choose-btn" id="exam-btn-choose" style="background:var(--gr)">
     ${icon("calendar", { size: 16 })} ${esc(xt("change_date_btn", "Changer la date"))}
   </button>
@@ -664,7 +664,7 @@ function renderCountdown(examDate) {
     <span class="exam-tile-lbl"${xRtl()}>${esc(xt("min_lbl", "Minutes"))}</span>
   </div>
 </div>
-<div style="text-align:center;font:500 12px/1.4 'Inter',sans-serif;color:var(--mu3);margin-bottom:14px">
+<div style="text-align:center;font:500 12px/1.4 'Archivo',sans-serif;color:var(--mu3);margin-bottom:14px">
   ${urgent ? "" : ""}${esc(fmtDate(examDate))}
 </div>
 <div class="exam-date-row">
@@ -949,8 +949,8 @@ export async function mount(root) {
   </div>
   <div class="exam-card" style="text-align:center;padding:28px 20px">
     <div style="margin-bottom:10px;color:var(--mu3)">${icon("alert-circle", { size: 30 })}</div>
-    <div style="font:700 15px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:6px"${xRtl()}>${esc(xt("err_title", "« Ton examen » indisponible"))}</div>
-    <div style="font:500 13px/1.5 'Inter',sans-serif;color:var(--mu3);margin-bottom:16px"${xRtl()}>${esc(xt("err_sub", "Vérifie ta connexion, puis réessaie."))}</div>
+    <div style="font:700 15px/1.3 'Archivo',sans-serif;color:var(--ink);margin-bottom:6px"${xRtl()}>${esc(xt("err_title", "« Ton examen » indisponible"))}</div>
+    <div style="font:500 13px/1.5 'Archivo',sans-serif;color:var(--mu3);margin-bottom:16px"${xRtl()}>${esc(xt("err_sub", "Vérifie ta connexion, puis réessaie."))}</div>
     <button class="exam-choose-btn" id="exam-retry">${esc(xt("retry_btn", "Réessayer"))}</button>
   </div>
 </div>`;

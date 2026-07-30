@@ -52,12 +52,12 @@ const STYLE = `<style>
   padding: 14px 20px 6px;
 }
 .avpk-title {
-  font: 800 18px/1.2 'Plus Jakarta Sans', sans-serif;
+  font: 800 18px/1.2 'Archivo', sans-serif;
   color: var(--ink);
   letter-spacing: -.025em;
 }
 .avpk-sub {
-  font: 500 13px/1.4 'Inter', sans-serif;
+  font: 500 13px/1.4 'Archivo', sans-serif;
   color: var(--mu3);
   margin-top: 4px;
 }
@@ -97,7 +97,7 @@ const STYLE = `<style>
   color: var(--a-ink);
   border-radius: 50%;
   display: grid; place-items: center;
-  font: 800 13px/1 'Inter', sans-serif;
+  font: 800 13px/1 'Archivo', sans-serif;
 }
 .avpk-actions {
   display: flex; gap: 10px;
@@ -110,7 +110,7 @@ const STYLE = `<style>
   border: 1.5px solid var(--bo);
   background: var(--su2);
   color: var(--ink);
-  font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
+  font: 700 14px/1 'Archivo', sans-serif;
   cursor: pointer;
   font-family: inherit;
   transition: background .12s;

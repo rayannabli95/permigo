@@ -9,9 +9,9 @@ import { getLang } from "@/utils/lang.js";
 
 const ROOMS = [
   { id: "boutique", label: "Boutique", route: "/boutique" },
-  { id: "galerie", label: "Galerie", route: "/galerie" },
+  { id: "galerie", label: "Ma collection", route: "/galerie" },
   { id: "cartes", label: "Cartes", route: "/cartes" },
-  { id: "classement", label: "Ligue", route: "/classement" },
+  { id: "classement", label: "Classement", route: "/classement" },
 ];
 
 // i18n du bandeau (EN/AR) — composant 100 % élève (les 4 salles sont des
@@ -22,15 +22,15 @@ const RCT_I18N = {
   en: {
     boutique: "Shop",
     galerie: "Collection",
-    trophees: "Trophies",
-    classement: "League",
+    cartes: "Cards",
+    classement: "Leaderboard",
     aria: "Rewards rooms",
   },
   ar: {
     boutique: "المتجر",
     galerie: "المجموعة",
-    trophees: "الكؤوس",
-    classement: "الدوري",
+    cartes: "البطاقات",
+    classement: "الترتيب",
     aria: "غرف المكافآت",
   },
 };
@@ -54,15 +54,18 @@ export function recompensesTabs(active, { dark = false } = {}) {
   return `
 <style>
 .rct {
-  display: flex; gap: 6px; padding: 5px; border-radius: 16px;
+  display: flex; gap: 4px; padding: 4px; border-radius: 16px;
   margin: 0 0 14px;
   background: color-mix(in srgb, var(--ink) 5%, transparent);
   border: 1px solid var(--bo);
 }
+/* nowrap + 11.5px : « Ma collection » est le plus long des 4 libellés et
+   repassait sur deux lignes en 390 px, ce qui décalait toute la rangée. */
 .rct-tab {
-  flex: 1; border: 0; border-radius: 12px; padding: 8px 4px; min-height: 44px;
+  flex: 1; border: 0; border-radius: 12px; padding: 8px 2px; min-height: 44px;
   cursor: pointer; text-align: center; background: transparent;
-  font: 600 12.5px/1 'Fredoka', sans-serif; color: var(--mu);
+  white-space: nowrap;
+  font: 600 11.5px/1 'Archivo', sans-serif; color: var(--mu);
   transition: background .16s cubic-bezier(.23,1,.32,1), color .16s;
 }
 .rct-tab.on {

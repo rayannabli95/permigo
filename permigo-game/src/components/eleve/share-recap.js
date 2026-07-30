@@ -136,12 +136,12 @@ async function drawCard({ kicker, big, sub, eleveName, moniteurName }) {
   }
   x.textAlign = "left";
   x.fillStyle = "#fff";
-  x.font = "700 48px 'Baloo 2','Fredoka',sans-serif";
+  x.font = "700 48px 'Archivo',sans-serif";
   x.fillText("PermiGo", 190, 126);
 
   // ── Kicker (pilule dorée) ──
   x.textAlign = "center";
-  x.font = "800 30px 'Fredoka',sans-serif";
+  x.font = "800 30px 'Archivo',sans-serif";
   const k = (kicker || "").toUpperCase();
   const kw = x.measureText(k).width;
   roundRect(x, W / 2 - kw / 2 - 34, 286, kw + 68, 66, 33);
@@ -159,22 +159,22 @@ async function drawCard({ kicker, big, sub, eleveName, moniteurName }) {
   gold.addColorStop(1, "#ff9b1e");
   x.fillStyle = gold;
   let fs = 230;
-  x.font = `800 ${fs}px 'Baloo 2','Fredoka',sans-serif`;
+  x.font = `800 ${fs}px 'Archivo',sans-serif`;
   while (x.measureText(big).width > W - 200 && fs > 90) {
     fs -= 10;
-    x.font = `800 ${fs}px 'Baloo 2','Fredoka',sans-serif`;
+    x.font = `800 ${fs}px 'Archivo',sans-serif`;
   }
   x.fillText(String(big), W / 2, 560);
 
   // ── Sous-titre ──
   x.fillStyle = "#d9d4f5";
-  x.font = "500 42px 'Fredoka',sans-serif";
+  x.font = "500 42px 'Archivo',sans-serif";
   wrap(x, sub || "", W / 2, 730, W - 200, 56);
 
   // ── Élève ──
   if (eleveName) {
     x.fillStyle = "#fff";
-    x.font = "700 52px 'Baloo 2','Fredoka',sans-serif";
+    x.font = "700 52px 'Archivo',sans-serif";
     x.fillText(`${eleveName}, ça avance 🔥`, W / 2, 900);
   }
 
@@ -186,13 +186,13 @@ async function drawCard({ kicker, big, sub, eleveName, moniteurName }) {
   x.lineTo(W - 120, H - 372);
   x.stroke();
   x.fillStyle = "#9a93cf";
-  x.font = "600 32px 'Fredoka',sans-serif";
+  x.font = "600 32px 'Archivo',sans-serif";
   x.fillText("JE RÉVISE MA CONDUITE AVEC", W / 2, H - 300);
   x.fillStyle = "#ffd06a";
-  x.font = "800 64px 'Baloo 2','Fredoka',sans-serif";
+  x.font = "800 64px 'Archivo',sans-serif";
   x.fillText(moniteurName || "ton moniteur", W / 2, H - 222);
   x.fillStyle = "#8a83c0";
-  x.font = "500 32px 'Fredoka',sans-serif";
+  x.font = "500 32px 'Archivo',sans-serif";
   x.fillText("entre les leçons, sur PermiGo", W / 2, H - 146);
 
   return c;
@@ -210,17 +210,17 @@ function ensureStyle() {
 .srk{width:100%;max-width:480px;background:var(--su);border-radius:26px 26px 0 0;padding:18px 18px max(16px,env(safe-area-inset-bottom));
   animation:srkUp .3s cubic-bezier(.32,.72,0,1) both;}
 @keyframes srkUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.srk-h{font:800 17px/1.2 'Plus Jakarta Sans',sans-serif;color:var(--ink);text-align:center;margin:4px 0 12px;}
+.srk-h{font:800 17px/1.2 'Archivo',sans-serif;color:var(--ink);text-align:center;margin:4px 0 12px;}
 .srk-prev{display:block;width:62%;max-width:240px;margin:0 auto 16px;border-radius:18px;
   box-shadow:0 18px 44px -14px rgba(0,0,0,.6);}
 .srk-act{display:flex;gap:10px;}
 .srk-share{flex:1;border:0;border-radius:16px;min-height:52px;cursor:pointer;
-  font:800 15px 'Plus Jakarta Sans',sans-serif;color:#3a1d00;
+  font:800 15px 'Archivo',sans-serif;color:#3a1d00;
   background:linear-gradient(180deg,#ffd24a,#ff9c1c);box-shadow:0 4px 0 #b85e00;
   display:flex;align-items:center;justify-content:center;gap:8px;}
 .srk-share:active{transform:translateY(3px);box-shadow:0 1px 0 #b85e00;}
 .srk-close{padding:0 20px;min-height:52px;border:1.5px solid var(--bo4);border-radius:16px;background:var(--bg);
-  color:var(--mu3);font:700 15px 'Plus Jakarta Sans',sans-serif;cursor:pointer;}
+  color:var(--mu3);font:700 15px 'Archivo',sans-serif;cursor:pointer;}
 @media (prefers-reduced-motion:reduce){.srk-bg,.srk{animation:none}}`;
   document.head.appendChild(s);
 }

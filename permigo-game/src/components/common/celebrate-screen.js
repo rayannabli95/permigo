@@ -140,7 +140,7 @@ const STYLE = `
 }
 
 .cs-title {
-  font: 800 32px/1.1 'Plus Jakarta Sans', sans-serif;
+  font: 800 32px/1.1 'Archivo', sans-serif;
   margin: 0 0 12px;
   letter-spacing: -.03em;
   background: linear-gradient(135deg, #fff 0%, var(--aml) 100%);
@@ -155,7 +155,7 @@ const STYLE = `
 .cs-overlay.cs-show .cs-title { opacity: 1; transform: translateY(0); }
 
 .cs-subtitle {
-  font: 500 16px/1.5 'Inter', sans-serif;
+  font: 500 16px/1.5 'Archivo', sans-serif;
   color: rgba(255,255,255,.8);
   margin: 0 0 36px;
   opacity: 0;
@@ -171,7 +171,7 @@ const STYLE = `
   color: var(--ink);
   border: 0;
   border-radius: 16px;
-  font: 800 16px/1 'Plus Jakarta Sans', sans-serif;
+  font: 800 16px/1 'Archivo', sans-serif;
   cursor: pointer;
   box-shadow: 0 10px 28px rgba(245,158,11,.4), inset 0 -3px 0 rgba(0,0,0,.12), inset 0 2px 0 rgba(255,255,255,.5);
   transition: transform .15s cubic-bezier(0.23, 1, 0.32, 1), box-shadow .15s ease;

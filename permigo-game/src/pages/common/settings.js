@@ -297,7 +297,7 @@ const STYLE = `<style>
   background: var(--bg);
   min-height: 100dvh;
   padding-bottom: 80px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Archivo', sans-serif;
 }
 /* header vitré collé sous le header global */
 .st-header {
@@ -330,7 +330,7 @@ const STYLE = `<style>
 .st-back::before { content: ''; position: absolute; inset: -4px; } /* hit-area 44 */
 .st-back:hover { background: var(--bg2); }
 .st-page-title {
-  font: 800 18px/1.2 'Plus Jakarta Sans', sans-serif;
+  font: 800 18px/1.2 'Archivo', sans-serif;
   color: var(--ink);
   letter-spacing: -.02em;
 }
@@ -348,7 +348,7 @@ const STYLE = `<style>
 /* Corps : groupes = libellé AU-DESSUS + carte */
 .st-body { padding: 16px 14px 30px; display: flex; flex-direction: column; gap: 18px; }
 .st-glabel {
-  font: 700 11px/1 'Inter', sans-serif;
+  font: 700 11px/1 'Archivo', sans-serif;
   letter-spacing: .08em; text-transform: uppercase;
   color: var(--mu); padding: 0 8px 8px;
 }
@@ -380,8 +380,8 @@ const STYLE = `<style>
 }
 .st-ic svg { width: 32px; height: 32px; display: block; }
 .st-row-left { flex: 1; min-width: 0; }
-.st-row-title { font: 700 14px/1.25 'Plus Jakarta Sans', sans-serif; color: var(--ink); }
-.st-row-sub { font: 500 12px/1.3 'Inter', sans-serif; color: var(--mu); margin-top: 2px; }
+.st-row-title { font: 700 14px/1.25 'Archivo', sans-serif; color: var(--ink); }
+.st-row-sub { font: 500 12px/1.3 'Archivo', sans-serif; color: var(--mu); margin-top: 2px; }
 .st-row-action { flex-shrink: 0; display: flex; align-items: center; }
 .st-chev { color: var(--mu); width: 18px; height: 18px; flex: none; }
 
@@ -395,7 +395,7 @@ const STYLE = `<style>
 
 /* Text button */
 .st-btn-txt {
-  font: 700 13px/1 'Inter', sans-serif;
+  font: 700 13px/1 'Archivo', sans-serif;
   color: var(--a-txt);
   background: none; border: none; cursor: pointer;
   padding: 10px 6px; margin: -6px -6px;
@@ -408,7 +408,7 @@ const STYLE = `<style>
   width: 100%;
   height: 44px;
   padding: 0 13px;
-  font: 600 14px/1 'Inter', sans-serif;
+  font: 600 14px/1 'Archivo', sans-serif;
   color: var(--ink);
   background: var(--bg);
   border: 1.5px solid var(--bo4);
@@ -423,7 +423,7 @@ const STYLE = `<style>
   height: 44px; padding: 0 18px;
   background: var(--a); color: var(--a-ink);
   border: none; border-radius: var(--r-md);
-  font: 800 13.5px/1 'Plus Jakarta Sans', sans-serif;
+  font: 800 13.5px/1 'Archivo', sans-serif;
   cursor: pointer; transition: background .15s;
   font-family: inherit; flex: none;
 }
@@ -432,7 +432,7 @@ const STYLE = `<style>
 
 /* Ne pas déranger */
 .st-dnd { display: flex; align-items: center; gap: 9px; }
-.st-dnd label { font: 600 12px/1 'Inter', sans-serif; color: var(--mu); flex-shrink: 0; }
+.st-dnd label { font: 600 12px/1 'Archivo', sans-serif; color: var(--mu); flex-shrink: 0; }
 
 /* Danger zone */
 .st-danger { border-color: color-mix(in srgb, var(--rd) 26%, var(--bo)); }
@@ -441,7 +441,7 @@ const STYLE = `<style>
 .st-theme-seg { display: flex; gap: 3px; background: var(--bg2); border: 1px solid var(--bo); border-radius: var(--r-md); padding: 3px; width: 100%; }
 .st-theme-btn {
   flex: 1; padding: 9px 4px; border: none; border-radius: var(--r-sm);
-  background: transparent; font: 700 12.5px/1 'Inter', sans-serif; color: var(--mu);
+  background: transparent; font: 700 12.5px/1 'Archivo', sans-serif; color: var(--mu);
   cursor: pointer; transition: background .15s cubic-bezier(.23,1,.32,1), color .15s, box-shadow .15s;
   white-space: nowrap; min-height: 44px; font-family: inherit;
   display: inline-flex; align-items: center; justify-content: center; gap: 5px;
@@ -491,18 +491,18 @@ const STYLE = `<style>
   margin: 0 auto 20px;
 }
 .st-modal-title {
-  font: 800 18px/1.2 'Plus Jakarta Sans', sans-serif;
+  font: 800 18px/1.2 'Archivo', sans-serif;
   color: var(--ink);
   margin-bottom: 8px;
 }
 .st-modal-body {
-  font: 400 14px/1.6 'Inter', sans-serif;
+  font: 400 14px/1.6 'Archivo', sans-serif;
   color: var(--mu);
   margin-bottom: 16px;
 }
 .st-modal-body strong { color: var(--ink); }
 .st-modal-label {
-  font: 600 12px/1 'Inter', sans-serif;
+  font: 600 12px/1 'Archivo', sans-serif;
   color: var(--mu);
   margin-bottom: 6px;
 }
@@ -523,7 +523,7 @@ const STYLE = `<style>
 .st-modal-cancel {
   flex: 1; padding: 14px;
   background: var(--bg); border: 1.5px solid var(--bo); border-radius: 12px;
-  font: 700 14px/1 'Plus Jakarta Sans', sans-serif; color: var(--mu3);
+  font: 700 14px/1 'Archivo', sans-serif; color: var(--mu3);
   cursor: pointer; min-height: 48px; font-family: inherit;
   transition: background .12s;
 }
@@ -531,14 +531,14 @@ const STYLE = `<style>
 .st-modal-confirm {
   flex: 1; padding: 14px;
   background: var(--rd); border: none; border-radius: 12px;
-  font: 700 14px/1 'Plus Jakarta Sans', sans-serif; color: #fff;
+  font: 700 14px/1 'Archivo', sans-serif; color: #fff;
   cursor: pointer; min-height: 48px; font-family: inherit;
   transition: background .12s, opacity .12s;
 }
 .st-modal-confirm:disabled { opacity: .4; cursor: not-allowed; }
 .st-modal-confirm:not(:disabled):active { background: var(--rdk); }
 .st-dpo-note {
-  font: 400 12px/1.5 'Inter', sans-serif;
+  font: 400 12px/1.5 'Archivo', sans-serif;
   color: var(--mu2);
   text-align: center;
   margin-top: 12px;
@@ -597,8 +597,8 @@ export async function mount(root, param) {
   ${renderHeader()}
   <div class="st-section" style="margin-top:20px;padding:28px 20px;text-align:center">
     <div style="margin-bottom:10px;color:var(--mu3)">${icon("alert-circle", { size: 30 })}</div>
-    <div style="font:700 15px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:6px">${st("load_err_title", "Impossible de charger tes préférences")}</div>
-    <div style="font:500 13px/1.5 'Inter',sans-serif;color:var(--mu3);margin-bottom:16px">${st("load_err_sub", "Vérifie ta connexion, puis réessaie.")}</div>
+    <div style="font:700 15px/1.3 'Archivo',sans-serif;color:var(--ink);margin-bottom:6px">${st("load_err_title", "Impossible de charger tes préférences")}</div>
+    <div style="font:500 13px/1.5 'Archivo',sans-serif;color:var(--mu3);margin-bottom:16px">${st("load_err_sub", "Vérifie ta connexion, puis réessaie.")}</div>
     <button class="st-save-btn" id="st-retry" style="margin:0 auto;width:auto;padding:10px 20px">${st("retry", "Réessayer")}</button>
   </div>
 </div>`;

@@ -81,7 +81,7 @@ const STYLE = `<style id="ppr-style">
   border-radius: 22px 22px 0 0; border-top: 1px solid var(--bo);
   box-shadow: var(--s3);
   padding: 10px 20px calc(20px + env(safe-area-inset-bottom, 0px));
-  font-family: 'Inter', sans-serif;
+  font-family: 'Archivo', sans-serif;
   transform: translateY(105%);
   transition: transform .34s cubic-bezier(.32,.72,0,1);
 }
@@ -101,19 +101,19 @@ const STYLE = `<style id="ppr-style">
   76% { rotate: 6deg; } 80% { rotate: -4deg; } 84% { rotate: 1deg; }
 }
 @media (prefers-reduced-motion: reduce) { .ppr-bell { animation: none; } }
-.ppr-title { font: 800 19px/1.25 'Plus Jakarta Sans', sans-serif; text-align: center; letter-spacing: -.015em; }
-.ppr-sub { font: 500 13.5px/1.45 'Inter', sans-serif; color: var(--mu2); text-align: center; margin: 5px 0 16px; }
+.ppr-title { font: 800 19px/1.25 'Archivo', sans-serif; text-align: center; letter-spacing: -.015em; }
+.ppr-sub { font: 500 13.5px/1.45 'Archivo', sans-serif; color: var(--mu2); text-align: center; margin: 5px 0 16px; }
 .ppr-rows { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
 .ppr-row {
   display: flex; align-items: center; gap: 12px;
   background: var(--bg2); border-radius: 13px; padding: 11px 14px;
-  font: 600 14px/1.3 'Inter', sans-serif; color: var(--ink);
+  font: 600 14px/1.3 'Archivo', sans-serif; color: var(--ink);
 }
 .ppr-row-ico { flex-shrink: 0; display: flex; color: var(--a-txt); }
 .ppr-cta {
   width: 100%; min-height: 52px; border: 0; border-radius: 14px;
   background: linear-gradient(to bottom, var(--a-lt), var(--a) 55%, var(--adk));
-  color: var(--a-ink); font: 800 15.5px/1 'Plus Jakarta Sans', sans-serif;
+  color: var(--a-ink); font: 800 15.5px/1 'Archivo', sans-serif;
   cursor: pointer; margin-bottom: 8px;
   box-shadow: 0 6px 16px -4px color-mix(in srgb, var(--a) 55%, transparent);
   -webkit-tap-highlight-color: transparent;
@@ -122,7 +122,7 @@ const STYLE = `<style id="ppr-style">
 .ppr-cta:disabled { opacity: .6; }
 .ppr-later {
   width: 100%; min-height: 44px; border: 0; border-radius: 12px;
-  background: none; color: var(--mu); font: 700 13.5px/1 'Inter', sans-serif; cursor: pointer;
+  background: none; color: var(--mu); font: 700 13.5px/1 'Archivo', sans-serif; cursor: pointer;
 }
 .ppr-cta:focus-visible, .ppr-later:focus-visible { outline: 3px solid var(--a); outline-offset: 2px; }
 </style>`;

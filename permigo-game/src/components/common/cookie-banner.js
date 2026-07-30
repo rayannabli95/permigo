@@ -77,7 +77,7 @@ const STYLE = `<style>
     padding: 18px 18px 16px;
     z-index: 9000;
     transition: transform .42s cubic-bezier(.22,1,.32,1);
-    font-family: 'Inter', sans-serif;
+    font-family: 'Archivo', sans-serif;
   }
   /* Dans l'app (chrome monté), le bandeau se pose AU-DESSUS de la barre de nav
      (~60px) au lieu de la recouvrir → les onglets restent tappables. Et pendant
@@ -88,16 +88,16 @@ const STYLE = `<style>
   .ck-banner.on { transform: translateX(-50%) translateY(0); }
   @media (prefers-reduced-motion: reduce) { .ck-banner { transition: none; } }
   .ck-ttl {
-    font: 800 15px/1.3 'Plus Jakarta Sans', sans-serif;
+    font: 800 15px/1.3 'Archivo', sans-serif;
     color: var(--ink); margin: 0 0 6px;
     display: flex; align-items: center; gap: 7px;
   }
-  .ck-txt { font: 500 12.5px/1.55 'Inter', sans-serif; color: var(--ink); margin: 0 0 14px; }
+  .ck-txt { font: 500 12.5px/1.55 'Archivo', sans-serif; color: var(--ink); margin: 0 0 14px; }
   .ck-txt a { color: var(--ink, var(--a-ink)); text-decoration: underline; }
   .ck-row { display: flex; gap: 8px; }
   .ck-btn {
     flex: 1; padding: 12px 14px; border-radius: 12px;
-    font: 700 13.5px/1 'Plus Jakarta Sans', sans-serif;
+    font: 700 13.5px/1 'Archivo', sans-serif;
     cursor: pointer; min-height: 46px; border: 1px solid transparent;
     transition: transform .12s, opacity .12s;
     -webkit-tap-highlight-color: transparent;

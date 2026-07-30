@@ -105,7 +105,7 @@ const STYLE = `<style>
   margin: 0 auto;
   padding: 0 0 110px;
   background: ${BG};
-  font-family: 'Inter', sans-serif;
+  font-family: 'Archivo', sans-serif;
   color: ${TEXT};
   min-height: 100dvh;
 }
@@ -132,13 +132,13 @@ const STYLE = `<style>
   gap: 12px;
 }
 .ck-hd-logo {
-  font: 800 16px/1 'Plus Jakarta Sans', sans-serif;
+  font: 800 16px/1 'Archivo', sans-serif;
   color: var(--bg); /* surface = var(--ink) → seul var(--bg) contraste dans les 2 thèmes */
   letter-spacing: -.02em;
   flex-shrink: 0;
 }
 .ck-hd-school {
-  font: 600 13px/1 'Inter', sans-serif;
+  font: 600 13px/1 'Archivo', sans-serif;
   color: ${TEXT};
   flex: 1;
   white-space: nowrap;
@@ -146,7 +146,7 @@ const STYLE = `<style>
   text-overflow: ellipsis;
 }
 .ck-hd-date {
-  font: 500 11px/1 'Inter', sans-serif;
+  font: 500 11px/1 'Archivo', sans-serif;
   color: ${MUTED};
   white-space: nowrap;
   flex-shrink: 0;
@@ -178,13 +178,13 @@ const STYLE = `<style>
   margin-bottom: 12px;
 }
 .ck-section-title {
-  font: 700 11px/1 'Inter', sans-serif;
+  font: 700 11px/1 'Archivo', sans-serif;
   text-transform: uppercase;
   letter-spacing: .12em;
   color: ${MUTED};
 }
 .ck-section-action {
-  font: 600 11px/1 'Inter', sans-serif;
+  font: 600 11px/1 'Archivo', sans-serif;
   color: ${ACC};
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -215,14 +215,14 @@ const STYLE = `<style>
   opacity: .7;
 }
 .ck-kpi-label {
-  font: 500 10.5px/1 'Inter', sans-serif;
+  font: 500 10.5px/1 'Archivo', sans-serif;
   text-transform: uppercase;
   letter-spacing: .1em;
   color: ${MUTED};
   margin-bottom: 10px;
 }
 .ck-kpi-val {
-  font: 800 28px/1 'IBM Plex Mono', 'Plus Jakarta Sans', monospace;
+  font: 800 28px/1 'IBM Plex Mono', 'Archivo', monospace;
   font-variant-numeric: tabular-nums;
   color: ${TEXT};
   letter-spacing: -.02em;
@@ -230,7 +230,7 @@ const STYLE = `<style>
 }
 .ck-kpi-delta {
   display: inline-flex; align-items: center; gap: 3px;
-  font: 600 11px/1 'Inter', sans-serif;
+  font: 600 11px/1 'Archivo', sans-serif;
   padding: 3px 7px;
   border-radius: var(--r-full);
 }
@@ -275,7 +275,7 @@ const STYLE = `<style>
   flex-shrink: 0;
 }
 .ck-legend-label {
-  font: 500 12px/1 'Inter', sans-serif;
+  font: 500 12px/1 'Archivo', sans-serif;
   color: ${TEXT};
   flex: 1;
 }
@@ -284,7 +284,7 @@ const STYLE = `<style>
   color: ${TEXT};
 }
 .ck-legend-pct {
-  font: 500 10px/1 'Inter', sans-serif;
+  font: 500 10px/1 'Archivo', sans-serif;
   color: ${MUTED};
   min-width: 32px;
   text-align: right;
@@ -316,17 +316,17 @@ const STYLE = `<style>
 }
 .ck-alert-body { flex: 1; min-width: 0; }
 .ck-alert-title {
-  font: 600 13px/1.3 'Inter', sans-serif;
+  font: 600 13px/1.3 'Archivo', sans-serif;
   color: ${TEXT};
   margin-bottom: 3px;
 }
 .ck-alert-sub {
-  font: 500 11.5px/1.4 'Inter', sans-serif;
+  font: 500 11.5px/1.4 'Archivo', sans-serif;
   color: ${MUTED};
 }
 .ck-alert-arrow { color: ${MUTED}; margin-top: 2px; flex-shrink: 0; }
 .ck-alerts-empty {
-  font: 500 13px/1 'Inter', sans-serif;
+  font: 500 13px/1 'Archivo', sans-serif;
   color: ${MUTED};
   padding: 16px 0;
   text-align: center;
@@ -364,13 +364,13 @@ const STYLE = `<style>
   background: color-mix(in srgb, var(--a) 20%, transparent);
   border: 1px solid color-mix(in srgb, var(--a) 30%, transparent);
   display: flex; align-items: center; justify-content: center;
-  font: 700 13px/1 'Plus Jakarta Sans', sans-serif;
+  font: 700 13px/1 'Archivo', sans-serif;
   color: ${ACC};
   flex-shrink: 0;
 }
 .ck-mon-info { flex: 1; min-width: 0; }
 .ck-mon-name {
-  font: 600 13px/1.2 'Inter', sans-serif;
+  font: 600 13px/1.2 'Archivo', sans-serif;
   color: ${TEXT};
   margin-bottom: 4px;
 }
@@ -418,8 +418,8 @@ const STYLE = `<style>
 .ck-bs.open { transform: translateY(0) !important; }
 .ck-bs-handle { width: 36px; height: 4px; background: ${BORD}; border-radius: 2px; margin: 14px auto 0; }
 .ck-bs-hd { padding: 16px 20px 14px; border-bottom: 1px solid ${BORD}; }
-.ck-bs-title { font: 700 16px/1.2 'Plus Jakarta Sans', sans-serif; color: ${TEXT}; }
-.ck-bs-sub { font: 500 12px/1 'Inter', sans-serif; color: ${MUTED}; margin-top: 4px; }
+.ck-bs-title { font: 700 16px/1.2 'Archivo', sans-serif; color: ${TEXT}; }
+.ck-bs-sub { font: 500 12px/1 'Archivo', sans-serif; color: ${MUTED}; margin-top: 4px; }
 .ck-bs-list { padding: 8px 0; }
 .ck-bs-eleve {
   display: flex; align-items: center; gap: 12px;
@@ -433,10 +433,10 @@ const STYLE = `<style>
   width: 36px; height: 36px; border-radius: var(--r);
   background: ${SURF2}; border: 1px solid ${BORD};
   display: flex; align-items: center; justify-content: center;
-  font: 700 13px/1 'Plus Jakarta Sans', sans-serif; color: ${TEXT};
+  font: 700 13px/1 'Archivo', sans-serif; color: ${TEXT};
   flex-shrink: 0;
 }
-.ck-bs-eleve-name { font: 600 13px/1.2 'Inter', sans-serif; color: ${TEXT}; flex: 1; }
+.ck-bs-eleve-name { font: 600 13px/1.2 'Archivo', sans-serif; color: ${TEXT}; flex: 1; }
 .ck-bs-eleve-val { font: 600 12px/1 'IBM Plex Mono', monospace; color: ${MUTED}; }
 
 /* Spin utility */
@@ -559,9 +559,9 @@ async function loadFallback(root, me) {
     wire(root, me);
   } catch (e) {
     root.innerHTML = `${STYLE}<div style="padding:60px 24px;text-align:center;color:${MUTED}">
-      <div style="font:700 18px/1.3 'Plus Jakarta Sans',sans-serif;color:${TEXT};margin-bottom:8px">Cockpit indisponible</div>
+      <div style="font:700 18px/1.3 'Archivo',sans-serif;color:${TEXT};margin-bottom:8px">Cockpit indisponible</div>
       <p style="font-size:13px;margin:0 0 20px">Vérifie ta connexion.</p>
-      <button onclick="location.reload()" style="padding:12px 24px;border:0;background:${ACC};color:#fff;border-radius:var(--r);font:700 14px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer">Recharger</button>
+      <button onclick="location.reload()" style="padding:12px 24px;border:0;background:${ACC};color:#fff;border-radius:var(--r);font:700 14px/1 'Archivo',sans-serif;cursor:pointer">Recharger</button>
     </div>`;
   }
 }
@@ -621,7 +621,7 @@ function render(data, me) {
       <span class="ck-section-title">Groupes d'élèves</span>
     </div>
     <div class="ck-cohort-wrap">
-      ${cohorts.length > 0 ? renderDonut(cohorts) : `<div style="text-align:center;padding:24px 0;font:500 13px/1 'Inter',sans-serif;color:${MUTED}">Données non disponibles</div>`}
+      ${cohorts.length > 0 ? renderDonut(cohorts) : `<div style="text-align:center;padding:24px 0;font:500 13px/1 'Archivo',sans-serif;color:${MUTED}">Données non disponibles</div>`}
     </div>
   </div>
 
@@ -770,7 +770,7 @@ function renderDonut(cohorts) {
         ${svgPaths}
         <circle cx="${cx}" cy="${cy}" r="${r}" fill="${SURF}"/>
         <text x="${cx}" y="${cy - 6}" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="20" font-weight="700" fill="${TEXT}">${total}</text>
-        <text x="${cx}" y="${cy + 14}" text-anchor="middle" font-family="'Inter',sans-serif" font-size="9" fill="${MUTED}">ÉLÈVES</text>
+        <text x="${cx}" y="${cy + 14}" text-anchor="middle" font-family="'Archivo',sans-serif" font-size="9" fill="${MUTED}">ÉLÈVES</text>
       </svg>
       <div class="ck-donut-legend">${legendRows}</div>
     </div>`;

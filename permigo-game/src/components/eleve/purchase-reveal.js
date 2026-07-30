@@ -99,19 +99,19 @@ function _ensureCss() {
   @keyframes prPop { from{opacity:0;transform:scale(.35)} to{opacity:1;transform:scale(1)} }
 
   .pr-kick {
-    font: 800 12px/1 'Plus Jakarta Sans', system-ui, sans-serif;
+    font: 800 12px/1 'Archivo', system-ui, sans-serif;
     letter-spacing: .24em; text-transform: uppercase;
     color: #ffd27a; margin-bottom: 10px; position: relative; z-index: 1;
     animation: prPop .4s cubic-bezier(.34,1.56,.64,1) both .22s;
   }
   .pr-name {
-    font: 900 28px/1.1 'Plus Jakarta Sans', system-ui, sans-serif;
+    font: 900 28px/1.1 'Archivo', system-ui, sans-serif;
     color: #fff; letter-spacing: -.03em; margin-bottom: 6px;
     position: relative; z-index: 1;
     animation: prPop .45s cubic-bezier(.34,1.56,.64,1) both .28s;
   }
   .pr-sub {
-    font: 500 14px/1.5 'Inter', system-ui, sans-serif;
+    font: 500 14px/1.5 'Archivo', system-ui, sans-serif;
     color: rgba(255,255,255,.65); max-width: 280px; margin-bottom: 28px;
     position: relative; z-index: 1;
     animation: prPop .4s cubic-bezier(.34,1.56,.64,1) both .34s;
@@ -128,7 +128,7 @@ function _ensureCss() {
     padding: 16px 44px; border: 0; border-radius: 16px;
     background: linear-gradient(180deg, #a78bfa, #7c4dff);
     color: #fff; cursor: pointer; min-height: 56px;
-    font: 800 16px 'Plus Jakarta Sans', system-ui, sans-serif;
+    font: 800 16px 'Archivo', system-ui, sans-serif;
     letter-spacing: -.01em;
     box-shadow: 0 8px 22px -6px rgba(124,77,255,.6), 0 2px 0 rgba(0,0,0,.18);
     animation: prPop .4s cubic-bezier(.34,1.56,.64,1) both .42s;

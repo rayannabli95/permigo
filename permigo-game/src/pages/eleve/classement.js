@@ -241,8 +241,8 @@ export async function mount(root, initialTab) {
     root.innerHTML = `${ARENE_CSS}<div class="arn" style="${ARENE_ACCENT}">
       <div class="arn-hd"><h1>${xD(esc(xt("title", "Classement")))}</h1><p class="arn-sub">${xD(esc(xt("err_title", "« Classement » indisponible")))}</p></div>
       <div style="padding:28px 20px;text-align:center">
-        <p style="font:600 13.5px/1.5 'Inter',sans-serif;color:var(--amute);margin:0 0 16px">${xD(esc(xt("err_sub", "Vérifie ta connexion, puis réessaie.")))}</p>
-        <button id="arn-retry" style="font:800 14px 'Inter',sans-serif;padding:13px 28px;border-radius:14px;border:0;background:var(--aup);color:#04220f;cursor:pointer">${xD(esc(xt("retry", "Réessayer")))}</button>
+        <p style="font:600 13.5px/1.5 'Archivo',sans-serif;color:var(--amute);margin:0 0 16px">${xD(esc(xt("err_sub", "Vérifie ta connexion, puis réessaie.")))}</p>
+        <button id="arn-retry" style="font:800 14px 'Archivo',sans-serif;padding:13px 28px;border-radius:14px;border:0;background:var(--aup);color:#04220f;cursor:pointer">${xD(esc(xt("retry", "Réessayer")))}</button>
       </div>
     </div>`;
     root
@@ -382,7 +382,7 @@ function _renderScopebar(state, rows) {
   const effectif = xD(esc(_effectifTxt(ranked)));
   if (state.solo) {
     // Solo : pas d'école → une seule portée (élèves PermiGo), pas de toggle.
-    return `<div class="arn-scopebar"><span style="display:inline-flex;align-items:center;gap:5px;font:800 12px/1 'Inter',sans-serif;color:#cabfef">${icon("users", { size: 13, strokeWidth: 2.2 })} ${xD(esc(xt("scope_solo", "Élèves PermiGo")))}</span><span class="arn-effectif">${effectif}</span></div>`;
+    return `<div class="arn-scopebar"><span style="display:inline-flex;align-items:center;gap:5px;font:800 12px/1 'Archivo',sans-serif;color:#cabfef">${icon("users", { size: 13, strokeWidth: 2.2 })} ${xD(esc(xt("scope_solo", "Élèves PermiGo")))}</span><span class="arn-effectif">${effectif}</span></div>`;
   }
   return `<div class="arn-scopebar">
     <div class="arn-scope" role="group" aria-label="${escAttr(xt("scope_aria", "Portée du classement"))}">

@@ -21,11 +21,13 @@ const STYLE = `
     height: calc(52px + env(safe-area-inset-top, 0px));
     padding-top: env(safe-area-inset-top, 0px);
     /* theme-aware : --su suit le thème, y compris en mode "auto" sur OS sombre
-       (où [data-theme="dark"] est absent). Clair=#fff, sombre=#181b30 → rendu identique. */
-    background: color-mix(in srgb, var(--su) 92%, transparent);
+       (où [data-theme="dark"] est absent). Clair=#fff, sombre=#181b30 → rendu identique.
+       --chrome-top : posé par les pages nuit (cf. utils/chrome-night.js) pour
+       que le bandeau prenne LEUR teinte au lieu de trancher en blanc. */
+    background: color-mix(in srgb, var(--chrome-top, var(--su)) 92%, transparent);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--bo);
+    border-bottom: 1px solid var(--chrome-bo, var(--bo));
     transition: background .2s;
     display: flex;
     align-items: center;
@@ -54,10 +56,12 @@ const STYLE = `
     display: flex; align-items: center; gap: 5px;
     height: 32px; padding: 0 11px 0 7px;
     border-radius: 999px; cursor: pointer;
-    border: 1px solid color-mix(in srgb, #f5b50a 38%, var(--bo));
-    background: linear-gradient(180deg, color-mix(in srgb, #ffd87a 24%, var(--su)), var(--su));
-    color: var(--ink);
-    font: 800 13.5px/1 'Plus Jakarta Sans', system-ui, sans-serif;
+    border: 1px solid color-mix(in srgb, #f5b50a 38%, var(--chrome-bo, var(--bo)));
+    background: linear-gradient(180deg,
+      color-mix(in srgb, #ffd87a 24%, var(--chrome-btn, var(--su))),
+      var(--chrome-btn, var(--su)));
+    color: var(--chrome-ink, var(--ink));
+    font: 800 13.5px/1 'Archivo', system-ui, sans-serif;
     font-variant-numeric: tabular-nums;
     -webkit-tap-highlight-color: transparent;
     transition: transform .12s;
@@ -68,9 +72,9 @@ const STYLE = `
   .ht-icon-btn {
     width: 44px; height: 44px;
     border-radius: 8px;
-    border: 1px solid var(--bo);
-    background: var(--su, #fff);
-    color: var(--ink);
+    border: 1px solid var(--chrome-bo, var(--bo));
+    background: var(--chrome-btn, var(--su, #fff));
+    color: var(--chrome-ink, var(--ink));
     cursor: pointer;
     padding: 0;
     display: flex; align-items: center; justify-content: center;
@@ -81,7 +85,7 @@ const STYLE = `
   .ht-icon-btn:active { transform: scale(.92); background: var(--bg2, color-mix(in srgb, var(--a) 8%, transparent)); }
   /* Réglages ouverts → l'icône prend la couleur du thème */
   .ht-icon-btn.active {
-    color: var(--a-txt);
+    color: var(--chrome-a, var(--a-txt));
     border-color: color-mix(in srgb, var(--a) 40%, transparent);
     background: color-mix(in srgb, var(--a) 10%, transparent);
   }

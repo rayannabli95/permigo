@@ -49,7 +49,7 @@ const PERKS = [
 const STYLE = `<style>
 .ftw{ max-width:480px; margin:0 auto; min-height:100dvh;
   padding:34px 20px calc(28px + env(safe-area-inset-bottom));
-  font-family:'Plus Jakarta Sans','Inter',sans-serif; color:#efeaff;
+  font-family:'Archivo',sans-serif; color:#efeaff;
   display:flex; flex-direction:column; justify-content:center;
   background:
     radial-gradient(130% 44% at 50% -4%, rgba(124,99,255,.34) 0%, rgba(124,99,255,0) 56%),
@@ -61,7 +61,7 @@ const STYLE = `<style>
   border:1px solid rgba(245,196,81,.34); box-shadow:0 16px 34px -18px rgba(6,2,22,.9); }
 .ftw-kick{ text-align:center; font-weight:800; font-size:11px; letter-spacing:.16em;
   text-transform:uppercase; color:#f5c451; margin-bottom:8px; }
-.ftw-title{ text-align:center; font-family:'Baloo 2','Plus Jakarta Sans',cursive;
+.ftw-title{ text-align:center; font-family:'Archivo', system-ui, sans-serif;
   font-weight:800; font-size:26px; line-height:1.15; margin:0 auto 10px; max-width:340px; }
 .ftw-sub{ text-align:center; font-size:14px; font-weight:600; color:#c3bdf0;
   margin:0 auto 22px; max-width:330px; line-height:1.5; }
@@ -74,13 +74,13 @@ const STYLE = `<style>
 .ftw-perk .tx b{ display:block; font-size:14px; font-weight:800; color:#fff; }
 .ftw-perk .tx span{ display:block; font-size:11.5px; font-weight:600; color:#a99ddb; margin-top:1px; }
 .ftw-unlock{ width:100%; padding:17px; border:0; border-radius:16px; cursor:pointer;
-  font:800 16.5px/1 'Plus Jakarta Sans',sans-serif; letter-spacing:-.01em; color:#241a45;
+  font:800 16.5px/1 'Archivo',sans-serif; letter-spacing:-.01em; color:#241a45;
   background:linear-gradient(180deg,#ffe9b0,#f0a93f);
   box-shadow:0 12px 24px -10px rgba(240,170,44,.7), inset 0 1px 0 rgba(255,255,255,.5);
   transition:transform .1s ease; }
 .ftw-unlock:active{ transform:scale(.98); }
 .ftw-explore{ display:block; margin:14px auto 0; background:none; border:0; cursor:pointer;
-  font:700 14px/1 'Plus Jakarta Sans',sans-serif; color:#b3aede;
+  font:700 14px/1 'Archivo',sans-serif; color:#b3aede;
   text-decoration:underline; text-underline-offset:3px; }
 .ftw-note{ text-align:center; font-size:11.5px; font-weight:600; color:#8f86c4; margin:16px 0 0; }
 @media (prefers-reduced-motion: reduce){ .ftw-unlock{ transition:none; } }
@@ -154,7 +154,7 @@ export function discoveryPillHTML(kind) {
 export const DISCOVERY_PILL_STYLE = `<style>
 .ft-pill{ display:inline-flex; align-items:center; gap:6px;
   padding:5px 12px; border-radius:999px; white-space:nowrap;
-  font:800 11.5px/1 'Plus Jakarta Sans',sans-serif; letter-spacing:-.01em;
+  font:800 11.5px/1 'Archivo',sans-serif; letter-spacing:-.01em;
   color:#f5c451; background:rgba(245,196,81,.12); border:1px solid rgba(245,196,81,.32); }
 </style>`;
 
@@ -163,10 +163,10 @@ const BANNER_STYLE = `<style>
 .ft-banner{ display:flex; align-items:center; gap:10px; flex-wrap:wrap;
   margin:0 0 14px; padding:9px 13px; border-radius:14px;
   background:rgba(245,196,81,.08); border:1px solid rgba(245,196,81,.26); }
-.ft-banner b{ font:800 11px/1 'Plus Jakarta Sans',sans-serif; letter-spacing:.1em;
+.ft-banner b{ font:800 11px/1 'Archivo',sans-serif; letter-spacing:.1em;
   text-transform:uppercase; color:#f5c451; }
 .ft-banner .items{ display:flex; gap:9px; flex-wrap:wrap; }
-.ft-banner .items span{ font:700 12px/1 'Nunito','Inter',sans-serif; color:#c7c0ee; }
+.ft-banner .items span{ font:700 12px/1 'Archivo',sans-serif; color:#c7c0ee; }
 </style>`;
 
 export function discoveryBannerHTML() {

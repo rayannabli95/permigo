@@ -17,7 +17,7 @@ const STYLE = `<style>
 .mpw{ position:relative; max-width:480px; margin:0 auto; min-height:100dvh;
   display:flex; flex-direction:column; justify-content:center; align-items:center;
   padding:24px 20px calc(28px + env(safe-area-inset-bottom));
-  font-family:'Plus Jakarta Sans','Inter',sans-serif; color:#eef0ff; text-align:center;
+  font-family:'Archivo',sans-serif; color:#eef0ff; text-align:center;
   background:
     radial-gradient(120% 50% at 50% -8%, rgba(255,206,77,.14) 0%, rgba(255,206,77,0) 55%),
     radial-gradient(120% 55% at 82% 10%, rgba(99,102,241,.35) 0%, rgba(99,102,241,0) 60%),
@@ -26,25 +26,25 @@ const STYLE = `<style>
 .mpw-badge{ width:78px; height:78px; border-radius:24px; display:flex; align-items:center; justify-content:center;
   background:linear-gradient(180deg,#ffe9b0,#f6c85f 55%,#e2951f);
   box-shadow:0 8px 0 #b46a10, 0 16px 26px rgba(180,106,16,.4), inset 0 2px 0 rgba(255,255,255,.6); margin-bottom:22px; }
-.mpw-title{ font-family:'Baloo 2',cursive; font-weight:800; font-size:26px; line-height:1.12; margin:0 0 8px; letter-spacing:-.01em; }
+.mpw-title{ font-family:'Archivo', system-ui, sans-serif; font-weight:800; font-size:26px; line-height:1.12; margin:0 0 8px; letter-spacing:-.01em; }
 .mpw-sub{ font-size:14px; font-weight:600; color:#c7c9f5; margin:0 0 22px; max-width:340px; line-height:1.5; }
 .mpw-card{ width:100%; max-width:360px; text-align:left; padding:18px; border-radius:20px; margin-bottom:20px;
   background:rgba(255,255,255,.06); border:1px solid rgba(255,206,77,.35); box-shadow:inset 0 1px 0 rgba(255,255,255,.14); }
-.mpw-price{ font-family:'Baloo 2',cursive; font-weight:800; font-size:26px; color:#ffe4a6;
+.mpw-price{ font-family:'Archivo', system-ui, sans-serif; font-weight:800; font-size:26px; color:#ffe4a6;
   display:flex; align-items:baseline; gap:6px; margin-bottom:12px; }
-.mpw-price small{ font-family:'Inter',sans-serif; font-weight:700; font-size:13px; color:#c7c9f5; }
+.mpw-price small{ font-family:'Archivo',sans-serif; font-weight:700; font-size:13px; color:#c7c9f5; }
 .mpw-feat{ display:flex; flex-direction:column; gap:9px; }
 .mpw-feat span{ display:flex; gap:9px; align-items:flex-start; font-size:13.5px; font-weight:600; color:#e6e7ff; line-height:1.35; }
 .mpw-feat svg{ flex:0 0 18px; margin-top:1px; }
 .mpw-cta{ width:100%; max-width:360px; height:58px; border:none; border-radius:18px; cursor:pointer;
-  font-family:'Baloo 2',cursive; font-weight:800; font-size:18px; color:#5a3406;
+  font-family:'Archivo', system-ui, sans-serif; font-weight:800; font-size:18px; color:#5a3406;
   background:linear-gradient(180deg,#ffe9b0 0%,#f6c85f 38%,#f0a93f 72%,#e2951f 100%);
   box-shadow:0 6px 0 #b46a10, 0 12px 20px rgba(180,106,16,.35), inset 0 2px 0 rgba(255,255,255,.7);
   transition:transform .1s ease, box-shadow .1s ease; }
 .mpw-cta:active{ transform:translateY(3px); box-shadow:0 3px 0 #b46a10, inset 0 2px 0 rgba(255,255,255,.7); }
 .mpw-cta[disabled]{ opacity:.7; cursor:default; }
 .mpw-logout{ margin-top:18px; background:none; border:none; cursor:pointer;
-  font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; font-size:13px; color:#a7a9e0; text-decoration:underline; text-underline-offset:3px; }
+  font-family:'Archivo',sans-serif; font-weight:700; font-size:13px; color:#a7a9e0; text-decoration:underline; text-underline-offset:3px; }
 .mpw-note{ margin-top:14px; font-size:11.5px; color:#9a9cd6; max-width:320px; line-height:1.4; }
 @media (prefers-reduced-motion: reduce){ .mpw *{ transition:none!important; } }
 </style>`;

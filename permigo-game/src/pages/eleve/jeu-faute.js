@@ -45,9 +45,9 @@ export async function mount(root) {
 <div style="min-height:60dvh;display:flex;align-items:center;justify-content:center;padding:24px">
   <div style="text-align:center;max-width:300px">
     <div style="font-size:40px;margin-bottom:12px" aria-hidden="true">🧐</div>
-    <div style="font:700 17px/1.3 'Plus Jakarta Sans',sans-serif;color:var(--ink);margin-bottom:6px"${jfRtl()}>${esc(jft("empty_title", "Rien à revoir pour l’instant"))}</div>
-    <p style="font:500 13.5px/1.5 'Inter',sans-serif;color:var(--mu);margin-bottom:18px"${jfRtl()}>${esc(jft("empty_sub", "Les fautes viennent de tes fiches de conduite. Lis-en une pour commencer."))}</p>
-    <button id="jf-empty-cta" style="min-height:44px;padding:12px 20px;border:0;border-radius:14px;background:var(--a);color:var(--a-ink);font:600 14px/1 'Plus Jakarta Sans',sans-serif;cursor:pointer"${jfRtl()}>${esc(jft("empty_cta", "Voir les fiches de conduite"))}</button>
+    <div style="font:700 17px/1.3 'Archivo',sans-serif;color:var(--ink);margin-bottom:6px"${jfRtl()}>${esc(jft("empty_title", "Rien à revoir pour l’instant"))}</div>
+    <p style="font:500 13.5px/1.5 'Archivo',sans-serif;color:var(--mu);margin-bottom:18px"${jfRtl()}>${esc(jft("empty_sub", "Les fautes viennent de tes fiches de conduite. Lis-en une pour commencer."))}</p>
+    <button id="jf-empty-cta" style="min-height:44px;padding:12px 20px;border:0;border-radius:14px;background:var(--a);color:var(--a-ink);font:600 14px/1 'Archivo',sans-serif;cursor:pointer"${jfRtl()}>${esc(jft("empty_cta", "Voir les fiches de conduite"))}</button>
   </div>
 </div>`;
     root
