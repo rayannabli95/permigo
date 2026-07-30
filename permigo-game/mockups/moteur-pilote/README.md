@@ -37,6 +37,19 @@ http://127.0.0.1:4175/mockups/moteur-pilote/
 - `engine.js` — état, filtrage, réponses, progression et persistance ;
 - `main.js` — rendu des écrans, cinq mécaniques, audio et interactions ;
 - `styles.css` — direction visuelle mobile, scènes et retours de jeu.
+- `art-library/` — bibliothèque SVG réutilisable, livrée et validée lot par lot.
+
+## Bibliothèque graphique
+
+La planche de contact du lot 1 « pieds et boîte » est disponible à :
+
+```text
+http://127.0.0.1:4175/mockups/moteur-pilote/art-library/
+```
+
+Elle expose six composants pilotables, leurs quatre états, l’éclairage séparé
+de chaque position P/R/N/D et de chaque rapport, ainsi que le test de silhouette
+à 40. Voir `art-library/README.md` pour l’API.
 
 ## Ajouter une mission
 
