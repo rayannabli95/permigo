@@ -104,21 +104,31 @@
        Le fond #010208 est la couleur EXACTE du fond de la vidéo → raccord
        invisible, aucune bordure visible autour du carré vidéo. -->
   <style>
-    #splash{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;background:#010208;padding:calc(env(safe-area-inset-top,0px) + 24px) 24px calc(env(safe-area-inset-bottom,0px) + 24px);animation:spFade .25s ease;overflow:hidden}
+    /* z-index au niveau --z-splash : le splash est un FRÈRE de #app (et non un
+       enfant), sinon le premier `app.innerHTML = …` d'une page l'efface avant
+       que la vidéo ait eu le temps de jouer. */
+    #splash{position:fixed;inset:0;z-index:10100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;background:#010208;padding:calc(env(safe-area-inset-top,0px) + 24px) 24px calc(env(safe-area-inset-bottom,0px) + 24px);animation:spFade .25s ease;overflow:hidden;transition:opacity .26s ease}
+    #splash.is-out{opacity:0;pointer-events:none}
     #splash::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 70% at 50% 45%,rgba(108,99,255,.16),transparent 62%);pointer-events:none}
-    /* Le poster (dernière image = logo complet) s'affiche instantanément ;
-       la vidéo se superpose dès qu'elle est prête. Pas d'écran vide. */
-    /* `screen` rend le noir de la vidéo/poster transparent : plus aucun carré
-       visible autour du logo, même si l'encodage n'a pas un noir parfait. */
+    /* `screen` rend le noir de la vidéo transparent : plus aucun carré visible
+       autour du logo, même si l'encodage n'a pas un noir parfait. */
     #splash .sp-logo{position:relative;width:min(58vw,240px);aspect-ratio:1;display:block;mix-blend-mode:screen}
     #splash .sp-logo video,#splash .sp-logo img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block}
     #splash .sp-logo video{z-index:1}
+    /* Le poster est la dernière image (logo COMPLET) : l'afficher d'entrée
+       spoilerait l'animation. Il ne sert donc que de repli — vidéo en erreur,
+       autoplay refusé ou mouvement réduit. */
+    #splash .sp-logo img{opacity:0}
+    #splash.is-fallback .sp-logo img{opacity:1}
+    #splash.is-fallback .sp-logo video{display:none}
     #splash .sp-go{font:800 16px/1 'Plus Jakarta Sans','Nunito',sans-serif;color:#a99cff;letter-spacing:.01em;opacity:0;animation:spGo 1.6s ease .5s forwards}
     @keyframes spFade{from{opacity:0}to{opacity:1}}
     @keyframes spGo{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
-    /* Mouvement réduit : on masque la vidéo, le poster (logo final) reste. */
+    /* Mouvement réduit : pas de vidéo, le logo fixe suffit. */
     @media (prefers-reduced-motion:reduce){
+      #splash{animation:none}
       #splash .sp-logo video{display:none}
+      #splash .sp-logo img{opacity:1}
       #splash .sp-go{animation:none;opacity:1}
     }
   </style>
@@ -127,17 +137,76 @@
   <!-- A11y : skip link -->
   <a href="#app" class="skip-link">Aller au contenu principal</a>
 
-  <!-- Container racine -->
-  <div id="app" role="main" tabindex="-1">
-    <div id="splash" aria-busy="true" aria-label="Chargement de PermiGo">
-      <div class="sp-logo" aria-hidden="true">
-        <img src="%BASE_URL%splash-permigo-poster.jpg" alt="" width="240" height="240" />
-        <video src="%BASE_URL%splash-permigo.mp4" poster="%BASE_URL%splash-permigo-poster.jpg"
-               autoplay muted playsinline disablepictureinpicture preload="auto"></video>
-      </div>
-      <div class="sp-go" aria-hidden="true">C'est parti</div>
+  <!-- Écran de chargement — FRÈRE de #app (voir le CSS plus haut) -->
+  <div id="splash" aria-busy="true" aria-label="Chargement de PermiGo">
+    <div class="sp-logo" aria-hidden="true">
+      <img src="%BASE_URL%splash-permigo-poster.jpg" alt="" width="240" height="240" />
+      <video src="%BASE_URL%splash-permigo.mp4"
+             autoplay muted playsinline disablepictureinpicture preload="auto"></video>
     </div>
+    <div class="sp-go" aria-hidden="true">C'est parti</div>
   </div>
+  <script>
+    /* Pilotage du splash — inline pour démarrer la vidéo au plus tôt.
+       Sans ça, Chrome n'enclenche l'autoplay qu'à la fin du parsing (mesuré en
+       prod : prête à 350 ms, jouée à 886 ms) et la première page l'effaçait à
+       967 ms — la vidéo ne restait que 80 ms à l'écran. */
+    (function () {
+      var sp = document.getElementById('splash');
+      if (!sp) return;
+      var v = sp.querySelector('video');
+      var RATE = 1.35;    // le logo est entièrement dessiné vers 1,25 s de vidéo
+      var SEEN = 1.35;    // on ferme dès que ces secondes de vidéo sont vues
+      var CAP = 2000;     // filet : le splash ne retarde jamais plus le boot
+      var closed = false;
+
+      function close() {
+        if (closed) return;
+        closed = true;
+        sp.classList.add('is-out');
+        var drop = function () { sp.remove(); };
+        sp.addEventListener('transitionend', drop, { once: true });
+        setTimeout(drop, 450); // filet si transitionend ne partait pas
+      }
+      function fallback() {
+        if (sp.classList.contains('is-fallback')) return;
+        sp.classList.add('is-fallback'); // logo fixe (le poster)
+        setTimeout(close, 600);          // rien à regarder → on ne fait pas patienter
+      }
+
+      var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
+      if (reduce || !v) {
+        setTimeout(close, 700);
+        return;
+      }
+
+      try { v.playbackRate = RATE; } catch (e) { /* refusé → vitesse normale */ }
+      v.addEventListener('ended', close, { once: true });
+      v.addEventListener('error', fallback, { once: true });
+
+      var kick = function () {
+        var p = v.play();
+        if (p && p.catch) p.catch(fallback); // autoplay refusé → logo fixe
+      };
+      kick();
+      v.addEventListener('canplay', kick, { once: true });
+      // Décodage trop lent / lecture jamais partie → logo fixe plutôt que vide.
+      setTimeout(function () { if (v.paused || !v.currentTime) fallback(); }, 900);
+
+      /* On se cale sur le temps de la VIDÉO, pas sur un setTimeout : pendant le
+         boot le thread principal est saturé et les timers dérivent (mesuré :
+         +400 ms sur un cap de 1 750 ms). `currentTime`, lui, ne dérive pas. */
+      var t0 = performance.now();
+      (function watch() {
+        if (closed) return;
+        if (v.currentTime >= SEEN || performance.now() - t0 >= CAP) return close();
+        requestAnimationFrame(watch);
+      })();
+    })();
+  </script>
+
+  <!-- Container racine -->
+  <div id="app" role="main" tabindex="-1"></div>
 
   <!-- Toast container -->
   <div id="toast-root" aria-live="polite"></div>
