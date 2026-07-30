@@ -714,7 +714,7 @@ function render({
 
   <div class="kpi-grid">
     <div class="kpi-card" style="--kc:var(--a)">
-      <span class="kpi-ico" style="color:var(--a)">${icon("users", { size: 22 })}</span>
+      <span class="kpi-ico" style="color:var(--a-txt)">${icon("users", { size: 22 })}</span>
       <div class="kpi-val">${elevesActifs}<span style="font-size:.5em;color:var(--mu2);font-weight:600">/${elevesTotal}</span></div>
       <div class="kpi-lbl">Élèves actifs<br><span style="font-size:.7em;color:var(--mu2)">(30 derniers jours)</span></div>
     </div>

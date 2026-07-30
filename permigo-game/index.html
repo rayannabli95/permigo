@@ -97,31 +97,29 @@
   <!-- ╔══ Fonts ══╗ -->
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&family=Nunito:wght@400;600;700;800;900&family=JetBrains+Mono:wght@700&family=Fredoka:wght@500;600;700&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet" />
 
-  <!-- ╔══ Écran de chargement (feu vert) — critical CSS inline ══╗
+  <!-- ╔══ Écran de chargement (logo animé) — critical CSS inline ══╗
        Inliné ici (pas dans le bundle) pour s'afficher AVANT que le JS charge.
-       Écran de MARQUE : toujours en vert PermiGo, indépendant de l'accent user. -->
+       Écran de MARQUE : fond nuit + logo animé (globe → route → « P »),
+       identique quel que soit l'accent choisi par l'utilisateur.
+       Le fond #010208 est la couleur EXACTE du fond de la vidéo → raccord
+       invisible, aucune bordure visible autour du carré vidéo. -->
   <style>
-    #splash{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;background:var(--bg,#f4f5fb);padding:calc(env(safe-area-inset-top,0px) + 24px) 24px calc(env(safe-area-inset-bottom,0px) + 24px);animation:spFade .3s ease;overflow:hidden}
-    #splash::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 70% at 50% 40%,rgba(88,204,2,.14),transparent 60%);pointer-events:none}
-    #splash .tl-badge{width:84px;height:84px;animation:spFloat 2.6s ease-in-out infinite;filter:drop-shadow(0 14px 26px rgba(70,163,2,.34))}
-    #splash .tl-badge img{width:100%;height:100%;object-fit:contain;display:block}
-    #splash .tl-housing{position:relative;display:flex;flex-direction:column;gap:12px;padding:14px;border-radius:22px;background:linear-gradient(180deg,#23262b,#0d0e10);box-shadow:0 16px 34px rgba(10,12,18,.32),0 0 0 1px rgba(255,255,255,.05),inset 0 1px 0 rgba(255,255,255,.08)}
-    #splash .tl-lamp{width:36px;height:36px;border-radius:50%;background:#1b1c1e;box-shadow:inset 0 2px 5px rgba(0,0,0,.6)}
-    #splash .tl-lamp.r{animation:spRed 2.4s infinite}
-    #splash .tl-lamp.y{animation:spAmber 2.4s infinite}
-    #splash .tl-lamp.g{animation:spGreen 2.4s infinite}
-    #splash .tl-go{font:800 17px/1 'Plus Jakarta Sans','Nunito',sans-serif;color:#46A302;letter-spacing:-.01em;opacity:0;animation:spGo 2.4s infinite}
+    #splash{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;background:#010208;padding:calc(env(safe-area-inset-top,0px) + 24px) 24px calc(env(safe-area-inset-bottom,0px) + 24px);animation:spFade .25s ease;overflow:hidden}
+    #splash::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 70% at 50% 45%,rgba(108,99,255,.16),transparent 62%);pointer-events:none}
+    /* Le poster (dernière image = logo complet) s'affiche instantanément ;
+       la vidéo se superpose dès qu'elle est prête. Pas d'écran vide. */
+    /* `screen` rend le noir de la vidéo/poster transparent : plus aucun carré
+       visible autour du logo, même si l'encodage n'a pas un noir parfait. */
+    #splash .sp-logo{position:relative;width:min(58vw,240px);aspect-ratio:1;display:block;mix-blend-mode:screen}
+    #splash .sp-logo video,#splash .sp-logo img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block}
+    #splash .sp-logo video{z-index:1}
+    #splash .sp-go{font:800 16px/1 'Plus Jakarta Sans','Nunito',sans-serif;color:#a99cff;letter-spacing:.01em;opacity:0;animation:spGo 1.6s ease .5s forwards}
     @keyframes spFade{from{opacity:0}to{opacity:1}}
-    @keyframes spFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-    @keyframes spRed{0%,26%{background:#ff4035;box-shadow:0 0 16px 3px #ff4035,inset 0 2px 5px rgba(0,0,0,.35)}32%,100%{background:#3a1413;box-shadow:inset 0 2px 5px rgba(0,0,0,.6)}}
-    @keyframes spAmber{0%,28%{background:#2b2710}34%,44%{background:#ffc107;box-shadow:0 0 16px 3px #ffc107}50%,100%{background:#2b2710}}
-    @keyframes spGreen{0%,50%{background:#12300f}58%,100%{background:#46e314;box-shadow:0 0 22px 6px rgba(70,227,20,.7)}}
-    @keyframes spGo{0%,52%{opacity:0;transform:scale(.8)}62%,100%{opacity:1;transform:scale(1)}}
+    @keyframes spGo{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+    /* Mouvement réduit : on masque la vidéo, le poster (logo final) reste. */
     @media (prefers-reduced-motion:reduce){
-      #splash .tl-badge{animation:none}
-      #splash .tl-lamp.r,#splash .tl-lamp.y{animation:none;background:#2b2710;box-shadow:inset 0 2px 5px rgba(0,0,0,.6)}
-      #splash .tl-lamp.g{animation:none;background:#46e314;box-shadow:0 0 22px 6px rgba(70,227,20,.7)}
-      #splash .tl-go{animation:none;opacity:1}
+      #splash .sp-logo video{display:none}
+      #splash .sp-go{animation:none;opacity:1}
     }
   </style>
 </head>
@@ -132,13 +130,12 @@
   <!-- Container racine -->
   <div id="app" role="main" tabindex="-1">
     <div id="splash" aria-busy="true" aria-label="Chargement de PermiGo">
-      <div class="tl-badge"><img src="%BASE_URL%skins/avatars/permigo-badge-icon.png" alt="PermiGo" width="84" height="84" /></div>
-      <div class="tl-housing" aria-hidden="true">
-        <span class="tl-lamp r"></span>
-        <span class="tl-lamp y"></span>
-        <span class="tl-lamp g"></span>
+      <div class="sp-logo" aria-hidden="true">
+        <img src="%BASE_URL%splash-permigo-poster.jpg" alt="" width="240" height="240" />
+        <video src="%BASE_URL%splash-permigo.mp4" poster="%BASE_URL%splash-permigo-poster.jpg"
+               autoplay muted playsinline disablepictureinpicture preload="auto"></video>
       </div>
-      <div class="tl-go" aria-hidden="true">C'est parti</div>
+      <div class="sp-go" aria-hidden="true">C'est parti</div>
     </div>
   </div>
 

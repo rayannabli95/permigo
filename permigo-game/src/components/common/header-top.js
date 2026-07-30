@@ -81,7 +81,7 @@ const STYLE = `
   .ht-icon-btn:active { transform: scale(.92); background: var(--bg2, color-mix(in srgb, var(--a) 8%, transparent)); }
   /* Réglages ouverts → l'icône prend la couleur du thème */
   .ht-icon-btn.active {
-    color: var(--a);
+    color: var(--a-txt);
     border-color: color-mix(in srgb, var(--a) 40%, transparent);
     background: color-mix(in srgb, var(--a) 10%, transparent);
   }

@@ -252,7 +252,7 @@ const STYLE = `<style>
   .vl-body .vl-row:first-child { border-top: 1.5px solid var(--bo); }
   .vl-row:active { background: var(--su2); }
   .vl-row:disabled { cursor: default; }
-  .vl-code { font: 800 12px var(--ens-body, sans-serif); color: var(--a); flex: none; width: 32px; letter-spacing: .01em; }
+  .vl-code { font: 800 12px var(--ens-body, sans-serif); color: var(--a-txt); flex: none; width: 32px; letter-spacing: .01em; }
   .vl-lbl { font: 600 13.5px/1.25 var(--ens-body, sans-serif); color: var(--ink2); flex: 1; min-width: 0; }
   .vl-row.on .vl-lbl { color: var(--ink); font-weight: 700; }
   .vl-row.locked .vl-lbl { color: var(--mu2); }
