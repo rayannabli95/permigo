@@ -269,7 +269,7 @@ export function validateMission(mission) {
   if (mission.outcome.claim !== "ready-to-practice") {
     throw new MissionSchemaError(
       "outcome.claim",
-      "une mission se termine sur « prêt·e à pratiquer », rien de plus fort",
+      "une mission se termine sur une invitation à pratiquer, rien de plus fort",
     );
   }
   exigeTexte(mission.outcome.title, "outcome.title", 3);

@@ -205,44 +205,92 @@ function profileCar(id, options) {
   return { drawing, labels: "" };
 }
 
+/**
+ * Le pneu, vu de près sur la bande de roulement.
+ *
+ * Une roue vue de face ne montre PAS l'usure : c'est la profondeur des rainures
+ * qui la dit, et elle ne se voit que de près. Le dessin est donc un gros plan de
+ * la gomme : quatre pavés, trois rainures, et le témoin d'usure au fond. Quand
+ * la gomme descend jusqu'au témoin, les deux arrivent au même niveau et le pneu
+ * est à changer. L'écart entre un pneu neuf et un pneu usé se voit d'un coup.
+ */
 function tyre(id, options) {
   const wear = safePercent(options.wear, 20);
-  const treadHeight = Math.max(2, 13 - wear * 0.1);
-  const wearY = 67 - wear * 0.25;
+
+  const FOND = 70;    // fond des rainures
+  const TEMOIN = 63;  // sommet du témoin d'usure, hauteur fixe
+  const CROWN = 6;    // bombé de la bande de roulement
+
+  // La gomme descend avec l'usure et s'arrête au témoin.
+  const surface = Math.min(TEMOIN, 24 + wear * 0.44);
+  const mort = surface >= TEMOIN - 1;
+  const teinte = mort ? ART_PALETTE.red : ART_PALETTE.gold;
+
+  // Corps de gomme : bombé sur le dessus, épaules arrondies, base au fond.
+  const gomme =
+    `M12 ${(surface + CROWN).toFixed(1)} ` +
+    `Q50 ${surface.toFixed(1)} 88 ${(surface + CROWN).toFixed(1)} ` +
+    `L88 ${FOND} L12 ${FOND} Z`;
+
+  const rainures = [26, 46, 66]
+    .map(
+      (x) =>
+        `<rect x="${x}" y="${(surface - 2).toFixed(1)}" width="8" height="${(
+          FOND - surface + 4
+        ).toFixed(1)}" rx="2" fill="${ART_PALETTE.night}"/>`,
+    )
+    .join("");
+
+  // Le témoin vit au fond de chaque rainure : quand la gomme arrive à son
+  // niveau, les deux affleurent et le pneu est à changer.
+  const temoins = [27.5, 47.5, 67.5]
+    .map(
+      (x) =>
+        `<rect x="${x}" y="${TEMOIN}" width="5" height="${FOND - TEMOIN}" rx="1.2" fill="${teinte}"/>`,
+    )
+    .join("");
+
   const drawing = svgShell(
     id,
     `
-      <ellipse class="pg-contact-shadow" cx="48" cy="90" rx="34" ry="5" fill="url(#${id}-contact)"/>
-      <path class="pg-tyre-shell" fill="${ART_PALETTE.night}" fill-rule="evenodd" d="M48 6A42 42 0 1 1 48 90 42 42 0 0 1 48 6Zm0 18A24 24 0 1 0 48 72 24 24 0 0 0 48 24Z"/>
-      <circle class="pg-tyre-rim" cx="48" cy="48" r="21" fill="url(#${id}-metal)"/>
-      <circle cx="48" cy="48" r="8" fill="${ART_PALETTE.n3}"/>
-      <path class="pg-tyre-spokes" d="M48 28V40M68 48H56M48 68V56M28 48H40M34 34 42 42M62 34 54 42M62 62 54 54M34 62 42 54" fill="none" stroke="${ART_PALETTE.night}" stroke-width="3" stroke-linecap="round"/>
-      <g class="pg-tyre-tread" fill="${ART_PALETTE.accent}">
-        <path d="M23 12 32 8 37 ${8 + treadHeight} 28 ${12 + treadHeight}Z"/>
-        <path d="M10 29 14 20 23 ${24 + treadHeight} 19 ${33 + treadHeight}Z"/>
-        <path d="M7 52 8 42 18 ${42 + treadHeight} 17 ${52 + treadHeight}Z"/>
-        <path d="M14 75 9 66 19 ${62 + treadHeight} 24 ${71 + treadHeight}Z"/>
-        <path d="M73 12 64 8 59 ${8 + treadHeight} 68 ${12 + treadHeight}Z"/>
-        <path d="M86 29 82 20 73 ${24 + treadHeight} 77 ${33 + treadHeight}Z"/>
-        <path d="M89 52 88 42 78 ${42 + treadHeight} 79 ${52 + treadHeight}Z"/>
-        <path d="M82 75 87 66 77 ${62 + treadHeight} 72 ${71 + treadHeight}Z"/>
-      </g>
-      <g class="pg-wear-gauge">
-        <rect x="83" y="23" width="10" height="50" rx="5" fill="${ART_PALETTE.n2}"/>
-        <rect x="85" y="${wearY}" width="6" height="${73 - wearY}" rx="3" fill="${wear >= 80 ? ART_PALETTE.red : ART_PALETTE.gold}"/>
-        <path class="pg-wear-indicator" d="M78 68H97" fill="none" stroke="${ART_PALETTE.red}" stroke-width="3" stroke-linecap="round"/>
-      </g>
-      <path class="pg-focus-edge" d="M22 15A42 42 0 0 1 76 17" fill="none" stroke="${ART_PALETTE.accent}" stroke-width="2" stroke-linecap="round"/>
+      <defs>
+        <clipPath id="${id}-gomme"><path d="${gomme}"/></clipPath>
+      </defs>
+
+      <ellipse class="pg-contact-shadow" cx="50" cy="93" rx="40" ry="5" fill="url(#${id}-contact)"/>
+
+      <!-- flanc et carcasse : ce qui ne s'use pas, identique sur les deux pneus -->
+      <path d="M10 ${FOND} H90 V84 A8 8 0 0 1 82 92 H18 A8 8 0 0 1 10 84 Z"
+        fill="${ART_PALETTE.n2}"/>
+      <path d="M16 ${FOND + 6} H84 M20 ${FOND + 13} H80" stroke="${ART_PALETTE.night}"
+        stroke-width="2" stroke-linecap="round" opacity=".7"/>
+      <path d="M10 ${FOND} H90" stroke="${ART_PALETTE.night}" stroke-width="2.4"/>
+
+      <!-- la gomme restante : c'est la seule chose qui change -->
+      <path d="${gomme}" fill="${ART_PALETTE.n3}"/>
+      <g clip-path="url(#${id}-gomme)">${rainures}</g>
+      <g clip-path="url(#${id}-gomme)">${temoins}</g>
+
+      <!-- la surface, c'est elle qui descend -->
+      <path d="M12 ${(surface + CROWN).toFixed(1)} Q50 ${surface.toFixed(1)} 88 ${(surface + CROWN).toFixed(1)}"
+        fill="none" stroke="${mort ? ART_PALETTE.red : ART_PALETTE.accent}"
+        stroke-width="2.4" stroke-linecap="round"/>
+
+      <!-- ce qu'il reste avant le témoin -->
+      <path d="M94 ${surface.toFixed(1)} V${TEMOIN}" stroke="${teinte}"
+        stroke-width="2" stroke-linecap="round"
+        stroke-dasharray="${mort ? "0 5" : "3 3"}"/>
     `,
     "pg-drawing-tyre",
     { sweep: false },
   );
+
   return {
     drawing,
     labels: `
       <span
         class="pg-object-label pg-wear-label"
-        style="--label-x:84%;--label-y:84%"
+        style="--label-x:80%;--label-y:15%"
       >${wear}%</span>`,
   };
 }
@@ -287,7 +335,7 @@ function rearLight(id, options) {
 function fluidContainer(id, fluid, x, y, width, height, options) {
   const selected = fluid.id === options.fluid;
   const level = selected ? options.level : 72;
-  const innerHeight = Math.max(2, (height - 8) * level / 100);
+  const innerHeight = Math.max(2, ((height - 8) * level) / 100);
   const innerY = y + height - 4 - innerHeight;
   return `
     <g
@@ -390,11 +438,12 @@ export function renderVehicleElement(type, options = {}) {
     level,
   });
   const status = lit ? "allumé" : "éteint";
-  const ariaLabel = type === "tyre-wear"
-    ? `${meta.ariaLabel}, usure ${wear} pour cent`
-    : type === "hood-levels"
-      ? `${meta.ariaLabel}, ${VEHICLE_FLUIDS.find((item) => item.id === fluid).label} à ${level} pour cent`
-      : `${meta.ariaLabel}, feux ${status}`;
+  const ariaLabel =
+    type === "tyre-wear"
+      ? `${meta.ariaLabel}, usure ${wear} pour cent`
+      : type === "hood-levels"
+        ? `${meta.ariaLabel}, ${VEHICLE_FLUIDS.find((item) => item.id === fluid).label} à ${level} pour cent`
+        : `${meta.ariaLabel}, feux ${status}`;
 
   return renderElementFrame({
     type,

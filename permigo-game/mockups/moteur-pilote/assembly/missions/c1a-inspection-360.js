@@ -171,7 +171,7 @@ export const C1A_INSPECTION_360 = {
       "Le pneu arrivé au témoin",
       "Le niveau anormalement bas",
     ],
-    body: "Tu es prêt·e à pratiquer ce tour de contrôle en leçon.",
+    body: "Tu sais quoi regarder avant de monter. Fais-le en vrai à ta prochaine leçon.",
     transfer:
       "À l'arrêt, montre ces quatre contrôles à ton enseignant et explique ce qui te ferait ne pas partir.",
   },
