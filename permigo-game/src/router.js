@@ -88,7 +88,12 @@ const ROUTES = {
     sessions: () => import("@/pages/eleve/session-confirmation.js"),
     quiz: () => import("@/pages/eleve/quiz.js"),
     "flash-quiz": () => import("@/pages/eleve/flash-quiz.js"),
-    trophees: () => import("@/pages/eleve/trophees.js"),
+    // Collection de cartes « Monument Valley » : une carte par compétence,
+    // débloquée à la certification. Swipe deck (#/cartes). Remplace les
+    // trophées (décision Rayan 30/07) — l'ancienne URL #/trophees redirige
+    // vers la collection pour ne casser aucun lien existant.
+    cartes: () => import("@/pages/eleve/collection.js"),
+    trophees: () => import("@/pages/eleve/collection.js"),
     classement: () => import("@/pages/eleve/classement.js"),
     galerie: () => import("@/pages/eleve/galerie.js"),
     recompenses: () => import("@/pages/eleve/recompenses.js"),
@@ -241,7 +246,8 @@ const ROUTE_TITLES = {
   sessions: "Mes séances",
   quiz: "Quiz",
   "flash-quiz": "Quiz éclair",
-  trophees: "Trophées",
+  trophees: "Ma collection",
+  cartes: "Ma collection",
   "trophees-moniteur": "Mes trophées",
   "ligue-semaine": "Ligue de la semaine",
   classement: "Classement",

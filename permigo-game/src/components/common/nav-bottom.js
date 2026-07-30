@@ -101,6 +101,7 @@ const TABS = {
       match: [
         "boutique",
         "galerie",
+        "cartes",
         "trophees",
         "mes-coffres",
         "classement",
