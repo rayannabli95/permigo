@@ -78,8 +78,8 @@ const ACC_I18N = {
     sos_freeze_aria: "Freeze my streak for 50 tokens",
     day_sing: "day",
     day_plur: "days",
-    sitday_aria: "In situation — play today's scene",
-    sitday_title: "In situation",
+    sitday_aria: "Road scenario — play today's scene",
+    sitday_title: "Road scenario",
     sitday_play: "Play",
     permis_aria: "Your virtual licence — {n} of 31 skills",
     permis_label: "Your virtual licence",
@@ -177,8 +177,8 @@ const ACC_I18N = {
     sos_freeze_aria: "تجميد سلسلتي مقابل 50 مقودًا",
     day_sing: "يوم",
     day_plur: "أيام",
-    sitday_aria: "في موقف — العب مشهد اليوم",
-    sitday_title: "في موقف",
+    sitday_aria: "سيناريو الطريق — العب مشهد اليوم",
+    sitday_title: "سيناريو الطريق",
     sitday_play: "العب",
     permis_aria: "رخصتك الافتراضية — {n} من 31 مهارة",
     permis_label: "رخصتك الافتراضية",
@@ -2241,9 +2241,16 @@ function render({
     .acc2-cover-in{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:0 16px 15px}
     .acc2-cover-t{flex:1;min-width:0;text-align:left;font:900 clamp(21px,6.4vw,30px)/1.03 'Archivo','Baloo 2',system-ui,sans-serif;word-spacing:.06em;text-transform:uppercase;color:#fff;text-shadow:0 3px 0 rgba(88,40,200,.55),0 10px 26px rgba(26,9,68,.85)}
     .acc2-cover-btn{flex:0 0 auto;background:#fff;color:#24124f;font:800 15px/1 'Archivo','Baloo 2',system-ui,sans-serif;border-radius:999px;padding:13px 24px;box-shadow:0 8px 18px -8px rgba(10,4,32,.8)}
+    /* Arabe : l'app reste LTR (cf. lang.js) mais une jaquette se lit dans le
+       sens de sa langue → on inverse titre/bouton et on aligne à droite. Le
+       titre est agrandi : à taille égale, l'arabe paraît deux fois plus petit
+       que les capitales latines, et Archivo n'a pas d'arabe (repli système,
+       d'où la graisse 800 plutôt que 900 qui serait faussement grasse). */
+    .acc2-cover.is-rtl .acc2-cover-in{flex-direction:row-reverse}
+    .acc2-cover.is-rtl .acc2-cover-t{text-align:right;font-size:clamp(25px,7.6vw,35px);font-weight:800;line-height:1.35}
     @media (prefers-reduced-motion:reduce){.acc2-cover,.acc2-cover-img{transition:none}}
   </style>
-  <button class="acc2-cover" id="acc-sit-day" type="button"
+  <button class="acc2-cover${getLang() === "ar" ? " is-rtl" : ""}" id="acc-sit-day" type="button"
           aria-label="${escAttr(atR("sitday_aria", "Mise en situation — jouer la scène du jour"))}">
     <img class="acc2-cover-img" src="/skins/cover-mise-en-situation.webp" alt="" aria-hidden="true" loading="lazy" decoding="async">
     <span class="acc2-cover-veil" aria-hidden="true"></span>
