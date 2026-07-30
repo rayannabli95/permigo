@@ -60,7 +60,7 @@ const ACC_I18N = {
     hero_aria: "Get ready for your next lesson",
     hero_kicker: "Your next lesson",
     hero_h1: "Get ready for your lesson",
-    prep_pill_sub: "Chosen for your next hour",
+    prep_pill_sub: "For your next hour",
     prep_pill_aria: "Your next lesson's topic: {t} — tap to change",
     hero_meta: "Be ready in 5 min for your next driving hour.",
     cta_king: "I'm getting ready",
@@ -575,96 +575,116 @@ const STYLE = `<style>
   .acc2-sos-flame img { animation: none; }
 }
 
-/* ════════════════ HERO FOCAL v2 ════════════════════════════════ */
+/* ════════════════ HERO FOCAL v2 — la route de montagne ═════════════
+   Le hero n'est plus un dégradé plat : c'est une ILLUSTRATION plein cadre
+   (route en lacets vers le sommet = la métaphore du parcours), qui change
+   selon l'heure locale — matin / midi / soir. La colonne texte vit dans le
+   ciel vide à gauche, la route et la voiture restent visibles à droite.
+   3 images WebP de ~30 Ko, une seule chargée à la fois. */
 .acc2-hero-v2 {
   position: relative;
-  background: var(--acc-hero-bg);
-  border: 1px solid var(--acc-hero-border);
+  border: 0;
   border-radius: 30px;
   margin: 12px 16px 0;
-  padding: 24px 22px 22px;
-  overflow: visible;
+  padding: 20px;
+  overflow: hidden;
   isolation: isolate;
+  aspect-ratio: 1.24;
+  min-height: 296px;
+  display: flex;
+  align-items: stretch;
+  background: var(--acc-hero-bg);
   box-shadow:
-    0 18px 44px -18px color-mix(in srgb, var(--a) 30%, transparent),
-    0 2px 0 rgba(255,255,255,.7) inset;
-  min-height: 300px;
+    0 20px 46px -20px rgba(22,25,58,.42),
+    0 2px 6px -2px rgba(22,25,58,.18);
 }
-.acc2-hero-halo {
+.acc2-hero-bg {
   position: absolute;
-  right: -12px;
-  top: -16px;
-  width: 220px;
-  height: 220px;
-  border-radius: 50%;
-  background: radial-gradient(circle,
-    color-mix(in srgb, var(--a-lt) 60%, transparent),
-    color-mix(in srgb, var(--a) 20%, transparent) 45%,
-    transparent 70%);
-  filter: blur(6px);
+  inset: 0;
   z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 78% 52%;
   pointer-events: none;
+}
+/* Voile de lisibilité : côté texte seulement, jamais sur la route. */
+.acc2-hero-shade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: var(--acc-hero-shade);
+}
+/* Teintes du texte par scène (l'image est fixe : ces couleurs ne
+   dépendent PAS du thème clair/sombre de l'app, sinon illisible). */
+.acc2-hero--matin, .acc2-hero--midi {
+  --acc-scene-ink: #241f3d;
+  --acc-scene-kick: #6a4a9c;
+  --acc-scene-mu: #4a4166;
+  --acc-scene-sh: 0 1px 0 rgba(255,255,255,.5);
+  --acc-hero-shade: linear-gradient(92deg,
+    rgba(255,255,255,.62) 0%,
+    rgba(255,255,255,.30) 38%,
+    rgba(255,255,255,.02) 62%,
+    transparent 76%);
+}
+.acc2-hero--midi {
+  --acc-scene-kick: #3d5a9e;
+  --acc-hero-shade: linear-gradient(92deg,
+    rgba(255,255,255,.58) 0%,
+    rgba(255,255,255,.26) 40%,
+    rgba(255,255,255,.02) 64%,
+    transparent 78%);
+}
+.acc2-hero--soir {
+  --acc-scene-ink: #fffdf8;
+  --acc-scene-kick: #ffcf8f;
+  --acc-scene-mu: #e4d9ff;
+  --acc-scene-sh: 0 2px 14px rgba(15,12,48,.5);
+  --acc-hero-shade: linear-gradient(92deg,
+    rgba(16,12,44,.62) 0%,
+    rgba(16,12,44,.34) 40%,
+    rgba(16,12,44,.05) 66%,
+    transparent 80%);
 }
 .acc2-hero-v2-txt {
   position: relative;
   z-index: 2;
-  max-width: 66%;
+  width: 63%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 .acc2-hero-kicker {
-  font: 800 12px/1 'Plus Jakarta Sans', sans-serif;
-  letter-spacing: .06em;
-  color: var(--acc-hero-kicker);
+  font: 800 11.5px/1 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: .09em;
+  color: var(--acc-scene-kick);
   text-transform: uppercase;
-  margin-bottom: 6px;
+  margin-bottom: 7px;
+  text-shadow: var(--acc-scene-sh);
 }
 .acc2-hero-h1 {
-  font: 700 40px/1.0 'Fredoka', 'Plus Jakarta Sans', sans-serif;
-  letter-spacing: -.015em;
-  color: var(--acc-hero-ink);
+  font: 700 clamp(27px, 8.2vw, 33px)/.98 'Fredoka', 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -.03em;
+  color: var(--acc-scene-ink);
   margin: 0;
   text-wrap: balance;
+  text-shadow: var(--acc-scene-sh);
 }
 .acc2-hero-meta {
   margin-top: 9px;
   font: 700 12.5px/1.4 'Plus Jakarta Sans', sans-serif;
-  color: var(--acc-hero-mu);
+  color: var(--acc-scene-mu);
+  text-shadow: var(--acc-scene-sh);
 }
-.acc2-hero-floor {
-  position: absolute;
-  right: 18px;
-  bottom: 8px;
-  width: 120px;
-  height: 20px;
-  border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(20,30,15,.26), transparent 70%);
-  filter: blur(4px);
-  z-index: 0;
-  pointer-events: none;
-  animation: heroFloorBreathe 4.5s ease-in-out infinite;
-}
-.acc2-hero-mascot {
-  position: absolute;
-  right: -14px;
-  bottom: -6px;
-  width: 156px;
-  z-index: 1;
-  filter:
-    drop-shadow(0 3px 3px rgba(20,30,15,.18))
-    drop-shadow(0 14px 20px rgba(20,30,15,.22));
-  animation: heroFloatIdle 4.5s ease-in-out infinite;
-  pointer-events: none;
-}
-@keyframes heroFloatIdle {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-8px); }
-}
-@keyframes heroFloorBreathe {
-  0%, 100% { transform: scale(1); opacity: .3; }
-  50%       { transform: scale(.82); opacity: .18; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .acc2-hero-mascot { animation: none; }
-  .acc2-hero-floor  { animation: none; }
+/* Le CTA se colle en bas de la colonne : le regard descend
+   ciel → titre → thème → bouton, dans l'ordre de la décision. */
+.acc2-hero-spacer { flex: 1 1 auto; min-height: 10px; }
+/* Écrans large / desktop : la colonne texte ne doit pas s'étirer */
+@media (min-width: 560px) {
+  .acc2-hero-v2 { aspect-ratio: 1.9; min-height: 300px; }
+  .acc2-hero-v2-txt { width: 46%; }
 }
 
 /* ════════════ CTA ROI — gros bouton violet 3D ══════════════════ */
@@ -709,9 +729,8 @@ const STYLE = `<style>
 }
 
 /* ═══ Hero « Prépare ta prochaine leçon » — gloss & pastille thème ═══ */
-/* Vernis plastique premium : voile clair en haut de la carte + balayage
-   lumineux périodique. Calque séparé avec overflow:hidden (la carte reste
-   overflow:visible pour laisser dépasser la mascotte). */
+/* Balayage lumineux périodique — comme un reflet qui passe sur la carte.
+   Plus de voile clair de base : il délavait l'illustration. */
 .acc2-hero-gloss {
   position: absolute;
   inset: 0;
@@ -719,10 +738,6 @@ const STYLE = `<style>
   overflow: hidden;
   z-index: 1;
   pointer-events: none;
-  background: linear-gradient(168deg,
-    rgba(255,255,255,.42) 0%,
-    rgba(255,255,255,.10) 36%,
-    transparent 55%);
 }
 .acc2-hero-gloss::after {
   content: "";
@@ -755,51 +770,115 @@ const STYLE = `<style>
   background: linear-gradient(180deg, rgba(255,255,255,.32), rgba(255,255,255,.04));
   pointer-events: none;
 }
+/* Pastille du thème : verre dépoli posé SUR l'illustration (elle doit se
+   détacher du ciel sans faire tache blanche opaque). */
 .acc2-prep-pill {
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  margin-top: 16px;
+  margin-top: 13px;
   max-width: 100%;
-  background: var(--su);
-  border: 1.5px solid var(--acc-hero-border);
+  background: rgba(255,255,255,.80);
+  -webkit-backdrop-filter: blur(9px) saturate(1.2);
+  backdrop-filter: blur(9px) saturate(1.2);
+  border: 1.5px solid rgba(255,255,255,.72);
   border-radius: 999px;
-  padding: 8px 14px 8px 10px;
-  color: var(--ink);
-  box-shadow: 0 6px 16px -8px color-mix(in srgb, var(--a) 40%, transparent);
+  padding: 7px 13px 7px 9px;
+  color: #241f3d;
+  box-shadow: 0 8px 20px -10px rgba(22,25,58,.5);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+}
+.acc2-hero--soir .acc2-prep-pill {
+  background: rgba(30,22,68,.58);
+  border-color: rgba(255,255,255,.26);
+  color: #fffdf8;
 }
 .acc2-prep-pill:active { transform: scale(.97); }
 .acc2-prep-pill-ic {
   flex: 0 0 auto;
-  width: 26px; height: 26px;
+  width: 25px; height: 25px;
   display: flex; align-items: center; justify-content: center;
   border-radius: 8px;
-  font-size: 15px;
-  background: color-mix(in srgb, var(--a) 14%, #fff);
+  font-size: 14px;
+  background: rgba(255,255,255,.6);
 }
+.acc2-hero--soir .acc2-prep-pill-ic { background: rgba(255,255,255,.16); }
 .acc2-prep-pill-tl {
   display: flex; flex-direction: column; min-width: 0;
   line-height: 1.15; text-align: left;
 }
 .acc2-prep-pill-tl b {
-  font: 800 13.5px/1.15 'Plus Jakarta Sans', sans-serif;
-  color: var(--ink);
+  font: 800 13px/1.15 'Plus Jakarta Sans', sans-serif;
+  color: inherit;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 .acc2-prep-pill-tl span {
-  font: 600 10.5px/1.2 'Inter', sans-serif;
-  color: var(--acc-hero-mu);
+  font: 600 10px/1.2 'Inter', sans-serif;
+  opacity: .72;
+  /* Une seule ligne : sur 2 lignes la pastille devenait un pavé et écrasait
+     le chevron — le titre de la compétence doit rester la vedette. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
-.acc2-prep-chev { flex: 0 0 auto; color: var(--acc-hero-kicker); font-size: 15px; font-weight: 800; }
-/* CTA « Je me prépare » DANS le hero : occupe la colonne texte, au-dessus de la mascotte */
-.acc2-hero-v2-txt .acc2-cta-king { width: 100%; margin: 16px 0 0; }
+.acc2-prep-chev {
+  flex: 0 0 auto; font-size: 15px; font-weight: 800; opacity: .55;
+  margin-left: 1px;
+}
+/* CTA « Je me prépare » DANS le hero : occupe la colonne texte */
+.acc2-hero-v2-txt .acc2-cta-king {
+  width: 100%;
+  margin: 13px 0 0;
+  padding: 16px;
+  font-size: 16.5px;
+  border-radius: 18px;
+}
+
+/* ── « Appuie ici » : respiration du CTA ────────────────────────────
+   L'élève ne voyait pas que le hero était tapable (retour Rayan). Un
+   grossissement LÉGER et lent (2 %) + un halo qui pulse : ça attire l'œil
+   sans clignoter. transform-origin en bas pour que le bouton « pousse »
+   depuis sa base plastique au lieu de flotter. */
+@keyframes accCtaBreathe {
+  0%, 62%, 100% { transform: scale(1); }
+  76%           { transform: scale(1.022); }
+}
+@keyframes accCtaHalo {
+  0%, 62%, 100% { opacity: 0; transform: scale(.98); }
+  76%           { opacity: .55; transform: scale(1.05); }
+}
+.acc2-hero-v2-txt .acc2-cta-king {
+  transform-origin: 50% 88%;
+  animation: accCtaBreathe 3.4s cubic-bezier(.34,1.4,.64,1) .9s infinite;
+}
+/* Le halo vit dans un calque à part : le bouton est overflow:hidden. */
+.acc2-hero-cta-wrap { position: relative; width: 100%; }
+.acc2-hero-cta-wrap::before {
+  content: "";
+  position: absolute;
+  inset: 2px 0 4px;
+  border-radius: 18px;
+  z-index: 0;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--a) 55%, transparent);
+  filter: blur(11px);
+  animation: accCtaHalo 3.4s cubic-bezier(.34,1.4,.64,1) .9s infinite;
+}
+.acc2-hero-cta-wrap .acc2-cta-king { position: relative; z-index: 1; }
+/* Au doigt, la respiration s'arrête : l'appui reprend la main. */
+.acc2-hero-v2-txt .acc2-cta-king:active {
+  animation: none;
+  transform: translateY(5px);
+}
 @media (prefers-reduced-motion: reduce) {
   .acc2-hero-gloss::after { animation: none; }
+  .acc2-hero-v2-txt .acc2-cta-king { animation: none; }
+  .acc2-hero-cta-wrap::before { animation: none; opacity: 0; }
 }
 
 /* ═══ Carte consolidation compacte (sous le CTA) ═══
@@ -1567,6 +1646,62 @@ function prepHrefFor(code, step) {
   return `#/revision-conduite/${code}`;
 }
 
+// ── Thème déclaré : {code, consolider} ────────────────────────────
+// `consolider` = l'élève a demandé EXPLICITEMENT à retravailler une
+// compétence déjà acquise (« Je consolide encore »). C'est la SEULE raison
+// pour laquelle le hero peut servir une compétence acquise : sans ce drapeau,
+// une compétence certifiée disparaît du hero au rendu suivant.
+//
+// Avant, l'avancée reposait sur un `removeItem` posé dans valider-seul.js :
+// un seul chemin sur les trois qui font passer une compétence en « acquise »
+// (auto-certification, validation moniteur, certification sur un autre
+// appareil) → le hero restait collé sur l'ancienne compétence. L'accueil est
+// maintenant la seule autorité : il RECALCULE au lieu de faire confiance.
+// Format legacy (chaîne nue) relu sans `consolider` → il se répare seul.
+function readPrepTheme() {
+  let raw = null;
+  try {
+    raw = localStorage.getItem(PREP_THEME_KEY);
+  } catch {
+    return null; // stockage indispo → choix auto
+  }
+  if (!raw) return null;
+  if (raw[0] !== "{") return { code: raw, consolider: false };
+  try {
+    const o = JSON.parse(raw);
+    return o?.code ? { code: o.code, consolider: !!o.consolider } : null;
+  } catch {
+    return null;
+  }
+}
+function writePrepTheme(code, consolider = false) {
+  try {
+    localStorage.setItem(PREP_THEME_KEY, JSON.stringify({ code, consolider }));
+  } catch {
+    /* stockage indispo → le hero retombe sur la suggestion auto */
+  }
+}
+function clearPrepTheme() {
+  try {
+    localStorage.removeItem(PREP_THEME_KEY);
+    // Le cycle (angle de travail + startedAt) pointait sur l'ancien thème :
+    // le garder ferait apparaître un débrief « Tu as revu X ? » sur une
+    // compétence que l'élève a déjà certifiée.
+    localStorage.removeItem(PREP_CYCLE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+// Scène du hero selon l'heure LOCALE (l'élève vit en local). 3 illustrations
+// de la même route de montagne : matin, midi, soir.
+function prepScene() {
+  const h = new Date().getHours();
+  if (h >= 5 && h < 11) return "matin";
+  if (h >= 11 && h < 18) return "midi";
+  return "soir";
+}
+
 // Salutation contextuelle. Revisite dans la même journée → message chaleureux.
 const LS_LAST_VISIT = "pg-last-visit";
 function _greeting(awayDays) {
@@ -1783,6 +1918,9 @@ export async function mount(root) {
       prepSuggestions = picks.map((c) => ({
         code: c,
         titre: getFiche(c).titre,
+        // `done` sert au choix manuel : piocher une compétence DÉJÀ acquise
+        // dans la feuille = « je veux la consolider » → le hero la garde.
+        done: validated.has(c),
         reason: targeted.includes(c)
           ? atR("reason_weak", "🎯 D'après tes fautes récentes")
           : !validated.has(c)
@@ -1790,18 +1928,23 @@ export async function mount(root) {
             : atR("reason_consol", "🔁 Acquise — pour consolider"),
       }));
 
+      // Le choix déclaré par l'élève est respecté — SAUF si la compétence est
+      // devenue acquise entre-temps (certifiée par lui ou validée par son
+      // moniteur). Dans ce cas le hero avance tout seul : c'est précisément
+      // ce que « l'ancienne compétence ne s'enlève pas » signalait. Seul
+      // « Je consolide encore » (drapeau `consolider`) la garde au hero.
+      const declared = readPrepTheme();
       let code = null;
-      try {
-        code = localStorage.getItem(PREP_THEME_KEY);
-      } catch {
-        /* stockage indispo → choix auto */
+      if (declared && getFiche(declared.code)) {
+        if (!validated.has(declared.code) || declared.consolider) {
+          code = declared.code;
+        } else {
+          clearPrepTheme(); // acquise → on ne la ressert plus
+        }
+      } else if (declared) {
+        clearPrepTheme(); // code inconnu (fiche supprimée/renommée)
       }
-      // Le choix DÉCLARÉ est toujours respecté — même sur une compétence
-      // déjà acquise (« je consolide encore » doit survivre au rechargement).
-      // L'avancée automatique passe par « Leçon suivante », pas par un reset.
-      if (!code || !getFiche(code)) {
-        code = prepSuggestions[0]?.code || null;
-      }
+      if (!code) code = prepSuggestions[0]?.code || null;
       const fiche = code ? getFiche(code) : null;
       if (fiche) {
         prep = { code, titre: fiche.titre };
@@ -2106,6 +2249,7 @@ function render({
   // variété invisible, zéro encombrement du hero.
   // Repli sans fiche (données indisponibles) : le hub Réviser.
   const _heroTitle = prep?.titre || "Prépare ta prochaine leçon";
+  const _scene = prepScene();
   const _prepCycle = prep ? loadPrepCycle() : null;
   const _prepStep =
     _prepCycle && _prepCycle.code === prep?.code
@@ -2177,8 +2321,10 @@ function render({
   ${renderStreakSos({ streak, streakSt, gemmes, href: _sosHref })}
 
   <!-- ══ HERO FOCAL — Prépare ta leçon (grand) ══ -->
-  <section class="acc2-hero-v2" aria-label="${escAttr(atR("hero_aria", "Prépare ta prochaine leçon"))}">
-    <div class="acc2-hero-halo" aria-hidden="true"></div>
+  <section class="acc2-hero-v2 acc2-hero--${_scene}" aria-label="${escAttr(atR("hero_aria", "Prépare ta prochaine leçon"))}">
+    <img class="acc2-hero-bg" src="/skins/prepare-lecon/${_scene}.webp" alt="" aria-hidden="true"
+         width="1200" height="675" fetchpriority="high" decoding="async">
+    <div class="acc2-hero-shade" aria-hidden="true"></div>
     <div class="acc2-hero-gloss" aria-hidden="true"></div>
     <div class="acc2-hero-v2-txt">
       <p class="acc2-hero-kicker">${at("hero_kicker", "Ta prochaine leçon")}</p>
@@ -2190,19 +2336,20 @@ function render({
               <span class="acc2-prep-pill-ic" aria-hidden="true">🎯</span>
               <span class="acc2-prep-pill-tl">
                 <b id="prep-theme-name">${_rtl(esc(ficheTitre(prep.code, prep.titre)))}</b>
-                <span>${at("prep_pill_sub", "Choisi pour ta prochaine heure")}</span>
+                <span>${at("prep_pill_sub", "Pour ta prochaine heure")}</span>
               </span>
               <span class="acc2-prep-chev" aria-hidden="true">›</span>
             </button>`
           : `<p class="acc2-hero-meta">${at("hero_meta", "Sois prêt·e en 5 min pour ta prochaine heure de conduite.")}</p>`
       }
-      <button class="acc2-cta-king"
-              id="action-cta-btn" type="button" data-href="${escAttr(_heroHref)}">
-        ${at("cta_king", "Je me prépare")} <span class="acc2-cta-arr" aria-hidden="true">→</span>
-      </button>
+      <div class="acc2-hero-spacer" aria-hidden="true"></div>
+      <div class="acc2-hero-cta-wrap">
+        <button class="acc2-cta-king"
+                id="action-cta-btn" type="button" data-href="${escAttr(_heroHref)}">
+          ${at("cta_king", "Je me prépare")} <span class="acc2-cta-arr" aria-hidden="true">→</span>
+        </button>
+      </div>
     </div>
-    <div class="acc2-hero-floor" aria-hidden="true"></div>
-    <img class="acc2-hero-mascot" src="/skins/mascot-point.png" alt="" aria-hidden="true" loading="eager">
   </section>
 
   <!-- Compte-rendu du moniteur (injecté async) — juste sous le hero, au-dessus
@@ -2608,6 +2755,9 @@ function wire(
     track("prep.debrief_keep", { code: prep?.code });
     const cyc = loadPrepCycle();
     if (cyc) savePrepCycle({ ...cyc, answered: true });
+    // Choix explicite : garder ce thème au hero MÊME s'il est déjà certifié.
+    // C'est le seul cas où une compétence acquise reste dans « Prépare ».
+    if (prep?.code) writePrepTheme(prep.code, true);
     _closeDebrief();
     toast(
       atR(
@@ -2624,11 +2774,7 @@ function wire(
     const next =
       (prepSuggestions || []).find((s) => s.code !== prep?.code) || null;
     if (next) {
-      try {
-        localStorage.setItem(PREP_THEME_KEY, next.code);
-      } catch {
-        /* stockage indispo → le hero changera au prochain rendu */
-      }
+      writePrepTheme(next.code, false);
       savePrepCycle({
         code: next.code,
         step: 0,
@@ -2692,7 +2838,8 @@ function openPrepThemeSheet(root, { prep, prepMondes, prepSuggestions }) {
           .map(
             (s, i) => `
           <button class="prep-sheet-item sug${s.code === prep?.code ? " cur" : ""}"
-                  type="button" data-code="${escAttr(s.code)}" data-titre="${escAttr(ficheTitre(s.code, s.titre))}">
+                  type="button" data-code="${escAttr(s.code)}" data-titre="${escAttr(ficheTitre(s.code, s.titre))}"
+                  ${s.done ? 'data-done="1"' : ""}>
             <span class="sug-n" aria-hidden="true">${i + 1}</span>
             <span class="tt">
               <span class="sug-t">${_rtl(esc(ficheTitre(s.code, s.titre)))}</span>
@@ -2714,7 +2861,8 @@ function openPrepThemeSheet(root, { prep, prepMondes, prepSuggestions }) {
               .map(
                 (f) => `
               <button class="prep-sheet-item${f.code === prep?.code ? " cur" : ""}"
-                      type="button" data-code="${escAttr(f.code)}" data-titre="${escAttr(ficheTitre(f.code, f.titre))}">
+                      type="button" data-code="${escAttr(f.code)}" data-titre="${escAttr(ficheTitre(f.code, f.titre))}"
+                      ${f.done ? 'data-done="1"' : ""}>
                 <span class="tt">${_rtl(esc(ficheTitre(f.code, f.titre)))}</span>
                 ${f.done ? `<span class="ok" aria-label="${escAttr(atR("sheet_done_aria", "déjà acquise"))}">✓</span>` : ""}
               </button>`,
@@ -2750,11 +2898,10 @@ function openPrepThemeSheet(root, { prep, prepMondes, prepSuggestions }) {
     btn.addEventListener("click", () => {
       const code = btn.dataset.code;
       const titre = btn.dataset.titre || "";
-      try {
-        localStorage.setItem(PREP_THEME_KEY, code);
-      } catch {
-        /* stockage indispo → le choix vaut pour cette visite via le DOM */
-      }
+      // Choisir une compétence DÉJÀ acquise = demander à la consolider :
+      // elle a le droit de rester au hero. Une non acquise, non : elle
+      // s'effacera d'elle-même dès qu'elle sera certifiée.
+      writePrepTheme(code, btn.dataset.done === "1");
       // Nouveau thème = nouveau cycle : on repart sur la fiche (angle 0)
       savePrepCycle({
         code,
