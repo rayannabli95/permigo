@@ -74,9 +74,9 @@ const BRIDGE_COMPETENCE = {
 
 const UI = {
   lab: {
-    fr: "Laboratoire pédagogique",
-    en: "Learning lab",
-    ar: "مختبر تعليمي",
+    fr: "Le labo de la conduite",
+    en: "The driving lab",
+    ar: "مختبر القيادة",
   },
   step: {
     fr: "Étape",
@@ -298,7 +298,7 @@ function renderHeader() {
     <header class="bridge-header">
       <div class="bridge-brand">
         <span class="bridge-brand-mark" aria-hidden="true"></span>
-        <span>PermiGo <strong>Bridge Lab</strong></span>
+        <span>Le labo de la <strong>conduite</strong></span>
       </div>
       ${renderLanguageSelector()}
     </header>
