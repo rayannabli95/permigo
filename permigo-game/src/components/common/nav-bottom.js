@@ -136,8 +136,10 @@ const STYLE = `
     position: fixed;
     bottom: 0; left: 0; right: 0;
     height: calc(60px + env(safe-area-inset-bottom, 0px));
-    background: var(--su);
-    border-top: 1px solid var(--bo);
+    /* --chrome-bottom : posé par les pages nuit (utils/chrome-night.js) pour
+       que la barre prenne LEUR teinte au lieu de trancher en blanc. */
+    background: var(--chrome-bottom, var(--su));
+    border-top: 1px solid var(--chrome-bo, var(--bo));
     display: flex;
     align-items: stretch;
     z-index: 300;
@@ -155,7 +157,7 @@ const STYLE = `
     gap: 3px;
     padding: 6px 2px 8px;
     cursor: pointer;
-    color: var(--mu2);
+    color: var(--chrome-mu, var(--mu2));
     background: none;
     border: none;
     font-family: inherit;
@@ -167,7 +169,7 @@ const STYLE = `
   /* Actif = icône PLEINE à la couleur du thème + label + halo « limelight »
      (défini plus bas) qui se pose sur l'onglet et glisse de l'un à l'autre. */
   .bn-tab.active {
-    color: var(--a-txt);
+    color: var(--chrome-a, var(--a-txt));
   }
   .bn-tab svg { display: block; flex-shrink: 0; }
   .bn-ico-fill { display: none; }
@@ -219,7 +221,7 @@ const STYLE = `
   .bn-label {
     max-width: 100%;
     text-align: center;
-    font: 700 9.5px/1 'Inter', sans-serif;
+    font: 700 9.5px/1 'Archivo', sans-serif;
     letter-spacing: -.1px;
     white-space: nowrap;
     overflow: hidden;
