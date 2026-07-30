@@ -183,7 +183,7 @@ const STYLE = `
   /* Actif = icône PLEINE à la couleur du thème + label + halo « limelight »
      (défini plus bas) qui se pose sur l'onglet et glisse de l'un à l'autre. */
   .bn-tab.active {
-    color: var(--a);
+    color: var(--a-txt);
   }
   .bn-tab svg { display: block; flex-shrink: 0; }
   .bn-ico-fill { display: none; }

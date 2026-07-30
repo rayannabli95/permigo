@@ -432,7 +432,7 @@ const STYLE = `<style>
   gap: 8px;
   margin: 0 0 14px;
 }
-.cea-section-tit svg { color: var(--a); flex-shrink: 0; }
+.cea-section-tit svg { color: var(--a-txt); flex-shrink: 0; }
 
 /* ── Adresse / accès ── */
 .cea-addr-row {
@@ -445,7 +445,7 @@ const STYLE = `<style>
   border-bottom: 1px solid var(--bo);
   margin-bottom: 12px;
 }
-.cea-addr-row svg { color: var(--a); flex-shrink: 0; }
+.cea-addr-row svg { color: var(--a-txt); flex-shrink: 0; }
 .cea-acces-item {
   display: flex;
   align-items: flex-start;
@@ -638,7 +638,7 @@ const STYLE = `<style>
   border-radius: 20px;
   background: color-mix(in srgb, var(--a) 14%, transparent);
   border: 1.5px solid color-mix(in srgb, var(--a) 28%, transparent);
-  color: var(--a);
+  color: var(--a-txt);
   display: flex; align-items: center; justify-content: center;
   margin: 0 auto 16px;
   position: relative;
@@ -694,7 +694,7 @@ const STYLE = `<style>
   color: var(--ink);
   border: 1px solid var(--bo);
 }
-.cea-lock-perk svg { color: var(--a); }
+.cea-lock-perk svg { color: var(--a-txt); }
 .cea-lock-cta {
   display: inline-flex;
   align-items: center;

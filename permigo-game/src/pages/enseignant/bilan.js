@@ -505,7 +505,7 @@ export async function mount(root, eleveId) {
     root.innerHTML = `${STYLE}<div class="bl"><div class="bl-body"><div class="bl-no-data">
       ${illus("clipboard", { size: 64 })}
       <p>Ouvre le bilan depuis la fiche d’un élève.</p>
-      <a href="#/eleves" style="color:var(--a);font-weight:700;text-decoration:none">Voir mes élèves →</a>
+      <a href="#/eleves" style="color:var(--a-txt);font-weight:700;text-decoration:none">Voir mes élèves →</a>
     </div></div></div>`;
     return;
   }

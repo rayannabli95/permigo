@@ -293,7 +293,7 @@ const STYLE = `<style>
     text-transform: uppercase; letter-spacing: .08em;
     display: inline-flex; align-items: center; gap: 6px;
   }
-  .lr-eng-ti svg { color: var(--a); }
+  .lr-eng-ti svg { color: var(--a-txt); }
   /* Étiquette de niveau d'engagement (grammaire partagée avec la liste) */
   .lr-tier {
     display: inline-flex; align-items: center; gap: 6px;

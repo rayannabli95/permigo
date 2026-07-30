@@ -163,7 +163,7 @@ const STYLE = `<style>
   }
   .ec-mon-tag {
     font: 500 11px/1 'Inter', sans-serif;
-    color: var(--a);
+    color: var(--a-txt);
     background: color-mix(in srgb, var(--a) 12%, transparent);
     padding: 3px 8px;
     border-radius: 99px;
