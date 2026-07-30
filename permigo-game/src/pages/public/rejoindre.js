@@ -33,7 +33,7 @@ const STYLE = `<style>
     font-family: 'Baloo 2', var(--fb), sans-serif;
     -webkit-font-smoothing: antialiased;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    --in:#6c63ff;--in-lt:#8e87ff;--in-dp:#4a3fc9;--in-dk:#372fa3;
+    --in:#5d56d8;--in-lt:#665edb;--in-dp:#4a3fc9;--in-dk:#372fa3;
     --gold:#ffce4d;--gold-dp:#e8a317;--go:#58cc02;--go-dp:#3a8a01;
     --ncard:#2b2160;--sg-ink:#f4f1ff;--ink-soft:#cdc8ec;--ink-mu:#aaa2d8;
     --field:#221a4f;--field-line:#6257a8;--focus:#ffd84d;
@@ -365,8 +365,8 @@ export async function mount(root) {
 
         <style>
           .sg-lang{display:flex;gap:6px;margin-top:2px}
-          .sg-lang-b{flex:1;padding:11px 4px;border-radius:12px;border:1.5px solid var(--bo);background:var(--su);color:var(--mu);font:700 14px/1.1 inherit;cursor:pointer;transition:border-color .15s,color .15s,box-shadow .15s}
-          .sg-lang-b.active{border-color:var(--a);color:var(--a);box-shadow:inset 0 0 0 1px var(--a)}
+          .sg-lang-b{flex:1;padding:11px 4px;border-radius:12px;border:1.5px solid var(--field-line);background:var(--field);color:var(--ink-soft);font:700 14px/1.1 inherit;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.06);transition:border-color .15s,color .15s,background .15s,box-shadow .15s}
+          .sg-lang-b.active{border-color:var(--focus);background:color-mix(in srgb,var(--gold) 10%,var(--field));color:var(--focus);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--gold) 45%,transparent),0 0 0 3px rgba(255,216,77,.1)}
         </style>
         <div class="sg-row">
           <label class="sg-label">Langue · Language · <span lang="ar" dir="rtl">اللغة</span></label>

@@ -38,7 +38,7 @@ const STYLE = `<style>
 .mpw-feat svg{ flex:0 0 18px; margin-top:1px; }
 .mpw-cta{ width:100%; max-width:360px; height:58px; border:none; border-radius:18px; cursor:pointer;
   font-family:'Baloo 2',cursive; font-weight:800; font-size:18px; color:#5a3406;
-  background:linear-gradient(180deg,#ffe9b0 0%,#f6c85f 38%,#f0a93f 72%,#e2951f 100%);
+  background:linear-gradient(180deg,#ffe9b0 0%,#f6c85f 38%,#f0a93f 72%,#e8a12b 100%);
   box-shadow:0 6px 0 #b46a10, 0 12px 20px rgba(180,106,16,.35), inset 0 2px 0 rgba(255,255,255,.7);
   transition:transform .1s ease, box-shadow .1s ease; }
 .mpw-cta:active{ transform:translateY(3px); box-shadow:0 3px 0 #b46a10, inset 0 2px 0 rgba(255,255,255,.7); }

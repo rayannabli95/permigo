@@ -530,7 +530,7 @@ const STYLE = `<style>
 .st-modal-cancel:active { background: var(--bg2); }
 .st-modal-confirm {
   flex: 1; padding: 14px;
-  background: var(--rd); border: none; border-radius: 12px;
+  background: var(--rdx); border: none; border-radius: 12px;
   font: 700 14px/1 'Plus Jakarta Sans', sans-serif; color: #fff;
   cursor: pointer; min-height: 48px; font-family: inherit;
   transition: background .12s, opacity .12s;

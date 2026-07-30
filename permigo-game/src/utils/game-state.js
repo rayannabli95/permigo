@@ -610,32 +610,33 @@ export function purchaseItem(itemId, cost) {
 // Mêmes 4 tokens que utils/accent.js (--a/--adk/--a-lt/--a-ink) : un thème
 // boutique recolore TOUTE l'app, sans reste violet sur les éléments qui
 // utilisent --a-lt ou --a-ink. `ink` = texte posé sur l'accent (contraste AA).
+// Les variantes restent assez profondes pour une encre blanche uniforme sur CTA.
 const THEME_COLORS = {
   rose: {
-    a: "#ec4899",
-    adk: "#be185d",
-    lt: "#fb7bb8",
+    a: "#b83275",
+    adk: "#98205c",
+    lt: "#c13c80",
     ink: "#ffffff",
     ap: "rgba(236,72,153,.09)",
   },
   vert: {
-    a: "#10b981",
-    adk: "#047857",
-    lt: "#34d399",
-    ink: "#04281d",
+    a: "#0a6e50",
+    adk: "#065f46",
+    lt: "#0c7858",
+    ink: "#ffffff",
     ap: "rgba(16,185,129,.09)",
   },
   cyan: {
-    a: "#0ea5e9",
-    adk: "#0369a1",
-    lt: "#38bdf8",
-    ink: "#062c3f",
+    a: "#0b6e99",
+    adk: "#075985",
+    lt: "#0b719f",
+    ink: "#ffffff",
     ap: "rgba(14,165,233,.09)",
   },
   rouge: {
-    a: "#ef4444",
-    adk: "#b91c1c",
-    lt: "#f87171",
+    a: "#c53030",
+    adk: "#9b1c1c",
+    lt: "#d13b3b",
     ink: "#ffffff",
     ap: "rgba(239,68,68,.09)",
   },

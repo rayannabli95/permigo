@@ -277,7 +277,7 @@ function badgeMarkup(def, size) {
 const STYLE = `<style>
 .rec {
   --gold-1:#ffe9a8; --gold-2:#ffd24a; --gold-3:#ff9c1c; --gold-deep:#c87d12; --gold-ink:#7a5510;
-  --go-1:#7ee83a; --go-2:#58cc02; --go-3:#46a302; --go-deep:#357c00;
+  --go-1:#338316; --go-2:#2f7d12; --go-3:#276a0d; --go-deep:#1f5608;
   max-width: 480px; margin: 0 auto; padding: 14px 15px 32px;
   font-family: 'Nunito', system-ui, sans-serif; color: var(--ink);
   background:
@@ -372,7 +372,7 @@ const STYLE = `<style>
 .rec-claim-n {
   flex: none; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; display: grid; place-items: center;
   font: 800 11.5px/1 'Baloo 2', cursive; color: #fff;
-  background: linear-gradient(180deg,#ff8a8a,#f43f5e 60%,#d92c4b); border: 1px solid rgba(255,255,255,.5);
+  background: linear-gradient(180deg,#d13f69,#b72d56 60%,#98205c); border: 1px solid rgba(255,255,255,.5);
 }
 
 .rec-hero-cap { display: flex; align-items: flex-start; gap: 7px; margin-top: 12px; font-size: 10.5px; font-weight: 700; color: var(--mu2); }

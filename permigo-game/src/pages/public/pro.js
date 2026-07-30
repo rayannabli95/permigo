@@ -16,7 +16,7 @@ const TEL = "06 02 12 53 87";
 
 const STYLE = `<style>
   .pro {
-    --a:#6c63ff; --a-lt:#8e87ff; --a-dk:#4a3fc9;
+    --a:#5d56d8; --a-lt:#665edb; --a-dk:#4a3fc9;
     --gold:#ffce4d; --gold-dp:#e8a317;
     --ink:#f4f1ff; --ink-soft:#cdc8ec; --ink-mu:#a49dd6;
     --field:#221a4f; --field-line:#544a97;

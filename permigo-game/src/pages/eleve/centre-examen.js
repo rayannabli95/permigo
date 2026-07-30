@@ -649,7 +649,7 @@ const STYLE = `<style>
   top: -6px; right: -6px;
   width: 20px; height: 20px;
   border-radius: 50%;
-  background: var(--am);
+  background: var(--amx);
   display: flex; align-items: center; justify-content: center;
   font: 900 9px/1 'Inter', sans-serif;
   color: #fff;
@@ -758,7 +758,7 @@ const STYLE = `<style>
   cursor: pointer;
   font: 800 16px/1.1 'Plus Jakarta Sans', sans-serif;
   letter-spacing: -.01em;
-  color: #fff;
+  color: #3a2600;
   /* Gradient or/ambre premium cohérent avec le style cinématique */
   background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
   box-shadow: 0 6px 24px rgba(245, 158, 11, 0.40);

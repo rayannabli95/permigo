@@ -174,7 +174,7 @@ export const ARENE_CSS = `<style>
 .arn-sc{ flex-shrink:0; font:800 15px/1 'Plus Jakarta Sans',sans-serif; font-variant-numeric:tabular-nums; letter-spacing:-.3px; text-align:right; }
 .arn-sc .of{ font:700 11px/1 'Inter',sans-serif; color:var(--amute); }
 .arn-chip{ flex-shrink:0; display:inline-flex; align-items:center; gap:3px; font:700 11px/1 'Inter',sans-serif; padding:4px 8px; border-radius:999px; }
-.arn-chip.flame{ color:#fff; background:color-mix(in srgb,#f59e0b 88%, var(--acc)); }
+.arn-chip.flame{ color:#3a2600; background:color-mix(in srgb,#f59e0b 88%, var(--acc)); }
 .arn-chip.flame.off{ color:var(--amute); background:rgba(255,255,255,.07); }
 
 /* ── Ligne « Toi » épinglée ── */

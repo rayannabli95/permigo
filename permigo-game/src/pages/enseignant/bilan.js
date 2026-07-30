@@ -114,7 +114,7 @@ const STYLE = `<style>
   border: none;
   border-radius: var(--ens-pill, 999px);
   font: 700 13px/1 var(--ens-body, 'Inter'), sans-serif;
-  color: #fff;
+  color: var(--ens-ink-go, #07150c);
   cursor: pointer;
   min-height: 44px;
   flex-shrink: 0;

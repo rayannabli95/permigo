@@ -289,8 +289,8 @@ const STYLE = `
   border: 0; border-radius: 16px; cursor: pointer;
   font: 800 15px/1 var(--fd, system-ui), sans-serif;
   letter-spacing: .05em; text-transform: uppercase;
-  color: #06070d;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--cu-accent) 72%, #fff) 0%, var(--cu-accent) 55%, color-mix(in srgb, var(--cu-accent) 80%, #000) 100%);
+  color: #fff;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--cu-accent) 60%, #000) 0%, color-mix(in srgb, var(--cu-accent) 55%, #000) 55%, color-mix(in srgb, var(--cu-accent) 48%, #000) 100%);
   box-shadow:
     0 14px 34px color-mix(in srgb, var(--cu-accent) 42%, transparent),
     0 2px 0 color-mix(in srgb, var(--cu-accent) 85%, #000),

@@ -414,7 +414,7 @@ export async function route(root, me) {
     if (reloadOnceOnChunkError(e)) return;
     root.innerHTML = `<div class="err" style="padding:32px;text-align:center;color:#64748b">
       <p>Cette page n'a pas pu être chargée.</p>
-      <button onclick="location.reload()" style="margin-top:12px;padding:12px 24px;border:0;background:#6366f1;color:#fff;border-radius:12px;cursor:pointer">Recharger</button>
+      <button onclick="location.reload()" style="margin-top:12px;padding:12px 24px;border:0;background:#5b5edb;color:#fff;border-radius:12px;cursor:pointer">Recharger</button>
     </div>`;
   }
 }

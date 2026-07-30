@@ -43,10 +43,10 @@ const STYLE = `
   /* Variants DEFAULT (solide) */
   .bdg.v-primary       { background: var(--a); color: var(--a-ink); }
   .bdg.v-secondary     { background: var(--bg3); color: var(--ink); }
-  .bdg.v-success       { background: var(--gr); color: #fff; }
-  .bdg.v-warning       { background: var(--am); color: #fff; }
-  .bdg.v-info          { background: var(--pu); color: #fff; }
-  .bdg.v-destructive   { background: var(--rd); color: #fff; }
+  .bdg.v-success       { background: var(--grdk); color: #fff; }
+  .bdg.v-warning       { background: var(--amx); color: #fff; }
+  .bdg.v-info          { background: var(--puk); color: #fff; }
+  .bdg.v-destructive   { background: var(--rdx); color: #fff; }
   .bdg.v-outline       { background: transparent; border-color: var(--bo); color: var(--mu3); }
 
   /* Appearance LIGHT (pastel doux) */

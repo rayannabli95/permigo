@@ -175,7 +175,7 @@ const STYLE = `<style>
     display: block;
     height: 100%;
     border-radius: 6px;
-    background: linear-gradient(90deg, var(--a-lt, #6d6bff), var(--a));
+    background: linear-gradient(90deg, var(--a-lt, #625ee8), var(--a));
   }
   .st-gauge-n {
     flex-shrink: 0;
@@ -264,7 +264,7 @@ const STYLE = `<style>
   .st-col-bar {
     width: 22px;
     border-radius: 4px 4px 0 0;
-    background: linear-gradient(180deg, var(--a-lt, #6d6bff), var(--a));
+    background: linear-gradient(180deg, var(--a-lt, #625ee8), var(--a));
   }
   .st-col-base {
     width: 22px;
@@ -292,7 +292,7 @@ const STYLE = `<style>
   /* ── Bloc 5 : carte réussite (seul bloc accent) ── */
   .st-proof {
     position: relative;
-    background: linear-gradient(150deg, var(--a), var(--a-lt, #6d6bff) 130%);
+    background: linear-gradient(150deg, var(--a), var(--a-lt, #625ee8) 130%);
     border-radius: 20px;
     padding: 18px 18px 16px;
     color: var(--a-ink, #fff);
@@ -365,7 +365,7 @@ const STYLE = `<style>
     background: color-mix(in srgb, var(--a) 22%, var(--su));
     min-width: 3px;
   }
-  .st-pf-bar.full { background: linear-gradient(90deg, var(--a-lt, #6d6bff), var(--a)); }
+  .st-pf-bar.full { background: linear-gradient(90deg, var(--a-lt, #625ee8), var(--a)); }
   .st-pf-n {
     flex-shrink: 0;
     font: 800 12px/1 var(--ens-body, 'Inter', sans-serif);

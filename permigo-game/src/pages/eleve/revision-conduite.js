@@ -421,8 +421,8 @@ const STYLE = `<style>
 
 .rvc-go { position:sticky; bottom: calc(16px + env(safe-area-inset-bottom)); width:100%;
   border:0; border-radius:14px; padding:15px; cursor:pointer; margin-top:18px;
-  font:800 16px 'Plus Jakarta Sans',sans-serif; color:#fff; background:var(--a,#6366f1);
-  box-shadow:0 8px 20px color-mix(in srgb, var(--a,#6366f1) 40%, transparent); }
+  font:800 16px 'Plus Jakarta Sans',sans-serif; color:#fff; background:var(--a,#5b5edb);
+  box-shadow:0 8px 20px color-mix(in srgb, var(--a,#5b5edb) 40%, transparent); }
 .rvc-go:active { transform: scale(0.98); }
 
 /* Flashcards */
@@ -433,7 +433,7 @@ const STYLE = `<style>
 .rvc-done-t { font:800 22px 'Plus Jakarta Sans',sans-serif; margin:10px 0 4px; }
 .rvc-ohint { color:var(--mu,#64748b); font-size:13px; margin:2px 0 14px; }
 .rvc-oslot { display:flex; align-items:center; gap:10px; padding:11px 12px; border-radius:12px; margin-bottom:8px; background: color-mix(in srgb,#10b981 12%, transparent); font-size:14px; line-height:1.35; animation: rvcrise .25s cubic-bezier(.23,1,.32,1); }
-.rvc-onum { width:22px; height:22px; border-radius:50%; background:#10b981; color:#fff; font:700 12px 'IBM Plex Mono',monospace; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.rvc-onum { width:22px; height:22px; border-radius:50%; background:#047857; color:#fff; font:700 12px 'IBM Plex Mono',monospace; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 .rvc-opool { display:flex; flex-direction:column; gap:8px; margin-top:6px; }
 .rvc-ochip { width:100%; text-align:left; border:1px solid var(--bo3,#e2e8f0); background:var(--su,#fff); color:var(--ink); border-radius:12px; padding:12px; cursor:pointer; font:600 14px/1.35 'Inter',sans-serif; transition: transform .12s ease-out; }
 .rvc-ochip:active { transform: scale(0.985); }

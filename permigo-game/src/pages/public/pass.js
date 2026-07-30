@@ -486,7 +486,7 @@ const STYLE = `<style>
     min-height: 100dvh;
     font-family: 'Baloo 2', var(--fb), sans-serif;
     -webkit-font-smoothing: antialiased;
-    --in:#6c63ff;--in-lt:#8e87ff;--in-dp:#4a3fc9;--in-dk:#372fa3;
+    --in:#5d56d8;--in-lt:#665edb;--in-dp:#4a3fc9;--in-dk:#372fa3;
     --gold:#ffce4d;--gold-dp:#e8a317;--go:#58cc02;--eco:#ffe94d;
     --pv-ink:#f4f1ff;--ink-soft:#cdc8ec;--ink-mu:#aaa2d8;--ink-dim:#8b7fc4;
     --tik-ink:#3a2a05;--tik-mu:#6b520f;--tik-lbl:#8a6a17;
@@ -724,7 +724,7 @@ const STYLE = `<style>
   .pv-pass-tag {
     position: absolute; top: -11px; left: 16px; z-index: 1;
     font: 800 10.5px/1 Inter, sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #fff;
-    background: #e2513f; padding: 7px 12px; border-radius: 99px; box-shadow: 0 4px 10px rgba(0,0,0,.35);
+    background: #c64133; padding: 7px 12px; border-radius: 99px; box-shadow: 0 4px 10px rgba(0,0,0,.35);
   }
   .pv-err { font: 700 13px/1.4 'Baloo 2', sans-serif; color: #ffb4a8; text-align: center; margin: 4px 0 0; display: none; }
   .pv-err.on { display: block; }

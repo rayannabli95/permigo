@@ -94,7 +94,7 @@ export function showLevelUp({ level, onClose } = {}) {
       .lvlup__sub{position:relative;font:500 14px/1.5 'Inter',system-ui,sans-serif;
         color:rgba(255,255,255,.7);max-width:300px;margin-top:8px}
       .lvlup__cta{position:relative;margin-top:26px;padding:15px 40px;border:0;border-radius:16px;
-        background:linear-gradient(180deg,#a78bfa,#7c4dff);color:#fff;cursor:pointer;
+        background:linear-gradient(180deg,#7652d1,#7c4dff);color:#fff;cursor:pointer;
         font:800 15px 'Plus Jakarta Sans',system-ui,sans-serif;letter-spacing:-.01em;
         box-shadow:0 8px 22px -6px rgba(124,77,255,.6),0 2px 0 rgba(0,0,0,.18);
         animation:lvlupPop .4s cubic-bezier(.34,1.56,.64,1) both .3s;-webkit-tap-highlight-color:transparent}

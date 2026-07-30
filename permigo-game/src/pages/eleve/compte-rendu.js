@@ -226,7 +226,7 @@ const STYLE = `<style>
   border: none; border-radius: 18px; cursor: pointer;
   font: 800 17px/1 'Plus Jakarta Sans', sans-serif; color: #fff;
   background: linear-gradient(180deg,
-    color-mix(in srgb, var(--a) 88%, #fff) 0%,
+    var(--a-lt) 0%,
     var(--a) 50%,
     var(--adk) 100%);
   box-shadow: 0 6px 0 var(--adk), 0 14px 26px -6px color-mix(in srgb, var(--a) 42%, transparent);

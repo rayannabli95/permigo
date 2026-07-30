@@ -164,7 +164,7 @@ export function openProvenanceEditor({ eleveId, prenom, current, onSaved }) {
       .pv-actions { display: flex; gap: 10px; }
       .pv-btn { border: 0; border-radius: 14px; font: 700 15px var(--ens-display, 'Fredoka'), 'Inter', sans-serif;
         padding: 14px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-      .pv-btn-primary { flex: 1; background: linear-gradient(180deg, var(--a-lt, #818cf8), var(--a));
+      .pv-btn-primary { flex: 1; background: linear-gradient(180deg, var(--a-lt, #626bd9), var(--a));
         color: #fff; box-shadow: 0 6px 16px -6px var(--a), inset 0 1px 0 rgba(255,255,255,.3); }
       .pv-btn-primary:disabled { opacity: .5; cursor: default; box-shadow: none; }
       .pv-btn-ghost { flex: 0 0 auto; background: var(--su2); color: var(--mu); border: 1px solid var(--bo); padding: 14px 18px; }

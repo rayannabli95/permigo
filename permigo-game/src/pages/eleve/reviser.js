@@ -153,7 +153,7 @@ const STYLE = `<style>
 .rv4-hsub { margin:7px 0 0; font:700 14px/1.35 'Nunito',sans-serif; color:#b3aede; }
 .rv4-cta { display:flex; align-items:center; justify-content:center; gap:9px; width:100%; margin-top:15px;
   padding:15px; border:0; border-radius:16px; cursor:pointer;
-  background:linear-gradient(180deg,#8e87ff,#6c63ff);
+  background:linear-gradient(180deg,#665edb,#5d56d8);
   box-shadow:0 4px 0 #4a3fc9, 0 12px 22px -10px rgba(74,63,201,.9);
   color:#fff; font:800 16.5px/1 'Plus Jakarta Sans',sans-serif; letter-spacing:-.01em;
   transition:transform .1s ease, box-shadow .1s ease; }

@@ -56,7 +56,7 @@ const STYLE = `<style>
 
 /* ════════════ VARIANTE MONITEUR — indigo confiant ════════════ */
 .pcc-card.is-ens {
-  background: linear-gradient(150deg, #4f46e5, #6d6bff 58%, #8b5cf6);
+  background: linear-gradient(150deg, #4f46e5, #625ee8 58%, #7750db);
   box-shadow: 0 18px 44px -16px rgba(79,70,229,.6);
   padding: 18px 18px 16px;
   --pcc-fg: #fff;

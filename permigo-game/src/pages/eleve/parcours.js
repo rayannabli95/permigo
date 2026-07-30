@@ -569,7 +569,7 @@ const STYLE = `<style>
   flex-shrink: 0;
   width: 32px; height: 32px;
   border-radius: var(--r);
-  background: var(--am);
+  background: var(--amx);
   color: #fff;
   display: grid;
   place-items: center;
@@ -611,7 +611,7 @@ const STYLE = `<style>
   place-items: center;
   flex-shrink: 0;
 }
-.fiche-status.done   .fiche-status-ico { background: var(--gr); color: #fff; }
+.fiche-status.done   .fiche-status-ico { background: var(--grdk); color: #fff; }
 .fiche-status.next   .fiche-status-ico { background: var(--wc, var(--a)); color: #fff; }
 .fiche-status.locked .fiche-status-ico { background: var(--bo4); color: #fff; }
 .fiche-status-body { flex: 1; }
@@ -712,7 +712,7 @@ const STYLE = `<style>
 .fiche-status.done   { background: rgba(62,224,126,.1) !important; }
 .fiche-status.next   { background: rgba(124,77,255,.16) !important; }
 .fiche-status.locked { background: rgba(255,255,255,.05) !important; }
-.fiche-status.done   .fiche-status-ico { background: linear-gradient(160deg,#3ee07e,#178246); color:#fff; }
+.fiche-status.done   .fiche-status-ico { background: linear-gradient(160deg,#0c7858,#065f46); color:#fff; }
 .fiche-status.next   .fiche-status-ico { background: linear-gradient(160deg,#fff0bf,#ffd24a 50%,#ff9c1c); color:#3a1c00; }
 .fiche-status.locked .fiche-status-ico { background: rgba(255,255,255,.12); color:#cdbff5; }
 .fiche-status-title { color: #fff !important; }
@@ -751,7 +751,7 @@ const STYLE = `<style>
    validée « Variante A » : violet = j'avance, or = je revois (état acquis). */
 .fiche-quiz-cta.v {
   color: #fff;
-  background: linear-gradient(180deg, #a89bff 0%, #7c4dff 48%, #5b50e0 100%);
+  background: linear-gradient(180deg, #7652d1 0%, #7c4dff 48%, #5b50e0 100%);
   box-shadow:
     0 6px 0 #3a30a8,
     0 14px 26px -8px rgba(124,77,255,.7),
@@ -1091,7 +1091,7 @@ const STYLE = `<style>
   transition: background .15s, color .15s, transform .12s;
 }
 .prc-cv-th-btn svg { width: 15px; height: 15px; }
-.prc-cv-th-btn.on { background: linear-gradient(180deg, #8b5cf6, #7c3aed); color: #fff; }
+.prc-cv-th-btn.on { background: linear-gradient(180deg, #7750db, #6d28d9); color: #fff; }
 .prc-cv-th-btn:not(.on):active { transform: scale(.95); }
 .prc-cv-th-btn:focus-visible { outline: 2px solid var(--cv-gold); outline-offset: 2px; }
 /* Version claire du sélecteur */

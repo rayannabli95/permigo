@@ -680,11 +680,10 @@ const STYLE = `<style>
   padding: 18px;
   font: 800 18px/1 'Plus Jakarta Sans', sans-serif;
   color: #fff;
-  /* Dégradé MÊME TEINTE (reflet clair → accent → accent foncé) : on garde le
-     relief plastique 3D sans virer de couleur. L'ancien --a-lt → --a faisait
-     lavande-clair → bleu-violet → lecture « bicolore ». */
+  /* Les trois faces de la palette restent dans la même teinte et gardent
+     chacune un contraste AA avec l'encre blanche. */
   background: linear-gradient(180deg,
-    color-mix(in srgb, var(--a) 88%, #fff) 0%,
+    var(--a-lt) 0%,
     var(--a) 50%,
     var(--adk) 100%);
   box-shadow: var(--acc-cta-shadow);
@@ -877,7 +876,7 @@ const STYLE = `<style>
   border: 0;
   color: #fff;
   background: linear-gradient(180deg,
-    color-mix(in srgb, var(--a) 88%, #fff) 0%,
+    var(--a-lt) 0%,
     var(--a) 50%,
     var(--adk) 100%);
   box-shadow: 0 3px 0 var(--adk);
@@ -993,7 +992,7 @@ const STYLE = `<style>
   align-items: center;
   justify-content: center;
   border-radius: 10px;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--a) 85%, #fff), var(--a));
+  background: linear-gradient(180deg, var(--a-lt), var(--a));
   color: #fff;
   font: 800 14px/1 'Plus Jakarta Sans', sans-serif;
   box-shadow: 0 2px 0 var(--adk);

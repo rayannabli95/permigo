@@ -62,7 +62,7 @@ const STYLE = `<style>
 .tr2-hero-wrap {
   position: relative; overflow: hidden;
   padding: 20px 20px 32px;
-  background: linear-gradient(150deg, #4f46e5, #6d6bff 60%, #8b5cf6);
+  background: linear-gradient(150deg, #4f46e5, #625ee8 60%, #7750db);
   color: #fff;
   isolation: isolate;
 }
@@ -112,8 +112,8 @@ const STYLE = `<style>
 .tr2-cta-btn {
   flex-shrink: 0; padding: 12px 16px; min-height: 48px;
   border: 0; border-radius: var(--ens-r, 16px);
-  background: linear-gradient(180deg, #6d6bff, #4f46e5);
-  color: var(--ens-ink-go, #07150c);
+  background: linear-gradient(180deg, #625ee8, #4f46e5);
+  color: #fff;
   font: 700 13px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif; cursor: pointer;
   box-shadow: 0 4px 0 0 color-mix(in srgb, #4f46e5 60%, #000), var(--ens-shadow, var(--s0));
   white-space: nowrap;

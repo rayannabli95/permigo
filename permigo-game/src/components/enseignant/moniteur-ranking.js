@@ -59,7 +59,7 @@ function ensureStyle() {
     font: 800 16px/1 'Plus Jakarta Sans', sans-serif;
     flex-shrink: 0;
   }
-  .mr-rank-badge.rank-1 { background: linear-gradient(135deg,var(--am),var(--amk)); color:#fff; }
+  .mr-rank-badge.rank-1 { background: linear-gradient(135deg,var(--am),var(--amk)); color:#3a2600; }
   .mr-rank-badge.rank-2 { background: linear-gradient(135deg,var(--mu2),var(--mu3)); color:#fff; }
   .mr-rank-badge.rank-3 { background: linear-gradient(135deg,var(--amx),#92400e); color:#fff; }
   .mr-rank-badge.rank-other { background: color-mix(in srgb, var(--a) 10%, transparent); color: var(--a-txt); border:1.5px solid color-mix(in srgb, var(--a) 20%, transparent); }

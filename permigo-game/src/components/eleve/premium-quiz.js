@@ -191,7 +191,7 @@ body.pq-immersive { background: #0c0a26 !important; }
   box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 3px 0 #110d35; }
 .pq-opt.good { background:linear-gradient(180deg,#ffd24a,#ff9c1c); border-color:rgba(255,255,255,.35); color:#3a1d00;
   box-shadow:0 5px 0 #b85e00, 0 10px 20px rgba(255,140,30,.4), inset 0 1px 0 rgba(255,255,255,.65); }
-.pq-opt.good .pq-opt-k { background:linear-gradient(180deg,#fff,#ffe7a8); color:#c46a00; box-shadow:inset 0 1px 0 rgba(255,255,255,.9), 0 3px 0 #c46a00; }
+.pq-opt.good .pq-opt-k { background:linear-gradient(180deg,#fff,#ffe7a8); color:#8f4900; box-shadow:inset 0 1px 0 rgba(255,255,255,.9), 0 3px 0 #8f4900; }
 .pq-opt.bad { background:linear-gradient(180deg,#4a2740,#34203a); border-color:rgba(255,160,90,.3); color:#ffd9c2; box-shadow:0 5px 0 #1f1430, inset 0 1px 0 rgba(255,255,255,.12); }
 .pq-opt.bad .pq-opt-k { background:linear-gradient(180deg,#5a3450,#3a2440); color:#ffb890; }
 .pq-opt.dim { opacity:.42; }

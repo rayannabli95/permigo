@@ -211,7 +211,7 @@ export function openInviteEleveModal(me) {
         box-shadow:0 2px 8px 0 color-mix(in srgb, var(--adk) 35%, transparent), 0 1.5px 0 0 rgba(255,255,255,.28) inset, 0 -2px 6px 0 color-mix(in srgb, var(--adk) 50%, transparent) inset;
       }
       .me-inv-act.share:hover { filter:brightness(1.04); }
-      .me-inv-act.wa { color:#fff; background:#25D366; box-shadow:0 2px 8px 0 rgba(37,211,102,.3); }
+      .me-inv-act.wa { color:#0a3d1c; background:#25D366; box-shadow:0 2px 8px 0 rgba(37,211,102,.3); }
       .me-inv-act.copy2 { color:var(--ink); background:var(--bg2,var(--bg4)); border:1px solid var(--bo); }
       .me-inv-act.copy2.copied { color:var(--grd); background:rgba(16,185,129,.1); border-color:rgba(16,185,129,.2); }
       .me-inv-err-msg {

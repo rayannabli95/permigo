@@ -288,7 +288,7 @@ const SHEET_STYLE = `
 .trsh-share {
   flex: 1; padding: 14px; min-height: 50px; border: 0;
   border-radius: var(--ens-r, 16px);
-  background: linear-gradient(180deg, #6d6bff, #4f46e5);
+  background: linear-gradient(180deg, #625ee8, #4f46e5);
   color: #fff;
   font: 700 14px/1 var(--ens-body, 'Plus Jakarta Sans'), sans-serif;
   cursor: pointer;

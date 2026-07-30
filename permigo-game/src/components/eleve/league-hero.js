@@ -249,7 +249,7 @@ export const LEAGUE_HERO_CSS = `
 .lgh-of{font:800 15px/1.2 'Baloo 2','Plus Jakarta Sans',sans-serif;color:#f7f5ff;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lgh-go{flex:0 0 auto;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  color:#fff;background:linear-gradient(180deg,color-mix(in srgb, var(--a) 85%, #fff) 0%,var(--a) 50%,var(--adk) 100%);
+  color:#fff;background:linear-gradient(180deg,var(--a-lt) 0%,var(--a) 50%,var(--adk) 100%);
   box-shadow:0 4px 12px -2px color-mix(in srgb,var(--a) 55%,transparent),inset 0 1px 0 rgba(255,255,255,.45)}
 .lgh-go svg{width:18px;height:18px}
 

@@ -126,7 +126,7 @@ function _ensureCss() {
   .pr-cta {
     position: relative; z-index: 1;
     padding: 16px 44px; border: 0; border-radius: 16px;
-    background: linear-gradient(180deg, #a78bfa, #7c4dff);
+    background: linear-gradient(180deg, #7652d1, #7c4dff);
     color: #fff; cursor: pointer; min-height: 56px;
     font: 800 16px 'Plus Jakarta Sans', system-ui, sans-serif;
     letter-spacing: -.01em;

@@ -7,55 +7,56 @@
 const KEY = "permigo-accent";
 
 // ink = couleur du texte/icône POSÉ sur l'accent (contraste).
-// Teintes claires (vert/orange/cyan) → ink foncé ; teintes soutenues → blanc.
+// Les accents d'action restent assez profonds pour recevoir une encre blanche :
+// même grammaire visuelle sur les CTA, sans libellés presque noirs sur couleur vive.
 export const ACCENTS = [
   {
     // Violet « Arène 3D » — DA élève par défaut, raccord avec le login/quiz.
     id: "violet",
     name: "Violet PermiGo",
-    a: "#6c63ff",
+    a: "#5d56d8",
     adk: "#4a3fc9",
-    lt: "#8e87ff",
+    lt: "#665edb",
     ink: "#ffffff",
   },
   {
     id: "vert",
     name: "Vert Duo",
-    a: "#58CC02",
-    adk: "#46A302",
-    lt: "#6fe016",
-    ink: "#1a2800",
+    a: "#2f7d12",
+    adk: "#276a0d",
+    lt: "#338316",
+    ink: "#ffffff",
   },
   {
     id: "bleu",
     name: "Bleu",
-    a: "#2f80ed",
-    adk: "#1b5fc0",
-    lt: "#5aa0ff",
+    a: "#1d5fba",
+    adk: "#164a96",
+    lt: "#2269c7",
     ink: "#ffffff",
   },
   {
     id: "cyan",
     name: "Cyan",
-    a: "#06b6d4",
-    adk: "#0e7490",
-    lt: "#3ddcf0",
-    ink: "#042a30",
+    a: "#0b7188",
+    adk: "#075a6c",
+    lt: "#087f9b",
+    ink: "#ffffff",
   },
   {
     id: "orange",
     name: "Orange",
-    a: "#f97316",
-    adk: "#c2540a",
-    lt: "#ffa24d",
-    ink: "#2a1400",
+    a: "#b8430c",
+    adk: "#8f2f0a",
+    lt: "#c2410c",
+    ink: "#ffffff",
   },
   {
     id: "rose",
     name: "Rose",
-    a: "#ec4899",
-    adk: "#be185d",
-    lt: "#fb7bb8",
+    a: "#b83275",
+    adk: "#98205c",
+    lt: "#c13c80",
     ink: "#ffffff",
   },
 ];

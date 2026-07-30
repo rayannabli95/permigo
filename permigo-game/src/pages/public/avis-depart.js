@@ -24,7 +24,7 @@ const STYLE = `<style>
   .cf {
     min-height: 100dvh; font-family: 'Baloo 2', var(--fb), sans-serif;
     -webkit-font-smoothing: antialiased;
-    --gold:#ffce4d;--in:#6c63ff;--in-lt:#8e87ff;--in-dp:#4a3fc9;--in-dk:#372fa3;
+    --gold:#ffce4d;--in:#5d56d8;--in-lt:#665edb;--in-dp:#4a3fc9;--in-dk:#372fa3;
     color: #f4f1ff;
     background: linear-gradient(180deg, #1b1240 0%, #241a4d 50%, #170f38 100%);
     padding: calc(14px + env(safe-area-inset-top)) 18px calc(40px + env(safe-area-inset-bottom));

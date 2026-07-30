@@ -381,7 +381,7 @@ const STYLE = `<style>
 .sc-modal-confirm-refuse {
   display: flex; align-items: center; justify-content: center; gap: 8px;
   width: 100%; padding: 14px 20px;
-  background: var(--rd); border: none; border-radius: 14px;
+  background: var(--rdx); border: none; border-radius: 14px;
   color: #fff; font: 700 14px/1 'Plus Jakarta Sans', sans-serif;
   cursor: pointer; min-height: 50px; margin-bottom: 8px;
   -webkit-tap-highlight-color: transparent;
