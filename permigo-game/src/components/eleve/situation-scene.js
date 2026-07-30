@@ -166,16 +166,145 @@ function vehiclePose(v) {
   return { x: -ux * d + sx * lane, y: -uy * d + sy * lane, ux, uy };
 }
 
+// ── Course d'un acteur : bornes de sécurité ────────────────────
+// Le départ des véhicules est une TRANSLATION rectiligne d'un groupe SVG rigide
+// (la carrosserie est dessinée pour UN cap, on ne peut pas la faire tourner).
+// Non borné, ça donnait trois bugs visibles : sur l'anneau d'un giratoire ou sur
+// une bretelle, la ligne droite quitte le bitume ; un véhicule qui arrive par
+// une branche finissait SUR l'îlot central (dans l'arbre) ; et 3,6 tuiles depuis
+// d = 2,6 sortent carrément du plateau (R = 3.55) → voiture dans le décor.
+// On borne donc la course : elle reste lisible (« il démarre, je suis »), et
+// l'acteur s'arrête toujours sur la chaussée, à l'intérieur du plateau.
+// Un acteur sur l'anneau ou sur la bretelle S'EFFACE en fin de course (cf.
+// actorFadesOut) : il « continue son chemin et quitte la scène ». C'est ce qui
+// autorise une course lisible malgré la ligne droite — il n'est plus là quand
+// la tangente quitterait le bitume. Le joueur, lui, ne s'efface JAMAIS : sa
+// course reste courte pour rester sur l'asphalte.
+// Bornes calibrées sur le DÉBUT du fondu (~0,95 s, soit ~83 % de la course avec
+// l'easing du CSS) : à cet instant l'acteur doit encore être sur le bitume.
+const RING_CHORD_MAX = 1.45; // corde tangente d'un acteur qui s'efface
+const RING_CHORD_STAY = 1.0; // corde qui reste DANS la bande de l'anneau
+const RAMP_CHORD_MAX = 1.3;
+const RAMP_CHORD_STAY = 0.6; // le joueur ne s'efface pas : il reste sur sa bretelle
+const RING_STOP_R = RING_LANE + 0.15; // on s'engage jusqu'à la voie de l'anneau
+const BOARD_MARGIN = 0.25; // marge de bord : le nez reste sur le plateau
+
+/** Demi-longueur d'un véhicule selon son gabarit (partagée avec le rendu). */
+function vehHalfLen(v) {
+  return v.type === "velo"
+    ? 0.24
+    : v.type === "moto"
+      ? 0.3
+      : v.type === "bus"
+        ? 0.95
+        : v.type === "camion"
+          ? 0.85
+          : 0.5;
+}
+
+/** Distance parcourue avant d'entrer dans le cercle de rayon r (∞ si jamais). */
+function distToRadius(p, r) {
+  const b = p.x * p.ux + p.y * p.uy;
+  const c = p.x * p.x + p.y * p.y - r * r;
+  if (c <= 0) return 0; // déjà dedans
+  const disc = b * b - c;
+  if (disc < 0) return Infinity;
+  const t = -b - Math.sqrt(disc);
+  return t > 0 ? t : Infinity;
+}
+
+/** Distance parcourue avant que le NEZ ne sorte du plateau. */
+function distToBoardEdge(p, hl) {
+  const lim = R - BOARD_MARGIN;
+  let max = Infinity;
+  for (const [pos, u] of [
+    [p.x, p.ux],
+    [p.y, p.uy],
+  ]) {
+    if (Math.abs(u) < 1e-6) continue;
+    max = Math.min(max, ((u > 0 ? lim : -lim) - pos) / u - hl);
+  }
+  return max;
+}
+
+/**
+ * Vrai si l'acteur quitte la scène en s'effaçant. Réservé aux acteurs dont la
+ * trajectoire réelle est COURBE (anneau, bretelle) : on ne sait pas faire
+ * tourner la carrosserie, alors ils s'en vont. Jamais le joueur.
+ */
+export function actorFadesOut(scene, actorId) {
+  if (actorId === "moi" || actorId === "pieton") return false;
+  const v = (scene.vehicules || []).find((x) => x.id === actorId);
+  if (!v) return false;
+  return typeof v.angle === "number" || typeof v.bretelle === "number";
+}
+
+/**
+ * Bord de plateau atteignable par un CONVOI (mêmes cap) : on prend la borne la
+ * plus courte du groupe, sinon un suiveur bornerait plus loin que son leader et
+ * lui rentrerait dedans (les voitures « se collent »).
+ */
+function convoyBoardLimit(scene, v, pose) {
+  let max = distToBoardEdge(pose, vehHalfLen(v));
+  for (const o of scene.vehicules || []) {
+    if (
+      o === v ||
+      typeof o.angle === "number" ||
+      typeof o.bretelle === "number"
+    )
+      continue;
+    const op = vehiclePose(o);
+    if (Math.abs(op.ux - pose.ux) > 0.01 || Math.abs(op.uy - pose.uy) > 0.01)
+      continue; // pas le même cap → pas le même convoi
+    max = Math.min(max, distToBoardEdge(op, vehHalfLen(o)));
+  }
+  return max;
+}
+
+/** Course réellement autorisée (tuiles) pour un véhicule donné. */
+function clampAdvance(scene, v, pose, tiles) {
+  let max = tiles;
+  const curved = typeof v.angle === "number" || typeof v.bretelle === "number";
+  if (typeof v.angle === "number") {
+    max = Math.min(
+      max,
+      actorFadesOut(scene, v.id) ? RING_CHORD_MAX : RING_CHORD_STAY,
+    );
+  } else if (typeof v.bretelle === "number") {
+    max = Math.min(
+      max,
+      actorFadesOut(scene, v.id) ? RAMP_CHORD_MAX : RAMP_CHORD_STAY,
+    );
+  } else if ((scene.kind || "croisement") === "giratoire") {
+    // arrive par une branche : il s'engage sur l'anneau et s'arrête là,
+    // jamais sur l'îlot central.
+    max = Math.min(max, distToRadius(pose, RING_STOP_R));
+  }
+  max = Math.min(
+    max,
+    curved
+      ? distToBoardEdge(pose, vehHalfLen(v))
+      : convoyBoardLimit(scene, v, pose),
+  );
+  return Math.max(0, max);
+}
+
 /** Décalage écran (px) pour avancer un acteur de `tiles` tuiles. */
 export function actorScreenDelta(scene, actorId, tiles = 3.4) {
   if (actorId === "pieton") {
-    // le piéton traverse vers l'est
-    return { dx: TW * tiles * 0.5, dy: TH * tiles * 0.5 };
+    // Le piéton traverse vers l'est : sa course est calculée pour qu'il ATTEIGNE
+    // le trottoir d'en face (avant, une distance fixe le laissait planté au
+    // milieu de la chaussée quand il partait du bord).
+    const from = scene.pieton?.engage ? -0.18 : -1.12;
+    const adv = HW + 0.34 - from;
+    return { dx: TW * adv, dy: TH * adv };
   }
   const v = (scene.vehicules || []).find((x) => x.id === actorId);
   if (!v) return { dx: 0, dy: 0 };
-  const { ux, uy } = vehiclePose(v);
-  return { dx: (ux + uy) * TW * tiles, dy: (ux - uy) * TH * tiles };
+  const pose = vehiclePose(v);
+  const { ux, uy } = pose;
+  const adv = clampAdvance(scene, v, pose, tiles);
+  return { dx: (ux + uy) * TW * adv, dy: (ux - uy) * TH * adv };
 }
 
 // ── éléments de décor ──────────────────────────────────────────
@@ -469,7 +598,7 @@ function vehicleMarkup(v, opts) {
   const isDeuxRoues = isMoto || isVelo;
   const col = VEH_COLORS[v.type] || CAR_COLORS[v.couleur] || CAR_COLORS.gris;
   // demi-longueur / demi-largeur selon le gabarit
-  const L = isVelo ? 0.24 : isMoto ? 0.3 : isBus ? 0.95 : isCamion ? 0.85 : 0.5;
+  const L = vehHalfLen(v);
   const W = isVelo ? 0.05 : isMoto ? 0.075 : isBus || isCamion ? 0.3 : 0.27;
   const sx = uy,
     sy = -ux;
