@@ -137,8 +137,10 @@ export async function maybeSendStreakRiskNotif() {
 
   new Notification("PermiGo", {
     body: `Ton parcours t'attend — 2 min suffisent !`,
-    icon: "/icons/icon-192.png",
-    badge: "/icons/badge-72.png",
+    // Chemins à la racine de public/ — il n'y a pas de dossier /icons/, la
+    // notification s'affichait donc sans icône.
+    icon: "/icon-192.png",
+    badge: "/badge-72.png",
     tag: "streak-risk",
   });
 }
