@@ -138,9 +138,16 @@ const STYLE = `<style>
   -webkit-tap-highlight-color:transparent; color:inherit; }
 .rv4-eyebrow { display:block; font:800 11px/1 'Plus Jakarta Sans',sans-serif; letter-spacing:.16em;
   text-transform:uppercase; color:#f5c451; margin:2px 2px 9px; }
-.rv4-frame { display:block; position:relative; height:202px; border-radius:18px; overflow:hidden;
+/* Le cadre suit un ratio, PAS une hauteur fixe : la capture fait 780×980 (le
+   plein écran du jeu, question + réponses comprises). Une hauteur figée à
+   202px en coupait plus de la moitié — le carrefour était décapité, et la
+   coupe empirait à mesure que l'écran s'élargissait (213px coupés à 390px de
+   large, 331px sur desktop). Ratio 780/475 + cover avec un object-position
+   calé sur la scène iso (y ≈ 85→462 dans la source) : le carrefour tient EN
+   ENTIER, au même cadrage sur tous les écrans. */
+.rv4-frame { display:block; position:relative; aspect-ratio:780/475; border-radius:18px; overflow:hidden;
   border:1.5px solid #f5c451; box-shadow:0 14px 30px -14px rgba(6,2,22,.85); background:#241a52; }
-.rv4-frame img { position:absolute; top:0; left:50%; transform:translateX(-50%); width:104%; display:block; }
+.rv4-frame img { display:block; width:100%; height:100%; object-fit:cover; object-position:50% 3%; }
 .rv4-frame::after { content:""; position:absolute; inset:0; pointer-events:none;
   background:linear-gradient(180deg,transparent 62%,rgba(29,21,66,.55) 100%); }
 .rv4-pastille { position:absolute; top:12px; left:12px; z-index:2; display:flex; align-items:center; gap:6px;
