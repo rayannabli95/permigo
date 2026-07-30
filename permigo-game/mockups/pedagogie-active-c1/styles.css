@@ -127,6 +127,59 @@ button:focus-visible {
   color: var(--ink);
 }
 
+.engine-launch {
+  min-height: 62px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 20px;
+  padding: 10px 13px;
+  border-radius: 16px;
+  color: #fff;
+  background: linear-gradient(145deg, #8567ff, #4b2bc3);
+  box-shadow:
+    0 5px 0 #35198f,
+    0 11px 20px rgb(74 43 196 / 20%);
+  text-decoration: none;
+  transition:
+    transform 140ms var(--ease-out),
+    box-shadow 160ms ease;
+}
+
+.engine-launch:active {
+  transform: translateY(3px);
+  box-shadow:
+    0 2px 0 #35198f,
+    0 6px 12px rgb(74 43 196 / 17%);
+}
+
+.engine-launch > span {
+  display: grid;
+  gap: 4px;
+}
+
+.engine-launch small {
+  color: #d8ccff;
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.engine-launch strong {
+  color: #fff;
+  font-size: 12px;
+}
+
+.engine-launch svg {
+  width: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.3;
+}
+
 .variant-nav {
   display: grid;
   gap: 8px;
