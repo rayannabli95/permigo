@@ -84,10 +84,6 @@ const MP_I18N = {
     lbl_done: "done",
     lbl_locked: "upcoming",
     lbl_progress: "in progress",
-    h_driving: "{h} h of driving",
-    lesson_one: "lesson",
-    lesson_many: "lessons",
-    with_name: "with {name}",
     renvoi_t: "Want to train? Head to Practice.",
     renvoi_s:
       "Here you see your validated progress — training happens in Practice.",
@@ -158,10 +154,6 @@ const MP_I18N = {
     lbl_done: "مكتمل",
     lbl_locked: "لاحقًا",
     lbl_progress: "جارٍ",
-    h_driving: "{h} ساعة قيادة",
-    lesson_one: "درس",
-    lesson_many: "دروس",
-    with_name: "مع {name}",
     renvoi_t: "تريد التدرّب؟ توجّه إلى المراجعة.",
     renvoi_s: "هنا تقدّمك المُصادَق عليه — التدريب يكون في قسم المراجعة.",
     s2_title: "دروسي",
@@ -356,13 +348,6 @@ const STYLE = `<style>
 .mp-comp.locked { opacity: .72; }
 .mp-comp.locked .mp-comp-t { color: var(--mu); }
 
-.mp-hstat {
-  display: flex; align-items: center; gap: 10px; margin-top: 10px; padding: 10px 13px; border-radius: 15px;
-  background: var(--su); border: 1px solid var(--bo); box-shadow: 0 1px 2px rgba(10,13,26,.04);
-}
-.mp-hstat p { flex: 1; font-size: 12px; font-weight: 800; color: var(--mu); }
-.mp-hstat p b { color: var(--ink); }
-
 .mp-renvoi {
   display: flex; align-items: center; gap: 10px; width: 100%; margin-top: 10px; padding: 11px 13px; border-radius: 15px; cursor: pointer;
   background: color-mix(in srgb, var(--a) 8%, var(--su)); border: 1px dashed color-mix(in srgb, var(--a) 40%, transparent);
@@ -483,12 +468,6 @@ function skeleton() {
   </div>`;
 }
 
-// ─── Petits helpers de format (locaux, pas de dépendance page→page) ────
-function fmtHeures(totalMin) {
-  const h = Math.round((totalMin / 60) * 10) / 10;
-  return Number.isInteger(h) ? String(h) : String(h).replace(".", ",");
-}
-
 // Médaillon d'un chapitre selon son état — grammaire dédiée « permis
 // virtuel » (check/vert = acquis, étoile/or = en cours, cadenas/slate =
 // à venir), distincte des médaillons-monde du jeu (parcours.js).
@@ -535,13 +514,7 @@ function renderHero({ totalAcquis, currentTitre, allDone, solo }) {
 }
 
 // ─── Étape 1 : mes compétences ─────────────────────────────────
-function renderStep1({
-  worldStates,
-  step1Failed,
-  totalMin,
-  nbLecons,
-  moniteurPrenom,
-}) {
+function renderStep1({ worldStates, step1Failed }) {
   if (step1Failed) {
     return `<section class="mp-step" id="mp-step-comps">
       <span class="mp-step-num" aria-hidden="true">1</span>
@@ -580,16 +553,14 @@ function renderStep1({
     })
     .join("");
 
-  const lessonWord =
-    nbLecons > 1 ? mpTR("lesson_many", "leçons") : mpTR("lesson_one", "leçon");
-  const hstatTxt = `${nbLecons} ${lessonWord}${moniteurPrenom ? ` ${mpTR("with_name", `avec ${moniteurPrenom}`, { name: moniteurPrenom })}` : ""}`;
-  const hstatHtml =
-    nbLecons > 0
-      ? `<div class="mp-hstat">
-          ${medallion("horloge", "violet", { size: 30 })}
-          <p><b>${getLang() === "ar" ? mpRtl(esc(mpTR("h_driving", `${fmtHeures(totalMin)} h de conduite`, { h: fmtHeures(totalMin) }))) : esc(mpTR("h_driving", `${fmtHeures(totalMin)} h de conduite`, { h: fmtHeures(totalMin) }))}</b> · ${getLang() === "ar" ? mpRtl(esc(hstatTxt)) : esc(hstatTxt)}</p>
-        </div>`
-      : "";
+  // Retrait des heures de conduite (30/07/2026, décision Rayan : « on ne parle
+  // pas d'heures de conduite dans l'application »). Le bloc affichait
+  // « X h de conduite · N leçons avec {moniteur} », lu depuis
+  // `sessions_moniteur` — une table que PLUS PERSONNE ne peut remplir depuis
+  // le retrait de la saisie de séance (lot 4 du pivot, #608). Sa dernière
+  // ligne date du 06/06/2026 : 3 élèves voyaient un compteur GELÉ à vie, et
+  // tous les autres ne voyaient rien. Un chiffre qui ne bouge plus est pire
+  // que pas de chiffre. Ce hub compte des COMPÉTENCES, pas des heures.
 
   return `<section class="mp-step" id="mp-step-comps">
     <span class="mp-step-num" aria-hidden="true">1</span>
@@ -598,7 +569,6 @@ function renderStep1({
       <span class="mp-step-s">${mpD("s1_sub", "les 4 chapitres du permis B")}</span>
     </div>
     <div class="mp-comps">${compsHtml}</div>
-    ${hstatHtml}
     <button class="mp-renvoi" id="mp-btn-reviser" type="button">
       ${medallion("eclair", "gold", { size: 28 })}
       <p>${mpD("renvoi_t", "Envie de t'entraîner ? Direction Réviser.")}
@@ -850,52 +820,40 @@ export async function mount(root) {
   const parcoursModP = import("@/pages/eleve/parcours.js");
   const examDataP = examModP.then((m) => m.loadData(me.id));
 
-  const [
-    valRes,
-    profRes,
-    sessRes,
-    examDataRes,
-    parcoursModRes,
-    examModRes,
-    selfValRes,
-  ] = await Promise.allSettled([
-    sb
-      .from("validations")
-      .select("competence_id, statut")
-      .eq("eleve_id", me.id),
-    // ⚠️ Pas d'embed self-join ici : PostgREST résout
-    // `moniteur:profiles!enseignant_id(prenom)` dans le sens INVERSE
-    // (to-many : « les profils dont je suis l'enseignant ») → tableau vide
-    // pour un élève, et la chip ne s'affichait jamais. Deux requêtes plates,
-    // couvertes par la policy profiles_select (élève lit les profils
-    // enseignant/gerant de son école).
-    (async () => {
-      const { data: moi, error } = await sb
-        .from("profiles")
-        .select("enseignant_id")
-        .eq("id", me.id)
-        .maybeSingle();
-      if (error) return { data: null, error };
-      if (!moi?.enseignant_id) return { data: null, error: null };
-      return sb
-        .from("profiles")
-        .select("prenom")
-        .eq("id", moi.enseignant_id)
-        .maybeSingle();
-    })(),
-    sb
-      .from("sessions_moniteur")
-      .select("duration_minutes")
-      .eq("eleve_id", me.id)
-      .in("confirmation_status", ["confirmed", "auto"]),
-    examDataP,
-    parcoursModP,
-    examModP,
-    // Validation autonome (élève SANS moniteur, pré-vente Pass Permis) :
-    // table séparée de `validations`, fusionnée en LECTURE SEULE ci-dessous
-    // pour que la progression du hub reste juste pour un compte solo.
-    sb.from("self_validations").select("competence_id").eq("eleve_id", me.id),
-  ]);
+  const [valRes, profRes, examDataRes, parcoursModRes, examModRes, selfValRes] =
+    await Promise.allSettled([
+      sb
+        .from("validations")
+        .select("competence_id, statut")
+        .eq("eleve_id", me.id),
+      // ⚠️ Pas d'embed self-join ici : PostgREST résout
+      // `moniteur:profiles!enseignant_id(prenom)` dans le sens INVERSE
+      // (to-many : « les profils dont je suis l'enseignant ») → tableau vide
+      // pour un élève, et la chip ne s'affichait jamais. Deux requêtes plates,
+      // couvertes par la policy profiles_select (élève lit les profils
+      // enseignant/gerant de son école).
+      (async () => {
+        const { data: moi, error } = await sb
+          .from("profiles")
+          .select("enseignant_id")
+          .eq("id", me.id)
+          .maybeSingle();
+        if (error) return { data: null, error };
+        if (!moi?.enseignant_id) return { data: null, error: null };
+        return sb
+          .from("profiles")
+          .select("prenom")
+          .eq("id", moi.enseignant_id)
+          .maybeSingle();
+      })(),
+      examDataP,
+      parcoursModP,
+      examModP,
+      // Validation autonome (élève SANS moniteur, pré-vente Pass Permis) :
+      // table séparée de `validations`, fusionnée en LECTURE SEULE ci-dessous
+      // pour que la progression du hub reste juste pour un compte solo.
+      sb.from("self_validations").select("competence_id").eq("eleve_id", me.id),
+    ]);
 
   const settledError = (result) =>
     result.status === "rejected"
@@ -903,12 +861,10 @@ export async function mount(root) {
       : result.value?.error;
   const valError = settledError(valRes);
   const profError = settledError(profRes);
-  const sessError = settledError(sessRes);
   const selfValError = settledError(selfValRes);
   const dataErrors = [
     ["validations", valError],
     ["profil moniteur", profError],
-    ["séances", sessError],
     ["auto-validations", selfValError],
   ].filter(([, error]) => error);
   if (dataErrors.length) {
@@ -957,13 +913,6 @@ export async function mount(root) {
     ? profRes.value?.data?.prenom || null
     : null;
 
-  const sessRows = !sessError ? sessRes.value?.data || [] : [];
-  const totalMin = sessRows.reduce(
-    (n, r) => n + (Number(r.duration_minutes) || 0),
-    0,
-  );
-  const nbLecons = sessRows.length;
-
   // ── Étape 2 : examen ──
   const examData =
     examDataRes.status === "fulfilled"
@@ -980,7 +929,7 @@ export async function mount(root) {
     ${renderChip(moniteurPrenom)}
     ${step1Failed ? "" : renderHero({ totalAcquis, currentTitre, allDone, solo })}
     <div class="mp-tl">
-      ${renderStep1({ worldStates, step1Failed, totalMin, nbLecons, moniteurPrenom })}
+      ${renderStep1({ worldStates, step1Failed })}
       ${renderStep3({ examMod, examData, examDate, solo, num: 2 })}
     </div>
   </div>`;
