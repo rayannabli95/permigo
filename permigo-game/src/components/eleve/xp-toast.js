@@ -3,6 +3,9 @@
 // Usage : showXpToast({ xp: 25, eleveName: 'Léa', trophy: 'Maîtrise du véhicule' })
 // ═══════════════════════════════════════════════════════════════
 
+import { esc } from "@/utils/escape.js";
+import { icon } from "@/utils/icons.js";
+
 const STYLE = `
   .xpt-wrap {
     position: fixed;
@@ -88,6 +91,12 @@ function ensureWrap() {
  */
 export function showXpToast({ xp, eleveName, trophy = null, duration = 4000 }) {
   const wrap = ensureWrap();
+  const safeXp = Number.isFinite(Number(xp))
+    ? Math.max(0, Math.trunc(Number(xp)))
+    : 0;
+  const safeDuration = Number.isFinite(Number(duration))
+    ? Math.max(0, Number(duration))
+    : 4000;
 
   // Carte XP principale
   const card = document.createElement('div');
@@ -95,10 +104,10 @@ export function showXpToast({ xp, eleveName, trophy = null, duration = 4000 }) {
   card.innerHTML = `
     <div class="xpt-icon">${icon('zap',{size:20})}</div>
     <div class="xpt-text">
-      <div class="xpt-label">+${xp} XP</div>
-      <div class="xpt-sub">${eleveName} progresse avec toi</div>
+      <div class="xpt-label">+${safeXp} XP</div>
+      <div class="xpt-sub">${esc(eleveName)} progresse avec toi</div>
     </div>
-    <div class="xpt-xp">+${xp}</div>
+    <div class="xpt-xp">+${safeXp}</div>
   `;
   wrap.appendChild(card);
 
@@ -110,8 +119,8 @@ export function showXpToast({ xp, eleveName, trophy = null, duration = 4000 }) {
     tCard.innerHTML = `
       <div class="xpt-icon" style="background:linear-gradient(135deg,var(--am),var(--amk))">${icon('trophy',{size:20})}</div>
       <div class="xpt-text">
-        <div class="xpt-label">${eleveName} a débloqué</div>
-        <div class="xpt-sub">${trophy}</div>
+        <div class="xpt-label">${esc(eleveName)} a débloqué</div>
+        <div class="xpt-sub">${esc(trophy)}</div>
       </div>
     `;
     wrap.appendChild(tCard);
@@ -129,5 +138,5 @@ export function showXpToast({ xp, eleveName, trophy = null, duration = 4000 }) {
     setTimeout(() => {
       wrap.innerHTML = '';
     }, 400);
-  }, duration);
+  }, safeDuration);
 }

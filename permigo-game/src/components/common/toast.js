@@ -14,7 +14,7 @@
  *   toast('Erreur réseau', 'error');
  */
 
-import { esc } from '@/utils/escape.js';
+import { esc, safeCssColor } from '@/utils/escape.js';
 
 const ROOT_ID = 'toast-root';
 
@@ -75,7 +75,8 @@ export function toast(msg, type = 'info', duration = 3000) {
 export function toastAvatar({ title, sub = '', initials = '?', color = 'var(--a)', type = 'success', duration = 3500 }) {
   const root = ensureRoot();
   const el = document.createElement('div');
-  el.className = `toast toast-${type} toast-rich`;
+  const safeType = ['success', 'info', 'error'].includes(type) ? type : 'info';
+  el.className = `toast toast-${safeType} toast-rich`;
   el.setAttribute('role', 'status');
   el.setAttribute('aria-live', 'polite');
   el.setAttribute('aria-atomic', 'true');
@@ -122,13 +123,14 @@ export function toastAvatar({ title, sub = '', initials = '?', color = 'var(--a)
         flex-shrink: 0;
       }
     </style>
-    <div class="ta-av" style="background:${esc(color)}">${esc(initials)}</div>
+    <div class="ta-av">${esc(initials)}</div>
     <div class="ta-body">
       <div class="ta-title">${esc(title)}</div>
       ${sub ? `<div class="ta-sub">${esc(sub)}</div>` : ''}
     </div>
-    ${type === 'success' ? `<div class="ta-check">✓</div>` : ''}
+    ${safeType === 'success' ? `<div class="ta-check">✓</div>` : ''}
   `;
+  el.querySelector('.ta-av').style.backgroundColor = safeCssColor(color, 'var(--a)');
   root.appendChild(el);
 
   let removed = false;

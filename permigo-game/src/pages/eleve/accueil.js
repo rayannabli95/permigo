@@ -2144,10 +2144,13 @@ function render({
   // Quiz de consolidation / récap en attente : la porte vit désormais dans
   // une carte compacte sous le CTA (le hero ne change plus de visage).
   const _isCons = pendingNotif?.type === "consolidation_quiz";
+  const _consolHref = pendingNotif?.data?.competence_id
+    ? `#/quiz/${encodeURIComponent(String(pendingNotif.data.competence_id))}/${_isCons ? "consolidation" : "post_validation"}`
+    : "";
   const consolCard = pendingNotif?.data?.competence_id
     ? `
   <button class="acc2-consol" id="acc-consol-btn" type="button"
-          data-href="#/quiz/${esc(pendingNotif.data.competence_id)}/${_isCons ? "consolidation" : "post_validation"}"
+          data-href="${escAttr(_consolHref)}"
           aria-label="${escAttr(_isCons ? atR("consol_aria_cons", "Quiz de consolidation — 2 questions, 30 secondes") : atR("consol_aria_rec", "Quiz-récap — 3 questions"))}">
     <span class="acc2-consol-ico" aria-hidden="true">🧠</span>
     <span class="acc2-consol-txt">

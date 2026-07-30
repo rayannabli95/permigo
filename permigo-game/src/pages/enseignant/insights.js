@@ -833,8 +833,9 @@ function renderActions({ carteExam, silencieux, topDiff }) {
 
   if (carteExam) {
     const nm = nomCourt(carteExam.eleve);
+    const route = `#/livret/${encodeURIComponent(String(carteExam.eleve.id ?? ""))}`;
     cards.push(`
-      <div class="st-act" role="button" tabindex="0" data-route="#/livret/${esc(carteExam.eleve.id)}"
+      <div class="st-act" role="button" tabindex="0" data-route="${escAttr(route)}"
            aria-label="Livret de ${nomAttr(carteExam.eleve)}">
         <span class="st-act-med">${medallion("examen", "indigo", { size: 38 })}</span>
         <div class="st-act-body">
@@ -849,6 +850,7 @@ function renderActions({ carteExam, silencieux, topDiff }) {
   if (silencieux.length > 0) {
     const e = silencieux[0];
     const nm = nomCourt(e);
+    const route = `#/livret/${encodeURIComponent(String(e.id ?? ""))}`;
     const depuis =
       e.daysAgo != null
         ? `Silencieux depuis ${e.daysAgo} jours`
@@ -858,7 +860,7 @@ function renderActions({ carteExam, silencieux, topDiff }) {
         ? ` · et ${silencieux.length - 1} autre${silencieux.length > 2 ? "s" : ""}`
         : "";
     cards.push(`
-      <div class="st-act" role="button" tabindex="0" data-route="#/livret/${esc(e.id)}"
+      <div class="st-act" role="button" tabindex="0" data-route="${escAttr(route)}"
            aria-label="Livret de ${nomAttr(e)}">
         <span class="st-act-med">${medallion("panneau", "red", { size: 38 })}</span>
         <div class="st-act-body">

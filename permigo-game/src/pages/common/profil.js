@@ -26,11 +26,7 @@ import { icon } from "@/utils/icons.js";
 import { medallion } from "@/utils/medallions.js";
 import { volantImg, volantLabel } from "@/utils/volant.js";
 import { haptic } from "@/utils/haptic.js";
-import {
-  isPushEnabled,
-  optOutPush,
-  optInPush,
-} from "@/services/web-push.js";
+import { isPushEnabled, optOutPush, optInPush } from "@/services/web-push.js";
 import { mountMoniteurRanking } from "@/components/enseignant/moniteur-ranking.js";
 import { getLang } from "@/utils/lang.js";
 import { toast } from "@/components/common/toast.js";
@@ -1176,10 +1172,7 @@ function _wirePseudo(root, me) {
           showErr(ptR("pseudo_invalid", "Format invalide."));
         } else {
           toast(
-            ptR(
-              "toast_pseudo_save_err",
-              "Impossible d'enregistrer le pseudo",
-            ),
+            ptR("toast_pseudo_save_err", "Impossible d'enregistrer le pseudo"),
             "error",
           );
         }
@@ -1227,6 +1220,7 @@ function _renderReferral(stats) {
   <div class="prf-ref-code-wrap">
     <span class="prf-ref-code" id="prf-ref-code" aria-label="${ptA("referral_code_aria", "Mon code parrainage : {code}", { code })}">${esc(code)}</span>
     <button class="prf-ref-copy-btn" id="prf-ref-copy" title="${ptA("referral_copy_title", "Copier le code")}" aria-label="${ptA("referral_copy_aria", "Copier mon code parrainage")}">
+
       ${icon("copy", { size: 18 })}
     </button>
   </div>
@@ -1308,11 +1302,10 @@ function _wireReferral(root, me) {
       } else {
         try {
           await navigator.clipboard.writeText(
-            ptR(
-              "referral_clipboard",
-              "Mon code PermiGo : {code} — {url}",
-              { code, url: window.location.origin },
-            ),
+            ptR("referral_clipboard", "Mon code PermiGo : {code} — {url}", {
+              code,
+              url: window.location.origin,
+            }),
           );
           const { toast } = await import("@/components/common/toast.js");
           toast(ptR("link_copied", "Lien copié"), "success");
@@ -1334,7 +1327,8 @@ function _wireReferral(root, me) {
       if (error || data?.error) {
         const { toast } = await import("@/components/common/toast.js");
         toast(
-          data?.error || ptR("generate_failed", "Impossible de générer le code"),
+          data?.error ||
+            ptR("generate_failed", "Impossible de générer le code"),
           "error",
         );
         btn.disabled = false;
@@ -1796,8 +1790,7 @@ const PROF_I18N = {
     role_platform: "Platform",
     student_bio: "Category B learner",
     stat_skills: "Skills",
-    share_student:
-      "I have validated {current}/{total} skills on PermiGo",
+    share_student: "I have validated {current}/{total} skills on PermiGo",
     instructor_bio: "{count} student(s) supported · this year",
     stat_students: "Students",
     share_instructor: "{count} validations on PermiGo this year",
@@ -1821,8 +1814,7 @@ const PROF_I18N = {
     public_username_help:
       "Visible in the ranking. Leave blank to remain anonymous. 3 to 16 characters: letters, numbers or _",
     save: "Save",
-    pseudo_format_err:
-      "3 to 16 characters: letters, numbers or _ only.",
+    pseudo_format_err: "3 to 16 characters: letters, numbers or _ only.",
     pseudo_invalid: "Invalid format.",
     referral: "Referrals",
     referral_reward: "+50 steering wheels per referral",
@@ -1847,8 +1839,7 @@ const PROF_I18N = {
     notifications: "Notifications",
     notifications_enabled: "enabled",
     notifications_disabled: "disabled",
-    notif_browser_help:
-      "Blocked by the browser — allow them in the settings",
+    notif_browser_help: "Blocked by the browser — allow them in the settings",
     notif_quiz_streak: "Quiz and streak active",
     licence_b: "Category B licence",
     instructor_default: "Instructor",
@@ -1935,8 +1926,7 @@ const PROF_I18N = {
     role_platform: "المنصة",
     student_bio: "متعلم رخصة الفئة B",
     stat_skills: "المهارات",
-    share_student:
-      "اعتمدت {current}/{total} مهارة على بيرميغو",
+    share_student: "اعتمدت {current}/{total} مهارة على بيرميغو",
     instructor_bio: "متابعة {count} طالب · هذا العام",
     stat_students: "الطلاب",
     share_instructor: "{count} اعتمادًا على بيرميغو هذا العام",
@@ -1960,8 +1950,7 @@ const PROF_I18N = {
     public_username_help:
       "يظهر في التصنيف. اتركه فارغًا لتبقى مجهولًا. من 3 إلى 16 حرفًا: أحرف أو أرقام أو _",
     save: "حفظ",
-    pseudo_format_err:
-      "من 3 إلى 16 حرفًا: أحرف أو أرقام أو _ فقط.",
+    pseudo_format_err: "من 3 إلى 16 حرفًا: أحرف أو أرقام أو _ فقط.",
     pseudo_invalid: "تنسيق غير صالح.",
     referral: "الإحالات",
     referral_reward: "+50 مقودًا لكل إحالة",
@@ -1975,8 +1964,7 @@ const PROF_I18N = {
     friend_code_placeholder: "رمز صديق…",
     apply: "تطبيق",
     referral_share_title: "انضم إلى بيرميغو!",
-    referral_share_text:
-      "استخدم رمزي {code} على بيرميغو واربح 50 مقودًا",
+    referral_share_text: "استخدم رمزي {code} على بيرميغو واربح 50 مقودًا",
     referral_clipboard: "رمزي على بيرميغو: {code} — {url}",
     link_copied: "تم نسخ الرابط",
     generating: "جارٍ الإنشاء…",
@@ -1986,15 +1974,13 @@ const PROF_I18N = {
     notifications: "الإشعارات",
     notifications_enabled: "مفعّلة",
     notifications_disabled: "معطّلة",
-    notif_browser_help:
-      "محظورة من المتصفح — اسمح بها في الإعدادات",
+    notif_browser_help: "محظورة من المتصفح — اسمح بها في الإعدادات",
     notif_quiz_streak: "الاختبارات والسلسلة مفعّلة",
     licence_b: "رخصة الفئة B",
     instructor_default: "مدرّب",
     rank_month: "{rank} هذا الشهر · {score} نقطة",
     validations_this_year: "الاعتمادات|هذا العام",
-    students_activity:
-      "متابعة {students} طالب · {active} نشط خلال 30 يومًا",
+    students_activity: "متابعة {students} طالب · {active} نشط خلال 30 يومًا",
     pro_streak: "السلسلة المهنية",
     my_achievements: "إنجازاتي",
     unlocked_to_come: "{unlocked} مفتوحة · {locked} قادمة",
@@ -2004,8 +1990,7 @@ const PROF_I18N = {
     view_ranking: "عرض التصنيف",
     you: "أنت",
     points: "نقطة",
-    ranking_empty:
-      "سيظهر تصنيفك بعد أول اعتماداتك هذا الشهر.",
+    ranking_empty: "سيظهر تصنيفك بعد أول اعتماداتك هذا الشهر.",
     account_settings: "إعدادات الحساب",
     teacher_notif_sub: "الاعتمادات، الحصص، الرسائل",
     validations_followups: "الاعتمادات والمتابعات",
@@ -2134,11 +2119,8 @@ async function mountEleveArene(root, me) {
   const valData = _queryData(valRes);
   const selfValData = _queryData(selfValRes);
   const achData = _queryData(achRes);
-  const validatedSet = new Set(
-    (valData || []).map((v) => v.competence_id),
-  );
-  for (const s of selfValData || [])
-    validatedSet.add(s.competence_id);
+  const validatedSet = new Set((valData || []).map((v) => v.competence_id));
+  for (const s of selfValData || []) validatedSet.add(s.competence_id);
   const validated = validatedSet.size;
   const _yStrS = yesterdayKey();
   // Série d'activité : périmée si dernière activité < hier (cf. accueil).
@@ -2187,9 +2169,7 @@ async function mountEleveArene(root, me) {
   }
 
   const achOk = Array.isArray(achData);
-  const unlockedKeys = new Set(
-    (achData || []).map((u) => u.achievement_key),
-  );
+  const unlockedKeys = new Set((achData || []).map((u) => u.achievement_key));
   const achievements = _areneAchievements(
     unlockedKeys,
     achOk,
@@ -2808,28 +2788,30 @@ async function mountEnseignantArene(root, me) {
   const today = new Date().toISOString().slice(0, 10);
   const month = new Date().toISOString().slice(0, 7) + "-01";
 
-  const [profileRes, validationsRes, elevesRes, rankingRes] = await Promise.all([
-    sb
-      .from("profiles")
-      .select("email, prenom, nom, created_at, streak_pro_days, avatar_url")
-      .eq("id", me.id)
-      .single(),
-    sb
-      .from("validations")
-      .select("competence_id, eleve_id, validated_at")
-      .eq("validated_by", me.id)
-      .gte("validated_at", yearStart),
-    sb
-      .from("profiles")
-      .select("id")
-      .eq("role", "eleve")
-      .eq("enseignant_id", me.id)
-      .is("deleted_at", null),
-    sb.rpc("get_moniteur_ranking", { p_month: month }).then(
-      (r) => r,
-      (error) => ({ data: null, error }),
-    ),
-  ]);
+  const [profileRes, validationsRes, elevesRes, rankingRes] = await Promise.all(
+    [
+      sb
+        .from("profiles")
+        .select("email, prenom, nom, created_at, streak_pro_days, avatar_url")
+        .eq("id", me.id)
+        .single(),
+      sb
+        .from("validations")
+        .select("competence_id, eleve_id, validated_at")
+        .eq("validated_by", me.id)
+        .gte("validated_at", yearStart),
+      sb
+        .from("profiles")
+        .select("id")
+        .eq("role", "eleve")
+        .eq("enseignant_id", me.id)
+        .is("deleted_at", null),
+      sb.rpc("get_moniteur_ranking", { p_month: month }).then(
+        (r) => r,
+        (error) => ({ data: null, error }),
+      ),
+    ],
+  );
   _reportQueryErrors(
     "carte enseignant",
     [

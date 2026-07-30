@@ -304,6 +304,7 @@ function loadErrorScreen(sub) {
 }
 
 function introScreen(sub, cat, already) {
+  const ficheHref = `#/revision-conduite/${encodeURIComponent(String(sub.c ?? ""))}`;
   const fiche = getFiche(sub.c);
   const steps = (fiche?.methode || []).slice(0, 4);
   const ficheList = steps.length
@@ -345,7 +346,7 @@ function introScreen(sub, cat, already) {
           <b>${vsD("step1_t", "Relis la méthode")}</b>
           <span>${vsD("step1_s", "Un rappel rapide de ce qu'il faut maîtriser.")}</span>
           <div class="vs-step-fiche">${ficheList}</div>
-          <a class="vs-fiche-link" href="#/revision-conduite/${esc(sub.c)}">${icon("book", { size: 14 })} ${vsD("fiche_link", "Voir la fiche complète")}</a>
+          <a class="vs-fiche-link" href="${escAttr(ficheHref)}">${icon("book", { size: 14 })} ${vsD("fiche_link", "Voir la fiche complète")}</a>
         </div>
       </div>
       <div class="vs-step">

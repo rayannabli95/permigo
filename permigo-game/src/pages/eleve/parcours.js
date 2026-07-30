@@ -2925,29 +2925,30 @@ function openFiche(root, compId, ws, validatedMap, pendingMap, hasMoniteur) {
       todo: medStatus("encours", { size: 58 }),
       locked: medStatus("verrouille", { size: 58 }),
     }[st] ?? medStatus("encours", { size: 58 });
+  const compRouteId = encodeURIComponent(String(compId ?? ""));
 
   // ── Boutons : UN principal (doré 3D) + UN secondaire (discret) max.
   // Deux destinations seulement depuis cette fenêtre : se préparer
   // (#/revision-conduite) ou certifier (#/valider-seul). Le 3e moteur
   // (re-quiz #/quiz/…) est retiré — plus de cul-de-sac ni de doublon.
   const btnPrepare = `
-    <a href="#/revision-conduite/${esc(compId)}" role="button" class="fiche-quiz-cta v">
+    <a href="${escAttr(`#/revision-conduite/${compRouteId}`)}" role="button" class="fiche-quiz-cta v">
       ${prcD("btn_prepare", "Je me prépare")} ${icon("arrow-right", { size: 17 })}
     </a>`;
   const btnRevoir = `
-    <a href="#/revision-conduite/${esc(compId)}" role="button" class="fiche-quiz-cta">
+    <a href="${escAttr(`#/revision-conduite/${compRouteId}`)}" role="button" class="fiche-quiz-cta">
       ${icon("refresh", { size: 16 })} ${prcD("btn_revoir", "Revoir en 2 min")}
     </a>`;
   const btnCertifierMain = `
-    <a href="#/valider-seul/${esc(compId)}" role="button" class="fiche-quiz-cta v">
+    <a href="${escAttr(`#/valider-seul/${compRouteId}`)}" role="button" class="fiche-quiz-cta v">
       ${icon("shield", { size: 16 })} ${prcD("btn_certifier", "Certifier cette compétence")}
     </a>`;
   const btnCertifierSecond = `
-    <a href="#/valider-seul/${esc(compId)}" role="button" class="fiche-self-cta">
+    <a href="${escAttr(`#/valider-seul/${compRouteId}`)}" role="button" class="fiche-self-cta">
       ${icon("shield", { size: 15 })} ${prcD("btn_cert2", "Déjà vue en leçon ? Certifie-la")}
     </a>`;
   const btnRevoirFiche = `
-    <a href="#/revision-conduite/${esc(compId)}" role="button" class="fiche-self-cta">
+    <a href="${escAttr(`#/revision-conduite/${compRouteId}`)}" role="button" class="fiche-self-cta">
       ${icon("book-open", { size: 15 })} ${prcD("btn_fiche", "Revoir la fiche")}
     </a>`;
 
