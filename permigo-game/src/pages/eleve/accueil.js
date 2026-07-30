@@ -71,8 +71,6 @@ const ACC_I18N = {
     debrief_keep: "I'll practise more",
     debrief_next: "Next lesson →",
     debrief_later: "Haven't had my lesson yet",
-    debrief_note_ph: "What tripped you up, in a few words (optional)",
-    debrief_note_aria: "Note about your lesson, optional",
     consol_aria_cons: "Consolidation quiz — 2 questions, 30 seconds",
     consol_aria_rec: "Recap quiz — 3 questions",
     consol_t_cons: "Lock in your new skill",
@@ -180,8 +178,6 @@ const ACC_I18N = {
     debrief_keep: "أواصل التدريب",
     debrief_next: "الدرس التالي ←",
     debrief_later: "لم آخذ درسي بعد",
-    debrief_note_ph: "ما الذي واجهتَ فيه صعوبة؟ بكلمات قليلة (اختياري)",
-    debrief_note_aria: "ملاحظة عن درسك، اختيارية",
     consol_aria_cons: "اختبار ترسيخ — سؤالان، 30 ثانية",
     consol_aria_rec: "اختبار مراجعة — 3 أسئلة",
     consol_t_cons: "ثبّت مهارتك الجديدة",
@@ -941,26 +937,6 @@ const STYLE = `<style>
   font: 600 12px/1.45 'Plus Jakarta Sans', sans-serif;
   color: var(--mu);
   margin: 0 0 12px;
-}
-/* Le mot de l'élève — FACULTATIF. Poser une question obligatoire ici ferait
-   fuir : le choix ci-dessous suffit déjà à tracer le débrief. */
-.acc2-debrief-note {
-  width: 100%;
-  min-height: 44px;
-  margin: 0 0 10px;
-  padding: 11px 12px;
-  border: 1.5px solid var(--bo);
-  border-radius: 13px;
-  background: var(--bg);
-  color: var(--ink);
-  font: 600 12.5px/1.4 'Plus Jakarta Sans', sans-serif;
-  resize: none;
-  outline: none;
-}
-.acc2-debrief-note::placeholder { color: var(--mu2); font-weight: 600; }
-.acc2-debrief-note:focus {
-  border-color: color-mix(in srgb, var(--a) 55%, var(--bo));
-  background: var(--su);
 }
 .acc2-debrief-row { display: flex; gap: 8px; }
 .acc2-debrief-btn {
@@ -2293,9 +2269,6 @@ function render({
     <p class="acc2-debrief-k">🚗 ${at("debrief_k", "Revenons sur ta leçon")}</p>
     <p class="acc2-debrief-t">${_rtl(esc(atR("debrief_t", "Tu as revu « {t} » avec ton enseignant ?").replace("{t}", ficheTitre(prep.code, prep.titre))))}</p>
     <p class="acc2-debrief-s">${at("debrief_s", "Certaines compétences demandent plusieurs leçons — c'est normal. On continue ensemble.")}</p>
-    <textarea class="acc2-debrief-note" id="debrief-note" rows="2" maxlength="280"
-      placeholder="${escAttr(atR("debrief_note_ph", "Ce qui a coincé, en un mot (facultatif)"))}"
-      aria-label="${escAttr(atR("debrief_note_aria", "Note sur ta leçon, facultative"))}"${getLang() === "ar" ? ' dir="rtl"' : ""}></textarea>
     <div class="acc2-debrief-row">
       <button class="acc2-debrief-btn keep" id="debrief-keep" type="button">${at("debrief_keep", "Je consolide encore")}</button>
       <button class="acc2-debrief-btn next" id="debrief-next" type="button">${at("debrief_next", "Leçon suivante →")}</button>
@@ -2773,41 +2746,9 @@ function wire(
 
   // ── Bloc « Revenons sur ta leçon » (débrief sans note) ──
   const _closeDebrief = () => root.querySelector("#acc-debrief")?.remove();
-
-  // Trace ÉCRITE du « Débriefer » de la boucle (table lecon_debriefs, ajoutée
-  // le 30/07/2026). Avant, le choix ne vivait qu'en localStorage et
-  // disparaissait au clic : l'élève n'avait aucun historique de ses leçons
-  // depuis le retrait des comptes-rendus du moniteur.
-  //
-  // Écriture au fil de l'eau, JAMAIS bloquante : la carte se ferme tout de
-  // suite, même hors ligne. Un débrief perdu ne casse rien — la boucle, elle,
-  // ne doit pas s'arrêter pour un aller-retour réseau.
-  //
-  // ⚠️ Promise.resolve(...) autour du builder Supabase : un PostgrestBuilder a
-  // bien `then` mais PAS `catch` — écrire `.insert(...).catch()` lève un
-  // TypeError SYNCHRONE et la requête ne part jamais (bug vécu sur les
-  // comptes-rendus, cf. mark_compte_rendu_read).
-  const _saveDebrief = (choix) => {
-    const el = root.querySelector("#debrief-note");
-    const note = (el?.value || "").trim().slice(0, 280);
-    const eleveId = getCurUser()?.id;
-    if (!eleveId) return;
-    Promise.resolve(
-      sb.from("lecon_debriefs").insert({
-        eleve_id: eleveId,
-        competence_id: prep?.code || null,
-        choix,
-        note: note || null,
-      }),
-    ).catch(() => {
-      /* hors ligne ou table indisponible → on n'embête pas l'élève */
-    });
-    track("prep.debrief_saved", { choix, code: prep?.code, note: !!note });
-  };
   root.querySelector("#debrief-keep")?.addEventListener("click", () => {
     haptic("select");
     track("prep.debrief_keep", { code: prep?.code });
-    _saveDebrief("consolide");
     const cyc = loadPrepCycle();
     if (cyc) savePrepCycle({ ...cyc, answered: true });
     // Choix explicite : garder ce thème au hero MÊME s'il est déjà certifié.
@@ -2825,9 +2766,6 @@ function wire(
   root.querySelector("#debrief-next")?.addEventListener("click", () => {
     haptic("select");
     track("prep.debrief_next", { code: prep?.code });
-    // Enregistré AVANT de basculer le thème : `prep.code` est réécrit juste
-    // en dessous, le débrief doit porter la compétence qu'on vient de vivre.
-    _saveDebrief("suivant");
     // Thème suivant = première suggestion différente du thème courant
     const next =
       (prepSuggestions || []).find((s) => s.code !== prep?.code) || null;

@@ -1,0 +1,25 @@
+-- ═══════════════════════════════════════════════════════════════
+-- 20260730180000 — Retrait de `lecon_debriefs` (décision Rayan, 30/07/2026)
+--
+-- La table avait été créée le jour même (20260730160000) pour redonner une
+-- trace écrite au « Débriefer » de la boucle, après le retrait des
+-- comptes-rendus du moniteur.
+--
+-- ❌ ANNULÉ quelques heures plus tard. Mot de Rayan : « enlève, on s'en
+-- fout d'un journal intime, ça sert à rien ». Il a raison et c'est la vraie
+-- leçon : ce que l'élève écrivait ne lui revenait JAMAIS. Une page qu'on ne
+-- rouvre pas, ça meurt en deux semaines — et « la boucle produit a une
+-- étape Débriefer » est une raison de concepteur, pas une raison d'élève.
+--
+-- ⚠️ Si l'idée revient un jour, elle ne vaut QUE si la note est REUTILISÉE :
+--   · elle réoriente la préparation de l'heure suivante, ou
+--   · elle devient ce que l'élève MONTRE à son moniteur (piste « Bridge »
+--     pour les élèves non francophones, cf. repositionnement du 29/07).
+-- Une note qu'on range n'a aucune valeur.
+--
+-- Suppression sans risque : table créée il y a quelques heures, ZÉRO ligne
+-- réelle (seules des lignes de test ont existé, effacées après vérification),
+-- aucune vue / fonction / policy tierce ne la référence.
+-- ═══════════════════════════════════════════════════════════════
+
+DROP TABLE IF EXISTS public.lecon_debriefs;

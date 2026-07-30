@@ -50,7 +50,6 @@ import { haptic } from "@/utils/haptic.js";
 import { icon } from "@/utils/icons.js";
 import { medallion } from "@/utils/medallions.js";
 import { REMC_TOTAL } from "@/data/remc.js";
-import { labelComp } from "@/utils/remc-label.js";
 import { getLang } from "@/utils/lang.js";
 import { worldTr } from "@/data/worlds-i18n.js";
 
@@ -93,13 +92,7 @@ const MP_I18N = {
     renvoi_s:
       "Here you see your validated progress — training happens in Practice.",
     s2_title: "My lessons",
-    s2_sub: "what you note after the hour",
-    s2_empty_t: "Your logbook is still empty.",
-    s2_empty_s:
-      "After each driving hour, the home screen asks how it went. What you write lands here.",
-    s2_tag_consol: "Practising more",
-    s2_tag_next: "Got it",
-    s2_more: "+ {n} older",
+    s2_sub: "your instructor's lesson reports",
     cr_lesson_of: "Lesson of {date}",
     cr_new: "New",
     cr_valid_one: "{n} validated",
@@ -172,13 +165,7 @@ const MP_I18N = {
     renvoi_t: "تريد التدرّب؟ توجّه إلى المراجعة.",
     renvoi_s: "هنا تقدّمك المُصادَق عليه — التدريب يكون في قسم المراجعة.",
     s2_title: "دروسي",
-    s2_sub: "ما تدوّنه بعد ساعة القيادة",
-    s2_empty_t: "دفتر رحلتك ما زال فارغاً.",
-    s2_empty_s:
-      "بعد كل ساعة قيادة، تسألك الصفحة الرئيسية كيف سارت الأمور. وما تكتبه يصل إلى هنا.",
-    s2_tag_consol: "أواصل التدريب",
-    s2_tag_next: "أتقنتها",
-    s2_more: "+ {n} أقدم",
+    s2_sub: "تقارير مدرّبك عن الدروس",
     cr_lesson_of: "درس يوم {date}",
     cr_new: "جديد",
     cr_valid_one: "{n} مُصادَق عليها",
@@ -385,30 +372,7 @@ const STYLE = `<style>
 .mp-renvoi p i { display: block; font-style: normal; font-size: 10.5px; font-weight: 700; color: var(--mu2); margin-top: 2px; }
 .mp-renvoi svg { width: 16px; height: 16px; flex: none; color: var(--a-txt); }
 
-/* ── Étape 2 : mes leçons (le carnet de bord écrit par l'élève) ── */
-.mp-deb {
-  padding: 11px 13px; border-radius: 15px; margin-bottom: 8px;
-  background: var(--su); border: 1px solid var(--bo); box-shadow: 0 1px 2px rgba(10,13,26,.04);
-}
-.mp-deb-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.mp-deb-d { font-size: 10.5px; font-weight: 800; color: var(--mu2); text-transform: uppercase; letter-spacing: .05em; }
-.mp-deb-tag { flex: none; font: 800 10px/1 'Nunito', sans-serif; padding: 4px 8px; border-radius: 8px; }
-.mp-deb-tag.consol { background: var(--amp); color: var(--am-txt); }
-.mp-deb-tag.next { background: var(--grp2); color: var(--grk2); }
-.mp-deb-c { font: 800 13px/1.25 'Baloo 2', cursive; margin-top: 6px; }
-.mp-deb-n {
-  font-size: 12px; font-weight: 600; line-height: 1.45; color: var(--mu); margin-top: 5px;
-  padding-left: 9px; border-left: 2px solid var(--bo);
-}
-.mp-deb-more { font-size: 10.5px; font-weight: 800; color: var(--mu2); text-align: center; padding: 2px 0 4px; }
-.mp-deb-empty {
-  padding: 14px 15px; border-radius: 16px; background: var(--bg2); border: 1px dashed var(--bo);
-}
-.mp-deb-empty p { font-size: 12.5px; font-weight: 800; line-height: 1.3; }
-.mp-deb-empty p i {
-  display: block; font-style: normal; font-size: 11px; font-weight: 700; color: var(--mu2);
-  margin-top: 4px; line-height: 1.45;
-}
+/* ── Étape 2 : mes leçons (comptes-rendus) ── */
 
 .mp-linkrow {
   display: flex; align-items: center; gap: 10px; width: 100%; margin-top: 9px; padding: 11px 13px; border-radius: 15px; cursor: pointer;
@@ -645,86 +609,18 @@ function renderStep1({
 }
 
 // ─── Étape 2 : mes leçons ───────────────────────────────────────
-// Histoire de cette étape : elle affichait les COMPTES-RENDUS du moniteur.
-// Le retrait de l'émission moniteur (lot 4 du pivot, 30/07/2026) l'a vidée →
-// le hub était passé à 2 étapes.
+// Retrait du moniteur (lot 4 du pivot, 30/07/2026) : l'étape ② « Mes leçons »
+// (dernier compte-rendu + lien vers l'historique) vivait ici. Elle était
+// alimentée à 100 % par le moniteur → le hub passe à 2 étapes.
 //
-// Elle revient le même jour, retournée du bon côté : c'est l'ÉLÈVE qui écrit
-// son débrief après chaque heure, depuis la carte « Revenons sur ta leçon »
-// de l'accueil (table lecon_debriefs, migration 20260730160000). C'est le
-// « Débriefer » de la boucle Préparer → Conduire → Débriefer → Consolider,
-// qui n'avait plus aucune trace écrite.
-//
-// Lecture seule ici : on n'écrit un débrief que là où il a du sens, juste
-// après la leçon. Ce hub, c'est le carnet — on le relit.
-const DEBRIEF_MAX = 6;
-
-function fmtDebriefDate(iso) {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "";
-  const l = getLang();
-  return d.toLocaleDateString(
-    l === "ar" ? "ar" : l === "en" ? "en-GB" : "fr-FR",
-    {
-      day: "numeric",
-      month: "long",
-    },
-  );
-}
-
-function renderStep2({ debriefs, debriefFailed, num = 2 }) {
-  if (debriefFailed) {
-    return `<section class="mp-step" id="mp-step-lecons">
-      <span class="mp-step-num" aria-hidden="true">${num}</span>
-      <div class="mp-step-h"><h2 class="mp-step-t">${mpD("s2_title", "Mes leçons")}</h2></div>
-      <div class="mp-err">
-        <p>${mpD("s2_err", "« Mes leçons » indisponible. Vérifie ta connexion, puis réessaie.")}</p>
-        <button id="mp-retry-2" type="button">${mpD("retry", "Réessayer")}</button>
-      </div>
-    </section>`;
-  }
-
-  // Aucun débrief : on explique d'où ça viendra, sans jamais culpabiliser —
-  // même ton que la carte de l'accueil.
-  const body = !debriefs.length
-    ? `<div class="mp-deb-empty">
-        <p>${mpD("s2_empty_t", "Ton carnet de bord est encore vide.")}
-          <i>${mpD("s2_empty_s", "Après chaque heure de conduite, l'accueil te demande comment ça s'est passé. Ce que tu notes atterrit ici.")}</i></p>
-      </div>`
-    : debriefs
-        .slice(0, DEBRIEF_MAX)
-        .map((d) => {
-          const nom = d.competence_id ? labelComp(d.competence_id) : "";
-          const consolide = d.choix === "consolide";
-          const badge = consolide
-            ? mpD("s2_tag_consol", "Je consolide")
-            : mpD("s2_tag_next", "Acquis");
-          return `<article class="mp-deb">
-            <div class="mp-deb-h">
-              <span class="mp-deb-d">${esc(fmtDebriefDate(d.created_at))}</span>
-              <span class="mp-deb-tag ${consolide ? "consol" : "next"}">${badge}</span>
-            </div>
-            ${nom ? `<p class="mp-deb-c">${mpDyn(esc(nom))}</p>` : ""}
-            ${d.note ? `<p class="mp-deb-n">${mpDyn(esc(d.note))}</p>` : ""}
-          </article>`;
-        })
-        .join("");
-
-  const more =
-    debriefs.length > DEBRIEF_MAX
-      ? `<p class="mp-deb-more">${mpD("s2_more", `+ ${debriefs.length - DEBRIEF_MAX} plus anciennes`, { n: debriefs.length - DEBRIEF_MAX })}</p>`
-      : "";
-
-  return `<section class="mp-step" id="mp-step-lecons">
-    <span class="mp-step-num" aria-hidden="true">${num}</span>
-    <div class="mp-step-h">
-      <h2 class="mp-step-t">${mpD("s2_title", "Mes leçons")}</h2>
-      <span class="mp-step-s">${mpD("s2_sub", "ce que tu notes après l'heure")}</span>
-    </div>
-    ${body}
-    ${more}
-  </section>`;
-}
+// ⚠️ NE PAS LA RECONSTRUIRE « en la faisant écrire par l'élève ». Ça a été
+// tenté le 30/07 (PR #612, table lecon_debriefs) et retiré le jour même
+// (#613). Raison, mot de Rayan : « on s'en fout d'un journal intime, ça sert
+// à rien » — ce que l'élève écrivait ne lui revenait JAMAIS, donc il ne
+// rouvrait jamais la page. Une trace n'a de valeur que si elle est
+// RÉUTILISÉE : réorienter la préparation de l'heure suivante, ou devenir ce
+// que l'élève MONTRE à son moniteur (piste « Bridge », élèves non
+// francophones). Sans ça, c'est une page morte.
 
 // ─── Étape 3 : l'examen ─────────────────────────────────────────
 const READINESS_ICON = {
@@ -962,7 +858,6 @@ export async function mount(root) {
     parcoursModRes,
     examModRes,
     selfValRes,
-    debriefRes,
   ] = await Promise.allSettled([
     sb
       .from("validations")
@@ -1000,15 +895,6 @@ export async function mount(root) {
     // table séparée de `validations`, fusionnée en LECTURE SEULE ci-dessous
     // pour que la progression du hub reste juste pour un compte solo.
     sb.from("self_validations").select("competence_id").eq("eleve_id", me.id),
-    // Étape ② : le carnet de bord écrit par l'élève après chaque heure.
-    // RLS self-only (migration 20260730160000) — le .eq est une ceinture,
-    // la policy est la bretelle.
-    sb
-      .from("lecon_debriefs")
-      .select("competence_id, choix, note, created_at")
-      .eq("eleve_id", me.id)
-      .order("created_at", { ascending: false })
-      .limit(30),
   ]);
 
   const settledError = (result) =>
@@ -1019,13 +905,11 @@ export async function mount(root) {
   const profError = settledError(profRes);
   const sessError = settledError(sessRes);
   const selfValError = settledError(selfValRes);
-  const debriefError = settledError(debriefRes);
   const dataErrors = [
     ["validations", valError],
     ["profil moniteur", profError],
     ["séances", sessError],
     ["auto-validations", selfValError],
-    ["débriefs", debriefError],
   ].filter(([, error]) => error);
   if (dataErrors.length) {
     console.error(
@@ -1080,20 +964,15 @@ export async function mount(root) {
   );
   const nbLecons = sessRows.length;
 
-  // ── Étape 2 : mes leçons (carnet de bord) ──
-  const debriefs = !debriefError ? debriefRes.value?.data || [] : [];
-  const debriefFailed = !!debriefError;
-
-  // ── Étape 3 : examen ──
+  // ── Étape 2 : examen ──
   const examData =
     examDataRes.status === "fulfilled"
       ? examDataRes.value
       : { loadFailed: true };
   const examDate = examMod ? examMod.parseSavedDate() : null;
 
-  // `solo` ne pilote plus la présence de l'étape « Mes leçons » : depuis le
-  // 30/07/2026 elle est alimentée par l'élève lui-même, donc elle vaut pour
-  // TOUS. `solo` ne sert plus qu'aux libellés.
+  // `solo` ne pilote plus la présence de l'étape « Mes leçons » (retirée pour
+  // TOUS depuis le retrait du moniteur) : il ne sert plus qu'aux libellés.
   const solo = isSoloEleve(me);
   root.innerHTML = `${STYLE}
   <div class="mp anim-slide-up">
@@ -1102,8 +981,7 @@ export async function mount(root) {
     ${step1Failed ? "" : renderHero({ totalAcquis, currentTitre, allDone, solo })}
     <div class="mp-tl">
       ${renderStep1({ worldStates, step1Failed, totalMin, nbLecons, moniteurPrenom })}
-      ${renderStep2({ debriefs, debriefFailed, num: 2 })}
-      ${renderStep3({ examMod, examData, examDate, solo, num: 3 })}
+      ${renderStep3({ examMod, examData, examDate, solo, num: 2 })}
     </div>
   </div>`;
 
