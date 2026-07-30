@@ -13,6 +13,9 @@
       "Mets le contact (sans démarrer) et regarde les témoins : ils s'allument puis s'éteignent. S'il en reste un allumé (huile, batterie, frein), tu le signales."
     ],
     "pourquoi": "Tu dois pouvoir actionner un clignotant ou un essuie-glace sans quitter la route des yeux. Si tu cherches une commande en roulant, tu ne regardes plus devant.",
+    "contexte": "Chaque fois que tu montes dans une voiture que tu ne connais pas : celle de l'auto-école, celle d'un proche, une location. Et le jour de l'examen, dans un véhicule que tu n'auras peut-être jamais conduit.",
+    "risque": "Chercher une commande en roulant, c'est deux secondes les yeux ailleurs. À 50 km/h tu parcours près de trente mètres sans rien voir. L'inspecteur, lui, repère tout de suite le conducteur qui tâtonne.",
+    "influence": "Un conducteur qui cherche ses commandes ralentit sans raison, hésite, freine au mauvais moment. Derrière, personne ne comprend ce qu'il va faire : c'est là que les autres tentent un dépassement risqué.",
     "erreur": "Confondre les deux commodos et déclencher les essuie-glaces au lieu du clignotant. Mémo simple : clignotant à gauche, balais à droite.",
     "bva": "Pas de pédale d'embrayage : à tes pieds il n'y a que frein (gauche) et accélérateur (droite), tous deux pour le pied droit. À la place du levier de vitesses, tu trouves le sélecteur P / R / N / D. Les commodos (clignotant à gauche, essuie-glaces à droite) ne changent pas.",
     "questions": [
@@ -32,7 +35,9 @@
         "explication": "Un témoin qui reste allumé (huile, frein, batterie…) signale un défaut."
       }
     ],
-    "sources": ["las-de-la-route/4vKI0ny8LI8"]
+    "sources": [
+      "las-de-la-route/4vKI0ny8LI8"
+    ]
   },
   {
     "code": "C1b",
@@ -49,6 +54,9 @@
       "Ceinture : elle passe sur l'épaule (pas le cou) et sur le bassin (pas le ventre), à plat, pas vrillée."
     ],
     "pourquoi": "Un siège mal réglé = tu ne peux pas débrayer à fond (risque de caler) et tu te fatigues vite. Trente secondes de réglage = toute la leçon plus confortable et plus sûre.",
+    "contexte": "Avant de démarrer, à chaque fois. Surtout quand quelqu'un a conduit la voiture avant toi : un moniteur, un parent, l'élève du créneau précédent. Le siège n'est jamais resté à ta taille.",
+    "risque": "Jambe trop tendue, tu n'enfonces plus l'embrayage à fond et tu cales en plein carrefour. Bras tendus, tu ne peux plus tourner vite en cas d'imprévu. Un rétroviseur mal réglé, c'est un angle mort que tu crois surveiller.",
+    "influence": "Caler au milieu d'une intersection, c'est bloquer tout le monde et se faire klaxonner. La pression monte, la reprise devient plus difficile. Trente secondes de réglage évitent toute la scène.",
     "erreur": "Régler le siège trop loin pour « avoir de la place » : la jambe gauche est tendue et n'enfonce plus l'embrayage à fond → tu cales sans comprendre pourquoi.",
     "bva": "Comme il n'y a pas d'embrayage, le repère « jambe gauche un peu pliée sur l'embrayage » ne s'applique pas. Tu règles la distance pour que le pied droit atteigne frein et accélérateur sans tendre la jambe, et tu cales ton pied gauche au repos (sur le repose-pied à gauche). Hauteur, dossier, volant, rétros, ceinture : identiques.",
     "questions": [
@@ -68,7 +76,9 @@
         "explication": "À plat, pas vrillée."
       }
     ],
-    "sources": ["evry-village/s0yN0M5bzjA"]
+    "sources": [
+      "evry-village/s0yN0M5bzjA"
+    ]
   },
   {
     "code": "C1c",
@@ -85,6 +95,9 @@
       "Repère « tourne ton volant du côté où tu veux aller » : plutôt que de te perdre entre droite et gauche (surtout en marche arrière), tu tournes le volant vers le côté où tu veux que la voiture se rapproche, en marche avant comme en marche arrière."
     ],
     "pourquoi": "Ton regard guide tes mains. Si tu fixes le capot ou un obstacle, tu vas dessus. Si tu regardes loin où tu veux aller, ta trajectoire devient naturellement droite.",
+    "contexte": "Pendant tout le trajet, mais ça se joue surtout en virage, sur une route étroite, et quand quelque chose déboule et qu'il faut corriger vite.",
+    "risque": "Mains mal placées, tu n'as pas l'amplitude pour braquer d'un coup. Trajectoire qui mord la ligne, et tu te retrouves sur la voie d'en face au pire moment.",
+    "influence": "Une voiture qui flotte dans sa voie force les autres à s'écarter. Le cycliste que tu serres et la voiture d'en face qui te voit déborder, eux, n'ont pas le choix : ils subissent ta trajectoire.",
     "erreur": "Conduire « bras croisés » en permanence ou tenir le volant d'une seule main posée en haut : tu perds en précision et en force pour réagir vite. Autre piège fréquent en manœuvre : dès que la voiture part un peu de travers, donner des coups de volant dans tous les sens pour « rattraper » → tu te perds complètement. Le bon réflexe : avance lentement, observe où va la voiture, puis corrige doucement.",
     "bva": null,
     "questions": [
@@ -104,7 +117,9 @@
         "explication": "Les coups de volant à répétition = tu te perds."
       }
     ],
-    "sources": ["las-de-la-route/spEpsRbwVyo"]
+    "sources": [
+      "las-de-la-route/spEpsRbwVyo"
+    ]
   },
   {
     "code": "C1d",
@@ -141,7 +156,10 @@
         "explication": "Trop tôt = tu roules en roue libre, trop tard = tu cales."
       }
     ],
-    "sources": ["las-de-la-route/4vKI0ny8LI8", "las-de-la-route/sV8hlEY349g"]
+    "sources": [
+      "las-de-la-route/4vKI0ny8LI8",
+      "las-de-la-route/sV8hlEY349g"
+    ]
   },
   {
     "code": "C1e",
@@ -176,7 +194,9 @@
         "explication": "Ça se fait même à l'arrêt."
       }
     ],
-    "sources": ["las-de-la-route/sV8hlEY349g"]
+    "sources": [
+      "las-de-la-route/sV8hlEY349g"
+    ]
   },
   {
     "code": "C1f",
@@ -212,7 +232,10 @@
         "explication": "Rétrograder en plein virage déséquilibre la voiture."
       }
     ],
-    "sources": ["evry-village/jK_mORq5XPU", "las-de-la-route/-c6RPXS6X-A"]
+    "sources": [
+      "evry-village/jK_mORq5XPU",
+      "las-de-la-route/-c6RPXS6X-A"
+    ]
   },
   {
     "code": "C1g",

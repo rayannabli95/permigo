@@ -541,7 +541,10 @@ const FD_STYLE = `<style>
 .fd-shot figcaption{ padding:9px 12px 11px; font-size:11.5px; line-height:1.35; color:#3d2f7a; font-weight:600; }
 
 .fd-coach-wrap{ margin-top:6px; }
-.fd-coach{ display:grid; gap:9px; padding:0 18px; align-items:stretch; }
+/* auto-fit : 2 cartes par ligne sur mobile, 3 dès qu'il y a la place. Avant,
+   une grille à N colonnes écrasait les cartes au-delà de trois (une fiche
+   ICRI complète en compte jusqu'à six). */
+.fd-coach{ display:grid; grid-template-columns:repeat(auto-fit,minmax(148px,1fr)); gap:9px; padding:0 18px; align-items:stretch; }
 /* Carte coach = bouton (demande Rayan 22/07 : tap → lecture en grand). */
 .fd-cc{ position:relative; border-radius:14px; padding:11px 10px 12px; background:#f6f4ff; border:1px solid #e6e2fb; border-top-color:#fff;
   box-shadow:0 3px 0 rgba(20,12,60,.28), inset 0 1px 0 rgba(255,255,255,.8); display:flex; flex-direction:column; gap:7px;
@@ -556,11 +559,18 @@ const FD_STYLE = `<style>
 .fd-cc.err .fd-ic{ background:linear-gradient(180deg,#ffe3d6,#ffd0bd); border:1px solid rgba(230,90,50,.4); }
 .fd-cc.why .fd-ic{ background:linear-gradient(180deg,#ece5ff,#ddd2ff); border:1px solid rgba(124,95,224,.4); }
 .fd-cc.auto .fd-ic{ background:linear-gradient(180deg,#dcebff,#c6ddff); border:1px solid rgba(63,130,214,.4); }
+/* ICRI — contexte (quand), risque (ce qu'on encourt), influence (les autres). */
+.fd-cc.ctx .fd-ic{ background:linear-gradient(180deg,#d5f2ee,#bfe8e2); border:1px solid rgba(20,150,140,.4); }
+.fd-cc.rsk .fd-ic{ background:linear-gradient(180deg,#ffdfe4,#ffc9d2); border:1px solid rgba(200,50,80,.4); }
+.fd-cc.inf .fd-ic{ background:linear-gradient(180deg,#dcf0dd,#c6e6ca); border:1px solid rgba(45,150,90,.4); }
 /* Spans display:block (pas de h4/p dans un <button> — contenu phrasé only). */
 .fd-cc-h{ display:block; font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:11px; letter-spacing:.02em; line-height:1.15; margin:0; }
 .fd-cc.err .fd-cc-h{ color:#c2410c; }
 .fd-cc.why .fd-cc-h{ color:#5b3fbf; }
 .fd-cc.auto .fd-cc-h{ color:#1e5fa8; }
+.fd-cc.ctx .fd-cc-h{ color:#0f6f68; }
+.fd-cc.rsk .fd-cc-h{ color:#b02a45; }
+.fd-cc.inf .fd-cc-h{ color:#1f7a45; }
 .fd-cc-p{ display:block; font-size:10.5px; line-height:1.4; color:#6b5fa0; font-weight:500; margin:0; }
 
 .fd-source{ text-align:center; font-size:10.5px; color:#c9bdf5; font-weight:600; margin:18px 18px 0; }
@@ -1191,17 +1201,17 @@ export async function mount(root, param) {
     const ERR_IC = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3l9.5 16.5H2.5L12 3z" fill="#ef6a3a"/><path d="M12 10v4.5" stroke="#fff0e8" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17.4" r="1.2" fill="#fff0e8"/></svg>`;
     const WHY_IC = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 18h6M9.5 21h5" stroke="#7c5fe0" stroke-width="1.8" stroke-linecap="round"/><path d="M12 3a6 6 0 0 1 3.6 10.8c-.7.5-1.1 1.2-1.1 2H9.5c0-.8-.4-1.5-1.1-2A6 6 0 0 1 12 3z" fill="#7c5fe0"/></svg>`;
     const AUTO_IC = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 13l1.6-4.4A2 2 0 0 1 7.5 7h9a2 2 0 0 1 1.9 1.6L20 13v5a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-1H7v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-5z" fill="#3f82d6"/><circle cx="7.2" cy="15.4" r="1.1" fill="#eaf3ff"/><circle cx="16.8" cy="15.4" r="1.1" fill="#eaf3ff"/></svg>`;
+    // ICRI : horloge (quand), panneau danger (ce qu'on risque), deux usagers
+    // (l'effet sur les autres).
+    const CTX_IC = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill="#14968c"/><path d="M12 7v5.2l3.2 2" stroke="#eafaf7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    const RSK_IC = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill="#c8324f"/><path d="M13.4 6.5l-4.6 6.4h3.1l-1.3 4.6 4.6-6.4h-3.1l1.3-4.6z" fill="#fff0f3"/></svg>`;
+    const INF_IC = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="8.6" cy="9" r="3.1" fill="#2d965a"/><path d="M3 19c0-3.1 2.5-5.2 5.6-5.2s5.6 2.1 5.6 5.2z" fill="#2d965a"/><circle cx="16.8" cy="10.2" r="2.4" fill="#2d965a" opacity=".55"/><path d="M13.4 19c0-2.5 1.9-4.1 3.9-4.1 1.6 0 3.7 1 3.7 4.1z" fill="#2d965a" opacity=".55"/></svg>`;
     // Loupe discrète (affordance) : la carte se tape pour lire en grand.
     const ZOOM_IC = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><circle cx="10.5" cy="10.5" r="6.5" stroke="#8579b8" stroke-width="2"/><path d="M15.5 15.5L21 21" stroke="#8579b8" stroke-width="2" stroke-linecap="round"/><path d="M10.5 8v5M8 10.5h5" stroke="#8579b8" stroke-width="1.8" stroke-linecap="round"/></svg>`;
+    // Ordre ICRI (Intérêt → Contexte → Risque → Influence) : l'élève lit
+    // d'abord à quoi ça sert, puis quand ça tombe, ce qu'il encourt, et l'effet
+    // sur les autres. L'erreur type et la boîte auto ferment la série.
     const coach = [];
-    if (f.erreur)
-      coach.push({
-        k: "err",
-        h: ui("err_h", "L’erreur à éviter"),
-        fr: f.erreur,
-        tr: tr?.erreur,
-        ic: ERR_IC,
-      });
     if (f.pourquoi)
       coach.push({
         k: "why",
@@ -1209,6 +1219,38 @@ export async function mount(root, param) {
         fr: f.pourquoi,
         tr: tr?.pourquoi,
         ic: WHY_IC,
+      });
+    if (f.contexte)
+      coach.push({
+        k: "ctx",
+        h: ui("ctx_h", "Quand ça arrive"),
+        fr: f.contexte,
+        tr: tr?.contexte,
+        ic: CTX_IC,
+      });
+    if (f.risque)
+      coach.push({
+        k: "rsk",
+        h: ui("rsk_h", "Ce que tu risques"),
+        fr: f.risque,
+        tr: tr?.risque,
+        ic: RSK_IC,
+      });
+    if (f.influence)
+      coach.push({
+        k: "inf",
+        h: ui("inf_h", "L’effet sur les autres"),
+        fr: f.influence,
+        tr: tr?.influence,
+        ic: INF_IC,
+      });
+    if (f.erreur)
+      coach.push({
+        k: "err",
+        h: ui("err_h", "L’erreur à éviter"),
+        fr: f.erreur,
+        tr: tr?.erreur,
+        ic: ERR_IC,
       });
     if (f.bva)
       coach.push({
@@ -1224,7 +1266,7 @@ export async function mount(root, param) {
     const coachHtml = coach.length
       ? `<div class="fd-coach-wrap">
           ${seclab("Cartes coach", lang !== "fr" ? ui("coach", "Cartes coach") : null)}
-          <div class="fd-coach" style="grid-template-columns:repeat(${coach.length},1fr)">
+          <div class="fd-coach">
             ${coach
               .map(
                 (c, i) =>
