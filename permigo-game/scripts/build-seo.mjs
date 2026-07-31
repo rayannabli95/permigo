@@ -157,7 +157,7 @@ ${body}
 <a href="/guides/">Guides</a>
 <a href="/pour-moniteurs/">Pour les moniteurs</a>
 </div>
-PermiGo — l'app qui transforme la révision du permis en habitude. Entraînement au code et à la conduite, à la marque de ton moniteur.
+PermiGo. Le compagnon qui te prépare avant chaque heure de conduite et t'accompagne entre deux leçons.
 </div></footer>
 </body>
 </html>`;
@@ -282,7 +282,7 @@ function buildCentre(c) {
     ? `<section><h2>Autres centres en ${esc(c.departement)}</h2><div class="grid two">${related
         .map(
           (o) =>
-            `<a class="tile" href="${centrePath(o)}"><h3>${esc(o.nom)}</h3><div class="meta">Difficulté ${o.difficulte}/5 — ${esc(o.difficulteLabel)}</div></a>`,
+            `<a class="tile" href="${centrePath(o)}"><h3>${esc(o.nom)}</h3><div class="meta">Difficulté ${o.difficulte}/5 · ${esc(o.difficulteLabel)}</div></a>`,
         )
         .join("")}</div></section>`
     : "";
@@ -309,7 +309,7 @@ ${relatedHtml}
   const fl = faqLd(c.faq);
   if (fl) jsonLd.push(fl);
   return layout({
-    title: `Centre d'examen du permis à ${c.nom} (${c.deptNum}) — pièges & conseils | PermiGo`,
+    title: `Centre d'examen du permis à ${c.nom} (${c.deptNum}). Pièges et conseils | PermiGo`,
     desc: `Centre d'examen du permis de ${c.nom} : accès, difficulté (${c.difficulteLabel.toLowerCase()}), pièges réels du secteur et conseils pour réussir. ${c.resume.slice(0, 90)}…`,
     path: centrePath(c),
     jsonLd,
@@ -333,7 +333,7 @@ function buildCentresHub() {
         `<section><h2>${esc(dep)}</h2><div class="grid two">${list
           .map(
             (c) =>
-              `<a class="tile" href="${centrePath(c)}"><h3>${esc(c.nom)}</h3><div class="meta">Difficulté ${c.difficulte}/5 — ${esc(c.difficulteLabel)}</div></a>`,
+              `<a class="tile" href="${centrePath(c)}"><h3>${esc(c.nom)}</h3><div class="meta">Difficulté ${c.difficulte}/5 · ${esc(c.difficulteLabel)}</div></a>`,
           )
           .join("")}</div></section>`,
     )
@@ -342,7 +342,7 @@ function buildCentresHub() {
 ${crumbHtml(trail)}
 <span class="pill">Guides centres d'examen</span>
 <h1>Centres d'examen du permis</h1>
-<p class="lead big">Chaque centre a ses pièges. On te dit, secteur par secteur, ce qui fait échouer les candidats — et comment t'y préparer. Connaître ton centre, c'est une vraie longueur d'avance le jour J.</p>
+<p class="lead big">Chaque centre a ses pièges. On te dit, secteur par secteur, ce qui fait échouer les candidats. Et comment t'y préparer. Connaître ton centre, c'est une vraie longueur d'avance le jour J.</p>
 ${groups}
 ${renderCta({
     text: "Prépare ton centre dans PermiGo",
