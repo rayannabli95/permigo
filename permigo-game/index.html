@@ -170,9 +170,12 @@
       var sp = document.getElementById('splash');
       if (!sp) return;
       var v = sp.querySelector('video');
-      var RATE = 1.35;    // le logo est entièrement dessiné vers 1,25 s de vidéo
-      var SEEN = 1.35;    // on ferme dès que ces secondes de vidéo sont vues
-      var CAP = 2000;     // filet : le splash ne retarde jamais plus le boot
+      /* Réglages du tempo. Le premier jet allait trop vite : on n'avait pas le
+         temps de lire les bonjours. La vidéo repasse à sa vitesse naturelle et
+         se joue quasi en entier. */
+      var RATE = 1;       // vitesse naturelle (le logo se dessine sur 1,25 s)
+      var SEEN = 2;       // on ferme après ces secondes de vidéo vues (durée : 2,07 s)
+      var CAP = 3400;     // filet : le splash ne retarde jamais plus le boot
       var closed = false;
 
       /* « Bonjour » défile dans toutes les langues et se POSE sur celle de
@@ -248,8 +251,8 @@
          La même boucle fait défiler les « bonjour » — un setInterval dérivait
          tellement qu'on n'en voyait que 4 sur les 16. */
       var t0 = performance.now();
-      var STEP = 100;                   // un « bonjour » toutes les 100 ms
-      var LAND = 0.35;                  // sa langue se pose 0,35 s avant la fin
+      var STEP = 210;                   // un « bonjour » toutes les 210 ms
+      var LAND = 0.6;                   // sa langue se pose 0,6 s avant la fin
       var next = 0, hi = 0;
       (function watch() {
         if (closed) return;
