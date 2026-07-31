@@ -1377,7 +1377,7 @@ const STYLE = `<style>
 
 /* ═══════════════ PERMIS COMPACT (carte maquette) ═══════════════ */
 .acc2-permis-compact {
-  display: flex; align-items: center; gap: 14px;
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
   background: var(--su); border: 1px solid var(--bo);
   border-radius: 22px; padding: 14px; margin: 14px 16px 0;
   text-decoration: none; cursor: pointer;
@@ -1400,6 +1400,10 @@ const STYLE = `<style>
   filter: drop-shadow(0 2px 2px rgba(40,20,90,.22)) drop-shadow(0 8px 12px rgba(40,20,90,.18));
 }
 .acc2-permis-body { flex: 1; min-width: 0; }
+/* Quête du jour : deuxième ligne de la carte, pleine largeur. Vide, elle ne
+   doit pas laisser l'écart de 14px de la carte derrière elle. */
+#acc-quest-slot { width: 100%; }
+#acc-quest-slot:empty { display: none; }
 .acc2-permis-row {
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
 }
@@ -1944,15 +1948,15 @@ export async function mount(root) {
 
     // Composants non-bloquants injectés sous le fold
     if (accDiv) {
-      // Quêtes du jour — deux lignes réclamables, sous le permis virtuel
-      const anchorEl = accDiv.querySelector("#acc-action-anchor");
-      if (anchorEl) {
-        const dqHost = document.createElement("div");
-        dqHost.style.cssText = "margin:16px 16px 0";
-        anchorEl.insertAdjacentElement("afterend", dqHost);
+      // Quête du jour — une ligne, DANS la carte du permis virtuel. Sautée
+      // quand les 31 compétences sont acquises : il n'y a plus rien à
+      // certifier, et un objectif qu'on ne peut plus atteindre est pire que
+      // pas d'objectif du tout.
+      const questSlot = accDiv.querySelector("#acc-quest-slot");
+      if (questSlot && worlds.reduce((s, w) => s + w.done, 0) < 31) {
         Promise.resolve()
           .then(() =>
-            mountDailyQuests(dqHost, { prefetchedQuests: todayQuests }),
+            mountDailyQuests(questSlot, { prefetchedQuests: todayQuests }),
           )
           .catch(() => {});
       }
@@ -2296,14 +2300,13 @@ function render({
               )
       }</span>
     </div>
+    <!-- Quête du jour (injectée async) : elle vit DANS cette carte, sous le
+         compteur qu'elle fait avancer. Décision Rayan 31/07 — un bloc de moins
+         sur l'accueil, et plus rien entre « Prépare ta leçon » et la mise en
+         situation. Posée en pleine largeur (et non dans la colonne de droite)
+         sinon le texte se casse en trois lignes à côté du bouton. -->
+    <div id="acc-quest-slot"></div>
   </div>
-
-  <!-- Ancre pour les quêtes du jour (mountDailyQuests). Elles vivent SOUS le
-       permis virtuel : la quête du jour, c'est certifier une compétence, elle
-       se lit juste après le compteur qu'elle fait avancer. Avant, elle
-       s'insérait entre « Prépare ta leçon » et la mise en situation et
-       coupait en deux les deux grandes portes de l'accueil. -->
-  <div id="acc-action-anchor"></div>
 
   <!-- Tes ligues : École (REMC) + Révision (quiz solo), à égalité -->
   <div id="acc-lb-slot"></div>

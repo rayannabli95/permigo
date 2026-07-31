@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════
--- Quêtes du jour : 2 quêtes, et la certification compte ENFIN
+-- Quête du jour : une seule, et la certification compte ENFIN
 --
 -- Trois choses, dont un bug silencieux :
 --
@@ -9,10 +9,11 @@
 --    certifie lui-même dans `self_validations`. La barre restait donc à 0/1
 --    quoi que fasse l'élève. → nouveau déclencheur sur `self_validations`.
 --
--- 2) On ne propose plus que « Se connecter aujourd'hui » et « Certifier une
---    compétence » (décision Rayan 31/07). La quête quiz disparaît : elle
---    poussait vers le quiz nu, que l'élève fuit, et diluait la seule action
---    qui fait avancer son permis.
+-- 2) UNE seule quête par jour : « Certifier une compétence ». La quête quiz
+--    poussait vers le quiz nu, que l'élève fuit ; « Se connecter aujourd'hui »
+--    se réclamait pour être simplement là et alourdissait la carte pour rien
+--    (décision Rayan 31/07 : « ça fait trop lourd en texte »). Le rendez-vous
+--    quotidien récompensé existe déjà ailleurs : la roue de Récompenses.
 --
 -- 3) Les deux déclencheurs cherchaient la ligne du jour avec CURRENT_DATE
 --    (UTC) alors que get_today_quests la crée en heure de Paris. Entre minuit
@@ -79,7 +80,7 @@ BEGIN
 END;
 $$;
 
--- ── 3. Deux quêtes par jour, et le mot juste ──────────────────────────────
+-- ── 3. Une quête par jour, et le mot juste ───────────────────────────────
 -- « Certifier » et non « Valider » : depuis le pivot, c'est l'élève qui
 -- certifie, le moniteur ne valide plus rien.
 CREATE OR REPLACE FUNCTION public.get_today_quests()
@@ -106,20 +107,12 @@ BEGIN
     FROM daily_quests_progress
    WHERE user_id = v_user_id
      AND quest_date = v_today
-     AND quest_id IN ('quest_login', 'quest_validate_1');
+     AND quest_id = 'quest_validate_1';
 
-  IF v_existing < 2 THEN
+  IF v_existing < 1 THEN
     INSERT INTO daily_quests_progress (user_id, quest_date, quest_id, target, reward_xp, reward_gemmes)
-    VALUES
-      (v_user_id, v_today, 'quest_login',      1, 10, 5),
-      (v_user_id, v_today, 'quest_validate_1', 1, 50, 20)
+    VALUES (v_user_id, v_today, 'quest_validate_1', 1, 50, 20)
     ON CONFLICT (user_id, quest_date, quest_id) DO NOTHING;
-
-    UPDATE daily_quests_progress
-       SET progress = 1, completed_at = COALESCE(completed_at, now())
-     WHERE user_id = v_user_id
-       AND quest_date = v_today
-       AND quest_id = 'quest_login';
   END IF;
 
   -- Série (inchangé) : une activité quiz dans la journée entretient la série.
@@ -153,14 +146,14 @@ BEGIN
     END IF;
   END IF;
 
-  -- Filtre sur les 2 quêtes actives : les élèves qui ont déjà reçu leur
-  -- troisième ligne aujourd'hui ne voient pas la quête quiz traîner un jour
-  -- de plus. Les anciennes lignes restent en base (aucune donnée effacée).
+  -- Filtre sur la seule quête active : les élèves qui ont déjà reçu leurs
+  -- lignes « connexion » et « quiz » aujourd'hui ne les voient pas traîner un
+  -- jour de plus. Les anciennes lignes restent en base (aucune donnée effacée,
+  -- et les récompenses déjà réclamées le restent).
   RETURN QUERY
   SELECT
     dq.quest_id,
     CASE dq.quest_id
-      WHEN 'quest_login'      THEN 'Se connecter aujourd''hui'
       WHEN 'quest_validate_1' THEN 'Certifier une compétence'
       ELSE dq.quest_id
     END AS title,
@@ -173,11 +166,6 @@ BEGIN
   FROM daily_quests_progress dq
   WHERE dq.user_id = v_user_id
     AND dq.quest_date = v_today
-    AND dq.quest_id IN ('quest_login', 'quest_validate_1')
-  ORDER BY CASE dq.quest_id
-             WHEN 'quest_login' THEN 1
-             WHEN 'quest_validate_1' THEN 2
-             ELSE 3
-           END;
+    AND dq.quest_id = 'quest_validate_1';
 END;
 $$;
