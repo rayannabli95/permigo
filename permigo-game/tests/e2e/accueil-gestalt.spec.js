@@ -51,8 +51,16 @@ test.describe("Accueil élève — Gestalt cleanup", () => {
     ).toHaveCount(0);
   });
 
-  // ─── C5 — label nav visible sous l'onglet actif seulement ─────────
-  test("C5 — label de nav visible uniquement sous l'onglet actif", async ({
+  // ─── C5 — la nav distingue l'onglet actif ─────────────────────────
+  // La règle d'origine (« seul l'onglet actif porte un label ») a été
+  // ABANDONNÉE : la nav affiche désormais le label sous CHAQUE picto, comme
+  // repère des sections (cf. nav-bottom.js, « TOUJOURS visible sous chaque
+  // picto »). Le test vérifie donc la règle qui a remplacé l'ancienne :
+  // tous les labels se lisent, et l'actif se distingue par la COULEUR.
+  // Cette dernière assertion n'est pas cosmétique : le 31/07/2026 le label
+  // actif est passé à 1,62:1 sur les pages nuit — invisible — sans qu'aucun
+  // test ne s'en aperçoive.
+  test("C5 — tous les labels se lisent, l'onglet actif se distingue", async ({
     page,
   }) => {
     await expect(page.locator("#bottom-nav")).toBeVisible();
@@ -70,7 +78,8 @@ test.describe("Accueil élève — Gestalt cleanup", () => {
       .evaluate((el) => parseFloat(getComputedStyle(el).opacity));
     expect(activeOpacity).toBeGreaterThan(0.9);
 
-    // Labels des onglets inactifs masqués (opacité 0) + picto présent partout
+    // Tous les labels se lisent + un seul picto visible par onglet
+    const couleurs = new Set();
     for (let i = 0; i < count; i++) {
       const tab = tabs.nth(i);
       const isActive = await tab.evaluate((el) =>
@@ -82,13 +91,21 @@ test.describe("Accueil élève — Gestalt cleanup", () => {
       await expect(tab.locator(".bn-ico-fill svg")).toHaveCount(1);
       await expect(tab.locator("svg:visible")).toHaveCount(1);
 
-      if (!isActive) {
-        const op = await tab
-          .locator(".bn-label")
-          .evaluate((el) => parseFloat(getComputedStyle(el).opacity));
-        expect(op).toBeLessThan(0.05);
-      }
+      const { op, color } = await tab.locator(".bn-label").evaluate((el) => {
+        const cs = getComputedStyle(el);
+        return { op: parseFloat(cs.opacity), color: cs.color };
+      });
+      // Le label de CHAQUE onglet doit se lire, actif ou non.
+      expect(op).toBeGreaterThan(0.9);
+      couleurs.add(isActive ? `actif:${color}` : `repos:${color}`);
     }
+
+    // L'actif doit se distinguer par la couleur — c'est le SEUL signal qui
+    // reste maintenant que tous les labels sont affichés.
+    const actif = [...couleurs].filter((c) => c.startsWith("actif:"));
+    const repos = [...couleurs].filter((c) => c.startsWith("repos:"));
+    expect(actif).toHaveLength(1);
+    expect(repos.map((c) => c.slice(6))).not.toContain(actif[0].slice(6));
   });
 
   // ─── C8 — pas de doublon d'entrée « examen blanc » sur l'accueil ──
