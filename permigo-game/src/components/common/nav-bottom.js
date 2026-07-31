@@ -230,8 +230,13 @@ const STYLE = `
     transition: color .15s var(--ease);
   }
   .bn-tab.active .bn-label {
-    /* Label 9.5px : l'accent pur ne tient pas le 4.5:1 — on l'ancre vers l'encre */
-    color: color-mix(in srgb, var(--adk) 55%, var(--ink));
+    /* Label 9.5px : l'accent pur ne tient pas le 4.5:1 — on l'ancre vers l'encre.
+       ⚠️ Sur une page nuit (chromeNight), --ink suit le THÈME et reste sombre
+       alors que la nav, elle, est passée au noir : le libellé actif devenait
+       illisible (mesuré à 1.62:1). Comme l'icône juste au-dessus, on suit donc
+       le chrome quand il est là, et on ne retombe sur l'encre que sinon.
+       (Aucun accent grave ici : ce bloc vit dans un template JS.) */
+    color: var(--chrome-a-sm, color-mix(in srgb, var(--adk) 55%, var(--ink)));
   }
   .bn-tab:active { transform: scale(.93); transition: transform .12s; }
   @keyframes bnTabIntro {
