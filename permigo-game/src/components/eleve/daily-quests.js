@@ -75,9 +75,15 @@ function cleanQuestTitle(title) {
     .trim();
 }
 
-// Titre affiché : traduction par quest_id (enum fermé), repli titre DB nettoyé.
+// Libellés FR portés par l'app plutôt que par la base : depuis le pivot, le
+// mot juste est « certifier » (c'est l'élève qui certifie, le moniteur ne
+// valide plus rien) — et l'écran n'a pas à attendre une migration pour le dire.
+const QUEST_FR = { quest_validate_1: "Certifier une compétence" };
+
+// Titre affiché : traduction par quest_id (enum fermé), repli libellé FR de
+// l'app, puis titre DB nettoyé si l'id est inconnu.
 function questTitle(q) {
-  return dqt(q.quest_id, cleanQuestTitle(q.title));
+  return dqt(q.quest_id, QUEST_FR[q.quest_id] || cleanQuestTitle(q.title));
 }
 
 // Où emmener l'élève quand la quête n'est pas encore faite. Sans ça, la carte
@@ -177,9 +183,13 @@ export async function mountDailyQuests(root, { prefetchedQuests } = {}) {
     }
   }
 
-  // Récompense déjà prise (ou rien à faire) → rien à montrer : la carte du
-  // permis se referme sans trait pointillé qui pende.
-  const quest = quests.find((q) => !q.claimed);
+  // « Se connecter aujourd'hui » ne s'affiche plus : elle se réclamait pour
+  // être simplement là (décision Rayan 31/07). Le serveur ne la crée plus,
+  // mais on la filtre AUSSI ici — sinon, entre le déploiement de cet écran et
+  // celui de la base, c'est elle qui occuperait la carte du permis.
+  // Récompense déjà prise (ou rien à faire) → rien à montrer, et la carte se
+  // referme sans trait pointillé qui pende.
+  const quest = quests.find((q) => !q.claimed && q.quest_id !== "quest_login");
   if (!quest) return;
 
   ensureStyle();
