@@ -78,6 +78,7 @@ function rendre() {
   } else if (etat.ecran === "beat") {
     corps = renderBeat(beatCourant(), {
       assetStates: etat.assetStates,
+      reponses: etat.reponsesJouees || {},
       verrouille: etat.verrouille,
       retour: etat.retour,
       ton: etat.ton,
@@ -91,10 +92,10 @@ function rendre() {
 
   racine.innerHTML = `<div class="mp-shell">${barre()}${corps}</div>`;
 
-  // marquage des réponses déjà jouées
+  // marquage des réponses déjà jouées (les pastilles le portent déjà)
   if (etat.ecran === "beat" && etat.reponsesJouees) {
     Object.entries(etat.reponsesJouees).forEach(([id, valeur]) => {
-      const bouton = racine.querySelector(`[data-answer="${CSS.escape(id)}"]`);
+      const bouton = racine.querySelector(`.mp-answer[data-answer="${CSS.escape(id)}"]`);
       if (bouton) bouton.dataset.etat = valeur;
     });
   }

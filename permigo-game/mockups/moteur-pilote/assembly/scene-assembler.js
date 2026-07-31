@@ -18,6 +18,23 @@ const RENDUS_PAR_FAMILLE = Object.freeze({
 });
 
 /**
+ * Les photos.
+ *
+ * On dessine ce qui change d'état — un tableau de bord, un voyant, une aiguille.
+ * On photographie ce qu'on regarde sans le transformer — la voiture, le pneu, le
+ * compartiment moteur. Dessinés, ces objets-là font toujours pauvres.
+ *
+ * Les photos sont prises en JOUR NEUTRE : c'est le CSS qui fait la nuit, et un
+ * halo posé par-dessus qui allume un phare. Une photo peut donc changer d'état.
+ */
+const PHOTOS = Object.freeze({
+  "voiture-avant": "../photos/voiture-avant.webp",
+  "voiture-arriere": "../photos/voiture-arriere.webp",
+  pneu: "../photos/pneu.webp",
+  moteur: "../photos/moteur.webp",
+});
+
+/**
  * Proportion naturelle d'un objet. C'est une connaissance de bibliothèque, pas
  * de mission : la donnée n'a pas à savoir qu'un bloc compteurs est large.
  */
@@ -44,7 +61,24 @@ export function assetId(asset) {
  * Un objet posé dans la scène. `state` vient du déroulé du jeu, pas de la
  * donnée : la mission décrit un repos, le jeu décide de `found` et `error`.
  */
+function renderPhoto(asset) {
+  const source = PHOTOS[asset.type];
+  const halos = (asset.options?.glows || [])
+    .map(
+      (halo) =>
+        `<span class="mp-glow" style="left:${halo.x}%;top:${halo.y}%"></span>`,
+    )
+    .join("");
+
+  return `
+    <div class="mp-photo" data-asset="${escapeText(assetId(asset))}">
+      <img src="${escapeText(source)}" alt="${escapeText(asset.options?.alt || "")}">
+      ${halos}
+    </div>`;
+}
+
 function renderAsset(asset, etats) {
+  if (asset.family === "photo") return renderPhoto(asset);
   const rendu = RENDUS_PAR_FAMILLE[asset.family];
   const id = assetId(asset);
   const state = etats[id] || asset.options?.state || "idle";
@@ -61,6 +95,31 @@ function renderAsset(asset, etats) {
     <div class="mp-asset" style="${style}" data-asset="${escapeText(id)}">
       ${rendu(asset.type, { ...asset.options, state })}
     </div>`;
+}
+
+/**
+ * Les pastilles posées sur la photo.
+ *
+ * Ici la réponse EST l'endroit : on ne peut pas désigner un pneu depuis une
+ * liste. La pastille est donc un anneau creux, l'objet reste visible au milieu,
+ * et son libellé n'est lu que par les lecteurs d'écran.
+ */
+function renderHotspots(beat, { verrouille, reponses = {} }) {
+  return beat.answers.options
+    .map((option, i) => {
+      const etat = reponses[option.id];
+      return `
+        <button
+          class="mp-hotspot"
+          type="button"
+          data-answer="${escapeText(option.id)}"
+          ${etat ? `data-etat="${etat}"` : ""}
+          ${verrouille && !etat ? "disabled" : ""}
+          style="left:${option.at.x}%;top:${option.at.y}%"
+          aria-label="${escapeText(option.label)}"
+        ><span aria-hidden="true">${i + 1}</span></button>`;
+    })
+    .join("");
 }
 
 /** La bande de réponses. Elle vit SOUS le cadre : elle ne couvre aucun objet. */
@@ -98,6 +157,7 @@ function renderAnswers(beat, { verrouille }) {
 export function renderBeat(beat, etat) {
   const {
     assetStates = {},
+    reponses = {},
     verrouille = false,
     retour = "",
     ton = "neutre",
@@ -118,11 +178,16 @@ export function renderBeat(beat, etat) {
 
       <div class="mp-stage" data-scene="${escapeText(beat.scene)}">
         ${beat.assets.map((asset) => renderAsset(asset, assetStates)).join("")}
+        ${
+          beat.answers.kind === "hotspot"
+            ? renderHotspots(beat, { verrouille, reponses })
+            : ""
+        }
       </div>
 
       <div class="mp-panel">
         <p class="mp-prompt" dir="auto">${escapeText(beat.prompt)}</p>
-        ${renderAnswers(beat, { verrouille })}
+        ${beat.answers.kind === "hotspot" ? "" : renderAnswers(beat, { verrouille })}
         <p class="mp-feedback is-${ton}" dir="auto" role="status" aria-live="polite">${escapeText(retour)}</p>
         ${
           indiceVisible

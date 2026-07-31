@@ -19,11 +19,13 @@ export const ASSET_FAMILIES = Object.freeze([
   "driving", // lot 1 : pédales, pieds, sélecteur, levier
   "dashboard", // lot 2 : compteurs, voyants, compte-tours
   "vehicle", // lot 3 : voiture, pneu, feux, capot
+  "photo", // ce qu'on regarde sans le transformer : dessiné, ça fait pauvre
 ]);
 
 export const ANSWER_KINDS = Object.freeze([
   "choice", // l'élève choisit une phrase
-  "target", // l'élève désigne un objet de la scène
+  "target", // l'élève désigne un objet dessiné de la scène
+  "hotspot", // l'élève montre un endroit sur la photo
 ]);
 
 export const TRANSMISSIONS = Object.freeze(["manual", "automatic"]);
@@ -82,6 +84,19 @@ function validerAsset(asset, chemin) {
     );
   }
   exigeTexte(asset.type, `${chemin}.type`, 2);
+  if (asset.family === "photo") {
+    if (!asset.options?.alt) {
+      throw new MissionSchemaError(
+        `${chemin}.options.alt`,
+        "une photo a besoin d'une description pour les lecteurs d'écran",
+      );
+    }
+    (asset.options.glows || []).forEach((halo, i) => {
+      exigePourcentage(halo?.x, `${chemin}.options.glows[${i}].x`);
+      exigePourcentage(halo?.y, `${chemin}.options.glows[${i}].y`);
+    });
+    return; // la photo remplit le cadre : pas d'ancrage à valider
+  }
   if (!asset.anchor || typeof asset.anchor !== "object") {
     throw new MissionSchemaError(`${chemin}.anchor`, "manquant");
   }
@@ -160,6 +175,13 @@ function validerBeat(beat, chemin) {
       );
     }
     idsReponses.add(option.id);
+    if (reponses.kind === "hotspot") {
+      if (!option.at || typeof option.at !== "object") {
+        throw new MissionSchemaError(sous, "une pastille a besoin d'un point `at`");
+      }
+      exigePourcentage(option.at.x, `${sous}.at.x`);
+      exigePourcentage(option.at.y, `${sous}.at.y`);
+    }
     if (reponses.kind === "target" && !idsAssets.has(option.id)) {
       throw new MissionSchemaError(
         sous,

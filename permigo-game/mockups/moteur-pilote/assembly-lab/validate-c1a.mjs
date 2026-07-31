@@ -34,12 +34,28 @@ const TYPES_CONNUS = new Set(
 );
 C1A_INSPECTION_360.beats.forEach((beat) => {
   beat.assets.forEach((asset) => {
+    if (asset.family === "photo") return; // une photo n'est pas un dessin
     assert.ok(
       TYPES_CONNUS.has(asset.type),
       `Objet inconnu de la bibliothèque : ${asset.type}`,
     );
   });
 });
+
+// Les photos référencées existent vraiment sur le disque.
+{
+  const { access } = await import("node:fs/promises");
+  const { fileURLToPath } = await import("node:url");
+  const dossier = fileURLToPath(new URL("../photos/", import.meta.url));
+  for (const beat of C1A_INSPECTION_360.beats) {
+    for (const asset of beat.assets) {
+      if (asset.family !== "photo") continue;
+      await access(`${dossier}${asset.type}.webp`).catch(() => {
+        throw new Error(`Photo manquante : ${asset.type}.webp`);
+      });
+    }
+  }
+}
 
 // Le schéma refuse bien une mission qui promet une certification.
 assert.throws(
@@ -176,6 +192,43 @@ for (const width of [320, 390, 520]) {
       });
     });
     assert.equal(chevauche, false, `Une réponse recouvre un objet sur « ${beat.id} »`);
+
+    // 3b bis — les pastilles posées sur la photo ne se chevauchent pas et
+    // restent dans le cadre : une réponse hors cadre est une réponse perdue.
+    if (beat.answers.kind === "hotspot") {
+      const probleme = await page.evaluate(() => {
+        const cadre = document.querySelector(".mp-stage").getBoundingClientRect();
+        const pastilles = [...document.querySelectorAll(".mp-hotspot")].map((n) =>
+          n.getBoundingClientRect(),
+        );
+        const dehors = pastilles.some(
+          (r) =>
+            r.left < cadre.left - 1 ||
+            r.right > cadre.right + 1 ||
+            r.top < cadre.top - 1 ||
+            r.bottom > cadre.bottom + 1,
+        );
+        let collees = false;
+        for (let i = 0; i < pastilles.length; i += 1) {
+          for (let j = i + 1; j < pastilles.length; j += 1) {
+            const a = pastilles[i];
+            const b = pastilles[j];
+            if (
+              a.left < b.right && a.right > b.left &&
+              a.top < b.bottom && a.bottom > b.top
+            ) collees = true;
+          }
+        }
+        return { dehors, collees, nombre: pastilles.length };
+      });
+      assert.equal(probleme.dehors, false, `Pastille hors cadre sur « ${beat.id} » à ${width}px`);
+      assert.equal(probleme.collees, false, `Deux pastilles se chevauchent sur « ${beat.id} » à ${width}px`);
+      assert.equal(
+        probleme.nombre,
+        beat.answers.options.length,
+        `Pastilles manquantes sur « ${beat.id} »`,
+      );
+    }
 
     // 3c — toutes les cibles font au moins 44 px.
     const tropPetit = await page.evaluate(() => {
