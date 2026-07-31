@@ -42,7 +42,7 @@ const MC_I18N = {
     open_aria: "Open",
     already_aria: "Already opened:",
     unavailable: "“Chests” unavailable.",
-    check_conn: "Check your connection, then try again.",
+    check_conn: "Check your connection. Try again.",
     retry: "Try again",
     none: "No chest yet.",
     none_sub: "Finish a world or keep your streak going.",
@@ -531,7 +531,7 @@ export async function mount(root) {
 
   if (chests.length === 0) {
     html = loadFailed
-      ? `<div class="mc-empty"><div class="mc-empty-ico">${medallion("panneau", "orange", { size: 52 })}</div>${crtl(ct("unavailable", "« Coffres » indisponible."))}<br>${crtl(ct("check_conn", "Vérifie ta connexion, puis réessaie."))}<br>
+      ? `<div class="mc-empty"><div class="mc-empty-ico">${medallion("panneau", "orange", { size: 52 })}</div>${crtl(ct("unavailable", "« Coffres » indisponible."))}<br>${crtl(ct("check_conn", "Vérifie ta connexion puis réessaie."))}<br>
          <button class="mc-open-btn" id="mc-retry" style="margin-top:12px">${ct("retry", "Réessayer")}</button></div>`
       : `<div class="mc-empty"><div class="mc-empty-ico">${medallion("coffre", "slate", { size: 52 })}</div>${crtl(ct("none", "Aucun coffre pour l’instant."))}<br>${crtl(ct("none_sub", "Termine un monde ou tiens ta série."))}</div>`;
   }

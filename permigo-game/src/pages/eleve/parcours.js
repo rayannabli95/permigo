@@ -1738,7 +1738,7 @@ export async function mount(root) {
     root.innerHTML = `${STYLE}<div class="prc"><div class="prc-hd"><div><div class="prc-title">${prcD("page_title", "Mon parcours")}</div></div></div>
       <div style="padding:48px 24px;text-align:center;color:var(--mu3)">
         <div style="font-size:40px;margin-bottom:12px">${icon("alert-circle", { size: 30 })}</div>
-        <p style="font:600 15px/1.5 'Archivo',sans-serif">${prcD("err_1", "« Mon parcours » indisponible.")}<br>${prcD("err_2", "Vérifie ta connexion, puis réessaie.")}</p>
+        <p style="font:600 15px/1.5 'Archivo',sans-serif">${prcD("err_1", "« Mon parcours » indisponible.")}<br>${prcD("err_2", "Vérifie ta connexion puis réessaie.")}</p>
         <button id="prc-retry" style="margin-top:14px;padding:12px 24px;border:0;background:var(--a);color:var(--a-ink);border-radius:12px;cursor:pointer">${prcD("retry", "Réessayer")}</button>
       </div></div>`;
     root

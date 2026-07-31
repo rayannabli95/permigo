@@ -96,9 +96,9 @@ const RVC_I18N = {
     world_2_name: "Driving in traffic",
     world_2_sub: "Drive in normal conditions",
     world_3_name: "Difficult conditions",
-    world_3_sub: "Night, weather and sharing the road",
+    world_3_sub: "Night · weather · sharing the road",
     world_4_name: "Independent driving",
-    world_4_sub: "On your own, safely and economically",
+    world_4_sub: "On your own · safe · economical",
     to_start: "To start",
     in_progress: "In progress",
     see_all: "See all the cards. {name}",
@@ -1345,7 +1345,7 @@ export async function mount(root, param) {
           <span class="fd-tag"><span class="fd-dot"></span><b>${esc(f.code)} · ${esc(competenceTxt)} · ${esc(ui("monde", "Monde"))} ${esc(String(f.monde))}</b></span>
         </div>
         <h1 class="fd-title fd-gold">${bi(f.titre, tr?.titre)}</h1>
-        <div class="fd-sub">${esc(ui("sub", "Coche tes gestes, puis débloque le test."))}</div>
+        <div class="fd-sub">${esc(ui("sub", "Coche tes gestes puis débloque le test."))}</div>
         <div class="fd-xp">
           <div class="fd-xp-top"><span class="lab">${esc(ui("deck", "Ton deck"))}</span><span class="cnt fd-gold">${count}<small> / ${total} ${esc(ui(total > 1 ? "gestes" : "geste", total > 1 ? "gestes" : "geste"))}</small></span></div>
           <div class="fd-bar"><div class="fill" style="width:${count ? Math.max(pct, 4) : 0}%"></div></div>
@@ -1437,7 +1437,7 @@ export async function mount(root, param) {
       haptic("success");
       root.innerHTML = `${STYLE}<div class="rvc"><div class="rvc-done">
         <div class="rvc-done-e">${medallion("check", "green", { size: 64 })}</div>
-        <div class="rvc-done-t">${rvcText("order_done", "Dans l’ordre, nickel !")}</div>
+        <div class="rvc-done-t">${rvcText("order_done", "Dans l’ordre. Nickel !")}</div>
         <p class="rvc-sub">${rvcText("order_done_body", "Les {count} étapes de « {title} » : pliées.", { count: steps.length, title })}</p>
         <button class="rvc-go" data-next>${rvcText("continue", "Continuer")}</button>
       </div></div>`;

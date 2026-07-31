@@ -77,12 +77,12 @@ const REC_I18N = {
     kicker: "The Wheel",
     t_spin_html: "Your <em>free spin</em> is waiting",
     t_back: "Come back tomorrow to play again",
-    sub_std: "Steering wheels, avatars and titles to win every day.",
-    sub_big_head: "Avatars, backgrounds, titles… and sometimes a",
+    sub_std: "Steering wheels · avatars · titles to win every day.",
+    sub_big_head: "Avatars · backgrounds · titles… and sometimes a",
     sub_big_gift: "real gift",
     sub_big_from: "from",
     sub_big_full:
-      "Avatars, backgrounds, titles… and sometimes a <b>real gift</b> from {name}.",
+      "Avatars · backgrounds · titles… and sometimes a <b>real gift</b> from {name}.",
     cta_spin: "Spin the wheel",
     cta_view: "See the Wheel",
     claim_chest_t: "Chest to open",
@@ -110,7 +110,7 @@ const REC_I18N = {
     in_collection: "In your collection",
     see_shop: "See in the shop",
     skins_h: "Skins & backgrounds",
-    skins_s: "your car, your licence",
+    skins_s: "your car and your licence",
     owned: "Owned",
     see_all_shop: "See the whole shop →",
     tag_bg: "Licence bg",
@@ -536,13 +536,13 @@ function renderHero(ctx) {
       ? rrtl(
           rtR(
             "sub_big_full",
-            "Avatars, fonds, titres… et parfois un <b>vrai cadeau</b> signé {name}.",
+            "Avatars · fonds · titres… et parfois un <b>vrai cadeau</b> signé {name}.",
             { name: esc(moniteurPrenom) },
           ),
         )
       : rtD(
           "sub_std",
-          `Des volants, des avatars et des titres à gagner chaque jour.`,
+          `Des volants · des avatars · des titres à gagner chaque jour.`,
         );
   const ctaLabel = spinAvailable
     ? rtR("cta_spin", "Lancer la roue")
@@ -667,7 +667,7 @@ function renderBoutiquePanel(ctx) {
     </a>`;
 
   const gridHtml = grid.length
-    ? `<div class="rec-sec-h"><h2>${rt("skins_h", "Skins & fonds")}</h2><span>${rt("skins_s", "ta voiture, ton permis")}</span></div>
+    ? `<div class="rec-sec-h"><h2>${rt("skins_h", "Skins & fonds")}</h2><span>${rt("skins_s", "ta voiture et ton permis")}</span></div>
        <div class="rec-grid">${grid.map((it) => renderShopItem(it)).join("")}</div>`
     : "";
 

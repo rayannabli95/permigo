@@ -62,7 +62,7 @@ const I18N = {
       "Your weak point: {label}. This is where you can gain the most points. Work on it again in your next session.",
     weak_instructor:
       "Your weak point: {label}. This is where you can gain the most points. Show it to your instructor for your next lesson.",
-    clean_solo: "Nothing to work on, that was solid. Keep it up.",
+    clean_solo: "Nothing to work on. Keep it up.",
     clean_instructor:
       "Nothing to work on, that was solid. Show this score to your instructor.",
     real_score_note:
@@ -71,7 +71,7 @@ const I18N = {
     back_revisions: "Back to revision",
     share_kicker: "Mock driving test",
     share_above: "Above the {threshold} threshold",
-    share_progress: "{score} points, you're improving",
+    share_progress: "{score} points. You're improving",
     eliminatory_title: "Eliminatory fault",
     eliminatory_sub:
       "In the real test, one is enough to fail, whatever your number of points. That is why we stop here.",
@@ -108,7 +108,7 @@ const I18N = {
       "نقطة ضعفك: {label}. هنا يمكنك كسب أكبر عدد من النقاط. راجعها في جلستك القادمة.",
     weak_instructor:
       "نقطة ضعفك: {label}. هنا يمكنك كسب أكبر عدد من النقاط. اعرضها على مدرّبك في الدرس القادم.",
-    clean_solo: "لا شيء يحتاج إلى مراجعة، أداء ممتاز. واصل هكذا.",
+    clean_solo: "لا شيء يحتاج إلى مراجعة. واصل هكذا.",
     clean_instructor:
       "لا شيء يحتاج إلى مراجعة، أداء ممتاز. اعرض هذه الدرجة على مدرّبك.",
     real_score_note:
@@ -117,7 +117,7 @@ const I18N = {
     back_revisions: "العودة إلى المراجعات",
     share_kicker: "امتحان قيادة تجريبي",
     share_above: "فوق عتبة {threshold}",
-    share_progress: "{score} نقطة، أنت تتقدّم",
+    share_progress: "{score} نقطة. أنت تتقدّم",
     eliminatory_title: "خطأ إقصائي",
     eliminatory_sub:
       "في الامتحان الحقيقي، يكفي خطأ واحد للرسوب مهما كان عدد نقاطك. لذلك نتوقف هنا.",
@@ -555,7 +555,7 @@ export async function mount(root) {
                   ? "clean_solo"
                   : "clean_instructor",
                 isSoloEleve(getCurUser())
-                  ? "Rien à retravailler, c’est propre. Continue comme ça."
+                  ? "Rien à retravailler. Continue comme ça."
                   : "Rien à retravailler, c’est propre. Montre ce score à ton moniteur.",
               )}</div>`
         }
@@ -573,7 +573,7 @@ export async function mount(root) {
           ? format("share_above", "Au-dessus du seuil de {threshold}", {
               threshold: SEUIL,
             })
-          : format("share_progress", "{score} points, ça progresse", {
+          : format("share_progress", "{score} points. Ça progresse", {
               score: r.note,
             }),
       });

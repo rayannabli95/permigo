@@ -61,7 +61,7 @@ const SI_I18N = {
     cta_intro: "Let’s go!",
     cta_game: "Play",
     done: "Done",
-    title_perfect: "Flawless, well done!",
+    title_perfect: "Flawless. Well done!",
     title_half: "You’ve already got the eye for it",
     title_welcome: "Welcome aboard!",
     sub_welcome: "Your journey and welcome chest are waiting for you.",
@@ -70,7 +70,7 @@ const SI_I18N = {
     round_done: "Round complete",
     title_flawless: "Flawless!",
     title_good: "Well done!",
-    title_keep: "Getting there, keep going!",
+    title_keep: "Getting there. Keep going!",
     sub_flawless: "You read the road like a pro.",
     sub_good: "A few more reflexes and you’ll have it locked in.",
     sub_keep: "Every mistake you catch here is one less on the real road.",
@@ -90,14 +90,14 @@ const SI_I18N = {
     kicker_game: "لعبة مصغّرة",
     h1_intro: "تحدي الطريق",
     h1_game: "سيناريو الطريق",
-    sub_intro: "مشهد واحد، قرار واحد. أظهر حسّك في القيادة.",
-    sub_game: "مشهد واحد، قرار واحد. طبّق قانون السير.",
+    sub_intro: "مشهد واحد. قرار واحد. أظهر حسّك في القيادة.",
+    sub_game: "مشهد واحد. قرار واحد. طبّق قانون السير.",
     session_of: "جلسة من {n}",
     per_correct: "+{n} لكل إجابة صحيحة",
     cta_intro: "هيا بنا!",
     cta_game: "العب",
     done: "انتهى",
-    title_perfect: "بدون خطأ، أحسنت!",
+    title_perfect: "بدون خطأ. أحسنت!",
     title_half: "لديك بالفعل حسّ جيد",
     title_welcome: "مرحبًا بك معنا!",
     sub_welcome: "مسارك وصندوق الترحيب في انتظارك.",
@@ -106,7 +106,7 @@ const SI_I18N = {
     round_done: "انتهت الجولة",
     title_flawless: "بدون خطأ!",
     title_good: "أحسنت!",
-    title_keep: "الأمور تتحسن، واصل!",
+    title_keep: "الأمور تتحسن. واصل!",
     sub_flawless: "تقرأ الطريق كالمحترفين.",
     sub_good: "بضعة ردود أفعال أخرى وستتقنها تمامًا.",
     sub_keep: "كل خطأ تتعرّف عليه هنا هو خطأ أقل في درسك الحقيقي.",
@@ -483,7 +483,7 @@ export async function mount(root, param) {
     if (isIntro) {
       const introTitre =
         pct === 100
-          ? sit("title_perfect", "Sans faute, bravo !")
+          ? sit("title_perfect", "Sans faute. Bravo !")
           : pct >= 50
             ? sit("title_half", "Tu as déjà l’œil")
             : sit("title_welcome", "Bienvenue à bord !");
@@ -533,7 +533,7 @@ export async function mount(root, param) {
         ? sit("title_flawless", "Sans faute !")
         : pct >= 60
           ? sit("title_good", "Bien joué !")
-          : sit("title_keep", "Ça rentre, continue !");
+          : sit("title_keep", "Ça rentre. Continue !");
     const sousTitre =
       pct === 100
         ? sit("sub_flawless", "Tu lis la route comme un chef.")

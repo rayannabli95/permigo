@@ -123,7 +123,7 @@ const ACC_I18N = {
       "The wheel, the shop, your trophies and your league. All in one place.",
     hint_reviser: "Find this lesson any time in “Practice” 📚",
     err_t: "“Home” is unavailable",
-    err_s: "Check your connection, then try again.",
+    err_s: "Check your connection. Try again.",
     err_retry: "Try again",
     reason_weak: "🎯 Based on your recent mistakes",
     reason_next: "📍 Next on your route",
@@ -1990,7 +1990,7 @@ export async function mount(root) {
     console.error("[accueil] mount failed", e);
     root.innerHTML = `<div style="padding:60px 24px;text-align:center;color:var(--mu3);font-family:'Archivo',sans-serif">
       <div style="font:800 18px/1.3 'Archivo',sans-serif;color:var(--ink);margin-bottom:8px">${at("err_t", "« Accueil » indisponible")}</div>
-      <p style="font-size:14px;line-height:1.5;margin:0 0 20px">${at("err_s", "Vérifie ta connexion, puis réessaie.")}</p>
+      <p style="font-size:14px;line-height:1.5;margin:0 0 20px">${at("err_s", "Vérifie ta connexion puis réessaie.")}</p>
       <button id="acc-reload" style="padding:12px 24px;border:0;background:var(--a);color: var(--a-ink);border-radius:12px;font:700 14px/1 'Archivo',sans-serif;cursor:pointer">${at("err_retry", "Réessayer")}</button>
     </div>`;
     root
@@ -2641,7 +2641,7 @@ function openPrepThemeSheet(root, { prep, prepMondes, prepSuggestions }) {
     <div class="prep-sheet" role="dialog" aria-modal="true"
          aria-label="${escAttr(atR("sheet_aria", "Choisir le thème de ta prochaine leçon"))}" tabindex="-1">
       <div class="prep-sheet-grab" aria-hidden="true"></div>
-      <h2 class="prep-sheet-h">${at("sheet_h", "Ta prochaine leçon, c'est quoi ?")}</h2>
+      <h2 class="prep-sheet-h">${at("sheet_h", "Ta prochaine leçon c'est quoi ?")}</h2>
       <p class="prep-sheet-s">${at("sheet_s", "PermiGo a ciblé tes 3 prochaines. À toi de choisir.")}</p>
       <div class="prep-sheet-list">
         ${prepSuggestions

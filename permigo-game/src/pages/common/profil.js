@@ -1747,12 +1747,12 @@ const PROF_I18N = {
     cta_review: "Revise now",
     settings: "Settings",
     row_notifs: "My notifications",
-    row_notifs_sub: "Validations, encouragements, reports",
+    row_notifs_sub: "Validations · encouragements · reports",
     row_reminders: "Revision reminders",
     notif_off: "Off",
     notif_rhythm: "Stay on track",
     notif_blocked: "Blocked by the browser",
-    row_settings_sub: "Theme, language, privacy",
+    row_settings_sub: "Theme · language · privacy",
     logout: "Log out",
     delete_account: "Delete my account",
     delete_sheet_transparency:
@@ -1848,9 +1848,9 @@ const PROF_I18N = {
     ranking_empty:
       "Your ranking will appear after your first validations this month.",
     account_settings: "Account settings",
-    teacher_notif_sub: "Validations, lessons, messages",
+    teacher_notif_sub: "Validations · lessons · messages",
     validations_followups: "Validations & follow-ups",
-    theme_subscription_security: "Theme, subscription, security",
+    theme_subscription_security: "Theme · subscription · security",
     ach_first_validation: "1st validation",
     ach_50_validations: "50 validations",
     ach_100_validations: "100 validations",
@@ -1883,12 +1883,12 @@ const PROF_I18N = {
     cta_review: "راجع الآن",
     settings: "الإعدادات",
     row_notifs: "إشعاراتي",
-    row_notifs_sub: "التحقّقات، التشجيعات، التقارير",
+    row_notifs_sub: "التحقّقات · التشجيعات · التقارير",
     row_reminders: "تذكيرات المراجعة",
     notif_off: "معطّلة",
     notif_rhythm: "حافظ على وتيرتك",
     notif_blocked: "محظورة من المتصفح",
-    row_settings_sub: "السمة، اللغة، الخصوصية",
+    row_settings_sub: "السمة · اللغة · الخصوصية",
     logout: "تسجيل الخروج",
     delete_account: "حذف حسابي",
     delete_sheet_transparency:
@@ -1981,9 +1981,9 @@ const PROF_I18N = {
     points: "نقطة",
     ranking_empty: "سيظهر تصنيفك بعد أول اعتماداتك هذا الشهر.",
     account_settings: "إعدادات الحساب",
-    teacher_notif_sub: "الاعتمادات، الحصص، الرسائل",
+    teacher_notif_sub: "الاعتمادات · الحصص · الرسائل",
     validations_followups: "الاعتمادات والمتابعات",
-    theme_subscription_security: "السمة، الاشتراك، الأمان",
+    theme_subscription_security: "السمة · الاشتراك · الأمان",
     ach_first_validation: "أول اعتماد",
     ach_50_validations: "50 اعتمادًا",
     ach_100_validations: "100 اعتماد",
@@ -2299,7 +2299,7 @@ async function mountEleveArene(root, me) {
     <div class="arn-set-list">
       <a class="arn-row" href="#/notifications">
         <span class="arn-row-ico">${medallion("message", "blue", { size: 30, shape: "tile" })}</span>
-        <span class="arn-row-lab">${pt("row_notifs", "Mes notifications")}<small>${pt("row_notifs_sub", "Validations, encouragements, comptes-rendus")}</small></span>
+        <span class="arn-row-lab">${pt("row_notifs", "Mes notifications")}<small>${pt("row_notifs_sub", "Validations · encouragements · comptes-rendus")}</small></span>
         <span class="arn-chev"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </a>
       ${
@@ -2314,7 +2314,7 @@ async function mountEleveArene(root, me) {
       }
       <a class="arn-row" href="#/settings">
         <span class="arn-row-ico">${medallion("reglages", "slate", { size: 30, shape: "tile" })}</span>
-        <span class="arn-row-lab">${pt("settings", "Réglages")}<small>${pt("row_settings_sub", "Thème, langue, confidentialité")}</small></span>
+        <span class="arn-row-lab">${pt("settings", "Réglages")}<small>${pt("row_settings_sub", "Thème · langue · confidentialité")}</small></span>
         <span class="arn-chev"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </a>
     </div>
@@ -2858,7 +2858,7 @@ async function mountEnseignantArene(root, me) {
     <div class="enp-set-list">
       <a class="enp-row" href="#/notifications">
         <span class="enp-row-ico">${medallion("message", "blue", { size: 30, shape: "tile" })}</span>
-        <span class="enp-row-lab">${pt("row_notifs", "Mes notifications")}<small>${pt("teacher_notif_sub", "Validations, séances, messages")}</small></span>
+        <span class="enp-row-lab">${pt("row_notifs", "Mes notifications")}<small>${pt("teacher_notif_sub", "Validations · séances · messages")}</small></span>
         <span class="enp-chev"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </a>
       ${
@@ -2873,7 +2873,7 @@ async function mountEnseignantArene(root, me) {
       }
       <a class="enp-row" href="#/settings">
         <span class="enp-row-ico">${medallion("reglages", "slate", { size: 30, shape: "tile" })}</span>
-        <span class="enp-row-lab">${pt("account_settings", "Réglages du compte")}<small>${pt("theme_subscription_security", "Thème, abonnement, sécurité")}</small></span>
+        <span class="enp-row-lab">${pt("account_settings", "Réglages du compte")}<small>${pt("theme_subscription_security", "Thème · abonnement · sécurité")}</small></span>
         <span class="enp-chev"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </a>
     </div>

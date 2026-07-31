@@ -19,11 +19,11 @@ const PRQ_I18N = {
   en: {
     kick: "Just one more step",
     title: "Choose your Pass to<br>start training",
-    sub: "All the content, your progress, your rewards. Unlocked right away.",
+    sub: "All the content · your progress · your rewards. Unlocked right away.",
     guarantee: "Money-back guarantee within 3 days",
     or: "or",
     code_lab: "I have a code from my instructor",
-    code_help: "Your instructor pays for you: enter their code, it's free.",
+    code_help: "Your instructor pays for you. Enter their code it's free.",
     code_ph: "E.G. PERMIS75",
     code_btn: "Confirm",
     code_empty: "Enter your instructor's code.",
@@ -50,7 +50,7 @@ const PRQ_I18N = {
     guarantee: "استرداد المال مضمون خلال 3 أيام",
     or: "أو",
     code_lab: "لديّ رمز من مدرّبي",
-    code_help: "مدرّبك يدفع عنك: أدخِل رمزه، والاشتراك مجاني.",
+    code_help: "مدرّبك يدفع عنك. أدخِل رمزه والاشتراك مجاني.",
     code_ph: "مثال: PERMIS75",
     code_btn: "تأكيد",
     code_empty: "أدخِل رمز مدرّبك.",
@@ -184,14 +184,14 @@ export async function mount(root, me) {
     <div class="prq-head">
       <div class="prq-kick">${pt("kick", "Plus qu'une étape")}</div>
       <h1 class="prq-title">${ptR("title", "Choisis ton Pass pour<br>commencer ton entraînement")}</h1>
-      <p class="prq-sub">${pt("sub", "Tout le contenu, ta progression, tes récompenses. Débloqués tout de suite.")}</p>
+      <p class="prq-sub">${pt("sub", "Tout le contenu · ta progression · tes récompenses. Débloqués tout de suite.")}</p>
     </div>
     <div class="prq-tiers">${tiers}</div>
     <div class="prq-guar">${SHIELD} ${pt("guarantee", "Satisfait ou remboursé sous 3 jours")}</div>
     <div class="prq-or">${pt("or", "ou")}</div>
     <div class="prq-code">
       <div class="prq-code-lab">${pt("code_lab", "J'ai un code de mon moniteur")}</div>
-      <div class="prq-code-help">${pt("code_help", "Ton moniteur paie pour toi : entre son code, c'est gratuit.")}</div>
+      <div class="prq-code-help">${pt("code_help", "Ton moniteur paie pour toi. Entre son code c'est gratuit.")}</div>
       <div class="prq-code-row">
         <input class="prq-code-in" id="prq-code" type="text" autocomplete="off" maxlength="12" placeholder="${pt("code_ph", "EX : PERMIS75")}" />
         <button class="prq-code-btn" id="prq-code-btn" type="button">${pt("code_btn", "Valider")}</button>

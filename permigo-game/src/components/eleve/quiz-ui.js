@@ -120,7 +120,7 @@ const RESULT_MSGS_I18N = {
       "Zero mistakes. Clean.",
     ],
     passed: [
-      "Well done, you're moving forward!",
+      "Well done. You're moving forward!",
       "Solid. Keep it up.",
       "You're improving. It shows.",
     ],
@@ -198,9 +198,9 @@ const RESULT_MSGS = {
     "Zéro erreur. Propre.",
   ],
   passed: [
-    "Bien joué, ça avance !",
+    "Bien joué. Ça avance !",
     "Solide. Continue comme ça.",
-    "Tu progresses, ça se voit.",
+    "Tu progresses. Ça se voit.",
   ],
   learn: [
     "Chaque question t'apprend un truc.",

@@ -201,7 +201,7 @@ export async function mount(root, mode) {
 
   if (error) {
     toast(
-      "Classement indisponible. Vérifie ta connexion, puis réessaie.",
+      "Classement indisponible. Vérifie ta connexion puis réessaie.",
       "error",
     );
     return;

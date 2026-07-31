@@ -78,7 +78,7 @@ const STR = {
       {
         img: "/skins/volant-coin.webp",
         t: "Et ça donne envie de revenir",
-        d: "Série, ligue, récompenses. Le code est inclus aussi.",
+        d: "Série · ligue · récompenses. Le code est inclus aussi.",
       },
     ],
     mathsRows: [
@@ -86,9 +86,9 @@ const STR = {
       ["Budget permis moyen", "1 800 €"],
       ["PermiGo, par mois", "9,99 €"],
     ],
-    mathsNote: "Une leçon mal préparée, c'est 55 € de perdus.",
+    mathsNote: "Une leçon mal préparée = 55 € de perdus.",
     mathsSrc: "Sources : UFC-Que Choisir (budget permis) · Sécurité routière",
-    secPass: "Trois billets, un objectif",
+    secPass: "Trois billets. Un objectif.",
     secPassSub:
       "Le même contenu partout. Plus tu vois loin, moins tu paies : 3 mois au mensuel = 29,97 €.",
     passes: {
@@ -110,7 +110,7 @@ const STR = {
       },
       pass6: {
         name: "Billet Platine · 6 mois",
-        desc: "Conduite accompagnée ou longue prépa, zéro pression.",
+        desc: "Conduite accompagnée ou longue prépa. Zéro pression.",
         strike: "59,94 €",
         price: "39,99 €",
         eco: "−33 %",
@@ -123,7 +123,7 @@ const STR = {
     stampT: "Satisfait ou remboursé sous 3 jours",
     stampD:
       "Teste tout pendant 3 jours. Pas convaincu ? Remboursé. Ensuite, le mensuel s'annule à tout moment, en un clic.",
-    secProof: "S'entraîner régulièrement, ça paie",
+    secProof: "S'entraîner régulièrement paie",
     proofA: "Conduite accompagnée (entraînement régulier)",
     proofAVal: "74,7 %",
     proofAW: 74.7,
@@ -198,7 +198,7 @@ const STR = {
     situTxt:
       "One scene. One decision: who goes first? Right of way, distances, merging. Like behind the wheel.",
     situAlt: "On-the-road mini-game: a crossroads, you decide who goes first",
-    centreTitle: "Your test centre, decoded",
+    centreTitle: "Your test centre decoded",
     centreTxt:
       "Difficulty, access, examiner reputation and the known traps of the route. Centre by centre.",
     centreAlt: "Cergy test-centre sheet: difficulty 3/5, access, route traps",
@@ -216,7 +216,7 @@ const STR = {
       {
         img: "/skins/volant-coin.webp",
         t: "And you'll want to come back",
-        d: "Streaks, leagues, rewards. The code test is included too.",
+        d: "Streaks · leagues · rewards. The code test is included too.",
       },
     ],
     nonFranco: {
@@ -230,7 +230,7 @@ const STR = {
     ],
     mathsNote: "One unprepared lesson = €55 wasted.",
     mathsSrc: "Sources: UFC-Que Choisir (licence budget) · Sécurité routière",
-    secPass: "Three tickets, one goal",
+    secPass: "Three tickets. One goal.",
     secPassSub:
       "Same content everywhere. The longer you commit, the less you pay: 3 months on monthly = €29.97.",
     passes: {
@@ -244,7 +244,7 @@ const STR = {
       pass3: {
         tag: "Most popular",
         name: "Gold Ticket · 3 months",
-        desc: "2 to 4 months is what a licence really takes. Paid once, price locked.",
+        desc: "2 to 4 months is what a licence really takes. Paid once and price locked.",
         strike: "€29.97",
         price: "€24.99",
         eco: "−17%",
@@ -252,7 +252,7 @@ const STR = {
       },
       pass6: {
         name: "Platinum · 6 months",
-        desc: "Accompanied driving or a longer prep, zero pressure.",
+        desc: "Accompanied driving or a longer prep. Zero pressure.",
         strike: "€59.94",
         price: "€39.99",
         eco: "−33%",
@@ -339,7 +339,7 @@ const STR = {
     situTxt:
       "مشهد واحد. قرار واحد: من يمرّ أولاً؟ أولوية المرور، المسافات، الاندماج. كما خلف المقود.",
     situAlt: "لعبة مصغّرة على الطريق: مفترق طرق، أنت تقرّر من يمرّ أولاً",
-    centreTitle: "مركز امتحانك، مفصّلاً",
+    centreTitle: "مركز امتحانك مفصّلاً",
     centreTxt:
       "الصعوبة، الوصول، سمعة الممتحنين والفخاخ المعروفة في المسار. مركزاً تلو الآخر.",
     centreAlt: "بطاقة مركز امتحان Cergy: الصعوبة 3/5، الوصول، فخاخ المسار",
@@ -357,7 +357,7 @@ const STR = {
       {
         img: "/skins/volant-coin.webp",
         t: "وستشعر برغبة في العودة",
-        d: "سلاسل أيام، دوريات، مكافآت. واختبار الكود مُضمَّن أيضاً.",
+        d: "سلاسل أيام · دوريات · مكافآت. واختبار الكود مُضمَّن أيضاً.",
       },
     ],
     nonFranco: {
@@ -371,7 +371,7 @@ const STR = {
     ],
     mathsNote: "درس غير مُحضَّر = €55 ضائعة.",
     mathsSrc: "المصادر: UFC-Que Choisir (ميزانية الرخصة) · Sécurité routière",
-    secPass: "ثلاث تذاكر، هدف واحد",
+    secPass: "ثلاث تذاكر. هدف واحد.",
     secPassSub:
       "المحتوى نفسه في كل الباقات. كلما التزمت مدةً أطول، دفعت أقل: 3 أشهر بالاشتراك الشهري = €29.97.",
     passes: {
@@ -393,7 +393,7 @@ const STR = {
       },
       pass6: {
         name: "البلاتينية · 6 أشهر",
-        desc: "القيادة المرافَقة أو تحضير أطول، دون أي ضغط.",
+        desc: "القيادة المرافَقة أو تحضير أطول. دون أي ضغط.",
         strike: "€59.94",
         price: "€39.99",
         eco: "−33%",

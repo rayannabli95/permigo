@@ -72,7 +72,7 @@ const OB_I18N = {
     color_group_aria: "Choose your colour",
     sec_reminders: "Your evening reminders",
     rem_title: "Reminder every evening",
-    rem_sub: "8 pm · gentle, never spam",
+    rem_sub: "8 pm · gentle and never spam",
     rem_switch_aria: "Turn on evening reminders",
     rem_note:
       "<b>3 questions every evening, 2 minutes</b>. That's what really makes you progress.",
@@ -139,7 +139,7 @@ const OB_I18N = {
     color_group_aria: "اختر لونك",
     sec_reminders: "تذكيراتك المسائية",
     rem_title: "تذكير كل مساء",
-    rem_sub: "الساعة 20 · لطيف، دون إزعاج",
+    rem_sub: "الساعة 20 · لطيف ودون إزعاج",
     rem_switch_aria: "تفعيل التذكيرات المسائية",
     rem_note: "<b>3 أسئلة كل مساء، دقيقتان</b>. هذا ما يجعلك تتقدّم فعلاً.",
     reward_aria: "صندوق ترحيب: 50 XP و25 مقوداً",
@@ -373,7 +373,7 @@ export async function mount(root) {
               <div class="ob-toggle-row">
                 <div class="ob-toggle-txt">
                   <div class="ob-toggle-tt">${ob("rem_title", "Rappel chaque soir")}</div>
-                  <div class="ob-toggle-ts">${obR("rem_sub", "20&nbsp;h · doux, jamais spam")}</div>
+                  <div class="ob-toggle-ts">${obR("rem_sub", "20&nbsp;h · doux et jamais spam")}</div>
                 </div>
                 <button
                   class="ob-switch${notifWanted ? "" : " off"}"

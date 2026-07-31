@@ -89,7 +89,7 @@ const VS_I18N = {
     cf_kick: "Quiz passed at {p}%",
     cf_title: "Do you feel ready to move on?",
     cf_p: "By certifying “{n}”, you confirm this move is done in a real lesson. Your instructor can see your certifications.",
-    cf_yes: "Yes, I certify",
+    cf_yes: "Yes I certify",
     cf_no: "Not yet",
   },
   ar: {
@@ -134,7 +134,7 @@ const VS_I18N = {
     cf_kick: "نجحت في الاختبار بنسبة {p}%",
     cf_title: "هل تشعر أنك جاهز للانتقال إلى ما بعدها؟",
     cf_p: "بمصادقتك على «{n}» تؤكد أن هذه الحركة أُنجزت في درس حقيقي. يمكن لمدرّبك رؤية مصادقاتك.",
-    cf_yes: "نعم، أصادق",
+    cf_yes: "نعم أصادق",
     cf_no: "ليس بعد",
   },
 };
@@ -297,7 +297,7 @@ function loadErrorScreen(sub) {
       ${icon("alert-circle", { size: 20 })}
       <div>
         <b>${vsD("load_title", "Vérification indisponible")}</b>
-        <p>${vsD("load_body", "Impossible de vérifier cette compétence. Vérifie ta connexion, puis réessaie.")}</p>
+        <p>${vsD("load_body", "Impossible de vérifier cette compétence. Vérifie ta connexion puis réessaie.")}</p>
         <button class="vs-ghost" id="vs-retry-load" type="button">${vsD("retry", "Réessayer")}</button>
       </div>
     </div>
@@ -588,7 +588,7 @@ function confirmScreen(sub, scorePct) {
     <span class="vsr-kick">${icon("check", { size: 13 })} ${vsD("cf_kick", `Quiz réussi à ${scorePct}%`, { p: scorePct })}</span>
     <h1 class="vsr-ttl">${vsD("cf_title", "Tu te sens prêt·e à passer à la suite ?")}</h1>
     <p class="vsr-p">${vsD("cf_p", `En certifiant « ${sub.n} », tu confirmes que ce geste est acquis en vraie leçon. Ton enseignant peut voir tes certifications.`, { n: sub.n })}</p>
-    <button class="vsr-cta" id="vs-certify" type="button">${vsD("cf_yes", "Oui, je certifie")} ${icon("shield", { size: 16 })}</button>
+    <button class="vsr-cta" id="vs-certify" type="button">${vsD("cf_yes", "Oui je certifie")} ${icon("shield", { size: 16 })}</button>
     <button class="vsr-ghost" id="vs-not-yet" type="button">${vsD("cf_no", "Pas encore")}</button>
   </div>`;
 }

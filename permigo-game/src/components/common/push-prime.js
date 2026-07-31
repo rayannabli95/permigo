@@ -26,7 +26,7 @@ const PPR_I18N = {
   en: {
     title_eleve: "Turn on your reminders",
     title_other: "Turn on your notifications",
-    sub_eleve: "One tap now, and we handle the rest.",
+    sub_eleve: "One tap now. We handle the rest.",
     sub_other: "One tap now. Never more than one a day.",
     cta_eleve: "Turn on my reminders",
     cta_other: "Turn on notifications",
@@ -34,7 +34,7 @@ const PPR_I18N = {
     activated: "Reminders on ✓",
     later: "Later",
     row_daily: "Your question of the day",
-    row_streak: "Your streak, before it breaks",
+    row_streak: "Your streak before it breaks",
     row_check_solo: "When you validate a skill",
     row_check_teacher: "When your instructor validates you",
     row_bell: "Validations to confirm",
@@ -43,7 +43,7 @@ const PPR_I18N = {
   ar: {
     title_eleve: "فعّل تذكيراتك",
     title_other: "فعّل إشعاراتك",
-    sub_eleve: "لمسة واحدة الآن، ونحن نتكفّل بالباقي.",
+    sub_eleve: "لمسة واحدة الآن. ونحن نتكفّل بالباقي.",
     sub_other: "لمسة واحدة الآن. أبدًا أكثر من واحدة في اليوم.",
     cta_eleve: "فعّل تذكيراتي",
     cta_other: "فعّل الإشعارات",
@@ -51,7 +51,7 @@ const PPR_I18N = {
     activated: "تم تفعيل التذكيرات ✓",
     later: "لاحقًا",
     row_daily: "سؤال اليوم الخاص بك",
-    row_streak: "سلسلتك، قبل أن تنقطع",
+    row_streak: "سلسلتك قبل أن تنقطع",
     row_check_solo: "عند تصديقك على كفاءة",
     row_check_teacher: "عند تصديق معلمك عليك",
     row_bell: "التصديقات بانتظار التأكيد",
@@ -180,7 +180,7 @@ function show(me) {
   const rows = tu
     ? [
         ["sun", pp("row_daily", "Ta question du jour")],
-        ["flame", pp("row_streak", "Ta série, avant qu'elle saute")],
+        ["flame", pp("row_streak", "Ta série avant qu'elle saute")],
         [
           "check-circle",
           isSoloEleve(me)
@@ -197,7 +197,7 @@ function show(me) {
     ? pp("title_eleve", "Active tes rappels")
     : pp("title_other", "Activez vos notifications");
   const sub = tu
-    ? pp("sub_eleve", "Un tap maintenant, et on s'occupe du reste.")
+    ? pp("sub_eleve", "Un tap maintenant. On s'occupe du reste.")
     : pp("sub_other", "Un tap maintenant. Jamais plus d'une par jour.");
   const cta = tu
     ? pp("cta_eleve", "Activer mes rappels")

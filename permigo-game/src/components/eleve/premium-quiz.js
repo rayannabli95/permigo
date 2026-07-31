@@ -71,12 +71,12 @@ const PQ_I18N = {
     close: "Close",
     continue_: "Continue",
     great_t: "You've got this!",
-    great_s: "Great score. Keep it up, show your instructor.",
+    great_s: "Great score. Show your instructor.",
     good_t: "Nice work",
     good_pass_s: "Quiz passed. Do it again to lock it in.",
     good_mid_s: "Almost there. Try two or three more and it'll click.",
     low_t: "Getting there",
-    low_s: "Re-read the sheet, then try again. It'll sink in.",
+    low_s: "Re-read the sheet then try again. It'll sink in.",
     quest_pass: "✓ This counts for your daily quest",
     quest_miss: "Daily quest: get {needed}/{total} right. Try again anytime",
   },
@@ -105,12 +105,12 @@ const PQ_I18N = {
     close: "إغلاق",
     continue_: "متابعة",
     great_t: "أنت بارع!",
-    great_s: "نتيجة رائعة. حافظ على هذا المستوى وأرِه لمعلمك.",
+    great_s: "نتيجة رائعة. أرِه لمعلمك.",
     good_t: "أحسنت",
     good_pass_s: "اجتزت الاختبار. أعِده لترسيخ الحركة.",
     good_mid_s: "أوشكت. أعِد المحاولة مرتين أو ثلاثًا وستثبت في ذهنك.",
     low_t: "الأمر قادم",
-    low_s: "أعد قراءة البطاقة بهدوء، ثم أعد المحاولة. ستفهمها جيدًا.",
+    low_s: "أعد قراءة البطاقة بهدوء ثم أعد المحاولة. ستفهمها جيدًا.",
     quest_pass: "✓ هذا يُحتسب ضمن مهمتك اليومية",
     quest_miss:
       "مهمة اليوم: أجب عن {needed}/{total} بشكل صحيح. أعد المحاولة متى شئت",
@@ -405,7 +405,7 @@ export function mountPremiumQuiz(
       t = pqT("great_t", "Tu assures !");
       s = pqT(
         "great_s",
-        "Gros score. Garde ce niveau, montre-le à ton moniteur.",
+        "Gros score. Montre-le à ton moniteur.",
       );
     } else if (questHint && passed) {
       // 70–79 % : réussi — ne surtout pas dire « Presque » (contradictoire).
@@ -425,7 +425,7 @@ export function mountPremiumQuiz(
     } else {
       e = "💪";
       t = pqT("low_t", "Ça vient");
-      s = pqT("low_s", "Relis la fiche cool, puis retente. Ça va rentrer.");
+      s = pqT("low_s", "Relis la fiche puis retente. Ça va rentrer.");
     }
     const questLine = !questHint
       ? ""

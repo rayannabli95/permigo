@@ -574,7 +574,7 @@ function renderLoadError(root, me, error) {
         ${medallion("cone", "orange", { size: 52 })}
         <p style="margin:0;font:600 15px/1.5 'Archivo',sans-serif;color:#1a1c2e;">
           « Aujourd’hui » indisponible.<br>
-          <span style="font:500 13px/1.5 'Archivo',sans-serif;color:#5a6188;">Vérifie ta connexion, puis réessaie.</span>
+          <span style="font:500 13px/1.5 'Archivo',sans-serif;color:#5a6188;">Vérifie ta connexion puis réessaie.</span>
         </p>
         <button id="aj-retry" type="button" style="border:none;border-radius:999px;padding:13px 24px;min-height:44px;background:#4f46e5;color:#fff;font:700 14px/1 'Archivo',sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent;">Réessayer</button>
       </div>

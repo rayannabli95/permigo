@@ -394,7 +394,7 @@ export async function mount(root, eleveId) {
       <div class="lr-page">
         <div class="lr-err">
           <div class="lr-err-ico">${illus("clipboard", { size: 64 })}</div>
-          Livret indisponible. Vérifie ta connexion, puis réessaie.
+          Livret indisponible. Vérifie ta connexion puis réessaie.
           <button id="lr-retry" type="button">Réessayer</button>
         </div>
       </div>

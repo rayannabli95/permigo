@@ -76,7 +76,7 @@ const CL_I18N = {
     title: "Leaderboard",
     loading: "Loading…",
     err_title: "“Leaderboard” unavailable",
-    err_sub: "Check your connection, then try again.",
+    err_sub: "Check your connection. Try again.",
     retry: "Try again",
     sub: "The skills you have certified",
     link_pseudo_t: "Choose your public nickname",
@@ -241,7 +241,7 @@ export async function mount(root, initialTab) {
     root.innerHTML = `${ARENE_CSS}<div class="arn" style="${ARENE_ACCENT}">
       <div class="arn-hd"><h1>${xD(esc(xt("title", "Classement")))}</h1><p class="arn-sub">${xD(esc(xt("err_title", "« Classement » indisponible")))}</p></div>
       <div style="padding:28px 20px;text-align:center">
-        <p style="font:600 13.5px/1.5 'Archivo',sans-serif;color:var(--amute);margin:0 0 16px">${xD(esc(xt("err_sub", "Vérifie ta connexion, puis réessaie.")))}</p>
+        <p style="font:600 13.5px/1.5 'Archivo',sans-serif;color:var(--amute);margin:0 0 16px">${xD(esc(xt("err_sub", "Vérifie ta connexion puis réessaie.")))}</p>
         <button id="arn-retry" style="font:800 14px 'Archivo',sans-serif;padding:13px 28px;border-radius:14px;border:0;background:var(--aup);color:#04220f;cursor:pointer">${xD(esc(xt("retry", "Réessayer")))}</button>
       </div>
     </div>`;

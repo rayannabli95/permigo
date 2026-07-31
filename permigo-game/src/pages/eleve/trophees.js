@@ -58,7 +58,7 @@ const TRO_I18N = {
     new_badge: "NEW",
     new_aria: "New trophy",
     unavailable: "“Trophies” unavailable",
-    check_conn: "Check your connection, then try again.",
+    check_conn: "Check your connection. Try again.",
     kicker_leg: "Your legendary trophy",
     kicker_best: "Your best trophy",
     kicker_first: "Your first trophy",
@@ -606,7 +606,7 @@ export async function mount(root, openKey = null) {
       <div style="text-align:center;padding:56px 24px;color:var(--ar-mu)">
         <div style="margin-bottom:12px;color:var(--ar-gold2)">${icon("trophy", { size: 44 })}</div>
         <div style="font:800 16px/1.3 'Archivo', system-ui, sans-serif;color:#fff;margin-bottom:6px">${ttD("unavailable", "« Trophées » indisponible")}</div>
-        <div style="font:500 13px/1.5 'Archivo',sans-serif">${ttD("check_conn", "Vérifie ta connexion, puis réessaie.")}</div>
+        <div style="font:500 13px/1.5 'Archivo',sans-serif">${ttD("check_conn", "Vérifie ta connexion puis réessaie.")}</div>
       </div>`;
   }
 }

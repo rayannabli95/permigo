@@ -437,7 +437,7 @@ async function renderEcole(root, slugOrId) {
     {
       ico: icon("trophy", { size: 22 }),
       title: "Gamification",
-      sub: "XP, trophées et streaks",
+      sub: "XP · trophées · streaks",
       color: "var(--pu)",
     },
   ];

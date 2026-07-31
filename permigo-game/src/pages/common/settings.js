@@ -34,11 +34,11 @@ const SET_I18N = {
     app_group: "App",
     app_add_home: "Add to home screen",
     app_add_home_aria: "Add PermiGo to home screen",
-    app_add_home_sub: "Open PermiGo in one tap, like a real app",
+    app_add_home_sub: "Open PermiGo in one tap like a real app",
     ens_group: "Your students",
     ens_wheel: "Your rewards wheel",
     ens_wheel_aria: "Set up your rewards wheel",
-    ens_wheel_sub: "Choose the prizes for your students, your brand",
+    ens_wheel_sub: "Choose the prizes for your students under your brand",
     sub_group: "Subscription",
     sub_loading: "Loading…",
     sub_cta: "Subscribe · €9.99/month",
@@ -78,7 +78,7 @@ const SET_I18N = {
     theme_auto: "System",
     theme_aria: "Choose theme",
     lang: "Language",
-    lang_sub: "Questions show in your language, with French kept below.",
+    lang_sub: "Questions show in your language. French stays below.",
     lang_aria: "Choose language",
     accent: "Accent colour",
     accent_sub: "Don't like green? Pick your colour.",
@@ -95,7 +95,7 @@ const SET_I18N = {
     data_export_sub: "Download a JSON file of all your data",
     export_arrow: "Export →",
     marketing: "Marketing emails",
-    marketing_sub: "Tips, news and PermiGo offers",
+    marketing_sub: "Tips · news · PermiGo offers",
     marketing_aria: "Receive marketing emails",
     privacy_policy: "Privacy policy",
     read_arrow: "Read →",
@@ -108,7 +108,7 @@ const SET_I18N = {
       "Your personal data is deleted or anonymised: your first name, email and photo are removed, and your statistics become anonymous. Your account cannot be recovered.",
     delete: "Delete",
     load_err_title: "Couldn't load your preferences",
-    load_err_sub: "Check your connection, then try again.",
+    load_err_sub: "Check your connection. Try again.",
     retry: "Try again",
     prefs_saved: "Preferences saved",
     checkout_success: "Thank you! Your subscription is being activated.",
@@ -139,7 +139,7 @@ const SET_I18N = {
     connection_error: "Connection error",
     delete_action: "This action is",
     irreversible: "irreversible",
-    delete_confirm_instruction: "To confirm, type exactly:",
+    delete_confirm_instruction: "To confirm type exactly:",
     confirmation: "Confirmation",
     cancel: "Cancel",
     delete_auth_note:
@@ -153,11 +153,11 @@ const SET_I18N = {
     app_group: "التطبيق",
     app_add_home: "أضف إلى الشاشة الرئيسية",
     app_add_home_aria: "أضف بيرميغو إلى الشاشة الرئيسية",
-    app_add_home_sub: "افتح بيرميغو بلمسة واحدة، مثل تطبيق حقيقي",
+    app_add_home_sub: "افتح بيرميغو بلمسة واحدة مثل تطبيق حقيقي",
     ens_group: "طلابك",
     ens_wheel: "عجلة مكافآتك",
     ens_wheel_aria: "اضبط عجلة مكافآتك",
-    ens_wheel_sub: "اختر الجوائز لطلابك، بعلامتك",
+    ens_wheel_sub: "اختر الجوائز لطلابك بعلامتك",
     sub_group: "الاشتراك",
     sub_loading: "جارٍ التحميل…",
     sub_cta: "اشترك · 9,99 € / شهر",
@@ -197,7 +197,7 @@ const SET_I18N = {
     theme_auto: "النظام",
     theme_aria: "اختر السمة",
     lang: "اللغة",
-    lang_sub: "تظهر الأسئلة بلغتك، مع الاحتفاظ بالفرنسية تحتها.",
+    lang_sub: "تظهر الأسئلة بلغتك. وتبقى الفرنسية تحتها.",
     lang_aria: "اختر اللغة",
     accent: "لون التمييز",
     accent_sub: "لا يعجبك الأخضر؟ اختر لونك.",
@@ -598,7 +598,7 @@ export async function mount(root, param) {
   <div class="st-section" style="margin-top:20px;padding:28px 20px;text-align:center">
     <div style="margin-bottom:10px;color:var(--mu3)">${icon("alert-circle", { size: 30 })}</div>
     <div style="font:700 15px/1.3 'Archivo',sans-serif;color:var(--ink);margin-bottom:6px">${st("load_err_title", "Impossible de charger tes préférences")}</div>
-    <div style="font:500 13px/1.5 'Archivo',sans-serif;color:var(--mu3);margin-bottom:16px">${st("load_err_sub", "Vérifie ta connexion, puis réessaie.")}</div>
+    <div style="font:500 13px/1.5 'Archivo',sans-serif;color:var(--mu3);margin-bottom:16px">${st("load_err_sub", "Vérifie ta connexion puis réessaie.")}</div>
     <button class="st-save-btn" id="st-retry" style="margin:0 auto;width:auto;padding:10px 20px">${st("retry", "Réessayer")}</button>
   </div>
 </div>`;
@@ -684,7 +684,7 @@ ${
         <span class="st-ic" aria-hidden="true">${medallion("fusee", "cyan", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
           <div class="st-row-title">${st("app_add_home", "Ajouter à l'écran d'accueil")}</div>
-          <div class="st-row-sub">${st("app_add_home_sub", "Ouvre PermiGo d'un geste, comme une vraie app")}</div>
+          <div class="st-row-sub">${st("app_add_home_sub", "Ouvre PermiGo d'un geste comme une vraie app")}</div>
         </div>
         <div class="st-row-action">${_CHEV}</div>
       </div>
@@ -702,7 +702,7 @@ ${
         <span class="st-ic" aria-hidden="true">${medallion("cadeau", "orange", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
           <div class="st-row-title">${st("ens_wheel", "Ta roue de récompenses")}</div>
-          <div class="st-row-sub">${st("ens_wheel_sub", "Choisis les lots offerts à tes élèves, à ta marque")}</div>
+          <div class="st-row-sub">${st("ens_wheel_sub", "Choisis les lots à ta marque pour tes élèves")}</div>
         </div>
         <div class="st-row-action">${_CHEV}</div>
       </div>
@@ -855,7 +855,7 @@ ${
           <span class="st-ic" aria-hidden="true" style="font-size:26px;line-height:1;display:flex;align-items:center;justify-content:center">🌍</span>
           <div class="st-row-left">
             <div class="st-row-title">${st("lang", "Langue")}</div>
-            <div class="st-row-sub">${st("lang_sub", "Les questions s'affichent dans ta langue, le français gardé dessous.")}</div>
+            <div class="st-row-sub">${st("lang_sub", "Les questions s'affichent dans ta langue. Le français reste dessous.")}</div>
           </div>
         </div>
         <div class="st-theme-seg st-expand" id="lang-seg" role="group" aria-label="${stA("lang_aria", "Choisir la langue")}">
@@ -931,7 +931,7 @@ ${
         <span class="st-ic" aria-hidden="true">${medallion("megaphone", "orange", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
           <div class="st-row-title">${st("marketing", "Emails marketing")}</div>
-          <div class="st-row-sub">${st("marketing_sub", "Conseils, nouveautés et offres PermiGo")}</div>
+          <div class="st-row-sub">${st("marketing_sub", "Conseils · nouveautés · offres PermiGo")}</div>
         </div>
         <div class="st-row-action">
           <label class="st-tgl" aria-label="${stA("marketing_aria", "Recevoir les emails marketing")}">
@@ -1450,7 +1450,7 @@ function _showDeleteModal(root, me) {
   <div class="st-modal-body">
     ${st("delete_action", "Cette action est")} <strong>${st("irreversible", "irréversible")}</strong>.
     ${st("delete_modal_transparency", "Tes données personnelles sont supprimées ou anonymisées : ton prénom, ton email et ta photo disparaissent, tes statistiques deviennent anonymes. Ton compte ne pourra pas être récupéré.")}
-    <br><br>${st("delete_confirm_instruction", "Pour confirmer, tape exactement :")}<br><strong>${CONFIRM_TEXT}</strong>
+    <br><br>${st("delete_confirm_instruction", "Pour confirmer tape exactement :")}<br><strong>${CONFIRM_TEXT}</strong>
   </div>
   <div class="st-modal-label">${st("confirmation", "Confirmation")}</div>
   <input class="st-modal-inp" id="del-confirm-inp" type="text" placeholder="${escAttr(CONFIRM_TEXT)}" autocomplete="off" spellcheck="false">

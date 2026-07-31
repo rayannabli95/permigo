@@ -116,7 +116,7 @@ const MP_I18N = {
     day_many: "days",
     prep_h: "Your preparation",
     centre_t: "Your exam centre",
-    centre_s: "Difficulty, route traps, on-site tips",
+    centre_s: "Difficulty · route traps · on-site tips",
     verdict_high: "Ready for the exam. Your {t} core skills are validated.",
     verdict_mid: "Almost ready. {n} core skill{s} left to validate.",
     verdict_low:
@@ -184,7 +184,7 @@ const MP_I18N = {
     day_many: "أيام",
     prep_h: "استعدادك",
     centre_t: "مركز امتحانك",
-    centre_s: "الصعوبة، مطبّات المسار، نصائح في الموقع",
+    centre_s: "الصعوبة · مطبّات المسار · نصائح في الموقع",
     verdict_high: "جاهز للامتحان. مهاراتك الأساسية الـ{t} مُصادَق عليها.",
     verdict_mid: "قريبًا تكون جاهزًا. بقيت {n} مهارة أساسية للمصادقة.",
     verdict_low: "في طور الاستعداد. صادق على مهاراتك درسًا بعد درس.",
@@ -520,7 +520,7 @@ function renderStep1({ worldStates, step1Failed }) {
       <span class="mp-step-num" aria-hidden="true">1</span>
       <div class="mp-step-h"><h2 class="mp-step-t">${mpD("s1_title", "Mes compétences")}</h2></div>
       <div class="mp-err">
-        <p>${mpD("s1_err", "« Mes compétences » indisponible. Vérifie ta connexion, puis réessaie.")}</p>
+        <p>${mpD("s1_err", "« Mes compétences » indisponible. Vérifie ta connexion puis réessaie.")}</p>
         <button id="mp-retry-1" type="button">${mpD("retry", "Réessayer")}</button>
       </div>
     </section>`;
@@ -647,7 +647,7 @@ function renderStep3({ examMod, examData, examDate, solo = false, num = 3 }) {
       <span class="mp-step-num" aria-hidden="true">${num}</span>
       <div class="mp-step-h"><h2 class="mp-step-t">${mpD("s3_title", "L'examen")}</h2></div>
       <div class="mp-err">
-        <p>${mpD("s3_err", "« L'examen » indisponible. Vérifie ta connexion, puis réessaie.")}</p>
+        <p>${mpD("s3_err", "« L'examen » indisponible. Vérifie ta connexion puis réessaie.")}</p>
         <button id="mp-retry-3" type="button">${mpD("retry", "Réessayer")}</button>
       </div>
     </section>`;
@@ -739,7 +739,7 @@ function renderStep3({ examMod, examData, examDate, solo = false, num = 3 }) {
       ${medallion("carte", "blue", { size: 38 })}
       <div class="mp-centre-b">
         <div class="mp-centre-t">${mpD("centre_t", "Ton centre d'examen")}</div>
-        <div class="mp-centre-s">${mpD("centre_s", "Difficulté, pièges du parcours, conseils sur place")}</div>
+        <div class="mp-centre-s">${mpD("centre_s", "Difficulté · pièges du parcours · conseils sur place")}</div>
       </div>
       ${CHEVRON}
     </a>

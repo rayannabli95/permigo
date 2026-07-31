@@ -23,7 +23,7 @@ const COPY = {
   route: {
     kick: "Mode découverte",
     emoji: "🚀",
-    title: "Ça, c'est tout ton parcours",
+    title: "Voilà tout ton parcours",
     sub: "Cette partie s'ouvre avec ton Pass : l'entraînement complet, ta progression et tes récompenses.",
   },
 };
