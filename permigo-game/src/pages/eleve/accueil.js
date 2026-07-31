@@ -1377,7 +1377,7 @@ const STYLE = `<style>
 
 /* ═══════════════ PERMIS COMPACT (carte maquette) ═══════════════ */
 .acc2-permis-compact {
-  display: flex; align-items: center; gap: 14px;
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
   background: var(--su); border: 1px solid var(--bo);
   border-radius: 22px; padding: 14px; margin: 14px 16px 0;
   text-decoration: none; cursor: pointer;
@@ -1400,6 +1400,10 @@ const STYLE = `<style>
   filter: drop-shadow(0 2px 2px rgba(40,20,90,.22)) drop-shadow(0 8px 12px rgba(40,20,90,.18));
 }
 .acc2-permis-body { flex: 1; min-width: 0; }
+/* Quête du jour : deuxième ligne de la carte, pleine largeur. Vide, elle ne
+   doit pas laisser l'écart de 14px de la carte derrière elle. */
+#acc-quest-slot { width: 100%; }
+#acc-quest-slot:empty { display: none; }
 .acc2-permis-row {
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
 }
@@ -1750,14 +1754,11 @@ export async function mount(root) {
       attemptsRes.value?.data || [],
       streak,
     );
-    // quest_validate_1 (« Valider 1 compétence ») retirée de l'affichage :
-    // l'élève ne valide JAMAIS lui-même (c'est le moniteur). Quête « morte »
-    // qu'il ne peut pas accomplir → masquée en attendant sa version reformulée
-    // (« Sois prêt pour ta prochaine compétence », branchée sur les fiches de
-    // révision, avec une vraie condition côté élève) qui doit la remplacer.
-    const todayQuests = (todayQuestsRes.value?.data || []).filter(
-      (q) => q.quest_id !== "quest_validate_1",
-    );
+    // quest_validate_1 était masquée ici (« l'élève ne valide jamais lui-même,
+    // c'est le moniteur ») — raison devenue fausse avec le pivot : l'élève
+    // certifie lui-même, et depuis le 31/07 la certification autonome fait
+    // avancer la quête (déclencheur sur self_validations). On l'affiche donc.
+    const todayQuests = todayQuestsRes.value?.data || [];
     if (todayQuestsRes.status === "rejected" || todayQuestsRes.value?.error) {
       console.error(
         "[accueil] get_today_quests:",
@@ -1947,15 +1948,15 @@ export async function mount(root) {
 
     // Composants non-bloquants injectés sous le fold
     if (accDiv) {
-      // Quêtes du jour — carrousel réclamable, juste sous le CTA king
-      const anchorEl = accDiv.querySelector("#acc-action-anchor");
-      if (anchorEl) {
-        const dqHost = document.createElement("div");
-        dqHost.style.cssText = "margin:16px 16px 0";
-        anchorEl.insertAdjacentElement("afterend", dqHost);
+      // Quête du jour — une ligne, DANS la carte du permis virtuel. Sautée
+      // quand les 31 compétences sont acquises : il n'y a plus rien à
+      // certifier, et un objectif qu'on ne peut plus atteindre est pire que
+      // pas d'objectif du tout.
+      const questSlot = accDiv.querySelector("#acc-quest-slot");
+      if (questSlot && worlds.reduce((s, w) => s + w.done, 0) < 31) {
         Promise.resolve()
           .then(() =>
-            mountDailyQuests(dqHost, { prefetchedQuests: todayQuests }),
+            mountDailyQuests(questSlot, { prefetchedQuests: todayQuests }),
           )
           .catch(() => {});
       }
@@ -2225,9 +2226,6 @@ function render({
   ${debriefCard}
   ${consolCard}
 
-  <!-- Ancre pour les quêtes du jour (mountDailyQuests) -->
-  <div id="acc-action-anchor"></div>
-
   <!-- ══ MISE EN SITUATION — jaquette générique (esprit « mode de jeu ») ══
        La carte d'accueil ne montre JAMAIS le scénario du jour : même image,
        même texte tous les jours. La vraie scène (question + réponses) ne se
@@ -2302,8 +2300,13 @@ function render({
               )
       }</span>
     </div>
+    <!-- Quête du jour (injectée async) : elle vit DANS cette carte, sous le
+         compteur qu'elle fait avancer. Décision Rayan 31/07 — un bloc de moins
+         sur l'accueil, et plus rien entre « Prépare ta leçon » et la mise en
+         situation. Posée en pleine largeur (et non dans la colonne de droite)
+         sinon le texte se casse en trois lignes à côté du bouton. -->
+    <div id="acc-quest-slot"></div>
   </div>
-
 
   <!-- Tes ligues : École (REMC) + Révision (quiz solo), à égalité -->
   <div id="acc-lb-slot"></div>
