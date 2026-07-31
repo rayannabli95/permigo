@@ -20,6 +20,7 @@ export const env = {
   API_URL: getEnv('API_URL', 'http://localhost:3001'),
   DATABASE_URL: getEnv('DATABASE_URL', 'file:./dev.db'),
   TURNSTILE_SITEKEY: getEnv('TURNSTILE_SITEKEY', ''), // Cloudflare Turnstile (optionnel)
+  META_PIXEL_ID: getEnv('META_PIXEL_ID', ''), // Pixel Facebook/Instagram — vide = mesure pub désactivée
   IS_PROD: getEnv('NODE_ENV') === 'production',
   IS_BROWSER: isBrowser,
 };

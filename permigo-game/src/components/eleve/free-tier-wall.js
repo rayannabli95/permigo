@@ -9,38 +9,54 @@
 // et par les pages quiz / fiches / en-situation (quota épuisé).
 // ═══════════════════════════════════════════════════════════════
 import { esc } from "@/utils/escape.js";
+import { icon } from "@/utils/icons.js";
 import { track } from "@/services/analytics.js";
 import { getCurUser } from "@/auth/cur-user.js";
-import { discoveryCounterLabel, freeQuota } from "@/utils/free-tier.js";
+import {
+  discoveryCounterLabel,
+  freeQuota,
+  FREE_SUBS,
+} from "@/utils/free-tier.js";
 
 const COPY = {
   quota: {
     kick: "Mode découverte",
-    emoji: "🎉",
+    ico: "sparkle",
     title: "Tu as goûté PermiGo aujourd'hui",
     sub: "Reviens demain pour une nouvelle dose. Ou débloque tout ton parcours maintenant, sans attendre.",
   },
+  // ⚠️ Une leçon au-delà des 3 offertes ne s'ouvrira PAS demain : surtout pas
+  // de « reviens demain » ici, ce serait une promesse fausse (les questions et
+  // la scène, elles, reviennent bien chaque jour → COPY.quota).
+  lesson: {
+    kick: "Compte gratuit",
+    ico: "key",
+    title: "Tu as fini les leçons offertes",
+    sub: "Les 3 premières sont à toi pour toujours. La suite du parcours s'ouvre avec ton Pass.",
+  },
   route: {
     kick: "Mode découverte",
-    emoji: "🚀",
+    ico: "map",
     title: "Voilà tout ton parcours",
     sub: "Cette partie s'ouvre avec ton Pass : l'entraînement complet, ta progression et tes récompenses.",
   },
 };
 
+// Icônes maison (utils/icons.js) — pas d'emoji : ils changent de dessin d'un
+// téléphone à l'autre, cassent l'alignement en arabe et font « brouillon ».
 const PERKS = [
   [
-    "♾️",
+    "zap",
     "Entraînement sans limite",
     "Questions, fiches et mises en situation à volonté",
   ],
   [
-    "🏅",
+    "award",
     "Ta progression + tes récompenses",
     "Compétences, coffres, volants et classement",
   ],
   [
-    "🎯",
+    "target",
     "Examen blanc & certification",
     "Tout ce qu'il faut pour être prêt le jour J",
   ],
@@ -56,19 +72,24 @@ const STYLE = `<style>
     linear-gradient(180deg,#241a52 0%,#1e1648 52%,#161138 100%); }
 .ftw *{ box-sizing:border-box; }
 .ftw-badge{ width:78px; height:78px; margin:0 auto 18px; display:grid; place-items:center;
-  font-size:38px; border-radius:24px;
+  color:#f5c451; border-radius:24px;
   background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.04));
   border:1px solid rgba(245,196,81,.34); box-shadow:0 16px 34px -18px rgba(6,2,22,.9); }
 .ftw-kick{ text-align:center; font-weight:800; font-size:11px; letter-spacing:.16em;
   text-transform:uppercase; color:#f5c451; margin-bottom:8px; }
+/* ⚠️ Couleur explicite obligatoire : la règle h1 globale de l'app repeint les
+   titres en sombre → sur ce fond nuit, le titre devenait illisible (vu à
+   l'écran le 31/07). Piège déjà payé sur les pages publiques dark.
+   (Pas d'accent grave dans ce commentaire : on est dans un gabarit JS.) */
 .ftw-title{ text-align:center; font-family:'Archivo', system-ui, sans-serif;
+  color:#fff;
   font-weight:800; font-size:26px; line-height:1.15; margin:0 auto 10px; max-width:340px; }
 .ftw-sub{ text-align:center; font-size:14px; font-weight:600; color:#c3bdf0;
   margin:0 auto 22px; max-width:330px; line-height:1.5; }
 .ftw-perks{ display:flex; flex-direction:column; gap:10px; margin-bottom:24px; }
 .ftw-perk{ display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:16px;
   background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); }
-.ftw-perk .ico{ flex:none; width:34px; height:34px; display:grid; place-items:center; font-size:19px;
+.ftw-perk .ico{ flex:none; width:34px; height:34px; display:grid; place-items:center; color:#b9a9ff;
   border-radius:11px; background:rgba(143,123,255,.16); }
 .ftw-perk .tx{ min-width:0; }
 .ftw-perk .tx b{ display:block; font-size:14px; font-weight:800; color:#fff; }
@@ -106,7 +127,12 @@ export async function mountFreeTierWall(
   // restaure pour que l'élève garde sa navigation vers le reste de la découverte.
   document.body.classList.remove("sit-immersive", "pq-immersive");
 
-  const c = COPY[reason] || COPY.quota;
+  // Une fiche murée = « tu as fini les leçons offertes » (définitif), pas
+  // « reviens demain » (le quota quotidien, lui, ne concerne que quiz + scène).
+  const c =
+    reason === "quota" && kind === "fiche"
+      ? COPY.lesson
+      : COPY[reason] || COPY.quota;
   const counter =
     reason === "quota" && kind
       ? `<p class="ftw-note">${esc(discoveryCounterLabel(kind))}</p>`
@@ -114,14 +140,14 @@ export async function mountFreeTierWall(
 
   root.innerHTML = `${STYLE}<div class="ftw">
     <div>
-      <div class="ftw-badge" aria-hidden="true">${c.emoji}</div>
+      <div class="ftw-badge" aria-hidden="true">${icon(c.ico, { size: 34, strokeWidth: 2 })}</div>
       <div class="ftw-kick">${esc(c.kick)}</div>
       <h1 class="ftw-title" tabindex="-1">${esc(c.title)}</h1>
       <p class="ftw-sub">${esc(c.sub)}</p>
       <div class="ftw-perks">
         ${PERKS.map(
           ([ico, t, s]) => `<div class="ftw-perk">
-            <span class="ico" aria-hidden="true">${ico}</span>
+            <span class="ico" aria-hidden="true">${icon(ico, { size: 18, strokeWidth: 2.2 })}</span>
             <span class="tx"><b>${esc(t)}</b><span>${esc(s)}</span></span>
           </div>`,
         ).join("")}
@@ -171,13 +197,14 @@ const BANNER_STYLE = `<style>
 
 export function discoveryBannerHTML() {
   const q = freeQuota("quiz");
-  const f = freeQuota("fiche");
   const s = freeQuota("scene");
+  // Les fiches ne sont plus un quota : les 3 premières leçons sont ouvertes en
+  // permanence (cf. free-tier.js). On affiche donc un acquis, pas un décompte.
   return `${BANNER_STYLE}<div class="ft-banner" role="status">
-    <b>Mode découverte</b>
+    <b>Compte gratuit</b>
     <span class="items">
+      <span>${FREE_SUBS.length} premières leçons</span>
       <span>${q.used}/${q.max} questions</span>
-      <span>${f.used}/${f.max} fiche</span>
       <span>${s.used}/${s.max} scène</span>
     </span>
   </div>`;

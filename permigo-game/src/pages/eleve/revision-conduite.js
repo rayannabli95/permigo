@@ -20,6 +20,8 @@ import { getLang } from "@/utils/lang.js";
 import { openCoachSheet } from "@/components/eleve/coach-sheet.js";
 import {
   isFreeTierUser,
+  isFreeSub,
+  FREE_SUBS,
   freeQuota,
   consumeFree,
   resetIfNewDay,
@@ -681,6 +683,15 @@ ${chromeNight("#5a4fc0", "#423a96")}
 .wm-ft{ flex:1; min-width:0; font-family:'Archivo',sans-serif; font-weight:800; font-size:14px; line-height:1.2; color:#241a45; letter-spacing:-.01em; }
 .wm-fiche.done .wm-ft{ color:#5a4712; }
 .wm-arw{ flex:0 0 auto; display:flex; }
+/* Compte gratuit : les leçons au-delà des 3 offertes restent VISIBLES, avec un
+   cadenas. On ne cache pas le programme — on montre ce qui attend derrière. */
+.wm-fiche.pglock{ background:linear-gradient(180deg,#f4f1fb,#eae5f7); border-color:rgba(120,105,180,.28); }
+.wm-fiche.pglock .wm-ft{ color:#6f639b; }
+.wm-lock{ flex:0 0 30px; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  color:#8a7cc0; background:rgba(120,105,180,.13); box-shadow:inset 0 0 0 1.5px rgba(120,105,180,.22); }
+.wm-lockflag{ position:absolute; top:-8px; right:14px; font-family:'Archivo',sans-serif; font-weight:800; font-size:9px;
+  letter-spacing:.1em; text-transform:uppercase; color:#241a45; background:linear-gradient(180deg,#ffe9b0,#f0a93f);
+  padding:3px 8px; border-radius:999px; box-shadow:0 2px 5px rgba(20,12,60,.28); }
 @media (prefers-reduced-motion: reduce){ .wm *{ transition:none!important; } }
 </style>`;
 
@@ -721,6 +732,8 @@ ${chromeNight("#5a4fc0", "#423a96")}
   border:1px solid #e6e2fb; border-top-color:#fff; box-shadow:0 4px 0 rgba(20,12,60,.35), inset 0 1px 0 #fff;
   -webkit-tap-highlight-color:transparent; transition:transform .1s ease; }
 .hub-world:active{ transform:scale(.99); }
+.hub-world.pglock{ opacity:.85; }
+.hub-world.pglock .hub-med{ filter:grayscale(.5) brightness(.94); }
 .hub-med{ position:relative; flex:0 0 58px; width:58px; height:58px; border-radius:50%;
   background:radial-gradient(circle at 38% 30%,#fff6df,#f6ead0 62%,#e6d6b4); border:1px solid #e6dcc4;
   box-shadow:inset 0 -3px 5px rgba(150,110,40,.22), inset 0 2px 2px rgba(255,255,255,.9), 0 3px 6px rgba(20,12,60,.14);
@@ -914,14 +927,20 @@ export async function mount(root, param) {
     const chev = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#b8afd6" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
     const back = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="#efe9ff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
+    // Compte gratuit : tout est listé, mais seules les 3 premières leçons
+    // s'ouvrent. Les autres portent un cadenas et mènent à l'offre.
+    const gratuit = isFreeTierUser(getCurUser());
+    const LOCK = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="5" y="10.5" width="14" height="9.5" rx="2.4" stroke="currentColor" stroke-width="2"/><path d="M8.4 10.5V7.9a3.6 3.6 0 0 1 7.2 0v2.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
     const items = fm
       .map((f, i) => {
-        const on = !!read[f.code];
-        const next = i === firstUnread;
+        const verrou = gratuit && !isFreeSub(f.code);
+        const on = !verrou && !!read[f.code];
+        const next = !verrou && i === firstUnread;
         const title = rvcFicheTitle(f);
-        return `<button class="wm-fiche${on ? " done" : ""}${next ? " next" : ""}" data-code="${escAttr(f.code)}">
+        return `<button class="wm-fiche${on ? " done" : ""}${next ? " next" : ""}${verrou ? " pglock" : ""}" data-code="${escAttr(f.code)}"${verrou ? ' data-verrou="1"' : ""}>
           ${next ? `<span class="wm-nextflag">${rvcText("unread", "à lire")}</span>` : ""}
-          <span class="wm-chk ${on ? "filled" : "empty"}">${on ? CHK : ""}</span>
+          ${verrou && i === FREE_SUBS.length ? `<span class="wm-lockflag">${rvcText("with_pass", "avec le Pass")}</span>` : ""}
+          ${verrou ? `<span class="wm-lock">${LOCK}</span>` : `<span class="wm-chk ${on ? "filled" : "empty"}">${on ? CHK : ""}</span>`}
           <span class="wm-ft">${rvcDisplay(title)}</span>
           <span class="wm-arw">${chev}</span>
         </button>`;
@@ -950,7 +969,15 @@ export async function mount(root, param) {
     });
     root.querySelectorAll("[data-code]").forEach((b) =>
       b.addEventListener("click", async () => {
-        code = b.getAttribute("data-code");
+        const c = b.getAttribute("data-code");
+        if (b.dataset.verrou) {
+          // Droit à l'offre : ouvrir la fiche pour la refermer aussitôt donnerait
+          // l'impression d'un bug.
+          track("freetier.lock_tap", { kind: "fiche", code: c });
+          const { mount } = await import("@/pages/eleve/pass-requis.js");
+          return mount(root, getCurUser());
+        }
+        code = c;
         focusId = null;
         await Promise.all([ensureFiche(code), ensureFichesI18n()]);
         view = "fiche";
@@ -976,6 +1003,8 @@ export async function mount(root, param) {
 
     const arw = (c) =>
       `<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="${c}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    const hubGratuit = isFreeTierUser(getCurUser());
+    const HUB_LOCK = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="5" y="10.5" width="14" height="9.5" rx="2.4" stroke="#b8afd6" stroke-width="2"/><path d="M8.4 10.5V7.9a3.6 3.6 0 0 1 7.2 0v2.6" stroke="#b8afd6" stroke-width="2" stroke-linecap="round"/></svg>`;
 
     const worlds = MONDES.map((m) => {
       const fm = fichesByMonde(m.n);
@@ -1006,15 +1035,18 @@ export async function mount(root, param) {
           </button>
         </div>`;
       }
-      // Monde normal : la carte entière ouvre la liste de ses fiches.
-      return `<button class="hub-world" data-monde="${m.n}">
+      // Monde normal : la carte entière ouvre la liste de ses fiches. Sur un
+      // compte gratuit, un monde dont AUCUNE leçon n'est offerte porte un
+      // cadenas — il reste visible et cliquable (il mène à l'offre).
+      const mondeVerrou = hubGratuit && !fm.some((f) => isFreeSub(f.code));
+      return `<button class="hub-world${mondeVerrou ? " pglock" : ""}" data-monde="${m.n}">
         <span class="hub-med"><img src="${badge}" alt="" width="512" height="512" loading="lazy" decoding="async"></span>
         <span class="hub-wbody">
           <span class="hub-wname">${rvcDisplay(worldName)}</span>
           <span class="hub-wsub">${rvcDisplay(worldSub)}</span>
           <span class="hub-wprog">${bar}${xn}</span>
         </span>
-        <span class="hub-arw">${arw("#b8afd6")}</span>
+        <span class="hub-arw">${mondeVerrou ? HUB_LOCK : arw("#b8afd6")}</span>
       </button>`;
     }).join("");
 
@@ -1090,22 +1122,19 @@ export async function mount(root, param) {
       return render();
     }
 
-    // ── Mode découverte : 1 fiche lisible par jour ─────────────────────────
-    // Ré-ouvrir la MÊME fiche reste permis (relecture) ; une AUTRE fiche après
-    // la fiche du jour → mur découverte. Les re-render de coche de geste
-    // repassent par ici : consumeFree est idempotent sur le même code.
+    // ── Compte gratuit : les 3 premières leçons, en grand ──────────────────
+    // Plus de quota quotidien sur les fiches (cf. free-tier.js) : C1a, C1b et
+    // C1c sont ouvertes autant qu'il veut, tout le reste renvoie au mur. Il
+    // traverse le début du cours d'une traite et bute sur « Démarrer et
+    // s'arrêter » — là où l'envie est la plus forte.
     const meFt = getCurUser();
-    if (isFreeTierUser(meFt)) {
-      resetIfNewDay();
-      if (!freeQuota("fiche", f.code).allowed) {
-        track("freetier.quota_hit", { kind: "fiche", code: f.code });
-        return mountFreeTierWall(root, {
-          me: meFt,
-          reason: "quota",
-          kind: "fiche",
-        });
-      }
-      consumeFree("fiche", f.code);
+    if (isFreeTierUser(meFt) && !isFreeSub(f.code)) {
+      track("freetier.quota_hit", { kind: "fiche", code: f.code });
+      return mountFreeTierWall(root, {
+        me: meFt,
+        reason: "quota",
+        kind: "fiche",
+      });
     }
 
     // Ouvrir = « lue » (progression du hub), tracké UNE fois — pas à chaque coche

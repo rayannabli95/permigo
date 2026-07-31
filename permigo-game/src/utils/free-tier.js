@@ -13,8 +13,20 @@
 const LS_KEY = "pg_freetier_v1";
 
 // Quotas quotidiens par « jour Paris » (cf. todayKey, même approche que roue.js).
-// quiz = nombre de QUESTIONS ; fiche / scène = nombre de contenus distincts.
-const FREE_QUOTAS = { quiz: 3, fiche: 1, scene: 1 };
+// quiz = nombre de QUESTIONS ; scène = nombre de contenus distincts.
+const FREE_QUOTAS = { quiz: 3, scene: 1 };
+
+// ⚠️ Les FICHES ne sont PLUS un quota quotidien (décision Rayan 30/07/2026,
+// campagne pub internationale). Avant : « 1 fiche par jour, n'importe laquelle »
+// — quelqu'un qui découvrait l'app le soir lisait UNE fiche et s'entendait dire
+// « reviens demain ». Maintenant : les 3 PREMIÈRES sous-compétences sont
+// ouvertes en grand, autant de fois qu'il veut, et le mur tombe sur C1d
+// « Démarrer et s'arrêter ». Il traverse le début du cours d'une traite et il
+// bute pile là où l'envie est la plus forte.
+//
+// Pourquoi 3 et pas toute la compétence C1 : C1 fait 9 sous-compétences sur 31,
+// « en vrai c'est la moitié de l'app » (Rayan).
+export const FREE_SUBS = ["C1a", "C1b", "C1c"];
 
 // Surfaces que l'élève en mode découverte peut explorer librement (chrome
 // affiché ; les quotas sont appliqués DANS la page). Tout le reste est muré
@@ -43,6 +55,14 @@ const DISCOVERY_ROUTES = new Set([
   "signup",
   "nouveau-mdp",
 ]);
+
+/**
+ * Cette sous-compétence est-elle ouverte au compte gratuit ?
+ * @param {string} code Ex. "C1a", "C2f"
+ */
+export function isFreeSub(code) {
+  return FREE_SUBS.includes(code);
+}
 
 /** L'élève est-il en mode découverte (solo non payé) ? Faux pour tous les autres. */
 export function isFreeTierUser(me) {
@@ -148,13 +168,11 @@ export function consumeFree(kind, ref = null, n = 1) {
 
 /** Libellé de compteur discret, ex. « Découverte : 2/3 questions aujourd'hui ». */
 export function discoveryCounterLabel(kind) {
+  if (kind === "fiche")
+    return `Compte gratuit : les ${FREE_SUBS.length} premières leçons`;
   const q = freeQuota(kind);
   if (kind === "quiz")
     return `Découverte : ${q.used}/${q.max} questions aujourd'hui`;
-  if (kind === "fiche")
-    return q.remaining > 0
-      ? "Découverte : 1 fiche aujourd'hui"
-      : "Découverte : fiche du jour lue";
   if (kind === "scene")
     return q.remaining > 0
       ? "Découverte : 1 scène aujourd'hui"
