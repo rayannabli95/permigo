@@ -48,12 +48,12 @@ const CSS = `
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
 body{background:var(--bg);color:var(--ink);
-font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+font-family:'Archivo',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
 line-height:1.65;-webkit-font-smoothing:antialiased;
 background-image:radial-gradient(900px 500px at 80% -10%,rgba(99,102,241,.18),transparent 60%),radial-gradient(700px 400px at -10% 10%,rgba(139,92,246,.12),transparent 55%)}
 .wrap{max-width:760px;margin:0 auto;padding:0 20px}
-h1,h2,h3{font-family:'Plus Jakarta Sans',system-ui,sans-serif;line-height:1.2;letter-spacing:-.02em}
-h1{font-size:clamp(1.7rem,6vw,2.5rem);font-weight:800;margin:.2em 0 .4em}
+h1,h2,h3{font-family:'Archivo',system-ui,sans-serif;line-height:1.15;letter-spacing:-.025em}
+h1{font-size:clamp(1.7rem,6vw,2.5rem);font-weight:900;letter-spacing:-.035em;margin:.2em 0 .4em}
 h2{font-size:clamp(1.3rem,4.5vw,1.7rem);font-weight:700;margin:1.8em 0 .5em}
 h3{font-size:1.12rem;font-weight:700;margin:1.3em 0 .35em;color:#fff}
 p{color:#d7dcf5;margin:.7em 0}
@@ -61,8 +61,9 @@ a{color:#a9b0ff;text-decoration:none}a:hover{text-decoration:underline}
 header.top{position:sticky;top:0;z-index:5;backdrop-filter:blur(12px);
 background:rgba(10,13,26,.7);border-bottom:1px solid var(--line)}
 header.top .wrap{display:flex;align-items:center;justify-content:space-between;height:58px}
-.brand{display:flex;align-items:center;gap:9px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;color:#fff;font-size:1.05rem}
-.brand img{width:26px;height:26px;border-radius:7px}
+.brand{display:flex;align-items:center;gap:9px;font-family:'Archivo',sans-serif;font-weight:900;color:#fff;font-size:1.05rem;letter-spacing:-.02em}
+/* le globe est détouré : pas de border-radius (icon-192 a un fond noir opaque) */
+.brand img{width:30px;height:30px}
 .btn{display:inline-block;background:linear-gradient(135deg,var(--indigo),var(--violet));
 color:#fff;font-weight:700;padding:11px 18px;border-radius:12px;font-size:.92rem;
 box-shadow:0 8px 24px rgba(99,102,241,.35)}
@@ -92,7 +93,7 @@ padding:16px;transition:border-color .2s,transform .2s}
 .cta{background:linear-gradient(135deg,rgba(99,102,241,.18),rgba(139,92,246,.14));
 border:1px solid rgba(99,102,241,.4);border-radius:var(--radius);padding:22px;margin:30px 0;text-align:center}
 .cta h3{margin-top:0}.cta p{color:#cfd5ff}
-.faq dt{font-weight:700;color:#fff;margin:16px 0 4px;font-family:'Plus Jakarta Sans',sans-serif}
+.faq dt{font-weight:800;color:#fff;margin:16px 0 4px;font-family:'Archivo',sans-serif}
 .faq dd{margin:0;color:#d0d6f3}
 footer.foot{border-top:1px solid var(--line);margin-top:40px;padding:26px 0 60px;color:var(--muted);font-size:.86rem}
 footer.foot .links{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:14px}
@@ -137,13 +138,13 @@ function layout({ title, desc, path, jsonLd = [], body }) {
 <link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400..900&display=swap" rel="stylesheet"/>
 <style>${CSS}</style>
 ${ld}
 </head>
 <body>
 <header class="top"><div class="wrap">
-<a class="brand" href="/"><img src="/icon-192.png" alt="PermiGo"/>PermiGo</a>
+<a class="brand" href="/"><img src="/logo-permigo.png" alt="PermiGo" width="30" height="30"/>PermiGo</a>
 <a class="btn btn-ghost" href="/#/signup">Ouvrir l'app</a>
 </div></header>
 <main class="wrap">

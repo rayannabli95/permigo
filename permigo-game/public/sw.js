@@ -12,7 +12,9 @@
 // reste servie À VIE sur les installations existantes.
 // v9 (31/07/2026) : le nouveau logo (#620) avait remplacé les PNG en place
 // sans bumper — tous les élèves déjà installés voyaient encore le P vert.
-const CACHE_NAME = "permigo-v9";
+// v10 (31/07/2026) : offline.html est pré-caché ET a changé (Archivo, vrai
+// logo, textes sans tirets) — sans bump, les installés gardent l'ancienne.
+const CACHE_NAME = "permigo-v10";
 // Scope auto-detect : ex '/permigo-v7/' sur GitHub Pages, '/' en local
 const SCOPE = self.registration
   ? self.registration.scope
