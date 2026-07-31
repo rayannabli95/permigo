@@ -9,6 +9,7 @@
 // et par les pages quiz / fiches / en-situation (quota épuisé).
 // ═══════════════════════════════════════════════════════════════
 import { esc } from "@/utils/escape.js";
+import { icon } from "@/utils/icons.js";
 import { track } from "@/services/analytics.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import {
@@ -20,7 +21,7 @@ import {
 const COPY = {
   quota: {
     kick: "Mode découverte",
-    emoji: "🎉",
+    ico: "sparkle",
     title: "Tu as goûté PermiGo aujourd'hui",
     sub: "Reviens demain pour une nouvelle dose. Ou débloque tout ton parcours maintenant, sans attendre.",
   },
@@ -29,31 +30,33 @@ const COPY = {
   // la scène, elles, reviennent bien chaque jour → COPY.quota).
   lesson: {
     kick: "Compte gratuit",
-    emoji: "🔑",
+    ico: "key",
     title: "Tu as fini les leçons offertes",
     sub: "Les 3 premières sont à toi pour toujours. La suite du parcours s'ouvre avec ton Pass.",
   },
   route: {
     kick: "Mode découverte",
-    emoji: "🚀",
+    ico: "map",
     title: "Voilà tout ton parcours",
     sub: "Cette partie s'ouvre avec ton Pass : l'entraînement complet, ta progression et tes récompenses.",
   },
 };
 
+// Icônes maison (utils/icons.js) — pas d'emoji : ils changent de dessin d'un
+// téléphone à l'autre, cassent l'alignement en arabe et font « brouillon ».
 const PERKS = [
   [
-    "♾️",
+    "zap",
     "Entraînement sans limite",
     "Questions, fiches et mises en situation à volonté",
   ],
   [
-    "🏅",
+    "award",
     "Ta progression + tes récompenses",
     "Compétences, coffres, volants et classement",
   ],
   [
-    "🎯",
+    "target",
     "Examen blanc & certification",
     "Tout ce qu'il faut pour être prêt le jour J",
   ],
@@ -69,7 +72,7 @@ const STYLE = `<style>
     linear-gradient(180deg,#241a52 0%,#1e1648 52%,#161138 100%); }
 .ftw *{ box-sizing:border-box; }
 .ftw-badge{ width:78px; height:78px; margin:0 auto 18px; display:grid; place-items:center;
-  font-size:38px; border-radius:24px;
+  color:#f5c451; border-radius:24px;
   background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.04));
   border:1px solid rgba(245,196,81,.34); box-shadow:0 16px 34px -18px rgba(6,2,22,.9); }
 .ftw-kick{ text-align:center; font-weight:800; font-size:11px; letter-spacing:.16em;
@@ -86,7 +89,7 @@ const STYLE = `<style>
 .ftw-perks{ display:flex; flex-direction:column; gap:10px; margin-bottom:24px; }
 .ftw-perk{ display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:16px;
   background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); }
-.ftw-perk .ico{ flex:none; width:34px; height:34px; display:grid; place-items:center; font-size:19px;
+.ftw-perk .ico{ flex:none; width:34px; height:34px; display:grid; place-items:center; color:#b9a9ff;
   border-radius:11px; background:rgba(143,123,255,.16); }
 .ftw-perk .tx{ min-width:0; }
 .ftw-perk .tx b{ display:block; font-size:14px; font-weight:800; color:#fff; }
@@ -137,14 +140,14 @@ export async function mountFreeTierWall(
 
   root.innerHTML = `${STYLE}<div class="ftw">
     <div>
-      <div class="ftw-badge" aria-hidden="true">${c.emoji}</div>
+      <div class="ftw-badge" aria-hidden="true">${icon(c.ico, { size: 34, strokeWidth: 2 })}</div>
       <div class="ftw-kick">${esc(c.kick)}</div>
       <h1 class="ftw-title" tabindex="-1">${esc(c.title)}</h1>
       <p class="ftw-sub">${esc(c.sub)}</p>
       <div class="ftw-perks">
         ${PERKS.map(
           ([ico, t, s]) => `<div class="ftw-perk">
-            <span class="ico" aria-hidden="true">${ico}</span>
+            <span class="ico" aria-hidden="true">${icon(ico, { size: 18, strokeWidth: 2.2 })}</span>
             <span class="tx"><b>${esc(t)}</b><span>${esc(s)}</span></span>
           </div>`,
         ).join("")}

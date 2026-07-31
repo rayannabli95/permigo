@@ -12,18 +12,20 @@ import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { startPassCheckout } from "@/services/billing.js";
 import { getLang } from "@/utils/lang.js";
+import { isFreeTierUser } from "@/utils/free-tier.js";
 
 // ─── i18n (coque) — traduction seule, repli FR. « Pass » = باقة, « moniteur »
 // = مدرّب, « volants » hors sujet ici. Prix/€ inchangés. ───
 const PRQ_I18N = {
   en: {
-    kick: "Just one more step",
-    title: "Choose your Pass to<br>start training",
-    sub: "All the content · your progress · your rewards. Unlocked right away.",
+    bulle: "Your first 3 lessons are yours. 28 to go.",
+    kick: "The rest is waiting",
+    title: "Open the other<br>28 lessons",
+    sub: "The full course, the mock exam, your progress and your rewards. Unlocked right away.",
     guarantee: "Money-back guarantee within 3 days",
     or: "or",
     code_lab: "I have a code from my instructor",
-    code_help: "Your instructor pays for you. Enter their code it's free.",
+    code_help: "Your instructor pays for you: enter their code, it's free.",
     code_ph: "E.G. PERMIS75",
     code_btn: "Confirm",
     code_empty: "Enter your instructor's code.",
@@ -33,24 +35,27 @@ const PRQ_I18N = {
     launch_price: "launch price",
     checkout_err: "Payment unavailable right now. Try again in a moment.",
     logout: "Log out",
-    tier_pass3_nom: "Gold Pass",
-    tier_pass3_sous: "3 months",
+    back: "Back",
+    keep_free: "Keep going with my free account",
+    tier_pass3_nom: "3-month Pass",
+    tier_pass3_sous: "€8.33 a month",
     tier_pass3_note: "most popular",
     tier_mensuel_nom: "Monthly Pass",
-    tier_mensuel_sous: "no commitment",
+    tier_mensuel_sous: "cancel anytime",
     tier_mensuel_note: "/ month",
     tier_pass6_nom: "Platinum Pass",
     tier_pass6_sous: "6 months",
     tier_pass6_note: "cheapest per month",
   },
   ar: {
-    kick: "خطوة أخيرة فقط",
-    title: "اختر باقتك لتبدأ<br>تدريبك",
-    sub: "كل المحتوى وتقدّمك ومكافآتك. مفتوحة فوراً.",
+    bulle: "دروسك الثلاثة الأولى لك. بقي 28 درساً.",
+    kick: "الباقي في انتظارك",
+    title: "افتح الدروس<br>الـ 28 الأخرى",
+    sub: "الدورة كاملة، والامتحان التجريبي، وتقدّمك ومكافآتك. تُفتح فوراً.",
     guarantee: "استرداد المال مضمون خلال 3 أيام",
     or: "أو",
     code_lab: "لديّ رمز من مدرّبي",
-    code_help: "مدرّبك يدفع عنك. أدخِل رمزه والاشتراك مجاني.",
+    code_help: "مدرّبك يدفع عنك: أدخِل رمزه، والاشتراك مجاني.",
     code_ph: "مثال: PERMIS75",
     code_btn: "تأكيد",
     code_empty: "أدخِل رمز مدرّبك.",
@@ -60,8 +65,10 @@ const PRQ_I18N = {
     launch_price: "سعر الإطلاق",
     checkout_err: "الدفع غير متاح حالياً. أعد المحاولة بعد لحظات.",
     logout: "تسجيل الخروج",
-    tier_pass3_nom: "الباقة الذهبية",
-    tier_pass3_sous: "3 أشهر",
+    back: "رجوع",
+    keep_free: "المتابعة بحسابي المجاني",
+    tier_pass3_nom: "باقة 3 أشهر",
+    tier_pass3_sous: "8.33 € شهرياً",
     tier_pass3_note: "الأكثر اختياراً",
     tier_mensuel_nom: "الباقة الشهرية",
     tier_mensuel_sous: "دون التزام",
@@ -80,32 +87,29 @@ function ptR(key, fr) {
   return (l !== "fr" && PRQ_I18N[l]?.[key]) || fr;
 }
 
+// DEUX offres, pas trois (décision Rayan 31/07/2026) : « 9,99 € ou bien 24,99 €
+// les trois mois ». Trois cartes faisaient hésiter ; deux font choisir. Le Pass
+// 6 mois reste vendable ailleurs (page publique #/pass), pas sur cet écran-ci.
 const TIERS = [
   {
     plan: "pass3",
-    nom: "Billet Or",
-    sous: "3 mois",
+    nom: "Pass 3 mois",
+    sous: "8,33 € par mois",
     price: "24,99 €",
     note: "le + choisi",
     best: true,
   },
   {
     plan: "mensuel",
-    nom: "Billet Mensuel",
+    nom: "Pass mensuel",
     sous: "sans engagement",
     price: "9,99 €",
     note: "/ mois",
     best: false,
   },
-  {
-    plan: "pass6",
-    nom: "Billet Platine",
-    sous: "6 mois",
-    price: "39,99 €",
-    note: "le moins cher au mois",
-    best: false,
-  },
 ];
+
+const MASCOTTE = "/skins/mascot-point.png";
 
 const STYLE = `<style>
 .prq{ position:relative; max-width:480px; margin:0 auto; min-height:100dvh;
@@ -115,15 +119,29 @@ const STYLE = `<style>
     radial-gradient(120% 46% at 50% -6%, rgba(124,99,255,.35) 0%, rgba(124,99,255,0) 55%),
     linear-gradient(180deg,#2a2170 0%,#1d1852 60%,#14103a 100%); }
 .prq *{ box-sizing:border-box; }
-.prq-head{ text-align:center; margin-bottom:20px; }
+.prq-head{ text-align:center; margin-bottom:18px; }
+/* La mascotte présente l'offre : elle sort du cadre par le haut et se pose sur
+   une lueur dorée, pour que l'œil aille d'elle vers le prix. Image PNG à fond
+   transparent (public/skins/), jamais un emoji. */
+.prq-mascot{ position:relative; width:172px; height:172px; margin:-6px auto 2px; display:block; }
+.prq-mascot img{ position:relative; z-index:1; width:100%; height:100%; object-fit:contain;
+  filter:drop-shadow(0 14px 22px rgba(8,4,30,.55)); animation:prqPop .5s cubic-bezier(.34,1.56,.64,1) both; }
+.prq-mascot::after{ content:""; position:absolute; left:50%; top:52%; width:150px; height:150px;
+  transform:translate(-50%,-50%); border-radius:50%; z-index:0;
+  background:radial-gradient(circle, rgba(255,206,77,.34) 0%, rgba(255,206,77,0) 68%); }
+@keyframes prqPop{ from{ opacity:0; transform:translateY(10px) scale(.9);} to{ opacity:1; transform:none;} }
+/* Bulle de la mascotte — c'est elle qui annonce, pas un bandeau anonyme. */
+.prq-bulle{ position:relative; display:inline-block; max-width:290px; margin:0 auto 12px; padding:10px 15px;
+  border-radius:16px 16px 16px 4px; background:linear-gradient(180deg,#fffdf6,#ffeec2); color:#3a2a05;
+  font-weight:700; font-size:13px; line-height:1.45; box-shadow:0 6px 16px -6px rgba(8,4,30,.6); }
 .prq-kick{ font-weight:800; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#b6a8ec; margin-bottom:8px; }
 /* color:inherit obligatoire — base.css pose une couleur sur h1..h4 et une règle
    directe bat la couleur héritée : sans ça le titre passe en encre sombre sur ce
    fond violet foncé (illisible en thème clair). */
-.prq-title{ color:inherit; font-family:'Archivo', system-ui, sans-serif; font-weight:800; font-size:25px; line-height:1.14; margin:0 0 8px; }
+.prq-title{ color:#fff; font-family:'Archivo', system-ui, sans-serif; font-weight:800; font-size:26px; line-height:1.14; margin:0 0 8px; }
 .prq-sub{ font-size:13.5px; font-weight:600; color:#c3bdf0; margin:0 auto; max-width:330px; line-height:1.5; }
 .prq-tiers{ display:flex; flex-direction:column; gap:11px; margin-bottom:16px; }
-.prq-tier{ display:flex; align-items:center; gap:13px; width:100%; text-align:left; cursor:pointer;
+.prq-tier{ position:relative; display:flex; align-items:center; gap:13px; width:100%; text-align:left; cursor:pointer;
   padding:14px 15px; border-radius:18px; background:rgba(255,255,255,.06); border:1.5px solid rgba(255,255,255,.14);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.1); -webkit-tap-highlight-color:transparent; transition:transform .1s ease; }
 .prq-tier:active{ transform:scale(.99); }
@@ -133,7 +151,7 @@ const STYLE = `<style>
 .prq-tnom{ font-family:'Archivo', system-ui, sans-serif; font-weight:800; font-size:16px; color:#fff; line-height:1.1; }
 .prq-tsous{ font-size:11.5px; font-weight:600; color:#b8aef0; margin-top:2px; }
 .prq-tprice{ flex:0 0 auto; text-align:right; }
-.prq-tprice b{ font-family:'Archivo', system-ui, sans-serif; font-weight:800; font-size:19px; color:#ffe4a6; }
+.prq-tprice b{ font-family:'Archivo', system-ui, sans-serif; font-weight:800; font-size:22px; color:#ffe4a6; }
 .prq-tprice span{ display:block; font-size:10px; font-weight:700; color:#b8aef0; }
 .prq-badge{ position:absolute; top:-9px; right:14px; font-weight:800; font-size:9px; letter-spacing:.08em; text-transform:uppercase;
   color:#1a1240; background:linear-gradient(180deg,#ffe9b0,#f4b24a); padding:3px 9px; border-radius:999px; box-shadow:0 2px 5px rgba(20,12,60,.35); }
@@ -152,23 +170,39 @@ const STYLE = `<style>
 .prq-code-btn[disabled]{ opacity:.6; cursor:default; }
 .prq-msg{ font-size:12px; font-weight:700; margin-top:8px; min-height:16px; }
 .prq-msg.err{ color:#ffb4a0; } .prq-msg.ok{ color:#9fe7b6; }
+.prq-back{ position:absolute; top:14px; left:14px; z-index:3; width:40px; height:40px; border:0; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; cursor:pointer; color:#efe9ff;
+  background:rgba(255,255,255,.1); box-shadow:inset 0 0 0 1px rgba(255,255,255,.16); }
+.prq-back:active{ transform:scale(.94); }
 .prq-logout{ display:block; margin:20px auto 0; background:none; border:none; cursor:pointer;
   font-weight:700; font-size:13px; color:#9a8fd0; text-decoration:underline; text-underline-offset:3px; }
 @media (prefers-reduced-motion: reduce){ .prq *{ transition:none!important; } }
 </style>`;
 
+const BACK_SVG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
 const SHIELD = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3l7 2.5v5c0 4.2-2.9 7.5-7 9-4.1-1.5-7-4.8-7-9v-5L12 3z" fill="rgba(52,199,120,.9)"/><path d="M8.5 12l2.5 2.5L15.5 10" stroke="#0c2b18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
 export async function mount(root, me) {
+  // Deux contextes très différents :
+  //  · À LA PORTE (élève bloqué avant d'entrer) → plein écran, sans navigation,
+  //    et on retire la réserve d'espace du bandeau (sinon bande blanche en haut).
+  //  · DEPUIS L'APP (il a tapé un cadenas) → il DOIT pouvoir revenir en arrière,
+  //    donc on garde le bandeau et la barre du bas, et on pose une flèche.
+  const dansApp = isFreeTierUser(me);
   track("eleve.pass_wall_viewed", {
     reason: me?.eleveAccess?.reason || "solo_no_pass",
+    from: dansApp ? "cadenas" : "porte",
   });
-  document
-    .getElementById("header-bar")
-    ?.style.setProperty("display", "none", "important");
-  document
-    .getElementById("bottom-nav")
-    ?.style.setProperty("display", "none", "important");
+  if (!dansApp) {
+    document
+      .getElementById("header-bar")
+      ?.style.setProperty("display", "none", "important");
+    document
+      .getElementById("bottom-nav")
+      ?.style.setProperty("display", "none", "important");
+    document.body.classList.add("no-top-chrome");
+  }
 
   const tiers = TIERS.map(
     (
@@ -181,24 +215,27 @@ export async function mount(root, me) {
   ).join("");
 
   root.innerHTML = `${STYLE}<div class="prq">
+    ${dansApp ? `<button class="prq-back" id="prq-back" type="button" aria-label="${pt("back", "Retour")}">${BACK_SVG}</button>` : ""}
+    <div class="prq-mascot"><img src="${MASCOTTE}" alt="" width="600" height="400" /></div>
     <div class="prq-head">
-      <div class="prq-kick">${pt("kick", "Plus qu'une étape")}</div>
-      <h1 class="prq-title">${ptR("title", "Choisis ton Pass pour<br>commencer ton entraînement")}</h1>
-      <p class="prq-sub">${pt("sub", "Tout le contenu · ta progression · tes récompenses. Débloqués tout de suite.")}</p>
+      <div class="prq-bulle">${pt("bulle", "Tes 3 premières leçons sont à toi. Il en reste 28.")}</div>
+      <div class="prq-kick">${pt("kick", "La suite t'attend")}</div>
+      <h1 class="prq-title">${ptR("title", "Ouvre les 28<br>autres leçons")}</h1>
+      <p class="prq-sub">${pt("sub", "Le parcours complet, l'examen blanc, ta progression et tes récompenses. Débloqués tout de suite.")}</p>
     </div>
     <div class="prq-tiers">${tiers}</div>
     <div class="prq-guar">${SHIELD} ${pt("guarantee", "Satisfait ou remboursé sous 3 jours")}</div>
     <div class="prq-or">${pt("or", "ou")}</div>
     <div class="prq-code">
       <div class="prq-code-lab">${pt("code_lab", "J'ai un code de mon moniteur")}</div>
-      <div class="prq-code-help">${pt("code_help", "Ton moniteur paie pour toi. Entre son code c'est gratuit.")}</div>
+      <div class="prq-code-help">${pt("code_help", "Ton moniteur paie pour toi : entre son code, c'est gratuit.")}</div>
       <div class="prq-code-row">
         <input class="prq-code-in" id="prq-code" type="text" autocomplete="off" maxlength="12" placeholder="${pt("code_ph", "EX : PERMIS75")}" />
         <button class="prq-code-btn" id="prq-code-btn" type="button">${pt("code_btn", "Valider")}</button>
       </div>
       <div class="prq-msg" id="prq-msg" role="status" aria-live="polite"></div>
     </div>
-    <button class="prq-logout" id="prq-logout" type="button">${pt("logout", "Me déconnecter")}</button>
+    ${dansApp ? `<button class="prq-logout" id="prq-keep" type="button">${pt("keep_free", "Continuer avec mon compte gratuit")}</button>` : `<button class="prq-logout" id="prq-logout" type="button">${pt("logout", "Me déconnecter")}</button>`}
   </div>`;
 
   root.querySelectorAll("[data-plan]").forEach((btn) =>
@@ -255,6 +292,13 @@ export async function mount(root, me) {
       codeBtn.disabled = false;
     }
   });
+
+  const retour = () => {
+    track("eleve.pass_wall_back");
+    location.hash = "#/revision-conduite";
+  };
+  root.querySelector("#prq-back")?.addEventListener("click", retour);
+  root.querySelector("#prq-keep")?.addEventListener("click", retour);
 
   root.querySelector("#prq-logout")?.addEventListener("click", async () => {
     track("eleve.pass_wall_logout");

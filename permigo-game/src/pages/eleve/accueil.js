@@ -779,6 +779,7 @@ const STYLE = `<style>
   width: 25px; height: 25px;
   display: flex; align-items: center; justify-content: center;
   border-radius: 8px;
+  color: #f0a93f;
   font-size: 14px;
   background: rgba(255,255,255,.16);
 }
@@ -2201,7 +2202,7 @@ function render({
         prep
           ? `<button class="acc2-prep-pill" id="prep-theme-btn" type="button"
               aria-label="${escAttr(atR("prep_pill_aria", "Thème de ta prochaine leçon : {t}. Appuie pour changer").replace("{t}", ficheTitre(prep.code, prep.titre)))}">
-              <span class="acc2-prep-pill-ic" aria-hidden="true">🎯</span>
+              <span class="acc2-prep-pill-ic" aria-hidden="true">${icon("target", { size: 15, strokeWidth: 2.4 })}</span>
               <span class="acc2-prep-pill-tl">
                 <b id="prep-theme-name">${_rtl(esc(ficheTitre(prep.code, prep.titre)))}</b>
                 <span>${at("prep_pill_sub", "Pour ta prochaine heure")}</span>
