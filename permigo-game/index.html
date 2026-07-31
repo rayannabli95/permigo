@@ -190,11 +190,23 @@
         ['zh', '你好'], ['it', 'Ciao'], ['pl', 'Cześć'], ['vi', 'Xin chào'],
         ['de', 'Hallo'], ['hi', 'नमस्ते'], ['ta', 'வணக்கம்'], ['sw', 'Jambo']
       ];
-      // La langue de l'élève : sa préférence enregistrée, sinon celle du
-      // téléphone, sinon le français.
+      /* La langue de l'élève, dans l'ordre : le lien de campagne (?lang=), sa
+         préférence enregistrée, puis son téléphone, sinon le français.
+         Le `?lang=` est relu ici parce que ce script tourne AVANT le bundle —
+         même règle que `langFromUrl()` dans src/utils/lang.js, garder les deux
+         alignés. Seul fr/en/ar est accepté depuis l'URL : ce sont les langues
+         que l'app parle vraiment. */
       var mine = (function () {
         var l = '';
-        try { l = localStorage.getItem('permigo_lang') || ''; } catch (e) { /* privé */ }
+        try {
+          var h = location.hash || '';
+          var hq = h.indexOf('?') >= 0 ? h.slice(h.indexOf('?') + 1) : '';
+          var raw = new URLSearchParams(hq).get('lang') ||
+                    new URLSearchParams(location.search).get('lang') || '';
+          raw = raw.slice(0, 2).toLowerCase();
+          if (raw === 'fr' || raw === 'en' || raw === 'ar') l = raw;
+        } catch (e) { /* URLSearchParams indispo */ }
+        if (!l) { try { l = localStorage.getItem('permigo_lang') || ''; } catch (e) { /* privé */ } }
         l = (l || navigator.language || 'fr').slice(0, 2).toLowerCase();
         for (var i = 0; i < HI.length; i++) if (HI[i][0] === l) return HI[i];
         return HI[0];
