@@ -70,6 +70,27 @@ export function applyLang(lang) {
   }
 }
 
+// ─── Langue portée par l'URL (liens de campagne) ───────────────
+// Les pubs pointent sur www.permigo.fr/?lang=ar ou www.permigo.fr/#/pass?lang=ar.
+// On accepte les DEUX emplacements : le paramètre peut vivre dans la query
+// classique OU dans celle du hash, puisque le routeur est en #/.
+// Seules les langues de l'app (fr/en/ar) sont acceptées : afficher un accueil
+// dans une langue qu'on ne parle pas ensuite serait une promesse non tenue.
+export function langFromUrl() {
+  try {
+    const h = location.hash || "";
+    const hq = h.includes("?") ? h.slice(h.indexOf("?") + 1) : "";
+    const raw =
+      new URLSearchParams(hq).get("lang") ||
+      new URLSearchParams(location.search).get("lang") ||
+      "";
+    const l = raw.slice(0, 2).toLowerCase();
+    return isLang(l) ? l : null;
+  } catch {
+    return null;
+  }
+}
+
 // ─── Current (source unique pour le rendu) ─────────────────────
 export function getLang() {
   try {
@@ -83,6 +104,18 @@ export function getLang() {
 
 // ─── Sync depuis les préférences backend ───────────────────────
 export async function syncLangFromPrefs(sb2 = sb) {
+  // Un lien de campagne gagne même sur la base : c'est le choix le plus récent
+  // et le plus explicite. On répare la base derrière pour les autres appareils.
+  const urlLang = langFromUrl();
+  if (urlLang) {
+    applyLang(urlLang);
+    try {
+      await sb2.rpc("set_my_preferences", { p_data: { language: urlLang } });
+    } catch {
+      /* le miroir localStorage tient déjà la préférence */
+    }
+    return;
+  }
   const local = getLang(); // choix mémorisé côté client (ou 'fr')
   try {
     const { data } = await sb2.rpc("get_my_preferences");
@@ -121,7 +154,9 @@ export async function saveLang(sb2, lang) {
   }
 }
 
-// ─── Init rapide (avant auth — lit localStorage) ───────────────
+// ─── Init rapide (avant auth — lit l'URL puis localStorage) ────
 export function initLangEarly() {
-  applyLang(getLang());
+  // Un lien de campagne porte une intention EXPLICITE et récente : il gagne
+  // sur le miroir local et DEVIENT la préférence (applyLang écrit le miroir).
+  applyLang(langFromUrl() || getLang());
 }
