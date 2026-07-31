@@ -32,6 +32,7 @@ const PHOTOS = Object.freeze({
   "voiture-arriere": "../photos/voiture-arriere.webp",
   pneu: "../photos/pneu.webp",
   moteur: "../photos/moteur.webp",
+  "poste-conduite": "../photos/poste-conduite.webp",
 });
 
 /**
@@ -61,6 +62,11 @@ export function assetId(asset) {
  * Un objet posé dans la scène. `state` vient du déroulé du jeu, pas de la
  * donnée : la mission décrit un repos, le jeu décide de `found` et `error`.
  */
+function ratioPhoto(beat) {
+  const photo = beat.assets.find((asset) => asset.family === "photo");
+  return photo?.options?.ratio ?? 1.5;
+}
+
 function renderPhoto(asset) {
   const source = PHOTOS[asset.type];
   const halos = (asset.options?.glows || [])
@@ -70,8 +76,11 @@ function renderPhoto(asset) {
     )
     .join("");
 
+  const lumiere = asset.options?.lumiere;
   return `
-    <div class="mp-photo" data-asset="${escapeText(assetId(asset))}">
+    <div class="mp-photo" data-asset="${escapeText(assetId(asset))}"${
+      lumiere ? ` style="--mp-lumiere:${lumiere}"` : ""
+    }>
       <img src="${escapeText(source)}" alt="${escapeText(asset.options?.alt || "")}">
       ${halos}
     </div>`;
@@ -122,6 +131,42 @@ function renderHotspots(beat, { verrouille, reponses = {} }) {
     .join("");
 }
 
+/**
+ * Les zones du geste.
+ *
+ * Deux temps dans le même écran. « repérer » : toutes les zones appellent, et
+ * chacune raconte à quoi elle sert quand on la touche. « refaire » : les mêmes
+ * zones, mais il faut les toucher dans l'ordre, et chacune prend son numéro.
+ */
+function renderZonesTactiles(beat, { phase, reperees = [], faites = [], verrouille }) {
+  const dejaVues = new Set(reperees);
+  const rang = new Map(faites.map((id, i) => [id, i + 1]));
+
+  return beat.answers.options
+    .map((zone) => {
+      const vue = dejaVues.has(zone.id);
+      const rangZone = rang.get(zone.id);
+      const classes = [
+        "mp-zone",
+        phase === "reperer" && vue ? "est-vue" : "",
+        rangZone ? "est-faite" : "",
+      ]
+        .filter(Boolean)
+        .join(" ");
+
+      return `
+        <button
+          class="${classes}"
+          type="button"
+          data-zone="${escapeText(zone.id)}"
+          ${verrouille ? "disabled" : ""}
+          style="left:${zone.at.x}%;top:${zone.at.y}%"
+          aria-label="${escapeText(zone.label)}"
+        >${rangZone ? `<b>${rangZone}</b>` : ""}</button>`;
+    })
+    .join("");
+}
+
 /** La bande de réponses. Elle vit SOUS le cadre : elle ne couvre aucun objet. */
 function renderAnswers(beat, { verrouille }) {
   const boutons = beat.answers.options
@@ -158,6 +203,9 @@ export function renderBeat(beat, etat) {
   const {
     assetStates = {},
     reponses = {},
+    phase = "reperer",
+    reperees = [],
+    faites = [],
     verrouille = false,
     retour = "",
     ton = "neutre",
@@ -180,18 +228,27 @@ export function renderBeat(beat, etat) {
         <u aria-hidden="true">${segments}</u>
       </div>
 
-      <div class="mp-stage" data-scene="${escapeText(beat.scene)}">
+      <div class="mp-stage" data-scene="${escapeText(beat.scene)}" style="--mp-ratio:${ratioPhoto(beat)}">
         ${beat.assets.map((asset) => renderAsset(asset, assetStates)).join("")}
         ${
           beat.answers.kind === "hotspot"
             ? renderHotspots(beat, { verrouille, reponses })
             : ""
         }
+        ${
+          beat.answers.kind === "zones"
+            ? renderZonesTactiles(beat, { phase, reperees, faites, verrouille })
+            : ""
+        }
       </div>
 
       <div class="mp-panel">
         <p class="mp-prompt" dir="auto">${escapeText(beat.prompt)}</p>
-        ${beat.answers.kind === "hotspot" ? "" : renderAnswers(beat, { verrouille })}
+        ${
+          beat.answers.kind === "hotspot" || beat.answers.kind === "zones"
+            ? ""
+            : renderAnswers(beat, { verrouille })
+        }
         <p class="mp-feedback is-${ton}" dir="auto" role="status" aria-live="polite">${escapeText(retour)}</p>
         ${
           indiceVisible

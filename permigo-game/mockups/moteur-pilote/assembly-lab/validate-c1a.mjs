@@ -232,7 +232,8 @@ for (const width of [320, 390, 520]) {
 
     // 3c — toutes les cibles font au moins 44 px.
     const tropPetit = await page.evaluate(() => {
-      const cibles = [...document.querySelectorAll("button")];
+      // La barre du bac à sable n'appartient pas à la mission.
+      const cibles = [...document.querySelectorAll(".mp-beat button")];
       return cibles
         .filter((b) => b.offsetParent !== null)
         .filter((b) => {
@@ -302,10 +303,18 @@ for (const width of [320, 390, 520]) {
 // 3f — clavier seul, du brief à la première réponse.
 {
   const page = await nouvelOnglet(390);
-  await page.keyboard.press("Tab");
-  await page.keyboard.press("Tab");
-  await page.keyboard.press("Tab");
-  await page.keyboard.press("Enter"); // commencer
+  // On tabule jusqu'au bouton de départ : compter les tabulations casserait
+  // le contrôle au premier changement de barre.
+  let tabulations = 0;
+  while (tabulations < 12) {
+    await page.keyboard.press("Tab");
+    tabulations += 1;
+    const surLeDepart = await page.evaluate(
+      () => document.activeElement?.dataset?.action === "commencer",
+    );
+    if (surLeDepart) break;
+  }
+  await page.keyboard.press("Enter");
   assert.equal(await page.locator(".mp-beat").count(), 1, "Le brief ne se passe pas au clavier");
   const atteignables = await page.evaluate(() =>
     [...document.querySelectorAll(".mp-answer")].every(

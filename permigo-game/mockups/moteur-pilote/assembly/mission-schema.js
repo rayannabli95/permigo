@@ -26,6 +26,10 @@ export const ANSWER_KINDS = Object.freeze([
   "choice", // l'élève choisit une phrase
   "target", // l'élève désigne un objet dessiné de la scène
   "hotspot", // l'élève montre un endroit sur la photo
+  // L'élève EXPLORE d'abord toutes les zones, chacune avec son aide, puis les
+  // touche dans le bon ordre. C'est cette exploration avant le geste qui donne
+  // la sensation de toucher, et pas la bonne case à trouver du premier coup.
+  "zones",
 ]);
 
 export const TRANSMISSIONS = Object.freeze(["manual", "automatic"]);
@@ -90,6 +94,14 @@ function validerAsset(asset, chemin) {
         `${chemin}.options.alt`,
         "une photo a besoin d'une description pour les lecteurs d'écran",
       );
+    }
+    if (asset.options.ratio !== undefined) {
+      if (typeof asset.options.ratio !== "number" || asset.options.ratio <= 0) {
+        throw new MissionSchemaError(
+          `${chemin}.options.ratio`,
+          "la proportion d'une photo est un nombre strictement positif",
+        );
+      }
     }
     (asset.options.glows || []).forEach((halo, i) => {
       exigePourcentage(halo?.x, `${chemin}.options.glows[${i}].x`);
@@ -175,6 +187,14 @@ function validerBeat(beat, chemin) {
       );
     }
     idsReponses.add(option.id);
+    if (reponses.kind === "zones") {
+      if (!option.at || typeof option.at !== "object") {
+        throw new MissionSchemaError(sous, "une zone a besoin d'un point `at`");
+      }
+      exigePourcentage(option.at.x, `${sous}.at.x`);
+      exigePourcentage(option.at.y, `${sous}.at.y`);
+      exigeTexte(option.aide, `${sous}.aide`, 8);
+    }
     if (reponses.kind === "hotspot") {
       if (!option.at || typeof option.at !== "object") {
         throw new MissionSchemaError(sous, "une pastille a besoin d'un point `at`");
@@ -190,7 +210,25 @@ function validerBeat(beat, chemin) {
     }
   });
 
-  if (!idsReponses.has(beat.solution)) {
+  if (reponses.kind === "zones") {
+    if (!Array.isArray(beat.ordre) || beat.ordre.length < 2) {
+      throw new MissionSchemaError(
+        `${chemin}.ordre`,
+        "un geste en zones a besoin d'un ordre d'au moins deux étapes",
+      );
+    }
+    beat.ordre.forEach((id, i) => {
+      if (!idsReponses.has(id)) {
+        throw new MissionSchemaError(
+          `${chemin}.ordre[${i}]`,
+          `« ${id} » n'est pas une zone de la scène`,
+        );
+      }
+    });
+    if (new Set(beat.ordre).size !== beat.ordre.length) {
+      throw new MissionSchemaError(`${chemin}.ordre`, "une zone y figure deux fois");
+    }
+  } else if (!idsReponses.has(beat.solution)) {
     throw new MissionSchemaError(
       `${chemin}.solution`,
       `« ${beat.solution} » ne fait pas partie des réponses`,
@@ -300,11 +338,12 @@ export function validateMission(mission) {
 
   if (
     !Array.isArray(mission.outcome.recap) ||
-    mission.outcome.recap.length !== mission.beats.length
+    mission.outcome.recap.length < 1 ||
+    mission.outcome.recap.length > 6
   ) {
     throw new MissionSchemaError(
       "outcome.recap",
-      `un rappel par temps de jeu (attendu : ${mission.beats.length})`,
+      "entre un et six rappels : ce que l'élève doit retenir, pas la liste des écrans",
     );
   }
   mission.outcome.recap.forEach((ligne, i) =>

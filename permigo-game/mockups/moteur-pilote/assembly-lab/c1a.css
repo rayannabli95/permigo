@@ -264,8 +264,10 @@
 
 /* ---------------------------------------------------------------- photos */
 
+/* Le cadre prend la proportion de la photo : sans recadrage, les repères
+   tombent exactement là où on les a mesurés. */
 .mp-stage:has(.mp-photo) {
-  aspect-ratio: 3 / 2;
+  aspect-ratio: var(--mp-ratio, 1.5);
 }
 
 .mp-photo {
@@ -279,7 +281,7 @@
   object-fit: cover;
   display: block;
   /* Les photos sont prises en jour neutre : la nuit se fait ici. */
-  filter: saturate(0.38) contrast(1.12) brightness(0.68);
+  filter: saturate(0.38) contrast(1.12) brightness(var(--mp-lumiere, 0.68));
 }
 
 .mp-photo::after {
@@ -371,6 +373,57 @@
   animation: none;
   opacity: 0.4;
   cursor: default;
+}
+
+/* ----------------------------------------------------------- les zones */
+
+/* Repérer : la zone appelle. Refaire : elle prend son numéro. */
+.mp-zone {
+  position: absolute;
+  z-index: 3;
+  width: 2.75rem;
+  height: 2.75rem;
+  translate: -50% -50%;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0.11rem dashed rgb(139 109 255 / 85%);
+  background: rgb(10 6 22 / 22%);
+  color: var(--al-accent);
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 900;
+  cursor: pointer;
+  animation: mp-appel 2.4s var(--al-ease) infinite;
+}
+
+@keyframes mp-appel {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(139 109 255 / 34%);
+  }
+  55% {
+    box-shadow: 0 0 0 0.65rem rgb(139 109 255 / 0%);
+  }
+}
+
+/* Une zone déjà explorée arrête d'appeler. */
+.mp-zone.est-vue {
+  border-style: solid;
+  border-color: rgb(139 109 255 / 45%);
+  animation: none;
+}
+
+.mp-zone.est-faite {
+  border: 0.11rem solid var(--al-green);
+  background: rgb(56 217 148 / 18%);
+  color: var(--al-green);
+  animation: none;
+}
+
+.mp-zone:disabled {
+  cursor: default;
+  animation: none;
 }
 
 /* -------------------------------------------------------------- la fiche */
@@ -644,10 +697,60 @@
   color: var(--al-accent);
 }
 
+/* ------------------------------------------------------ barre bac à sable */
+
+.mp-labo {
+  margin-top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.1rem;
+  border-block-start: 0.06rem solid var(--trait);
+}
+
+.mp-labo > span {
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--second);
+}
+
+.mp-labo div {
+  display: flex;
+}
+
+.mp-labo button {
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+  padding: 0 0.6rem;
+  border: 0.06rem solid var(--trait);
+  border-inline-end-width: 0;
+  background: transparent;
+  color: var(--second);
+  font-family: inherit;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.mp-labo div button:last-child {
+  border-inline-end-width: 0.06rem;
+}
+
+.mp-labo button[aria-pressed="true"] {
+  color: var(--al-gold);
+  border-color: rgb(244 199 94 / 55%);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .mp-next,
   .mp-answer,
   .mp-hotspot,
+  .mp-zone,
   .mp-stage .pg-cluster-warning.is-lit,
   .mp-stage .pg-warning-cell.is-lit,
   .mp-stage .pg-warning-asset.is-lit {
