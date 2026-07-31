@@ -104,12 +104,16 @@ function chargerMission() {
   return true;
 }
 
+/**
+ * Le code REMC (« C1a ») ne s'affiche JAMAIS à l'élève : c'est du chinois pour
+ * lui (décision Rayan, 31/07/2026). Il sert d'identifiant, pas de titre.
+ */
 function barre() {
   return `
     <div class="mp-topbar">
       <div>
         <h2>Mode Pilote</h2>
-        <p>${etat.mission.competence} · ${etat.mission.title}</p>
+        <p>${etat.mission.title}</p>
       </div>
     </div>`;
 }
