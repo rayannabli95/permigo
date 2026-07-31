@@ -48,7 +48,7 @@ const PRC_I18N = {
     fresh_unlock: "Just unlocked: {name}",
     chip_chap: "Chapter {n} of {t}",
     suivi: "Overview",
-    suivi_aria: "My overview — validated skills, lessons, exam",
+    suivi_aria: "My overview. Validated skills, lessons, exam",
     prog_chap: "Chapter progress",
     jalons_word: "milestones",
     aria_jalons: "{d} milestones out of {t} done",
@@ -62,14 +62,14 @@ const PRC_I18N = {
     ms_next: "In progress",
     ms_todo: "Up next",
     call_kick: "★ Current step",
-    aria_current: "Current step: {name} — Continue",
+    aria_current: "Current step: {name}. Continue",
     continue: "Continue",
     boss_won_kick: "★ Boss defeated",
     boss_kick: "Chapter boss",
-    boss_won_sub: "Chapter certified — your reward is here",
+    boss_won_sub: "Chapter certified. Your reward is here",
     boss_remain_one: "Only 1 skill left to validate to defeat it",
     boss_remain_many: "Only {n} skills left to validate to defeat it",
-    boss_all: "All validated — reward incoming",
+    boss_all: "All validated. Reward incoming",
     next_locked_aria: "Chapter {n} locked: {t}",
     next_locked_kick: "Chapter {n} · Locked",
     next_locked_sub: "Beat the boss of “{name}” to open it",
@@ -77,11 +77,11 @@ const PRC_I18N = {
     next_open_kick: "Next chapter · Unlocked",
     chapnav_aria: "Journey chapters",
     chap_n: "Chapter {n}",
-    chap_shown: " — shown",
+    chap_shown: ". Shown",
     themesw_aria: "Display: light or dark",
     theme_dark: "Dark",
     theme_light: "Light",
-    main_aria: "Your journey — chapter view",
+    main_aria: "Your journey. Chapter view",
     close: "Close",
     fiche_chap: "CHAPTER {n} · {name}",
     st_certified: "Certified by you",
@@ -110,7 +110,7 @@ const PRC_I18N = {
     fresh_unlock: "فتحت للتو: {name}",
     chip_chap: "الفصل {n} من {t}",
     suivi: "الملخّص",
-    suivi_aria: "ملخّصي — المهارات المُصادَق عليها، الدروس، الامتحان",
+    suivi_aria: "ملخّصي. المهارات المُصادَق عليها، الدروس، الامتحان",
     prog_chap: "تقدّم الفصل",
     jalons_word: "محطة",
     aria_jalons: "{d} محطة من {t} مكتملة",
@@ -124,14 +124,14 @@ const PRC_I18N = {
     ms_next: "جارٍ",
     ms_todo: "لاحقًا",
     call_kick: "★ الخطوة الحالية",
-    aria_current: "الخطوة الحالية: {name} — متابعة",
+    aria_current: "الخطوة الحالية: {name}. متابعة",
     continue: "متابعة",
     boss_won_kick: "★ هُزم الزعيم",
     boss_kick: "زعيم الفصل",
-    boss_won_sub: "الفصل مُصادَق عليه — مكافأتك هنا",
+    boss_won_sub: "الفصل مُصادَق عليه. مكافأتك هنا",
     boss_remain_one: "بقيت مهارة واحدة للمصادقة لهزيمته",
     boss_remain_many: "بقيت {n} مهارات للمصادقة لهزيمته",
-    boss_all: "اكتملت كلها — المكافأة وشيكة",
+    boss_all: "اكتملت كلها. المكافأة وشيكة",
     next_locked_aria: "الفصل {n} مقفل: {t}",
     next_locked_kick: "الفصل {n} · مقفل",
     next_locked_sub: "اهزم زعيم «{name}» لفتحه",
@@ -139,11 +139,11 @@ const PRC_I18N = {
     next_open_kick: "الفصل التالي · مفتوح",
     chapnav_aria: "فصول المسار",
     chap_n: "الفصل {n}",
-    chap_shown: " — معروض",
+    chap_shown: ". معروض",
     themesw_aria: "العرض: فاتح أو داكن",
     theme_dark: "داكن",
     theme_light: "فاتح",
-    main_aria: "مسارك — عرض الفصل",
+    main_aria: "مسارك. عرض الفصل",
     close: "إغلاق",
     fiche_chap: "الفصل {n} · {name}",
     st_certified: "صادقت عليها بنفسك",
@@ -2341,7 +2341,7 @@ function renderChapterView(
             <!-- Mode condensé (hub mon-permis) gardé en OPTION : l'onglet
                  « Mon permis » ouvre désormais le parcours en direct
                  (décision Rayan 2026-07-16), ce bouton donne le résumé. -->
-            <a class="prc-cv-suivi" href="#/mon-permis" aria-label="${prcT("suivi_aria", "Mon suivi — compétences validées, leçons, examen")}">
+            <a class="prc-cv-suivi" href="#/mon-permis" aria-label="${prcT("suivi_aria", "Mon suivi. Compétences validées, leçons, examen")}">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="3.5" cy="6" r="1.6" fill="currentColor"/><circle cx="3.5" cy="12" r="1.6" fill="currentColor"/><circle cx="3.5" cy="18" r="1.6" fill="currentColor"/></svg>
               <span>${prcD("suivi", "Suivi")}</span>
             </a>
@@ -2437,7 +2437,7 @@ function renderChapterView(
           ? `<div class="prc-cv-current-call"
               data-comp="${escAttr(sub.c)}" data-world-idx="${currentIdx}"
               role="button" tabindex="0"
-              aria-label="${prcT("aria_current", `Étape en cours : ${sub.n} — Continuer`, { name: sub.n })}">
+              aria-label="${prcT("aria_current", `Étape en cours : ${sub.n}. Continuer`, { name: sub.n })}">
             <div class="prc-cv-call-kick">${prcD("call_kick", "★ Étape en cours")}</div>
             <div class="prc-cv-call-ct">${nameBi(sub.n, subTr(sub.c))}</div>
             <button class="prc-cv-cta" type="button"
@@ -2485,14 +2485,14 @@ function renderChapterView(
           <div class="prc-cv-boss-ttl">${nameBi(chapTitle, chapTr(world))}</div>
           <div class="prc-cv-boss-sub">${
             bossWon
-              ? prcD("boss_won_sub", "Chapitre certifié — ta récompense est là")
+              ? prcD("boss_won_sub", "Chapitre certifié. Ta récompense est là")
               : bossRemain > 0
                 ? prcD(
                     bossRemain > 1 ? "boss_remain_many" : "boss_remain_one",
                     `Plus que ${bossRemain} compétence${bossRemain > 1 ? "s" : ""} à valider pour le vaincre`,
                     { n: bossRemain },
                   )
-                : prcD("boss_all", "Toutes acquises — récompense imminente")
+                : prcD("boss_all", "Toutes acquises. Récompense imminente")
           }</div>
         </div>
       </div>`;
@@ -2587,7 +2587,7 @@ function renderChapterView(
               : w.status === "locked"
                 ? ICO_LK
                 : `${i + 1}`;
-          return `<button class="prc-cv-cn ${cls}" data-chap="${i}" type="button" role="tab" aria-selected="${isCur}" aria-label="${prcT("chap_n", `Chapitre ${i + 1}`, { n: i + 1 })}${isCur ? prcT("chap_shown", " — affiché") : ""}">${inner}</button>`;
+          return `<button class="prc-cv-cn ${cls}" data-chap="${i}" type="button" role="tab" aria-selected="${isCur}" aria-label="${prcT("chap_n", `Chapitre ${i + 1}`, { n: i + 1 })}${isCur ? prcT("chap_shown", ". Affiché") : ""}">${inner}</button>`;
         })
         .join("")}
     </div>
@@ -2609,7 +2609,7 @@ function renderChapterView(
 
   // La carte de voyage est la SEULE vue nuit de la page (le squelette et
   // l'état d'erreur restent clairs) → le chrome se teinte ici, pas dans STYLE.
-  return `<style>${chromeNight("#1d1140", "#0b0719")}</style><div class="prc-cv" role="main" aria-label="${prcT("main_aria", "Ton parcours — vue chapitre")}">
+  return `<style>${chromeNight("#1d1140", "#0b0719")}</style><div class="prc-cv" role="main" aria-label="${prcT("main_aria", "Ton parcours. Vue chapitre")}">
   <div class="prc-cv-screen">
     <div class="prc-cv-topbar">
       ${chapNav}

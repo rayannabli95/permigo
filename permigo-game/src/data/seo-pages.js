@@ -26,7 +26,7 @@ export const GUIDES = [
     metaDesc:
       "La méthode pour réviser le code de la route sans t'épuiser : petites sessions quotidiennes, séries blanches, et travail des erreurs. Réussis tes 35/40.",
     h1: "Comment réviser le code de la route efficacement",
-    lead: "Réviser le code, ce n'est pas lire le livret dix fois d'affilée la veille. C'est s'entraîner un peu chaque jour, comprendre ses erreurs, et arriver à l'examen avec des réflexes — pas juste de la mémoire. Voici la méthode qui marche.",
+    lead: "Réviser le code, ce n'est pas lire le livret dix fois d'affilée la veille. C'est s'entraîner un peu chaque jour, comprendre ses erreurs, et arriver à l'examen avec des réflexes. Pas juste de la mémoire. Voici la méthode qui marche.",
     sections: [
       {
         h2: "Le seul objectif : 35 bonnes réponses sur 40",
@@ -72,7 +72,7 @@ export const GUIDES = [
         ],
       },
       {
-        h2: "3. Lis la question en entier — les pièges sont dans les mots",
+        h2: "3. Lis la question en entier. Les pièges sont dans les mots",
         blocks: [
           {
             type: "p",
@@ -93,7 +93,7 @@ export const GUIDES = [
         blocks: [
           {
             type: "p",
-            text: "Les dernières semaines, enchaîne des séries blanches de 40 questions, chronométrées, sans pause et sans regarder les corrections en cours de route — exactement comme à l'examen. C'est ce qui transforme tes connaissances en performance le jour J.",
+            text: "Les dernières semaines, enchaîne des séries blanches de 40 questions, chronométrées, sans pause et sans regarder les corrections en cours de route. Exactement comme à l'examen. C'est ce qui transforme tes connaissances en performance le jour J.",
           },
         ],
       },
@@ -126,7 +126,7 @@ export const GUIDES = [
     metaDesc:
       "L'examen blanc du code reproduit les conditions réelles : 40 questions, le chrono, le stress. C'est le meilleur test pour savoir si tu es prêt à passer.",
     h1: "Examen blanc du code : le test qui dit si tu es prêt",
-    lead: "Un examen blanc, c'est une série de 40 questions dans les conditions de l'examen officiel : le format, le rythme, le chrono. C'est le seul vrai moyen de savoir si tu es prêt — bien plus fiable que ton ressenti.",
+    lead: "Un examen blanc, c'est une série de 40 questions dans les conditions de l'examen officiel : le format, le rythme, le chrono. C'est le seul vrai moyen de savoir si tu es prêt. Bien plus fiable que ton ressenti.",
     sections: [
       {
         h2: "Pourquoi l'examen blanc change tout",
@@ -137,7 +137,7 @@ export const GUIDES = [
           },
           {
             type: "callout",
-            text: "Règle simple : ne réserve ton examen officiel que quand tu dépasses 35/40 sur plusieurs examens blancs d'affilée. Pas une fois par chance — plusieurs fois de suite.",
+            text: "Règle simple : ne réserve ton examen officiel que quand tu dépasses 35/40 sur plusieurs examens blancs d'affilée. Pas une fois par chance. Plusieurs fois de suite.",
           },
         ],
       },
@@ -172,7 +172,7 @@ export const GUIDES = [
     faq: [
       {
         q: "À partir de quel score puis-je réserver l'examen du code ?",
-        r: "Quand tu dépasses 35/40 de façon régulière sur plusieurs examens blancs d'affilée — pas une seule fois. La régularité est le meilleur indicateur que tu es prêt.",
+        r: "Quand tu dépasses 35/40 de façon régulière sur plusieurs examens blancs d'affilée. Pas une seule fois. La régularité est le meilleur indicateur que tu es prêt.",
       },
       {
         q: "Un examen blanc est-il vraiment comme l'examen officiel ?",
@@ -203,7 +203,7 @@ export const GUIDES = [
           },
           {
             type: "callout",
-            text: "La logique est simple : la grille mesure ta conduite globale, la faute éliminatoire sanctionne ce qui met en danger. Sécurité d'abord — toujours.",
+            text: "La logique est simple : la grille mesure ta conduite globale, la faute éliminatoire sanctionne ce qui met en danger. Sécurité d'abord. Toujours.",
           },
         ],
       },
@@ -223,7 +223,7 @@ export const GUIDES = [
           },
           {
             type: "p",
-            text: "La conséquence est la même pour toutes : échec immédiat, quel que soit le reste de la prestation. Inutile de « rattraper » après — d'où l'importance de la vigilance du début à la fin.",
+            text: "La conséquence est la même pour toutes : échec immédiat, quel que soit le reste de la prestation. Inutile de « rattraper » après. D'où l'importance de la vigilance du début à la fin.",
           },
         ],
       },
@@ -448,7 +448,7 @@ export const GUIDES = [
       },
       {
         q: "Est-ce que ça réduit la période probatoire ?",
-        r: "Non — c'est la conduite accompagnée (AAC) qui réduit la période probatoire à 2 ans. La supervisée garde la période normale de 3 ans.",
+        r: "Non. C'est la conduite accompagnée (AAC) qui réduit la période probatoire à 2 ans. La supervisée garde la période normale de 3 ans.",
       },
     ],
     cta: {
@@ -473,14 +473,14 @@ export const GUIDES = [
           {
             type: "ul",
             items: [
-              "20 heures minimum de formation pratique en boîte manuelle — c'est la loi, aucune présentation à l'examen en dessous.",
+              "20 heures minimum de formation pratique en boîte manuelle. C'est la loi, aucune présentation à l'examen en dessous.",
               "13 heures minimum si tu passes le permis en boîte automatique.",
               "Dans les faits, la moyenne nationale tourne autour de 30 à 35 heures avant la réussite.",
             ],
           },
           {
             type: "p",
-            text: "Pourquoi cet écart entre le minimum et la réalité ? Parce que le minimum est pensé comme un plancher de sécurité, pas comme une promesse. La vraie question n'est pas « combien d'heures » mais « suis-je capable de conduire seul en sécurité » — c'est ça que l'examinateur évalue.",
+            text: "Pourquoi cet écart entre le minimum et la réalité ? Parce que le minimum est pensé comme un plancher de sécurité, pas comme une promesse. La vraie question n'est pas « combien d'heures » mais « suis-je capable de conduire seul en sécurité ». C'est ça que l'examinateur évalue.",
           },
         ],
       },
@@ -490,7 +490,7 @@ export const GUIDES = [
           {
             type: "ul",
             items: [
-              "La fréquence : deux à trois leçons par semaine font progresser bien plus vite qu'une leçon isolée — tu ne repars pas de zéro à chaque fois.",
+              "La fréquence : deux à trois leçons par semaine font progresser bien plus vite qu'une leçon isolée. Tu ne repars pas de zéro à chaque fois.",
               "Ce que tu fais ENTRE les leçons : réviser les compétences, revoir tes erreurs, mentaliser les parcours. Une leçon préparée vaut presque le double.",
               "La conduite supervisée ou accompagnée : chaque heure avec un accompagnateur est une heure d'expérience non facturée.",
               "La régularité du moniteur : un moniteur qui te suit vraiment cible les heures sur tes points faibles au lieu de dérouler un programme générique.",
@@ -512,7 +512,7 @@ export const GUIDES = [
           {
             type: "ul",
             items: [
-              "Arrive à ta leçon en sachant ce que tu vas travailler — et repars en sachant ce que tu dois consolider.",
+              "Arrive à ta leçon en sachant ce que tu vas travailler. Et repars en sachant ce que tu dois consolider.",
               "Travaille la théorie du geste hors voiture : giratoires, priorités, contrôles, manœuvres se comprennent très bien à tête reposée.",
               "Si tu le peux, ajoute la conduite supervisée dès que ton moniteur te valide le niveau.",
               "Passe en boîte automatique si la manuelle n'est pas un besoin pour toi : 13 h minimum au lieu de 20, et un apprentissage plus simple.",
@@ -528,7 +528,7 @@ export const GUIDES = [
       },
       {
         q: "Boîte automatique : c'est vraiment plus court ?",
-        r: "Oui : 13 heures minimum au lieu de 20, et moins de choses à gérer (pas d'embrayage ni de passage de vitesses). En contrepartie, ton permis est d'abord limité aux boîtes automatiques — il peut être étendu ensuite par une formation courte de 7 h.",
+        r: "Oui : 13 heures minimum au lieu de 20, et moins de choses à gérer (pas d'embrayage ni de passage de vitesses). En contrepartie, ton permis est d'abord limité aux boîtes automatiques. Il peut être étendu ensuite par une formation courte de 7 h.",
       },
       {
         q: "Combien de leçons par semaine, idéalement ?",
@@ -536,7 +536,7 @@ export const GUIDES = [
       },
       {
         q: "Comment savoir si je suis prêt pour l'examen ?",
-        r: "Quand les compétences du programme (le référentiel REMC) sont validées par ton moniteur et que tu conduis de façon autonome sans être guidé. Pas avant — présenter trop tôt, c'est payer une présentation pour rien.",
+        r: "Quand les compétences du programme (le référentiel REMC) sont validées par ton moniteur et que tu conduis de façon autonome sans être guidé. Pas avant. Présenter trop tôt, c'est payer une présentation pour rien.",
       },
     ],
     cta: {
@@ -559,7 +559,7 @@ export const GUIDES = [
         blocks: [
           {
             type: "p",
-            text: "Ton résultat arrive en général sous 48 heures sur le site officiel, avec le bilan de l'examinateur (le CEPC) : la note sur 31, le détail par compétence, et surtout ce qui t'a coûté l'examen — une note trop basse ou une erreur éliminatoire.",
+            text: "Ton résultat arrive en général sous 48 heures sur le site officiel, avec le bilan de l'examinateur (le CEPC) : la note sur 31, le détail par compétence, et surtout ce qui t'a coûté l'examen. Une note trop basse ou une erreur éliminatoire.",
           },
           {
             type: "callout",
@@ -577,7 +577,7 @@ export const GUIDES = [
           {
             type: "ul",
             items: [
-              "Une ou deux leçons ciblées sur les points du bilan — pas besoin de tout refaire.",
+              "Une ou deux leçons ciblées sur les points du bilan. Pas besoin de tout refaire.",
               "La conduite supervisée si tu as un accompagnateur : rouler sans payer, exactement ce qu'il te faut.",
               "Dix minutes de révision par jour sur les compétences qui ont pêché : giratoires, priorités, contrôles…",
             ],
@@ -593,7 +593,7 @@ export const GUIDES = [
           },
           {
             type: "p",
-            text: "Le bon moment pour repasser, c'est quand les points du bilan sont corrigés ET que tu enchaînes des conduites propres — pas juste quand une place se libère. Se représenter trop tôt, c'est risquer de griller une présentation.",
+            text: "Le bon moment pour repasser, c'est quand les points du bilan sont corrigés ET que tu enchaînes des conduites propres. Pas juste quand une place se libère. Se représenter trop tôt, c'est risquer de griller une présentation.",
           },
         ],
       },
@@ -602,7 +602,7 @@ export const GUIDES = [
         blocks: [
           {
             type: "p",
-            text: "Un examen note une conduite de 32 minutes un jour donné — pas ta valeur, pas ton avenir de conducteur. Le stress du premier passage est d'ailleurs souvent la vraie cause de l'échec, et il baisse naturellement au second : tu sais désormais exactement à quoi ressemble l'épreuve.",
+            text: "Un examen note une conduite de 32 minutes un jour donné. Pas ta valeur, pas ton avenir de conducteur. Le stress du premier passage est d'ailleurs souvent la vraie cause de l'échec, et il baisse naturellement au second : tu sais désormais exactement à quoi ressemble l'épreuve.",
           },
           {
             type: "callout",
@@ -626,7 +626,7 @@ export const GUIDES = [
       },
       {
         q: "Une faute éliminatoire, ça veut dire que je conduis mal ?",
-        r: "Non. Une éliminatoire sanctionne UNE situation où l'examinateur a dû intervenir ou a jugé un danger — souvent un réflexe précis à corriger (un contrôle oublié, une priorité). C'est ciblé, donc corrigeable.",
+        r: "Non. Une éliminatoire sanctionne UNE situation où l'examinateur a dû intervenir ou a jugé un danger. Souvent un réflexe précis à corriger (un contrôle oublié, une priorité). C'est ciblé, donc corrigeable.",
       },
       {
         q: "Combien de candidats réussissent du premier coup ?",
@@ -647,7 +647,7 @@ export const GUIDES = [
     metaDesc:
       "Heures à l'unité, pas de frais de structure, suivi direct : ce que coûte le permis avec un moniteur indépendant, et comment payer moins sans bâcler.",
     h1: "Le permis avec un moniteur indépendant : combien ça coûte ?",
-    lead: "Le permis B coûte en moyenne entre 1 500 et 2 000 € en France, tout compris. Passer par un moniteur indépendant change la structure du prix : tu paies la personne qui t'apprend à conduire, pas les murs d'une agence. Voici comment lire les prix — et surtout comment faire baisser la facture intelligemment.",
+    lead: "Le permis B coûte en moyenne entre 1 500 et 2 000 € en France, tout compris. Passer par un moniteur indépendant change la structure du prix : tu paies la personne qui t'apprend à conduire, pas les murs d'une agence. Voici comment lire les prix. Et surtout comment faire baisser la facture intelligemment.",
     sections: [
       {
         h2: "Comment se décompose le prix",
@@ -672,7 +672,7 @@ export const GUIDES = [
           {
             type: "ul",
             items: [
-              "Le suivi : c'est le même moniteur du début à la fin. Il connaît tes points faibles par cœur — pas besoin de re-expliquer ton niveau à chaque leçon.",
+              "Le suivi : c'est le même moniteur du début à la fin. Il connaît tes points faibles par cœur. Pas besoin de re-expliquer ton niveau à chaque leçon.",
               "La souplesse : créneaux directs avec le moniteur, sans passer par un planning d'agence.",
               "Le prix : pas de local commercial à financer, ce qui se retrouve souvent dans le tarif horaire ou dans l'absence de frais annexes.",
             ],
@@ -691,7 +691,7 @@ export const GUIDES = [
             items: [
               "Le permis à 1 € par jour : un prêt à taux zéro pour les 15-25 ans, remboursé à petites mensualités.",
               "Le CPF : le permis B peut être financé par ton compte formation si son obtention sert ton projet professionnel.",
-              "Les aides locales : beaucoup de régions, départements et missions locales aident les jeunes ou les demandeurs d'emploi — renseigne-toi près de chez toi.",
+              "Les aides locales : beaucoup de régions, départements et missions locales aident les jeunes ou les demandeurs d'emploi. Renseigne-toi près de chez toi.",
             ],
           },
         ],
@@ -742,11 +742,11 @@ export const GUIDES = [
 // ─────────────────────────────────────────────────────────────
 export const MONITEUR_PILLAR = {
   slug: "pour-moniteurs",
-  metaTitle: "PermiGo — l'app à TA marque pour moniteur indépendant",
+  metaTitle: "PermiGo. L'app à TA marque pour moniteur indépendant",
   metaDesc:
     "L'app d'entraînement au permis à ta marque, qui rend tes élèves accros à réviser entre les leçons et prouve tes résultats. Pas une plateforme qui te prend tes élèves. 9,99 €/mois.",
   h1: "Ton app de permis. À ton nom. Pas à celui d'une plateforme.",
-  lead: "PermiGo, c'est l'outil du moniteur indépendant : une app d'entraînement à ta marque qui garde tes élèves actifs entre les leçons, et qui matérialise ton travail — qui progresse, qui est prêt, ton taux de réussite. Tes élèves, ta marque, tes résultats.",
+  lead: "PermiGo, c'est l'outil du moniteur indépendant : une app d'entraînement à ta marque qui garde tes élèves actifs entre les leçons, et qui matérialise ton travail. Qui progresse, qui est prêt, ton taux de réussite. Tes élèves, ta marque, tes résultats.",
   sections: [
     {
       h2: "Le problème : entre deux leçons, ton élève est seul",
@@ -770,7 +770,7 @@ export const MONITEUR_PILLAR = {
         },
         {
           type: "p",
-          text: "Les plateformes outillent le moniteur, mais à LEUR marque — et elles possèdent ton élève. PermiGo fait l'inverse : l'app et le suivi sont à TA marque. L'élève est à toi, la relation est à toi.",
+          text: "Les plateformes outillent le moniteur, mais à LEUR marque. Et elles possèdent ton élève. PermiGo fait l'inverse : l'app et le suivi sont à TA marque. L'élève est à toi, la relation est à toi.",
         },
         {
           type: "h3",
@@ -778,7 +778,7 @@ export const MONITEUR_PILLAR = {
         },
         {
           type: "p",
-          text: "Parcours gamifié, séries quotidiennes, examens blancs, défis : l'élève prend l'habitude de réviser sans que tu aies à le relancer. Un élève qui s'entraîne entre les leçons, c'est un élève qui progresse plus vite — et un taux de réussite qui monte.",
+          text: "Parcours gamifié, séries quotidiennes, examens blancs, défis : l'élève prend l'habitude de réviser sans que tu aies à le relancer. Un élève qui s'entraîne entre les leçons, c'est un élève qui progresse plus vite. Et un taux de réussite qui monte.",
         },
         {
           type: "h3",

@@ -15,7 +15,7 @@ const FICHE_SCHEMAS = {
     {
       src: "geste-poste-conduite",
       fr: "Installe-toi bien avant tout : c’est ta base.",
-      en: "Settle in properly first — it’s your base.",
+      en: "Settle in properly first. It’s your base.",
       ar: "استقرّ جيدًا قبل كل شيء: هذه قاعدتك.",
     },
     {
@@ -55,7 +55,7 @@ const FICHE_SCHEMAS = {
     {
       src: "geste-regard-loin",
       fr: "Regarde loin : ton regard tire la voiture.",
-      en: "Look far ahead — your eyes pull the car.",
+      en: "Look far ahead. Your eyes pull the car.",
       ar: "انظر بعيدًا: نظرك يقود السيارة.",
     },
   ],
@@ -159,7 +159,7 @@ const FICHE_SCHEMAS = {
     {
       src: "C2f-giratoire-1-ville",
       fr: "Un rond-point, c’est une route à deux voies… mais courbée.",
-      en: "A roundabout is just a two-lane road — only curved.",
+      en: "A roundabout is just a two-lane road. Only curved.",
       ar: "الدوّار مجرد طريق بمسارين… لكنه منحنٍ.",
     },
     {
@@ -287,8 +287,8 @@ const FICHE_SCHEMAS = {
     {
       src: "geste-regard-loin",
       fr: "Regarde à 15-20 secondes devant toi.",
-      en: "Look 15–20 seconds ahead.",
-      ar: "انظر إلى مسافة 15–20 ثانية أمامك.",
+      en: "Look 15 to 20 seconds ahead.",
+      ar: "انظر إلى مسافة 15 إلى 20 ثانية أمامك.",
     },
     {
       src: "geste-retro-interieur",

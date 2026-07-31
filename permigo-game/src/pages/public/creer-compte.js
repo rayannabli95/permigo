@@ -261,7 +261,7 @@ export async function mount(root) {
           <span class="sg-logo-fb" aria-hidden="true"><b>P</b></span>
         </div>
         <h1 class="sg-title">Crée ton compte moniteur</h1>
-        <p class="sg-sub">Des élèves qui arrivent préparés à chaque leçon — ton tableau de bord est prêt en 30 secondes.</p>
+        <p class="sg-sub">Des élèves qui arrivent préparés à chaque leçon. Ton tableau de bord est prêt en 30 secondes.</p>
         <div style="text-align:center"><span class="sg-role-badge">Moniteur indépendant</span></div>
         ${connectedBanner}
 
@@ -302,7 +302,7 @@ export async function mount(root) {
         <button class="sg-btn" id="sg-submit" disabled>Créer mon compte</button>
         <div class="sg-trust">
           <span>${icon("check", { size: 13, strokeWidth: 2.5 })} Sans engagement</span>
-          <span>${icon("check", { size: 13, strokeWidth: 2.5 })} Jusqu'à 100 élèves — gratuit pour eux</span>
+          <span>${icon("check", { size: 13, strokeWidth: 2.5 })} Jusqu'à 100 élèves. Gratuit pour eux</span>
         </div>
         <div class="sg-sep"></div>
         <div class="sg-login-row">Déjà un compte&nbsp;? <a href="/#/login">Se connecter</a></div>
@@ -451,12 +451,12 @@ function renderPaymentStep(root, prenom) {
         <div style="text-align:left;margin:0 0 18px;padding:16px;border-radius:16px;background:rgba(255,206,77,.1);box-shadow:inset 0 0 0 1.5px rgba(255,206,77,.35)">
           <div style="font:800 22px/1.2 'Archivo',var(--fb),sans-serif;color:var(--gold);margin-bottom:8px">9,99 €/mois</div>
           <div style="display:flex;flex-direction:column;gap:7px;font:600 13.5px/1.4 'Archivo',var(--fb),sans-serif;color:var(--ink-soft)">
-            <span style="display:flex;gap:7px;align-items:center">${icon("check", { size: 14, strokeWidth: 2.5 })} Jusqu'à 100 élèves — gratuit pour eux</span>
+            <span style="display:flex;gap:7px;align-items:center">${icon("check", { size: 14, strokeWidth: 2.5 })} Jusqu'à 100 élèves. Gratuit pour eux</span>
             <span style="display:flex;gap:7px;align-items:center">${icon("check", { size: 14, strokeWidth: 2.5 })} Sans engagement, résiliable en ligne à tout moment</span>
             <span style="display:flex;gap:7px;align-items:center">${icon("check", { size: 14, strokeWidth: 2.5 })} Ta marque, ton code élève, ton suivi</span>
           </div>
         </div>
-        <button class="sg-btn" id="sg-pay" type="button" style="margin-top:0">Activer mon abonnement — 9,99 €/mois</button>
+        <button class="sg-btn" id="sg-pay" type="button" style="margin-top:0">Activer mon abonnement · 9,99 €/mois</button>
         <p style="margin:14px 0 0;font:600 12px/1.5 'Archivo',var(--fb),sans-serif;color:var(--ink-mu)">Paiement sécurisé Stripe. Résiliable en ligne à tout moment, sans frais.</p>
       </div>
     </div>`;
@@ -478,7 +478,7 @@ function renderPaymentStep(root, prenom) {
         4500,
       );
       payBtn.disabled = false;
-      payBtn.textContent = "Activer mon abonnement — 9,99 €/mois";
+      payBtn.textContent = "Activer mon abonnement · 9,99 €/mois";
     }
   });
 }

@@ -531,7 +531,7 @@ export async function mount(root, openKey = null) {
     <div class="tr2-hero-inner">
       <div class="tr2-hero-top">
         <h1 class="tr2-hero-title" tabindex="-1">${tt("title", "Mes trophées")}</h1>
-        <div class="tr2-hero-count" id="tr2-count">— / ${CATALOG.length}</div>
+        <div class="tr2-hero-count" id="tr2-count">/ ${CATALOG.length}</div>
       </div>
       <div class="tr2-progress-wrap">
         <div class="tr2-progress-bar"><div class="tr2-progress-fill" id="tr2-fill" style="width:0%"></div></div>
@@ -829,7 +829,7 @@ function renderFeatured(def, unlockData, stats = { compCount: 0, streak: 0 }) {
       : "";
   return `
     <div class="tr2-feat ${isU ? rar2 : "locked"}" data-key="${escAttr(def.key)}" role="button" tabindex="0"
-      aria-label="${escAttr(trTitle(def))} — ${rar(rar2)}${isU ? tt("aria_unlocked", ", débloqué") : tt("aria_locked", ", à débloquer")}">
+      aria-label="${escAttr(trTitle(def))}. ${rar(rar2)}${isU ? tt("aria_unlocked", ", débloqué") : tt("aria_locked", ", à débloquer")}">
       <div class="tr2-feat-kick"><span class="pin" aria-hidden="true"></span>${esc(kicker)}</div>
       <div class="tr2-feat-stage">
         <span class="tr2-feat-halo" aria-hidden="true"></span>

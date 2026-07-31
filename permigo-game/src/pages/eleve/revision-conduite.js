@@ -101,7 +101,7 @@ const RVC_I18N = {
     world_4_sub: "On your own, safely and economically",
     to_start: "To start",
     in_progress: "In progress",
-    see_all: "See all the cards — {name}",
+    see_all: "See all the cards. {name}",
     start: "Start",
     reread: "Read again",
     continue: "Continue",
@@ -120,14 +120,14 @@ const RVC_I18N = {
     cert_done_kicker: "Already in My licence",
     cert_done_title: "Already self-certified",
     cert_done_body:
-      "“{title}” is already acquired in your journey. Great job — keep reviewing whenever you like.",
+      "“{title}” is already acquired in your journey. Great job. Keep reviewing whenever you like.",
     cert_keep: "Keep reviewing",
     cert_review: "Review in My licence →",
     my_licence: "My licence",
     quiz_passed: "Quiz passed",
     cert_prompt: "Ready to certify this skill?",
     cert_prompt_body:
-      "You have just reviewed “{title}”. Certify it to move it forward in {product} — an official five-question quiz confirms you have acquired it.",
+      "You have just reviewed “{title}”. Certify it to move it forward in {product}. An official five-question quiz confirms you have acquired it.",
     certify: "Certify this skill",
     later: "Later",
   },
@@ -148,7 +148,7 @@ const RVC_I18N = {
     world_4_sub: "بمفردك وبأمان واقتصاد",
     to_start: "للبدء",
     in_progress: "قيد التقدم",
-    see_all: "عرض جميع البطاقات — {name}",
+    see_all: "عرض جميع البطاقات. {name}",
     start: "ابدأ",
     reread: "اقرأ مجدداً",
     continue: "واصل",
@@ -167,14 +167,14 @@ const RVC_I18N = {
     cert_done_kicker: "موجودة بالفعل في رخصتي",
     cert_done_title: "سبق أن اعتمدتها بنفسك",
     cert_done_body:
-      "« {title} » مكتسبة بالفعل في مسارك. أحسنت — يمكنك متابعة مراجعتها متى شئت.",
+      "« {title} » مكتسبة بالفعل في مسارك. أحسنت. يمكنك متابعة مراجعتها متى شئت.",
     cert_keep: "واصل المراجعة",
     cert_review: "← عرضها في رخصتي",
     my_licence: "رخصتي",
     quiz_passed: "نجحت في الاختبار",
     cert_prompt: "هل أنت مستعد لاعتماد هذه المهارة؟",
     cert_prompt_body:
-      "لقد راجعت للتو « {title} ». اعتمدها لتتقدم في « {product} » — ويؤكد اختبار رسمي من خمسة أسئلة أنك أتقنتها.",
+      "لقد راجعت للتو « {title} ». اعتمدها لتتقدم في « {product} ». ويؤكد اختبار رسمي من خمسة أسئلة أنك أتقنتها.",
     certify: "اعتماد هذه المهارة",
     later: "لاحقاً",
   },
@@ -299,15 +299,15 @@ function pointFaible(revised) {
   return sorted[0];
 }
 
-// Découpe la méthode en sections à partir des préfixes « Label — … » déjà
-// présents dans certaines fiches (ex. « Créneau — … », « Règles communes — … »).
-// Le libellé doit rester court (≤ 26 car.) pour ne pas confondre avec un tiret
-// employé au milieu d'une phrase. Sans préfixe : un seul groupe (label null).
+// Découpe la méthode en sections à partir des préfixes « Label. … » déjà
+// présents dans certaines fiches (ex. « Créneau. … », « Règles communes. … »).
+// Le libellé doit rester court (≤ 26 car.) pour ne pas confondre avec une
+// phrase courte. Sans préfixe : un seul groupe (label null).
 function groupSteps(methode) {
   const groups = [];
   let cur = null;
   for (const raw of methode) {
-    const m = raw.match(/^(.{2,26}?) [—–] (.+)$/s);
+    const m = raw.match(/^(.{2,26}?)[.—–] (.+)$/s);
     const label = m ? m[1].trim() : null;
     const text = m ? m[2].trim() : raw.trim();
     if (!cur || cur.label !== label) {
@@ -991,7 +991,7 @@ export async function mount(root, param) {
         // Monde en cours : agrandi, porte le bouton « Continuer ».
         return `<div class="hub-world active">
           <span class="hub-flag"><span class="hub-pulse"></span>${firstEver ? rvcText("to_start", "À commencer") : rvcText("in_progress", "En cours")}</span>
-          <button class="hub-ahead" data-monde="${m.n}" aria-label="${escAttr(rvcT("see_all", "Voir toutes les fiches — {name}", { name: worldName }))}">
+          <button class="hub-ahead" data-monde="${m.n}" aria-label="${escAttr(rvcT("see_all", "Voir toutes les fiches. {name}", { name: worldName }))}">
             <span class="hub-med"><img src="${badge}" alt="" width="512" height="512" loading="lazy" decoding="async"></span>
             <span class="hub-wbody">
               <span class="hub-wname">${rvcDisplay(worldName)}</span>

@@ -532,10 +532,10 @@ function openInviteModal(me) {
           } catch {
             emailEl.focus();
             emailEl.select();
-            toast("Copie impossible — sélectionne le lien", "error");
+            toast("Copie impossible. Sélectionne le lien", "error");
           }
         });
-        toast("Invitation créée — email non envoyé", "info", 5000);
+        toast("Invitation créée. Email non envoyé", "info", 5000);
         emailEl.focus();
         emailEl.select();
         return;

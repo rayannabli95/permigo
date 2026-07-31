@@ -42,7 +42,7 @@ const I18N = {
     faq_title: "Frequently asked questions",
     info_note:
       "This information may change. Check the exact address on your official exam notice.",
-    locked_title: "Centre guide — {name}",
+    locked_title: "Centre guide. {name}",
     locked_sub:
       "Difficulty, route pitfalls, advice and FAQs for your exam centre. Unlock the guides with PermiGo+.",
     route_pitfalls: "Route pitfalls",
@@ -70,7 +70,7 @@ const I18N = {
     faq_title: "الأسئلة الشائعة",
     info_note:
       "قد تتغيّر هذه المعلومات. تحقّق من العنوان الدقيق في استدعائك الرسمي للامتحان.",
-    locked_title: "بطاقة المركز — {name}",
+    locked_title: "بطاقة المركز. {name}",
     locked_sub:
       "الصعوبة ومطبّات المسار والنصائح والأسئلة الشائعة لمركز امتحانك. افتح البطاقات مع PermiGo+.",
     route_pitfalls: "مطبّات المسار",
@@ -984,7 +984,7 @@ function renderLocked(c) {
         ${icon("lock", { size: 28 })}
         <span class="cea-lock-badge">${icon("sparkle", { size: 10 })}</span>
       </div>
-      <div class="cea-lock-tit">${rtl(esc(format("locked_title", "Fiche centre — {name}", { name: c.nom })))}</div>
+      <div class="cea-lock-tit">${rtl(esc(format("locked_title", "Fiche centre. {name}", { name: c.nom })))}</div>
       <p class="cea-lock-sub">${txt("locked_sub", "Difficulté, pièges du parcours, conseils et FAQ de ton centre d’examen. Débloque les fiches avec PermiGo+.")}</p>
       <div class="cea-lock-perks">
         <span class="cea-lock-perk">${icon("alert-triangle", { size: 13 })} ${txt("route_pitfalls", "Pièges du parcours")}</span>

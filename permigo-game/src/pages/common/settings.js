@@ -41,7 +41,7 @@ const SET_I18N = {
     ens_wheel_sub: "Choose the prizes for your students, your brand",
     sub_group: "Subscription",
     sub_loading: "Loading…",
-    sub_cta: "Subscribe — €9.99/month",
+    sub_cta: "Subscribe · €9.99/month",
     sub_manage: "Manage my subscription",
     sub_mine: "My subscription",
     partial_load_err: "Some preferences could not be loaded",
@@ -103,7 +103,7 @@ const SET_I18N = {
     credits: "Credits & licences",
     danger_group: "Danger zone",
     delete_account: "Delete my account",
-    delete_account_sub: "Irreversible — personal data deleted or anonymised",
+    delete_account_sub: "Irreversible. Personal data deleted or anonymised",
     delete_modal_transparency:
       "Your personal data is deleted or anonymised: your first name, email and photo are removed, and your statistics become anonymous. Your account cannot be recovered.",
     delete: "Delete",
@@ -113,19 +113,19 @@ const SET_I18N = {
     prefs_saved: "Preferences saved",
     checkout_success: "Thank you! Your subscription is being activated.",
     checkout_cancel: "Payment cancelled.",
-    sub_ends: "{base} — ends on {date}",
-    sub_next_charge: "{base} — next payment on {date}",
+    sub_ends: "{base}. Ends on {date}",
+    sub_next_charge: "{base}. Next payment on {date}",
     sub_monthly_active: "Monthly subscription active",
     sub_active: "Subscription active",
     sub_pro_desc:
-      "PermiGo Pro — digital REMC booklet, student tracking, no ads.",
+      "PermiGo Pro. Digital REMC booklet, student tracking, no ads.",
     redirecting: "Redirecting…",
     checkout_failed:
       "Unable to open payment. Try again or contact us: contact@permigo.fr",
     push_install:
       "First install PermiGo on your home screen to enable notifications.",
     push_blocked:
-      "Notifications are blocked — allow them in your phone settings.",
+      "Notifications are blocked. Allow them in your phone settings.",
     push_enabled: "Notifications enabled ✓",
     save_error: "Save error",
     dnd_saved: "Do not disturb period saved",
@@ -144,8 +144,8 @@ const SET_I18N = {
     cancel: "Cancel",
     delete_auth_note:
       "To erase the authentication account, contact",
-    delete_failed: "Unable to delete — contact dpo@permigo.fr",
-    delete_error: "Error — contact dpo@permigo.fr",
+    delete_failed: "Unable to delete. Contact dpo@permigo.fr",
+    delete_error: "Error. Contact dpo@permigo.fr",
   },
   ar: {
     back: "رجوع",
@@ -160,7 +160,7 @@ const SET_I18N = {
     ens_wheel_sub: "اختر الجوائز لطلابك، بعلامتك",
     sub_group: "الاشتراك",
     sub_loading: "جارٍ التحميل…",
-    sub_cta: "اشترك — 9,99 € / شهر",
+    sub_cta: "اشترك · 9,99 € / شهر",
     sub_manage: "إدارة اشتراكي",
     sub_mine: "اشتراكي",
     partial_load_err: "تعذّر تحميل بعض الإعدادات",
@@ -222,7 +222,7 @@ const SET_I18N = {
     credits: "الحقوق والتراخيص",
     danger_group: "منطقة حسّاسة",
     delete_account: "حذف حسابي",
-    delete_account_sub: "لا رجعة فيه — تُحذف بياناتك الشخصية أو تُجعل مجهولة",
+    delete_account_sub: "لا رجعة فيه. تُحذف بياناتك الشخصية أو تُجعل مجهولة",
     delete_modal_transparency:
       "تُحذف بياناتك الشخصية أو تُجعل مجهولة الهوية: يُمحى اسمك وبريدك الإلكتروني وصورتك، وتصبح إحصاءاتك مجهولة. لا يمكن استرجاع حسابك.",
     delete: "حذف",
@@ -232,19 +232,19 @@ const SET_I18N = {
     prefs_saved: "تم حفظ الإعدادات",
     checkout_success: "شكرًا! جارٍ تفعيل اشتراكك.",
     checkout_cancel: "تم إلغاء الدفع.",
-    sub_ends: "{base} — ينتهي في {date}",
-    sub_next_charge: "{base} — الدفعة التالية في {date}",
+    sub_ends: "{base}. ينتهي في {date}",
+    sub_next_charge: "{base}. الدفعة التالية في {date}",
     sub_monthly_active: "الاشتراك الشهري مفعّل",
     sub_active: "الاشتراك مفعّل",
     sub_pro_desc:
-      "بيرميغو برو — دفتر REMC رقمي، متابعة الطلاب، بلا إعلانات.",
+      "بيرميغو برو. دفتر REMC رقمي، متابعة الطلاب، بلا إعلانات.",
     redirecting: "جارٍ التحويل…",
     checkout_failed:
       "تعذّر فتح الدفع. أعد المحاولة أو راسلنا: contact@permigo.fr",
     push_install:
       "ثبّت بيرميغو أولًا على شاشتك الرئيسية لتفعيل الإشعارات.",
     push_blocked:
-      "الإشعارات محظورة — اسمح بها في إعدادات الهاتف.",
+      "الإشعارات محظورة. اسمح بها في إعدادات الهاتف.",
     push_enabled: "تم تفعيل الإشعارات ✓",
     save_error: "خطأ في الحفظ",
     dnd_saved: "تم حفظ فترة عدم الإزعاج",
@@ -262,8 +262,8 @@ const SET_I18N = {
     confirmation: "التأكيد",
     cancel: "إلغاء",
     delete_auth_note: "لمحو حساب المصادقة، تواصل مع",
-    delete_failed: "تعذّر الحذف — تواصل مع dpo@permigo.fr",
-    delete_error: "خطأ — تواصل مع dpo@permigo.fr",
+    delete_failed: "تعذّر الحذف. تواصل مع dpo@permigo.fr",
+    delete_error: "خطأ. تواصل مع dpo@permigo.fr",
   },
 };
 // Traduit-ou-français, avec esc() intégré (sûr en texte et en attribut ""). En
@@ -726,7 +726,7 @@ ${
             <div class="st-row-sub" id="st-sub-status">${st("sub_loading", "Chargement…")}</div>
           </div>
         </div>
-        <button class="st-save-btn" id="st-subscribe" style="display:none;align-self:stretch;text-align:center">${st("sub_cta", "S'abonner — 9,99 €/mois")}</button>
+        <button class="st-save-btn" id="st-subscribe" style="display:none;align-self:stretch;text-align:center">${st("sub_cta", "S'abonner · 9,99 €/mois")}</button>
         <button class="st-save-btn" id="st-manage-sub" style="display:none;align-self:stretch;text-align:center;background:var(--su);color:var(--a-txt);border:1.5px solid var(--bo4)">${st("sub_manage", "Gérer mon abonnement")}</button>
       </div>
     </div>
@@ -978,7 +978,7 @@ ${
         <span class="st-ic" aria-hidden="true">${medallion("faute", "red", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
           <div class="st-row-title" style="color:var(--rd-txt)">${st("delete_account", "Supprimer mon compte")}</div>
-          <div class="st-row-sub">${st("delete_account_sub", "Irréversible — données personnelles supprimées ou anonymisées")}</div>
+          <div class="st-row-sub">${st("delete_account_sub", "Irréversible. Données personnelles supprimées ou anonymisées")}</div>
         </div>
         <div class="st-row-action">
           <button class="st-btn-txt danger" id="btn-delete-account">${st("delete", "Supprimer")}</button>
@@ -1055,12 +1055,12 @@ function wire(root, me, prefs) {
           )
         : null;
       return sub?.cancel_at_period_end
-        ? stR("sub_ends", "{base} — se termine le {date}", {
+        ? stR("sub_ends", "{base}. Se termine le {date}", {
             base,
             date: until,
           })
         : until
-          ? stR("sub_next_charge", "{base} — prochain prélèvement le {date}", {
+          ? stR("sub_next_charge", "{base}. Prochain prélèvement le {date}", {
               base,
               date: until,
             })
@@ -1100,7 +1100,7 @@ function wire(root, me, prefs) {
         } else {
           subStatus.textContent = stR(
             "sub_pro_desc",
-            "PermiGo Pro — livret REMC numérique, suivi élèves, sans pub.",
+            "PermiGo Pro. Livret REMC numérique, suivi élèves, sans pub.",
           );
           if (subBtn) subBtn.style.display = "";
           if (manageBtn) manageBtn.style.display = "none";
@@ -1126,7 +1126,7 @@ function wire(root, me, prefs) {
           subBtn.disabled = false;
           subBtn.textContent = stR(
             "sub_cta",
-            "S'abonner — 9,99 €/mois",
+            "S'abonner · 9,99 €/mois",
           );
         }
       });
@@ -1190,7 +1190,7 @@ function wire(root, me, prefs) {
             toast(
               stR(
                 "push_blocked",
-                "Notifications bloquées — autorise-les dans les réglages du téléphone.",
+                "Notifications bloquées. Autorise-les dans les réglages du téléphone.",
               ),
               "error",
               4500,
@@ -1496,7 +1496,7 @@ function _showDeleteModal(root, me) {
           data?.error ||
             stR(
               "delete_failed",
-              "Suppression impossible — contacte dpo@permigo.fr",
+              "Suppression impossible. Contacte dpo@permigo.fr",
             ),
           "error",
           6000,
@@ -1511,7 +1511,7 @@ function _showDeleteModal(root, me) {
     } catch (e) {
       console.error("[settings] delete_account", e);
       toast(
-        stR("delete_error", "Erreur — contacte dpo@permigo.fr"),
+        stR("delete_error", "Erreur. Contacte dpo@permigo.fr"),
         "error",
         6000,
       );

@@ -466,7 +466,7 @@ function _hofSection(hof) {
     </div>`,
     )
     .join("");
-  return `<div class="arn-hof-title">${icon("award", { size: 13, strokeWidth: 2.2 })} Hall of Fame — ${xD(esc(xt("hof_title_suffix", "permis obtenu")))}</div>${rows}`;
+  return `<div class="arn-hof-title">${icon("award", { size: 13, strokeWidth: 2.2 })} Hall of Fame. ${xD(esc(xt("hof_title_suffix", "permis obtenu")))}</div>${rows}`;
 }
 
 // ─── Wire ────────────────────────────────────────────────────────

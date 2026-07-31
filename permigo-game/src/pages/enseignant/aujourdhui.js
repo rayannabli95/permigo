@@ -34,7 +34,7 @@ const TOUR_KEY = "pg-tour-moniteur-v1";
 const MONITEUR_TOUR_STEPS = [
   {
     title: "Bienvenue sur PermiGo",
-    text: "Tes élèves préparent chaque leçon dans l’app. Toi, tu vois qui s’entraîne, qui avance, qui décroche — d’un coup d’œil.",
+    text: "Tes élèves préparent chaque leçon dans l’app. Toi, tu vois qui s’entraîne, qui avance, qui décroche. D’un coup d’œil.",
   },
   {
     sel: "#aj-act-invite",
@@ -888,7 +888,7 @@ async function renderInto(root, _me) {
           <span class="aj-radar-ic">${medallion("cible", "indigo", { size: 34 })}</span>
           <span class="aj-radar-tx">
             <span class="aj-radar-t">Radar de relance</span>
-            <span class="aj-radar-s">${nbDecroche > 0 ? `${nbDecroche} décroche${nbDecroche > 1 ? "nt" : ""} — relance en 1 tap` : "Personne ne décroche 👌"}</span>
+            <span class="aj-radar-s">${nbDecroche > 0 ? `${nbDecroche} décroche${nbDecroche > 1 ? "nt" : ""}. Relance en 1 tap` : "Personne ne décroche 👌"}</span>
           </span>
           <span class="aj-radar-chev">${icon("chevron-right", { size: 20, strokeWidth: 2.4 })}</span>
         </div>

@@ -26,7 +26,7 @@ const DQ_I18N = {
     count: "{n} to claim",
     claim: "Claim",
     done: "Done",
-    claim_aria: " — claim the reward",
+    claim_aria: ". Claim the reward",
     missing: "Quest not found.",
     pop_ok: "Quest complete ✓",
     pop_volants: "+{n} steering wheels",
@@ -42,7 +42,7 @@ const DQ_I18N = {
     count: "{n} للاستلام",
     claim: "استلام",
     done: "تم",
-    claim_aria: " — استلم المكافأة",
+    claim_aria: ". استلم المكافأة",
     missing: "المهمة غير موجودة.",
     pop_ok: "أُنجزت المهمة ✓",
     pop_volants: "+{n} مقود",
@@ -379,7 +379,7 @@ function renderCard(q) {
   return `
     <div class="dq-card ${stCls}" data-quest-id="${escAttr(String(q.quest_id))}"
          role="${ready ? "button" : "article"}" tabindex="${ready ? "0" : "-1"}"
-         aria-label="${escAttr(questTitle(q))}${ready ? escAttr(dqt("claim_aria", " — réclamer la récompense")) : ""}">
+         aria-label="${escAttr(questTitle(q))}${ready ? escAttr(dqt("claim_aria", ". Réclamer la récompense")) : ""}">
       <div class="dq-ico" style="background:${cat.color}18">
         ${
           cat.img

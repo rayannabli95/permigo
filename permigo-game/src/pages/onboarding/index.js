@@ -50,16 +50,16 @@ const OB_I18N = {
     skip: "Skip",
     skip_aria: "Skip the intro",
     hero_lead:
-      "I'm <b>PermiGo</b>. In 30 seconds we'll set up your app — then you'll revise <b>2 min each evening</b>.",
+      "I'm <b>PermiGo</b>. In 30 seconds we'll set up your app. Then you'll revise <b>2 min each evening</b>.",
     sec_identity: "Let's get to know you",
     id_prenom: "First name",
     id_nom: "Last name",
     id_naissance: "Date of birth",
     id_parent: "A parent's email",
     id_parent_micro:
-      "Under 15: a parent's consent is required — a confirmation link will be sent to them.",
+      "Under 15: a parent's consent is required. A confirmation link will be sent to them.",
     id_code_label: "Instructor code",
-    id_code_opt: "— if you have one",
+    id_code_opt: "if you have one",
     id_code_help:
       "Did your instructor give you a code? Enter it to join them. Otherwise, leave it empty.",
     ph_prenom: "Your first name",
@@ -75,31 +75,31 @@ const OB_I18N = {
     rem_sub: "8 pm · gentle, never spam",
     rem_switch_aria: "Turn on evening reminders",
     rem_note:
-      "<b>3 questions every evening, 2 minutes</b> — that's what really makes you progress.",
+      "<b>3 questions every evening, 2 minutes</b>. That's what really makes you progress.",
     reward_aria: "Welcome chest: 50 XP and 25 steering wheels",
     reward_tag: "Reward",
     reward_title: "A chest is waiting for you tonight",
     pill_vol: "25&nbsp;steering wheels",
     sec_a2hs: "Add the app",
     a2hs_lead:
-      "<b>2 taps, 10 seconds</b> — your reminders and rewards land right here.",
+      "<b>2 taps, 10 seconds</b>. Your reminders and rewards land right here.",
     a2hs_plat_aria: "Switch the instructions platform (iPhone / Android)",
     cta: "Let's go",
     cue: "Scroll down to pick your colour",
     code_checking: "Checking…",
     code_invalid:
-      "✗ Code not found — check with your instructor, or leave it empty.",
+      "✗ Code not found. Check with your instructor, or leave it empty.",
     code_join: "✓ You're joining {ecole}",
-    code_err_generic: "Check failed — try again.",
+    code_err_generic: "Check failed. Try again.",
     ecole_fallback: "your driving school",
     toast_parent_required: "Enter a valid parent email.",
-    toast_save_failed: "Couldn't save — try again.",
+    toast_save_failed: "Couldn't save. Try again.",
     toast_join_failed:
-      "Couldn't link to your instructor right now — your account is ready anyway.",
-    notif_on_note: "<b>Reminders on</b> — see you tonight!",
+      "Couldn't link to your instructor right now. Your account is ready anyway.",
+    notif_on_note: "<b>Reminders on</b>. See you tonight!",
     notif_on_announce: "Reminders on! You'll get 3 questions tonight.",
     notif_denied_note:
-      "Blocked — turn them on in settings if you change your mind.",
+      "Blocked. Turn them on in settings if you change your mind.",
     notif_denied_announce:
       "Reminders not turned on. You can enable them later in settings.",
     a2hs_install: "Install the app in 1 tap",
@@ -117,16 +117,16 @@ const OB_I18N = {
     skip: "تخطّي",
     skip_aria: "تخطّي المقدّمة",
     hero_lead:
-      "أنا <b>بيرميغو</b>. في 30 ثانية نجهّز تطبيقك — بعدها تراجع <b>دقيقتين كل مساء</b>.",
+      "أنا <b>بيرميغو</b>. في 30 ثانية نجهّز تطبيقك. بعدها تراجع <b>دقيقتين كل مساء</b>.",
     sec_identity: "لنتعارف",
     id_prenom: "الاسم",
     id_nom: "اللقب",
     id_naissance: "تاريخ الميلاد",
     id_parent: "بريد أحد الوالدين",
     id_parent_micro:
-      "أقل من 15 سنة: موافقة أحد الوالدين إلزامية — سيُرسَل إليه رابط تأكيد.",
+      "أقل من 15 سنة: موافقة أحد الوالدين إلزامية. سيُرسَل إليه رابط تأكيد.",
     id_code_label: "رمز المدرّب",
-    id_code_opt: "— إن كان لديك واحد",
+    id_code_opt: "إن كان لديك واحد",
     id_code_help:
       "أعطاك مدرّبك رمزاً؟ أدخِله للانضمام إليه. وإلّا، اتركه فارغاً.",
     ph_prenom: "اسمك",
@@ -141,27 +141,27 @@ const OB_I18N = {
     rem_title: "تذكير كل مساء",
     rem_sub: "الساعة 20 · لطيف، دون إزعاج",
     rem_switch_aria: "تفعيل التذكيرات المسائية",
-    rem_note: "<b>3 أسئلة كل مساء، دقيقتان</b> — هذا ما يجعلك تتقدّم فعلاً.",
+    rem_note: "<b>3 أسئلة كل مساء، دقيقتان</b>. هذا ما يجعلك تتقدّم فعلاً.",
     reward_aria: "صندوق ترحيب: 50 XP و25 مقوداً",
     reward_tag: "مكافأة",
     reward_title: "صندوق ينتظرك هذا المساء",
     pill_vol: "25&nbsp;مقوداً",
     sec_a2hs: "أضِف التطبيق",
-    a2hs_lead: "<b>لمستان، 10 ثوانٍ</b> — تذكيراتك ومكافآتك تصل إلى هنا.",
+    a2hs_lead: "<b>لمستان، 10 ثوانٍ</b>. تذكيراتك ومكافآتك تصل إلى هنا.",
     a2hs_plat_aria: "تغيير منصّة التعليمات (iPhone / Android)",
     cta: "لننطلق",
     cue: "انزل لاختيار لونك",
     code_checking: "جارٍ التحقّق…",
-    code_invalid: "✗ الرمز غير موجود — تحقّق مع مدرّبك، أو اتركه فارغاً.",
+    code_invalid: "✗ الرمز غير موجود. تحقّق مع مدرّبك، أو اتركه فارغاً.",
     code_join: "✓ أنت تنضمّ إلى {ecole}",
-    code_err_generic: "تعذّر التحقّق — أعد المحاولة.",
+    code_err_generic: "تعذّر التحقّق. أعد المحاولة.",
     ecole_fallback: "مدرسة القيادة",
     toast_parent_required: "أدخِل بريد أحد الوالدين صحيحاً.",
-    toast_save_failed: "تعذّر الحفظ — أعد المحاولة.",
-    toast_join_failed: "تعذّر ربطك بمدرّبك الآن — حسابك جاهز على أي حال.",
-    notif_on_note: "<b>التذكيرات مفعّلة</b> — إلى اللقاء هذا المساء!",
+    toast_save_failed: "تعذّر الحفظ. أعد المحاولة.",
+    toast_join_failed: "تعذّر ربطك بمدرّبك الآن. حسابك جاهز على أي حال.",
+    notif_on_note: "<b>التذكيرات مفعّلة</b>. إلى اللقاء هذا المساء!",
     notif_on_announce: "التذكيرات مفعّلة! ستصلك 3 أسئلة هذا المساء.",
-    notif_denied_note: "محظورة — فعّلها من الإعدادات إن غيّرت رأيك.",
+    notif_denied_note: "محظورة. فعّلها من الإعدادات إن غيّرت رأيك.",
     notif_denied_announce:
       "التذكيرات غير مفعّلة. يمكنك تفعيلها لاحقاً من الإعدادات.",
     a2hs_install: "ثبّت التطبيق بلمسة واحدة",
@@ -275,7 +275,7 @@ export async function mount(root) {
               <img class="ob-mascot" src="/skins/mascot-hello.png" alt="" />
             </div>
             <h1 class="ob-h1" id="ob-h1">${obGreet(prenom)}</h1>
-            <p class="ob-lead">${obR("hero_lead", "Moi c'est <b>PermiGo</b>. En 30&nbsp;secondes, on prépare ton appli — après, tu réviseras <b>2&nbsp;min par soir</b>.")}</p>
+            <p class="ob-lead">${obR("hero_lead", "Moi c'est <b>PermiGo</b>. En 30&nbsp;secondes, on prépare ton appli. Après, tu réviseras <b>2&nbsp;min par soir</b>.")}</p>
           </header>
 
           ${
@@ -303,10 +303,10 @@ export async function mount(root) {
               <div id="ob-id-parent-row" style="display:none">
                 <label class="ob-id-label" for="ob-id-parent">${ob("id_parent", "Email d'un parent")}</label>
                 <input class="ob-id-input" id="ob-id-parent" type="email" autocomplete="off" placeholder="parent@exemple.fr">
-                <p class="ob-micro">${ob("id_parent_micro", "Moins de 15 ans : l'accord d'un parent est obligatoire — un lien de validation lui sera transmis.")}</p>
+                <p class="ob-micro">${ob("id_parent_micro", "Moins de 15 ans : l'accord d'un parent est obligatoire. Un lien de validation lui sera transmis.")}</p>
               </div>
               <div>
-                <label class="ob-id-label" for="ob-id-code">${ob("id_code_label", "Code moniteur")} <span class="ob-id-opt">${ob("id_code_opt", "— si tu en as un")}</span></label>
+                <label class="ob-id-label" for="ob-id-code">${ob("id_code_label", "Code moniteur")} <span class="ob-id-opt">${ob("id_code_opt", "si tu en as un")}</span></label>
                 <input class="ob-id-input ob-id-code" id="ob-id-code" type="text" maxlength="16" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="PERMIS75">
                 <p class="ob-micro" id="ob-id-code-help">${ob("id_code_help", "Ton moniteur t'a donné un code ? Tape-le pour le rejoindre. Sinon, laisse vide.")}</p>
               </div>
@@ -386,7 +386,7 @@ export async function mount(root) {
                   <span class="ob-knob" aria-hidden="true"></span>
                 </button>
               </div>
-              <p class="ob-micro" id="ob-notif-note">${obR("rem_note", "<b>3 questions chaque soir, 2 minutes</b> — c'est ce qui fait progresser pour de vrai.")}</p>
+              <p class="ob-micro" id="ob-notif-note">${obR("rem_note", "<b>3 questions chaque soir, 2 minutes</b>. C'est ce qui fait progresser pour de vrai.")}</p>
             </div>
 
             <!-- Carte récompense -->
@@ -416,7 +416,7 @@ export async function mount(root) {
             </div>
             <div class="ob-install-head">
               <img class="ob-install-badge" src="/skins/avatars/permigo-badge-icon.png" alt="" />
-              <p class="ob-install-lead">${obR("a2hs_lead", "<b>2 gestes, 10 secondes</b> — tes rappels et tes récompenses arrivent ici.")}</p>
+              <p class="ob-install-lead">${obR("a2hs_lead", "<b>2 gestes, 10 secondes</b>. Tes rappels et tes récompenses arrivent ici.")}</p>
             </div>
             <div class="ob-a2hs-steps" id="ob-a2hs-steps"></div>
             <button class="ob-plat-switch" id="ob-plat-switch" type="button" aria-label="${ob("a2hs_plat_aria", "Changer la plateforme des instructions (iPhone / Android)")}"></button>
@@ -553,7 +553,7 @@ export async function mount(root) {
             idCodeHelp.className = "ob-micro err";
             idCodeHelp.textContent = obR(
               "code_invalid",
-              "✗ Code introuvable — revérifie auprès de ton moniteur, ou laisse vide.",
+              "✗ Code introuvable. Revérifie auprès de ton moniteur, ou laisse vide.",
             );
           } else {
             codeState = "valid";
@@ -571,7 +571,7 @@ export async function mount(root) {
           idCodeHelp.className = "ob-micro err";
           idCodeHelp.textContent = obR(
             "code_err_generic",
-            "Vérification impossible — réessaie.",
+            "Vérification impossible. Réessaie.",
           );
         }
         updateCta();
@@ -605,7 +605,7 @@ export async function mount(root) {
       toast(
         /parent_email_required/i.test(profErr.message || "")
           ? obR("toast_parent_required", "Renseigne un email de parent valide.")
-          : obR("toast_save_failed", "Enregistrement impossible — réessaie."),
+          : obR("toast_save_failed", "Enregistrement impossible. Réessaie."),
         "error",
         4000,
       );
@@ -622,7 +622,7 @@ export async function mount(root) {
         toast(
           obR(
             "toast_join_failed",
-            "Rattachement au moniteur impossible pour l'instant — ton compte est quand même prêt.",
+            "Rattachement au moniteur impossible pour l'instant. Ton compte est quand même prêt.",
           ),
           "info",
           4500,
@@ -714,7 +714,7 @@ export async function mount(root) {
         if (note)
           note.innerHTML = obR(
             "notif_on_note",
-            "<b>Rappels activés</b> — à ce soir&nbsp;!",
+            "<b>Rappels activés</b>. À ce soir&nbsp;!",
           );
         announce(
           obR(
@@ -728,7 +728,7 @@ export async function mount(root) {
         if (note && Notification.permission === "denied") {
           note.textContent = obR(
             "notif_denied_note",
-            "Bloquées — active-les dans les réglages si tu changes d'avis.",
+            "Bloquées. Active-les dans les réglages si tu changes d'avis.",
           );
           announce(
             obR(

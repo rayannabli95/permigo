@@ -27,13 +27,13 @@ const I18N = {
     err_mismatch: "Les mots de passe ne correspondent pas",
     err_signup: "Erreur lors de l'inscription",
     err_generic: "Erreur inscription",
-    success: "Inscription réussie — vérifie ta boîte mail",
+    success: "Inscription réussie. Vérifie ta boîte mail",
     auth_registered: "Un compte existe déjà pour cet email.",
     auth_invalid_email: "Adresse email invalide.",
     auth_password_short:
       "Le mot de passe doit contenir au moins 6 caractères.",
     auth_rate_limit:
-      "Trop de tentatives — réessaie dans quelques minutes.",
+      "Trop de tentatives. Réessaie dans quelques minutes.",
   },
   en: {
     title: "Create an account",
@@ -52,11 +52,11 @@ const I18N = {
     err_mismatch: "Passwords don't match",
     err_signup: "Sign-up failed",
     err_generic: "Sign-up error",
-    success: "Account created — check your inbox",
+    success: "Account created. Check your inbox",
     auth_registered: "An account already exists for this email.",
     auth_invalid_email: "Invalid email address.",
     auth_password_short: "Password must be at least 6 characters.",
-    auth_rate_limit: "Too many attempts — try again in a few minutes.",
+    auth_rate_limit: "Too many attempts. Try again in a few minutes.",
   },
   ar: {
     title: "إنشاء حساب",
@@ -75,11 +75,11 @@ const I18N = {
     err_mismatch: "كلمتا المرور غير متطابقتين",
     err_signup: "تعذّر إنشاء الحساب",
     err_generic: "حدث خطأ أثناء إنشاء الحساب",
-    success: "تم إنشاء الحساب — تحقق من صندوق بريدك",
+    success: "تم إنشاء الحساب. تحقق من صندوق بريدك",
     auth_registered: "يوجد حساب مسجّل بهذا البريد الإلكتروني.",
     auth_invalid_email: "عنوان البريد الإلكتروني غير صالح.",
     auth_password_short: "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل.",
-    auth_rate_limit: "محاولات كثيرة — حاول مجددًا بعد دقائق.",
+    auth_rate_limit: "محاولات كثيرة. حاول مجددًا بعد دقائق.",
   },
 };
 
@@ -254,7 +254,7 @@ function wire(root) {
       }
 
       toast(
-        t("success", "Inscription réussie — vérifie ta boîte mail"),
+        t("success", "Inscription réussie. Vérifie ta boîte mail"),
         "success",
       );
       setTimeout(() => {

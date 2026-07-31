@@ -54,8 +54,8 @@ const SI_I18N = {
     kicker_game: "Mini-game",
     h1_intro: "Scenario challenge",
     h1_game: "Road scenario",
-    sub_intro: "One scene, one decision. Show your road instincts.",
-    sub_game: "One scene, one decision. Apply the rules of the road.",
+    sub_intro: "One scene. One decision. Show your road instincts.",
+    sub_game: "One scene. One decision. Apply the rules of the road.",
     session_of: "Session of {n}",
     per_correct: "+{n} per correct answer",
     cta_intro: "Let’s go!",
@@ -74,8 +74,8 @@ const SI_I18N = {
     sub_flawless: "You read the road like a pro.",
     sub_good: "A few more reflexes and you’ll have it locked in.",
     sub_keep: "Every mistake you catch here is one less on the real road.",
-    cap_max: "Today’s reward maxed out — come back tomorrow",
-    zero_next: "0 {word} — next one’s the one",
+    cap_max: "Today’s reward maxed out. Come back tomorrow",
+    zero_next: "0 {word}. Next one’s the one",
     cap_note: "Daily cap reached. Your {word} refill tomorrow.",
     collection: "Collection · {a}/{b} scenes seen",
     to_review: "To review",
@@ -110,8 +110,8 @@ const SI_I18N = {
     sub_flawless: "تقرأ الطريق كالمحترفين.",
     sub_good: "بضعة ردود أفعال أخرى وستتقنها تمامًا.",
     sub_keep: "كل خطأ تتعرّف عليه هنا هو خطأ أقل في درسك الحقيقي.",
-    cap_max: "بلغت مكافأة اليوم حدّها الأقصى — عد غدًا",
-    zero_next: "0 {word} — المحاولة القادمة ستكون الصحيحة",
+    cap_max: "بلغت مكافأة اليوم حدّها الأقصى. عد غدًا",
+    zero_next: "0 {word}. المحاولة القادمة ستكون الصحيحة",
     cap_note: "بلغت السقف اليومي. تتجدد {word} غدًا.",
     collection: "المجموعة · {a}/{b} مشهد تمت مشاهدته",
     to_review: "للمراجعة",
@@ -241,11 +241,11 @@ export async function mount(root, param) {
           isIntro
             ? sit(
                 "sub_intro",
-                "Une scène, une décision. Montre ton flair pour la route.",
+                "Une scène. Une décision. Montre ton flair pour la route.",
               )
             : sit(
                 "sub_game",
-                "Une scène, une décision. Applique le code de la route.",
+                "Une scène. Une décision. Applique le code de la route.",
               ),
         )}</p>
         <div class="sit-hero" aria-hidden="true">${renderSituationScene(demo.scene)}</div>
@@ -555,8 +555,8 @@ export async function mount(root, param) {
             credites > 0
               ? `${volantImg(20, { drop: true })} <b>+${credites}</b>&nbsp;${esc(sitVolantWord(credites))}`
               : gagnes > 0 && plafonne
-                ? `${volantImg(20)} ${esc(sit("cap_max", "Récompense du jour au max — reviens demain"))}`
-                : `${volantImg(20)} ${esc(sit("zero_next", "0 volant — la prochaine est la bonne").replace("{word}", sitVolantWord(0)))}`
+                ? `${volantImg(20)} ${esc(sit("cap_max", "Récompense du jour au max. Reviens demain"))}`
+                : `${volantImg(20)} ${esc(sit("zero_next", "0 volant. La prochaine est la bonne").replace("{word}", sitVolantWord(0)))}`
           }
         </div>
         ${

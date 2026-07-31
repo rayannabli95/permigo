@@ -21,7 +21,7 @@ export const QUESTIONS = [
     ],
     correct: 1,
     explication:
-      "Ceux qui sont déjà dedans sont prioritaires. Toi qui entres, tu cèdes — sauf panneau contraire.",
+      "Ceux qui sont déjà dedans sont prioritaires. Toi qui entres, tu cèdes. Sauf panneau contraire.",
     tags: ["priorite", "rond_point"],
   },
   {
@@ -90,7 +90,7 @@ export const QUESTIONS = [
     ],
     correct: 1,
     explication:
-      "Tu peux la franchir pour tourner, jamais y circuler. Et tu cèdes le passage aux vélos — dans les DEUX sens, c'est le piège des pistes bidirectionnelles.",
+      "Tu peux la franchir pour tourner, jamais y circuler. Et tu cèdes le passage aux vélos dans les DEUX sens. C'est le piège des pistes bidirectionnelles.",
     tags: ["cycliste", "faute_eliminatoire"],
   },
   {
@@ -184,7 +184,7 @@ export const QUESTIONS = [
     ],
     correct: 2,
     explication:
-      "Tu t'arrêtes. Devant un bus, tu ne vois pas qui débouche — prudence maximale.",
+      "Tu t'arrêtes. Devant un bus, tu ne vois pas qui débouche. Prudence maximale.",
     tags: ["pieton"],
   },
   {
@@ -374,7 +374,7 @@ export const QUESTIONS = [
     enonce: "Ton téléphone sonne pendant que tu conduis. Tu fais quoi ?",
     options: [
       "Je réponds vite si c'est important",
-      "Je ne réponds pas — ou je m'arrête pour répondre",
+      "Je ne réponds pas. Ou je m'arrête pour répondre",
       "Je réponds avec le haut-parleur en main",
     ],
     correct: 1,
@@ -549,7 +549,7 @@ export const QUESTIONS = [
     ],
     correct: 0,
     explication:
-      "Tu ralentis et tu cèdes — mais si c'est visiblement libre, pas besoin de t'arrêter. C'est la différence avec le STOP.",
+      "Tu ralentis et tu cèdes. Mais si c'est visiblement libre, pas besoin de t'arrêter. C'est la différence avec le STOP.",
     tags: ["priorite", "signalisation"],
   },
   {
@@ -663,7 +663,7 @@ export const QUESTIONS = [
     ],
     correct: 1,
     explication:
-      "La zone 30 n'interdit pas de doubler — mais le 1 m de marge latérale reste obligatoire.",
+      "La zone 30 n'interdit pas de doubler. Mais le 1 m de marge latérale reste obligatoire.",
     tags: ["cycliste", "vitesse"],
   },
   {
@@ -723,7 +723,7 @@ export const QUESTIONS = [
     ],
     correct: 2,
     explication:
-      "En zone de rencontre (20 km/h), les piétons sont prioritaires sur toute la chaussée. Attention : en zone 30, ils n'ont PAS cette priorité générale — c'est le piège classique.",
+      "En zone de rencontre (20 km/h), les piétons sont prioritaires sur toute la chaussée. Attention : en zone 30, ils n'ont PAS cette priorité générale. C'est le piège classique.",
     tags: ["pieton", "signalisation"],
   },
   {
@@ -738,7 +738,7 @@ export const QUESTIONS = [
     ],
     correct: 1,
     explication:
-      "En mode électrique, t'es quasi silencieux. Piétons et malvoyants ne t'entendent pas — c'est à toi de compenser.",
+      "En mode électrique, t'es quasi silencieux. Piétons et malvoyants ne t'entendent pas. C'est à toi de compenser.",
     tags: ["pieton", "eco_conduite"],
   },
   {
@@ -820,7 +820,7 @@ export const QUESTIONS = [
     ],
     correct: 1,
     explication:
-      "Sans disque, pas de zone bleue — même pour 5 minutes. Tu cherches ailleurs.",
+      "Sans disque, pas de zone bleue. Même pour 5 minutes. Tu cherches ailleurs.",
     tags: ["signalisation"],
   },
   {
@@ -889,7 +889,7 @@ export const QUESTIONS = [
     ],
     correct: 1,
     explication:
-      "Toujours la règle des 2 secondes — à 130 km/h ça fait environ 72 m. Repère : 2 bandes blanches de la BAU.",
+      "Toujours la règle des 2 secondes. À 130 km/h ça fait environ 72 m. Repère : 2 bandes blanches de la BAU.",
     tags: ["vitesse"],
   },
   {
@@ -945,7 +945,7 @@ export const QUESTIONS = [
     ],
     correct: 1,
     explication:
-      "Urgences uniquement. Y rouler est interdit — et tu bloques le passage des secours.",
+      "Urgences uniquement. Y rouler est interdit. Et tu bloques le passage des secours.",
     tags: ["signalisation", "faute_eliminatoire"],
   },
   {
@@ -977,7 +977,7 @@ export const QUESTIONS = [
     enonce:
       "T'es sur la voie de gauche depuis 5 km sans rien doubler. Tu fais quoi ?",
     options: [
-      "Je reviens à droite — rouler à gauche sans doubler est interdit",
+      "Je reviens à droite. Rouler à gauche sans doubler est interdit",
       "Je reste à gauche, c'est plus rapide",
       "J'accélère",
     ],
@@ -1022,7 +1022,7 @@ export const QUESTIONS = [
     options: ["60 km/h", "80 km/h", "Non, pas de minimum légal"],
     correct: 2,
     explication:
-      "Pas de minimum légal en France. Mais rouler trop lentement crée un vrai danger — en dessous de 60, c'est déconseillé.",
+      "Pas de minimum légal en France. Mais rouler trop lentement crée un vrai danger. En dessous de 60, c'est déconseillé.",
     tags: ["vitesse"],
   },
   {
@@ -1047,7 +1047,7 @@ export const QUESTIONS = [
       "Tu sors de l'autoroute après 2 h à 130 km/h. Quel piège t'attend ?",
     options: [
       "Aucun, rien de particulier",
-      "Je risque de sous-estimer ma vitesse en ville — l'effet tunnel",
+      "Je risque de sous-estimer ma vitesse en ville (effet tunnel)",
       "Je conduis mieux, je suis échauffé",
     ],
     correct: 1,
@@ -1064,7 +1064,7 @@ export const QUESTIONS = [
     options: ["0,2 g/L", "0,5 g/L", "0,8 g/L"],
     correct: 1,
     explication:
-      "0,5 g/L de sang (soit 0,25 mg/L d'air expiré). En permis probatoire, c'est 0,2 g/L — quasiment zéro.",
+      "0,5 g/L de sang (soit 0,25 mg/L d'air expiré). En permis probatoire, c'est 0,2 g/L. Quasiment zéro.",
     tags: ["alcool"],
   },
   {
@@ -1164,7 +1164,7 @@ export const QUESTIONS = [
     ],
     correct: 1,
     explication:
-      "Réservés au brouillard ou à la neige denses. Sous la pluie ils éblouissent ceux qui te suivent — c'est même interdit.",
+      "Réservés au brouillard ou à la neige denses. Sous la pluie ils éblouissent ceux qui te suivent. C'est même interdit.",
     tags: ["signalisation", "verification_interieure"],
   },
   {
@@ -2215,7 +2215,7 @@ export const QUESTIONS = [
     ],
     correct: 1,
     explication:
-      "La marche arrière sert à manœuvrer sur une courte distance. Reculer longtemps est dangereux — et c'est strictement interdit sur autoroute.",
+      "La marche arrière sert à manœuvrer sur une courte distance. Reculer longtemps est dangereux. Et c'est strictement interdit sur autoroute.",
     tags: ["manoeuvre"],
   },
   {
@@ -2304,7 +2304,7 @@ export const QUESTIONS = [
     ],
     correct: 1,
     explication:
-      "Priorité à ceux qui sont déjà sur l'anneau. La règle « priorité à droite » ne s'applique pas dans un giratoire signalé — tu cèdes toujours.",
+      "Priorité à ceux qui sont déjà sur l'anneau. La règle « priorité à droite » ne s'applique pas dans un giratoire signalé. Tu cèdes toujours.",
     tags: ["priorite", "rond_point"],
   },
   {
@@ -2387,7 +2387,7 @@ export const QUESTIONS = [
     enonce: "À quelle vitesse roule-t-on en général dans un giratoire ?",
     options: [
       "Pas de règle, la priorité suffit",
-      "Vitesse adaptée pour pouvoir céder et s'arrêter si besoin — souvent 20-30 km/h",
+      "Vitesse adaptée pour pouvoir céder et s'arrêter si besoin. Souvent 20-30 km/h",
       "50 km/h comme en ville",
     ],
     correct: 1,
@@ -2437,7 +2437,7 @@ export const QUESTIONS = [
     ],
     correct: 1,
     explication:
-      "En France, tout carrefour à sens giratoire est systématiquement signalisé (panneau AB25 + « cédez le passage ») : tu cèdes donc à ceux qui sont déjà sur l'anneau. La cession est due parce qu'il est signalisé — c'est la règle que tu rencontreras partout.",
+      "En France, tout carrefour à sens giratoire est systématiquement signalisé (panneau AB25 + « cédez le passage ») : tu cèdes donc à ceux qui sont déjà sur l'anneau. La cession est due parce qu'il est signalisé. C'est la règle que tu rencontreras partout.",
     tags: ["priorite", "rond_point", "signalisation"],
   },
 

@@ -3,14 +3,14 @@
 export const PARCOURS = [
   {
     id: 1,
-    nom: "Cergy — ronds-points",
+    nom: "Cergy. Ronds-points",
     contexte:
       "Sortie de la gare de Cergy-Saint-Christophe, circulation dense, nombreux giratoires et zones 30.",
     difficulte: 3,
   },
   {
     id: 2,
-    nom: "Paris — trafic dense",
+    nom: "Paris. Trafic dense",
     contexte:
       "Traversée du centre de Paris, boulevards à 50 km/h, sas vélos, piétons en nombre.",
     difficulte: 5,
@@ -24,7 +24,7 @@ export const PARCOURS = [
   },
   {
     id: 4,
-    nom: "Lyon — zone 30",
+    nom: "Lyon. Zone 30",
     contexte:
       "Quartier résidentiel de Lyon, zone 30, tramway, nombreux cyclistes et piétons.",
     difficulte: 4,

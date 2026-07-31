@@ -69,7 +69,7 @@ export async function lancerQuiz({
     try {
       const { toast } = await import("@/components/common/toast.js");
       toast(
-        "Ce quiz n'est pas encore prêt — réessaie plus tard.",
+        "Ce quiz n'est pas encore prêt. Réessaie plus tard.",
         "info",
         4000,
       );

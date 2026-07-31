@@ -76,7 +76,7 @@ export const CATALOG = [
     emoji: "🎓",
     image: "/skins/badge-3d-05.webp",
     title: "Prêt examen blanc",
-    body: "28/31. La voiture est sur la route — lance l'examen blanc.",
+    body: "28/31. La voiture est sur la route. Lance l'examen blanc.",
     rarity: "legendaire",
     xp: 600,
     gemmes: 150,

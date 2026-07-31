@@ -207,7 +207,7 @@ export function openProvenanceEditor({ eleveId, prenom, current, onSaved }) {
         ${current ? `<button class="pv-btn pv-btn-ghost" id="pv-remove">Retirer</button>` : ""}
       </div>
 
-      <div class="pv-note"><b>Confidentiel.</b> C'est ton info à toi (comme un CRM) — l'élève ne la voit jamais.</div>
+      <div class="pv-note"><b>Confidentiel.</b> C'est ton info à toi (comme un CRM). L'élève ne la voit jamais.</div>
     </div>`;
 
   document.body.appendChild(wrap);

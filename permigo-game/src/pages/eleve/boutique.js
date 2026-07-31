@@ -69,7 +69,7 @@ const BO_I18N = {
     selection: "✦ Selection",
     note: "Skins are 100% cosmetic: style, never an advantage.",
     obj_removed: "Objective removed",
-    obj_set: "Objective set — earn steering wheels by revising!",
+    obj_set: "Objective set. Earn steering wheels by revising!",
     buy_fail: "Purchase failed. Try again.",
     not_enough: "Not enough steering wheels",
     already_owned: "Already in your inventory",
@@ -96,7 +96,7 @@ const BO_I18N = {
     obj_kick_pin: "Your goal",
     obj_kick_aim: "To aim for",
     obj_reached: "Goal reached!",
-    obj_touch: "— tap to get it",
+    obj_touch: "tap to get it",
     obj_earn: "Earned by <b>revising</b>",
     obj_aria: "Goal:",
     obj_can_buy: "you can buy it",
@@ -107,7 +107,7 @@ const BO_I18N = {
       "Every finished revision session credits your balance. <b>No shortcuts.</b>",
     daily_cta: "Revise",
     price: "Price",
-    equipped_remove: "✓ Equipped — remove",
+    equipped_remove: "Remove",
     obj_on: "✓ This is your goal",
     obj_off: "🎯 Set as goal",
     close: "Close",
@@ -141,7 +141,7 @@ const BO_I18N = {
     selection: "✦ مختارات",
     note: "الأشكال تجميلية 100% : أناقة فقط، لا أفضلية أبدًا.",
     obj_removed: "أُزيل الهدف",
-    obj_set: "حُدّد الهدف — اربح مقاود بالمراجعة!",
+    obj_set: "حُدّد الهدف. اربح مقاود بالمراجعة!",
     buy_fail: "تعذّر الشراء. أعد المحاولة.",
     not_enough: "لا مقاود كافية",
     already_owned: "موجود في مخزونك بالفعل",
@@ -168,7 +168,7 @@ const BO_I18N = {
     obj_kick_pin: "هدفك",
     obj_kick_aim: "للطموح",
     obj_reached: "تحقّق الهدف!",
-    obj_touch: "— المس للحصول عليه",
+    obj_touch: "المس للحصول عليه",
     obj_earn: "يُربح <b>بالمراجعة</b>",
     obj_aria: "الهدف:",
     obj_can_buy: "يمكنك شراؤه",
@@ -178,7 +178,7 @@ const BO_I18N = {
     daily_sub: "كل جلسة مراجعة مكتملة تُضاف إلى رصيدك. <b>لا اختصارات.</b>",
     daily_cta: "راجع",
     price: "السعر",
-    equipped_remove: "✓ مُجهَّز — أزِل",
+    equipped_remove: "أزِل",
     obj_on: "✓ هذا هدفك",
     obj_off: "🎯 حدّده هدفًا",
     close: "إغلاق",
@@ -827,7 +827,7 @@ export async function mount(root) {
           nowOn
             ? btR(
                 "obj_set",
-                "Objectif défini — gagne des volants en révisant !",
+                "Objectif défini. Gagne des volants en révisant !",
               )
             : btR("obj_removed", "Objectif retiré"),
           nowOn ? "success" : "info",
@@ -1106,7 +1106,7 @@ function showDetailModal(item, gemmes, me, onConfirm, triggerEl) {
   if (item.owned) {
     cta = `<button class="bo3-modal-cta equip" id="bo3-cta" type="button">${isEquipped ? bt("equipped_remove", "Retirer") : bt("equip_btn", "Équiper")}</button>`;
   } else if (canAfford) {
-    cta = `<button class="bo3-modal-cta buy" id="bo3-cta" type="button">${bt("buy", "Acheter")} — ${item.cost_gemmes} ${volantImg(14)}</button>`;
+    cta = `<button class="bo3-modal-cta buy" id="bo3-cta" type="button">${bt("buy", "Acheter")} ${item.cost_gemmes} ${volantImg(14)}</button>`;
     balanceLine = `<div class="bo3-modal-balance">${brtl(afterBuyLine(afterBalance))}</div>`;
   } else {
     cta = `<button class="bo3-modal-cta locked" id="bo3-cta" type="button" disabled>${icon("lock", { size: 14 })} ${bt("not_enough", "Pas assez de volants")}</button>`;
@@ -1159,7 +1159,7 @@ function showDetailModal(item, gemmes, me, onConfirm, triggerEl) {
     haptic("tap");
     toast(
       nowOn
-        ? btR("obj_set", "Objectif défini — gagne des volants en révisant !")
+        ? btR("obj_set", "Objectif défini. Gagne des volants en révisant !")
         : btR("obj_removed", "Objectif retiré"),
       nowOn ? "success" : "info",
     );

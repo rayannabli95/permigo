@@ -70,9 +70,9 @@ const MP_I18N = {
     hero_kick: "The road to the real licence",
     hero_of: "out of {t}",
     hero_lbl: "skills validated",
-    hero_sub_solo: "On your own, at your pace — this is your real progress.",
+    hero_sub_solo: "At your own pace. Your real progress.",
     hero_sub_monit:
-      "By your instructor, in real lessons — this is your real progress.",
+      "Practised in lessons then certified by you. Your real progress.",
     hero_aria: "{n} skills out of {t}",
     hero_chap: "Current chapter:",
     hero_all_done: "All chapters validated",
@@ -86,7 +86,7 @@ const MP_I18N = {
     lbl_progress: "in progress",
     renvoi_t: "Want to train? Head to Practice.",
     renvoi_s:
-      "Here you see your validated progress — training happens in Practice.",
+      "Here you see your validated progress. Training happens in Practice.",
     s2_title: "My lessons",
     s2_sub: "your instructor's lesson reports",
     cr_lesson_of: "Lesson of {date}",
@@ -141,8 +141,8 @@ const MP_I18N = {
     hero_kick: "الطريق إلى الرخصة الحقيقية",
     hero_of: "من {t}",
     hero_lbl: "مهارة مُصادَق عليها",
-    hero_sub_solo: "بشكل مستقل وعلى وتيرتك — هذا تقدّمك الحقيقي.",
-    hero_sub_monit: "من مدرّبك أثناء الدروس الحقيقية — هذا تقدّمك الحقيقي.",
+    hero_sub_solo: "بشكل مستقل وعلى وتيرتك. هذا تقدّمك الحقيقي.",
+    hero_sub_monit: "من مدرّبك أثناء الدروس الحقيقية. هذا تقدّمك الحقيقي.",
     hero_aria: "{n} مهارة من {t}",
     hero_chap: "الفصل الحالي:",
     hero_all_done: "اكتملت جميع الفصول",
@@ -155,7 +155,7 @@ const MP_I18N = {
     lbl_locked: "لاحقًا",
     lbl_progress: "جارٍ",
     renvoi_t: "تريد التدرّب؟ توجّه إلى المراجعة.",
-    renvoi_s: "هنا تقدّمك المُصادَق عليه — التدريب يكون في قسم المراجعة.",
+    renvoi_s: "هنا تقدّمك المُصادَق عليه. التدريب يكون في قسم المراجعة.",
     s2_title: "دروسي",
     s2_sub: "تقارير مدرّبك عن الدروس",
     cr_lesson_of: "درس يوم {date}",
@@ -500,8 +500,8 @@ function renderHero({ totalAcquis, currentTitre, allDone, solo }) {
         <div class="mp-hero-t">${totalAcquis} <small>${mpD("hero_of", `sur ${REMC_TOTAL}`, { t: REMC_TOTAL })}</small></div>
         <div class="mp-hero-lbl">${mpD("hero_lbl", "compétences validées")}</div>
         <!-- Retrait du moniteur (lot 4 du pivot) : plus d'attribution « par ton
-             moniteur » — l'élève pratique en leçon puis certifie lui-même. -->
-        <div class="mp-hero-s">${solo ? mpD("hero_sub_solo", "En autonomie, à ton rythme — c'est ta vraie progression.") : mpD("hero_sub_monit", "Pratiquée en leçon, certifiée par toi — c'est ta vraie progression.")}</div>
+             moniteur ». L'élève pratique en leçon puis certifie lui-même. -->
+        <div class="mp-hero-s">${solo ? mpD("hero_sub_solo", "À ton rythme et en autonomie. Ta vraie progression.") : mpD("hero_sub_monit", "Pratiquée en leçon puis certifiée par toi. Ta vraie progression.")}</div>
       </div>
       <span class="mp-hero-med" aria-hidden="true">${medallion("trophee", "gold", { size: 68 })}</span>
     </div>
@@ -542,7 +542,7 @@ function renderStep1({ worldStates, step1Failed }) {
             ? mpTR("lbl_locked", "à venir")
             : mpTR("lbl_progress", "en cours");
       const titre = ws.world?.titre || "";
-      return `<button class="mp-comp ${cls}" type="button" data-chap="${ws.idx}" aria-label="${escAttr(titre)} — ${ws.done} sur ${ws.total} ${escAttr(lbl)}">
+      return `<button class="mp-comp ${cls}" type="button" data-chap="${ws.idx}" aria-label="${escAttr(titre)}. ${ws.done} sur ${ws.total} ${escAttr(lbl)}">
         ${chapMedallion(ws.status)}
         <div class="mp-comp-b">
           <div class="mp-comp-t">${mpNameBi(titre, worldTr(ws.world?.id, getLang())?.titre)}</div>
@@ -572,7 +572,7 @@ function renderStep1({ worldStates, step1Failed }) {
     <button class="mp-renvoi" id="mp-btn-reviser" type="button">
       ${medallion("eclair", "gold", { size: 28 })}
       <p>${mpD("renvoi_t", "Envie de t'entraîner ? Direction Réviser.")}
-        <i>${mpD("renvoi_s", "Ici, c'est ta progression validée — l'entraînement se passe dans Réviser.")}</i></p>
+        <i>${mpD("renvoi_s", "Ici tu vois ta progression validée. L'entraînement se passe dans Réviser.")}</i></p>
       ${CHEVRON}
     </button>
   </section>`;

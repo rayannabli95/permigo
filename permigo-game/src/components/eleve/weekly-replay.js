@@ -229,7 +229,7 @@ export function playReplay(stats) {
           try {
             await navigator.share({
               title: "Ma semaine sur PermiGo",
-              text: `${stats.compsValidated} compétence${stats.compsValidated !== 1 ? "s" : ""} cette semaine — je progresse vers mon permis !`,
+              text: `${stats.compsValidated} compétence${stats.compsValidated !== 1 ? "s" : ""} cette semaine. Je progresse vers mon permis !`,
               // location.origin : l'ancien domaine en dur
               // (permigo-game.vercel.app) renvoie un 404.
               url: window.location.origin,

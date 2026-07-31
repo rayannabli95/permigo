@@ -716,9 +716,9 @@ async function loadData(me) {
 
   // ── Portefeuille : 4 tranches d'avancement ──
   const tranches = [
-    { nom: "Démarrage", range: "0–25 %", count: 0 },
-    { nom: "En construction", range: "25–50 %", count: 0 },
-    { nom: "Bien avancés", range: "50–75 %", count: 0 },
+    { nom: "Démarrage", range: "0 à 25 %", count: 0 },
+    { nom: "En construction", range: "25 à 50 %", count: 0 },
+    { nom: "Bien avancés", range: "50 à 75 %", count: 0 },
     { nom: "Bientôt sortis", range: "75 % +", count: 0, full: true },
   ];
   actifs.forEach((e) => {
@@ -821,7 +821,7 @@ function renderAll(root, data) {
       <p class="st-foot">${
         data.saisies7j > 0
           ? `Tu as mis à jour ${data.saisies7j} compétence${data.saisies7j > 1 ? "s" : ""} chez tes élèves ces 7 derniers jours.`
-          : "Aucune validation saisie depuis 7 jours — pense à saisir tes séances pour garder une photo fidèle."
+          : "Aucune validation saisie depuis 7 jours. Pense à saisir tes séances pour garder une photo fidèle."
       }</p>
     </div>
   `;
@@ -841,7 +841,7 @@ function renderActions({ carteExam, silencieux, topDiff }) {
         <div class="st-act-body">
           <div class="st-act-kick amber">Examen proche</div>
           <div class="st-act-ttl">${nm} passe ${esc(carteExam.quand)}</div>
-          <div class="st-act-txt">${carteExam.acquis}/${REMC_TOTAL} acquis — prépare son passage.</div>
+          <div class="st-act-txt">${carteExam.acquis}/${REMC_TOTAL} acquis. Prépare son passage.</div>
         </div>
         ${CHEV}
       </div>`);
@@ -882,7 +882,7 @@ function renderActions({ carteExam, silencieux, topDiff }) {
         <div class="st-act-body">
           <div class="st-act-kick indigo">Point pédago</div>
           <div class="st-act-ttl">${lbl}</div>
-          <div class="st-act-txt">${topDiff.count} élève${topDiff.count > 1 ? "s" : ""} noté${topDiff.count > 1 ? "s" : ""} « à revoir » dessus ces 60 derniers jours — prévois un temps dédié en leçon.</div>
+          <div class="st-act-txt">${topDiff.count} élève${topDiff.count > 1 ? "s" : ""} noté${topDiff.count > 1 ? "s" : ""} « à revoir » dessus ces 60 derniers jours. Prévois un temps dédié en leçon.</div>
         </div>
         ${CHEV}
       </div>`);
@@ -907,7 +907,7 @@ function renderActions({ carteExam, silencieux, topDiff }) {
 function renderPrets({ prets }) {
   if (prets.length === 0) {
     return `<div class="st-card"><div class="st-empty">
-      Aucune compétence validée pour l'instant — les jauges de tes élèves apparaîtront ici.
+      Aucune compétence validée pour l'instant. Les jauges de tes élèves apparaîtront ici.
     </div></div>`;
   }
   const rows = prets
@@ -920,7 +920,7 @@ function renderPrets({ prets }) {
         : "livret complet";
       return `
       <div class="st-row" role="button" tabindex="0" data-eleve-id="${escAttr(e.id)}"
-           aria-label="Livret de ${nomAttr(e)} — ${e.acquis} compétence${e.acquis > 1 ? "s" : ""} acquise${e.acquis > 1 ? "s" : ""} sur ${REMC_TOTAL}">
+           aria-label="Livret de ${nomAttr(e)}. ${e.acquis} compétence${e.acquis > 1 ? "s" : ""} acquise${e.acquis > 1 ? "s" : ""} sur ${REMC_TOTAL}">
         <div style="flex-shrink:0">${renderUserAvatar(e, 36)}</div>
         <div class="st-row-body">
           <div class="st-row-nom">${nm}</div>
@@ -942,7 +942,7 @@ function renderSilencieux({ silencieux }) {
   const n = silencieux.length;
   if (n === 0) {
     return `<div class="st-card" id="st-sil-card"><div class="st-empty">
-      Personne en silence — tous tes élèves ont donné signe de vie ces ${SILENCE_JOURS} derniers jours.
+      Personne en silence. Tous tes élèves ont donné signe de vie ces ${SILENCE_JOURS} derniers jours.
     </div></div>`;
   }
   const visibles = _showAllSilencieux ? silencieux : silencieux.slice(0, 3);
@@ -953,7 +953,7 @@ function renderSilencieux({ silencieux }) {
         e.daysAgo != null ? `depuis ${e.daysAgo} j` : "jamais vu sur l'app";
       return `
       <div class="st-row" role="button" tabindex="0" data-eleve-id="${escAttr(e.id)}"
-           aria-label="Livret de ${nomAttr(e)} — silencieux ${escAttr(depuis)}">
+           aria-label="Livret de ${nomAttr(e)}. Silencieux ${escAttr(depuis)}">
         <div style="flex-shrink:0">${renderUserAvatar(e, 36)}</div>
         <div class="st-row-body"><div class="st-row-nom">${nm}</div></div>
         <span class="st-row-val">${esc(depuis)}</span>
@@ -985,7 +985,7 @@ function renderRevisions({
 }) {
   if (quizKo) {
     return `<div class="st-card"><div class="st-empty">
-      Données de révision indisponibles pour le moment — réessaie un peu plus tard.
+      Données de révision indisponibles pour le moment. Réessaie un peu plus tard.
     </div></div>`;
   }
   if (nbReviseurs7j === 0) {
@@ -1013,7 +1013,7 @@ function renderRevisions({
       const nm = nomCourt(e);
       return `
       <div class="st-row" role="button" tabindex="0" data-eleve-id="${escAttr(e.id)}"
-           aria-label="Livret de ${nomAttr(e)} — ${e.nQuiz} quiz ces 7 derniers jours">
+           aria-label="Livret de ${nomAttr(e)}. ${e.nQuiz} quiz ces 7 derniers jours">
         <div style="flex-shrink:0">${renderUserAvatar(e, 36)}</div>
         <div class="st-row-body"><div class="st-row-nom">${nm}</div></div>
         <span class="st-row-val">${e.nQuiz} <small>quiz</small></span>

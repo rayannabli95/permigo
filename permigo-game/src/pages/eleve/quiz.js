@@ -47,22 +47,22 @@ const QP_I18N = {
     start: "Start",
     later: "Later",
     no_q: "No questions for this skill yet",
-    save_err: "Couldn't save — try again",
+    save_err: "Couldn't save. Try again",
     locked: "Your instructor hasn't unlocked this skill yet.",
     almost: "Almost! You need 70% to pass. Try again.",
     saved: "Quiz saved.",
     daily_ok: "Well done! Question of the day: done.",
     daily_ko: "Good try! Come back tomorrow for the next one.",
     validated: "Skill validated! Keep it up",
-    passed_chain: "Well done! You're on a roll — keep going?",
+    passed_chain: "Well done! You're on a roll. Keep going?",
     passed: "Well done! Quiz passed.",
     upcoming_chain:
-      "Upcoming skill — your instructor will work on it with you.",
+      "Upcoming skill. Your instructor will work on it with you.",
     upcoming:
       "Upcoming skill. Your instructor will work on it with you in a lesson.",
-    retry_chain: "No worries — every question helps you improve. Keep going?",
+    retry_chain: "No worries. Every question helps you improve. Keep going?",
     retry:
-      "You're almost there — one more round with your instructor and it's in the bag.",
+      "You're almost there. One more round with your instructor and it's in the bag.",
     streak_days: "{n} days in a row",
     cont: "Keep practising",
     see_parcours: "See my journey",
@@ -81,19 +81,19 @@ const QP_I18N = {
     start: "ابدأ",
     later: "لاحقًا",
     no_q: "لا توجد أسئلة لهذه المهارة بعد",
-    save_err: "تعذّر الحفظ — حاول مجددًا",
+    save_err: "تعذّر الحفظ. حاول مجددًا",
     locked: "لم يفتح مدرّبك هذه المهارة بعد.",
     almost: "اقتربت! تحتاج إلى 70٪ للنجاح. حاول مجددًا.",
     saved: "تم حفظ الاختبار.",
     daily_ok: "أحسنت! أنجزت سؤال اليوم.",
     daily_ko: "محاولة جيدة! عد غدًا للسؤال التالي.",
     validated: "تم اعتماد المهارة! واصل هكذا",
-    passed_chain: "أحسنت! أنت في أوج حماسك — نتابع؟",
+    passed_chain: "أحسنت! أنت في أوج حماسك. نتابع؟",
     passed: "أحسنت! نجحت في الاختبار.",
-    upcoming_chain: "مهارة قادمة — سيتدرّب عليها مدرّبك معك.",
+    upcoming_chain: "مهارة قادمة. سيتدرّب عليها مدرّبك معك.",
     upcoming: "مهارة قادمة. سيتدرّب عليها مدرّبك معك في الدرس.",
-    retry_chain: "لا بأس — كل سؤال يجعلك تتقدّم. نواصل؟",
-    retry: "اقتربت — جولة أخيرة مع مدرّبك وستنجح.",
+    retry_chain: "لا بأس. كل سؤال يجعلك تتقدّم. نواصل؟",
+    retry: "اقتربت. جولة أخيرة مع مدرّبك وستنجح.",
     streak_days: "{n} أيام متتالية",
     cont: "واصل المراجعة",
     see_parcours: "عرض مساري",
@@ -538,7 +538,7 @@ async function handleComplete(
 
   if (error) {
     console.warn("[quiz] submit_competence_quiz error", error);
-    toast(qt("save_err", "Erreur lors de la sauvegarde — réessaie"), "error");
+    toast(qt("save_err", "Erreur lors de la sauvegarde. Réessaie"), "error");
     // Fallback : afficher le résultat quand même
     renderResult(root, {
       score,
@@ -779,13 +779,13 @@ function renderResult(
       ? qt("validated", "Compétence validée ! Continue comme ça")
       : passed
         ? canChain
-          ? qt("passed_chain", "Bien joué ! Tu es chaud — on enchaîne ?")
+          ? qt("passed_chain", "Bien joué ! Tu es chaud. On enchaîne ?")
           : qt("passed", "Bien joué ! Quiz réussi.")
         : reason === "no_competence_unlocked"
           ? canChain
             ? qt(
                 "upcoming_chain",
-                "Compétence à venir — ton moniteur la travaillera avec toi.",
+                "Compétence à venir. Ton moniteur la travaillera avec toi.",
               )
             : qt(
                 "upcoming",
@@ -794,11 +794,11 @@ function renderResult(
           : canChain
             ? qt(
                 "retry_chain",
-                "Pas grave — chaque question te fait progresser. On continue ?",
+                "Pas grave. Chaque question te fait progresser. On continue ?",
               )
             : qt(
                 "retry",
-                "Tu y es presque — un dernier tour avec ton moniteur et c'est dans la poche.",
+                "Tu y es presque. Un dernier tour avec ton moniteur et c'est dans la poche.",
               );
   }
 

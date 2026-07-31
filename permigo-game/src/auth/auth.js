@@ -22,7 +22,7 @@ export const sb =
       })
     : null;
 
-if (!sb) console.warn("[auth] Supabase non configuré — auth désactivée");
+if (!sb) console.warn("[auth] Supabase non configuré. Auth désactivée");
 
 // NOTE : le listener auth est attaché manuellement APRÈS le boot
 // (pour éviter le deadlock sur getSession au démarrage).
@@ -45,7 +45,7 @@ export async function login(email, password, opts = {}) {
   const loginPromise = sb.auth.signInWithPassword(payload);
   const timeout = new Promise((_, rej) =>
     setTimeout(
-      () => rej(new Error("Login timeout 10s — vérifie la console réseau")),
+      () => rej(new Error("Login timeout 10s. Vérifie la console réseau")),
       10000,
     ),
   );
@@ -73,7 +73,7 @@ export async function login(email, password, opts = {}) {
 
   if (pErr || !profile) {
     await sb.auth.signOut();
-    return { ok: false, error: "Profil introuvable — contacter l'admin" };
+    return { ok: false, error: "Profil introuvable. Contacter l'admin" };
   }
 
   setCurUser({ ...profile, email: profile.email || cleanEmail });
@@ -128,12 +128,12 @@ export async function verifyOtp(email, token) {
     await sb.auth.signOut();
     return {
       ok: false,
-      error: "Impossible de charger le profil — réessaie",
+      error: "Impossible de charger le profil. Réessaie",
     };
   }
   if (!profile) {
     await sb.auth.signOut();
-    return { ok: false, error: "Profil introuvable — contacter l'admin" };
+    return { ok: false, error: "Profil introuvable. Contacter l'admin" };
   }
   setCurUser({ ...profile, email: profile.email || cleanEmail });
   return { ok: true, profile };

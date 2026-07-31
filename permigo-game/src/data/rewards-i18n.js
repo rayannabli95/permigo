@@ -21,7 +21,7 @@ const TROPHY_I18N = {
     },
     comp_10: {
       t: "Chassis set",
-      b: "A third of the journey. The foundations are there — keep going!",
+      b: "A third of the journey. The foundations are there. Keep going!",
     },
     comp_15: {
       t: "Engine fitted",
@@ -37,7 +37,7 @@ const TROPHY_I18N = {
     },
     comp_28: {
       t: "Mock exam ready",
-      b: "28/31. The car is on the road — start the mock exam.",
+      b: "28/31. The car is on the road. Start the mock exam.",
     },
     comp_31: {
       t: "Open road",
@@ -75,7 +75,7 @@ const TROPHY_I18N = {
     },
     comp_10: {
       t: "الهيكل جاهز",
-      b: "ثلث المسار. الأساسات موجودة — واصل!",
+      b: "ثلث المسار. الأساسات موجودة. واصل!",
     },
     comp_15: {
       t: "المحرك مثبّت",
@@ -91,7 +91,7 @@ const TROPHY_I18N = {
     },
     comp_28: {
       t: "جاهز للامتحان التجريبي",
-      b: "28/31. السيارة على الطريق — ابدأ الامتحان التجريبي.",
+      b: "28/31. السيارة على الطريق. ابدأ الامتحان التجريبي.",
     },
     comp_31: {
       t: "الطريق مفتوح",
@@ -182,7 +182,7 @@ const ITEM_I18N = {
     },
     avatar_warrior: {
       n: "The Warrior",
-      d: "Tough and determined — ready to face anything on the road.",
+      d: "Tough and determined. Ready to face anything on the road.",
     },
     avatar_pilot: {
       n: "The Pilot",
@@ -214,7 +214,7 @@ const ITEM_I18N = {
     },
     avatar_warrior: {
       n: "المحارب",
-      d: "قويّ وعازم — مستعد لمواجهة كل شيء على الطريق.",
+      d: "قويّ وعازم. مستعد لمواجهة كل شيء على الطريق.",
     },
     avatar_pilot: {
       n: "الطيّار",

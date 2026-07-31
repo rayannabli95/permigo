@@ -231,7 +231,7 @@ async function shareCanvas(canvas, data) {
   );
   if (!blob) return;
   const file = new File([blob], "permigo-recap.png", { type: "image/png" });
-  const text = `${data.big} — ${data.kicker}. Je révise ma conduite avec ${data.moniteurName || "mon moniteur"} sur PermiGo 🚗`;
+  const text = `${data.big}. ${data.kicker}. Je révise ma conduite avec ${data.moniteurName || "mon moniteur"} sur PermiGo 🚗`;
   try {
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({ files: [file], text });

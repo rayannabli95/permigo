@@ -31,11 +31,11 @@ const LGH_I18N = {
     school: "Your school",
     solo: "PermiGo learners",
     of_students: "{org} · {n} learner{s}",
-    aria: "Your league — {st} — see the leaderboard",
+    aria: "Your league. {st}. See the leaderboard",
     aria_rank: "you're {r} of {n}",
     aria_empty: "no certified skill yet",
     invite: "Certify your first skill to enter the race.",
-    top: "You're in the lead — keep your spot",
+    top: "You're in the lead. Keep your spot",
     gap: "Only <b>{g} {u}</b> to overtake {w}",
     first_place: "1st place",
     pt: "skill",
@@ -48,11 +48,11 @@ const LGH_I18N = {
     school: "مدرستك",
     solo: "طلاب بيرميغو",
     of_students: "{org} · {n} طالبًا",
-    aria: "دوريك — {st} — عرض الترتيب",
+    aria: "دوريك. {st}. عرض الترتيب",
     aria_rank: "أنت في المركز {r} من أصل {n}",
     aria_empty: "لم تثبّت أي مهارة بعد",
     invite: "ثبّت أول مهارة لتدخل السباق.",
-    top: "أنت في الصدارة — حافظ على مركزك",
+    top: "أنت في الصدارة. حافظ على مركزك",
     gap: "تفصلك <b>{g} {u}</b> عن تجاوز {w}",
     first_place: "المركز الأول",
     pt: "مهارة",
@@ -89,7 +89,7 @@ function nudgeLine(m) {
     return `<div class="lgh-nudge lgh-nudge-invite">${lgRtl(esc(lgt("invite", "Certifie ta première compétence pour entrer dans la course.")))}</div>`;
   }
   if (m.mine.rang === 1) {
-    return `<div class="lgh-nudge"><span class="lgh-up" aria-hidden="true">👑</span> ${lgRtl(esc(lgt("top", "Tu es en tête — garde ta place")))}</div>`;
+    return `<div class="lgh-nudge"><span class="lgh-up" aria-hidden="true">👑</span> ${lgRtl(esc(lgt("top", "Tu es en tête. Garde ta place")))}</div>`;
   }
   if (m.above) {
     const unit =
@@ -136,7 +136,7 @@ function renderHero(m, solo) {
 
   return `<div class="lgh-eyebrow">${lgRtl(esc(lgt("eyebrow", "Ta ligue")))}</div>
   <div class="lgh" role="button" tabindex="0"
-       aria-label="${escAttr(lgt("aria", "Ta ligue — {st} — voir le classement").replace("{st}", ariaSt))}">
+       aria-label="${escAttr(lgt("aria", "Ta ligue. {st}. Voir le classement").replace("{st}", ariaSt))}">
     <span class="lgh-glow lgh-glow-a" aria-hidden="true"></span>
     <span class="lgh-glow lgh-glow-b" aria-hidden="true"></span>
 
