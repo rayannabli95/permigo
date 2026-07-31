@@ -53,7 +53,7 @@ const HM_I18N = {
     less: "Less",
     more: "More",
     scroll_aria: "Activity history, scrolls horizontally",
-    active_aria: " — active",
+    active_aria: ". Active",
   },
   ar: {
     days: ["إث", "ثل", "أر", "خم", "جم", "سب", "أح"],
@@ -76,7 +76,7 @@ const HM_I18N = {
     less: "أقل",
     more: "أكثر",
     scroll_aria: "سجل النشاط، تمرير أفقي",
-    active_aria: " — نشط",
+    active_aria: ". نشط",
   },
 };
 function hmt(key, fr) {
@@ -200,7 +200,7 @@ export function renderHeatmap({
                    data-key="${cell.key}"
                    data-label="${cell.dateLabel}"
                    data-detail="${cell.detail ? encodeURIComponent(cell.detail) : ""}"
-                   aria-label="${cell.dateLabel}${cell.isActive ? hmt("active_aria", " — actif") : ""}"></div>
+                   aria-label="${cell.dateLabel}${cell.isActive ? hmt("active_aria", ". Actif") : ""}"></div>
             `,
               )
               .join("")}

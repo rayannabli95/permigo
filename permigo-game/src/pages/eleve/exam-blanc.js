@@ -93,7 +93,7 @@ const EXBS_I18N = {
     trophy_start: "First spark",
     trophy_end: "A month without a miss",
     title: "Your exam journey",
-    subtitle: "The real exam experience, or practise by topic.",
+    subtitle: "The real exam experience or practise by topic.",
     officiel_kicker: "Official exam",
     officiel_title: "40 questions · timed · just like the real thing",
     officiel_sub_unlocked: "Pass with 5 mistakes maximum.",
@@ -168,7 +168,7 @@ const EXBS_I18N = {
     trophy_start: "الشرارة الأولى",
     trophy_end: "شهر دون خطأ",
     title: "مسارك للامتحان",
-    subtitle: "الامتحان كالحقيقي، أو تدرّب حسب الموضوع.",
+    subtitle: "الامتحان كالحقيقي أو تدرّب حسب الموضوع.",
     officiel_kicker: "الامتحان الرسمي",
     officiel_title: "40 سؤالاً · بوقت محدد · كالامتحان الحقيقي",
     officiel_sub_unlocked: "النجاح بـ 5 أخطاء كحد أقصى.",
@@ -228,7 +228,7 @@ const EXBS_I18N = {
     centre_traps: "أسئلة {name} الصعبة",
     theme_perfect: "بلا أخطاء في هذا الموضوع. لقد أتقنته.",
     revision_done: "انتهت المراجعة",
-    revision_help: "أعد هذه السلسلة حتى تتقنها، ثم جرّب الامتحان الرسمي.",
+    revision_help: "أعد هذه السلسلة حتى تتقنها ثم جرّب الامتحان الرسمي.",
     retry: "إعادة",
     back: "رجوع",
   },
@@ -253,12 +253,12 @@ function exsRtl() {
 const PARCOURS_I18N = {
   en: {
     1: {
-      nom: "Cergy — roundabouts",
+      nom: "Cergy. Roundabouts",
       contexte:
         "Leaving Cergy-Saint-Christophe station, heavy traffic, many roundabouts (giratoires) and 30 km/h zones.",
     },
     2: {
-      nom: "Paris — heavy traffic",
+      nom: "Paris. Heavy traffic",
       contexte:
         "Crossing central Paris, 50 km/h boulevards, cycle boxes (sas vélos), lots of pedestrians.",
     },
@@ -268,7 +268,7 @@ const PARCOURS_I18N = {
         "Country roads with no road markings, unmarked intersections, farm tractors.",
     },
     4: {
-      nom: "Lyon — 30 zone",
+      nom: "Lyon. 30 zone",
       contexte:
         "Residential area in Lyon, 30 km/h zone (zone 30), tramway, lots of cyclists and pedestrians.",
     },
@@ -315,12 +315,12 @@ const PARCOURS_I18N = {
   },
   ar: {
     1: {
-      nom: "سيرجي — الدوارات",
+      nom: "سيرجي. الدوارات",
       contexte:
         "الخروج من محطة سيرجي-سان-كريستوف، حركة مرور كثيفة، دوّارات (giratoires) عديدة ومناطق سرعة 30.",
     },
     2: {
-      nom: "باريس — حركة كثيفة",
+      nom: "باريس. حركة كثيفة",
       contexte:
         "عبور وسط باريس، شوارع بسرعة 50 كم/سا، مربعات انتظار الدراجات (sas vélos)، مشاة بكثرة.",
     },
@@ -330,7 +330,7 @@ const PARCOURS_I18N = {
         "طرق ريفية بلا علامات أرضية، تقاطعات غير مؤشَّرة، جرارات زراعية.",
     },
     4: {
-      nom: "ليون — منطقة 30",
+      nom: "ليون. منطقة 30",
       contexte:
         "حي سكني في ليون، منطقة سرعة 30 (zone 30)، ترام، دراجات ومشاة بكثرة.",
     },
@@ -735,7 +735,7 @@ function renderSelection() {
     <button class="exb-quit-btn" id="exb-back" aria-label="${escAttr(exsT("back_aria", "Retour"))}">←</button>
     ${renderTrophy(TROPHY_START, "exb-trophy--start")}
     <h1 class="exb-sel-title"${exsRtl()}>${esc(exsT("title", "Ton parcours d’examen"))}</h1>
-    <p class="exb-sel-sub"${exsRtl()}>${esc(exsT("subtitle", "L’examen comme le vrai, ou entraîne-toi par thème."))}</p>
+    <p class="exb-sel-sub"${exsRtl()}>${esc(exsT("subtitle", "L’examen comme le vrai ou entraîne-toi par thème."))}</p>
   </div>
   ${officiel}
   ${weakSection}
@@ -1476,7 +1476,7 @@ function showRevisionResults(
         <div class="exb-res-score">${score}<span class="exb-res-total"> / ${total}</span></div>
         <div class="exb-res-pct">${esc(label)} · ${pct} %</div>
         <div class="exb-res-verdict">${esc(exsT("revision_done", "Révision terminée"))}</div>
-        <div class="exb-res-cepc">${esc(exsT("revision_help", "Refais cette série jusqu’à la maîtriser, puis tente l’examen officiel."))}</div>
+        <div class="exb-res-cepc">${esc(exsT("revision_help", "Refais cette série jusqu’à la maîtriser puis tente l’examen officiel."))}</div>
       </div>
       <div class="exb-res-body">
         <div class="exb-res-bar">

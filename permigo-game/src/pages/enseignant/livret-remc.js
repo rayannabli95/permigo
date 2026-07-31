@@ -394,7 +394,7 @@ export async function mount(root, eleveId) {
       <div class="lr-page">
         <div class="lr-err">
           <div class="lr-err-ico">${illus("clipboard", { size: 64 })}</div>
-          Livret indisponible. Vérifie ta connexion, puis réessaie.
+          Livret indisponible. Vérifie ta connexion puis réessaie.
           <button id="lr-retry" type="button">Réessayer</button>
         </div>
       </div>
@@ -562,7 +562,7 @@ function computeEleveProfil() {
   if (quizPerWeek > 0) bits.push(`~${Math.round(quizPerWeek)} quiz/sem`);
   const streakBit = _streakEff >= 2 ? ` Série en cours : ${_streakEff} j.` : "";
   const facts = bits.length ? ` : ${bits.join(", ")}.` : ".";
-  return { tone: "warm", text: `${prenom} — ${label}${facts}${streakBit}` };
+  return { tone: "warm", text: `${prenom}. ${label}${facts}${streakBit}` };
 }
 
 // Carte « profil en un coup d'œil » — texte déjà échappé par computeEleveProfil.
@@ -707,7 +707,7 @@ function render() {
         <div class="lr-hero-in">
           <button class="lr-back" aria-label="Retour liste élèves">${icon("arrow-left", { size: 18, strokeWidth: 2.5 })}</button>
           <div class="lr-hd-info">
-            <h1 class="lr-title" tabindex="-1">Livret — ${prenomNom || "Élève"}</h1>
+            <h1 class="lr-title" tabindex="-1">Livret. ${prenomNom || "Élève"}</h1>
             <p class="lr-subtitle">${acquis}/${REMC_TOTAL} compétences validées</p>
           </div>
           <button class="lr-bilan-btn" id="lr-bilan-btn" aria-label="Voir le bilan trimestriel">
@@ -831,7 +831,7 @@ async function _loadFeedSection() {
         <summary>
           <span class="lr-feed-dot k-validation">${icon("check", { size: 12, strokeWidth: 2.5 })}</span>
           <span class="lr-feed-grp-txt">
-            <span class="lr-feed-grp-ttl">${esc(_relTime(g.ts))} — ${esc(summary || "activité")}</span>
+            <span class="lr-feed-grp-ttl">${esc(_relTime(g.ts))}. ${esc(summary || "activité")}</span>
             <span class="lr-feed-grp-sub">${esc(g.moniteur)}</span>
           </span>
           <span class="lr-feed-grp-chev">${icon("chevron-down", { size: 14, strokeWidth: 2.2 })}</span>
@@ -980,7 +980,7 @@ function renderMonde(cat) {
     cat.subs.length > 0 ? Math.round((acquis / cat.subs.length) * 100) : 0;
 
   return `
-    <div class="lr-monde" role="group" aria-label="${escAttr(cat.name)} — ${acquis}/${cat.subs.length} acquises">
+    <div class="lr-monde" role="group" aria-label="${escAttr(cat.name)}. ${acquis}/${cat.subs.length} acquises">
       <div class="lr-monde-hd" style="background:${col.bg}; border-color:${col.border};">
         <span class="lr-monde-med">${medallion(...(MONDE_MED[cat.id] || MONDE_MED.C1), { size: 30 })}</span>
         <span class="lr-monde-nm">${esc(cat.name)}</span>
@@ -1014,7 +1014,7 @@ function renderComp(sub) {
   // ce geste seul (quiz ≥80 %), et peut confirmer en séance.
   const selfVal = !statut ? _selfValsMap[sub.c] : null;
   const badge = selfVal
-    ? `<span class="lr-comp-badge ens-chip lr-comp-auto" title="Validée en autonomie (quiz ${Math.round(selfVal.score)}%) avant rattachement — à confirmer en séance">Auto-validée</span>`
+    ? `<span class="lr-comp-badge ens-chip lr-comp-auto" title="Validée en autonomie (quiz ${Math.round(selfVal.score)}%) avant rattachement. À confirmer en séance">Auto-validée</span>`
     : `<span class="lr-comp-badge ens-chip ${chipMod}">${cfg.label}</span>`;
 
   const medKey = STATUT_MED[statut];

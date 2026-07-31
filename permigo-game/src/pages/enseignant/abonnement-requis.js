@@ -80,8 +80,8 @@ export async function mount(root, me) {
     }</h1>
     <p class="mpw-sub">${
       isPaywall
-        ? "Ton espace moniteur t'attend — active ton abonnement pour y accéder et garder tes élèves gratuits."
-        : "Active ton abonnement pour retrouver ton espace moniteur — et garder tes élèves gratuits."
+        ? "Ton espace moniteur t'attend. Active ton abonnement pour y accéder et garder tes élèves gratuits."
+        : "Active ton abonnement pour retrouver ton espace moniteur. Et garder tes élèves gratuits."
     }</p>
     <div class="mpw-card">
       <div class="mpw-price">9,99 €<small>/ mois</small></div>
@@ -108,7 +108,7 @@ export async function mount(root, me) {
       console.error("[abonnement-requis] checkout", err);
       const { toast } = await import("@/components/common/toast.js");
       toast(
-        "Paiement indisponible pour le moment — réessaie dans un instant.",
+        "Paiement indisponible pour le moment. Réessaie dans un instant.",
         "error",
         4500,
       );

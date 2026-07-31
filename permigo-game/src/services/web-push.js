@@ -136,7 +136,7 @@ export async function maybeSendStreakRiskNotif() {
   track("push.streak_risk_sent", {});
 
   new Notification("PermiGo", {
-    body: `Ton parcours t'attend — 2 min suffisent !`,
+    body: `Ton parcours t'attend. 2 min suffisent !`,
     // Chemins à la racine de public/ — il n'y a pas de dossier /icons/, la
     // notification s'affichait donc sans icône.
     icon: "/icon-192.png",
@@ -156,7 +156,7 @@ async function _ensureSubscription() {
   const vapidKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
   if (!vapidKey) {
     console.warn(
-      "[web-push] VITE_VAPID_PUBLIC_KEY manquante — subscription désactivée",
+      "[web-push] VITE_VAPID_PUBLIC_KEY manquante. Subscription désactivée",
     );
     return;
   }

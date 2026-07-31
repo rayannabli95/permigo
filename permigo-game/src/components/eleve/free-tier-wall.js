@@ -18,12 +18,12 @@ const COPY = {
     kick: "Mode découverte",
     emoji: "🎉",
     title: "Tu as goûté PermiGo aujourd'hui",
-    sub: "Reviens demain pour une nouvelle dose — ou débloque tout ton parcours maintenant, sans attendre.",
+    sub: "Reviens demain pour une nouvelle dose. Ou débloque tout ton parcours maintenant, sans attendre.",
   },
   route: {
     kick: "Mode découverte",
     emoji: "🚀",
-    title: "Ça, c'est tout ton parcours",
+    title: "Voilà tout ton parcours",
     sub: "Cette partie s'ouvre avec ton Pass : l'entraînement complet, ta progression et tes récompenses.",
   },
 };

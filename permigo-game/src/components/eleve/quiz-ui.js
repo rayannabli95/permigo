@@ -117,21 +117,21 @@ const RESULT_MSGS_I18N = {
     perfect: [
       "Flawless. Seriously?!",
       "100%. Hats off.",
-      "Zero mistakes — clean.",
+      "Zero mistakes. Clean.",
     ],
     passed: [
-      "Well done, you're moving forward!",
+      "Well done. You're moving forward!",
       "Solid. Keep it up.",
-      "You're improving — it shows.",
+      "You're improving. It shows.",
     ],
     learn: [
       "Every question teaches you something.",
-      "You remember better after a mistake — it's proven.",
+      "You remember better after a mistake. It's proven.",
       "No worries: now you know.",
     ],
   },
   ar: {
-    perfect: ["بلا أخطاء. حقًا؟!", "100٪. أحسنت.", "صفر أخطاء — عمل نظيف."],
+    perfect: ["بلا أخطاء. حقًا؟!", "100٪. أحسنت.", "صفر أخطاء. عمل نظيف."],
     passed: [
       "أحسنت، أنت تتقدّم!",
       "قويّ. واصل هكذا.",
@@ -139,7 +139,7 @@ const RESULT_MSGS_I18N = {
     ],
     learn: [
       "كل سؤال يعلّمك شيئًا.",
-      "نتذكّر أفضل بعد الخطأ — هذا مثبت.",
+      "نتذكّر أفضل بعد الخطأ. هذا مثبت.",
       "لا بأس: الآن صرت تعرف.",
     ],
   },
@@ -195,16 +195,16 @@ const RESULT_MSGS = {
   perfect: [
     "Sans-faute. Sérieux ?!",
     "100 %. Chapeau.",
-    "Zéro erreur — propre.",
+    "Zéro erreur. Propre.",
   ],
   passed: [
-    "Bien joué, ça avance !",
+    "Bien joué. Ça avance !",
     "Solide. Continue comme ça.",
-    "Tu progresses, ça se voit.",
+    "Tu progresses. Ça se voit.",
   ],
   learn: [
     "Chaque question t'apprend un truc.",
-    "On retient mieux après une erreur — c'est prouvé.",
+    "On retient mieux après une erreur. C'est prouvé.",
     "Pas grave : maintenant tu sais.",
   ],
 };

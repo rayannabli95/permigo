@@ -154,7 +154,7 @@ export function openAvatarPicker(opts = {}) {
         <div class="avpk-handle"></div>
         <div class="avpk-hd">
           <div class="avpk-title">Choisis ton avatar</div>
-          <div class="avpk-sub">9 visuels au choix — change quand tu veux</div>
+          <div class="avpk-sub">9 visuels au choix. Change quand tu veux</div>
         </div>
         <div class="avpk-grid">
           ${ASSETS.avatar

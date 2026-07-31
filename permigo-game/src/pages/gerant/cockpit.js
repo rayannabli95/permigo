@@ -637,7 +637,7 @@ function render(data, me) {
             .slice(0, 5)
             .map((a) => renderAlert(a))
             .join("")
-        : `<div class="ck-alerts-empty">${icon("check-circle", { size: 16, strokeWidth: 2 })} Aucune alerte — tout va bien</div>`
+        : `<div class="ck-alerts-empty">${icon("check-circle", { size: 16, strokeWidth: 2 })} Aucune alerte. Tout va bien</div>`
     }
   </div>
 

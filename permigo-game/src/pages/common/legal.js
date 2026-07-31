@@ -14,7 +14,7 @@ const CONTENT = {
     sections: [
       {
         heading: "Responsable du traitement",
-        body: "PermiGo SAS — dpo@permigo.fr",
+        body: "PermiGo SAS · dpo@permigo.fr",
       },
       {
         heading: "Données collectées",
@@ -26,7 +26,7 @@ const CONTENT = {
       },
       {
         heading: "Base légale",
-        body: "Exécution du contrat (abonnement auto-école), intérêt légitime (amélioration du service), consentement (emails marketing — révocable à tout moment dans Paramètres).",
+        body: "Exécution du contrat (abonnement auto-école), intérêt légitime (amélioration du service), consentement (emails marketing. Révocable à tout moment dans Paramètres).",
       },
       // ⚠️ TEXTE À FAIRE VALIDER PAR UN JURISTE / DPO avant déploiement large.
       {
@@ -35,11 +35,11 @@ const CONTENT = {
       },
       {
         heading: "Conservation",
-        body: "Données conservées pendant la durée de l'abonnement + 3 ans. Suppression via Paramètres → Supprimer mon compte ou sur demande à dpo@permigo.fr : les données privées (email, préférences, messages, notifications) sont supprimées immédiatement et le profil est anonymisé — le prénom disparaît, les statistiques d'apprentissage sont conservées sous forme anonyme. L'effacement du compte de connexion s'obtient auprès de dpo@permigo.fr (traité sous 30 jours).",
+        body: "Données conservées pendant la durée de l'abonnement + 3 ans. Suppression via Paramètres → Supprimer mon compte ou sur demande à dpo@permigo.fr : les données privées (email, préférences, messages, notifications) sont supprimées immédiatement et le profil est anonymisé. Le prénom disparaît, les statistiques d'apprentissage sont conservées sous forme anonyme. L'effacement du compte de connexion s'obtient auprès de dpo@permigo.fr (traité sous 30 jours).",
       },
       {
         heading: "Vos droits",
-        body: "Accès, rectification, effacement, portabilité, opposition — exercez-les via dpo@permigo.fr. Réclamation possible auprès de la CNIL (cnil.fr).",
+        body: "Accès, rectification, effacement, portabilité, opposition. Exercez-les via dpo@permigo.fr. Réclamation possible auprès de la CNIL (cnil.fr).",
       },
       {
         heading: "Cookies",
@@ -52,7 +52,7 @@ const CONTENT = {
     sections: [
       {
         heading: "Objet",
-        body: "PermiGo est une plateforme d'accompagnement pédagogique pour l'apprentissage du permis de conduire (catégorie B). L'accès est ouvert aux élèves — rattachés à un moniteur ou en autonomie —, aux moniteurs et aux gérants d'auto-écoles.",
+        body: "PermiGo est une plateforme d'accompagnement pédagogique pour l'apprentissage du permis de conduire (catégorie B). L'accès est ouvert aux élèves (rattachés à un moniteur ou en autonomie), aux moniteurs et aux gérants d'auto-écoles.",
       },
       {
         heading: "Accès au service",
@@ -86,7 +86,7 @@ const CONTENT = {
       },
       {
         heading: "Contact",
-        body: "PermiGo SAS — contact@permigo.fr · dpo@permigo.fr",
+        body: "PermiGo SAS · contact@permigo.fr · dpo@permigo.fr",
       },
     ],
   },
@@ -115,7 +115,7 @@ const LEGAL_I18N = {
       sections: [
         {
           heading: "Data controller",
-          body: "PermiGo SAS — dpo@permigo.fr",
+          body: "PermiGo SAS · dpo@permigo.fr",
         },
         {
           heading: "Data collected",
@@ -127,7 +127,7 @@ const LEGAL_I18N = {
         },
         {
           heading: "Legal basis",
-          body: "Performance of the contract (driving school subscription), legitimate interest (service improvement), and consent (marketing emails — which can be withdrawn at any time in Settings).",
+          body: "Performance of the contract (driving school subscription), legitimate interest (service improvement), and consent (marketing emails. Which can be withdrawn at any time in Settings).",
         },
         {
           heading: "Children under 15",
@@ -135,11 +135,11 @@ const LEGAL_I18N = {
         },
         {
           heading: "Retention",
-          body: "Data is retained for the duration of the subscription plus 3 years. It can be deleted via Settings → Delete my account or by requesting deletion at dpo@permigo.fr: private data (email, preferences, messages and notifications) is deleted immediately and the profile is anonymised — the first name is removed and learning statistics are retained in anonymous form. Deletion of the login account can be requested from dpo@permigo.fr (processed within 30 days).",
+          body: "Data is retained for the duration of the subscription plus 3 years. It can be deleted via Settings → Delete my account or by requesting deletion at dpo@permigo.fr: private data (email, preferences, messages and notifications) is deleted immediately and the profile is anonymised. The first name is removed and learning statistics are retained in anonymous form. Deletion of the login account can be requested from dpo@permigo.fr (processed within 30 days).",
         },
         {
           heading: "Your rights",
-          body: "Access, rectification, erasure, portability and objection — exercise these rights by contacting dpo@permigo.fr. You may lodge a complaint with the CNIL (cnil.fr).",
+          body: "Access, rectification, erasure, portability and objection. Exercise these rights by contacting dpo@permigo.fr. You may lodge a complaint with the CNIL (cnil.fr).",
         },
         {
           heading: "Cookies",
@@ -152,7 +152,7 @@ const LEGAL_I18N = {
       sections: [
         {
           heading: "Purpose",
-          body: "PermiGo is an educational support platform for learning to drive (category B licence). Access is available to students — linked to an instructor or learning independently —, instructors and driving school managers.",
+          body: "PermiGo is an educational support platform for learning to drive (category B licence). Access is available to students (linked to an instructor or learning independently), instructors and driving school managers.",
         },
         {
           heading: "Access to the service",
@@ -184,7 +184,7 @@ const LEGAL_I18N = {
         },
         {
           heading: "Contact",
-          body: "PermiGo SAS — contact@permigo.fr · dpo@permigo.fr",
+          body: "PermiGo SAS · contact@permigo.fr · dpo@permigo.fr",
         },
       ],
     },
@@ -209,7 +209,7 @@ const LEGAL_I18N = {
       sections: [
         {
           heading: "المسؤول عن معالجة البيانات",
-          body: "PermiGo SAS — dpo@permigo.fr",
+          body: "PermiGo SAS · dpo@permigo.fr",
         },
         {
           heading: "البيانات التي نجمعها",
@@ -221,7 +221,7 @@ const LEGAL_I18N = {
         },
         {
           heading: "الأساس القانوني",
-          body: "تنفيذ العقد (اشتراك مدرسة تعليم القيادة)، والمصلحة المشروعة (تحسين الخدمة)، والموافقة (رسائل التسويق الإلكترونية — ويمكن سحبها في أي وقت من الإعدادات).",
+          body: "تنفيذ العقد (اشتراك مدرسة تعليم القيادة)، والمصلحة المشروعة (تحسين الخدمة)، والموافقة (رسائل التسويق الإلكترونية. ويمكن سحبها في أي وقت من الإعدادات).",
         },
         {
           heading: "القاصرون دون 15 عامًا",
@@ -229,11 +229,11 @@ const LEGAL_I18N = {
         },
         {
           heading: "مدة الاحتفاظ",
-          body: "نحتفظ بالبيانات طوال مدة الاشتراك إضافة إلى 3 سنوات. يمكن حذفها عبر الإعدادات ← حذف حسابي أو بطلب يُرسل إلى dpo@permigo.fr: تُحذف البيانات الخاصة (البريد الإلكتروني والتفضيلات والرسائل والإشعارات) فورًا، ويُخفى الملف الشخصي — يُحذف الاسم الأول وتُحفظ إحصاءات التعلم بصورة مجهولة الهوية. يمكن طلب حذف حساب تسجيل الدخول من dpo@permigo.fr (تتم المعالجة خلال 30 يومًا).",
+          body: "نحتفظ بالبيانات طوال مدة الاشتراك إضافة إلى 3 سنوات. يمكن حذفها عبر الإعدادات ← حذف حسابي أو بطلب يُرسل إلى dpo@permigo.fr: تُحذف البيانات الخاصة (البريد الإلكتروني والتفضيلات والرسائل والإشعارات) فورًا، ويُخفى الملف الشخصي. يُحذف الاسم الأول وتُحفظ إحصاءات التعلم بصورة مجهولة الهوية. يمكن طلب حذف حساب تسجيل الدخول من dpo@permigo.fr (تتم المعالجة خلال 30 يومًا).",
         },
         {
           heading: "حقوقك",
-          body: "الوصول والتصحيح والحذف وقابلية النقل والاعتراض — يمكنك ممارسة هذه الحقوق عبر dpo@permigo.fr. ويمكنك تقديم شكوى إلى اللجنة الوطنية للمعلومات والحريات CNIL ‏(cnil.fr).",
+          body: "الوصول والتصحيح والحذف وقابلية النقل والاعتراض. يمكنك ممارسة هذه الحقوق عبر dpo@permigo.fr. ويمكنك تقديم شكوى إلى اللجنة الوطنية للمعلومات والحريات CNIL ‏(cnil.fr).",
         },
         {
           heading: "ملفات تعريف الارتباط",
@@ -246,7 +246,7 @@ const LEGAL_I18N = {
       sections: [
         {
           heading: "الغرض",
-          body: "بيرميغو منصة دعم تعليمي لتعلم قيادة السيارة (رخصة الفئة B). وهي متاحة للطلاب — المرتبطين بمدرّب أو الذين يتعلمون باستقلالية — وللمدرّبين ومديري مدارس تعليم القيادة.",
+          body: "بيرميغو منصة دعم تعليمي لتعلم قيادة السيارة (رخصة الفئة B). وهي متاحة للطلاب (المرتبطين بمدرّب أو الذين يتعلمون باستقلالية) وللمدرّبين ومديري مدارس تعليم القيادة.",
         },
         {
           heading: "الوصول إلى الخدمة",
@@ -278,7 +278,7 @@ const LEGAL_I18N = {
         },
         {
           heading: "التواصل",
-          body: "PermiGo SAS — contact@permigo.fr · dpo@permigo.fr",
+          body: "PermiGo SAS · contact@permigo.fr · dpo@permigo.fr",
         },
       ],
     },

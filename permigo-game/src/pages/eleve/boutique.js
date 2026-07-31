@@ -55,21 +55,21 @@ const BO_I18N = {
     sec_fonds_sub: "Your virtual licence card",
     roue_aria: "Open the Wheel",
     roue_t: "The Wheel",
-    roue_s_solo: "Skins, titles and <b>rewards</b> to unlock.",
-    roue_s: "Skins, titles and <b>real big prizes</b> from your instructor.",
+    roue_s_solo: "Skins · titles · <b>rewards</b> to unlock.",
+    roue_s: "Skins · titles · <b>real big prizes</b> from your instructor.",
     roue_go: "Free spin!",
     hd_title: "Shop",
     hd_small: "Your style on the leaderboard",
     balance_lab: "Your balance:",
     sr_volants: "steering wheels",
     unavailable: "“Shop” unavailable",
-    check_conn: "Check your connection, then try again.",
+    check_conn: "Check your connection. Try again.",
     vedette: "Star of the day",
     vedette_sub: "The piece to aim for",
     selection: "✦ Selection",
-    note: "Skins are 100% cosmetic: style, never an advantage.",
+    note: "Skins are 100% cosmetic: style and never an advantage.",
     obj_removed: "Objective removed",
-    obj_set: "Objective set — earn steering wheels by revising!",
+    obj_set: "Objective set. Earn steering wheels by revising!",
     buy_fail: "Purchase failed. Try again.",
     not_enough: "Not enough steering wheels",
     already_owned: "Already in your inventory",
@@ -85,7 +85,7 @@ const BO_I18N = {
     aria_not_enough: "not enough steering wheels",
     hero_sub_default: "Your signature on the leaderboard",
     intro_x: "Got it",
-    intro_title: "Your car, your signature",
+    intro_title: "Your car. Your signature.",
     intro_1: "It shows next to your name on the leaderboard",
     intro_2: "Unlock skins with your steering wheels",
     intro_3: "Tap a skin to equip it in 1 tap",
@@ -96,7 +96,7 @@ const BO_I18N = {
     obj_kick_pin: "Your goal",
     obj_kick_aim: "To aim for",
     obj_reached: "Goal reached!",
-    obj_touch: "— tap to get it",
+    obj_touch: "tap to get it",
     obj_earn: "Earned by <b>revising</b>",
     obj_aria: "Goal:",
     obj_can_buy: "you can buy it",
@@ -107,7 +107,7 @@ const BO_I18N = {
       "Every finished revision session credits your balance. <b>No shortcuts.</b>",
     daily_cta: "Revise",
     price: "Price",
-    equipped_remove: "✓ Equipped — remove",
+    equipped_remove: "Remove",
     obj_on: "✓ This is your goal",
     obj_off: "🎯 Set as goal",
     close: "Close",
@@ -139,9 +139,9 @@ const BO_I18N = {
     vedette: "نجم اليوم",
     vedette_sub: "القطعة المنشودة",
     selection: "✦ مختارات",
-    note: "الأشكال تجميلية 100% : أناقة فقط، لا أفضلية أبدًا.",
+    note: "الأشكال تجميلية 100% : أناقة فقط ولا أفضلية أبدًا.",
     obj_removed: "أُزيل الهدف",
-    obj_set: "حُدّد الهدف — اربح مقاود بالمراجعة!",
+    obj_set: "حُدّد الهدف. اربح مقاود بالمراجعة!",
     buy_fail: "تعذّر الشراء. أعد المحاولة.",
     not_enough: "لا مقاود كافية",
     already_owned: "موجود في مخزونك بالفعل",
@@ -157,7 +157,7 @@ const BO_I18N = {
     aria_not_enough: "لا مقاود كافية",
     hero_sub_default: "توقيعك في التصنيف",
     intro_x: "فهمت",
-    intro_title: "سيارتك، توقيعك",
+    intro_title: "سيارتك. توقيعك.",
     intro_1: "تظهر بجانب اسمك في التصنيف",
     intro_2: "افتح الأشكال بمقاودك",
     intro_3: "المس شكلًا لتجهيزه بلمسة واحدة",
@@ -168,7 +168,7 @@ const BO_I18N = {
     obj_kick_pin: "هدفك",
     obj_kick_aim: "للطموح",
     obj_reached: "تحقّق الهدف!",
-    obj_touch: "— المس للحصول عليه",
+    obj_touch: "المس للحصول عليه",
     obj_earn: "يُربح <b>بالمراجعة</b>",
     obj_aria: "الهدف:",
     obj_can_buy: "يمكنك شراؤه",
@@ -178,7 +178,7 @@ const BO_I18N = {
     daily_sub: "كل جلسة مراجعة مكتملة تُضاف إلى رصيدك. <b>لا اختصارات.</b>",
     daily_cta: "راجع",
     price: "السعر",
-    equipped_remove: "✓ مُجهَّز — أزِل",
+    equipped_remove: "أزِل",
     obj_on: "✓ هذا هدفك",
     obj_off: "🎯 حدّده هدفًا",
     close: "إغلاق",
@@ -698,7 +698,7 @@ export async function mount(root) {
       content.innerHTML = `<div class="bo3-empty">
         ${medallion("panneau", "orange", { size: 48 })}
         <div class="bo3-empty-t">${bt("unavailable", "Boutique indisponible")}</div>
-        <div class="bo3-empty-d">${bt("check_conn", "Vérifie ta connexion, puis réessaie.")}</div>
+        <div class="bo3-empty-d">${bt("check_conn", "Vérifie ta connexion puis réessaie.")}</div>
       </div>`;
       return;
     }
@@ -708,7 +708,7 @@ export async function mount(root) {
       content.innerHTML = `<div class="bo3-empty">
         ${medallion("cadeau", "pink", { size: 48 })}
         <div class="bo3-empty-t">${bt("unavailable", "Boutique indisponible")}</div>
-        <div class="bo3-empty-d">${bt("check_conn", "Vérifie ta connexion, puis réessaie.")}</div>
+        <div class="bo3-empty-d">${bt("check_conn", "Vérifie ta connexion puis réessaie.")}</div>
       </div>`;
       return;
     }
@@ -752,17 +752,17 @@ export async function mount(root) {
             solo
               ? btR(
                   "roue_s_solo",
-                  "Skins, titres et des <b>récompenses</b> à débloquer.",
+                  "Skins · titres · <b>récompenses</b> à débloquer.",
                 )
               : btR(
                   "roue_s",
-                  "Skins, titres et des <b>gros lots réels</b> de ton moniteur.",
+                  "Skins · titres · <b>gros lots réels</b> de ton moniteur.",
                 ),
           )}</span>
         </span>
         <span class="bo3-roue-g">${bt("roue_go", "Tour gratuit !")}</span>
       </a>
-      <div class="bo3-note">${bt("note", "Les skins sont 100 % cosmétiques : du style, jamais d’avantage.")}</div>`;
+      <div class="bo3-note">${bt("note", "Les skins sont 100 % cosmétiques : du style et jamais d’avantage.")}</div>`;
 
     wire(content);
     _scanCovers(content);
@@ -827,7 +827,7 @@ export async function mount(root) {
           nowOn
             ? btR(
                 "obj_set",
-                "Objectif défini — gagne des volants en révisant !",
+                "Objectif défini. Gagne des volants en révisant !",
               )
             : btR("obj_removed", "Objectif retiré"),
           nowOn ? "success" : "info",
@@ -1106,7 +1106,7 @@ function showDetailModal(item, gemmes, me, onConfirm, triggerEl) {
   if (item.owned) {
     cta = `<button class="bo3-modal-cta equip" id="bo3-cta" type="button">${isEquipped ? bt("equipped_remove", "Retirer") : bt("equip_btn", "Équiper")}</button>`;
   } else if (canAfford) {
-    cta = `<button class="bo3-modal-cta buy" id="bo3-cta" type="button">${bt("buy", "Acheter")} — ${item.cost_gemmes} ${volantImg(14)}</button>`;
+    cta = `<button class="bo3-modal-cta buy" id="bo3-cta" type="button">${bt("buy", "Acheter")} ${item.cost_gemmes} ${volantImg(14)}</button>`;
     balanceLine = `<div class="bo3-modal-balance">${brtl(afterBuyLine(afterBalance))}</div>`;
   } else {
     cta = `<button class="bo3-modal-cta locked" id="bo3-cta" type="button" disabled>${icon("lock", { size: 14 })} ${bt("not_enough", "Pas assez de volants")}</button>`;
@@ -1159,7 +1159,7 @@ function showDetailModal(item, gemmes, me, onConfirm, triggerEl) {
     haptic("tap");
     toast(
       nowOn
-        ? btR("obj_set", "Objectif défini — gagne des volants en révisant !")
+        ? btR("obj_set", "Objectif défini. Gagne des volants en révisant !")
         : btR("obj_removed", "Objectif retiré"),
       nowOn ? "success" : "info",
     );

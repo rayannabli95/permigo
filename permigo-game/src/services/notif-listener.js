@@ -55,7 +55,7 @@ async function poll() {
   const me = getCurUser();
   import.meta.env.DEV &&
     console.log(
-      `[notif-listener] poll cycle — user=${me?.id ?? "none"} quizOpen=${_quizOpen}`,
+      `[notif-listener] poll cycle. User=${me?.id ?? "none"} quizOpen=${_quizOpen}`,
     );
 
   if (!me || _quizOpen) return;

@@ -188,7 +188,7 @@ async function loadData() {
 
   if (error) {
     console.error("[relances] query error", error);
-    toast("Vérifie ta connexion, puis réessaie.", "error");
+    toast("Vérifie ta connexion puis réessaie.", "error");
     _cooling = [];
     return;
   }

@@ -57,7 +57,7 @@ export const SITU_I18N = {
   "giratoire-entree": {
     en: {
       q: "You reach the roundabout. What do you do?",
-      e: "Vehicles already on the roundabout have priority — that's what the give-way sign at the entrance means. You enter once it's clear.",
+      e: "Vehicles already on the roundabout have priority. That's what the give-way sign at the entrance means. You enter once it's clear.",
       r: {
         cede: "I give way",
         engage: "I go straight in",
@@ -66,7 +66,7 @@ export const SITU_I18N = {
     },
     ar: {
       q: "تصل إلى الدوّار. ماذا تفعل؟",
-      e: "أصحاب الأولوية هم من يسيرون بالفعل على الدوّار — وهذا معنى لافتة افسح الطريق عند المدخل. تدخل عندما يصبح الطريق خاليًا.",
+      e: "أصحاب الأولوية هم من يسيرون بالفعل على الدوّار. وهذا معنى لافتة افسح الطريق عند المدخل. تدخل عندما يصبح الطريق خاليًا.",
       r: {
         cede: "افسح الطريق",
         engage: "أدخل مباشرة",
@@ -123,7 +123,7 @@ export const SITU_I18N = {
   "prio-droite-gauche": {
     en: {
       q: "A car is coming from your left. What do you do?",
-      e: "It's coming from your left, so you have priority to the right. You go — but keep an eye on it, just in case.",
+      e: "It's coming from your left, so you have priority to the right. You go. But keep an eye on it, just in case.",
       r: {
         passe: "I go: I have priority",
         laisse: "I let it pass",
@@ -132,7 +132,7 @@ export const SITU_I18N = {
     },
     ar: {
       q: "سيارة قادمة من يسارك. ماذا تفعل؟",
-      e: "هي قادمة من يسارك، وبالتالي فإن الأولوية لليمين تكون لك. تمرّ — مع إبقاء عينك عليها احتياطًا.",
+      e: "هي قادمة من يسارك، وبالتالي فإن الأولوية لليمين تكون لك. تمرّ. مع إبقاء عينك عليها احتياطًا.",
       r: {
         passe: "أمرّ: لديّ الأولوية",
         laisse: "أدعها تمرّ",
@@ -265,7 +265,7 @@ export const SITU_I18N = {
   "croisement-visibilite": {
     en: {
       q: "A blind intersection. What do you do?",
-      e: "With no visibility, a car could suddenly appear from your right — and it would have priority. Slow down and check before going through.",
+      e: "With no visibility, a car could suddenly appear from your right. And it would have priority. Slow down and check before going through.",
       r: {
         ralentis: "I slow down and check to the right",
         continue: "I keep my speed, no one in sight",
@@ -274,7 +274,7 @@ export const SITU_I18N = {
     },
     ar: {
       q: "تقاطع منعدم الرؤية. ماذا تفعل؟",
-      e: "في غياب الرؤية، قد تظهر سيارة فجأة من يمينك — وستكون هي صاحبة الأولوية. أبطئ وتفقّد المكان قبل المرور.",
+      e: "في غياب الرؤية، قد تظهر سيارة فجأة من يمينك. وستكون هي صاحبة الأولوية. أبطئ وتفقّد المكان قبل المرور.",
       r: {
         ralentis: "أبطئ وأتفقّد جهة اليمين",
         continue: "أحافظ على سرعتي، فلا أحد في الأفق",
@@ -323,7 +323,7 @@ export const SITU_I18N = {
   "stop-voiture-croise": {
     en: {
       q: "You're at the stop sign. A car is coming on the priority road. What do you do?",
-      e: "At a stop sign, you always come to a full stop — and the road you're crossing keeps priority: you let its traffic pass before you go.",
+      e: "At a stop sign, you always come to a full stop. And the road you're crossing keeps priority: you let its traffic pass before you go.",
       r: {
         arret_laisse: "Full stop, then I let it pass",
         arret_passe: "Full stop, then I go before it",
@@ -332,7 +332,7 @@ export const SITU_I18N = {
     },
     ar: {
       q: "أنت عند لافتة قف. سيارة قادمة على الطريق ذي الأولوية. ماذا تفعل؟",
-      e: "عند لافتة قف، تتوقف دائمًا توقفًا تامًا — ويبقى الطريق الذي تقطعه صاحب الأولوية: تدع مركباته تمرّ قبل أن تتقدّم.",
+      e: "عند لافتة قف، تتوقف دائمًا توقفًا تامًا. ويبقى الطريق الذي تقطعه صاحب الأولوية: تدع مركباته تمرّ قبل أن تتقدّم.",
       r: {
         arret_laisse: "توقف تام، ثم أدعها تمرّ",
         arret_passe: "توقف تام، ثم أمرّ قبلها",
@@ -501,7 +501,7 @@ export const SITU_I18N = {
   "feu-orange-engage": {
     en: {
       q: "The light turns amber at the last moment, you're almost on it. What do you do?",
-      e: "Amber requires you to stop UNLESS you can no longer brake safely. Too far in, you go through — without accelerating. That's the difference from seeing amber from a distance.",
+      e: "Amber requires you to stop UNLESS you can no longer brake safely. Too far in, you go through. Without accelerating. That's the difference from seeing amber from a distance.",
       r: {
         passe: "I go through: braking here would be dangerous",
         pile: "I slam the brakes to stop",
@@ -510,7 +510,7 @@ export const SITU_I18N = {
     },
     ar: {
       q: "تتحوّل الإشارة إلى البرتقالي في اللحظة الأخيرة، وأنت على وشك الوصول إليها. ماذا تفعل؟",
-      e: "البرتقالي يفرض التوقف إلا إذا لم يعد بإمكانك الفرملة بأمان. إذا كنت قد اقتربت كثيرًا، تمرّ — دون تسريع. وهذا هو الفارق عن رؤية الضوء البرتقالي من بعيد.",
+      e: "البرتقالي يفرض التوقف إلا إذا لم يعد بإمكانك الفرملة بأمان. إذا كنت قد اقتربت كثيرًا، تمرّ. دون تسريع. وهذا هو الفارق عن رؤية الضوء البرتقالي من بعيد.",
       r: {
         passe: "أمرّ: فالفرملة هنا ستكون خطيرة",
         pile: "أفرمل بقوة لأتوقف",
@@ -523,12 +523,12 @@ export const SITU_I18N = {
   "feu-eteint-prio-droite": {
     en: {
       q: "The traffic light is out of order, off. Who goes first?",
-      e: "An unlit or broken traffic light no longer counts: the crossing becomes an intersection with no signage. Priority to the right applies — the blue car goes first.",
+      e: "An unlit or broken traffic light no longer counts: the crossing becomes an intersection with no signage. Priority to the right applies. The blue car goes first.",
       r: { v1: "The blue car", moi: "You" },
     },
     ar: {
       q: "إشارة المرور معطّلة ومطفأة. من يمرّ أولًا؟",
-      e: "الإشارة المطفأة أو المعطّلة لم تعد سارية: يعود التقاطع تقاطعًا بلا إشارات. تُطبَّق الأولوية لليمين — السيارة الزرقاء تمرّ أولًا.",
+      e: "الإشارة المطفأة أو المعطّلة لم تعد سارية: يعود التقاطع تقاطعًا بلا إشارات. تُطبَّق الأولوية لليمين. السيارة الزرقاء تمرّ أولًا.",
       r: { v1: "السيارة الزرقاء", moi: "أنت" },
     },
   },
@@ -555,12 +555,12 @@ export const SITU_I18N = {
   "camion-prio-droite": {
     en: {
       q: "A truck is coming from your right. Who goes first?",
-      e: "Big or small, the rule doesn't change: it's coming from your right, it goes first. With a truck, keep even more margin — it pulls away slowly.",
+      e: "Big or small, the rule doesn't change: it's coming from your right, it goes first. With a truck, keep even more margin. It pulls away slowly.",
       r: { v1: "The truck", moi: "You" },
     },
     ar: {
       q: "شاحنة قادمة من يمينك. من يمرّ أولًا؟",
-      e: "كبيرة كانت المركبة أم صغيرة، القاعدة لا تتغيّر: هي قادمة من يمينك، فتمرّ أولًا. ومع الشاحنة، اترك هامشًا أكبر — فهي تنطلق ببطء.",
+      e: "كبيرة كانت المركبة أم صغيرة، القاعدة لا تتغيّر: هي قادمة من يمينك، فتمرّ أولًا. ومع الشاحنة، اترك هامشًا أكبر. فهي تنطلق ببطء.",
       r: { v1: "الشاحنة", moi: "أنت" },
     },
   },
@@ -591,7 +591,7 @@ export const SITU_I18N = {
   "autoroute-voie-droite": {
     en: {
       q: "You're driving in the left lane and the right lane is clear. What do you do?",
-      e: "On a highway, you drive in the rightmost lane. The left lane is only for overtaking — staying in it without reason is an offence.",
+      e: "On a highway, you drive in the rightmost lane. The left lane is only for overtaking. Staying in it without reason is an offence.",
       r: {
         rabats: "I move back into the right lane",
         reste: "I stay left, it flows better",
@@ -600,7 +600,7 @@ export const SITU_I18N = {
     },
     ar: {
       q: "تسير في المسرب الأيسر والمسرب الأيمن خالٍ. ماذا تفعل؟",
-      e: "على الطريق السريع، تسير في أقصى مسرب إلى اليمين. المسرب الأيسر مخصص فقط للتجاوز — والبقاء فيه دون سبب مخالفة.",
+      e: "على الطريق السريع، تسير في أقصى مسرب إلى اليمين. المسرب الأيسر مخصص فقط للتجاوز. والبقاء فيه دون سبب مخالفة.",
       r: {
         rabats: "أنتقل إلى المسرب الأيمن",
         reste: "أبقى في اليسار، فالحركة أسلس هناك",
@@ -611,7 +611,7 @@ export const SITU_I18N = {
   "autoroute-bau-bouchon": {
     en: {
       q: "There's a traffic jam and the hard shoulder is free. Do you use it?",
-      e: "The hard shoulder is for broken-down vehicles and emergency services. Driving on it is forbidden and dangerous, jam or not — you wait in your lane.",
+      e: "The hard shoulder is for broken-down vehicles and emergency services. Driving on it is forbidden and dangerous, jam or not. You wait in your lane.",
       r: {
         non: "No: it's reserved for emergencies",
         sortie: "Yes, just to reach the exit",
@@ -620,7 +620,7 @@ export const SITU_I18N = {
     },
     ar: {
       q: "هناك ازدحام والمسار الاضطراري خالٍ. هل تسلكه؟",
-      e: "المسار الاضطراري مخصص للمركبات المعطّلة وخدمات الطوارئ. السير عليه ممنوع وخطير، سواء كان هناك ازدحام أم لا — تنتظر في مسربك.",
+      e: "المسار الاضطراري مخصص للمركبات المعطّلة وخدمات الطوارئ. السير عليه ممنوع وخطير، سواء كان هناك ازدحام أم لا. تنتظر في مسربك.",
       r: {
         non: "لا: فهو مخصص لحالات الطوارئ",
         sortie: "نعم، فقط للوصول إلى المخرج",
@@ -697,7 +697,7 @@ export const SITU_I18N = {
   "pieton-hors-passage": {
     en: {
       q: "They're crossing outside any pedestrian crossing. What do you do?",
-      e: "Even in the wrong, a pedestrian is still vulnerable: you never force your way through. Slow down, ready to stop — a collision would be tragic, whatever the rule says.",
+      e: "Even in the wrong, a pedestrian is still vulnerable: you never force your way through. Slow down, ready to stop. A collision would be tragic, whatever the rule says.",
       r: {
         ralentis: "I slow down and let them finish",
         klaxonne: "I honk: they shouldn't be there",
@@ -706,7 +706,7 @@ export const SITU_I18N = {
     },
     ar: {
       q: "يعبر خارج أي ممر مخصص للمشاة. ماذا تفعل؟",
-      e: "حتى لو كان المشي مخالفًا، يبقى المشاة ضعفاء: لا تفرض مرورك أبدًا. أبطئ واستعد للتوقف — فالاصطدام يظل كارثيًا مهما كانت القاعدة.",
+      e: "حتى لو كان المشي مخالفًا، يبقى المشاة ضعفاء: لا تفرض مرورك أبدًا. أبطئ واستعد للتوقف. فالاصطدام يظل كارثيًا مهما كانت القاعدة.",
       r: {
         ralentis: "أبطئ وأدعه ينهي عبوره",
         klaxonne: "أستخدم البوق: فلا يحقّ له العبور هنا",
@@ -719,7 +719,7 @@ export const SITU_I18N = {
   "prioritaire-samu-derriere": {
     en: {
       q: "An ambulance is coming up behind you, siren blaring. What do you do?",
-      e: "You always make way for an emergency vehicle: move over to the right and slow down — without slamming the brakes or stopping just anywhere.",
+      e: "You always make way for an emergency vehicle: move over to the right and slow down. Without slamming the brakes or stopping just anywhere.",
       r: {
         serre: "I move over to the right and slow down",
         accel: "I speed up so I don't hold it up",
@@ -728,7 +728,7 @@ export const SITU_I18N = {
     },
     ar: {
       q: "سيارة إسعاف تقترب من خلفك وصفّارة الإنذار تعمل بصوت عالٍ. ماذا تفعل؟",
-      e: "عليك دائمًا تسهيل مرور مركبة الطوارئ: انحرف نحو اليمين وأبطئ — دون التوقف المفاجئ أو التوقف في أي مكان.",
+      e: "عليك دائمًا تسهيل مرور مركبة الطوارئ: انحرف نحو اليمين وأبطئ. دون التوقف المفاجئ أو التوقف في أي مكان.",
       r: {
         serre: "أنحرف نحو اليمين وأبطئ",
         accel: "أسرّع حتى لا أعرقلها",
@@ -763,7 +763,7 @@ export const SITU_I18N = {
   "cede-camion-gauche": {
     en: {
       q: "The truck is coming from your left, but you have a give-way sign. What do you do?",
-      e: "The sign overrides the priority-to-the-right rule: you're on the NON-priority road, so you give way to vehicles from both sides — even those coming from the left.",
+      e: "The sign overrides the priority-to-the-right rule: you're on the NON-priority road, so you give way to vehicles from both sides. Even those coming from the left.",
       r: {
         cede: "I let it pass",
         passe: "I go: it's coming from my left",
@@ -772,7 +772,7 @@ export const SITU_I18N = {
     },
     ar: {
       q: "الشاحنة قادمة من يسارك، لكن لديك لافتة افسح الطريق. ماذا تفعل؟",
-      e: "اللافتة تُلغي قاعدة الأولوية لليمين: أنت على الطريق غير ذي الأولوية، لذا تفسح الطريق للمركبات القادمة من الجهتين — حتى تلك القادمة من اليسار.",
+      e: "اللافتة تُلغي قاعدة الأولوية لليمين: أنت على الطريق غير ذي الأولوية، لذا تفسح الطريق للمركبات القادمة من الجهتين. حتى تلك القادمة من اليسار.",
       r: {
         cede: "أدعها تمرّ",
         passe: "أمرّ: فهي قادمة من يساري",
@@ -805,7 +805,7 @@ export const SITU_I18N = {
   "stop-moto-gauche": {
     en: {
       q: "At the stop sign, the motorbike is coming from your left. What do you do?",
-      e: "The stop sign puts you on the non-priority road: after the full stop, you give way to traffic from BOTH directions — including from the left.",
+      e: "The stop sign puts you on the non-priority road: after the full stop, you give way to traffic from BOTH directions. Including from the left.",
       r: {
         arret_laisse: "Full stop, then I let it pass",
         arret_passe: "Full stop, then I go: it's coming from the left",
@@ -814,7 +814,7 @@ export const SITU_I18N = {
     },
     ar: {
       q: "عند لافتة قف، الدراجة النارية قادمة من يسارك. ماذا تفعل؟",
-      e: "لافتة قف تضعك على الطريق غير ذي الأولوية: بعد التوقف التام، تفسح الطريق للمركبات القادمة من الاتجاهين — بما في ذلك القادمة من اليسار.",
+      e: "لافتة قف تضعك على الطريق غير ذي الأولوية: بعد التوقف التام، تفسح الطريق للمركبات القادمة من الاتجاهين. بما في ذلك القادمة من اليسار.",
       r: {
         arret_laisse: "توقف تام، ثم أدعها تمرّ",
         arret_passe: "توقف تام، ثم أمرّ: فهي قادمة من اليسار",
@@ -865,7 +865,7 @@ export const SITU_I18N = {
   "giratoire-deux-voitures": {
     en: {
       q: "Two cars are following each other on the roundabout. When do you enter?",
-      e: "Everything on the roundabout has priority. A gap that's too tight between two cars means an emergency brake for the second one — wait for a clear opening.",
+      e: "Everything on the roundabout has priority. A gap that's too tight between two cars means an emergency brake for the second one. Wait for a clear opening.",
       r: {
         apres: "Once both have gone past",
         entre: "I slip in between them",
@@ -874,7 +874,7 @@ export const SITU_I18N = {
     },
     ar: {
       q: "سيارتان متتاليتان على الدوّار. متى تدخل؟",
-      e: "كل ما يسير على الدوّار له الأولوية. الفجوة الضيقة جدًا بين سيارتين تعني فرملة طارئة للسيارة الثانية — انتظر حتى تكون الفجوة واضحة.",
+      e: "كل ما يسير على الدوّار له الأولوية. الفجوة الضيقة جدًا بين سيارتين تعني فرملة طارئة للسيارة الثانية. انتظر حتى تكون الفجوة واضحة.",
       r: {
         apres: "بعد أن تمرّ كلتاهما",
         entre: "أتسلل بينهما",
@@ -887,7 +887,7 @@ export const SITU_I18N = {
   "feu-vert-libre": {
     en: {
       q: "Green light, clear intersection. What do you do?",
-      e: "Green light plus a clear intersection: you go through at normal speed, glancing each way. Stopping on a green light surprises drivers behind you — that's the real danger.",
+      e: "Green light plus a clear intersection: you go through at normal speed, glancing each way. Stopping on a green light surprises drivers behind you. That's the real danger.",
       r: {
         passe: "I go through, staying alert",
         arret: "I make a precautionary stop",
@@ -896,7 +896,7 @@ export const SITU_I18N = {
     },
     ar: {
       q: "إشارة خضراء، والتقاطع خالٍ. ماذا تفعل؟",
-      e: "إشارة خضراء وتقاطع خالٍ: تمرّ بسرعة عادية مع نظرة سريعة لكل جانب. التوقف عند الضوء الأخضر يُفاجئ من خلفك — وهذا هو الخطر الحقيقي.",
+      e: "إشارة خضراء وتقاطع خالٍ: تمرّ بسرعة عادية مع نظرة سريعة لكل جانب. التوقف عند الضوء الأخضر يُفاجئ من خلفك. وهذا هو الخطر الحقيقي.",
       r: {
         passe: "أمرّ، مع بقائي متيقظًا",
         arret: "أتوقف توقفًا احتياطيًا",
@@ -951,12 +951,12 @@ export const SITU_I18N = {
   "cycliste-croisement-droite": {
     en: {
       q: "A cyclist is coming from your right. Who goes first?",
-      e: "Priority to the right applies to ALL vehicles, bicycles included. They go first — and cutting them off puts them in danger, not you.",
+      e: "Priority to the right applies to ALL vehicles, bicycles included. They go first. And cutting them off puts them in danger, not you.",
       r: { velo: "The cyclist", moi: "You" },
     },
     ar: {
       q: "دراج قادم من يمينك. من يمرّ أولًا؟",
-      e: "الأولوية لليمين تسري على جميع المركبات، بما فيها الدراجات الهوائية. هو يمرّ أولًا — وقطع الطريق عليه يعرّضه هو للخطر، لا أنت.",
+      e: "الأولوية لليمين تسري على جميع المركبات، بما فيها الدراجات الهوائية. هو يمرّ أولًا. وقطع الطريق عليه يعرّضه هو للخطر، لا أنت.",
       r: { velo: "الدراج", moi: "أنت" },
     },
   },
@@ -1021,7 +1021,7 @@ export const SITU_I18N = {
   "autoroute-distance-traits": {
     en: {
       q: "At 130 km/h, what distance should you keep from the car ahead?",
-      e: "The official reference: one road-edge mark plus a gap ≈ 45 m. Two marks ≈ 90 m — that's your 2-second safety gap at 130 km/h.",
+      e: "The official reference: one road-edge mark plus a gap ≈ 45 m. Two marks ≈ 90 m. That's your 2-second safety gap at 130 km/h.",
       r: {
         traits: "At least 2 marks on the hard shoulder",
         longueur: "One car length is enough",
@@ -1030,7 +1030,7 @@ export const SITU_I18N = {
     },
     ar: {
       q: "عند سرعة 130 كم/سا، ما المسافة التي يجب أن تتركها عن السيارة التي أمامك؟",
-      e: "المرجع الرسمي: علامة واحدة على حافة الطريق مع الفراغ التالي لها ≈ 45 مترًا. علامتان ≈ 90 مترًا — وهذه مسافة الأمان بثانيتين عند سرعة 130 كم/سا.",
+      e: "المرجع الرسمي: علامة واحدة على حافة الطريق مع الفراغ التالي لها ≈ 45 مترًا. علامتان ≈ 90 مترًا. وهذه مسافة الأمان بثانيتين عند سرعة 130 كم/سا.",
       r: {
         traits: "علامتان على الأقل من علامات المسار الاضطراري",
         longueur: "طول سيارة واحدة يكفي",
@@ -1063,7 +1063,7 @@ export const SITU_I18N = {
   "distance-moto": {
     en: {
       q: "You're following a motorbike. What's your safety distance?",
-      e: "A motorbike brakes in a shorter distance than a car, and its rider is exposed. You increase your distance — if they fall, you need room to avoid them.",
+      e: "A motorbike brakes in a shorter distance than a car, and its rider is exposed. You increase your distance. If they fall, you need room to avoid them.",
       r: {
         plus: "Even bigger than with a car",
         meme: "The same as usual",
@@ -1072,7 +1072,7 @@ export const SITU_I18N = {
     },
     ar: {
       q: "أنت خلف دراجة نارية. ما مسافة الأمان التي تلتزم بها؟",
-      e: "الدراجة النارية تتوقف بمسافة أقصر من السيارة، وسائقها معرّض ومكشوف. تزيد المسافة — فإن سقط، تحتاج إلى مساحة لتفاديه.",
+      e: "الدراجة النارية تتوقف بمسافة أقصر من السيارة، وسائقها معرّض ومكشوف. تزيد المسافة. فإن سقط، تحتاج إلى مساحة لتفاديه.",
       r: {
         plus: "أكبر منها مع السيارة",
         meme: "نفس المسافة المعتادة",
@@ -1107,12 +1107,12 @@ export const SITU_I18N = {
   "croisement-stop-en-face": {
     en: {
       q: "It has a stop sign and is turning left. You have no sign. Who goes?",
-      e: "The stop sign is for THEM: you're on the priority road, you go. Still keep an eye out — a driver running a stop sign is only spotted at the last moment.",
+      e: "The stop sign is for THEM: you're on the priority road, you go. Still keep an eye out. A driver running a stop sign is only spotted at the last moment.",
       r: { moi: "You", v1: "The grey car" },
     },
     ar: {
       q: "لديها لافتة قف وتنعطف إلى يسارها. أما أنت فلا توجد لديك أي لافتة. من يمرّ؟",
-      e: "لافتة قف مخصصة لها هي: أنت على الطريق ذي الأولوية، فتمرّ. لكن راقب المكان جيدًا — فمن يتجاهل لافتة قف لا يُلاحَظ إلا في اللحظة الأخيرة.",
+      e: "لافتة قف مخصصة لها هي: أنت على الطريق ذي الأولوية، فتمرّ. لكن راقب المكان جيدًا. فمن يتجاهل لافتة قف لا يُلاحَظ إلا في اللحظة الأخيرة.",
       r: { moi: "أنت", v1: "السيارة الرمادية" },
     },
   },

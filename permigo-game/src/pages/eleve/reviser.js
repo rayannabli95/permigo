@@ -44,14 +44,14 @@ const RV_I18N = {
     eyebrow: "Real-life scenarios · {n} scenes",
     fav: "Students' favourite",
     hero_alt: "A scene from the game: an intersection, one decision to make",
-    hero_title: "One scene, one decision",
-    hero_sub: "3 min, just like the road — not theory.",
+    hero_title: "One scene. One decision.",
+    hero_sub: "3 min just like the road",
     hero_cta: "Play a scene",
     rail: "More ways to practise",
     exam_t: "Mock exam",
-    exam_s: "Just like exam day, scored out of 31",
+    exam_s: "Scored out of 31 like exam day",
     fiches_t: "Revision sheets",
-    fiches_s: "The right moves, not theory",
+    fiches_s: "Moves rather than theory",
     fiches_m: "Sheets",
     centre_t: "Exam centre",
     centre_s: "Your centre on exam day",
@@ -69,14 +69,14 @@ const RV_I18N = {
     eyebrow: "مواقف قيادة واقعية · {n} مشهدًا",
     fav: "المفضّل لدى الطلاب",
     hero_alt: "مشهد من اللعبة: تقاطع يتطلب قرارًا",
-    hero_title: "مشهد واحد، قرار واحد",
-    hero_sub: "3 دقائق، كما على الطريق — وليس النظري.",
+    hero_title: "مشهد واحد. قرار واحد.",
+    hero_sub: "3 دقائق كما على الطريق",
     hero_cta: "العب مشهدًا",
     rail: "طرق أخرى للتدرّب",
     exam_t: "امتحان تجريبي",
-    exam_s: "مثل يوم الامتحان، الدرجة من 31",
+    exam_s: "الدرجة من 31 كما في يوم الامتحان",
     fiches_t: "بطاقات المراجعة",
-    fiches_s: "الحركات الصحيحة، لا النظري",
+    fiches_s: "الحركة قبل النظري",
     fiches_m: "بطاقات",
     centre_t: "مركز الامتحان",
     centre_s: "مركزك يوم الامتحان",
@@ -251,17 +251,17 @@ function render({
         <img src="${HERO_IMG}" alt="${rv("hero_alt", "Une scène du jeu En situation : un croisement à décider")}" width="780" height="980" loading="eager" decoding="async">
       </span>
       <span class="rv4-hbody">
-        <h2 class="rv4-htitle"${R}>${rv("hero_title", "Une scène, une décision")}</h2>
-        <p class="rv4-hsub"${R}>${rv("hero_sub", "3 min, comme sur la route — pas du code.")}</p>
+        <h2 class="rv4-htitle"${R}>${rv("hero_title", "Une scène. Une décision.")}</h2>
+        <p class="rv4-hsub"${R}>${rv("hero_sub", "3 min comme sur la route")}</p>
         <span class="rv4-cta">${SVG.play}<span${R}>${rv("hero_cta", "Jouer une scène")}</span></span>
       </span>
     </button>
 
     <div class="rv4-rail">
       <div class="rv4-railhead"><span${R}>${rv("rail", "Aussi pour s'entraîner")}</span><div class="rule"></div></div>
-      ${item("exam-conduite", BADGE.exam, rv("exam_t", "Examen blanc"), rv("exam_s", "Comme le jour J, noté sur 31"), examMeta)}
-      ${item("revision-conduite", BADGE.fiche, rv("fiches_t", "Fiches de révision"), rv("fiches_s", "Le geste, pas le code"), `<small${R}>${rv("fiches_m", "Fiches")}</small>${fichesLues} / ${fichesTotal}`)}
-      ${item("centre-examen", BADGE.centre, rv("centre_t", "Centre d'examen"), rv("centre_s", "Ton centre, le jour J"), `<small${R}>${rv("centre_m", "Le jour J")}</small>${rv("centre_v", "Voir")}`)}
+      ${item("exam-conduite", BADGE.exam, rv("exam_t", "Examen blanc"), rv("exam_s", "Noté sur 31 comme le jour J"), examMeta)}
+      ${item("revision-conduite", BADGE.fiche, rv("fiches_t", "Fiches de révision"), rv("fiches_s", "Le geste plutôt que le code"), `<small${R}>${rv("fiches_m", "Fiches")}</small>${fichesLues} / ${fichesTotal}`)}
+      ${item("centre-examen", BADGE.centre, rv("centre_t", "Centre d'examen"), rv("centre_s", "Ton centre le jour J"), `<small${R}>${rv("centre_m", "Le jour J")}</small>${rv("centre_v", "Voir")}`)}
     </div>
 
   </div></div>`;

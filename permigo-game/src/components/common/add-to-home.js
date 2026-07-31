@@ -110,7 +110,7 @@ export function renderAddToHome(root, { onDone } = {}) {
     <div class="a2hs">
       <img class="a2hs-badge" src="${BADGE}" alt="PermiGo" />
       <h1 class="a2hs-title">Ajoute PermiGo à ton écran d'accueil</h1>
-      <p class="a2hs-sub">Ouvre l'app d'un seul geste, comme une vraie appli — et garde ta progression à portée de main chaque jour.</p>
+      <p class="a2hs-sub">Ouvre l'app d'un seul geste, comme une vraie appli. Et garde ta progression à portée de main chaque jour.</p>
 
       <div class="a2hs-card">
         ${platPicker}

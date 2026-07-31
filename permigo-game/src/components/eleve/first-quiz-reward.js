@@ -79,7 +79,7 @@ export function showFirstQuizReward({ me = null, scorePct = null } = {}) {
   ov.className = "fqr";
   ov.setAttribute("role", "dialog");
   ov.setAttribute("aria-modal", "true");
-  ov.setAttribute("aria-label", "Premier quiz réussi — un tour de roue offert");
+  ov.setAttribute("aria-label", "Premier quiz réussi. Un tour de roue offert");
   ov.innerHTML = `
     <style>${CSS}</style>
     <div class="fqr-stars" aria-hidden="true">

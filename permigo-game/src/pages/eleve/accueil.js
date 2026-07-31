@@ -54,34 +54,34 @@ const ACC_I18N = {
     hero_kicker: "Your next lesson",
     hero_h1: "Get ready for your lesson",
     prep_pill_sub: "For your next hour",
-    prep_pill_aria: "Your next lesson's topic: {t} — tap to change",
+    prep_pill_aria: "Your next lesson's topic: {t}. Tap to change",
     hero_meta: "Be ready in 5 min for your next driving hour.",
     cta_king: "I'm getting ready",
     debrief_k: "Let's look back at your lesson",
     debrief_t: 'Did you go over "{t}" with your instructor?',
     debrief_s:
-      "Some skills take several lessons — that's normal. We keep going together.",
+      "Some skills take several lessons. That's normal. We keep going together.",
     debrief_keep: "I'll practise more",
     debrief_next: "Next lesson →",
     debrief_later: "Haven't had my lesson yet",
-    consol_aria_cons: "Consolidation quiz — 2 questions, 30 seconds",
-    consol_aria_rec: "Recap quiz — 3 questions",
+    consol_aria_cons: "Consolidation quiz. 2 questions, 30 seconds",
+    consol_aria_rec: "Recap quiz. 3 questions",
     consol_t_cons: "Lock in your new skill",
     consol_t_rec: "Recap on your skill",
     consol_s_cons: "Consolidation quiz · 2 questions · 30 s",
     consol_s_rec: "Recap quiz · 3 questions · optional",
     sos_title_crit: "Your {j} streak is about to break!",
     sos_title_risk: "Your {j} streak breaks tonight",
-    sos_sub_crit: "Quick — one quiz saves it.",
+    sos_sub_crit: "Quick. One quiz saves it.",
     sos_sub_risk: "Do your daily quiz to keep it.",
     sos_freeze: "Freeze · 50",
     sos_freeze_aria: "Freeze my streak for 50 tokens",
     day_sing: "day",
     day_plur: "days",
-    sitday_aria: "Road scenario — play today's scene",
+    sitday_aria: "Road scenario. Play today's scene",
     sitday_title: "Road scenario",
     sitday_play: "Play",
-    permis_aria: "Your virtual licence — {n} of 31 skills",
+    permis_aria: "Your virtual licence. {n} of 31 skills",
     permis_label: "Your virtual licence",
     permis_sub_zero_solo: "Every skill you validate completes it.",
     permis_sub_zero_mon: "Every skill your instructor validates completes it.",
@@ -120,24 +120,24 @@ const ACC_I18N = {
     tour_map_x: "31 skills to validate to earn your licence.",
     tour_rewards_t: "Your rewards",
     tour_rewards_x:
-      "The wheel, the shop, your trophies and your league — all in one place.",
+      "The wheel, the shop, your trophies and your league. All in one place.",
     hint_reviser: "Find this lesson any time in “Practice” 📚",
     err_t: "“Home” is unavailable",
-    err_s: "Check your connection, then try again.",
+    err_s: "Check your connection. Try again.",
     err_retry: "Try again",
     reason_weak: "🎯 Based on your recent mistakes",
     reason_next: "📍 Next on your route",
-    reason_consol: "🔁 Achieved — worth consolidating",
+    reason_consol: "🔁 Achieved. Worth consolidating",
     freeze_wait: "⏳ Freezing…",
     freeze_need: "You need 50 steering wheels to freeze your streak.",
     freeze_ok_toast: "Streak frozen for 24 h.",
     freeze_ok_btn: "✓ Streak frozen",
     freeze_fail: "The freeze failed. Try again.",
-    debrief_keep_toast: "Consolidating — that's how you improve 💪",
+    debrief_keep_toast: "Consolidating. That's how you improve 💪",
     debrief_new_toast: "New lesson to prepare: {t}",
     sheet_aria: "Choose your next lesson's topic",
     sheet_h: "What's your next lesson?",
-    sheet_s: "PermiGo picked your next 3 — your call.",
+    sheet_s: "PermiGo picked your next 3. Your call.",
     sheet_more_q: "Another topic in mind?",
     sheet_more_u: "Full list",
     sheet_monde: "World",
@@ -154,33 +154,33 @@ const ACC_I18N = {
     hero_kicker: "درسك القادم",
     hero_h1: "استعدّ لدرسك",
     prep_pill_sub: "مختار لساعتك القادمة",
-    prep_pill_aria: "موضوع درسك القادم: {t} — اضغط للتغيير",
+    prep_pill_aria: "موضوع درسك القادم: {t}. اضغط للتغيير",
     hero_meta: "كن مستعدّاً في 5 دقائق لساعة قيادتك القادمة.",
     cta_king: "أستعدّ",
     debrief_k: "لنعُد إلى درسك",
     debrief_t: "هل راجعت «{t}» مع مدرّبك؟",
-    debrief_s: "بعض المهارات تحتاج عدة دروس — هذا طبيعي. نواصل معاً.",
+    debrief_s: "بعض المهارات تحتاج عدة دروس. هذا طبيعي. نواصل معاً.",
     debrief_keep: "أواصل التدريب",
     debrief_next: "الدرس التالي ←",
     debrief_later: "لم آخذ درسي بعد",
-    consol_aria_cons: "اختبار ترسيخ — سؤالان، 30 ثانية",
-    consol_aria_rec: "اختبار مراجعة — 3 أسئلة",
+    consol_aria_cons: "اختبار ترسيخ. سؤالان، 30 ثانية",
+    consol_aria_rec: "اختبار مراجعة. 3 أسئلة",
     consol_t_cons: "ثبّت مهارتك الجديدة",
     consol_t_rec: "مراجعة لمهارتك",
     consol_s_cons: "اختبار ترسيخ · سؤالان · 30 ث",
     consol_s_rec: "اختبار مراجعة · 3 أسئلة · اختياري",
     sos_title_crit: "سلسلتك ({j}) على وشك الانقطاع!",
     sos_title_risk: "ستنقطع سلسلتك ({j}) الليلة",
-    sos_sub_crit: "بسرعة — اختبار واحد ينقذها.",
+    sos_sub_crit: "بسرعة. اختبار واحد ينقذها.",
     sos_sub_risk: "أنجز اختبار اليوم للحفاظ عليها.",
     sos_freeze: "تجميد · 50",
     sos_freeze_aria: "تجميد سلسلتي مقابل 50 مقودًا",
     day_sing: "يوم",
     day_plur: "أيام",
-    sitday_aria: "سيناريو الطريق — العب مشهد اليوم",
+    sitday_aria: "سيناريو الطريق. العب مشهد اليوم",
     sitday_title: "سيناريو الطريق",
     sitday_play: "العب",
-    permis_aria: "رخصتك الافتراضية — {n} من 31 مهارة",
+    permis_aria: "رخصتك الافتراضية. {n} من 31 مهارة",
     permis_label: "رخصتك الافتراضية",
     permis_sub_zero_solo: "كل مهارة تثبّتها تُكملها.",
     permis_sub_zero_mon: "كل مهارة يثبّتها مدرّبك تُكملها.",
@@ -216,24 +216,24 @@ const ACC_I18N = {
     tour_map_t: "خريطة رخصتك",
     tour_map_x: "31 مهارة عليك إتقانها لنيل رخصتك.",
     tour_rewards_t: "مكافآتك",
-    tour_rewards_x: "العجلة والمتجر وكؤوسك ودوريك — كلها هنا.",
+    tour_rewards_x: "العجلة والمتجر وكؤوسك ودوريك. كلها هنا.",
     hint_reviser: "تجد هذا الدرس متى شئت في «المراجعة» 📚",
     err_t: "«الرئيسية» غير متاحة",
     err_s: "تحقّق من اتصالك ثم أعد المحاولة.",
     err_retry: "إعادة المحاولة",
     reason_weak: "🎯 بناءً على أخطائك الأخيرة",
     reason_next: "📍 التالي في مسارك",
-    reason_consol: "🔁 مكتسبة — للترسيخ",
+    reason_consol: "🔁 مكتسبة. للترسيخ",
     freeze_wait: "⏳ جارٍ التجميد…",
     freeze_need: "تحتاج 50 مقودًا لتجميد سلسلتك.",
     freeze_ok_toast: "جُمّدت السلسلة لمدة 24 ساعة.",
     freeze_ok_btn: "✓ جُمّدت السلسلة",
     freeze_fail: "فشل التجميد. أعد المحاولة.",
-    debrief_keep_toast: "نرسّخ المهارة — هكذا نتقدّم 💪",
+    debrief_keep_toast: "نرسّخ المهارة. هكذا نتقدّم 💪",
     debrief_new_toast: "درس جديد للتحضير: {t}",
     sheet_aria: "اختر موضوع درسك القادم",
     sheet_h: "ما موضوع درسك القادم؟",
-    sheet_s: "اختار لك بيرميغو 3 مواضيع — القرار لك.",
+    sheet_s: "اختار لك بيرميغو 3 مواضيع. القرار لك.",
     sheet_more_q: "موضوع آخر في بالك؟",
     sheet_more_u: "القائمة الكاملة",
     sheet_monde: "عالم",
@@ -339,7 +339,7 @@ function eleveTourSteps() {
       title: atR("tour_rewards_t", "Tes récompenses"),
       text: atR(
         "tour_rewards_x",
-        "La roue, la boutique, tes trophées et ta ligue — tout est là.",
+        "La roue, la boutique, tes trophées et ta ligue. Tout est là.",
       ),
     },
   ];
@@ -1815,7 +1815,7 @@ export async function mount(root) {
           ? atR("reason_weak", "🎯 D'après tes fautes récentes")
           : !validated.has(c)
             ? atR("reason_next", "📍 La suite de ton parcours")
-            : atR("reason_consol", "🔁 Acquise — pour consolider"),
+            : atR("reason_consol", "🔁 Acquise. Pour consolider"),
       }));
 
       // Le choix déclaré par l'élève est respecté — SAUF si la compétence est
@@ -1990,7 +1990,7 @@ export async function mount(root) {
     console.error("[accueil] mount failed", e);
     root.innerHTML = `<div style="padding:60px 24px;text-align:center;color:var(--mu3);font-family:'Archivo',sans-serif">
       <div style="font:800 18px/1.3 'Archivo',sans-serif;color:var(--ink);margin-bottom:8px">${at("err_t", "« Accueil » indisponible")}</div>
-      <p style="font-size:14px;line-height:1.5;margin:0 0 20px">${at("err_s", "Vérifie ta connexion, puis réessaie.")}</p>
+      <p style="font-size:14px;line-height:1.5;margin:0 0 20px">${at("err_s", "Vérifie ta connexion puis réessaie.")}</p>
       <button id="acc-reload" style="padding:12px 24px;border:0;background:var(--a);color: var(--a-ink);border-radius:12px;font:700 14px/1 'Archivo',sans-serif;cursor:pointer">${at("err_retry", "Réessayer")}</button>
     </div>`;
     root
@@ -2041,7 +2041,7 @@ function renderStreakSos({ streak, streakSt, gemmes, href }) {
         jours,
       );
   const sub = crit
-    ? atR("sos_sub_crit", "Vite — un quiz suffit pour la sauver.")
+    ? atR("sos_sub_crit", "Vite. Un quiz suffit pour la sauver.")
     : atR("sos_sub_risk", "Fais ton quiz du jour pour la garder.");
   const freeze =
     gemmes >= 50
@@ -2051,7 +2051,7 @@ function renderStreakSos({ streak, streakSt, gemmes, href }) {
   return `
   <div class="acc2-sos${crit ? " crit" : ""}" id="acc-sos">
     <button class="acc2-sos-main" id="sos-go" type="button" data-href="${escAttr(href || "")}"
-            aria-label="${escAttr(`${title.replace(/&nbsp;/g, " ")} — ${sub}`)}">
+            aria-label="${escAttr(`${title.replace(/&nbsp;/g, " ")}. ${sub}`)}">
       <span class="acc2-sos-flame" aria-hidden="true">
         <img src="/skins/permigo-streak-flame-v1.webp" alt="">
       </span>
@@ -2139,7 +2139,7 @@ function render({
   <section class="acc2-debrief" id="acc-debrief" aria-label="${escAttr(atR("debrief_k", "Revenons sur ta leçon"))}">
     <p class="acc2-debrief-k">🚗 ${at("debrief_k", "Revenons sur ta leçon")}</p>
     <p class="acc2-debrief-t">${_rtl(esc(atR("debrief_t", "Tu as revu « {t} » avec ton enseignant ?").replace("{t}", ficheTitre(prep.code, prep.titre))))}</p>
-    <p class="acc2-debrief-s">${at("debrief_s", "Certaines compétences demandent plusieurs leçons — c'est normal. On continue ensemble.")}</p>
+    <p class="acc2-debrief-s">${at("debrief_s", "Certaines compétences demandent plusieurs leçons. C'est normal. On continue ensemble.")}</p>
     <div class="acc2-debrief-row">
       <button class="acc2-debrief-btn keep" id="debrief-keep" type="button">${at("debrief_keep", "Je consolide encore")}</button>
       <button class="acc2-debrief-btn next" id="debrief-next" type="button">${at("debrief_next", "Leçon suivante →")}</button>
@@ -2162,7 +2162,7 @@ function render({
     ? `
   <button class="acc2-consol" id="acc-consol-btn" type="button"
           data-href="${escAttr(_consolHref)}"
-          aria-label="${escAttr(_isCons ? atR("consol_aria_cons", "Quiz de consolidation — 2 questions, 30 secondes") : atR("consol_aria_rec", "Quiz-récap — 3 questions"))}">
+          aria-label="${escAttr(_isCons ? atR("consol_aria_cons", "Quiz de consolidation. 2 questions, 30 secondes") : atR("consol_aria_rec", "Quiz-récap. 3 questions"))}">
     <span class="acc2-consol-ico" aria-hidden="true">🧠</span>
     <span class="acc2-consol-txt">
       <span class="acc2-consol-t">${_isCons ? at("consol_t_cons", "Ancre ta nouvelle compétence") : at("consol_t_rec", "Récap sur ta compétence")}</span>
@@ -2199,7 +2199,7 @@ function render({
       ${
         prep
           ? `<button class="acc2-prep-pill" id="prep-theme-btn" type="button"
-              aria-label="${escAttr(atR("prep_pill_aria", "Thème de ta prochaine leçon : {t} — appuie pour changer").replace("{t}", ficheTitre(prep.code, prep.titre)))}">
+              aria-label="${escAttr(atR("prep_pill_aria", "Thème de ta prochaine leçon : {t}. Appuie pour changer").replace("{t}", ficheTitre(prep.code, prep.titre)))}">
               <span class="acc2-prep-pill-ic" aria-hidden="true">🎯</span>
               <span class="acc2-prep-pill-tl">
                 <b id="prep-theme-name">${_rtl(esc(ficheTitre(prep.code, prep.titre)))}</b>
@@ -2251,7 +2251,7 @@ function render({
     @media (prefers-reduced-motion:reduce){.acc2-cover,.acc2-cover-img{transition:none}}
   </style>
   <button class="acc2-cover${getLang() === "ar" ? " is-rtl" : ""}" id="acc-sit-day" type="button"
-          aria-label="${escAttr(atR("sitday_aria", "Mise en situation — jouer la scène du jour"))}">
+          aria-label="${escAttr(atR("sitday_aria", "Mise en situation. Jouer la scène du jour"))}">
     <img class="acc2-cover-img" src="/skins/cover-mise-en-situation.webp" alt="" aria-hidden="true" loading="lazy" decoding="async">
     <span class="acc2-cover-veil" aria-hidden="true"></span>
     <span class="acc2-cover-in">
@@ -2262,7 +2262,7 @@ function render({
 
   <!-- ══ PERMIS VIRTUEL — carte compacte maquette ══ -->
   <div class="acc2-permis-compact" id="acc-permis" role="button" tabindex="0"
-       aria-label="${escAttr(atR("permis_aria", "Ton permis virtuel — {n} sur 31 compétences").replace("{n}", totalValidated))}">
+       aria-label="${escAttr(atR("permis_aria", "Ton permis virtuel. {n} sur 31 compétences").replace("{n}", totalValidated))}">
     <div class="acc2-permis-thumb">
       <img src="/skins/trophy-permis-virtuel.webp" alt="" aria-hidden="true" loading="eager">
     </div>
@@ -2572,7 +2572,7 @@ function wire(
     toast(
       atR(
         "debrief_keep_toast",
-        "On consolide — c'est comme ça qu'on progresse 💪",
+        "On consolide. C'est comme ça qu'on progresse 💪",
       ),
       "success",
     );
@@ -2641,8 +2641,8 @@ function openPrepThemeSheet(root, { prep, prepMondes, prepSuggestions }) {
     <div class="prep-sheet" role="dialog" aria-modal="true"
          aria-label="${escAttr(atR("sheet_aria", "Choisir le thème de ta prochaine leçon"))}" tabindex="-1">
       <div class="prep-sheet-grab" aria-hidden="true"></div>
-      <h2 class="prep-sheet-h">${at("sheet_h", "Ta prochaine leçon, c'est quoi ?")}</h2>
-      <p class="prep-sheet-s">${at("sheet_s", "PermiGo a ciblé tes 3 prochaines — à toi de choisir.")}</p>
+      <h2 class="prep-sheet-h">${at("sheet_h", "Ta prochaine leçon c'est quoi ?")}</h2>
+      <p class="prep-sheet-s">${at("sheet_s", "PermiGo a ciblé tes 3 prochaines. À toi de choisir.")}</p>
       <div class="prep-sheet-list">
         ${prepSuggestions
           .map(
@@ -2864,7 +2864,7 @@ function buildActivityData(attempts, streak) {
     const _qWord =
       v > 1 ? atR("heat_quiz_many", "quiz") : atR("heat_quiz_one", "quiz");
     details[k] =
-      `${dt.toLocaleDateString(atLoc(), { day: "numeric", month: "long" })} — ${v} ${_qWord}${v > 1 && getLang() === "fr" ? "s" : ""}`;
+      `${dt.toLocaleDateString(atLoc(), { day: "numeric", month: "long" })}. ${v} ${_qWord}${v > 1 && getLang() === "fr" ? "s" : ""}`;
   }
   const days7 = [];
   for (let i = 6; i >= 0; i--) {

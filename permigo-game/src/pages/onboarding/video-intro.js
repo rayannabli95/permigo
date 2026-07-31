@@ -28,7 +28,7 @@ const VI_I18N = {
     dialog_aria: "PermiGo introduction",
     title: "Let us introduce PermiGo",
     lead: "One minute to see how we get you ready for every lesson.",
-    ok: "OK, show me",
+    ok: "OK show me",
     later: "Later",
     skip_aria: "Skip the video",
   },
@@ -69,7 +69,7 @@ export function mountVideoIntro(root, onDone) {
         <h1 class="vi-title" tabindex="-1">${t("title", "Laisse-nous te présenter PermiGo")}</h1>
         <p class="vi-lead">${t("lead", "Une minute pour découvrir comment on prépare chacune de tes leçons.")}</p>
         <button class="vi-ok" id="vi-ok" type="button">
-          ${t("ok", "OK, montre-moi")} <span class="vi-ok-arr" aria-hidden="true">${arrow}</span>
+          ${t("ok", "OK montre-moi")} <span class="vi-ok-arr" aria-hidden="true">${arrow}</span>
         </button>
         <button class="vi-skip-gate" id="vi-skip-gate" type="button">${t("later", "Plus tard")}</button>
       </div>

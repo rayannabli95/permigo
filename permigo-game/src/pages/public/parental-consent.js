@@ -103,7 +103,7 @@ function renderForm(root, req, token) {
         </div>
 
         <p class="pc-reassure" style="font:600 13px/1.55 'Archivo',sans-serif;color:var(--ink);background:color-mix(in srgb, var(--gr, #22c55e) 9%, transparent);border:1px solid color-mix(in srgb, var(--gr, #22c55e) 24%, transparent);border-radius:12px;padding:12px 14px;margin:0 0 14px">
-          PermiGo, c'est un cahier de révision numérique — rien de plus. On garde seulement le <strong>prénom</strong> et la <strong>progression</strong> de votre enfant. <strong>Aucun numéro de téléphone, aucune adresse, aucune donnée bancaire.</strong>
+          PermiGo, c'est un cahier de révision numérique. Rien de plus. On garde seulement le <strong>prénom</strong> et la <strong>progression</strong> de votre enfant. <strong>Aucun numéro de téléphone, aucune adresse, aucune donnée bancaire.</strong>
         </p>
 
         <p class="pc-legal">
@@ -145,7 +145,7 @@ function renderForm(root, req, token) {
       toast(
         /invalid_or_used/i.test(e?.message || "")
           ? "Ce lien a déjà été utilisé."
-          : "Erreur — réessaie.",
+          : "Erreur. Réessaie.",
         "error",
         4000,
       );

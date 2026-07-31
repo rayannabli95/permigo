@@ -34,14 +34,14 @@ const SET_I18N = {
     app_group: "App",
     app_add_home: "Add to home screen",
     app_add_home_aria: "Add PermiGo to home screen",
-    app_add_home_sub: "Open PermiGo in one tap, like a real app",
+    app_add_home_sub: "Open PermiGo in one tap like a real app",
     ens_group: "Your students",
     ens_wheel: "Your rewards wheel",
     ens_wheel_aria: "Set up your rewards wheel",
-    ens_wheel_sub: "Choose the prizes for your students, your brand",
+    ens_wheel_sub: "Choose the prizes for your students under your brand",
     sub_group: "Subscription",
     sub_loading: "Loading…",
-    sub_cta: "Subscribe — €9.99/month",
+    sub_cta: "Subscribe · €9.99/month",
     sub_manage: "Manage my subscription",
     sub_mine: "My subscription",
     partial_load_err: "Some preferences could not be loaded",
@@ -78,7 +78,7 @@ const SET_I18N = {
     theme_auto: "System",
     theme_aria: "Choose theme",
     lang: "Language",
-    lang_sub: "Questions show in your language, with French kept below.",
+    lang_sub: "Questions show in your language. French stays below.",
     lang_aria: "Choose language",
     accent: "Accent colour",
     accent_sub: "Don't like green? Pick your colour.",
@@ -95,7 +95,7 @@ const SET_I18N = {
     data_export_sub: "Download a JSON file of all your data",
     export_arrow: "Export →",
     marketing: "Marketing emails",
-    marketing_sub: "Tips, news and PermiGo offers",
+    marketing_sub: "Tips · news · PermiGo offers",
     marketing_aria: "Receive marketing emails",
     privacy_policy: "Privacy policy",
     read_arrow: "Read →",
@@ -103,29 +103,29 @@ const SET_I18N = {
     credits: "Credits & licences",
     danger_group: "Danger zone",
     delete_account: "Delete my account",
-    delete_account_sub: "Irreversible — personal data deleted or anonymised",
+    delete_account_sub: "Irreversible. Personal data deleted or anonymised",
     delete_modal_transparency:
       "Your personal data is deleted or anonymised: your first name, email and photo are removed, and your statistics become anonymous. Your account cannot be recovered.",
     delete: "Delete",
     load_err_title: "Couldn't load your preferences",
-    load_err_sub: "Check your connection, then try again.",
+    load_err_sub: "Check your connection. Try again.",
     retry: "Try again",
     prefs_saved: "Preferences saved",
     checkout_success: "Thank you! Your subscription is being activated.",
     checkout_cancel: "Payment cancelled.",
-    sub_ends: "{base} — ends on {date}",
-    sub_next_charge: "{base} — next payment on {date}",
+    sub_ends: "{base}. Ends on {date}",
+    sub_next_charge: "{base}. Next payment on {date}",
     sub_monthly_active: "Monthly subscription active",
     sub_active: "Subscription active",
     sub_pro_desc:
-      "PermiGo Pro — digital REMC booklet, student tracking, no ads.",
+      "PermiGo Pro. Digital REMC booklet, student tracking, no ads.",
     redirecting: "Redirecting…",
     checkout_failed:
       "Unable to open payment. Try again or contact us: contact@permigo.fr",
     push_install:
       "First install PermiGo on your home screen to enable notifications.",
     push_blocked:
-      "Notifications are blocked — allow them in your phone settings.",
+      "Notifications are blocked. Allow them in your phone settings.",
     push_enabled: "Notifications enabled ✓",
     save_error: "Save error",
     dnd_saved: "Do not disturb period saved",
@@ -139,13 +139,13 @@ const SET_I18N = {
     connection_error: "Connection error",
     delete_action: "This action is",
     irreversible: "irreversible",
-    delete_confirm_instruction: "To confirm, type exactly:",
+    delete_confirm_instruction: "To confirm type exactly:",
     confirmation: "Confirmation",
     cancel: "Cancel",
     delete_auth_note:
       "To erase the authentication account, contact",
-    delete_failed: "Unable to delete — contact dpo@permigo.fr",
-    delete_error: "Error — contact dpo@permigo.fr",
+    delete_failed: "Unable to delete. Contact dpo@permigo.fr",
+    delete_error: "Error. Contact dpo@permigo.fr",
   },
   ar: {
     back: "رجوع",
@@ -153,14 +153,14 @@ const SET_I18N = {
     app_group: "التطبيق",
     app_add_home: "أضف إلى الشاشة الرئيسية",
     app_add_home_aria: "أضف بيرميغو إلى الشاشة الرئيسية",
-    app_add_home_sub: "افتح بيرميغو بلمسة واحدة، مثل تطبيق حقيقي",
+    app_add_home_sub: "افتح بيرميغو بلمسة واحدة مثل تطبيق حقيقي",
     ens_group: "طلابك",
     ens_wheel: "عجلة مكافآتك",
     ens_wheel_aria: "اضبط عجلة مكافآتك",
-    ens_wheel_sub: "اختر الجوائز لطلابك، بعلامتك",
+    ens_wheel_sub: "اختر الجوائز لطلابك بعلامتك",
     sub_group: "الاشتراك",
     sub_loading: "جارٍ التحميل…",
-    sub_cta: "اشترك — 9,99 € / شهر",
+    sub_cta: "اشترك · 9,99 € / شهر",
     sub_manage: "إدارة اشتراكي",
     sub_mine: "اشتراكي",
     partial_load_err: "تعذّر تحميل بعض الإعدادات",
@@ -197,7 +197,7 @@ const SET_I18N = {
     theme_auto: "النظام",
     theme_aria: "اختر السمة",
     lang: "اللغة",
-    lang_sub: "تظهر الأسئلة بلغتك، مع الاحتفاظ بالفرنسية تحتها.",
+    lang_sub: "تظهر الأسئلة بلغتك. وتبقى الفرنسية تحتها.",
     lang_aria: "اختر اللغة",
     accent: "لون التمييز",
     accent_sub: "لا يعجبك الأخضر؟ اختر لونك.",
@@ -222,7 +222,7 @@ const SET_I18N = {
     credits: "الحقوق والتراخيص",
     danger_group: "منطقة حسّاسة",
     delete_account: "حذف حسابي",
-    delete_account_sub: "لا رجعة فيه — تُحذف بياناتك الشخصية أو تُجعل مجهولة",
+    delete_account_sub: "لا رجعة فيه. تُحذف بياناتك الشخصية أو تُجعل مجهولة",
     delete_modal_transparency:
       "تُحذف بياناتك الشخصية أو تُجعل مجهولة الهوية: يُمحى اسمك وبريدك الإلكتروني وصورتك، وتصبح إحصاءاتك مجهولة. لا يمكن استرجاع حسابك.",
     delete: "حذف",
@@ -232,19 +232,19 @@ const SET_I18N = {
     prefs_saved: "تم حفظ الإعدادات",
     checkout_success: "شكرًا! جارٍ تفعيل اشتراكك.",
     checkout_cancel: "تم إلغاء الدفع.",
-    sub_ends: "{base} — ينتهي في {date}",
-    sub_next_charge: "{base} — الدفعة التالية في {date}",
+    sub_ends: "{base}. ينتهي في {date}",
+    sub_next_charge: "{base}. الدفعة التالية في {date}",
     sub_monthly_active: "الاشتراك الشهري مفعّل",
     sub_active: "الاشتراك مفعّل",
     sub_pro_desc:
-      "بيرميغو برو — دفتر REMC رقمي، متابعة الطلاب، بلا إعلانات.",
+      "بيرميغو برو. دفتر REMC رقمي، متابعة الطلاب، بلا إعلانات.",
     redirecting: "جارٍ التحويل…",
     checkout_failed:
       "تعذّر فتح الدفع. أعد المحاولة أو راسلنا: contact@permigo.fr",
     push_install:
       "ثبّت بيرميغو أولًا على شاشتك الرئيسية لتفعيل الإشعارات.",
     push_blocked:
-      "الإشعارات محظورة — اسمح بها في إعدادات الهاتف.",
+      "الإشعارات محظورة. اسمح بها في إعدادات الهاتف.",
     push_enabled: "تم تفعيل الإشعارات ✓",
     save_error: "خطأ في الحفظ",
     dnd_saved: "تم حفظ فترة عدم الإزعاج",
@@ -262,8 +262,8 @@ const SET_I18N = {
     confirmation: "التأكيد",
     cancel: "إلغاء",
     delete_auth_note: "لمحو حساب المصادقة، تواصل مع",
-    delete_failed: "تعذّر الحذف — تواصل مع dpo@permigo.fr",
-    delete_error: "خطأ — تواصل مع dpo@permigo.fr",
+    delete_failed: "تعذّر الحذف. تواصل مع dpo@permigo.fr",
+    delete_error: "خطأ. تواصل مع dpo@permigo.fr",
   },
 };
 // Traduit-ou-français, avec esc() intégré (sûr en texte et en attribut ""). En
@@ -598,7 +598,7 @@ export async function mount(root, param) {
   <div class="st-section" style="margin-top:20px;padding:28px 20px;text-align:center">
     <div style="margin-bottom:10px;color:var(--mu3)">${icon("alert-circle", { size: 30 })}</div>
     <div style="font:700 15px/1.3 'Archivo',sans-serif;color:var(--ink);margin-bottom:6px">${st("load_err_title", "Impossible de charger tes préférences")}</div>
-    <div style="font:500 13px/1.5 'Archivo',sans-serif;color:var(--mu3);margin-bottom:16px">${st("load_err_sub", "Vérifie ta connexion, puis réessaie.")}</div>
+    <div style="font:500 13px/1.5 'Archivo',sans-serif;color:var(--mu3);margin-bottom:16px">${st("load_err_sub", "Vérifie ta connexion puis réessaie.")}</div>
     <button class="st-save-btn" id="st-retry" style="margin:0 auto;width:auto;padding:10px 20px">${st("retry", "Réessayer")}</button>
   </div>
 </div>`;
@@ -684,7 +684,7 @@ ${
         <span class="st-ic" aria-hidden="true">${medallion("fusee", "cyan", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
           <div class="st-row-title">${st("app_add_home", "Ajouter à l'écran d'accueil")}</div>
-          <div class="st-row-sub">${st("app_add_home_sub", "Ouvre PermiGo d'un geste, comme une vraie app")}</div>
+          <div class="st-row-sub">${st("app_add_home_sub", "Ouvre PermiGo d'un geste comme une vraie app")}</div>
         </div>
         <div class="st-row-action">${_CHEV}</div>
       </div>
@@ -702,7 +702,7 @@ ${
         <span class="st-ic" aria-hidden="true">${medallion("cadeau", "orange", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
           <div class="st-row-title">${st("ens_wheel", "Ta roue de récompenses")}</div>
-          <div class="st-row-sub">${st("ens_wheel_sub", "Choisis les lots offerts à tes élèves, à ta marque")}</div>
+          <div class="st-row-sub">${st("ens_wheel_sub", "Choisis les lots à ta marque pour tes élèves")}</div>
         </div>
         <div class="st-row-action">${_CHEV}</div>
       </div>
@@ -726,7 +726,7 @@ ${
             <div class="st-row-sub" id="st-sub-status">${st("sub_loading", "Chargement…")}</div>
           </div>
         </div>
-        <button class="st-save-btn" id="st-subscribe" style="display:none;align-self:stretch;text-align:center">${st("sub_cta", "S'abonner — 9,99 €/mois")}</button>
+        <button class="st-save-btn" id="st-subscribe" style="display:none;align-self:stretch;text-align:center">${st("sub_cta", "S'abonner · 9,99 €/mois")}</button>
         <button class="st-save-btn" id="st-manage-sub" style="display:none;align-self:stretch;text-align:center;background:var(--su);color:var(--a-txt);border:1.5px solid var(--bo4)">${st("sub_manage", "Gérer mon abonnement")}</button>
       </div>
     </div>
@@ -855,7 +855,7 @@ ${
           <span class="st-ic" aria-hidden="true" style="font-size:26px;line-height:1;display:flex;align-items:center;justify-content:center">🌍</span>
           <div class="st-row-left">
             <div class="st-row-title">${st("lang", "Langue")}</div>
-            <div class="st-row-sub">${st("lang_sub", "Les questions s'affichent dans ta langue, le français gardé dessous.")}</div>
+            <div class="st-row-sub">${st("lang_sub", "Les questions s'affichent dans ta langue. Le français reste dessous.")}</div>
           </div>
         </div>
         <div class="st-theme-seg st-expand" id="lang-seg" role="group" aria-label="${stA("lang_aria", "Choisir la langue")}">
@@ -931,7 +931,7 @@ ${
         <span class="st-ic" aria-hidden="true">${medallion("megaphone", "orange", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
           <div class="st-row-title">${st("marketing", "Emails marketing")}</div>
-          <div class="st-row-sub">${st("marketing_sub", "Conseils, nouveautés et offres PermiGo")}</div>
+          <div class="st-row-sub">${st("marketing_sub", "Conseils · nouveautés · offres PermiGo")}</div>
         </div>
         <div class="st-row-action">
           <label class="st-tgl" aria-label="${stA("marketing_aria", "Recevoir les emails marketing")}">
@@ -978,7 +978,7 @@ ${
         <span class="st-ic" aria-hidden="true">${medallion("faute", "red", { size: 32, shape: "tile" })}</span>
         <div class="st-row-left">
           <div class="st-row-title" style="color:var(--rd-txt)">${st("delete_account", "Supprimer mon compte")}</div>
-          <div class="st-row-sub">${st("delete_account_sub", "Irréversible — données personnelles supprimées ou anonymisées")}</div>
+          <div class="st-row-sub">${st("delete_account_sub", "Irréversible. Données personnelles supprimées ou anonymisées")}</div>
         </div>
         <div class="st-row-action">
           <button class="st-btn-txt danger" id="btn-delete-account">${st("delete", "Supprimer")}</button>
@@ -1055,12 +1055,12 @@ function wire(root, me, prefs) {
           )
         : null;
       return sub?.cancel_at_period_end
-        ? stR("sub_ends", "{base} — se termine le {date}", {
+        ? stR("sub_ends", "{base}. Se termine le {date}", {
             base,
             date: until,
           })
         : until
-          ? stR("sub_next_charge", "{base} — prochain prélèvement le {date}", {
+          ? stR("sub_next_charge", "{base}. Prochain prélèvement le {date}", {
               base,
               date: until,
             })
@@ -1100,7 +1100,7 @@ function wire(root, me, prefs) {
         } else {
           subStatus.textContent = stR(
             "sub_pro_desc",
-            "PermiGo Pro — livret REMC numérique, suivi élèves, sans pub.",
+            "PermiGo Pro. Livret REMC numérique, suivi élèves, sans pub.",
           );
           if (subBtn) subBtn.style.display = "";
           if (manageBtn) manageBtn.style.display = "none";
@@ -1126,7 +1126,7 @@ function wire(root, me, prefs) {
           subBtn.disabled = false;
           subBtn.textContent = stR(
             "sub_cta",
-            "S'abonner — 9,99 €/mois",
+            "S'abonner · 9,99 €/mois",
           );
         }
       });
@@ -1190,7 +1190,7 @@ function wire(root, me, prefs) {
             toast(
               stR(
                 "push_blocked",
-                "Notifications bloquées — autorise-les dans les réglages du téléphone.",
+                "Notifications bloquées. Autorise-les dans les réglages du téléphone.",
               ),
               "error",
               4500,
@@ -1450,7 +1450,7 @@ function _showDeleteModal(root, me) {
   <div class="st-modal-body">
     ${st("delete_action", "Cette action est")} <strong>${st("irreversible", "irréversible")}</strong>.
     ${st("delete_modal_transparency", "Tes données personnelles sont supprimées ou anonymisées : ton prénom, ton email et ta photo disparaissent, tes statistiques deviennent anonymes. Ton compte ne pourra pas être récupéré.")}
-    <br><br>${st("delete_confirm_instruction", "Pour confirmer, tape exactement :")}<br><strong>${CONFIRM_TEXT}</strong>
+    <br><br>${st("delete_confirm_instruction", "Pour confirmer tape exactement :")}<br><strong>${CONFIRM_TEXT}</strong>
   </div>
   <div class="st-modal-label">${st("confirmation", "Confirmation")}</div>
   <input class="st-modal-inp" id="del-confirm-inp" type="text" placeholder="${escAttr(CONFIRM_TEXT)}" autocomplete="off" spellcheck="false">
@@ -1496,7 +1496,7 @@ function _showDeleteModal(root, me) {
           data?.error ||
             stR(
               "delete_failed",
-              "Suppression impossible — contacte dpo@permigo.fr",
+              "Suppression impossible. Contacte dpo@permigo.fr",
             ),
           "error",
           6000,
@@ -1511,7 +1511,7 @@ function _showDeleteModal(root, me) {
     } catch (e) {
       console.error("[settings] delete_account", e);
       toast(
-        stR("delete_error", "Erreur — contacte dpo@permigo.fr"),
+        stR("delete_error", "Erreur. Contacte dpo@permigo.fr"),
         "error",
         6000,
       );

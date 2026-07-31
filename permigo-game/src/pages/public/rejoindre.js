@@ -210,14 +210,14 @@ const SG_I18N = {
     role_badge: "Student",
     already_connected: "You're already signed in as {name}.",
     already_switch: "Sign out to create an account",
-    lang_help: "Questions show in your language, with French kept below.",
+    lang_help: "Questions show in your language. French stays below.",
     code_label: "Instructor code",
     code_help_default: "Ask your instructor for it.",
     code_checking: "Checking…",
     code_notfound_help: "✗ Code not found. Double-check with your instructor.",
     code_notfound_join: "No instructor matches this code.",
     code_valid: "✓ Valid code",
-    code_check_failed: "Check failed, try again.",
+    code_check_failed: "Check failed. Try again.",
     join_school: "You're joining {school}{with}.",
     join_with: " with {name}",
     email_label: "Your email",
@@ -239,7 +239,7 @@ const SG_I18N = {
     submitting: "Creating…",
     have_account: "Already have an account? ",
     login_link: "Log in",
-    toast_code_invalid: "Invalid instructor code — check it again.",
+    toast_code_invalid: "Invalid instructor code. Check it again.",
     code_notfound_short: "✗ Code not found.",
     toast_already_school:
       "This account is already linked to an instructor. Please log in.",
@@ -261,18 +261,18 @@ const SG_I18N = {
     title_join: "انضمّ إلى مدرّبك",
     sub_solo:
       "دقيقتان وتدخل التطبيق. إن اشتريت باقة، استعمل البريد نفسه الذي دفعت به.",
-    sub_join: "أدخِل الرمز الذي أعطاك إياه مدرّبك، ثم أنشئ حسابك.",
+    sub_join: "أدخِل رمز مدرّبك ثم أنشئ حسابك.",
     role_badge: "طالب",
     already_connected: "أنت مسجّل الدخول بالفعل باسم {name}.",
     already_switch: "سجّل الخروج لإنشاء حساب",
-    lang_help: "تظهر الأسئلة بلغتك، مع الاحتفاظ بالفرنسية تحتها.",
+    lang_help: "تظهر الأسئلة بلغتك. وتبقى الفرنسية تحتها.",
     code_label: "رمز المدرّب",
     code_help_default: "اطلبه من مدرّبك.",
     code_checking: "جارٍ التحقّق…",
     code_notfound_help: "✗ الرمز غير موجود. تحقّق مجدّداً مع مدرّبك.",
     code_notfound_join: "لا يوجد مدرّب يطابق هذا الرمز.",
     code_valid: "✓ رمز صالح",
-    code_check_failed: "تعذّر التحقّق، أعد المحاولة.",
+    code_check_failed: "تعذّر التحقّق. أعد المحاولة.",
     join_school: "أنت تنضمّ إلى {school}{with}.",
     join_with: " مع {name}",
     email_label: "بريدك الإلكتروني",
@@ -294,7 +294,7 @@ const SG_I18N = {
     submitting: "جارٍ الإنشاء…",
     have_account: "لديك حساب بالفعل؟ ",
     login_link: "تسجيل الدخول",
-    toast_code_invalid: "رمز المدرّب غير صالح — تحقّق منه مجدّداً.",
+    toast_code_invalid: "رمز المدرّب غير صالح. تحقّق منه مجدّداً.",
     code_notfound_short: "✗ الرمز غير موجود.",
     toast_already_school: "هذا الحساب مرتبط بمدرّب بالفعل. سجّل الدخول.",
     toast_parent_required: "أدخِل بريد أحد الوالدين صحيحاً",
@@ -359,7 +359,7 @@ export async function mount(root) {
       <div class="sg-card">
         <img class="sg-logo" src="/skins/avatars/permigo-badge-icon.png" alt="PermiGo" width="88" height="88" />
         <h1 class="sg-title">${solo ? sgt("title_solo", "Crée ton compte élève") : sgt("title_join", "Rejoins ton moniteur")}</h1>
-        <p class="sg-sub">${solo ? sgt("sub_solo", "2 minutes, et tu entres dans l'app. Si tu as pris un Pass, utilise le même email que ton paiement.") : sgt("sub_join", "Entre le code que ton moniteur t'a donné, puis crée ton compte.")}</p>
+        <p class="sg-sub">${solo ? sgt("sub_solo", "2 minutes, et tu entres dans l'app. Si tu as pris un Pass, utilise le même email que ton paiement.") : sgt("sub_join", "Entre le code de ton moniteur puis crée ton compte.")}</p>
         <div style="text-align:center"><span class="sg-role-badge">${sgt("role_badge", "Élève")}</span></div>
         ${connectedBanner}
 
@@ -707,7 +707,7 @@ export async function mount(root) {
               toast(
                 sgtR(
                   "toast_code_invalid",
-                  "Code moniteur invalide — revérifie-le.",
+                  "Code moniteur invalide. Revérifie-le.",
                 ),
                 "error",
                 4000,

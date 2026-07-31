@@ -36,7 +36,7 @@ const EXAM_I18N = {
     "Those already in the roundabout",
     "Whoever comes from the right"
    ],
-   "explication": "Those already inside have priority. You, entering, must give way — unless a sign says otherwise."
+   "explication": "Those already inside have priority. You, entering, must give way. Unless a sign says otherwise."
   },
   "ar": {
    "enonce": "تصل إلى دوّار. مَن يمرّ أولاً؟",
@@ -45,7 +45,7 @@ const EXAM_I18N = {
     "الموجودون داخل الدوّار بالفعل",
     "القادم من جهة اليمين"
    ],
-   "explication": "مَن هم داخل الدوّار بالفعل لهم الأولوية. أنت الداخل تتنازل عن المرور — إلا إذا دلّت لافتة على غير ذلك."
+   "explication": "مَن هم داخل الدوّار بالفعل لهم الأولوية. أنت الداخل تتنازل عن المرور. إلا إذا دلّت لافتة على غير ذلك."
   }
  },
  "p1q2": {
@@ -136,7 +136,7 @@ const EXAM_I18N = {
     "Yes, just to cross it to turn",
     "No, it's forbidden"
    ],
-   "explication": "You may cross it to turn, never drive along it. And you give way to cyclists — in BOTH directions, that's the trap with two-way cycle paths."
+   "explication": "You may cross it to turn, never drive along it. And you give way to cyclists. In BOTH directions, that's the trap with two-way cycle paths."
   },
   "ar": {
    "enonce": "لكي تنعطف يميناً، هل يمكنك القيادة على مسار درّاجات باتجاهين؟",
@@ -145,7 +145,7 @@ const EXAM_I18N = {
     "نعم، فقط لعبوره من أجل الانعطاف",
     "لا، هذا ممنوع"
    ],
-   "explication": "يمكنك عبوره من أجل الانعطاف، لا السير عليه أبداً. وتتنازل عن المرور للدرّاجات — في الاتجاهين، وهذا هو فخّ مسارات الدرّاجات ذات الاتجاهين."
+   "explication": "يمكنك عبوره من أجل الانعطاف، لا السير عليه أبداً. وتتنازل عن المرور للدرّاجات. في الاتجاهين، وهذا هو فخّ مسارات الدرّاجات ذات الاتجاهين."
   }
  },
  "p1q7": {
@@ -276,7 +276,7 @@ const EXAM_I18N = {
     "I speed up to pass before them",
     "I stop to let them cross"
    ],
-   "explication": "You stop. In front of a bus, you can't see who's stepping out — maximum caution."
+   "explication": "You stop. In front of a bus, you can't see who's stepping out. Maximum caution."
   },
   "ar": {
    "enonce": "تتجاوز حافلة متوقفة. مشاة يعبرون أمام الحافلة. ماذا تفعل؟",
@@ -285,7 +285,7 @@ const EXAM_I18N = {
     "أزيد سرعتي لأمرّ قبلهم",
     "أتوقف لأتركهم يعبرون"
    ],
-   "explication": "تتوقف. أمام الحافلة لا ترى مَن يخرج فجأة — أقصى درجات الحذر."
+   "explication": "تتوقف. أمام الحافلة لا ترى مَن يخرج فجأة. أقصى درجات الحذر."
   }
  },
  "p1q14": {
@@ -553,7 +553,7 @@ const EXAM_I18N = {
    "enonce": "Your phone rings while you're driving. What do you do?",
    "options": [
     "I answer quickly if it's important",
-    "I don't answer — or I pull over to answer",
+    "I don't answer. Or I pull over to answer",
     "I answer on speaker while holding it"
    ],
    "explication": "Phone in hand at the wheel = forbidden. Earphones and earpieces too. Only a hands-free system built into the vehicle is allowed."
@@ -562,7 +562,7 @@ const EXAM_I18N = {
    "enonce": "يرنّ هاتفك أثناء القيادة. ماذا تفعل؟",
    "options": [
     "أُجيب بسرعة إذا كان الأمر مهمًا",
-    "لا أُجيب — أو أتوقف لأُجيب",
+    "لا أُجيب. أو أتوقف لأُجيب",
     "أُجيب على مكبّر الصوت وأنا أمسكه بيدي"
    ],
    "explication": "الهاتف في اليد أثناء القيادة = ممنوع. وكذلك سمّاعات الأذن. المسموح فقط هو نظام حرّ اليدين المدمج في السيارة."
@@ -796,7 +796,7 @@ const EXAM_I18N = {
     "Yes, it's mandatory like a STOP",
     "Only if visibility is poor"
    ],
-   "explication": "You slow down and give way — but if it's clearly clear, you don't need to stop. That's the difference from a STOP."
+   "explication": "You slow down and give way. But if it's clearly clear, you don't need to stop. That's the difference from a STOP."
   },
   "ar": {
    "enonce": "إشارة «تنازل عن الأولوية»، ولا مركبة في الأفق. هل عليك التوقف؟",
@@ -805,7 +805,7 @@ const EXAM_I18N = {
     "نعم، إنه إجباري مثل STOP",
     "فقط إذا كانت الرؤية سيئة"
    ],
-   "explication": "تبطئ وتتنازل عن المرور — لكن إذا كان الطريق خالياً بوضوح، لا حاجة للتوقف. هذا هو الفرق عن STOP."
+   "explication": "تبطئ وتتنازل عن المرور. لكن إذا كان الطريق خالياً بوضوح، لا حاجة للتوقف. هذا هو الفرق عن STOP."
   }
  },
  "p3q10": {
@@ -1036,7 +1036,7 @@ const EXAM_I18N = {
     "Yes, but they let cars pass",
     "Yes, and it's up to drivers to let them pass"
    ],
-   "explication": "In a shared zone (20 km/h), pedestrians have priority across the whole road. Careful: in a 30 km/h zone they do NOT have this general priority — that's the classic trap."
+   "explication": "In a shared zone (20 km/h), pedestrians have priority across the whole road. Careful: in a 30 km/h zone they do NOT have this general priority. That's the classic trap."
   },
   "ar": {
    "enonce": "في منطقة الالتقاء، هل يمكن للمشاة العبور خارج الممرات؟",
@@ -1045,7 +1045,7 @@ const EXAM_I18N = {
     "نعم، لكن عليهم إفساح الطريق للسيارات",
     "نعم، وعلى السائقين إفساح الطريق لهم"
    ],
-   "explication": "في منطقة الالتقاء (20 كم/س) للمشاة الأولوية على كامل الطريق. انتبه: في منطقة 30 كم/س لا تكون لهم هذه الأولوية العامة — وهذا هو الفخ المعتاد."
+   "explication": "في منطقة الالتقاء (20 كم/س) للمشاة الأولوية على كامل الطريق. انتبه: في منطقة 30 كم/س لا تكون لهم هذه الأولوية العامة. وهذا هو الفخ المعتاد."
   }
  },
  "p4q7": {
@@ -1056,7 +1056,7 @@ const EXAM_I18N = {
     "I'm extra alert: they don't hear me coming",
     "Nothing, the law makes no difference"
    ],
-   "explication": "In electric mode you're almost silent. Pedestrians and visually impaired people can't hear you — it's up to you to make up for it."
+   "explication": "In electric mode you're almost silent. Pedestrians and visually impaired people can't hear you. It's up to you to make up for it."
   },
   "ar": {
    "enonce": "سيارتك الهجينة تسير في الوضع الكهربائي. ما الذي يتغيّر تجاه المشاة؟",
@@ -1065,7 +1065,7 @@ const EXAM_I18N = {
     "أُضاعف يقظتي: فهم لا يسمعون اقترابي",
     "لا شيء، القانون لا يُفرّق"
    ],
-   "explication": "في الوضع الكهربائي تكون شبه صامت. المشاة وضعاف البصر لا يسمعونك — فعليك أنت التعويض عن ذلك."
+   "explication": "في الوضع الكهربائي تكون شبه صامت. المشاة وضعاف البصر لا يسمعونك. فعليك أنت التعويض عن ذلك."
   }
  },
  "p4q8": {
@@ -1176,7 +1176,7 @@ const EXAM_I18N = {
     "I look for another space",
     "I photograph the time with my phone"
    ],
-   "explication": "No disc, no blue zone parking — not even for 5 minutes. Look elsewhere."
+   "explication": "No disc, no blue zone parking. Not even for 5 minutes. Look elsewhere."
   },
   "ar": {
    "enonce": "منطقة زرقاء، لكنك لا تملك قرص التوقيت. ماذا تفعل؟",
@@ -1185,7 +1185,7 @@ const EXAM_I18N = {
     "أبحث عن مكان آخر",
     "ألتقط صورة للوقت بهاتفي"
    ],
-   "explication": "بلا قرص، لا توقّف في المنطقة الزرقاء — ولا حتى لخمس دقائق. ابحث في مكان آخر."
+   "explication": "بلا قرص، لا توقّف في المنطقة الزرقاء. ولا حتى لخمس دقائق. ابحث في مكان آخر."
   }
  },
  "p4q14": {
@@ -1276,7 +1276,7 @@ const EXAM_I18N = {
     "2 seconds (about 72 metres at 130 km/h)",
     "200 metres"
    ],
-   "explication": "Always the 2-second rule — at 130 km/h that's about 72 m. A marker: 2 white lines of the hard shoulder."
+   "explication": "Always the 2-second rule. At 130 km/h that's about 72 m. A marker: 2 white lines of the hard shoulder."
   },
   "ar": {
    "enonce": "عند سرعة 130 km/h، ما هي مسافة الأمان الدنيا؟",
@@ -1285,7 +1285,7 @@ const EXAM_I18N = {
     "ثانيتان (نحو 72 متراً عند 130 km/h)",
     "200 متر"
    ],
-   "explication": "دائماً قاعدة الثانيتين — عند 130 km/h تعادل نحو 72 متراً. علامة مرجعية: خطان أبيضان من شريط التوقف الاضطراري."
+   "explication": "دائماً قاعدة الثانيتين. عند 130 km/h تعادل نحو 72 متراً. علامة مرجعية: خطان أبيضان من شريط التوقف الاضطراري."
   }
  },
  "p5q4": {
@@ -1356,7 +1356,7 @@ const EXAM_I18N = {
     "For emergencies only: breakdowns, rescue services, police",
     "For overtaking when the right-hand lane is busy"
    ],
-   "explication": "Emergencies only. Driving on it is forbidden — and you block the way for the emergency services."
+   "explication": "Emergencies only. Driving on it is forbidden. And you block the way for the emergency services."
   },
   "ar": {
    "enonce": "شريط التوقف الاضطراري، ما فائدته؟",
@@ -1365,7 +1365,7 @@ const EXAM_I18N = {
     "للطوارئ فقط: الأعطال، الإسعاف، رجال الأمن",
     "للتجاوز إذا كان المسار الأيمن مزدحماً"
    ],
-   "explication": "للطوارئ فقط. السير عليه ممنوع — كما أنك تسد الطريق أمام فرق الإنقاذ."
+   "explication": "للطوارئ فقط. السير عليه ممنوع. كما أنك تسد الطريق أمام فرق الإنقاذ."
   }
  },
  "p5q8": {
@@ -1412,7 +1412,7 @@ const EXAM_I18N = {
   "en": {
    "enonce": "You've been in the left-hand lane for 5 km without overtaking anything. What do you do?",
    "options": [
-    "I move back to the right — driving on the left without overtaking is forbidden",
+    "I move back to the right. Driving on the left without overtaking is forbidden",
     "I stay on the left, it's faster",
     "I speed up"
    ],
@@ -1421,7 +1421,7 @@ const EXAM_I18N = {
   "ar": {
    "enonce": "أنت على المسار الأيسر منذ 5 كيلومترات دون أن تتجاوز أحداً. ماذا تفعل؟",
    "options": [
-    "أعود إلى اليمين — السير على اليسار دون تجاوز ممنوع",
+    "أعود إلى اليمين. السير على اليسار دون تجاوز ممنوع",
     "أبقى على اليسار، فهو أسرع",
     "أزيد السرعة"
    ],
@@ -1476,7 +1476,7 @@ const EXAM_I18N = {
     "80 km/h",
     "No, there is no legal minimum"
    ],
-   "explication": "No legal minimum in France. But driving too slowly creates a real danger — below 60, it's not advised."
+   "explication": "No legal minimum in France. But driving too slowly creates a real danger. Below 60, it's not advised."
   },
   "ar": {
    "enonce": "هل توجد سرعة دنيا قانونية على الطريق السريع (المسار الأيمن)؟",
@@ -1485,7 +1485,7 @@ const EXAM_I18N = {
     "80 km/h",
     "لا، ليس هناك حد أدنى قانوني"
    ],
-   "explication": "لا يوجد حد أدنى قانوني في فرنسا. لكن السير ببطء شديد يخلق خطراً حقيقياً — دون 60، الأمر غير محبّذ."
+   "explication": "لا يوجد حد أدنى قانوني في فرنسا. لكن السير ببطء شديد يخلق خطراً حقيقياً. دون 60، الأمر غير محبّذ."
   }
  },
  "p5q14": {
@@ -1513,7 +1513,7 @@ const EXAM_I18N = {
    "enonce": "You leave the motorway after 2 hours at 130 km/h. What trap awaits you?",
    "options": [
     "None, nothing in particular",
-    "I risk underestimating my speed in town — the tunnel effect",
+    "I risk underestimating my speed in town (tunnel effect)",
     "I drive better, I'm warmed up"
    ],
    "explication": "After 2 hours at 130, 50 in town feels ultra slow. Your perception is distorted: trust the speedometer, not your feelings."
@@ -1522,7 +1522,7 @@ const EXAM_I18N = {
    "enonce": "تخرج من الطريق السريع بعد ساعتين عند 130 km/h. ما الفخّ الذي ينتظرك؟",
    "options": [
     "لا شيء، لا شيء بالذات",
-    "قد أقلّل من تقدير سرعتي داخل المدينة — تأثير النفق",
+    "قد أقلّل من تقدير سرعتي داخل المدينة (تأثير النفق)",
     "أقود بشكل أفضل، فأنا متهيّئ"
    ],
    "explication": "بعد ساعتين عند 130، تبدو الـ50 داخل المدينة بطيئة للغاية. إدراكك مضلّل: ثق بعدّاد السرعة، لا بإحساسك."
@@ -1536,7 +1536,7 @@ const EXAM_I18N = {
     "0.5 g/L",
     "0.8 g/L"
    ],
-   "explication": "0.5 g/L of blood (that is 0.25 mg/L of exhaled air). On a probationary licence it's 0.2 g/L — almost zero."
+   "explication": "0.5 g/L of blood (that is 0.25 mg/L of exhaled air). On a probationary licence it's 0.2 g/L. Almost zero."
   },
   "ar": {
    "enonce": "أثناء القيادة، ما هي النسبة القصوى المسموح بها للكحول في الدم؟",
@@ -1545,7 +1545,7 @@ const EXAM_I18N = {
     "0.5 غ/ل",
     "0.8 غ/ل"
    ],
-   "explication": "0.5 غ/ل من الدم (أي 0.25 مغ/ل من هواء الزفير). في رخصة القيادة تحت الاختبار تكون 0.2 غ/ل — أي شبه معدومة."
+   "explication": "0.5 غ/ل من الدم (أي 0.25 مغ/ل من هواء الزفير). في رخصة القيادة تحت الاختبار تكون 0.2 غ/ل. أي شبه معدومة."
   }
  },
  "p6q2": {
@@ -1696,7 +1696,7 @@ const EXAM_I18N = {
     "Only in thick fog or snow",
     "At night on the motorway"
    ],
-   "explication": "Reserved for dense fog or snow. In the rain they dazzle those behind you — it's even forbidden."
+   "explication": "Reserved for dense fog or snow. In the rain they dazzle those behind you. It's even forbidden."
   },
   "ar": {
    "enonce": "متى تستعمل أضواء الضباب الخلفية؟",
@@ -1705,7 +1705,7 @@ const EXAM_I18N = {
     "في الضباب أو الثلج الكثيف فقط",
     "ليلاً على الطريق السيار"
    ],
-   "explication": "مخصصة للضباب أو الثلج الكثيف. تحت المطر تُبهر من يسير خلفك — بل هي ممنوعة."
+   "explication": "مخصصة للضباب أو الثلج الكثيف. تحت المطر تُبهر من يسير خلفك. بل هي ممنوعة."
   }
  },
  "p6q10": {
@@ -3216,7 +3216,7 @@ const EXAM_I18N = {
     "Over a short distance, for a manoeuvre only",
     "Including on the motorway if needed"
    ],
-   "explication": "Reverse gear is for manoeuvring over a short distance. Reversing for a long way is dangerous — and it is strictly forbidden on the motorway."
+   "explication": "Reverse gear is for manoeuvring over a short distance. Reversing for a long way is dangerous. And it is strictly forbidden on the motorway."
   },
   "ar": {
    "enonce": "الرجوع إلى الخلف، كيف تستعمله؟",
@@ -3225,7 +3225,7 @@ const EXAM_I18N = {
     "لمسافة قصيرة، من أجل مناورة فقط",
     "بما في ذلك على الطريق السريع عند الحاجة"
    ],
-   "explication": "الرجوع إلى الخلف يُستعمل للمناورة على مسافة قصيرة. الرجوع لمسافة طويلة خطير — وهو ممنوع منعًا باتًّا على الطريق السريع."
+   "explication": "الرجوع إلى الخلف يُستعمل للمناورة على مسافة قصيرة. الرجوع لمسافة طويلة خطير. وهو ممنوع منعًا باتًّا على الطريق السريع."
   }
  },
  "p11q11": {
@@ -3396,7 +3396,7 @@ const EXAM_I18N = {
     "A junction where you give way to the right",
     "A pedestrian crossing"
    ],
-   "explication": "Saint Andrew's cross: at the next junction, priority to the right — you give way to anyone coming from your right."
+   "explication": "Saint Andrew's cross: at the next junction, priority to the right. You give way to anyone coming from your right."
   },
   "ar": {
    "enonce": "هذه اللافتة تُنذرك بـ…",
@@ -3405,7 +3405,7 @@ const EXAM_I18N = {
     "تقاطع تفسح فيه الطريق لمن على اليمين",
     "ممر للمشاة"
    ],
-   "explication": "صليب القديس أندراوس: عند التقاطع القادم، الأولوية لليمين — تفسح الطريق لمن يأتي من يمينك."
+   "explication": "صليب القديس أندراوس: عند التقاطع القادم، الأولوية لليمين. تفسح الطريق لمن يأتي من يمينك."
   }
  },
  "p12q5": {
@@ -3536,7 +3536,7 @@ const EXAM_I18N = {
     "Stopping AND parking",
     "Traffic only"
    ],
-   "explication": "Blue disc with a red cross: no stopping and no parking — you must not come to a halt here."
+   "explication": "Blue disc with a red cross: no stopping and no parking. You must not come to a halt here."
   },
   "ar": {
    "enonce": "هذه اللافتة تمنع…",
@@ -3545,7 +3545,7 @@ const EXAM_I18N = {
     "التوقف والوقوف معاً",
     "المرور فقط"
    ],
-   "explication": "قرص أزرق بصليب أحمر: لا توقف ولا وقوف — يجب ألّا تتوقف هنا."
+   "explication": "قرص أزرق بصليب أحمر: لا توقف ولا وقوف. يجب ألّا تتوقف هنا."
   }
  },
  "p12q12": {

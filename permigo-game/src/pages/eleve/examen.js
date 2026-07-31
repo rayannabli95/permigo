@@ -65,9 +65,9 @@ const EX_I18N = {
     tip3: "Arrive 15 min early. Time to relax and check your paperwork.",
     tip4: "Breathe from your belly before starting. 4 s in, 4 s out.",
     centre_title: "Your exam centre",
-    centre_sub: "Difficulty, route pitfalls, tips on the day.",
+    centre_sub: "Difficulty · route pitfalls · tips on the day",
     err_title: "“Your exam” unavailable",
-    err_sub: "Check your connection, then try again.",
+    err_sub: "Check your connection. Try again.",
     retry_btn: "Retry",
   },
   ar: {
@@ -116,9 +116,9 @@ const EX_I18N = {
     tip3: "صل قبل 15 دقيقة. وقت كافٍ للاسترخاء والتحقق من الأوراق.",
     tip4: "تنفّس من بطنك قبل البدء. 4 ثوانٍ شهيقًا، 4 ثوانٍ زفيرًا.",
     centre_title: "مركز امتحانك",
-    centre_sub: "الصعوبة، مطبّات المسار، نصائح يوم الامتحان.",
+    centre_sub: "الصعوبة · مطبّات المسار · نصائح يوم الامتحان",
     err_title: "«امتحانك» غير متاح",
-    err_sub: "تحقّق من اتصالك، ثم أعد المحاولة.",
+    err_sub: "تحقّق من اتصالك ثم أعد المحاولة.",
     retry_btn: "إعادة المحاولة",
   },
 };
@@ -950,7 +950,7 @@ export async function mount(root) {
   <div class="exam-card" style="text-align:center;padding:28px 20px">
     <div style="margin-bottom:10px;color:var(--mu3)">${icon("alert-circle", { size: 30 })}</div>
     <div style="font:700 15px/1.3 'Archivo',sans-serif;color:var(--ink);margin-bottom:6px"${xRtl()}>${esc(xt("err_title", "« Ton examen » indisponible"))}</div>
-    <div style="font:500 13px/1.5 'Archivo',sans-serif;color:var(--mu3);margin-bottom:16px"${xRtl()}>${esc(xt("err_sub", "Vérifie ta connexion, puis réessaie."))}</div>
+    <div style="font:500 13px/1.5 'Archivo',sans-serif;color:var(--mu3);margin-bottom:16px"${xRtl()}>${esc(xt("err_sub", "Vérifie ta connexion puis réessaie."))}</div>
     <button class="exam-choose-btn" id="exam-retry">${esc(xt("retry_btn", "Réessayer"))}</button>
   </div>
 </div>`;
