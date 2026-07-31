@@ -166,15 +166,19 @@ export function renderBeat(beat, etat) {
     total = 1,
   } = etat || {};
 
-  const jauge = Array.from({ length: total }, (_, i) => {
+  const segments = Array.from({ length: total }, (_, i) => {
     const classe =
       i < index - 1 ? "est-fait" : i === index - 1 ? "est-ici" : "";
     return `<i class="${classe}"></i>`;
   }).join("");
+  const deuxChiffres = (n) => String(n).padStart(2, "0");
 
   return `
     <div class="mp-beat" data-beat="${escapeText(beat.id)}" data-mode="${escapeText(beat.mode)}"${verrouille ? " data-repondu" : ""}>
-      <div class="mp-progress" role="img" aria-label="Temps ${index} sur ${total}">${jauge}</div>
+      <div class="mp-progress" role="img" aria-label="Contrôle ${index} sur ${total}">
+        <b>${deuxChiffres(index)}</b><em>/ ${deuxChiffres(total)} contrôles</em>
+        <u aria-hidden="true">${segments}</u>
+      </div>
 
       <div class="mp-stage" data-scene="${escapeText(beat.scene)}">
         ${beat.assets.map((asset) => renderAsset(asset, assetStates)).join("")}
@@ -195,7 +199,7 @@ export function renderBeat(beat, etat) {
             : `<button class="mp-hint-ask" type="button" data-action="indice">Voir un indice</button>`
         }
         <button class="mp-next" type="button" data-action="suivant" ${verrouille ? "" : "disabled"}>
-          ${index === total ? "Terminer" : "Contrôle suivant"}
+          <span>${index === total ? "Terminer la fiche" : "Contrôle suivant"}</span>
         </button>
       </div>
     </div>`;
@@ -209,7 +213,7 @@ export function renderBrief(mission) {
       <h1 dir="auto">${escapeText(mission.title)}</h1>
       <p class="mp-hook" dir="auto">${escapeText(mission.hook)}</p>
       <p class="mp-duration">${mission.beats.length} contrôles · ${mission.estimatedMinutes} min, sans chrono</p>
-      <button class="mp-next" type="button" data-action="commencer">${escapeText(mission.cta)}</button>
+      <button class="mp-next" type="button" data-action="commencer"><span>${escapeText(mission.cta)}</span></button>
     </div>`;
 }
 
@@ -225,7 +229,7 @@ export function renderOutcome(mission, { recap = [] } = {}) {
       <ol class="mp-recap">${etapes}</ol>
       <p dir="auto">${escapeText(mission.outcome.body)}</p>
       <p class="mp-transfer" dir="auto"><span>En leçon</span> ${escapeText(mission.outcome.transfer)}</p>
-      <button class="mp-next" type="button" data-action="retour">Revenir aux missions</button>
+      <button class="mp-next" type="button" data-action="retour"><span>Revenir aux missions</span></button>
       <button class="mp-replay" type="button" data-action="rejouer">Rejouer sans indice</button>
     </div>`;
 }
