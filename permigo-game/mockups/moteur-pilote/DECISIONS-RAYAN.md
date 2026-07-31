@@ -39,7 +39,39 @@ Deux modes distincts, on ne les fusionne pas.
 - **Mise en situation** : les scènes de décision, déjà en production.
 - **Mode Pilote** : l'entraînement qui fait monter les compétences dans « Mon permis ».
 
-## 4. À trancher avant de coder le lot suivant
+## 4. L'entrée du Mode Pilote, c'est « Mon permis », pas un menu à lui
+
+Aujourd'hui `main.js` affiche `renderHub()` (ligne 209) : ses propres mondes, ses propres
+nœuds de mission, son propre niveau. C'est un deuxième hub, en concurrence directe avec
+« Mon permis ».
+
+**Ce n'est pas ce qu'on veut.** L'élève ne choisit pas une mission dans un menu séparé.
+Il part de « Mon permis », il touche une compétence, et il tombe dans la mission
+correspondante. Le Mode Pilote reçoit un identifiant de compétence et joue la mission.
+Il ne présente rien avant.
+
+À faire : sortir la sélection de mission du Mode Pilote et la remplacer par une entrée
+directe par identifiant de compétence (C1a, C1b…). L'écran « boîte manuelle ou
+automatique » reste, mais il appartient à l'inscription ou aux réglages, pas au lancement
+d'une mission.
+
+## 5. Reprendre le toucher du Labo
+
+Le Mode Pilote a bien des zones tactiles (`content.js`, `hotspots`, mode `spot`), mais
+elles sont plus pauvres que celles du Labo. Différence exacte :
+
+| | Labo | Mode Pilote |
+|---|---|---|
+| Zones par scène | plusieurs, définies dans le preset `zones[] { id, label, aide, at:{x,y} }` en pourcentage du décor | une bonne réponse à trouver |
+| Ce que fait l'élève | **explore** les zones, puis **les touche dans le bon ordre** | touche la bonne zone |
+| Aide | un texte de coaching **par zone** | un seul message de rattrapage |
+| Parcours | 6 étapes, repérer puis refaire le geste | briefing, jeu, retour |
+
+À reprendre du Labo, sans reprendre son code tel quel :
+`src/lab/labo/presets.js` (le format `zones` en pourcentage) et le temps d'exploration
+avant le geste, avec son aide par zone. C'est ce qui donne la sensation de toucher.
+
+## 6. À trancher avant de coder le lot suivant
 
 **Contradiction ouverte sur la certification.**
 
