@@ -31,16 +31,13 @@ export const C1A_INSPECTION_360 = {
       scene: "cockpit",
       assets: [
         {
+          // Pas le bloc compteurs : dessus, un voyant fait douze pixels et se
+          // cache derrière un cadran. Le tableau des douze, lui, montre lequel
+          // s'allume et à côté de quoi.
           family: "dashboard",
-          type: "instrument-cluster",
+          type: "warning-lights",
           anchor: { x: 50, y: 50, scale: 1 },
-          options: {
-            warning: "oil",
-            lit: true,
-            speed: 0,
-            rpm: 0,
-            state: "active",
-          },
+          options: { warning: "oil", lit: true, state: "active" },
         },
       ],
       prompt: "Ce voyant rouge reste allumé après le contact. Que fais-tu ?",

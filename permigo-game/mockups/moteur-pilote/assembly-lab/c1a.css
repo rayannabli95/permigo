@@ -77,22 +77,35 @@
   color: var(--al-accent);
 }
 
+.mp-brief {
+  gap: 0.7rem;
+  padding: 1.8rem 1.3rem 1.4rem;
+}
+
 .mp-brief h1 {
   margin: 0;
-  font-size: 1.6rem;
-  line-height: 1.15;
+  font-size: clamp(1.7rem, 8vw, 2.1rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
   text-wrap: balance;
 }
 
 .mp-hook {
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.02rem;
+  line-height: 1.45;
   color: #cdc2f2;
+  text-wrap: pretty;
 }
 
 .mp-duration {
-  margin: 0;
-  font-size: 0.82rem;
+  margin: 0.2rem 0 0.5rem;
+  align-self: flex-start;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: rgb(139 109 255 / 14%);
+  font-size: 0.78rem;
+  font-weight: 700;
   color: var(--al-accent);
 }
 
@@ -138,7 +151,7 @@
 
 /* Un seul objet en scène : il respire, et rien n'a besoin de le désigner. */
 .mp-stage:has(.mp-asset:only-child) .mp-asset {
-  width: calc(86% * var(--pg-asset-scale, 1));
+  width: calc(80% * var(--pg-asset-scale, 1));
 }
 
 .mp-stage:has(.mp-asset:only-child) .pg-state-marker {
@@ -147,6 +160,51 @@
 
 .mp-asset .pg-element {
   width: 100%;
+}
+
+/* Un voyant allumé au milieu de onze éteints ne se trouve pas tout seul :
+   il pulse jusqu'à ce que l'élève réponde. */
+.mp-stage .pg-cluster-warning.is-lit {
+  animation: mp-voyant 1.5s var(--al-ease) infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.mp-stage .pg-warning-cell.is-lit,
+.mp-stage .pg-warning-asset.is-lit {
+  animation: mp-voyant-case 1.6s var(--al-ease) infinite;
+}
+
+@keyframes mp-voyant-case {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(255 118 110 / 42%);
+  }
+  55% {
+    box-shadow: 0 0 0 0.85rem rgb(255 118 110 / 0%);
+  }
+}
+
+/* On fait grossir le halo, jamais baisser l'opacité : un voyant qui
+   s'efface est plus dur à trouver, pas plus facile. */
+@keyframes mp-voyant {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 0.22rem var(--warning-tone));
+    scale: 1;
+  }
+  50% {
+    filter: drop-shadow(0 0 1.5rem var(--warning-tone))
+      drop-shadow(0 0 0.7rem var(--warning-tone));
+    scale: 1.18;
+  }
+}
+
+/* Dès que l'élève a répondu, le voyant arrête de réclamer l'attention. */
+.mp-beat[data-repondu] .pg-cluster-warning.is-lit,
+.mp-beat[data-repondu] .pg-warning-cell.is-lit,
+.mp-beat[data-repondu] .pg-warning-asset.is-lit {
+  animation: none;
 }
 
 /* ------------------------------------------------------------- la photo */
@@ -442,7 +500,10 @@
     transition: none;
   }
 
-  .mp-hotspot {
+  .mp-hotspot,
+  .mp-stage .pg-cluster-warning.is-lit,
+  .mp-stage .pg-warning-cell.is-lit,
+  .mp-stage .pg-warning-asset.is-lit {
     animation: none;
   }
 }

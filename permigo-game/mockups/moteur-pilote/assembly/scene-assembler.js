@@ -173,7 +173,7 @@ export function renderBeat(beat, etat) {
   }).join("");
 
   return `
-    <div class="mp-beat" data-beat="${escapeText(beat.id)}" data-mode="${escapeText(beat.mode)}">
+    <div class="mp-beat" data-beat="${escapeText(beat.id)}" data-mode="${escapeText(beat.mode)}"${verrouille ? " data-repondu" : ""}>
       <div class="mp-progress" role="img" aria-label="Temps ${index} sur ${total}">${jauge}</div>
 
       <div class="mp-stage" data-scene="${escapeText(beat.scene)}">
@@ -203,12 +203,12 @@ export function renderBeat(beat, etat) {
 
 /** Écran d'ouverture. */
 export function renderBrief(mission) {
+  // Le bandeau porte déjà la compétence : on ne la répète pas ici.
   return `
     <div class="mp-brief">
-      <span class="mp-eyebrow">${escapeText(mission.competence)} · préparation</span>
       <h1 dir="auto">${escapeText(mission.title)}</h1>
       <p class="mp-hook" dir="auto">${escapeText(mission.hook)}</p>
-      <p class="mp-duration">${mission.estimatedMinutes} minutes, sans chronomètre</p>
+      <p class="mp-duration">${mission.beats.length} contrôles · ${mission.estimatedMinutes} min, sans chrono</p>
       <button class="mp-next" type="button" data-action="commencer">${escapeText(mission.cta)}</button>
     </div>`;
 }
