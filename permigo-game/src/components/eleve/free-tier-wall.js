@@ -74,7 +74,12 @@ const STYLE = `<style>
   border:1px solid rgba(245,196,81,.34); box-shadow:0 16px 34px -18px rgba(6,2,22,.9); }
 .ftw-kick{ text-align:center; font-weight:800; font-size:11px; letter-spacing:.16em;
   text-transform:uppercase; color:#f5c451; margin-bottom:8px; }
+/* ⚠️ Couleur explicite obligatoire : la règle h1 globale de l'app repeint les
+   titres en sombre → sur ce fond nuit, le titre devenait illisible (vu à
+   l'écran le 31/07). Piège déjà payé sur les pages publiques dark.
+   (Pas d'accent grave dans ce commentaire : on est dans un gabarit JS.) */
 .ftw-title{ text-align:center; font-family:'Archivo', system-ui, sans-serif;
+  color:#fff;
   font-weight:800; font-size:26px; line-height:1.15; margin:0 auto 10px; max-width:340px; }
 .ftw-sub{ text-align:center; font-size:14px; font-weight:600; color:#c3bdf0;
   margin:0 auto 22px; max-width:330px; line-height:1.5; }
