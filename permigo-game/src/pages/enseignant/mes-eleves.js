@@ -665,7 +665,7 @@ export async function mount(root) {
           <div class="me-hero-content">
             <p class="me-hero-kicker">Suivi des élèves</p>
             <h1 class="me-hero-title">« Mes élèves » indisponible</h1>
-            <p class="me-hero-sub">Vérifie ta connexion, puis réessaie.</p>
+            <p class="me-hero-sub">Vérifie ta connexion puis réessaie.</p>
             <div class="me-hero-actions">
               <button id="me-retry" type="button">Réessayer</button>
             </div>
@@ -751,7 +751,7 @@ async function loadData() {
 
   if (e1) {
     console.error("[mes-eleves] query error", e1);
-    toast("Vérifie ta connexion, puis réessaie.", "error");
+    toast("Vérifie ta connexion puis réessaie.", "error");
     _eleves = [];
     return false;
   }
@@ -790,7 +790,7 @@ async function loadData() {
       validations: e2 || null,
       examens: e3 || null,
     });
-    toast("Progression des élèves indisponible — réessaie.", "error");
+    toast("Progression des élèves indisponible. Réessaie.", "error");
     _eleves = [];
     return false;
   }
@@ -881,7 +881,7 @@ async function loadDrillData(compId) {
   } catch (e) {
     console.error("[mes-eleves] drill load error", e);
     _drillEleves = [];
-    toast("Vérifie ta connexion, puis réessaie.", "error");
+    toast("Vérifie ta connexion puis réessaie.", "error");
   }
 }
 
@@ -896,7 +896,7 @@ function renderDrill() {
       <div>
         <h1 class="me-h1" style="display:flex;align-items:center;gap:8px;font-size:17px;">
           ${icon("search", { size: 16, strokeWidth: 2.2, color: "var(--a)" })}
-          Bloqués — compétence ${esc(_drillComp)}
+          Bloqués. Compétence ${esc(_drillComp)}
         </h1>
         <p class="me-sub">${count} élève${count !== 1 ? "s" : ""} en difficulté · 30 derniers jours</p>
       </div>
@@ -1363,7 +1363,7 @@ function renderBandRow(eleve, opts = {}) {
 
   return `
     <div class="me-row" data-eleve-id="${escAttr(eleve.id)}" role="listitem" tabindex="0"
-         aria-label="Ouvrir le livret de ${fullNom} — ${eleve.acquis}/${eleve.total} competences acquises${eleve.readiness === "recu" ? ", examen reussi" : eleve.readiness === "rate" ? ", examen a repasser" : eleve.readiness === "planifie" ? ", examen prevu" : eleve.readiness === "pret" ? ", pret pour l'examen" : eleve.aRelancer ? ", a relancer" : ""}">
+         aria-label="Ouvrir le livret de ${fullNom}. ${eleve.acquis}/${eleve.total} competences acquises${eleve.readiness === "recu" ? ", examen reussi" : eleve.readiness === "rate" ? ", examen a repasser" : eleve.readiness === "planifie" ? ", examen prevu" : eleve.readiness === "pret" ? ", pret pour l'examen" : eleve.aRelancer ? ", a relancer" : ""}">
       <div class="me-av" style="flex-shrink:0">${renderUserAvatar({ avatar_url: eleve.avatar_url, prenom: eleve.prenom, nom: eleve.nom }, 36)}</div>
       <span class="me-nom">${fullNom}</span>
       ${engDot(eleve)}
@@ -1578,7 +1578,7 @@ async function renderClassementPanel() {
 
 function classementBodyHtml(data) {
   if (!data || data.error) {
-    return `<div class="me-empty">Classement indisponible. Vérifie ta connexion, puis réessaie.</div>`;
+    return `<div class="me-empty">Classement indisponible. Vérifie ta connexion puis réessaie.</div>`;
   }
   const { ranked, hof, isTheorie } = data;
   const fmtScore = (e) =>

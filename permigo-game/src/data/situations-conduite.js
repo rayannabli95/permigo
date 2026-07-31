@@ -120,7 +120,7 @@ export const SITUATIONS = [
     ],
     bonne: "cede",
     explication:
-      "Ceux qui roulent déjà sur l'anneau ont la priorité — c'est le sens du panneau « cédez le passage » à l'entrée. Tu t'engages quand c'est libre.",
+      "Ceux qui roulent déjà sur l'anneau ont la priorité. C'est le sens du panneau « cédez le passage » à l'entrée. Tu t'engages quand c'est libre.",
     focus: { veh: "v1" },
     okAnim: [{ veh: "v1" }, { veh: "moi", delai: 900 }],
   },
@@ -223,7 +223,7 @@ export const SITUATIONS = [
     ],
     bonne: "passe",
     explication:
-      "Elle vient de ta gauche : c'est toi qui as la priorité à droite. Tu passes — en gardant un œil sur elle, au cas où.",
+      "Elle vient de ta gauche : c'est toi qui as la priorité à droite. Tu passes. En gardant un œil sur elle, au cas où.",
     focus: { veh: "moi" },
     okAnim: [{ veh: "moi" }, { veh: "v1", delai: 950 }],
   },
@@ -432,7 +432,7 @@ export const SITUATIONS = [
     ],
     bonne: "ralentis",
     explication:
-      "Sans visibilité, une voiture peut surgir de ta droite — et elle serait prioritaire. Tu ralentis et tu contrôles avant de passer.",
+      "Sans visibilité, une voiture peut surgir de ta droite. Et elle serait prioritaire. Tu ralentis et tu contrôles avant de passer.",
   },
 
   // ── Priorité à droite (suite) ────────────────────────────────
@@ -523,7 +523,7 @@ export const SITUATIONS = [
     ],
     bonne: "arret_laisse",
     explication:
-      "Au stop, tu marques toujours un arrêt complet — et la route que tu croises reste prioritaire : tu laisses passer les véhicules qui y roulent avant de t'engager.",
+      "Au stop, tu marques toujours un arrêt complet. Et la route que tu croises reste prioritaire : tu laisses passer les véhicules qui y roulent avant de t'engager.",
     focus: { veh: "v1" },
     okAnim: [{ veh: "v1" }, { veh: "moi", delai: 900 }],
   },
@@ -806,7 +806,7 @@ export const SITUATIONS = [
     ],
     bonne: "passe",
     explication:
-      "L'orange impose l'arrêt SAUF si tu ne peux plus freiner sans danger. Trop engagé, tu passes — sans accélérer. C'est la nuance avec un orange vu de loin.",
+      "L'orange impose l'arrêt SAUF si tu ne peux plus freiner sans danger. Trop engagé, tu passes. Sans accélérer. C'est la nuance avec un orange vu de loin.",
     okAnim: [{ veh: "moi" }],
   },
 
@@ -832,7 +832,7 @@ export const SITUATIONS = [
     ],
     bonne: "v1",
     explication:
-      "Un feu éteint ou en panne ne compte plus : le croisement redevient une intersection sans signalisation. Priorité à droite — la voiture bleue passe d'abord.",
+      "Un feu éteint ou en panne ne compte plus : le croisement redevient une intersection sans signalisation. Priorité à droite. La voiture bleue passe d'abord.",
     focus: { veh: "v1" },
     okAnim: [{ veh: "v1" }, { veh: "moi", delai: 950 }],
   },
@@ -883,7 +883,7 @@ export const SITUATIONS = [
     ],
     bonne: "v1",
     explication:
-      "Gros ou petit, la règle ne change pas : il vient de ta droite, il passe en premier. Avec un camion, garde encore plus de marge — il démarre lentement.",
+      "Gros ou petit, la règle ne change pas : il vient de ta droite, il passe en premier. Avec un camion, garde encore plus de marge. Il démarre lentement.",
     focus: { veh: "v1" },
     okAnim: [{ veh: "v1" }, { veh: "moi", delai: 1100 }],
   },
@@ -951,7 +951,7 @@ export const SITUATIONS = [
     ],
     bonne: "rabats",
     explication:
-      "Sur autoroute, tu circules sur la voie la plus à droite. La voie de gauche sert uniquement à dépasser — rester dessus sans raison est une infraction.",
+      "Sur autoroute, tu circules sur la voie la plus à droite. La voie de gauche sert uniquement à dépasser. Rester dessus sans raison est une infraction.",
     okAnim: [{ veh: "moi", clign: "droit" }],
   },
   {
@@ -984,7 +984,7 @@ export const SITUATIONS = [
     ],
     bonne: "non",
     explication:
-      "La bande d'arrêt d'urgence sert aux véhicules en panne et aux secours. Y rouler est interdit et dangereux, bouchon ou pas — tu patientes dans ta file.",
+      "La bande d'arrêt d'urgence sert aux véhicules en panne et aux secours. Y rouler est interdit et dangereux, bouchon ou pas. Tu patientes dans ta file.",
     okAnim: [
       { veh: "v1" },
       { veh: "v2", delai: 200 },
@@ -1113,7 +1113,7 @@ export const SITUATIONS = [
     ],
     bonne: "ralentis",
     explication:
-      "Même en tort, un piéton reste fragile : tu ne forces jamais le passage. Tu ralentis, prêt à t'arrêter — un choc resterait dramatique, peu importe la règle.",
+      "Même en tort, un piéton reste fragile : tu ne forces jamais le passage. Tu ralentis, prêt à t'arrêter. Un choc resterait dramatique, peu importe la règle.",
     focus: { pieton: true },
     okAnim: [{ veh: "pieton" }, { veh: "moi", delai: 1400 }],
   },
@@ -1148,7 +1148,7 @@ export const SITUATIONS = [
     ],
     bonne: "serre",
     explication:
-      "Tu facilites toujours le passage d'un véhicule d'urgence : tu serres à droite et tu ralentis — sans piler ni t'arrêter n'importe où.",
+      "Tu facilites toujours le passage d'un véhicule d'urgence : tu serres à droite et tu ralentis. Sans piler ni t'arrêter n'importe où.",
     focus: { veh: "samu" },
     okAnim: [{ veh: "samu" }],
   },
@@ -1230,7 +1230,7 @@ export const SITUATIONS = [
     ],
     bonne: "cede",
     explication:
-      "Le panneau prime sur la règle de la droite : tu es sur la voie NON prioritaire, tu cèdes aux véhicules des deux côtés — même à ceux qui viennent de gauche.",
+      "Le panneau prime sur la règle de la droite : tu es sur la voie NON prioritaire, tu cèdes aux véhicules des deux côtés. Même à ceux qui viennent de gauche.",
     focus: { veh: "v1" },
     // Un camion fait 1,7 tuile : il lui faut une course plus longue pour
     // DÉGAGER le carrefour, et au joueur plus de temps avant de s'engager —
@@ -1306,7 +1306,7 @@ export const SITUATIONS = [
     ],
     bonne: "arret_laisse",
     explication:
-      "Le stop te place sur la voie non prioritaire : après l'arrêt complet, tu cèdes aux DEUX sens — y compris à ce qui vient de gauche.",
+      "Le stop te place sur la voie non prioritaire : après l'arrêt complet, tu cèdes aux DEUX sens. Y compris à ce qui vient de gauche.",
     focus: { veh: "v1" },
     okAnim: [{ veh: "v1" }, { veh: "moi", delai: 1000 }],
   },
@@ -1401,7 +1401,7 @@ export const SITUATIONS = [
     ],
     bonne: "apres",
     explication:
-      "Tout ce qui roule sur l'anneau est prioritaire. Un créneau trop court entre deux voitures, c'est un freinage d'urgence pour la seconde — tu attends que ce soit franc.",
+      "Tout ce qui roule sur l'anneau est prioritaire. Un créneau trop court entre deux voitures, c'est un freinage d'urgence pour la seconde. Tu attends que ce soit franc.",
     focus: { veh: "v1" },
     okAnim: [
       { veh: "v1" },
@@ -1436,7 +1436,7 @@ export const SITUATIONS = [
     ],
     bonne: "passe",
     explication:
-      "Feu vert + carrefour dégagé : tu passes à allure normale, un coup d'œil de chaque côté. T'arrêter au vert surprend ceux qui te suivent — c'est ça, le danger.",
+      "Feu vert + carrefour dégagé : tu passes à allure normale, un coup d'œil de chaque côté. T'arrêter au vert surprend ceux qui te suivent. C'est ça, le danger.",
     okAnim: [{ veh: "moi" }],
   },
 
@@ -1527,7 +1527,7 @@ export const SITUATIONS = [
     ],
     bonne: "velo",
     explication:
-      "La priorité à droite vaut pour TOUS les véhicules, vélo compris. Il passe en premier — et lui couper la route le met en danger, pas toi.",
+      "La priorité à droite vaut pour TOUS les véhicules, vélo compris. Il passe en premier. Et lui couper la route le met en danger, pas toi.",
     focus: { veh: "velo" },
     okAnim: [{ veh: "velo" }, { veh: "moi", delai: 1100 }],
   },
@@ -1662,7 +1662,7 @@ export const SITUATIONS = [
     ],
     bonne: "traits",
     explication:
-      "Le repère officiel : un trait de rive + un intervalle ≈ 45 m. Deux traits ≈ 90 m — c'est tes 2 secondes de sécurité à 130 km/h.",
+      "Le repère officiel : un trait de rive + un intervalle ≈ 45 m. Deux traits ≈ 90 m. C'est tes 2 secondes de sécurité à 130 km/h.",
     okAnim: [{ veh: "lead" }, { veh: "moi", delai: 250 }],
   },
   {
@@ -1732,7 +1732,7 @@ export const SITUATIONS = [
     ],
     bonne: "plus",
     explication:
-      "Une moto freine plus court qu'une voiture et son pilote est à découvert. Tu allonges ta distance — s'il chute, il te faut la place de l'éviter.",
+      "Une moto freine plus court qu'une voiture et son pilote est à découvert. Tu allonges ta distance. S'il chute, il te faut la place de l'éviter.",
     okAnim: [{ veh: "lead" }, { veh: "moi", delai: 250 }],
   },
 
@@ -1793,7 +1793,7 @@ export const SITUATIONS = [
     ],
     bonne: "moi",
     explication:
-      "Le stop est pour ELLE : tu es sur la route prioritaire, tu passes. Garde quand même un œil — un stop grillé ne se voit qu'au dernier moment.",
+      "Le stop est pour ELLE : tu es sur la route prioritaire, tu passes. Garde quand même un œil. Un stop grillé ne se voit qu'au dernier moment.",
     focus: { veh: "moi" },
     okAnim: [{ veh: "moi" }, { veh: "v1", delai: 1100 }],
   },

@@ -242,7 +242,7 @@ function render(root, data, fraud = []) {
 
     <!-- ─── ACTIVITY 24h ─── -->
     <div class="dbg-section">
-      <div class="dbg-section-hd">Activity — 24h</div>
+      <div class="dbg-section-hd">Activity. 24h</div>
       <div class="dbg-row"><span class="l">validations</span><span class="v">${a.validations || 0}</span></div>
       <div class="dbg-row"><span class="l">quiz attempts</span><span class="v">${a.quiz_attempts || 0}</span></div>
       <div class="dbg-row"><span class="l">new profiles</span><span class="v">${a.new_profiles || 0}</span></div>
@@ -265,7 +265,7 @@ function render(root, data, fraud = []) {
 
     <!-- ─── FRAUD SIGNALS ─── -->
     <div class="dbg-section">
-      <div class="dbg-section-hd">Fraud signals — 30j (${fraud.filter(f => f.flag_count > 0).length} flagged)</div>
+      <div class="dbg-section-hd">Fraud signals. 30j (${fraud.filter(f => f.flag_count > 0).length} flagged)</div>
       ${fraud.length === 0 ? '<div style="color:var(--mu3);font-size:12px">no signals</div>' : fraud.slice(0, 12).map(f => {
         const cls = f.flag_count >= 2 ? 'error' : f.flag_count === 1 ? 'warn' : 'ok';
         const hh = Math.floor(Number(f.total_minutes || 0) / 60);

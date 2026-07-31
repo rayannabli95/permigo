@@ -58,7 +58,7 @@ const TRO_I18N = {
     new_badge: "NEW",
     new_aria: "New trophy",
     unavailable: "“Trophies” unavailable",
-    check_conn: "Check your connection, then try again.",
+    check_conn: "Check your connection. Try again.",
     kicker_leg: "Your legendary trophy",
     kicker_best: "Your best trophy",
     kicker_first: "Your first trophy",
@@ -531,7 +531,7 @@ export async function mount(root, openKey = null) {
     <div class="tr2-hero-inner">
       <div class="tr2-hero-top">
         <h1 class="tr2-hero-title" tabindex="-1">${tt("title", "Mes trophées")}</h1>
-        <div class="tr2-hero-count" id="tr2-count">— / ${CATALOG.length}</div>
+        <div class="tr2-hero-count" id="tr2-count">/ ${CATALOG.length}</div>
       </div>
       <div class="tr2-progress-wrap">
         <div class="tr2-progress-bar"><div class="tr2-progress-fill" id="tr2-fill" style="width:0%"></div></div>
@@ -606,7 +606,7 @@ export async function mount(root, openKey = null) {
       <div style="text-align:center;padding:56px 24px;color:var(--ar-mu)">
         <div style="margin-bottom:12px;color:var(--ar-gold2)">${icon("trophy", { size: 44 })}</div>
         <div style="font:800 16px/1.3 'Archivo', system-ui, sans-serif;color:#fff;margin-bottom:6px">${ttD("unavailable", "« Trophées » indisponible")}</div>
-        <div style="font:500 13px/1.5 'Archivo',sans-serif">${ttD("check_conn", "Vérifie ta connexion, puis réessaie.")}</div>
+        <div style="font:500 13px/1.5 'Archivo',sans-serif">${ttD("check_conn", "Vérifie ta connexion puis réessaie.")}</div>
       </div>`;
   }
 }
@@ -829,7 +829,7 @@ function renderFeatured(def, unlockData, stats = { compCount: 0, streak: 0 }) {
       : "";
   return `
     <div class="tr2-feat ${isU ? rar2 : "locked"}" data-key="${escAttr(def.key)}" role="button" tabindex="0"
-      aria-label="${escAttr(trTitle(def))} — ${rar(rar2)}${isU ? tt("aria_unlocked", ", débloqué") : tt("aria_locked", ", à débloquer")}">
+      aria-label="${escAttr(trTitle(def))}. ${rar(rar2)}${isU ? tt("aria_unlocked", ", débloqué") : tt("aria_locked", ", à débloquer")}">
       <div class="tr2-feat-kick"><span class="pin" aria-hidden="true"></span>${esc(kicker)}</div>
       <div class="tr2-feat-stage">
         <span class="tr2-feat-halo" aria-hidden="true"></span>

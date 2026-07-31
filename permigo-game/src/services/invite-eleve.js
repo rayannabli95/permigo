@@ -27,7 +27,7 @@ function parseEmails(raw) {
 export function openInviteEleveModal(me) {
   if (!me?.auto_ecole_id) {
     toast(
-      "Ton profil ne contient pas d'auto-école — contacte le gérant.",
+      "Ton profil ne contient pas d'auto-école. Contacte le gérant.",
       "error",
     );
     return;
@@ -238,8 +238,8 @@ export function openInviteEleveModal(me) {
       ${codeBlockHtml(me)}
       <div class="me-inv-or">ou par email</div>
       <p class="me-inv-sub">
-        Un email par ligne. PermiGo crée un lien d'accès pour chacun —
-        ton élève clique, crée son compte, et apparaît dans ta liste.
+        Un email par ligne. PermiGo crée un lien d'accès pour chacun.
+        Ton élève clique, crée son compte, et apparaît dans ta liste.
       </p>
       <textarea
         class="me-inv-textarea"
@@ -395,7 +395,7 @@ export function openInviteEleveModal(me) {
       ${
         ok > 0
           ? results.some((r) => r.link && !r.mailSent)
-            ? `<p class="me-inv-result-hint">⚠️ L'email automatique n'est pas encore actif — <strong>envoie toi-même son lien à chaque élève</strong> (Partager ou WhatsApp). Dès qu'il l'ouvre et crée son compte, il apparaît dans ta liste.</p>`
+            ? `<p class="me-inv-result-hint">⚠️ L'email automatique n'est pas encore actif. <strong>envoie toi-même son lien à chaque élève</strong> (Partager ou WhatsApp). Dès qu'il l'ouvre et crée son compte, il apparaît dans ta liste.</p>`
             : `<p class="me-inv-result-hint">Un email avec son lien a été envoyé à chaque élève. Tu peux aussi le partager directement.</p>`
           : ""
       }
@@ -439,7 +439,7 @@ export function openInviteEleveModal(me) {
         return true;
       } catch {
         toast(
-          "Copie indisponible — sélectionne le lien à la main",
+          "Copie indisponible. Sélectionne le lien à la main",
           "error",
           3500,
         );
@@ -469,7 +469,7 @@ export function openInviteEleveModal(me) {
           }
         } else {
           const ok = await doCopy(link, null);
-          if (ok) toast("Lien copié — colle-le où tu veux", "info", 3000);
+          if (ok) toast("Lien copié. Colle-le où tu veux", "info", 3000);
         }
       });
     });
@@ -497,7 +497,7 @@ function codeDisplayHtml(code) {
   return `
     <div class="me-inv-code-label">Ton code élève</div>
     <div class="me-inv-code-value">${esc(code)}</div>
-    <div class="me-inv-code-hint">Tes élèves le tapent à l'inscription — tu n'as jamais besoin de leur email.</div>
+    <div class="me-inv-code-hint">Tes élèves le tapent à l'inscription. Tu n'as jamais besoin de leur email.</div>
     <div class="me-inv-share-row">
       <button class="me-inv-act share" type="button" data-act="code-share">Partager</button>
       <button class="me-inv-act copy2" type="button" data-act="code-copy">Copier le code</button>
@@ -508,7 +508,7 @@ function codeDisplayHtml(code) {
 function codeFormHtml(prefill) {
   return `
     <div class="me-inv-code-label">${prefill ? "Modifier ton code" : "Crée ton code élève"}</div>
-    <div class="me-inv-code-hint">Un code court à ta marque (ex&nbsp;: PERMIS75). Tes élèves le tapent à l'inscription — pas besoin de leur email.</div>
+    <div class="me-inv-code-hint">Un code court à ta marque (ex&nbsp;: PERMIS75). Tes élèves le tapent à l'inscription. Pas besoin de leur email.</div>
     <div class="me-inv-code-form">
       <input class="me-inv-code-input" data-el="code-input" type="text" maxlength="16"
         autocapitalize="characters" autocomplete="off" spellcheck="false"
@@ -552,7 +552,7 @@ function wireCodeBlock(sheet, me) {
         track("invite_eleve.code_copied");
       } catch {
         toast(
-          "Copie indisponible — sélectionne le code à la main",
+          "Copie indisponible. Sélectionne le code à la main",
           "error",
           3500,
         );
@@ -578,7 +578,7 @@ function wireCodeBlock(sheet, me) {
           await navigator.clipboard.writeText(
             shareMsg(me.join_code) + "\n" + link,
           );
-          toast("Message copié — colle-le où tu veux", "info", 3000);
+          toast("Message copié. Colle-le où tu veux", "info", 3000);
           track("invite_eleve.code_shared", { method: "copy" });
         } catch {
           toast("Partage indisponible sur cet appareil", "error", 3000);

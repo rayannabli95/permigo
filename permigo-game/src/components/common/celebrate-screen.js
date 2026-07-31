@@ -42,7 +42,7 @@ const CS_I18N = {
     firstValidation_cta: "Continue the journey",
     tenComps_title: "A third of the way",
     tenComps_subtitle:
-      "10 skills validated out of 31. You're getting ahead — keep the pace.",
+      "10 skills validated out of 31. You're getting ahead. Keep the pace.",
     tenComps_cta: "Onwards",
     readyExam_title: "Ready for the exam",
     readyExam_subtitle:
@@ -50,7 +50,7 @@ const CS_I18N = {
     readyExam_cta: "See my card",
     permisEarned_title: "Virtual licence earned",
     permisEarned_subtitle:
-      "All 31 skills validated. Well done — the road is yours.",
+      "All 31 skills validated. Well done. The road is yours.",
     permisEarned_cta: "Share my victory",
   },
   ar: {
@@ -62,14 +62,14 @@ const CS_I18N = {
     firstValidation_cta: "واصل المسار",
     tenComps_title: "ثلث الطريق",
     tenComps_subtitle:
-      "10 مهارات مُصادَق عليها من 31. أنت تتقدّم — حافظ على الوتيرة.",
+      "10 مهارات مُصادَق عليها من 31. أنت تتقدّم. حافظ على الوتيرة.",
     tenComps_cta: "إلى الأمام",
     readyExam_title: "جاهز للامتحان",
     readyExam_subtitle: "28 مهارة مكتملة. يمكنك اجتياز امتحانك متى شئت.",
     readyExam_cta: "اعرض بطاقتي",
     permisEarned_title: "حصلت على الرخصة الافتراضية",
     permisEarned_subtitle:
-      "المهارات الـ31 كلها مُصادَق عليها. أحسنت — الطريق لك.",
+      "المهارات الـ31 كلها مُصادَق عليها. أحسنت. الطريق لك.",
     permisEarned_cta: "شارك انتصاري",
   },
 };
@@ -283,7 +283,7 @@ const CELEBRATE_PRESETS = {
     illustration: "/skins/trophy-permis-virtuel.webp",
     fallbackEmoji: "👑",
     title: "Permis virtuel obtenu",
-    subtitle: "Les 31 compétences validées. Bravo, tu maîtrises la route.",
+    subtitle: "Les 31 compétences validées. Tu maîtrises la route.",
     ctaLabel: "Partager ma victoire",
     trackKey: "celebrate.permis_earned",
   },

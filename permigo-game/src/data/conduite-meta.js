@@ -64,9 +64,9 @@ export const MONDES_CONDUITE = [
   {
     n: 3,
     nom: "Conditions difficiles",
-    sous: "Nuit, météo, partage de la route",
+    sous: "Nuit · météo · partage de la route",
   },
-  { n: 4, nom: "Conduite autonome", sous: "Seul, sûr, économique" },
+  { n: 4, nom: "Conduite autonome", sous: "Seul · sûr · économique" },
 ];
 
 export const FICHE_CODES = FICHE_META.map((fiche) => fiche.code);

@@ -162,12 +162,12 @@ const FICHE_I18N = {
         'Setting the seat too far back to "have room": your left leg is stretched out and no longer presses the clutch all the way down → you stall without understanding why.',
       bva: 'Since there is no clutch, the cue "left leg slightly bent on the clutch" doesn\'t apply. You adjust the distance so your right foot reaches the brake and accelerator without stretching your leg, and you settle your left foot at rest (on the footrest to the left). Height, backrest, steering wheel, mirrors, seatbelt: the same.',
       methode: [
-        'Seat — distance (depth): move the seat forward/back so your left foot can press the clutch all the way down with your leg still slightly bent (never fully straight). Many learners sit too far back "to have room": if you have to stretch your leg, move closer.',
-        "Seat — height: adjust it so you can see the road without craning your neck. A concrete cue from the instructor: lower the sun visor — if you can see the road below it, your eye height is correct; if the sun visor hides the road from you, you're too low.",
-        "Backrest: adjust it in relation to how you hold the steering wheel — when your hands are on the wheel, your arms should stay slightly bent (neither too close nor too far).",
+        'Seat distance (depth): move the seat forward/back so your left foot can press the clutch all the way down with your leg still slightly bent (never fully straight). Many learners sit too far back "to have room": if you have to stretch your leg, move closer.',
+        "Seat height: adjust it so you can see the road without craning your neck. A concrete cue from the instructor: lower the sun visor. If you can see the road below it, your eye height is correct; if the sun visor hides the road from you, you're too low.",
+        "Backrest: adjust it in relation to how you hold the steering wheel. When your hands are on the wheel, your arms should stay slightly bent (neither too close nor too far).",
         "Headrest: the top of the headrest level with the top of your head.",
         "Steering wheel: adjust it if needed (handle under the wheel) so it doesn't bother your knees and you can clearly see the dashboard over the top.",
-        "Mirrors: the interior one first, with your right hand, without lifting your shoulders off the seat — you should see the whole rear window at a single glance, without moving your head. Then the exterior ones: you only glimpse a small edge of your car at the bottom, the rest on the road (aim for about 90% road, your bodywork just serving as a reference).",
+        "Mirrors: the interior one first, with your right hand, without lifting your shoulders off the seat. You should see the whole rear window at a single glance, without moving your head. Then the exterior ones: you only glimpse a small edge of your car at the bottom, the rest on the road (aim for about 90% road, your bodywork just serving as a reference).",
         "Seatbelt: it goes over the shoulder (not the neck) and over the hips (not the belly), lying flat, not twisted.",
       ],
       quiz: [
@@ -222,12 +222,12 @@ const FICHE_I18N = {
         "ضبط المقعد بعيداً جداً إلى الخلف «لتوفير مساحة»: تكون ساقك اليسرى ممدودة ولا تعود تضغط على القابض حتى النهاية ← يتوقّف المحرّك دون أن تفهم السبب.",
       bva: "بما أنه لا يوجد قابض، فإن العلامة «الساق اليسرى مثنية قليلاً على القابض» لا تنطبق. تضبط المسافة بحيث تصل قدمك اليمنى إلى الفرامل ودواسة الوقود دون مدّ الساق، وتضع قدمك اليسرى في وضع الراحة (على مسند القدم إلى اليسار). الارتفاع والمسند والمقود والمرايا وحزام الأمان: كما هي.",
       methode: [
-        "المقعد — المسافة (العمق): حرّك المقعد إلى الأمام/الخلف بحيث تستطيع قدمك اليسرى الضغط على القابض حتى النهاية والساق لا تزال مثنية قليلاً (لا تكن مستقيمة تماماً أبداً). كثير من المتعلّمين يجلسون بعيداً جداً «لتوفير مساحة»: إذا اضطررت إلى مدّ ساقك، فاقترب أكثر.",
-        "المقعد — الارتفاع: اضبطه بحيث ترى الطريق دون أن تُجهد رقبتك. علامة عملية من المدرّب: أنزِل واقية الشمس — إذا رأيت الطريق من تحتها فإن ارتفاع نظرك سليم؛ وإذا حجبت عنك واقية الشمس الطريق فأنت منخفض جداً.",
-        "المسند (ظهر المقعد): يُضبط بالنسبة إلى مسك المقود — عندما تكون يداك على المقود يجب أن يبقى ذراعاك مثنيين قليلاً (لا قريبين جداً ولا بعيدين جداً).",
+        "مسافة المقعد (العمق): حرّك المقعد إلى الأمام/الخلف بحيث تستطيع قدمك اليسرى الضغط على القابض حتى النهاية والساق لا تزال مثنية قليلاً (لا تكن مستقيمة تماماً أبداً). كثير من المتعلّمين يجلسون بعيداً جداً «لتوفير مساحة»: إذا اضطررت إلى مدّ ساقك، فاقترب أكثر.",
+        "ارتفاع المقعد: اضبطه بحيث ترى الطريق دون أن تُجهد رقبتك. علامة عملية من المدرّب: أنزِل واقية الشمس. إذا رأيت الطريق من تحتها فإن ارتفاع نظرك سليم؛ وإذا حجبت عنك واقية الشمس الطريق فأنت منخفض جداً.",
+        "المسند (ظهر المقعد): يُضبط بالنسبة إلى مسك المقود. عندما تكون يداك على المقود يجب أن يبقى ذراعاك مثنيين قليلاً (لا قريبين جداً ولا بعيدين جداً).",
         "مسند الرأس: يكون أعلى مسند الرأس بمستوى أعلى الرأس.",
         "المقود: اضبطه إذا لزم الأمر (المقبض أسفل المقود) بحيث لا يزعج ركبتيك وترى لوحة العدادات جيداً من فوقه.",
-        "المرايا: الداخلية أولاً، باليد اليمنى، دون رفع كتفيك عن المقعد — يجب أن ترى الزجاج الخلفي كاملاً بنظرة واحدة، دون تحريك رأسك. ثم الجانبيتان: لا ترى سوى جزء صغير من سيارتك في الأسفل، والباقي على الطريق (الهدف حوالي 90% من الطريق، وهيكل سيارتك مجرّد علامة مرجعية).",
+        "المرايا: الداخلية أولاً، باليد اليمنى، دون رفع كتفيك عن المقعد. يجب أن ترى الزجاج الخلفي كاملاً بنظرة واحدة، دون تحريك رأسك. ثم الجانبيتان: لا ترى سوى جزء صغير من سيارتك في الأسفل، والباقي على الطريق (الهدف حوالي 90% من الطريق، وهيكل سيارتك مجرّد علامة مرجعية).",
         "حزام الأمان: يمرّ على الكتف (لا على الرقبة) وعلى الحوض (لا على البطن)، مستوياً وغير ملتوٍ.",
       ],
       quiz: [
@@ -281,14 +281,14 @@ const FICHE_I18N = {
       pourquoi:
         "Your eyes guide your hands. If you stare at the hood or an obstacle, you drive straight into it. If you look far ahead to where you want to go, your line naturally becomes straight.",
       erreur:
-        'Driving with your arms constantly crossed, or holding the wheel with a single hand resting at the top: you lose precision and strength to react quickly. Another common trap during maneuvers: the moment the car drifts a little off line, jerking the wheel in every direction to "catch" it — you get completely lost. The right reflex: move slowly, watch where the car is going, then correct gently.',
+        'Driving with your arms constantly crossed, or holding the wheel with a single hand resting at the top: you lose precision and strength to react quickly. Another common trap during maneuvers: the moment the car drifts a little off line, jerking the wheel in every direction to "catch" it. You get completely lost. The right reflex: move slowly, watch where the car is going, then correct gently.',
       bva: "",
       methode: [
         "Place your hands like on a clock: quarter to three (9 and 3), thumbs resting on the rim, not wrapped underneath.",
         'Look far ahead, not at the hood: your gaze "pulls" the car toward where you want to go.',
         "Turn by pull-pushing the wheel without crossing your hands: one hand pulls, the other pushes/guides.",
         "Only cross your hands for slow maneuvers (parallel parking, U-turn), never at normal speed.",
-        "Let the wheel come back while holding it after a turn — don't let go and let it spin on its own.",
+        "Let the wheel come back while holding it after a turn. Don't let go and let it spin on its own.",
         'Learn "how many turns does the wheel make?": a wheel turns about one and a half turns each way (one full turn plus a half turn to reach full lock). To know whether your wheels are straight after full lock, do exactly the reverse.',
         'Learn "turn the wheel toward the side you want to go": rather than getting confused between right and left (especially in reverse), turn the wheel toward the side you want the car to move closer to, both going forward and in reverse.',
       ],
@@ -348,7 +348,7 @@ const FICHE_I18N = {
         'انظر بعيداً إلى الأمام، لا إلى غطاء المحرّك: نظرك "يسحب" السيارة نحو حيث تريد الذهاب.',
         "أدِر المقود بالسحب والدفع دون تقاطع اليدين: يد تسحب والأخرى تدفع/تُرافق.",
         "لا تقاطع يديك إلّا في المناورات البطيئة (الركن الجانبي، الدوران الكامل)، ولا تفعل ذلك أبداً بالسرعة العادية.",
-        "دَع المقود يعود ممسكاً به بعد المنعطف — لا تتركه ليدور من تلقاء نفسه.",
+        "دَع المقود يعود ممسكاً به بعد المنعطف. لا تتركه ليدور من تلقاء نفسه.",
         'تعرّف على "كم دورة يدور المقود؟": يدور المقود نحو دورة ونصف في كل اتجاه (دورة كاملة زائد نصف دورة للوصول إلى أقصى انعطاف). ولمعرفة ما إذا كانت عجلاتك مستقيمة بعد انعطاف كامل، أعِد العكس تماماً.',
         'تعرّف على "أدِر مقودك نحو الجهة التي تريد الذهاب إليها": بدلاً من أن تختلط عليك اليمين واليسار (خاصّة عند الرجوع للخلف)، أدِر المقود نحو الجهة التي تريد أن تقترب السيارة منها، سواء في السير للأمام أو للخلف.',
       ],
@@ -403,16 +403,16 @@ const FICHE_I18N = {
         "The biting point (or rather the biting zone) is the moment when the clutch starts to transfer the engine's power to the wheels. Releasing it too fast at that moment = the car jolts or stalls. Releasing it smoothly = a clean start.",
       erreur:
         "Releasing the clutch all at once at the biting point → it stalls or lurches. And declutching too late when braking → it stalls just before you stop.",
-      bva: "No biting point, no clutch, no 1st gear to engage. To start: foot on the brake, selector on D, release the brake and the car moves on its own (at idle), then accelerate gently. To stop: brake gradually with your right foot until you stop — no risk of stalling. For a long stop, shift to P and set the handbrake.",
+      bva: "No biting point, no clutch, no 1st gear to engage. To start: foot on the brake, selector on D, release the brake and the car moves on its own (at idle), then accelerate gently. To stop: brake gradually with your right foot until you stop. No risk of stalling. For a long stop, shift to P and set the handbrake.",
       methode: [
-        "Before you drive — Before starting: handbrake on, gear lever in neutral, clutch pressed all the way down, ignition on.",
-        "Before you drive — Engage 1st gear.",
-        'The biting point — Find the biting zone: let the clutch up and move quickly through the "dead zone" (between the pedal fully pressed and the start of the biting point), then slow the movement as soon as the engine responds.',
-        'The biting point — At the biting point, give a touch of accelerator and let your left foot slide up gradually (the car "wants" to move, the engine sound changes a little).',
-        "The biting point — Release the handbrake, the car moves forward.",
-        "Stopping and foot position — To stop: ease off the accelerator early, brake gradually, and press the clutch just before coming to a full stop so you don't stall.",
-        "Stopping and foot position — At a stop: keep the brake held, then neutral + handbrake if you stay stationary.",
-        "Stopping and foot position — Foot position: press with the ball of your foot, heel anchored on the floor, and slide your heel along the floor to let the clutch up. If you lift your heel or your sole slips, you lose precision and can no longer find the biting point in the same spot.",
+        "Before you drive. Before starting: handbrake on, gear lever in neutral, clutch pressed all the way down, ignition on.",
+        "Before you drive. Engage 1st gear.",
+        'The biting point. Find the biting zone: let the clutch up and move quickly through the "dead zone" (between the pedal fully pressed and the start of the biting point), then slow the movement as soon as the engine responds.',
+        'The biting point. At the biting point, give a touch of accelerator and let your left foot slide up gradually (the car "wants" to move, the engine sound changes a little).',
+        "The biting point. Release the handbrake, the car moves forward.",
+        "Stopping and foot position. To stop: ease off the accelerator early, brake gradually, and press the clutch just before coming to a full stop so you don't stall.",
+        "Stopping and foot position. At a stop: keep the brake held, then neutral + handbrake if you stay stationary.",
+        "Stopping and foot position. Foot position: press with the ball of your foot, heel anchored on the floor, and slide your heel along the floor to let the clutch up. If you lift your heel or your sole slips, you lose precision and can no longer find the biting point in the same spot.",
       ],
       quiz: [
         {
@@ -460,16 +460,16 @@ const FICHE_I18N = {
         "نقطة التلامس (أو بالأحرى منطقة التلامس) هي اللحظة التي يبدأ فيها القابض (الدبرياج) بنقل قوة المحرّك إلى العجلات. إطلاقه بسرعة كبيرة في تلك اللحظة = تنتفض السيارة أو يتوقّف المحرّك. إطلاقه بسلاسة = انطلاقة نظيفة.",
       erreur:
         "إطلاق القابض دفعة واحدة عند نقطة التلامس ← يتوقّف المحرّك أو تنطلق السيارة بتشنّج. وضغط القابض متأخّرًا أثناء الفرملة ← يتوقّف المحرّك قبيل التوقّف مباشرة.",
-      bva: "لا نقطة تلامس، ولا قابض، ولا سرعة أولى يجب إدخالها. للانطلاق: القدم على الفرامل، الذراع على الوضع D، تُفلت الفرامل فتتحرّك السيارة وحدها (على السرعة الخاملة)، ثم تُسرّع بهدوء. للتوقّف: تفرمل تدريجيًّا بالقدم اليمنى حتى التوقّف — دون أي خطر لتوقّف المحرّك. عند التوقّف الطويل، تنتقل إلى الوضع P وتشدّ فرملة اليد.",
+      bva: "لا نقطة تلامس، ولا قابض، ولا سرعة أولى يجب إدخالها. للانطلاق: القدم على الفرامل، الذراع على الوضع D، تُفلت الفرامل فتتحرّك السيارة وحدها (على السرعة الخاملة)، ثم تُسرّع بهدوء. للتوقّف: تفرمل تدريجيًّا بالقدم اليمنى حتى التوقّف. دون أي خطر لتوقّف المحرّك. عند التوقّف الطويل، تنتقل إلى الوضع P وتشدّ فرملة اليد.",
       methode: [
-        "قبل السير — قبل الانطلاق: فرملة اليد مشدودة، الذراع على الوضع المحايد، القابض مضغوط حتى النهاية، تشغيل الإشعال.",
-        "قبل السير — أدخِل السرعة الأولى.",
-        "نقطة التلامس — جِد منطقة التلامس: أفلِت القابض وتجاوز بسرعة «المنطقة الميتة» (بين ضغط الدواسة كاملًا وبداية التلامس)، ثم أبطئ الحركة فور استجابة المحرّك.",
-        "نقطة التلامس — عند التلامس، امنح لمسة خفيفة من دواسة الوقود ودع قدمك اليسرى تنزلق صعودًا تدريجيًّا (السيارة «تريد» التقدّم، ويتغيّر صوت المحرّك قليلًا).",
-        "نقطة التلامس — أفلِت فرملة اليد فتتقدّم السيارة.",
-        "التوقّف ووضع القدم — للتوقّف: ارفع قدمك عن دواسة الوقود مبكرًا، افرمل تدريجيًّا، واضغط القابض قبيل التوقّف التامّ مباشرة كي لا يتوقّف المحرّك.",
-        "التوقّف ووضع القدم — عند التوقّف: أبقِ الفرامل مضغوطة، ثم الوضع المحايد + فرملة اليد إن بقيت ثابتًا.",
-        "التوقّف ووضع القدم — وضع القدم: اضغط بمقدّمة القدم مع تثبيت الكعب على الأرض، وأنزلق بالكعب على الأرض لرفع القابض. إن رفعت كعبك أو انزلق نعلك، فقدت الدقّة ولم تعد تجد نقطة التلامس في المكان نفسه.",
+        "قبل السير. قبل الانطلاق: فرملة اليد مشدودة، الذراع على الوضع المحايد، القابض مضغوط حتى النهاية، تشغيل الإشعال.",
+        "قبل السير. أدخِل السرعة الأولى.",
+        "نقطة التلامس. جِد منطقة التلامس: أفلِت القابض وتجاوز بسرعة «المنطقة الميتة» (بين ضغط الدواسة كاملًا وبداية التلامس)، ثم أبطئ الحركة فور استجابة المحرّك.",
+        "نقطة التلامس. عند التلامس، امنح لمسة خفيفة من دواسة الوقود ودع قدمك اليسرى تنزلق صعودًا تدريجيًّا (السيارة «تريد» التقدّم، ويتغيّر صوت المحرّك قليلًا).",
+        "نقطة التلامس. أفلِت فرملة اليد فتتقدّم السيارة.",
+        "التوقّف ووضع القدم. للتوقّف: ارفع قدمك عن دواسة الوقود مبكرًا، افرمل تدريجيًّا، واضغط القابض قبيل التوقّف التامّ مباشرة كي لا يتوقّف المحرّك.",
+        "التوقّف ووضع القدم. عند التوقّف: أبقِ الفرامل مضغوطة، ثم الوضع المحايد + فرملة اليد إن بقيت ثابتًا.",
+        "التوقّف ووضع القدم. وضع القدم: اضغط بمقدّمة القدم مع تثبيت الكعب على الأرض، وأنزلق بالكعب على الأرض لرفع القابض. إن رفعت كعبك أو انزلق نعلك، فقدت الدقّة ولم تعد تجد نقطة التلامس في المكان نفسه.",
       ],
       quiz: [
         {
@@ -515,7 +515,7 @@ const FICHE_I18N = {
         "Smooth driving is all about anticipation: if you look far ahead, you never have to brake hard. Bonus: comfortable passengers, less fuel used, and a better mark at the test.",
       erreur:
         "Driving like an accordion: accelerating hard then braking hard, over and over, because you look too close in front of you. You wear everyone out and you wear out the car.",
-      bva: "Because the same right foot works both the brake and the accelerator, the dosing happens with a single foot: you lift off the gas and press the brake, never using both at the same time. In D, the car keeps creeping forward on its own at idle as soon as you release the brake — remember to hold the brake to stay still on a slope.",
+      bva: "Because the same right foot works both the brake and the accelerator, the dosing happens with a single foot: you lift off the gas and press the brake, never using both at the same time. In D, the car keeps creeping forward on its own at idle as soon as you release the brake. Remember to hold the brake to stay still on a slope.",
       methode: [
         "Accelerate gradually, with the ball of your foot: your right foot pushes down gently, never in a jerk.",
         "Practise holding the engine at different speeds (e.g. ~1000, ~1500, ~2500 rpm): the more you press, the higher the engine revs; if you go past the target rpm, ease off a little without letting go completely, then re-adjust. This step-by-step dosing can even be practised while stopped.",
@@ -546,7 +546,7 @@ const FICHE_I18N = {
             "You release just before stopping: no jerk, passengers not shaken.",
         },
         {
-          q: "Driving like an accordion (accelerate hard, brake hard, over and over) — why is it bad?",
+          q: "Driving like an accordion (accelerate hard, brake hard, over and over). Why is it bad?",
           options: [
             "It's faster",
             "You look too close and wear everyone out",
@@ -574,7 +574,7 @@ const FICHE_I18N = {
         "القيادة السلسة أساسها الاستباق: إذا نظرت بعيداً إلى الأمام، فلن تضطر أبداً إلى الفرملة بعنف. وميزة إضافية: راحة الركاب، واستهلاك أقل للوقود، ونتيجة أفضل في الامتحان.",
       erreur:
         "القيادة على شكل «أكورديون»: التسارع بقوة ثم الفرملة بقوة، بشكل متكرر، لأنك تنظر قريباً جداً أمامك. فتُتعب الجميع وتُتلف السيارة.",
-      bva: "بما أن القدم اليمنى نفسها تستخدم للفرامل ودواسة السرعة، فإن التحكم يتم بقدم واحدة: ترفع قدمك عن دواسة السرعة وتضعها على الفرامل، دون استخدام الاثنتين في الوقت نفسه أبداً. في وضع D، تواصل السيارة التقدم من تلقاء نفسها عند السرعة البطيئة بمجرد أن ترفع قدمك عن الفرامل — تذكّر أن تبقي قدمك على الفرامل لتظل ثابتاً في المنحدر.",
+      bva: "بما أن القدم اليمنى نفسها تستخدم للفرامل ودواسة السرعة، فإن التحكم يتم بقدم واحدة: ترفع قدمك عن دواسة السرعة وتضعها على الفرامل، دون استخدام الاثنتين في الوقت نفسه أبداً. في وضع D، تواصل السيارة التقدم من تلقاء نفسها عند السرعة البطيئة بمجرد أن ترفع قدمك عن الفرامل. تذكّر أن تبقي قدمك على الفرامل لتظل ثابتاً في المنحدر.",
       methode: [
         "سارِع تدريجياً بمقدمة القدم: تدفع القدم اليمنى برفق، دون أي حركة مفاجئة أبداً.",
         "تدرّب على تثبيت المحرك على سرعات دوران مختلفة (مثلاً ~1000 و~1500 و~2500 دورة في الدقيقة): كلما ضغطت أكثر، ارتفعت دورات المحرك؛ وإذا تجاوزت السرعة المستهدفة، خفّف الضغط قليلاً دون أن ترفع قدمك تماماً، ثم أعد الضبط. هذا التحكم «بالمراحل» يمكن التدرب عليه حتى والسيارة متوقفة.",
@@ -605,7 +605,7 @@ const FICHE_I18N = {
             "تُخفّف الضغط قبل التوقف مباشرة: دون حركة مفاجئة، ودون اهتزاز الركاب.",
         },
         {
-          q: "القيادة على شكل أكورديون (تسارع بقوة، فرملة بقوة، بشكل متكرر) — لماذا هي سيئة؟",
+          q: "القيادة على شكل أكورديون (تسارع بقوة، فرملة بقوة، بشكل متكرر). لماذا هي سيئة؟",
           options: [
             "إنها أسرع",
             "تنظر قريباً جداً وتُتعب الجميع",
@@ -634,14 +634,14 @@ const FICHE_I18N = {
         "The right gear is the one that keeps the engine comfortable: neither straining nor over-revving. Downshifting before the bend leaves you power to accelerate cleanly on the way out.",
       erreur:
         "Looking at the gear lever while changing gear (you're no longer watching the road) and stalling on a downshift because you release the clutch too fast at low revs. Also picking the wrong gear from a poor grip on the lever (aiming for 4th, engaging 2nd): a gearbox mistake is often an automatic fail on the test.",
-      bva: "There is no gear change to make: the gearbox does it for you. No clutch, no gear lever: you stay in D and manage everything with the accelerator. This card (manual upshifting/downshifting) does not concern a learner in an automatic — and the risk of a fail-worthy gearbox error does not exist. Good to know: some automatics offer a manual mode (+/-), but it isn't required at the start of learning.",
+      bva: "There is no gear change to make: the gearbox does it for you. No clutch, no gear lever: you stay in D and manage everything with the accelerator. This card (manual upshifting/downshifting) does not concern a learner in an automatic. And the risk of a fail-worthy gearbox error does not exist. Good to know: some automatics offer a manual mode (+/-), but it isn't required at the start of learning.",
       methode: [
         'Listen to / watch the engine revs. The sound cue first ("the engine is climbing"); rough figures: ~2000 rpm on a diesel, ~2500 on a petrol.',
         "To change up a gear: lift off the accelerator, press the clutch fully, move the lever, release the clutch gently (in two stages), get back on the accelerator.",
         "Hold the lever properly: with the palm of your hand resting around the knob, never with your fingertips or gripping hard. No force needed: it's the position of your hand that matters.",
         "Use the return spring: the lever always comes back to neutral (between 3rd and 4th) on its own. Place your hand on the right-hand side of neutral for the right-hand gears (5/6 + reverse depending on the model) and in front of/behind for 1/2/3/4 to counter this spring.",
         "Keep your eyes on the road, not on the lever: you feel the gears by hand.",
-        "Downshift BEFORE a bend or braking, never during — and you downshift because you have already slowed down, not to slow down. You pick the right gear so you have pulling power on the way out.",
+        "Downshift BEFORE a bend or braking, never during. And you downshift because you have already slowed down, not to slow down. You pick the right gear so you have pulling power on the way out.",
         'Match the gear to your speed: too high at low speed = the engine "splutters"; too low at high speed = the engine "screams". You stop in 2nd, not in 1st (then you go back to 1st to set off again).',
       ],
       quiz: [
@@ -690,14 +690,14 @@ const FICHE_I18N = {
         "السرعة المناسبة هي التي تُبقي المحرك مرتاحاً: لا يجهد ولا يرتفع دورانه أكثر من اللازم. خفض السرعة قبل المنعطف يترك لك قوة كافية للتسارع بسلاسة عند الخروج منه.",
       erreur:
         "النظر إلى عصا ناقل الحركة أثناء تغيير السرعة (فلا تعود تنظر إلى الطريق)، وإطفاء المحرك عند خفض السرعة لأنك ترفع قدمك عن دواسة القابض بسرعة كبيرة مع انخفاض دوران المحرك. وكذلك اختيار السرعة الخاطئة بسبب مسك سيّئ للعصا (تقصد الرابعة فتُدخل الثانية): الخطأ في ناقل الحركة كثيراً ما يكون سبباً للرسوب المباشر في الاختبار.",
-      bva: "لا يوجد أي تغيير للسرعة تقوم به: ناقل الحركة يفعل ذلك عنك. لا قابض ولا عصا سرعات: تبقى على وضع D وتدير كل شيء بدواسة التسارع. هذه البطاقة (رفع وخفض السرعة يدوياً) لا تخص المتعلّم على ناقل حركة أوتوماتيكي — وخطر الرسوب المباشر بسبب خطأ في ناقل الحركة غير موجود. من المفيد أن تعرف: بعض النواقل الأوتوماتيكية توفّر وضعاً يدوياً (+/-)، لكن ذلك غير مطلوب في بداية التعلّم.",
+      bva: "لا يوجد أي تغيير للسرعة تقوم به: ناقل الحركة يفعل ذلك عنك. لا قابض ولا عصا سرعات: تبقى على وضع D وتدير كل شيء بدواسة التسارع. هذه البطاقة (رفع وخفض السرعة يدوياً) لا تخص المتعلّم على ناقل حركة أوتوماتيكي. وخطر الرسوب المباشر بسبب خطأ في ناقل الحركة غير موجود. من المفيد أن تعرف: بعض النواقل الأوتوماتيكية توفّر وضعاً يدوياً (+/-)، لكن ذلك غير مطلوب في بداية التعلّم.",
       methode: [
         "استمع إلى دوران المحرك وراقبه. الإشارة الصوتية أولاً (« المحرك يرتفع صوته ») ؛ أرقام تقريبية: نحو 2000 دورة/دقيقة في الديزل، ونحو 2500 في البنزين.",
         "لرفع سرعة أعلى: ارفع قدمك عن دواسة التسارع، اضغط القابض حتى النهاية، حرّك العصا، ثم اترك القابض بلطف (على مرحلتين)، وعُد إلى دواسة التسارع.",
         "امسك العصا جيداً: براحة يدك موضوعة حول المقبض، لا بأطراف الأصابع ولا بضغط قوي. لا حاجة إلى القوة: المهم هو وضعية اليد.",
         "استعن بزنبرك الإرجاع: العصا تعود دائماً إلى الوضع المحايد (بين الثالثة والرابعة) من تلقاء نفسها. ضع يدك على الجانب الأيمن من الوضع المحايد لسرعات اليمين (5/6 + الرجوع للخلف حسب الطُرز) وأمام/خلف لسرعات 1/2/3/4 لمقاومة هذا الزنبرك.",
         "أبقِ عينيك على الطريق، لا على العصا: أنت تشعر بالسرعات بيدك.",
-        "اخفض السرعة قبل المنعطف أو قبل الفرملة، لا أثناءهما — وتخفض السرعة لأنك قد أبطأت فعلاً، لا لكي تبطئ. تختار السرعة المناسبة لتحصل على قوة سحب عند الخروج.",
+        "اخفض السرعة قبل المنعطف أو قبل الفرملة، لا أثناءهما. وتخفض السرعة لأنك قد أبطأت فعلاً، لا لكي تبطئ. تختار السرعة المناسبة لتحصل على قوة سحب عند الخروج.",
         "لائم السرعة مع السير: سرعة عالية جداً مع بطء = المحرك « يتلعثم » ؛ سرعة منخفضة جداً مع سير سريع = المحرك « يصرخ ». تتوقّف على الثانية، لا على الأولى (ثم تعود إلى الأولى للانطلاق من جديد).",
       ],
       quiz: [
@@ -746,11 +746,11 @@ const FICHE_I18N = {
         'Reciting a list by heart without showing anything. On the test and in real life, you are expected to point to the item ("the oil cap is here") and make the gesture.',
       bva: "",
       methode: [
-        "Tyres — not visibly flat, no cuts, tread not too worn (wear indicator).",
-        "Lights — switch them on and have someone check headlights (dipped/main beam), indicators, brake lights, reversing lights.",
-        "Windows, mirrors, plates, lenses — clean, nothing broken, good visibility.",
-        "Fluid levels (if asked) — you can show where the engine oil, windscreen washer and coolant are.",
-        "On the test — the examiner asks you for a check (inside or outside) plus a road-safety question plus a first-aid point. You show and explain calmly.",
+        "Tyres. Not visibly flat, no cuts, tread not too worn (wear indicator).",
+        "Lights. Switch them on and have someone check headlights (dipped/main beam), indicators, brake lights, reversing lights.",
+        "Windows, mirrors, plates, lenses. Clean, nothing broken, good visibility.",
+        "Fluid levels (if asked). You can show where the engine oil, windscreen washer and coolant are.",
+        "On the test. The examiner asks you for a check (inside or outside) plus a road-safety question plus a first-aid point. You show and explain calmly.",
       ],
       quiz: [
         {
@@ -804,11 +804,11 @@ const FICHE_I18N = {
         'سرد قائمة عن ظهر قلب دون إظهار أي شيء. في الامتحان وفي الواقع، يُنتظر منك أن تشير إلى العنصر ("سدادة الزيت هنا") وأن تؤدّي الحركة.',
       bva: "",
       methode: [
-        "الإطارات — غير مُفرَّغة الهواء بالنظر، دون شقوق، والمطاط ليس مهترئًا كثيرًا (مؤشّر التآكل).",
-        "الأضواء — أشعلها واطلب من أحدهم فحص المصابيح (الضوء المنخفض/العالي)، الغمّازات، أضواء الفرملة، أضواء الرجوع للخلف.",
-        "الزجاج والمرايا واللوحات والعواكس — نظيفة، لا شيء مكسور، رؤية جيدة.",
-        "المستويات (إن طُلب) — تعرف أن تُظهر مكان زيت المحرك وسائل غسل الزجاج وسائل التبريد.",
-        "في الامتحان — يطلب منك المفتّش فحصًا (داخليًا أو خارجيًا) + سؤالًا عن السلامة المرورية + مسألة إسعافات أولية. تُظهر وتشرح بهدوء.",
+        "الإطارات. غير مُفرَّغة الهواء بالنظر، دون شقوق، والمطاط ليس مهترئًا كثيرًا (مؤشّر التآكل).",
+        "الأضواء. أشعلها واطلب من أحدهم فحص المصابيح (الضوء المنخفض/العالي)، الغمّازات، أضواء الفرملة، أضواء الرجوع للخلف.",
+        "الزجاج والمرايا واللوحات والعواكس. نظيفة، لا شيء مكسور، رؤية جيدة.",
+        "المستويات (إن طُلب). تعرف أن تُظهر مكان زيت المحرك وسائل غسل الزجاج وسائل التبريد.",
+        "في الامتحان. يطلب منك المفتّش فحصًا (داخليًا أو خارجيًا) + سؤالًا عن السلامة المرورية + مسألة إسعافات أولية. تُظهر وتشرح بهدوء.",
       ],
       quiz: [
         {
@@ -866,22 +866,22 @@ const FICHE_I18N = {
       methode: [
         "The 6 families (the examiner sets ONE): reversing in a straight line, reversing on a curve, angle (echelon) parking, U-turn (in 3, 5 or 7 moves), reverse bay parking, parallel parking.",
         "The real key to ALL manoeuvres: knowing how to move your car in reverse (to the right, to the left). And you never have priority during a manoeuvre: you make it safe first and let every road user who comes along pass.",
-        "Common rules — Make it safe: indicator before you stop, 360° checks (mirrors + looking directly), you let others pass.",
-        "Common rules — The slowest pace possible: you are not being timed.",
-        "Common rules — Manage your spacing: don't brush against the cars beside you.",
-        "Common rules — You may LEAN against the kerb, never MOUNT it (hitting/mounting the kerb = fail).",
-        "Common rules — 360° checks during the manoeuvre, regularly.",
-        "Common rules — At the end: neutral + handbrake, car properly stopped.",
-        "Parallel parking — Pull up level with the car in front of the space (mirror to mirror), right indicator, at a good sideways distance.",
-        "Parallel parking — Engage reverse, check, let others pass if needed.",
-        'Parallel parking — Give a small quarter-turn of the wheel to the right and go and "find" the space by reversing very slowly (if there are 2-3 free spaces behind, use the whole space).',
-        "Parallel parking — Reverse while easing gently towards the kerb, without hitting it. Tip: you can fold in the right-hand mirror to see the kerb better — remember to put it back before setting off.",
-        "Parallel parking — Engage 1st gear, turn the wheel right and move forward gently to line up parallel, then straighten the wheels quickly as soon as you're straight.",
-        'Reverse bay / angle parking — Count the spaces from your target ("count 3-4 bays") and stop level with it, also looking ahead of you between each bay.',
-        "Reverse bay / angle parking — Reverse, turn the wheel fully towards the space, check 360°.",
-        "Reverse bay / angle parking — General reference point: when you turn around, it's the FIRST light / the first edge of the neighbouring car that should appear (near the start, at the latest the middle of your rear window). If you aim for the 2nd light, you're moving too far out.",
-        "Reverse bay / angle parking — Reverse slowly, wait until you're straight BEFORE straightening the wheels (a half-turn plus one full turn).",
-        "Reverse bay / angle parking — Don't rely on the neighbouring spaces to line up: imagine your bay's line extending outwards and follow along it.",
+        "Common rules. Make it safe: indicator before you stop, 360° checks (mirrors + looking directly), you let others pass.",
+        "Common rules. The slowest pace possible: you are not being timed.",
+        "Common rules. Manage your spacing: don't brush against the cars beside you.",
+        "Common rules. You may LEAN against the kerb, never MOUNT it (hitting/mounting the kerb = fail).",
+        "Common rules. 360° checks during the manoeuvre, regularly.",
+        "Common rules. At the end: neutral + handbrake, car properly stopped.",
+        "Parallel parking. Pull up level with the car in front of the space (mirror to mirror), right indicator, at a good sideways distance.",
+        "Parallel parking. Engage reverse, check, let others pass if needed.",
+        'Parallel parking. Give a small quarter-turn of the wheel to the right and go and "find" the space by reversing very slowly (if there are 2-3 free spaces behind, use the whole space).',
+        "Parallel parking. Reverse while easing gently towards the kerb, without hitting it. Tip: you can fold in the right-hand mirror to see the kerb better. Remember to put it back before setting off.",
+        "Parallel parking. Engage 1st gear, turn the wheel right and move forward gently to line up parallel, then straighten the wheels quickly as soon as you're straight.",
+        'Reverse bay / angle parking. Count the spaces from your target ("count 3-4 bays") and stop level with it, also looking ahead of you between each bay.',
+        "Reverse bay / angle parking. Reverse, turn the wheel fully towards the space, check 360°.",
+        "Reverse bay / angle parking. General reference point: when you turn around, it's the FIRST light / the first edge of the neighbouring car that should appear (near the start, at the latest the middle of your rear window). If you aim for the 2nd light, you're moving too far out.",
+        "Reverse bay / angle parking. Reverse slowly, wait until you're straight BEFORE straightening the wheels (a half-turn plus one full turn).",
+        "Reverse bay / angle parking. Don't rely on the neighbouring spaces to line up: imagine your bay's line extending outwards and follow along it.",
       ],
       quiz: [
         {
@@ -938,22 +938,22 @@ const FICHE_I18N = {
       methode: [
         "العائلات الست (يفرض عليك الممتحن واحدة منها): الرجوع للخلف في خط مستقيم، الرجوع للخلف في منحنى، الركن المائل (بزاوية)، الدوران بزاوية 180 درجة (في 3 أو 5 أو 7 حركات)، الركن للخلف في الخانة، الركن الموازي.",
         "المفتاح الحقيقي لكل المناورات: أن تعرف كيف تحرّك سيارتك للخلف (إلى اليمين، إلى اليسار). ولست أبدًا صاحب الأولوية أثناء المناورة: تؤمّن أولًا وتترك كل مستخدم للطريق يقترب يمرّ.",
-        "قواعد مشتركة — أمّن: إشارة الانعطاف قبل أن تتوقف، مراقبة بزاوية 360 درجة (المرايا + النظر المباشر)، وتترك الآخرين يمرّون.",
-        "قواعد مشتركة — أبطأ وتيرة ممكنة: لست مؤقّتًا بزمن.",
-        "قواعد مشتركة — تحكّم في المسافات: لا تلامس السيارات المجاورة.",
-        "قواعد مشتركة — يمكنك أن تستند على الرصيف، لكن لا تصعد عليه أبدًا (لمس الرصيف أو الصعود عليه = رسوب).",
-        "قواعد مشتركة — مراقبة بزاوية 360 درجة أثناء المناورة، بانتظام.",
-        "قواعد مشتركة — في النهاية: الوضع المحايد + فرامل اليد، والسيارة متوقفة تمامًا.",
-        "الركن الموازي — قف بمحاذاة السيارة التي أمام المكان (مرآة أمام مرآة)، إشارة انعطاف إلى اليمين، على مسافة جانبية مناسبة.",
-        "الركن الموازي — أدخِل غيار الرجوع للخلف، راقب، واترك الآخرين يمرّون إذا لزم الأمر.",
-        "الركن الموازي — أدِر المقود ربع دورة صغيرة إلى اليمين واذهب لـ«البحث» عن المكان بالرجوع ببطء شديد (إذا كان هناك مكانان أو ثلاثة أماكن فارغة خلفك، استفد من كامل المساحة).",
-        "الركن الموازي — ارجع للخلف مستندًا برفق نحو الرصيف، دون أن تلمسه. نصيحة: يمكنك طيّ المرآة اليمنى لترى الرصيف بشكل أفضل — تذكّر أن تعيدها قبل أن تنطلق.",
-        "الركن الموازي — أدخِل الغيار الأول، أدِر المقود إلى اليمين وتقدّم برفق لتصطفّ موازيًا، ثم قوّم العجلات بسرعة بمجرد أن تصبح مستقيمًا.",
-        "الركن للخلف في الخانة / بزاوية — عُدّ الأماكن ابتداءً من هدفك («عُدّ 3-4 خانات») وتوقّف بمحاذاته، مع النظر أيضًا أمامك بين كل خانة وأخرى.",
-        "الركن للخلف في الخانة / بزاوية — ارجع للخلف، أدِر المقود بالكامل نحو جهة المكان، وراقب بزاوية 360 درجة.",
-        "الركن للخلف في الخانة / بزاوية — علامة مرجعية عامة: عندما تلتفت للخلف، فإن أول ضوء / أول حافة للسيارة المجاورة هي التي يجب أن تظهر (قرب البداية، وفي أقصى الحالات منتصف الزجاج الخلفي). إذا استهدفت الضوء الثاني، فأنت تبتعد كثيرًا.",
-        "الركن للخلف في الخانة / بزاوية — ارجع للخلف ببطء، وانتظر حتى تصبح مستقيمًا قبل أن تقوّم العجلات (نصف دورة + دورة كاملة).",
-        "الركن للخلف في الخانة / بزاوية — لا تعتمد على الأماكن المجاورة لتصطفّ: تخيّل أن خط خانتك يمتد نحو الخارج وسِر بمحاذاته.",
+        "قواعد مشتركة. أمّن: إشارة الانعطاف قبل أن تتوقف، مراقبة بزاوية 360 درجة (المرايا + النظر المباشر)، وتترك الآخرين يمرّون.",
+        "قواعد مشتركة. أبطأ وتيرة ممكنة: لست مؤقّتًا بزمن.",
+        "قواعد مشتركة. تحكّم في المسافات: لا تلامس السيارات المجاورة.",
+        "قواعد مشتركة. يمكنك أن تستند على الرصيف، لكن لا تصعد عليه أبدًا (لمس الرصيف أو الصعود عليه = رسوب).",
+        "قواعد مشتركة. مراقبة بزاوية 360 درجة أثناء المناورة، بانتظام.",
+        "قواعد مشتركة. في النهاية: الوضع المحايد + فرامل اليد، والسيارة متوقفة تمامًا.",
+        "الركن الموازي. قف بمحاذاة السيارة التي أمام المكان (مرآة أمام مرآة)، إشارة انعطاف إلى اليمين، على مسافة جانبية مناسبة.",
+        "الركن الموازي. أدخِل غيار الرجوع للخلف، راقب، واترك الآخرين يمرّون إذا لزم الأمر.",
+        "الركن الموازي. أدِر المقود ربع دورة صغيرة إلى اليمين واذهب لـ«البحث» عن المكان بالرجوع ببطء شديد (إذا كان هناك مكانان أو ثلاثة أماكن فارغة خلفك، استفد من كامل المساحة).",
+        "الركن الموازي. ارجع للخلف مستندًا برفق نحو الرصيف، دون أن تلمسه. نصيحة: يمكنك طيّ المرآة اليمنى لترى الرصيف بشكل أفضل. تذكّر أن تعيدها قبل أن تنطلق.",
+        "الركن الموازي. أدخِل الغيار الأول، أدِر المقود إلى اليمين وتقدّم برفق لتصطفّ موازيًا، ثم قوّم العجلات بسرعة بمجرد أن تصبح مستقيمًا.",
+        "الركن للخلف في الخانة / بزاوية. عُدّ الأماكن ابتداءً من هدفك («عُدّ 3-4 خانات») وتوقّف بمحاذاته، مع النظر أيضًا أمامك بين كل خانة وأخرى.",
+        "الركن للخلف في الخانة / بزاوية. ارجع للخلف، أدِر المقود بالكامل نحو جهة المكان، وراقب بزاوية 360 درجة.",
+        "الركن للخلف في الخانة / بزاوية. علامة مرجعية عامة: عندما تلتفت للخلف، فإن أول ضوء / أول حافة للسيارة المجاورة هي التي يجب أن تظهر (قرب البداية، وفي أقصى الحالات منتصف الزجاج الخلفي). إذا استهدفت الضوء الثاني، فأنت تبتعد كثيرًا.",
+        "الركن للخلف في الخانة / بزاوية. ارجع للخلف ببطء، وانتظر حتى تصبح مستقيمًا قبل أن تقوّم العجلات (نصف دورة + دورة كاملة).",
+        "الركن للخلف في الخانة / بزاوية. لا تعتمد على الأماكن المجاورة لتصطفّ: تخيّل أن خط خانتك يمتد نحو الخارج وسِر بمحاذاته.",
       ],
       quiz: [
         {
@@ -1004,7 +1004,7 @@ const FICHE_I18N = {
       titre: "String together maneuvers on your own",
       competence: "Vehicle handling",
       pourquoi:
-        "On the test, the examiner won't guide you. This skill proves that you decide and correct yourself on your own — that's what being ready for World 2 means.",
+        "On the test, the examiner won't guide you. This skill proves that you decide and correct yourself on your own. That's what being ready for World 2 means.",
       erreur:
         "Waiting for the instructor's \"go\" for every move. As long as you depend on guidance, the maneuver isn't mastered. The other trap: panicking as soon as the maneuver isn't perfect on the first try instead of calmly repositioning.",
       bva: "Same maneuvers, same expected autonomy. You handle direction with the selector (D to go forward, R to reverse) and control your slowness with the brake rather than the clutch. Not being able to stall helps you stay calm when you correct yourself.",
@@ -1012,7 +1012,7 @@ const FICHE_I18N = {
         "Analyze the situation: which maneuver does the spot call for (parallel parking, bay parking, angle parking, U-turn)?",
         "Choose the right maneuver and the right side yourself (reminder: parallel/bay parking on the left only on a one-way street, otherwise you end up facing oncoming traffic).",
         "Signal and make it safe: turn signal before stopping, mirror checks + blind spot + direct vision; you don't have priority, you let others pass.",
-        "Do it slowly, managing YOUR reference points (the ones your instructor taught you) — and keeping the same procedure every time so you can correct yourself.",
+        "Do it slowly, managing YOUR reference points (the ones your instructor taught you). And keeping the same procedure every time so you can correct yourself.",
         "If it goes wrong, correct without panicking: straighten up (wheel straight, wheels straight), spot which side has room, and bring the car toward that side. A clean correction beats forcing it.",
       ],
       quiz: [
@@ -1062,7 +1062,7 @@ const FICHE_I18N = {
       titre: "ربط المناورات بشكل مستقل",
       competence: "التحكم في السيارة",
       pourquoi:
-        "في الامتحان، لن يوجّهك المُفتّش. هذه المهارة تُثبت أنك تقرّر بنفسك وتصحّح أخطاءك بنفسك — هذا هو معنى أن تكون جاهزًا للعالم الثاني.",
+        "في الامتحان، لن يوجّهك المُفتّش. هذه المهارة تُثبت أنك تقرّر بنفسك وتصحّح أخطاءك بنفسك. هذا هو معنى أن تكون جاهزًا للعالم الثاني.",
       erreur:
         'انتظار إشارة "ابدأ" من المدرّب عند كل حركة. ما دمت تعتمد على التوجيه، فالمناورة لم تُتقَن بعد. الفخّ الآخر: الذعر بمجرد أن تكون المناورة غير مثالية من المحاولة الأولى بدلاً من إعادة التموضع بهدوء.',
       bva: "نفس المناورات، ونفس الاستقلالية المطلوبة. تتحكم في الاتجاه بواسطة ناقل الحركة (D للتقدم، R للرجوع) وتتحكم في بطء السيارة بالفرامل بدلاً من القابض. عدم إمكانية إطفاء المحرك يساعدك على البقاء هادئًا عندما تصحّح.",
@@ -1070,7 +1070,7 @@ const FICHE_I18N = {
         "حلّل الوضع: أي مناورة يتطلبها المكان (ركن موازٍ، ركن عمودي، ركن مائل، دوران بزاوية 180 درجة)؟",
         "اختر بنفسك المناورة المناسبة والجهة المناسبة (تذكير: الركن الموازي/العمودي على اليسار فقط في الطريق ذي الاتجاه الواحد، وإلا تصبح في الاتجاه المعاكس).",
         "أعلن وأمّن: إشارة الانعطاف قبل التوقف، فحص المرايا + الزاوية الميتة + الرؤية المباشرة؛ لست صاحب الأولوية، فأنت تفسح المجال للآخرين.",
-        "نفّذ ببطء، مع إدارة معالمك المرجعية (تلك التي علّمك إياها مدرّبك) — والحفاظ على نفس الإجراء في كل مرة كي تتمكن من التصحيح.",
+        "نفّذ ببطء، مع إدارة معالمك المرجعية (تلك التي علّمك إياها مدرّبك). والحفاظ على نفس الإجراء في كل مرة كي تتمكن من التصحيح.",
         "إذا فشلت، صحّح دون ذعر: عدّل وضعك (المقود مستقيم، العجلات مستقيمة)، حدّد الجهة التي لديك فيها مساحة، وأعد السيارة نحو تلك الجهة. التصحيح النظيف أفضل من التصرف بالقوة.",
       ],
       quiz: [
@@ -1243,7 +1243,7 @@ const FICHE_I18N = {
         "Keeping the same speed everywhere \"because we're within the limit\". A school zone at 50 is still dangerous at 50 if children are crossing. Conversely, crawling well below the limit on a clear road is no guarantee of safety: you adapt, you don't freeze.",
       bva: "",
       methode: [
-        "Look for signs as far ahead as possible: speed limit, school, market, bend, roadworks zone, vehicles pulling out. Even when it's quiet, you keep reading the signs — it's your warm-up before the busy areas.",
+        "Look for signs as far ahead as possible: speed limit, school, market, bend, roadworks zone, vehicles pulling out. Even when it's quiet, you keep reading the signs. It's your warm-up before the busy areas.",
         "Ease off the accelerator BEFORE the zone, not once you're in it. Often it's enough to release the accelerator and let the car slow down on its own, without harsh braking.",
         "Measure your distance from the car ahead: the 2-second rule (as the back of their car passes a fixed marker, you should reach that same marker at least 2 seconds later).",
         "Double this distance in rain or at night (at least 4 seconds).",
@@ -1300,7 +1300,7 @@ const FICHE_I18N = {
         "الحفاظ على السرعة نفسها في كل مكان «لأننا ضمن الحد المسموح». المنطقة المدرسية عند 50 تبقى خطيرة عند 50 إذا كان الأطفال يعبرون. وفي المقابل، الزحف بسرعة أقل بكثير من الحد على طريق خالٍ ليس ضماناً للسلامة: نتكيّف ولا نتجمّد.",
       bva: "",
       methode: [
-        "ابحث عن الإشارات في أبعد نقطة ممكنة: تحديد السرعة، مدرسة، سوق، منعطف، منطقة أشغال، مخارج المركبات. حتى عندما يكون الطريق هادئاً، استمر في قراءة اللافتات — فهذا إحماؤك قبل المناطق المزدحمة.",
+        "ابحث عن الإشارات في أبعد نقطة ممكنة: تحديد السرعة، مدرسة، سوق، منعطف، منطقة أشغال، مخارج المركبات. حتى عندما يكون الطريق هادئاً، استمر في قراءة اللافتات. فهذا إحماؤك قبل المناطق المزدحمة.",
         "ارفع قدمك عن دوّاسة الوقود قبل المنطقة، لا بعد دخولك فيها. غالباً يكفي أن ترفع قدمك عن دوّاسة الوقود وتترك السيارة تُبطئ من تلقاء نفسها، دون فرملة مفاجئة.",
         "قِس مسافتك عن السيارة التي أمامك: قاعدة الثانيتين (عند مرور مؤخرة سيارته بعلامة ثابتة، يجب أن تمرّ أنت بالعلامة نفسها بعد ثانيتين على الأقل).",
         "ضاعِف هذه المسافة عند المطر أو في الليل (4 ثوانٍ على الأقل).",
@@ -1356,11 +1356,11 @@ const FICHE_I18N = {
       pourquoi:
         "A well-positioned car is easy to read: others understand where you're going. And above all, a beginner almost always feels that their car is too wide, that \"it won't fit\": this is an optical illusion. A car is about 1.80 m wide (≈ 2 m including mirrors); a lane is at least 3 m wide. Even when passing a bus on a narrow road, the space is there. Trust your reference points, not your feeling.",
       erreur:
-        'Hugging the right "to be safe" and grazing parked cars, the curb, or cyclists. Too far right is just as dangerous as too far in the middle. Another trap: staring at the mirror in a bend to steer by it — it lies (the rear of your car is farther from the curb than the front), you correct wrongly and hit the sidewalk.',
+        'Hugging the right "to be safe" and grazing parked cars, the curb, or cyclists. Too far right is just as dangerous as too far in the middle. Another trap: staring at the mirror in a bend to steer by it. It lies (the rear of your car is farther from the curb than the front), you correct wrongly and hit the sidewalk.',
       bva: "",
       methode: [
         "Drive in the middle of your lane, neither hugging the right nor creeping over the center.",
-        'Use concrete reference points: with your mirrors, check the gap on the left (center line) and on the right (edge); and take a quick glance down to place the right-hand edge — a common reference point: it "lands" roughly in the middle of your windshield.',
+        'Use concrete reference points: with your mirrors, check the gap on the left (center line) and on the right (edge); and take a quick glance down to place the right-hand edge. A common reference point: it "lands" roughly in the middle of your windshield.',
         "Keep a side clearance of at least one car door from parked cars (risk of a door opening or a pedestrian stepping out).",
         "On a narrow road or with cyclists, move slightly to the left, after checking it's clear, to leave a safety gap when you meet or overtake.",
         "Stay centered and steady in a queue or a marked lane: no weaving.",
@@ -1414,11 +1414,11 @@ const FICHE_I18N = {
       pourquoi:
         "السيارة الموضوعة جيدًا يسهل فهم مسارها: يفهم الآخرون إلى أين تتجه. والأهم أن المبتدئ يشعر دائمًا تقريبًا بأن سيارته عريضة جدًا وأنها «لن تمر»: هذا وهم بصري. عرض السيارة نحو 1.80 م (≈ 2 م مع المرايا)؛ وعرض المسار لا يقل عن 3 م. حتى عند تقاطعك مع حافلة على طريق ضيق، المساحة موجودة. اعتمد على علاماتك المرجعية لا على إحساسك.",
       erreur:
-        "الالتصاق باليمين «حرصًا على الحذر» وملامسة السيارات المتوقفة أو الحافة أو الدراجين. الابتعاد كثيرًا إلى اليمين خطير مثل الابتعاد كثيرًا نحو الوسط. فخ آخر: تثبيت النظر على المرآة في المنعطف للاسترشاد بها — فهي تخدعك (مؤخرة سيارتك أبعد عن الحافة من مقدمتها)، فتصحح خطأً وتصطدم بالرصيف.",
+        "الالتصاق باليمين «حرصًا على الحذر» وملامسة السيارات المتوقفة أو الحافة أو الدراجين. الابتعاد كثيرًا إلى اليمين خطير مثل الابتعاد كثيرًا نحو الوسط. فخ آخر: تثبيت النظر على المرآة في المنعطف للاسترشاد بها. فهي تخدعك (مؤخرة سيارتك أبعد عن الحافة من مقدمتها)، فتصحح خطأً وتصطدم بالرصيف.",
       bva: "",
       methode: [
         "سِر في منتصف مسارك، لا ملتصقًا باليمين ولا متجاوزًا نحو الوسط.",
-        "استعمل علامات مرجعية ملموسة: بمراياك، تحقق من المسافة على اليسار (الخط الأوسط) وعلى اليمين (الحافة)؛ وألقِ نظرة سريعة إلى الأسفل لتحديد الحافة اليمنى — علامة مرجعية شائعة: تظهر تقريبًا في منتصف زجاجك الأمامي.",
+        "استعمل علامات مرجعية ملموسة: بمراياك، تحقق من المسافة على اليسار (الخط الأوسط) وعلى اليمين (الحافة)؛ وألقِ نظرة سريعة إلى الأسفل لتحديد الحافة اليمنى. علامة مرجعية شائعة: تظهر تقريبًا في منتصف زجاجك الأمامي.",
         "احتفظ بمسافة جانبية لا تقل عن عرض باب عن السيارات المتوقفة (خطر فتح باب أو ظهور مفاجئ لأحد المشاة).",
         "على طريق ضيق أو مع وجود دراجين، انزح قليلًا إلى اليسار بعد التأكد من خلوه، لترك مسافة أمان عند التقاطع أو التجاوز.",
         "ابقَ في المنتصف وثابتًا داخل الصف أو المسار المخطط: بلا تعرّج.",
@@ -1470,7 +1470,7 @@ const FICHE_I18N = {
       titre: "Taking a bend",
       competence: "Traffic",
       pourquoi:
-        'You brake in a straight line, where the car is stable. Braking in the middle of a bend unbalances it and makes it lose grip. Speed is set BEFORE, the steering is handled DURING. And the line follows your eyes: an instructor puts it bluntly — "my head goes to the left and my hand follows at the same time." If you look at the edge, you go toward the edge.',
+        'You brake in a straight line, where the car is stable. Braking in the middle of a bend unbalances it and makes it lose grip. Speed is set BEFORE, the steering is handled DURING. And the line follows your eyes: an instructor puts it bluntly. "my head goes to the left and my hand follows at the same time." If you look at the edge, you go toward the edge.',
       erreur:
         "Entering too fast and braking in the middle of the bend. It's a sign you anticipated poorly: next time, slow down earlier. Another common mistake: taking the bend with the engine under-revving (gear too high). The car struggles, judders, and you risk stalling right in the curve. Downshift BEFORE so you have power.",
       bva: "",
@@ -1478,9 +1478,9 @@ const FICHE_I18N = {
         "Prepare your eyes early: as soon as you see the bend, your eyes go toward the exit (where the road opens back up). Lean forward a little, turn your head if the windscreen pillars get in the way.",
         "Brake and slow down BEFORE entering, on the section that's still straight. If needed, downshift to be in the right gear.",
         "Stay firmly in your lane: don't cross the centre line and don't cut the bend.",
-        "Pull the steering wheel with one hand: right hand for a right bend, left hand for a left bend — without forcing with both hands (you'd compromise your line), your eyes always fixed far ahead.",
+        "Pull the steering wheel with one hand: right hand for a right bend, left hand for a left bend. Without forcing with both hands (you'd compromise your line), your eyes always fixed far ahead.",
         "Accelerate gently once the exit is in sight.",
-        'Safe line — you stay in your lane (without cutting or crossing the line). The "outside → inside → outside" line is a racing line, irrelevant for the driving test.',
+        'Safe line. You stay in your lane (without cutting or crossing the line). The "outside → inside → outside" line is a racing line, irrelevant for the driving test.',
       ],
       quiz: [
         {
@@ -1529,7 +1529,7 @@ const FICHE_I18N = {
       titre: "اجتياز المنعطف",
       competence: "السير",
       pourquoi:
-        "تفرمل في خط مستقيم، حيث تكون السيارة مستقرة. الفرملة في وسط المنعطف تُفقدها توازنها وتُفقدها التماسك مع الطريق. السرعة تُضبط قبل المنعطف، والمقود يُدار أثناءه. والمسار يتبع النظر: يقولها أحد المدربين بصراحة — «رأسي تتجه يساراً ويدي تتبعها في الوقت نفسه». إذا نظرت إلى الحافة، اتجهت نحو الحافة.",
+        "تفرمل في خط مستقيم، حيث تكون السيارة مستقرة. الفرملة في وسط المنعطف تُفقدها توازنها وتُفقدها التماسك مع الطريق. السرعة تُضبط قبل المنعطف، والمقود يُدار أثناءه. والمسار يتبع النظر: يقولها أحد المدربين بصراحة. «رأسي تتجه يساراً ويدي تتبعها في الوقت نفسه». إذا نظرت إلى الحافة، اتجهت نحو الحافة.",
       erreur:
         "الدخول بسرعة زائدة والفرملة في وسط المنعطف. هذا دليل على أنك لم تتوقّع جيداً: في المرة القادمة أبطئ مبكراً. خطأ شائع آخر: مقاربة المنعطف بعدد دورات منخفض (سرعة تروس عالية جداً). تتعب السيارة وتتقطّع، وقد تنطفئ في وسط المنعطف. خفّض السرعة قبل المنعطف لتحصل على القوة اللازمة.",
       bva: "",
@@ -1537,9 +1537,9 @@ const FICHE_I18N = {
         "هيّئ نظرك مبكراً: بمجرد أن ترى المنعطف، توجّه عينيك نحو المخرج (حيث ينفتح الطريق من جديد). مِل قليلاً إلى الأمام، وأدِر رأسك إن كانت قوائم الزجاج الأمامي تحجب الرؤية.",
         "افرمل وأبطئ قبل الدخول، على الجزء الذي لا يزال مستقيماً. عند الحاجة، خفّض السرعة لتكون في التروس المناسب.",
         "ابقَ ضمن مسارك تماماً: لا تتجاوز الخط الأوسط ولا تقطع المنعطف.",
-        "اسحب المقود بيد واحدة: اليد اليمنى للمنعطف نحو اليمين، واليد اليسرى للمنعطف نحو اليسار — دون شدّ باليدين معاً (فذلك يُفسد مسارك)، مع إبقاء النظر بعيداً دائماً.",
+        "اسحب المقود بيد واحدة: اليد اليمنى للمنعطف نحو اليمين، واليد اليسرى للمنعطف نحو اليسار. دون شدّ باليدين معاً (فذلك يُفسد مسارك)، مع إبقاء النظر بعيداً دائماً.",
         "تسارع بلطف بمجرد أن يظهر المخرج.",
-        "مسار آمن — تبقى ضمن مسارك (دون قطع أو تجاوز الخط). المسار «الخارج ← الداخل ← الخارج» هو خط سباق، ولا علاقة له باختبار الرخصة.",
+        "مسار آمن. تبقى ضمن مسارك (دون قطع أو تجاوز الخط). المسار «الخارج ← الداخل ← الخارج» هو خط سباق، ولا علاقة له باختبار الرخصة.",
       ],
       quiz: [
         {
@@ -1589,12 +1589,12 @@ const FICHE_I18N = {
       titre: "Passing and Meeting Oncoming Traffic",
       competence: "Traffic",
       pourquoi:
-        "An overtake is a moment when you're driving in the opposite lane: everything must be safe BEFORE, because once you've committed you can't back out. One instructor stresses the value of signalling even when passing a cyclist: it warns those behind you AND shows the examiner that you've analysed the situation. And the decision must be clear-cut: you firmly choose either to pass or to hold back — you don't sit there hesitating in the middle.",
+        "An overtake is a moment when you're driving in the opposite lane: everything must be safe BEFORE, because once you've committed you can't back out. One instructor stresses the value of signalling even when passing a cyclist: it warns those behind you AND shows the examiner that you've analysed the situation. And the decision must be clear-cut: you firmly choose either to pass or to hold back. You don't sit there hesitating in the middle.",
       erreur:
-        'Overtaking "because it\'ll be fine" without full visibility (a bend, a hill), or giving in to pressure from a car tailgating you. The right reflex when doubt sets in: ease off the accelerator, downshift, hold back — and if the examiner asks why you slowed down, you justify it ("I had a doubt about how the cyclist would behave, I couldn\'t see far enough ahead").',
+        'Overtaking "because it\'ll be fine" without full visibility (a bend, a hill), or giving in to pressure from a car tailgating you. The right reflex when doubt sets in: ease off the accelerator, downshift, hold back. And if the examiner asks why you slowed down, you justify it ("I had a doubt about how the cyclist would behave, I couldn\'t see far enough ahead").',
       bva: "",
       methode: [
-        "To OVERTAKE — Check it's allowed: no solid line, no bend, no crest of a hill, no reduced visibility.",
+        "To OVERTAKE. Check it's allowed: no solid line, no bend, no crest of a hill, no reduced visibility.",
         "Make sure you have visibility: you must see far and clear ahead of the vehicle you're about to pass.",
         "Chain your checks: interior mirror → left exterior mirror → left turn signal → blind-spot check → action. Make sure no one is already overtaking you.",
         "Pull out and overtake decisively, leaving lateral clearance (at least 1 m in town, 1.50 m outside built-up areas for a cyclist or two-wheeler).",
@@ -1650,10 +1650,10 @@ const FICHE_I18N = {
       pourquoi:
         "التجاوز لحظة تسير فيها في المسار المقابل: يجب أن يكون كل شيء آمناً قبل الشروع، لأنك بمجرد أن تنطلق لا يمكنك التراجع. يشدد أحد المدربين على أهمية استخدام الإشارة الضوئية حتى عند تجاوز راكب دراجة: فهي تنبّه من خلفك وتُظهر للممتحن أنك حللت الموقف. ويجب أن يكون القرار حاسماً: تختار بوضوح إما أن تتجاوز أو أن تتراجع، فلا تبقى متردداً في المنتصف.",
       erreur:
-        "التجاوز «لأن الأمر سيمر» دون رؤية كاملة (منعطف، مرتفع)، أو الرضوخ لضغط سيارة تلتصق بك من الخلف. رد الفعل الصحيح عند دخول الشك: ترفع قدمك عن دواسة الوقود، وتخفض السرعة، وتتراجع — وإذا سألك الممتحن عن سبب تخفيفك السرعة، تبرر ذلك («كان لدي شك في تصرف راكب الدراجة، ولم أكن أرى بعيداً بما يكفي»).",
+        "التجاوز «لأن الأمر سيمر» دون رؤية كاملة (منعطف، مرتفع)، أو الرضوخ لضغط سيارة تلتصق بك من الخلف. رد الفعل الصحيح عند دخول الشك: ترفع قدمك عن دواسة الوقود، وتخفض السرعة، وتتراجع. وإذا سألك الممتحن عن سبب تخفيفك السرعة، تبرر ذلك («كان لدي شك في تصرف راكب الدراجة، ولم أكن أرى بعيداً بما يكفي»).",
       bva: "",
       methode: [
-        "للتجاوز — تحقق من أنه مسموح: لا خط متصل، لا منعطف، لا قمة مرتفع، لا رؤية محدودة.",
+        "للتجاوز. تحقق من أنه مسموح: لا خط متصل، لا منعطف، لا قمة مرتفع، لا رؤية محدودة.",
         "تأكد من توفر الرؤية: يجب أن ترى بعيداً وخالياً أمام المركبة التي ستتجاوزها.",
         "تابع الفحوصات بالتتابع: المرآة الداخلية ← المرآة الخارجية اليسرى ← الإشارة الضوئية لليسار ← فحص النقطة العمياء ← التنفيذ. تأكد من أن لا أحد يتجاوزك بالفعل.",
         "انحرف وتجاوز بحزم مع ترك مسافة جانبية (متر واحد على الأقل داخل المدينة، 1,50 م خارج العمران لراكب دراجة أو مركبة ذات عجلتين).",
@@ -1709,20 +1709,20 @@ const FICHE_I18N = {
         'Two big classics: forgetting the right turn signal before leaving the roundabout (people waiting stay stuck or pull out thinking you are continuing); and failing to spot the intersection in time, leading to a failure to give way on the right because you "thought you had time to get across."',
       bva: "",
       methode: [
-        "At intersections — Spot an intersection before dealing with priority: look for the clues — a pedestrian crossing, the curve of a curb in the distance (a street opens up), a gap between parked cars or between buildings, direction signs.",
-        "At intersections — At an intersection, identify the type AS YOU ARRIVE: traffic light, STOP, give way, or nothing.",
-        "At intersections — If there is no sign at all, priority is to the right: anything coming out from your right goes before you.",
-        "At intersections — Adjust your speed to visibility: a glance in the interior mirror, then drop back to 2nd; if you cannot see anything on the right, drop even to 1st to have time to look properly. The examiner will never hold it against you for slowing down to observe well.",
-        "At intersections — Never stop suddenly at an intersection (risk of being rear-ended): slow down early and smoothly.",
-        "At intersections — Only pull out if you can clear the junction: never get stuck in the middle of a crossroads.",
-        "Priority to the right — Failure to give way on the right: if the car coming from the right is forced to slow down or stop to let you pass, that is already a failure to give way — even without a collision. It is never up to it to brake for you.",
-        'Priority to the right — False positives: a parking lot exit, a private residence ("private" sign), a raised curb = not a priority on the right. Those coming out of them do not have priority (but you stay careful).',
-        'At the roundabout — At a roundabout ("Give way" sign): as you approach, check behind, slow down and shift down (often 2nd). Choose your lane: right lane by default on a small roundabout / to exit early; lane matching your exit on a large roundabout.',
-        "At the roundabout — Give way: those already on the ring have priority. Take your time — do not rush until you have properly judged both the distance AND the speed of those going around. When in doubt, wait; you can even go around again.",
-        "At the roundabout — Pull into a big enough gap, without a left turn signal to enter (unless you are turning sharply left / going all the way around).",
-        "At the roundabout — Approaching your exit: RIGHT turn signal just before it. Since it sometimes cancels between two exits, do not hesitate to switch it back on.",
-        "At the roundabout — Before exiting: check the left blind spot (in case someone cuts across you), a glance to the right for bikes / the cycle lane, then exit and turn off the signal. Watch for the pedestrian crossing at the exit: do not accelerate until you have checked.",
-        'At the roundabout — A "traffic circle" is not the same as a "roundabout": the difference is read at the entrance. Roundabout = "Give way" at the entrance → the one entering does NOT have priority, they let those already on the ring pass. Traffic circle (rare, no sign at the entrance) → priority to the right → the one entering has priority over those already inside.',
+        "At intersections. Spot an intersection before dealing with priority. Look for the clues: a pedestrian crossing, the curve of a curb in the distance (a street opens up), a gap between parked cars or between buildings, direction signs.",
+        "At intersections. At an intersection, identify the type AS YOU ARRIVE: traffic light, STOP, give way, or nothing.",
+        "At intersections. If there is no sign at all, priority is to the right: anything coming out from your right goes before you.",
+        "At intersections. Adjust your speed to visibility: a glance in the interior mirror, then drop back to 2nd; if you cannot see anything on the right, drop even to 1st to have time to look properly. The examiner will never hold it against you for slowing down to observe well.",
+        "At intersections. Never stop suddenly at an intersection (risk of being rear-ended): slow down early and smoothly.",
+        "At intersections. Only pull out if you can clear the junction: never get stuck in the middle of a crossroads.",
+        "Priority to the right. Failure to give way on the right: if the car coming from the right is forced to slow down or stop to let you pass, that is already a failure to give way, even without a collision. It is never up to it to brake for you.",
+        'Priority to the right. False positives: a parking lot exit, a private residence ("private" sign), a raised curb = not a priority on the right. Those coming out of them do not have priority (but you stay careful).',
+        'At the roundabout. At a roundabout ("Give way" sign): as you approach, check behind, slow down and shift down (often 2nd). Choose your lane: right lane by default on a small roundabout / to exit early; lane matching your exit on a large roundabout.',
+        "At the roundabout. Give way: those already on the ring have priority. Take your time. Do not rush until you have properly judged both the distance AND the speed of those going around. When in doubt, wait; you can even go around again.",
+        "At the roundabout. Pull into a big enough gap, without a left turn signal to enter (unless you are turning sharply left / going all the way around).",
+        "At the roundabout. Approaching your exit: RIGHT turn signal just before it. Since it sometimes cancels between two exits, do not hesitate to switch it back on.",
+        "At the roundabout. Before exiting: check the left blind spot (in case someone cuts across you), a glance to the right for bikes / the cycle lane, then exit and turn off the signal. Watch for the pedestrian crossing at the exit: do not accelerate until you have checked.",
+        'At the roundabout. A "traffic circle" is not the same as a "roundabout": the difference is read at the entrance. Roundabout = "Give way" at the entrance → the one entering does NOT have priority, they let those already on the ring pass. Traffic circle (rare, no sign at the entrance) → priority to the right → the one entering has priority over those already inside.',
       ],
       quiz: [
         {
@@ -1776,20 +1776,20 @@ const FICHE_I18N = {
         "خطآن كلاسيكيان كبيران: نسيان إشارة الانعطاف اليمنى قبل الخروج من الدوّار (فيبقى المنتظرون عالقين أو يندفعون ظنّاً منهم أنك ستواصل)؛ وعدم اكتشاف التقاطع في الوقت المناسب، ممّا يؤدي إلى عدم منح الأولوية لليمين لأنك «ظننت أن لديك وقتاً للمرور».",
       bva: "",
       methode: [
-        "عند التقاطعات — اكتشف التقاطع قبل مسألة الأولوية: ابحث عن المؤشرات — ممرّ مشاة، انحناء الرصيف في البعيد (شارع يتفرّع)، فُرجة بين السيارات المركونة أو بين المباني، لوحات إرشادية.",
-        "عند التقاطعات — عند التقاطع، حدّد نوعه وأنت تصل: إشارة ضوئية، أو لوحة قِف STOP، أو أفسح الطريق، أو لا شيء.",
-        "عند التقاطعات — إذا لم تكن هناك أي لوحة، فالأولوية لليمين: كل ما يتفرّع من يمينك يمرّ قبلك.",
-        "عند التقاطعات — كيّف سرعتك مع مدى الرؤية: نظرة سريعة إلى المرآة الداخلية، ثم عُد إلى الغيار الثاني؛ وإن لم تكن ترى شيئاً على اليمين، فعُد حتى إلى الغيار الأول لتملك وقتاً للنظر جيداً. لن يلومك المراقب أبداً على التباطؤ من أجل المراقبة الجيدة.",
-        "عند التقاطعات — لا تتوقّف أبداً بشكل مفاجئ عند التقاطع (خطر أن تُصدَم من الخلف): تباطأ مبكراً وبلطف.",
-        "عند التقاطعات — لا تندفع إلا إذا كان بإمكانك إخلاء التقاطع: لا نبقى عالقين أبداً في منتصف المفترق.",
-        "الأولوية لليمين — عدم منح الأولوية لليمين: إذا اضطُرّت السيارة القادمة من اليمين إلى التباطؤ أو التوقّف لتترك لك المرور، فهذا يُعدّ أصلاً عدم منح للأولوية — حتى دون اصطدام. ليس عليها أبداً أن تكبح من أجلك.",
-        "الأولوية لليمين — الحالات المضلّلة: مخرج موقف سيارات، أو مجمّع سكني خاص (لوحة «خاص»)، أو رصيف مرتفع = ليست أولوية لليمين. الخارجون منها ليست لهم الأولوية (لكن ابقَ حذراً).",
-        "عند الدوّار — عند الدوّار (لوحة «أفسح الطريق»): عند الاقتراب، راقب الخلف، تباطأ وخفّض الغيار (غالباً الثاني). اختر مسربك: المسرب الأيمن افتراضياً في دوّار صغير / للخروج مبكراً؛ والمسرب المناسب لمخرجك في دوّار كبير.",
-        "عند الدوّار — أفسح الطريق: من هم على الحلقة أصلاً لهم الأولوية. خذ وقتك — لا تتسرّع حتى تقدّر جيداً المسافة والسرعة معاً لمن يدورون. عند الشك، انتظر؛ ويمكنك حتى أن تدور دورة أخرى.",
-        "عند الدوّار — اندفع في فُرجة كافية، دون إشارة انعطاف يسرى للدخول (إلا إذا كنت تنعطف يساراً بشكل واضح / تدور دورة كاملة).",
-        "عند الدوّار — عند الاقتراب من مخرجك: إشارة انعطاف يمنى قبله مباشرة. ولأنها تنطفئ أحياناً بين مخرجين، لا تتردّد في إعادة تشغيلها.",
-        "عند الدوّار — قبل الخروج: راقب النقطة العمياء اليسرى (تحسّباً لمن قد يقطع طريقك)، ونظرة إلى اليمين للدراجات / المسار المخصص للدراجات، ثم اخرج وأطفئ الإشارة. انتبه لممرّ المشاة عند المخرج: لا تُسرّع حتى تتحقّق.",
-        "عند الدوّار — «الدوّار الصغير» ليس كـ«الدوّار ذي أفسح الطريق»: يُقرأ الفرق عند المدخل. الدوّار ذو «أفسح الطريق» عند المدخل → الداخل ليست له الأولوية، يترك المرور لمن هم على الحلقة أصلاً. أما الدوّار الصغير (نادر، دون لوحة عند المدخل) → الأولوية لليمين → الداخل له الأولوية على من هم في الداخل أصلاً.",
+        "عند التقاطعات. اكتشف التقاطع قبل مسألة الأولوية. ابحث عن المؤشرات: ممرّ مشاة، انحناء الرصيف في البعيد (شارع يتفرّع)، فُرجة بين السيارات المركونة أو بين المباني، لوحات إرشادية.",
+        "عند التقاطعات. عند التقاطع، حدّد نوعه وأنت تصل: إشارة ضوئية، أو لوحة قِف STOP، أو أفسح الطريق، أو لا شيء.",
+        "عند التقاطعات. إذا لم تكن هناك أي لوحة، فالأولوية لليمين: كل ما يتفرّع من يمينك يمرّ قبلك.",
+        "عند التقاطعات. كيّف سرعتك مع مدى الرؤية: نظرة سريعة إلى المرآة الداخلية، ثم عُد إلى الغيار الثاني؛ وإن لم تكن ترى شيئاً على اليمين، فعُد حتى إلى الغيار الأول لتملك وقتاً للنظر جيداً. لن يلومك المراقب أبداً على التباطؤ من أجل المراقبة الجيدة.",
+        "عند التقاطعات. لا تتوقّف أبداً بشكل مفاجئ عند التقاطع (خطر أن تُصدَم من الخلف): تباطأ مبكراً وبلطف.",
+        "عند التقاطعات. لا تندفع إلا إذا كان بإمكانك إخلاء التقاطع: لا نبقى عالقين أبداً في منتصف المفترق.",
+        "الأولوية لليمين. عدم منح الأولوية لليمين: إذا اضطُرّت السيارة القادمة من اليمين إلى التباطؤ أو التوقّف لتترك لك المرور، فهذا يُعدّ أصلاً عدم منح للأولوية، حتى دون اصطدام. ليس عليها أبداً أن تكبح من أجلك.",
+        "الأولوية لليمين. الحالات المضلّلة: مخرج موقف سيارات، أو مجمّع سكني خاص (لوحة «خاص»)، أو رصيف مرتفع = ليست أولوية لليمين. الخارجون منها ليست لهم الأولوية (لكن ابقَ حذراً).",
+        "عند الدوّار. عند الدوّار (لوحة «أفسح الطريق»): عند الاقتراب، راقب الخلف، تباطأ وخفّض الغيار (غالباً الثاني). اختر مسربك: المسرب الأيمن افتراضياً في دوّار صغير / للخروج مبكراً؛ والمسرب المناسب لمخرجك في دوّار كبير.",
+        "عند الدوّار. أفسح الطريق: من هم على الحلقة أصلاً لهم الأولوية. خذ وقتك. لا تتسرّع حتى تقدّر جيداً المسافة والسرعة معاً لمن يدورون. عند الشك، انتظر؛ ويمكنك حتى أن تدور دورة أخرى.",
+        "عند الدوّار. اندفع في فُرجة كافية، دون إشارة انعطاف يسرى للدخول (إلا إذا كنت تنعطف يساراً بشكل واضح / تدور دورة كاملة).",
+        "عند الدوّار. عند الاقتراب من مخرجك: إشارة انعطاف يمنى قبله مباشرة. ولأنها تنطفئ أحياناً بين مخرجين، لا تتردّد في إعادة تشغيلها.",
+        "عند الدوّار. قبل الخروج: راقب النقطة العمياء اليسرى (تحسّباً لمن قد يقطع طريقك)، ونظرة إلى اليمين للدراجات / المسار المخصص للدراجات، ثم اخرج وأطفئ الإشارة. انتبه لممرّ المشاة عند المخرج: لا تُسرّع حتى تتحقّق.",
+        "عند الدوّار. «الدوّار الصغير» ليس كـ«الدوّار ذي أفسح الطريق»: يُقرأ الفرق عند المدخل. الدوّار ذو «أفسح الطريق» عند المدخل → الداخل ليست له الأولوية، يترك المرور لمن هم على الحلقة أصلاً. أما الدوّار الصغير (نادر، دون لوحة عند المدخل) → الأولوية لليمين → الداخل له الأولوية على من هم في الداخل أصلاً.",
       ],
       quiz: [
         {
@@ -1842,14 +1842,14 @@ const FICHE_I18N = {
       pourquoi:
         "The road is a dialogue. Others can't guess your intentions: if you signal early and clearly, everyone adjusts smoothly. An instructor shows it well: a turn signal from another driver switched on too late creates doubt (\"what are they doing? a U-turn?\"). On the other hand, a clearly visible turn signal while you're waiting to pull out reassures others and moves the situation forward. Signalling too late is no longer any use.",
       erreur:
-        "Switching on the turn signal at the same time as you turn (or not at all) — it must warn others BEFORE, not go along with the movement. And its cousin: signalling your intention and then moving over far too late, which surprises the drivers behind you.",
+        "Switching on the turn signal at the same time as you turn (or not at all). It must warn others BEFORE, not go along with the movement. And its cousin: signalling your intention and then moving over far too late, which surprises the drivers behind you.",
       bva: "",
       methode: [
         "Anticipate your action (turning, changing lane, stopping) BEFORE you do it.",
-        "Switch on your turn signal early enough, before changing direction — far enough in advance to give others time to understand (aim for about 3 s).",
+        "Switch on your turn signal early enough, before changing direction. Far enough in advance to give others time to understand (aim for about 3 s).",
         "Move over as soon as it's safe once you've signalled your intention: you don't signal and then wait 50 m to move across.",
         "Seek eye contact at pedestrian crossings and junctions: an exchanged glance is worth more than a gamble.",
-        "Switch off your turn signal once the manoeuvre is finished (if it doesn't cancel by itself — on a roundabout it often cancels too early, so turn it back on).",
+        "Switch off your turn signal once the manoeuvre is finished (if it doesn't cancel by itself. On a roundabout it often cancels too early, so turn it back on).",
         "Keep the horn for warning of a danger, never for anger.",
       ],
       quiz: [
@@ -1901,14 +1901,14 @@ const FICHE_I18N = {
       pourquoi:
         "الطريق حوار. لا يستطيع الآخرون تخمين نواياك: إذا أنذرت مبكرًا وبوضوح، تكيّف الجميع دون ارتجاج. يوضّح المدرّب ذلك جيدًا: إشارة انعطاف من سائق آخر تُشغّل متأخرًا تخلق الشك («ماذا يفعل؟ التفافة كاملة؟»). وفي المقابل، إشارة انعطاف واضحة وأنت تنتظر للاندماج تطمئن الآخرين وتدفع الموقف للأمام. الإنذار المتأخر جدًا لم يعد مفيدًا.",
       erreur:
-        "تشغيل إشارة الانعطاف في نفس لحظة الانعطاف (أو عدم تشغيلها إطلاقًا) — يجب أن تُنذر قبل الحركة لا أن ترافقها. وقرينها: أن تُشير إلى نيتك ثم تنحرف متأخرًا جدًا، مما يفاجئ من خلفك.",
+        "تشغيل إشارة الانعطاف في نفس لحظة الانعطاف (أو عدم تشغيلها إطلاقًا). يجب أن تُنذر قبل الحركة لا أن ترافقها. وقرينها: أن تُشير إلى نيتك ثم تنحرف متأخرًا جدًا، مما يفاجئ من خلفك.",
       bva: "",
       methode: [
         "توقّع حركتك (الانعطاف، تغيير المسار، التوقّف) قبل أن تقوم بها.",
-        "شغّل إشارة الانعطاف مبكرًا بما يكفي، قبل تغيير الاتجاه — قبله بما يكفي لإعطاء الآخرين وقتًا للفهم (استهدف نحو 3 ثوانٍ).",
+        "شغّل إشارة الانعطاف مبكرًا بما يكفي، قبل تغيير الاتجاه. قبله بما يكفي لإعطاء الآخرين وقتًا للفهم (استهدف نحو 3 ثوانٍ).",
         "انحرف بمجرد أن يكون ذلك آمنًا بعد أن تُشير إلى نيتك: لا تُشير ثم تنتظر 50 مترًا قبل الانحراف.",
         "ابحث عن التواصل بالنظر عند ممرات المشاة والتقاطعات: نظرة متبادلة خير من مجازفة.",
-        "أطفئ إشارة الانعطاف بعد انتهاء المناورة (إذا لم تنطفئ وحدها — ففي الدوّار غالبًا ما تنطفئ مبكرًا جدًا، فأعد تشغيلها).",
+        "أطفئ إشارة الانعطاف بعد انتهاء المناورة (إذا لم تنطفئ وحدها. ففي الدوّار غالبًا ما تنطفئ مبكرًا جدًا، فأعد تشغيلها).",
         "احفظ المنبّه (الزمّور) للتحذير من خطر، ولا تستخدمه أبدًا للغضب.",
       ],
       quiz: [
@@ -1957,16 +1957,16 @@ const FICHE_I18N = {
       titre: "Driving alone in the city (summary)",
       competence: "Traffic",
       pourquoi:
-        'World 2 is validated when every action becomes automatic and your mind is free to make decisions, no longer to operate the car. A telling sign: good learners check their mirrors "without even noticing it," out of habit. You handle a long sequence with no help from the instructor — including in tricky areas (shopping streets, crowded car parks) where you don\'t let others rush you.',
+        'World 2 is validated when every action becomes automatic and your mind is free to make decisions, no longer to operate the car. A telling sign: good learners check their mirrors "without even noticing it," out of habit. You handle a long sequence with no help from the instructor. Including in tricky areas (shopping streets, crowded car parks) where you don\'t let others rush you.',
       erreur:
         'Panicking over something unexpected (a closed street, the wrong lane on a roundabout, a wrong turn) and making a dangerous move to "fix it" (a sudden U-turn, reversing, forcing a lane change). Stay calm, keep going in the lane you\'re in, and get back on track safely afterwards.',
       bva: "",
       methode: [
         "Before setting off, picture your route: the streets, the turns, the difficult spots.",
         "Put the reflexes of World 2 on a loop: look far and keep your eyes moving (C2a), suitable speed (C2b), correct positioning (C2c).",
-        'Structure every maneuver, don\'t rush it: "take the time to do it well" — performing the actions in order (check → indicator → blind spot → action) is exactly what makes driving smooth and safe.',
+        'Structure every maneuver, don\'t rush it: "take the time to do it well". Performing the actions in order (check → indicator → blind spot → action) is exactly what makes driving smooth and safe.',
         "Signal your intentions early (indicators, C2g) and handle right of way (C2f) without hesitating.",
-        'Stay calm when something unexpected happens: if you take the wrong lane or the wrong street, keep going — even if it means going around the roundabout again — and get back on track further on. Never make a dangerous maneuver to "make up for it."',
+        'Stay calm when something unexpected happens: if you take the wrong lane or the wrong street, keep going, even if it means going around the roundabout again, and get back on track further on. Never make a dangerous maneuver to "make up for it."',
       ],
       quiz: [
         {
@@ -2014,16 +2014,16 @@ const FICHE_I18N = {
       titre: "القيادة بمفردك في المدينة (خلاصة)",
       competence: "السير",
       pourquoi:
-        "يُعتبر العالم الثاني مُنجَزًا عندما تصبح كل الحركات تلقائية ويتحرر ذهنك لاتخاذ القرارات بدلًا من الانشغال بقيادة السيارة. علامة معبّرة: التلاميذ المتمكنون يتفقدون مراياهم «دون أن ينتبهوا لذلك»، بحكم العادة. تُنجز تسلسلًا طويلًا دون تدخل المدرّب — بما في ذلك في المناطق الصعبة (الشوارع التجارية، مواقف السيارات المزدحمة) حيث لا تدع الآخرين يستعجلونك.",
+        "يُعتبر العالم الثاني مُنجَزًا عندما تصبح كل الحركات تلقائية ويتحرر ذهنك لاتخاذ القرارات بدلًا من الانشغال بقيادة السيارة. علامة معبّرة: التلاميذ المتمكنون يتفقدون مراياهم «دون أن ينتبهوا لذلك»، بحكم العادة. تُنجز تسلسلًا طويلًا دون تدخل المدرّب. بما في ذلك في المناطق الصعبة (الشوارع التجارية، مواقف السيارات المزدحمة) حيث لا تدع الآخرين يستعجلونك.",
       erreur:
         "الذعر أمام أمر غير متوقع (شارع مغلق، مسار خاطئ في الدوّار، خطأ في الطريق) والقيام بحركة خطيرة من أجل «التصحيح» (استدارة مفاجئة، رجوع إلى الخلف، تغيير المسار بالقوة). ابقَ هادئًا، تابع السير في المسار الذي أنت فيه، ثم عُد إلى طريقك بأمان بعد ذلك.",
       bva: "",
       methode: [
         "قبل الانطلاق، تخيّل مسارك: الشوارع، تغييرات الاتجاه، المناطق الصعبة.",
         "كرّر ردود الفعل الخاصة بالعالم الثاني: النظر بعيدًا وتحريك العينين (C2a)، السرعة المناسبة (C2b)، الوضعية الصحيحة (C2c).",
-        "نظّم كل مناورة ولا تُنجزها على عجل: «نأخذ الوقت لإتقانها» — تنفيذ الحركات بالترتيب (المراقبة ← إشارة الانعطاف ← النقطة العمياء ← الفعل) هو بالضبط ما يجعل القيادة سلسة وآمنة.",
+        "نظّم كل مناورة ولا تُنجزها على عجل: «نأخذ الوقت لإتقانها». تنفيذ الحركات بالترتيب (المراقبة ← إشارة الانعطاف ← النقطة العمياء ← الفعل) هو بالضبط ما يجعل القيادة سلسة وآمنة.",
         "أعلن نواياك مبكرًا (إشارات الانعطاف، C2g) وتعامل مع الأولويات (C2f) دون تردد.",
-        "ابقَ هادئًا أمام المفاجآت: إذا أخطأت المسار أو الشارع، تابع السير — حتى لو اضطررت إلى الدوران حول الدوّار من جديد — ثم عُد إلى طريقك لاحقًا. لا تقم أبدًا بمناورة خطيرة من أجل «التدارك».",
+        "ابقَ هادئًا أمام المفاجآت: إذا أخطأت المسار أو الشارع، تابع السير، حتى لو اضطررت إلى الدوران حول الدوّار من جديد، ثم عُد إلى طريقك لاحقًا. لا تقم أبدًا بمناورة خطيرة من أجل «التدارك».",
       ],
       quiz: [
         {
@@ -2071,19 +2071,19 @@ const FICHE_I18N = {
       titre: "Seeing well and being seen at night",
       competence: "Difficult conditions",
       pourquoi:
-        'At night, you see much less far and your eyes tire quickly. The whole challenge is to see as far as possible without dazzling others, and not to let yourself be hypnotized by oncoming headlights. An instructor sums it up well: at night, "the eyes work enormously" — they are constantly searching for cues, whereas during the day they rest.',
+        'At night, you see much less far and your eyes tire quickly. The whole challenge is to see as far as possible without dazzling others, and not to let yourself be hypnotized by oncoming headlights. An instructor sums it up well: at night, "the eyes work enormously". They are constantly searching for cues, whereas during the day they rest.',
       erreur:
-        "Staying on high beam facing an oncoming car (you dazzle it, it dazzles you back) — or staring at the oncoming headlights. If you stop watching the road for even a fraction of a second, it can be dramatic: you completely lose the right edge of the road.",
+        "Staying on high beam facing an oncoming car (you dazzle it, it dazzles you back). Or staring at the oncoming headlights. If you stop watching the road for even a fraction of a second, it can be dramatic: you completely lose the right edge of the road.",
       bva: "",
       methode: [
-        "Before you drive — Before setting off: check that your windows and headlights are clean. A dirty window doubles the glare at night.",
-        "Before you drive — As soon as you're moving: switch on your dipped beams (low beams). At night they are mandatory, even in a lit town.",
-        "Playing with the headlights — On an unlit road with no one coming: switch to high beams (full beams) to see farther. Outside built-up areas, the signs and marker posts become reflective: you see much farther and feel more confident.",
-        "Playing with the headlights — You see a vehicle coming toward you (or the faintest glow of headlights in the distance): switch back to dipped beams BEFORE it bothers you, so you don't dazzle it. At the slightest doubt (a glow behind a wall, a bend), stay on dipped beams.",
-        "Playing with the headlights — While a car is passing you: NEVER stare at the oncoming headlights. Rest your gaze on the right edge of your lane (line or kerb) and follow it. You can even use the reflection of the oncoming headlights on the right-hand kerb to place yourself.",
-        'Alertness at night — Your gaze becomes shorter than in broad daylight. That\'s normal: you see less far, so you act "with a lag" — you brake a little earlier and accelerate again a little later.',
-        "Alertness at night — Beware of dark-clothed pedestrians and animals. A pedestrian in dark clothes and a hood shows up very late at night. Outside built-up areas, an animal may suddenly appear. Simple rule: certainty = I go, doubt = I don't accelerate.",
-        "Alertness at night — You feel heavy and your eyelids are drooping: you stop. Take a break every 2 hours — AND at the very first sign of tiredness, without waiting for the 2 hours.",
+        "Before you drive. Before setting off: check that your windows and headlights are clean. A dirty window doubles the glare at night.",
+        "Before you drive. As soon as you're moving: switch on your dipped beams (low beams). At night they are mandatory, even in a lit town.",
+        "Playing with the headlights. On an unlit road with no one coming: switch to high beams (full beams) to see farther. Outside built-up areas, the signs and marker posts become reflective: you see much farther and feel more confident.",
+        "Playing with the headlights. You see a vehicle coming toward you (or the faintest glow of headlights in the distance): switch back to dipped beams BEFORE it bothers you, so you don't dazzle it. At the slightest doubt (a glow behind a wall, a bend), stay on dipped beams.",
+        "Playing with the headlights. While a car is passing you: NEVER stare at the oncoming headlights. Rest your gaze on the right edge of your lane (line or kerb) and follow it. You can even use the reflection of the oncoming headlights on the right-hand kerb to place yourself.",
+        'Alertness at night. Your gaze becomes shorter than in broad daylight. That\'s normal: you see less far, so you act "with a lag". You brake a little earlier and accelerate again a little later.',
+        "Alertness at night. Beware of dark-clothed pedestrians and animals. A pedestrian in dark clothes and a hood shows up very late at night. Outside built-up areas, an animal may suddenly appear. Simple rule: certainty = I go, doubt = I don't accelerate.",
+        "Alertness at night. You feel heavy and your eyelids are drooping: you stop. Take a break every 2 hours and at the very first sign of tiredness, without waiting for the 2 hours.",
       ],
       quiz: [
         {
@@ -2132,19 +2132,19 @@ const FICHE_I18N = {
       titre: "الرؤية الجيدة وأن تكون مرئيًا جيدًا في الليل",
       competence: "الظروف الصعبة",
       pourquoi:
-        "في الليل، ترى مسافة أقصر بكثير وتتعب عيناك بسرعة. التحدي كله هو أن ترى أبعد مسافة ممكنة دون أن تُبهر الآخرين، وألا تدع نفسك تنجذب إلى أضواء المركبات القادمة في الاتجاه المعاكس. يلخّص أحد المدربين الأمر جيدًا: في الليل «تعمل العينان كثيرًا جدًا» — فهما تبحثان باستمرار عن مؤشرات، بينما تستريحان في النهار.",
+        "في الليل، ترى مسافة أقصر بكثير وتتعب عيناك بسرعة. التحدي كله هو أن ترى أبعد مسافة ممكنة دون أن تُبهر الآخرين، وألا تدع نفسك تنجذب إلى أضواء المركبات القادمة في الاتجاه المعاكس. يلخّص أحد المدربين الأمر جيدًا: في الليل «تعمل العينان كثيرًا جدًا». فهما تبحثان باستمرار عن مؤشرات، بينما تستريحان في النهار.",
       erreur:
-        "البقاء على الأضواء العالية أمام سيارة قادمة في الاتجاه المعاكس (فتُبهرها وتُبهرك بالمقابل) — أو تثبيت النظر على أضواء المركبة المقابلة. إذا توقفت عن مراقبة الطريق ولو لجزء من الثانية، فقد يكون ذلك كارثيًا: تفقد تمامًا الحافة اليمنى للطريق.",
+        "البقاء على الأضواء العالية أمام سيارة قادمة في الاتجاه المعاكس (فتُبهرها وتُبهرك بالمقابل). أو تثبيت النظر على أضواء المركبة المقابلة. إذا توقفت عن مراقبة الطريق ولو لجزء من الثانية، فقد يكون ذلك كارثيًا: تفقد تمامًا الحافة اليمنى للطريق.",
       bva: "",
       methode: [
-        "قبل القيادة — قبل الانطلاق: تأكد من أن زجاج نوافذك ومصابيحك نظيفة. الزجاج المتّسخ يضاعف الانعكاسات في الليل.",
-        "قبل القيادة — بمجرد أن تبدأ القيادة: أشعل الأضواء المنخفضة (أضواء التلاقي). في الليل تكون إلزامية، حتى في المدينة المضاءة.",
-        "اللعب بالأضواء — على طريق غير مضاء ولا أحد قادم في الاتجاه المعاكس: انتقل إلى الأضواء العالية (الأضواء الكاملة) لترى أبعد. خارج المناطق العمرانية، تصبح اللافتات والعلامات عاكسة: ترى أبعد بكثير وتشعر بثقة أكبر.",
-        "اللعب بالأضواء — ترى مركبة قادمة في الاتجاه المعاكس (أو أدنى وميض لأضواء بعيدة): عُد إلى الأضواء المنخفضة قبل أن تزعجها، حتى لا تُبهرها. عند أدنى شك (وميض خلف جدار، أو منعطف)، ابقَ على الأضواء المنخفضة.",
-        "اللعب بالأضواء — أثناء تجاوز مركبة لك: لا تثبّت نظرك أبدًا على أضواء المركبة المقابلة. ثبّت نظرك على الحافة اليمنى لمسارك (الخط أو الرصيف) واتبعها. يمكنك حتى الاستعانة بانعكاس أضواء المركبة المقابلة على الحافة اليمنى لتحديد موقعك.",
-        "اليقظة في الليل — يصبح مدى نظرك أقصر مما هو عليه في وضح النهار. هذا طبيعي: ترى مسافة أقل، لذا تتصرف «بتأخير» — تفرمل أبكر بقليل وتعاود التسارع متأخرًا بقليل.",
-        "اليقظة في الليل — احذر المشاة ذوي الملابس الداكنة والحيوانات. المشاة بملابس داكنة وقلنسوة يظهرون متأخرًا جدًا في الليل. خارج المناطق العمرانية، قد يظهر حيوان فجأة. قاعدة بسيطة: اليقين = أتقدّم، الشك = لا أتسارع.",
-        "اليقظة في الليل — تشعر بالثقل وتتدلى جفونك: توقّف. خذ استراحة كل ساعتين — وعند أول علامة تعب مهما كانت بسيطة، دون انتظار الساعتين.",
+        "قبل القيادة. قبل الانطلاق: تأكد من أن زجاج نوافذك ومصابيحك نظيفة. الزجاج المتّسخ يضاعف الانعكاسات في الليل.",
+        "قبل القيادة. بمجرد أن تبدأ القيادة: أشعل الأضواء المنخفضة (أضواء التلاقي). في الليل تكون إلزامية، حتى في المدينة المضاءة.",
+        "اللعب بالأضواء. على طريق غير مضاء ولا أحد قادم في الاتجاه المعاكس: انتقل إلى الأضواء العالية (الأضواء الكاملة) لترى أبعد. خارج المناطق العمرانية، تصبح اللافتات والعلامات عاكسة: ترى أبعد بكثير وتشعر بثقة أكبر.",
+        "اللعب بالأضواء. ترى مركبة قادمة في الاتجاه المعاكس (أو أدنى وميض لأضواء بعيدة): عُد إلى الأضواء المنخفضة قبل أن تزعجها، حتى لا تُبهرها. عند أدنى شك (وميض خلف جدار، أو منعطف)، ابقَ على الأضواء المنخفضة.",
+        "اللعب بالأضواء. أثناء تجاوز مركبة لك: لا تثبّت نظرك أبدًا على أضواء المركبة المقابلة. ثبّت نظرك على الحافة اليمنى لمسارك (الخط أو الرصيف) واتبعها. يمكنك حتى الاستعانة بانعكاس أضواء المركبة المقابلة على الحافة اليمنى لتحديد موقعك.",
+        "اليقظة في الليل. يصبح مدى نظرك أقصر مما هو عليه في وضح النهار. هذا طبيعي: ترى مسافة أقل، لذا تتصرف «بتأخير». تفرمل أبكر بقليل وتعاود التسارع متأخرًا بقليل.",
+        "اليقظة في الليل. احذر المشاة ذوي الملابس الداكنة والحيوانات. المشاة بملابس داكنة وقلنسوة يظهرون متأخرًا جدًا في الليل. خارج المناطق العمرانية، قد يظهر حيوان فجأة. قاعدة بسيطة: اليقين = أتقدّم، الشك = لا أتسارع.",
+        "اليقظة في الليل. تشعر بالثقل وتتدلى جفونك: توقّف. خذ استراحة كل ساعتين وعند أول علامة تعب مهما كانت بسيطة، دون انتظار الساعتين.",
       ],
       quiz: [
         {
@@ -2200,14 +2200,14 @@ const FICHE_I18N = {
         'Keeping the same distance as in dry weather "because you can still see fine". Visibility has nothing to do with grip: even if you can see, you brake half as well. Another common mistake: switching on the rear fog light in the rain (forbidden, and you dazzle the driver behind you).',
       bva: "",
       methode: [
-        "Prepare, slow down — Prepare the car from the very first drops. Front wipers (set the speed to match how hard it's raining), rear wiper if needed, and above all demisting: air conditioning + warm air on the windscreen to clear the fog quickly. A misted-up window means less visibility, just like the rain.",
-        'Prepare, slow down — Ease off the accelerator and respect the "rain" limits. On the motorway: 130 → 110, 110 → 100. And on a bend signposted at 50, in the rain you do NOT take it at 50: it can slide.',
-        "On slippery ground — Increase your distance from the car in front. In the rain: ×2 (4 seconds instead of 2). On snow: even more (up to ×3).",
-        "On slippery ground — Brake gently and early. On wet ground, braking takes twice the distance: start braking much earlier, with small presses, never a sudden jolt.",
-        "On slippery ground — Avoid big puddles. A large puddle can make you lose grip all at once (aquaplaning) and hide a hole. If you can't avoid it: slow down BEFORE, then cross at a steady speed, without turning the steering wheel.",
-        "See and be seen — Switch on the right lights depending on visibility: rain / grey daylight → dipped headlights to be seen and see better; fog or snow, visibility under 50 m → front AND rear fog lights allowed; ⚠️ in the RAIN: rear fog lights FORBIDDEN — they badly dazzle the driver behind (up to 2.5× a brake light), front only if the rain is heavy; turn off the fog lights as soon as visibility returns.",
-        "See and be seen — No full beam in heavy rain. The light reflects off the drops and creates a wall of glare: you see even less well. Stay on dipped beam.",
-        "See and be seen — If the fog is thick: apply the rule of three 50s — 50 m visibility → 50 km/h speed → 50 m gap.",
+        "Prepare, slow down. Prepare the car from the very first drops. Front wipers (set the speed to match how hard it's raining), rear wiper if needed, and above all demisting: air conditioning + warm air on the windscreen to clear the fog quickly. A misted-up window means less visibility, just like the rain.",
+        'Prepare, slow down. Ease off the accelerator and respect the "rain" limits. On the motorway: 130 → 110, 110 → 100. And on a bend signposted at 50, in the rain you do NOT take it at 50: it can slide.',
+        "On slippery ground. Increase your distance from the car in front. In the rain: ×2 (4 seconds instead of 2). On snow: even more (up to ×3).",
+        "On slippery ground. Brake gently and early. On wet ground, braking takes twice the distance: start braking much earlier, with small presses, never a sudden jolt.",
+        "On slippery ground. Avoid big puddles. A large puddle can make you lose grip all at once (aquaplaning) and hide a hole. If you can't avoid it: slow down BEFORE, then cross at a steady speed, without turning the steering wheel.",
+        "See and be seen. Switch on the right lights depending on visibility: rain / grey daylight → dipped headlights to be seen and see better; fog or snow, visibility under 50 m → front AND rear fog lights allowed; ⚠️ in the RAIN: rear fog lights FORBIDDEN (they badly dazzle the driver behind, up to 2.5× a brake light), front only if the rain is heavy; turn off the fog lights as soon as visibility returns.",
+        "See and be seen. No full beam in heavy rain. The light reflects off the drops and creates a wall of glare: you see even less well. Stay on dipped beam.",
+        "See and be seen. If the fog is thick, apply the rule of three 50s: 50 m visibility → 50 km/h speed → 50 m gap.",
       ],
       quiz: [
         {
@@ -2253,14 +2253,14 @@ const FICHE_I18N = {
         'الاحتفاظ بنفس المسافة كما في الطقس الجاف "لأنك ما زلت ترى جيداً". الرؤية لا علاقة لها بالتشبث بالطريق: حتى لو كنت ترى، فإن قدرتك على الفرملة تصبح نصف ما كانت. خطأ شائع آخر: تشغيل مصباح الضباب الخلفي تحت المطر (ممنوع، وأنت تُبهر من يسير خلفك).',
       bva: "",
       methode: [
-        "استعدّ، خفّف السرعة — جهّز السيارة منذ أولى القطرات. مساحات أمامية (اضبط سرعتها حسب شدة المطر)، مساحة خلفية عند الحاجة، وقبل كل شيء إزالة الضباب: مكيّف الهواء + هواء ساخن على الزجاج الأمامي لطرد الضباب بسرعة. الزجاج المغطى بالضباب يعني رؤية أقل، تماماً مثل المطر.",
-        "استعدّ، خفّف السرعة — ارفع قدمك عن الدواسة واحترم حدود السرعة الخاصة بـ«المطر». على الطريق السيّار: 130 ← 110، 110 ← 100. وفي منعطف مُشار إليه بـ50، تحت المطر لا تأخذه بسرعة 50: قد ينزلق.",
-        "على أرض زلقة — زِد المسافة بينك وبين السيارة التي أمامك. تحت المطر: ×2 (4 ثوانٍ بدل 2). على الثلج: أكثر من ذلك (حتى ×3).",
-        "على أرض زلقة — افرمل بلطف وباكراً. على أرض مبللة تحتاج الفرملة إلى ضعف المسافة: ابدأ الفرملة أبكر بكثير، بضغطات صغيرة، دون أي حركة مفاجئة.",
-        "على أرض زلقة — تجنّب البِرَك الكبيرة. البركة الكبيرة قد تفقدك التشبث بالطريق فجأة (الانزلاق المائي) وتخفي حفرة. إن لم تستطع تجنّبها: خفّف السرعة قبلها، ثم اعبرها بسرعة ثابتة، دون أي حركة على المِقود.",
-        "انظر وكن مرئياً — شغّل الأضواء المناسبة حسب الرؤية: مطر / نهار رمادي ← الأضواء المنخفضة (الكود) لتُرى وترى أفضل؛ ضباب أو ثلج، رؤية أقل من 50 م ← مصابيح الضباب الأمامية والخلفية مسموح بها؛ ⚠️ تحت المطر: مصابيح الضباب الخلفية ممنوعة — فهي تُبهر بشدة السائق الذي خلفك (حتى 2.5 ضعف مصباح التوقف)، والأمامية فقط إن كان المطر كثيفاً؛ أطفئ مصابيح الضباب فور عودة الرؤية.",
-        "انظر وكن مرئياً — لا تستعمل الأضواء العالية تحت المطر الغزير. ينعكس الضوء على القطرات ويصنع لك جداراً من الوهج: فترى بشكل أسوأ. ابقَ على الأضواء المنخفضة.",
-        "انظر وكن مرئياً — إن كان الضباب كثيفاً: طبّق قاعدة الثلاثة 50 — رؤية 50 م ← سرعة 50 كم/س ← مسافة 50 م.",
+        "استعدّ، خفّف السرعة. جهّز السيارة منذ أولى القطرات. مساحات أمامية (اضبط سرعتها حسب شدة المطر)، مساحة خلفية عند الحاجة، وقبل كل شيء إزالة الضباب: مكيّف الهواء + هواء ساخن على الزجاج الأمامي لطرد الضباب بسرعة. الزجاج المغطى بالضباب يعني رؤية أقل، تماماً مثل المطر.",
+        "استعدّ، خفّف السرعة. ارفع قدمك عن الدواسة واحترم حدود السرعة الخاصة بـ«المطر». على الطريق السيّار: 130 ← 110، 110 ← 100. وفي منعطف مُشار إليه بـ50، تحت المطر لا تأخذه بسرعة 50: قد ينزلق.",
+        "على أرض زلقة. زِد المسافة بينك وبين السيارة التي أمامك. تحت المطر: ×2 (4 ثوانٍ بدل 2). على الثلج: أكثر من ذلك (حتى ×3).",
+        "على أرض زلقة. افرمل بلطف وباكراً. على أرض مبللة تحتاج الفرملة إلى ضعف المسافة: ابدأ الفرملة أبكر بكثير، بضغطات صغيرة، دون أي حركة مفاجئة.",
+        "على أرض زلقة. تجنّب البِرَك الكبيرة. البركة الكبيرة قد تفقدك التشبث بالطريق فجأة (الانزلاق المائي) وتخفي حفرة. إن لم تستطع تجنّبها: خفّف السرعة قبلها، ثم اعبرها بسرعة ثابتة، دون أي حركة على المِقود.",
+        "انظر وكن مرئياً. شغّل الأضواء المناسبة حسب الرؤية: مطر / نهار رمادي ← الأضواء المنخفضة (الكود) لتُرى وترى أفضل؛ ضباب أو ثلج، رؤية أقل من 50 م ← مصابيح الضباب الأمامية والخلفية مسموح بها؛ ⚠️ تحت المطر: مصابيح الضباب الخلفية ممنوعة (فهي تُبهر بشدة السائق الذي خلفك، حتى 2.5 ضعف مصباح التوقف)، والأمامية فقط إن كان المطر كثيفاً؛ أطفئ مصابيح الضباب فور عودة الرؤية.",
+        "انظر وكن مرئياً. لا تستعمل الأضواء العالية تحت المطر الغزير. ينعكس الضوء على القطرات ويصنع لك جداراً من الوهج: فترى بشكل أسوأ. ابقَ على الأضواء المنخفضة.",
+        "انظر وكن مرئياً. إن كان الضباب كثيفاً، طبّق قاعدة الثلاثة 50: رؤية 50 م ← سرعة 50 كم/س ← مسافة 50 م.",
       ],
       quiz: [
         {
@@ -2311,8 +2311,8 @@ const FICHE_I18N = {
         "Spot the danger with your eyes: shaded patches under trees, a shiny slick, dead leaves, loose gravel, a wet tunnel exit. You anticipate BEFORE you reach it.",
         "Ease off the accelerator gently well before the slippery zone, never on it.",
         "On the zone: everything smoothly. Light accelerator, gradual steering, no sharp moves. On a wet surface, one abrupt acceleration is enough to make the wheels spin.",
-        "Slow down BEFORE the bend, on the straight — not in it. In a slippery curve, look as far ahead as possible to anticipate your line, and turn with your foot off the accelerator. Use the reflective signs and the kerbs to aim for your exit.",
-        "If the rear starts to slide: ease off the accelerator (without braking hard) and look where you want to go — your hands follow your eyes.",
+        "Slow down BEFORE the bend, on the straight. Not in it. In a slippery curve, look as far ahead as possible to anticipate your line, and turn with your foot off the accelerator. Use the reflective signs and the kerbs to aim for your exit.",
+        "If the rear starts to slide: ease off the accelerator (without braking hard) and look where you want to go. Your hands follow your eyes.",
       ],
       quiz: [
         {
@@ -2369,8 +2369,8 @@ const FICHE_I18N = {
         "اكتشف الخطر بعينك: المناطق المظللة تحت الأشجار، بقعة لامعة، أوراق شجر ميتة، حصى صغير، مخرج نفق مبلل. أنت تتوقّع قبل أن تصل إلى المكان.",
         "ارفع قدمك عن دواسة السرعة برفق قبل المنطقة الزلقة بوقت كافٍ، لا فوقها أبدًا.",
         "في المنطقة الزلقة: كل شيء بسلاسة. دواسة سرعة خفيفة، مقود تدريجي، دون أي حركة حادة. على أرض مبللة، تكفي ضغطة مفاجئة على دواسة السرعة لجعل العجلات تدور في مكانها.",
-        "خفّف السرعة قبل المنعطف، على الخط المستقيم — لا داخله. في منعطف زلق، انظر إلى أبعد مسافة ممكنة لتتوقّع مسارك، وانعطف مع رفع قدمك عن دواسة السرعة. استعن باللافتات العاكسة وحواف الطريق لتحديد مخرجك.",
-        "إذا بدأ مؤخّر السيارة بالانزلاق: ارفع قدمك عن دواسة السرعة (دون كبح مفاجئ) وانظر إلى حيث تريد الذهاب — تتبع يداك نظرك.",
+        "خفّف السرعة قبل المنعطف، على الخط المستقيم. لا داخله. في منعطف زلق، انظر إلى أبعد مسافة ممكنة لتتوقّع مسارك، وانعطف مع رفع قدمك عن دواسة السرعة. استعن باللافتات العاكسة وحواف الطريق لتحديد مخرجك.",
+        "إذا بدأ مؤخّر السيارة بالانزلاق: ارفع قدمك عن دواسة السرعة (دون كبح مفاجئ) وانظر إلى حيث تريد الذهاب. تتبع يداك نظرك.",
       ],
       quiz: [
         {
@@ -2423,14 +2423,14 @@ const FICHE_I18N = {
       pourquoi:
         "In an emergency, the shortest way to stop is to brake as hard as possible. ABS lets you brake fully without locking the wheels, so you don't slide straight ahead: you keep the ability to steer to avoid the obstacle. You declutch afterward, not before, so you don't lose engine braking at the very start of braking.",
       erreur:
-        "Braking in jerky bursts or letting off the pedal as soon as it vibrates, out of fear. The vibration IS the sign that the ABS is working: releasing lengthens the stopping distance and makes you lose the benefit of the system. Another mistake: declutching BEFORE braking — the order is brake first, clutch second.",
+        "Braking in jerky bursts or letting off the pedal as soon as it vibrates, out of fear. The vibration IS the sign that the ABS is working: releasing lengthens the stopping distance and makes you lose the benefit of the system. Another mistake: declutching BEFORE braking. The order is brake first, clutch second.",
       bva: "",
       methode: [
-        "An obstacle appears. First action: you brake HARD, all the way, in one go. The brake first — it's the absolute priority.",
-        "You keep your foot pressed down, without releasing. On a car with ABS (all modern driving-school cars), it's the ABS that keeps the wheels from locking — you'll feel the pedal vibrate or \"tap-tap\" under your foot: that's normal, don't let off.",
+        "An obstacle appears. First action: you brake HARD, all the way, in one go. The brake first. It's the absolute priority.",
+        "You keep your foot pressed down, without releasing. On a car with ABS (all modern driving-school cars), it's the ABS that keeps the wheels from locking. You'll feel the pedal vibrate or \"tap-tap\" under your foot: that's normal, don't let off.",
         "You can steer at the same time. With ABS, you keep steering: you can brake fully AND steer the car toward your escape route.",
         "Look at your escape route, not the obstacle. Where your eyes go, the car goes.",
-        "Then you declutch — just before the engine stalls. The order matters: brake first, clutch second. You press the clutch so you don't stall and keep control, but only once braking is under way.",
+        "Then you declutch. Just before the engine stalls. The order matters: brake first, clutch second. You press the clutch so you don't stall and keep control, but only once braking is under way.",
         "Once the danger has passed: you release gradually and go back to normal driving.",
       ],
       quiz: [
@@ -2474,14 +2474,14 @@ const FICHE_I18N = {
       pourquoi:
         "في حالة الطوارئ، أقصر طريق للتوقف هو الفرملة بأقصى قوة. يتيح لك نظام ABS الفرملة الكاملة دون أن تُقفَل العجلات، فلا تنزلق السيارة إلى الأمام مباشرة: تحتفظ بإمكانية التوجيه لتجنب العائق. تفصل القابض (الدبرياج) بعد ذلك وليس قبله، حتى لا تفقد فرملة المحرك في بداية الفرملة تماماً.",
       erreur:
-        "الفرملة على شكل نقرات متقطعة أو رفع القدم عن الدواسة بمجرد أن تهتز، بدافع الخوف. الاهتزاز هو نفسه علامة على أن نظام ABS يعمل: الرفع يطيل مسافة التوقف ويفقدك فائدة النظام. خطأ آخر: فصل القابض قبل الفرملة — الترتيب هو الفرملة أولاً ثم القابض.",
+        "الفرملة على شكل نقرات متقطعة أو رفع القدم عن الدواسة بمجرد أن تهتز، بدافع الخوف. الاهتزاز هو نفسه علامة على أن نظام ABS يعمل: الرفع يطيل مسافة التوقف ويفقدك فائدة النظام. خطأ آخر: فصل القابض قبل الفرملة. الترتيب هو الفرملة أولاً ثم القابض.",
       bva: "",
       methode: [
-        "يظهر عائق فجأة. أول حركة: تفرمل بقوة، إلى النهاية، دفعة واحدة. الفرملة أولاً — إنها الأولوية المطلقة.",
-        "تُبقي قدمك ضاغطة دون أن ترفع. في سيارة مزودة بنظام ABS (جميع سيارات مدارس القيادة الحديثة)، فإن نظام ABS هو الذي يمنع العجلات من الإقفال — ستشعر بالدواسة تهتز أو تنبض «تكة تكة» تحت قدمك: هذا طبيعي، لا ترفع قدمك.",
+        "يظهر عائق فجأة. أول حركة: تفرمل بقوة، إلى النهاية، دفعة واحدة. الفرملة أولاً. إنها الأولوية المطلقة.",
+        "تُبقي قدمك ضاغطة دون أن ترفع. في سيارة مزودة بنظام ABS (جميع سيارات مدارس القيادة الحديثة)، فإن نظام ABS هو الذي يمنع العجلات من الإقفال. ستشعر بالدواسة تهتز أو تنبض «تكة تكة» تحت قدمك: هذا طبيعي، لا ترفع قدمك.",
         "يمكنك التوجيه في الوقت نفسه. مع نظام ABS تحتفظ بالتوجيه: يمكنك الفرملة بأقصى قوة وتوجيه السيارة نحو مخرج النجاة في آن واحد.",
         "انظر إلى مخرج النجاة، لا إلى العائق. حيث تتجه عيناك تتجه السيارة.",
-        "ثم تفصل القابض (الدبرياج) — قبل أن يتوقف المحرك مباشرة. الترتيب مهم: الفرملة أولاً ثم القابض. تضغط على القابض حتى لا يتوقف المحرك وتحافظ على السيطرة، ولكن فقط بعد بدء الفرملة.",
+        "ثم تفصل القابض (الدبرياج). قبل أن يتوقف المحرك مباشرة. الترتيب مهم: الفرملة أولاً ثم القابض. تضغط على القابض حتى لا يتوقف المحرك وتحافظ على السيطرة، ولكن فقط بعد بدء الفرملة.",
         "بعد زوال الخطر: ترفع قدمك تدريجياً وتعود إلى القيادة العادية.",
       ],
       quiz: [
@@ -2533,16 +2533,16 @@ const FICHE_I18N = {
         "Merging too slowly (or even stopping at the end of the acceleration lane): you force cars to brake for you and you create a hazard. A successful merge means reaching THEIR speed. Another mistake: braking in the driving lane instead of waiting for the deceleration lane.",
       bva: "",
       methode: [
-        'Entering — Spot the merge: the combo of a "Give way" sign plus a no-left-turn sign signals an acceleration lane 9 times out of 10. As soon as you see it, get ready.',
-        "Entering — Merging in: put on your left turn signal.",
-        "Entering — Accelerate along the whole acceleration lane to reach a speed close to that of the traffic (in practice, at least 70-80). Short lane → stay in 3rd (more pickup); long lane → you can shift to 4th. NEVER stop at the end of the lane.",
-        "Entering — Check the left exterior mirror plus a glance over your shoulder (blind spot) and pick the car you're going to slot in ahead of.",
-        "Entering — When the gap is clear, merge in smoothly and turn off the signal. You don't slow down to merge: you hold your speed or accelerate.",
-        "Driving — Cruising: stay in the right lane by default, even when the road widens to 3 lanes.",
-        "Driving — To overtake: check (interior mirror → exterior mirror → blind spot), left signal, pull out, don't slow down during the overtake, then move back to the right once you're past (right signal, another check).",
-        "Driving — Never stay alongside a heavy truck: overtake it decisively.",
-        "Exiting — Getting off: right signal about 200 m before your exit, after checking.",
-        "Exiting — You do NOT brake on the motorway: wait until you're on the deceleration lane, once you've exited, to slow down and change down calmly.",
+        'Entering. Spot the merge: the combo of a "Give way" sign plus a no-left-turn sign signals an acceleration lane 9 times out of 10. As soon as you see it, get ready.',
+        "Entering. Merging in: put on your left turn signal.",
+        "Entering. Accelerate along the whole acceleration lane to reach a speed close to that of the traffic (in practice, at least 70-80). Short lane → stay in 3rd (more pickup); long lane → you can shift to 4th. NEVER stop at the end of the lane.",
+        "Entering. Check the left exterior mirror plus a glance over your shoulder (blind spot) and pick the car you're going to slot in ahead of.",
+        "Entering. When the gap is clear, merge in smoothly and turn off the signal. You don't slow down to merge: you hold your speed or accelerate.",
+        "Driving. Cruising: stay in the right lane by default, even when the road widens to 3 lanes.",
+        "Driving. To overtake: check (interior mirror → exterior mirror → blind spot), left signal, pull out, don't slow down during the overtake, then move back to the right once you're past (right signal, another check).",
+        "Driving. Never stay alongside a heavy truck: overtake it decisively.",
+        "Exiting. Getting off: right signal about 200 m before your exit, after checking.",
+        "Exiting. You do NOT brake on the motorway: wait until you're on the deceleration lane, once you've exited, to slow down and change down calmly.",
       ],
       quiz: [
         {
@@ -2596,16 +2596,16 @@ const FICHE_I18N = {
         "الاندماج ببطء شديد (أو حتى التوقف في نهاية مسار التسارع): تجبر السيارات على الفرملة من أجلك وتخلق خطراً. الاندماج الناجح هو الوصول إلى سرعتهم. خطأ آخر: الفرملة في مسار السير بدلاً من انتظار مسار التباطؤ.",
       bva: "",
       methode: [
-        "الدخول — رصد الاندماج: مزيج علامة «أعطِ الأولوية» مع منع الانعطاف يساراً يُنذر بوجود مسار تسارع في 9 حالات من 10. بمجرد أن تراه، استعد.",
-        "الدخول — الاندماج: شغّل إشارة الانعطاف اليسرى.",
-        "الدخول — سرّع على طول مسار التسارع كله للوصول إلى سرعة قريبة من سرعة التدفق (عملياً 70-80 على الأقل). مسار قصير ← ابقَ في السرعة الثالثة (استجابة أكبر)؛ مسار طويل ← يمكنك الانتقال إلى الرابعة. لا تتوقف أبداً في نهاية المسار.",
-        "الدخول — تحقق من المرآة الخارجية اليسرى مع نظرة فوق الكتف (النقطة العمياء) واختر السيارة التي ستندمج أمامها.",
-        "الدخول — عندما تكون المساحة خالية، اندمج بسلاسة وأطفئ الإشارة. لا تتباطأ للاندماج: تحافظ على سرعتك أو تسرّع.",
-        "السير — القيادة: ابقَ في المسار الأيمن افتراضياً، حتى عندما تتسع الطريق إلى ثلاثة مسارات.",
-        "السير — للتجاوز: تحقق (المرآة الداخلية ← الخارجية ← النقطة العمياء)، إشارة يسرى، تجاوز، لا تتباطأ أثناء التجاوز، ثم عُد إلى اليمين بعد التجاوز (إشارة يمنى، تحقق جديد).",
-        "السير — لا تبقَ أبداً بجانب شاحنة ثقيلة: تجاوزها بحزم.",
-        "الخروج — الخروج: إشارة يمنى حوالي 200 م قبل مخرجك، بعد التحقق.",
-        "الخروج — لا تفرمل على الطريق السيارة: انتظر حتى تكون على مسار التباطؤ، بعد الخروج، لتتباطأ وتخفّض السرعة بهدوء.",
+        "الدخول. رصد الاندماج: مزيج علامة «أعطِ الأولوية» مع منع الانعطاف يساراً يُنذر بوجود مسار تسارع في 9 حالات من 10. بمجرد أن تراه، استعد.",
+        "الدخول. الاندماج: شغّل إشارة الانعطاف اليسرى.",
+        "الدخول. سرّع على طول مسار التسارع كله للوصول إلى سرعة قريبة من سرعة التدفق (عملياً 70-80 على الأقل). مسار قصير ← ابقَ في السرعة الثالثة (استجابة أكبر)؛ مسار طويل ← يمكنك الانتقال إلى الرابعة. لا تتوقف أبداً في نهاية المسار.",
+        "الدخول. تحقق من المرآة الخارجية اليسرى مع نظرة فوق الكتف (النقطة العمياء) واختر السيارة التي ستندمج أمامها.",
+        "الدخول. عندما تكون المساحة خالية، اندمج بسلاسة وأطفئ الإشارة. لا تتباطأ للاندماج: تحافظ على سرعتك أو تسرّع.",
+        "السير. القيادة: ابقَ في المسار الأيمن افتراضياً، حتى عندما تتسع الطريق إلى ثلاثة مسارات.",
+        "السير. للتجاوز: تحقق (المرآة الداخلية ← الخارجية ← النقطة العمياء)، إشارة يسرى، تجاوز، لا تتباطأ أثناء التجاوز، ثم عُد إلى اليمين بعد التجاوز (إشارة يمنى، تحقق جديد).",
+        "السير. لا تبقَ أبداً بجانب شاحنة ثقيلة: تجاوزها بحزم.",
+        "الخروج. الخروج: إشارة يمنى حوالي 200 م قبل مخرجك، بعد التحقق.",
+        "الخروج. لا تفرمل على الطريق السيارة: انتظر حتى تكون على مسار التباطؤ، بعد الخروج، لتتباطأ وتخفّض السرعة بهدوء.",
       ],
       quiz: [
         {
@@ -2657,7 +2657,7 @@ const FICHE_I18N = {
       pourquoi:
         "A tunnel is an enclosed space: you make yourself visible (lights) and always keep an exit in mind. A bridge is a very exposed space: the wind can push you suddenly, which is why you hold the steering wheel firmly.",
       erreur:
-        'Entering a tunnel without turning on your lights (you can "still see" at the entrance but you become invisible deeper inside) — or letting go of the steering wheel as you leave a bridge, just as the gust hits.',
+        'Entering a tunnel without turning on your lights (you can "still see" at the entrance but you become invisible deeper inside). Or letting go of the steering wheel as you leave a bridge, just as the gust hits.',
       bva: "",
       methode: [
         "Tunnel: before entering, turn on your dipped headlights (never full-beam headlights in a tunnel).",
@@ -2716,7 +2716,7 @@ const FICHE_I18N = {
       pourquoi:
         "النفق مكان مغلق: تجعل نفسك مرئيًا (بالأضواء) وتبقي دائمًا مخرجًا في ذهنك. أما الجسر فهو مكان شديد التعرّض: يمكن للرياح أن تدفعك فجأة، ولذلك تمسك المقود بإحكام.",
       erreur:
-        "الدخول إلى النفق دون إشعال أضوائك (فأنت «لا تزال ترى» عند المدخل لكنك تصبح غير مرئي في العمق) — أو ترك المقود عند الخروج من الجسر تمامًا في اللحظة التي تضربك فيها هبّة الريح.",
+        "الدخول إلى النفق دون إشعال أضوائك (فأنت «لا تزال ترى» عند المدخل لكنك تصبح غير مرئي في العمق). أو ترك المقود عند الخروج من الجسر تمامًا في اللحظة التي تضربك فيها هبّة الريح.",
       bva: "",
       methode: [
         "النفق: قبل الدخول، أشعل الأضواء المنخفضة (لا تستخدم أبدًا الأضواء العالية داخل النفق).",
@@ -2772,17 +2772,17 @@ const FICHE_I18N = {
         "Dense city: sharing the road with pedestrians, cyclists and buses",
       competence: "Difficult conditions",
       pourquoi:
-        'In a dense city, danger doesn\'t come from speed but from the unexpected: a pedestrian between two cars, a bike in your blind spot, a door opening, a pedestrian hidden behind a bus. Driving slowly and looking everywhere is what gives you time to stop in time. An instructor puts it another way: your driving "draws in" whatever your decisions cause — one hesitation too many and you find yourself stuck behind a cyclist you can no longer overtake.',
+        'In a dense city, danger doesn\'t come from speed but from the unexpected: a pedestrian between two cars, a bike in your blind spot, a door opening, a pedestrian hidden behind a bus. Driving slowly and looking everywhere is what gives you time to stop in time. An instructor puts it another way: your driving "draws in" whatever your decisions cause. One hesitation too many and you find yourself stuck behind a cyclist you can no longer overtake.',
       erreur:
         'Forgetting to check the blind spot over your shoulder before turning right: a cyclist coming up on your right is invisible in the mirror, and this is the classic "car turning / bike going straight" accident. Another trap: pulling out in front of a stopped bus without picturing the pedestrian crossing hidden behind it.',
       bva: "",
       methode: [
         "Ease off the gas. In a dense city, a reduced speed is your number-one safety margin: it gives you time to react to whatever appears. Take speed bumps in 2nd gear, gently.",
-        "Look far AND wide. Scan the sidewalks, between parked cars, in front of stopped buses — a pedestrian can appear anywhere, especially behind a bus that blocks your view (the classic trap: they step right onto the crossing, hidden by the bus).",
+        "Look far AND wide. Scan the sidewalks, between parked cars, in front of stopped buses. A pedestrian can appear anywhere, especially behind a bus that blocks your view (the classic trap: they step right onto the crossing, hidden by the bus).",
         "Before every maneuver (turning, pulling back in, parking): check your blind spot over your shoulder. A bike or scooter slipping between you and the curb hides there easily. Even simply pulling away at a light deserves a glance.",
         "When you overtake a bike: leave at least 1 meter of space (1.5 m outside built-up areas) and slow down. If you're already too close when you spot it, don't overtake: ease off the gas and wait.",
         "At a pedestrian crossing: slow down and always give way to the pedestrian, even one who has taken a single step. Until you're certain there's no one, don't accelerate.",
-        "Bus lane: don't drive in it (unless allowed by road markings); watch for a bus pulling away from its stop — it has priority, so ease off the gas and let it go.",
+        "Bus lane: don't drive in it (unless allowed by road markings); watch for a bus pulling away from its stop. It has priority, so ease off the gas and let it go.",
       ],
       quiz: [
         {
@@ -2831,17 +2831,17 @@ const FICHE_I18N = {
       titre: "المدينة المزدحمة: مشاركة الطريق مع المشاة والدراجات والحافلات",
       competence: "الظروف الصعبة",
       pourquoi:
-        "في المدينة المزدحمة، لا يأتي الخطر من السرعة بل من المفاجآت: مشاة بين سيارتين، دراجة في نقطتك العمياء، باب يُفتح، مشاة مختبئون خلف حافلة. القيادة ببطء والنظر في كل الاتجاهات هو ما يمنحك الوقت للتوقف في الوقت المناسب. يقولها المدرب بطريقة أخرى: قيادتك «تجتذب» ما تسببه قراراتك — تردد زائد واحد وتجد نفسك عالقاً خلف راكب دراجة لم يعد بإمكانك تجاوزه.",
+        "في المدينة المزدحمة، لا يأتي الخطر من السرعة بل من المفاجآت: مشاة بين سيارتين، دراجة في نقطتك العمياء، باب يُفتح، مشاة مختبئون خلف حافلة. القيادة ببطء والنظر في كل الاتجاهات هو ما يمنحك الوقت للتوقف في الوقت المناسب. يقولها المدرب بطريقة أخرى: قيادتك «تجتذب» ما تسببه قراراتك. تردد زائد واحد وتجد نفسك عالقاً خلف راكب دراجة لم يعد بإمكانك تجاوزه.",
       erreur:
         "نسيان التحقق من النقطة العمياء فوق الكتف قبل الانعطاف يميناً: راكب دراجة يتقدم على يمينك غير مرئي في المرآة، وهذا هو الحادث الكلاسيكي «سيارة تنعطف / دراجة تسير مستقيمة». فخ آخر: التقدم أمام حافلة متوقفة دون تخيّل المشاة الذين يعبرون مختبئين خلفها.",
       bva: "",
       methode: [
         "ارفع قدمك عن الوقود. في المدينة المزدحمة، السرعة المنخفضة هي هامش أمانك الأول: تمنحك الوقت للتفاعل مع كل ما يظهر فجأة. المطبات، خذها بالسرعة الثانية وبلطف.",
-        "انظر بعيداً وواسعاً. امسح بنظرك الأرصفة، وبين السيارات المتوقفة، وأمام الحافلات المتوقفة — يمكن للمشاة أن يظهروا في أي مكان، خاصة خلف حافلة تحجب الرؤية (الفخ الكلاسيكي: يخرج تماماً على ممر العبور، مختبئاً خلف الحافلة).",
+        "انظر بعيداً وواسعاً. امسح بنظرك الأرصفة، وبين السيارات المتوقفة، وأمام الحافلات المتوقفة. يمكن للمشاة أن يظهروا في أي مكان، خاصة خلف حافلة تحجب الرؤية (الفخ الكلاسيكي: يخرج تماماً على ممر العبور، مختبئاً خلف الحافلة).",
         "قبل كل مناورة (الانعطاف، العودة إلى المسار، الركن): تحقق من نقطتك العمياء فوق الكتف. دراجة أو سكوتر يتسلل بينك وبين الرصيف يختبئ هناك بسهولة. حتى مجرد الانطلاق عند إشارة يستحق نظرة.",
         "عند تجاوز دراجة: اترك مسافة متر واحد على الأقل (1,50 م خارج المناطق المبنية) وأبطئ. إذا كنت قريباً جداً بالفعل عندما تكتشفها، فلا تتجاوز: ارفع قدمك وانتظر.",
         "أمام ممر المشاة: أبطئ وأفسح الطريق دائماً للمشاة، حتى لو خطا خطوة واحدة. ما دمت غير متأكد من خلو الطريق، لا تُسرِع.",
-        "مسار الحافلات: لا تسر فيه (إلا بترخيص مرسوم على الأرض)؛ انتبه للحافلة التي تنطلق من موقفها، فلها الأولوية — ارفع قدمك ودعها تنطلق.",
+        "مسار الحافلات: لا تسر فيه (إلا بترخيص مرسوم على الأرض)؛ انتبه للحافلة التي تنطلق من موقفها، فلها الأولوية. ارفع قدمك ودعها تنطلق.",
       ],
       quiz: [
         {
@@ -3141,7 +3141,7 @@ const FICHE_I18N = {
         "Shift up early to drive at low revs. Sound cue first: change gear when you feel \"the engine climbing,\" without revving it hard. Rough number guide: around 2000 rpm in a diesel, 2500 rpm in a petrol car. On a nice clear straight, don't hesitate to go up to 5th/6th: it's more economical.",
         "Drive at low revs: an engine turning calmly uses less fuel.",
         "Use engine braking: when you see you're going to slow down (a light, a roundabout, a 70 zone), ease off the accelerator early and let the car slow down on its own. You brake less.",
-        'If you have to stop, brake "progressively decreasing": a bit harder at the start, then release gently at the end of braking. You stop right on the mark, smoothly, without jolting your passengers — instead of arriving fast and braking hard at the last second.',
+        'If you have to stop, brake "progressively decreasing": a bit harder at the start, then release gently at the end of braking. You stop right on the mark, smoothly, without jolting your passengers. Instead of arriving fast and braking hard at the last second.',
         "Keep a steady speed: bursts of accelerator and brake are wasted fuel.",
         "Switch off the engine if you're stopped for a long time (except in traffic, where the car's stop & start handles it).",
       ],
@@ -3200,7 +3200,7 @@ const FICHE_I18N = {
         "بدّل إلى سرعة أعلى مبكرًا للقيادة على دورات منخفضة. اعتمد على السمع أولًا: بدّل السرعة حين تشعر بأن «المحرّك يرتفع»، دون أن تجهده. مؤشّر رقمي تقريبي: نحو 2000 دورة/دقيقة في الديزل، و2500 دورة/دقيقة في البنزين. على طريق مستقيم جميل وخالٍ، لا تتردّد في الصعود إلى السرعة الخامسة/السادسة: فهذا أكثر اقتصادًا.",
         "قُد على دورات منخفضة: المحرّك الذي يدور بهدوء يستهلك أقل.",
         "استعمل فرملة المحرّك: عندما ترى أنك ستبطئ (إشارة ضوئية، دوّار، منطقة 70)، ارفع قدمك عن دواسة الوقود مبكرًا واترك السيارة تبطئ من تلقاء نفسها. فتفرمل أقل.",
-        "إذا اضطررت إلى التوقّف، افرمل «بشكل تنازلي»: أقوى قليلًا في البداية، ثم أرخِ الدواسة برفق في نهاية الفرملة. تتوقّف عند النقطة المطلوبة تمامًا، بسلاسة، دون هزّ ركّابك — بدلًا من الوصول بسرعة والفرملة بعنف في اللحظة الأخيرة.",
+        "إذا اضطررت إلى التوقّف، افرمل «بشكل تنازلي»: أقوى قليلًا في البداية، ثم أرخِ الدواسة برفق في نهاية الفرملة. تتوقّف عند النقطة المطلوبة تمامًا، بسلاسة، دون هزّ ركّابك. بدلًا من الوصول بسرعة والفرملة بعنف في اللحظة الأخيرة.",
         "حافظ على سرعة ثابتة: ضغطات دواسة الوقود والفرامل المتكرّرة هي وقود مهدور.",
         "أطفئ المحرّك إذا توقّفت لفترة طويلة (إلا في زحمة السير، حيث يتكفّل نظام «التوقّف والتشغيل» في السيارة بذلك).",
       ],
@@ -3252,7 +3252,7 @@ const FICHE_I18N = {
       titre: "Anticipate danger and stay calm at the wheel",
       competence: "Independent",
       pourquoi:
-        'A driver who anticipates rarely has to brake in an emergency. Seeing far and early means you have time to decide calmly instead of reacting in panic. Instructors say hazard awareness "can be felt": that\'s exactly what the examiner wants to see — a driver who senses the risk and adjusts their speed instead of charging ahead.',
+        'A driver who anticipates rarely has to brake in an emergency. Seeing far and early means you have time to decide calmly instead of reacting in panic. Instructors say hazard awareness "can be felt": that\'s exactly what the examiner wants to see. A driver who senses the risk and adjusts their speed instead of charging ahead.',
       erreur:
         'Staring at the car right in front of you (short gaze) and getting caught out by everything happening further ahead. Or letting anger take over and driving "to get back at" another driver.',
       bva: "",
@@ -3373,7 +3373,7 @@ const FICHE_I18N = {
       pourquoi:
         "The more vulnerable the road user, the more an error costs them. You anticipate THEIR mistakes, because you are the one with the metal body around you. On the test, letting a pedestrian with right of way cross isn't even 'courtesy': it's an obligation. Failing to do it is an automatic fail.",
       erreur:
-        "Overtaking a cyclist 'right up close' without changing your line, or pulling away sharply at a crosswalk the moment the light turns green without checking that no one is left. Watch out for the opposite too: stopping to 'let through' someone who does NOT have right of way (your light is green, theirs is red) is an unjustified and dangerous stop — so it's a fault.",
+        "Overtaking a cyclist 'right up close' without changing your line, or pulling away sharply at a crosswalk the moment the light turns green without checking that no one is left. Watch out for the opposite too: stopping to 'let through' someone who does NOT have right of way (your light is green, theirs is red) is an unjustified and dangerous stop. So it's a fault.",
       bva: "",
       methode: [
         "Spot vulnerable road users early: pedestrians, cyclists, scooters, motorcycles.",
@@ -3432,7 +3432,7 @@ const FICHE_I18N = {
       pourquoi:
         "كلما كان مستخدم الطريق أكثر هشاشة، كلّفه الخطأ ثمناً أغلى. أنت تتوقّع أخطاءه هو، لأنك أنت من يحيط به هيكل معدني. في الامتحان، ترك الراجل صاحب الأولوية يعبر ليس مجرّد «لباقة»: إنه واجب. عدم القيام به يعني الرسوب المباشر.",
       erreur:
-        "تجاوز راكب الدراجة «بمحاذاته» دون تغيير مسارك، أو الانطلاق بحدّة عند ممرّ المشاة بمجرّد أن يصير الضوء أخضر دون التأكّد من أنه لم يبقَ أحد. انتبه للعكس أيضاً: التوقّف من أجل «إفساح المجال» لشخص ليست له الأولوية (ضوؤك أخضر وضوؤه أحمر) هو توقّف غير مبرّر وخطير — أي أنه خطأ.",
+        "تجاوز راكب الدراجة «بمحاذاته» دون تغيير مسارك، أو الانطلاق بحدّة عند ممرّ المشاة بمجرّد أن يصير الضوء أخضر دون التأكّد من أنه لم يبقَ أحد. انتبه للعكس أيضاً: التوقّف من أجل «إفساح المجال» لشخص ليست له الأولوية (ضوؤك أخضر وضوؤه أحمر) هو توقّف غير مبرّر وخطير. أي أنه خطأ.",
       bva: "",
       methode: [
         "تعرّف مبكّراً على مستخدمي الطريق الهشّين: المشاة، راكبو الدراجات، الدرّاجات الكهربائية، ذوو العجلتين.",
@@ -3490,7 +3490,7 @@ const FICHE_I18N = {
       titre: "Approaching the practical exam without panicking",
       competence: "Independent",
       pourquoi:
-        'The examiner assesses your safety and your independence, not perfection. They want to see a driver who can manage on their own without putting anyone in danger. Many learners "stop hearing" the examiner because they are so stressed, and they give up feeling like losers even though they had it in the bag. Remarks during the exam are often meant kindly, to help your driving mature — and some "mistakes" you think are serious are not mistakes to them.',
+        'The examiner assesses your safety and your independence, not perfection. They want to see a driver who can manage on their own without putting anyone in danger. Many learners "stop hearing" the examiner because they are so stressed, and they give up feeling like losers even though they had it in the bag. Remarks during the exam are often meant kindly, to help your driving mature. And some "mistakes" you think are serious are not mistakes to them.',
       erreur:
         'Freezing or giving up after a small mistake ("that\'s it, I\'m done, I\'m too stressed"), when the exam is actually going very well. Or driving in an unusual way (too slow, too tense) to "look good", which is exactly what creates errors.',
       bva: "",
@@ -3551,7 +3551,7 @@ const FICHE_I18N = {
       titre: "مواجهة الامتحان العملي دون ذعر",
       competence: "مستقل",
       pourquoi:
-        'يقيّم المُفتّش سلامتك واستقلاليتك، لا الكمال. فهو يريد أن يرى سائقًا يتدبّر أموره بنفسه دون أن يعرّض أحدًا للخطر. كثير من المتعلّمين "لا يعودون يسمعون" المُفتّش لشدّة توترهم، فيستسلمون وهم يشعرون بالخسارة رغم أنهم كانوا ناجحين. الملاحظات أثناء الامتحان غالبًا ما تكون بدافع اللطف لمساعدة قيادتك على النضج — وبعض "الأخطاء" التي تظنّها خطيرة ليست أخطاءً في نظره.',
+        'يقيّم المُفتّش سلامتك واستقلاليتك، لا الكمال. فهو يريد أن يرى سائقًا يتدبّر أموره بنفسه دون أن يعرّض أحدًا للخطر. كثير من المتعلّمين "لا يعودون يسمعون" المُفتّش لشدّة توترهم، فيستسلمون وهم يشعرون بالخسارة رغم أنهم كانوا ناجحين. الملاحظات أثناء الامتحان غالبًا ما تكون بدافع اللطف لمساعدة قيادتك على النضج. وبعض "الأخطاء" التي تظنّها خطيرة ليست أخطاءً في نظره.',
       erreur:
         'التجمّد أو الاستسلام بعد خطأ صغير ("انتهى الأمر، أنا متوتّر جدًا")، بينما الامتحان يسير على ما يرام. أو القيادة بطريقة غير معتادة (بطيء جدًا، متشنّج جدًا) من أجل "إظهار الإتقان"، وهو ما يخلق الأخطاء بالضبط.',
       bva: "",

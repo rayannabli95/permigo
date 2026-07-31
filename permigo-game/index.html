@@ -11,7 +11,7 @@
   <meta name="theme-color" content="#6366f1" />
 
   <!-- ╔══ SEO ══╗ -->
-  <title>PermiGo — le compagnon qui te prépare avant chaque heure de conduite</title>
+  <title>PermiGo. Le compagnon qui te prépare avant chaque heure de conduite</title>
   <meta name="description" content="PermiGo te prépare avant chaque heure de conduite et t'accompagne entre deux leçons : fiches de préparation, mini-jeux « En situation », examens blancs, suivi de progression. Mode découverte gratuit." />
   <meta name="keywords" content="permis de conduire, préparer leçon de conduite, réviser la conduite, examen blanc, app permis, centre d'examen permis, moniteur indépendant" />
   <link rel="canonical" href="https://www.permigo.fr/" />
@@ -20,7 +20,7 @@
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="PermiGo" />
   <meta property="og:locale" content="fr_FR" />
-  <meta property="og:title" content="PermiGo — le compagnon qui te prépare avant chaque heure de conduite" />
+  <meta property="og:title" content="PermiGo. Le compagnon qui te prépare avant chaque heure de conduite" />
   <meta property="og:description" content="Prépare chaque leçon avant de monter en voiture, débriefe après, progresse entre deux. Mode découverte gratuit, Pass Permis dès 9,99 €/mois." />
   <meta property="og:url" content="https://www.permigo.fr/" />
   <meta property="og:image" content="https://www.permigo.fr/og-image.png" />
@@ -29,11 +29,11 @@
 
   <!-- ╔══ Twitter Card ══╗ -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="PermiGo — le compagnon qui te prépare avant chaque heure de conduite" />
+  <meta name="twitter:title" content="PermiGo. Le compagnon qui te prépare avant chaque heure de conduite" />
   <meta name="twitter:description" content="Prépare chaque leçon avant de monter en voiture, débriefe après, progresse entre deux. Mode découverte gratuit, Pass Permis dès 9,99 €/mois." />
   <meta name="twitter:image" content="https://www.permigo.fr/og-image.png" />
 
-  <!-- ╔══ JSON-LD (entité marque + produit — base GEO/réponses IA) ══╗
+  <!-- ╔══ JSON-LD (entité marque + produit. Base GEO/réponses IA) ══╗
        UN SEUL bloc SoftwareApplication (le doublon « Beta gratuite, price 0 »
        a été retiré : il contredisait les vrais prix du Pass) + l'entité marque. -->
   <script type="application/ld+json">
@@ -82,7 +82,7 @@
   <!-- frame-ancestors est IGNORÉ en <meta> (warning console) → fourni en
        en-tête HTTP via vercel.json, pas ici. -->
   <!-- ⚠️ C'est CETTE meta qui fait foi en prod : les blocs "/(.*)" du
-       vercel.json ne sortent PAS (constaté 16/07/2026 — seuls les blocs à
+       vercel.json ne sortent PAS (constaté 16/07/2026. Seuls les blocs à
        préfixe simple type /sw.js sont servis). Toute nouvelle origine
        (script, frame, connect…) doit donc être ajoutée ICI.
        accounts.google.com/gsi = bouton Google officiel (GIS) du login. -->
@@ -152,7 +152,7 @@
   <!-- A11y : skip link -->
   <a href="#app" class="skip-link">Aller au contenu principal</a>
 
-  <!-- Écran de chargement — FRÈRE de #app (voir le CSS plus haut) -->
+  <!-- Écran de chargement. FRÈRE de #app (voir le CSS plus haut) -->
   <div id="splash" aria-busy="true" aria-label="Chargement de PermiGo">
     <div class="sp-logo" aria-hidden="true">
       <img src="%BASE_URL%splash-permigo-poster.jpg" alt="" width="240" height="240" />
@@ -190,11 +190,23 @@
         ['zh', '你好'], ['it', 'Ciao'], ['pl', 'Cześć'], ['vi', 'Xin chào'],
         ['de', 'Hallo'], ['hi', 'नमस्ते'], ['ta', 'வணக்கம்'], ['sw', 'Jambo']
       ];
-      // La langue de l'élève : sa préférence enregistrée, sinon celle du
-      // téléphone, sinon le français.
+      /* La langue de l'élève, dans l'ordre : le lien de campagne (?lang=), sa
+         préférence enregistrée, puis son téléphone, sinon le français.
+         Le `?lang=` est relu ici parce que ce script tourne AVANT le bundle —
+         même règle que `langFromUrl()` dans src/utils/lang.js, garder les deux
+         alignés. Seul fr/en/ar est accepté depuis l'URL : ce sont les langues
+         que l'app parle vraiment. */
       var mine = (function () {
         var l = '';
-        try { l = localStorage.getItem('permigo_lang') || ''; } catch (e) { /* privé */ }
+        try {
+          var h = location.hash || '';
+          var hq = h.indexOf('?') >= 0 ? h.slice(h.indexOf('?') + 1) : '';
+          var raw = new URLSearchParams(hq).get('lang') ||
+                    new URLSearchParams(location.search).get('lang') || '';
+          raw = raw.slice(0, 2).toLowerCase();
+          if (raw === 'fr' || raw === 'en' || raw === 'ar') l = raw;
+        } catch (e) { /* URLSearchParams indispo */ }
+        if (!l) { try { l = localStorage.getItem('permigo_lang') || ''; } catch (e) { /* privé */ } }
         l = (l || navigator.language || 'fr').slice(0, 2).toLowerCase();
         for (var i = 0; i < HI.length; i++) if (HI[i][0] === l) return HI[i];
         return HI[0];

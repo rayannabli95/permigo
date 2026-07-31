@@ -26,7 +26,7 @@ const I18N = {
     bonus_eco: "Eco-driving",
     phase_accueil: {
       titre: "Welcome & identity",
-      sous: "Before driving — the examiner checks that it really is you.",
+      sous: "Before driving. The examiner checks that it really is you.",
     },
     phase_installation: {
       titre: "Set-up & safety on board",
@@ -42,7 +42,7 @@ const I18N = {
     },
     phase_autonomie: {
       titre: "Independent driving",
-      sous: "“Follow signs for [town]” — about 5 min without guidance.",
+      sous: "“Follow signs for [town]”. About 5 min without guidance.",
     },
     phase_manoeuvre: {
       titre: "The manoeuvre",
@@ -72,7 +72,7 @@ const I18N = {
         "Mirrors → steering wheel → seat",
         "Steering wheel → seat → mirrors",
       ],
-      why: "Seat first (your reference position), then the steering wheel, then the mirrors — adjusted once you are seated properly. The examiner is not fixated on the exact order, but on you being set up correctly.",
+      why: "Seat first (your reference position), then the steering wheel, then the mirrors. Adjusted once you are seated properly. The examiner is not fixated on the exact order, but on you being set up correctly.",
     },
     "p2-securite": {
       q: "You are settled in. Before moving off, the safety reflex is to…",
@@ -84,7 +84,7 @@ const I18N = {
       why: "Safety on board = 1 easy point: seat belts, doors (locking makes you check them), and no red warning light on the dashboard.",
     },
     "p3-silence": {
-      q: "“I will give you directions. If I say nothing…” — what do you do?",
+      q: "“I will give you directions. If I say nothing…”. What do you do?",
       opts: [
         "Continue straight ahead",
         "Stop to ask",
@@ -95,7 +95,7 @@ const I18N = {
     "p4-prio-droite": {
       q: "At an unsigned junction, a car approaches from your right. What do you do?",
       opts: [
-        "Give way — priority from the right",
+        "Give way. Priority from the right",
         "Go through because you arrived first",
         "Accelerate to pass in front",
       ],
@@ -207,7 +207,7 @@ const I18N = {
         "Immediately behind your car",
         "You do not put out a triangle",
       ],
-      why: "About 30 m before the hazard, where others can see you in time — and get yourself to safety first (high-visibility vest, off the road).",
+      why: "About 30 m before the hazard, where others can see you in time. And get yourself to safety first (high-visibility vest, off the road).",
     },
     "p8-immo": {
       q: "You return to the centre. To secure the vehicle properly:",
@@ -216,7 +216,7 @@ const I18N = {
         "Turn off the engine while leaving a gear engaged on level ground",
         "Get out and let the examiner handle the rest",
       ],
-      why: "Neutral + handbrake + wipers off + engine off. Some learners fail by switching off in the final minutes — stay fully focused to the end.",
+      why: "Neutral + handbrake + wipers off + engine off. Some learners fail by switching off in the final minutes. Stay fully focused to the end.",
     },
     "p8-eco": {
       q: "Throughout the route, for eco-driving you have…",
@@ -237,7 +237,7 @@ const I18N = {
     bonus_eco: "القيادة الاقتصادية",
     phase_accueil: {
       titre: "الاستقبال والهوية",
-      sous: "قبل القيادة — يتحقّق المفتش من أنك الشخص المعني.",
+      sous: "قبل القيادة. يتحقّق المفتش من أنك الشخص المعني.",
     },
     phase_installation: {
       titre: "الجلوس والسلامة داخل المركبة",
@@ -253,7 +253,7 @@ const I18N = {
     },
     phase_autonomie: {
       titre: "القيادة المستقلة",
-      sous: "«اتبع اتجاه [المدينة]» — نحو 5 دقائق دون توجيه.",
+      sous: "«اتبع اتجاه [المدينة]». نحو 5 دقائق دون توجيه.",
     },
     phase_manoeuvre: {
       titre: "المناورة",
@@ -295,7 +295,7 @@ const I18N = {
       why: "السلامة داخل المركبة = نقطة سهلة: الأحزمة، والأبواب، وعدم وجود ضوء تحذير أحمر على لوحة القيادة.",
     },
     "p3-silence": {
-      q: "«سأعطيك الاتجاهات. إذا لم أقل شيئًا…» — ماذا تفعل؟",
+      q: "«سأعطيك الاتجاهات. إذا لم أقل شيئًا…». ماذا تفعل؟",
       opts: [
         "تواصل السير إلى الأمام",
         "تتوقف لتسأل",
@@ -306,7 +306,7 @@ const I18N = {
     "p4-prio-droite": {
       q: "عند تقاطع بلا لافتة، تقترب سيارة من يمينك. ماذا تفعل؟",
       opts: [
-        "تفسح الطريق — الأولوية لليمين",
+        "تفسح الطريق. الأولوية لليمين",
         "تمر لأنك وصلت أولًا",
         "تسرّع للمرور أمامها",
       ],
@@ -418,7 +418,7 @@ const I18N = {
         "خلف سيارتك مباشرة",
         "لا نضع مثلثًا",
       ],
-      why: "نحو 30 مترًا قبل الخطر حيث يراك الآخرون في الوقت المناسب — واحمِ نفسك أولًا بارتداء السترة والابتعاد عن الطريق.",
+      why: "نحو 30 مترًا قبل الخطر حيث يراك الآخرون في الوقت المناسب. واحمِ نفسك أولًا بارتداء السترة والابتعاد عن الطريق.",
     },
     "p8-immo": {
       q: "تعود إلى المركز. لتثبيت المركبة بشكل صحيح:",
@@ -427,7 +427,7 @@ const I18N = {
         "تطفئ المحرك مع إبقاء ناقل الحركة على سرعة في طريق مستوٍ",
         "تخرج وتترك الباقي للمفتش",
       ],
-      why: "وضع الحياد + فرامل اليد + إيقاف الماسحات + إطفاء المحرك. يرسب بعض المتعلمين بسبب التراخي في الدقائق الأخيرة — ابقَ مركّزًا حتى النهاية.",
+      why: "وضع الحياد + فرامل اليد + إيقاف الماسحات + إطفاء المحرك. يرسب بعض المتعلمين بسبب التراخي في الدقائق الأخيرة. ابقَ مركّزًا حتى النهاية.",
     },
     "p8-eco": {
       q: "طوال المسار، من أجل القيادة الاقتصادية كنت…",
@@ -490,7 +490,7 @@ const PHASES_FR = [
     key: "accueil",
     emoji: "🪪",
     titre: "Accueil & identité",
-    sous: "Avant de rouler — l'inspecteur vérifie que c'est bien toi.",
+    sous: "Avant de rouler. L'inspecteur vérifie que c'est bien toi.",
     items: [
       {
         id: "p1-impression",
@@ -525,7 +525,7 @@ const PHASES_FR = [
           "Volant → siège → rétroviseurs",
         ],
         correct: 0,
-        why: "Siège d'abord (ta position de référence), puis volant, puis les rétros — réglés une fois que tu es bien assis. L'inspecteur n'est pas au taquet sur l'ordre exact, mais que tu sois bien installé.",
+        why: "Siège d'abord (ta position de référence), puis volant, puis les rétros. Réglés une fois que tu es bien assis. L'inspecteur n'est pas au taquet sur l'ordre exact, mais que tu sois bien installé.",
       },
       {
         id: "p2-securite",
@@ -552,7 +552,7 @@ const PHASES_FR = [
       {
         id: "p3-silence",
         fam: "autonomie",
-        q: "« Les directions, je te les donne. Si je ne dis rien… » — tu fais quoi ?",
+        q: "« Les directions, je te les donne. Si je ne dis rien… ». Tu fais quoi ?",
         opts: [
           "Tu continues tout droit",
           "Tu t'arrêtes pour demander",
@@ -576,7 +576,7 @@ const PHASES_FR = [
         tags: ["priorite"],
         q: "Intersection sans panneau, une voiture arrive à ta droite. Tu fais quoi ?",
         opts: [
-          "Tu cèdes — priorité à droite",
+          "Tu cèdes. Priorité à droite",
           "Tu passes, tu étais là avant",
           "Tu accélères pour passer devant",
         ],
@@ -687,7 +687,7 @@ const PHASES_FR = [
     key: "autonomie",
     emoji: "🧭",
     titre: "Conduite autonome",
-    sous: "« Suis la direction de [ville] » — ~5 min sans guidage.",
+    sous: "« Suis la direction de [ville] ». ~5 min sans guidage.",
     items: [
       {
         id: "p5-tromper",
@@ -771,7 +771,7 @@ const PHASES_FR = [
           "On ne pose pas de triangle",
         ],
         correct: 0,
-        why: "~30 m avant le danger, là où les autres te voient à temps — et tu te mets en sécurité (gilet, hors chaussée) avant.",
+        why: "~30 m avant le danger, là où les autres te voient à temps. Et tu te mets en sécurité (gilet, hors chaussée) avant.",
       },
     ],
   },
@@ -793,7 +793,7 @@ const PHASES_FR = [
           "Tu sors, l'inspecteur s'occupe du reste",
         ],
         correct: 0,
-        why: "Point mort + frein à main + essuie-glaces coupés + moteur éteint. Des élèves se font éliminer en relâchant dans les dernières minutes — reste à fond jusqu'au bout.",
+        why: "Point mort + frein à main + essuie-glaces coupés + moteur éteint. Des élèves se font éliminer en relâchant dans les dernières minutes. Reste à fond jusqu'au bout.",
       },
       {
         id: "p8-eco",

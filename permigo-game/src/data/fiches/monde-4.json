@@ -80,7 +80,7 @@
       "Passe les rapports tôt pour rouler en bas régime. Repère sonore d'abord : tu changes quand tu sens « le moteur qui monte », sans le pousser. Repère chiffré indicatif : vers 2000 tr/min en diesel, 2500 tr/min en essence. Sur une belle ligne droite dégagée, n'hésite pas à monter jusqu'à la 5e/6e : c'est plus économique.",
       "Roule en sous-régime : un moteur qui tourne calmement consomme moins.",
       "Sers-toi du frein moteur : quand tu vois que tu vas ralentir (feu, giratoire, ligne 70), tu lèves le pied tôt et tu laisses la voiture décélérer seule. Tu freines moins.",
-      "Si tu dois t'arrêter, freine « dégressif » : un peu plus fort au début, puis tu relâches doucement en fin de freinage. Tu t'arrêtes pile, en douceur, sans secouer tes passagers — au lieu d'arriver vite et de freiner sec à la dernière seconde.",
+      "Si tu dois t'arrêter, freine « dégressif » : un peu plus fort au début, puis tu relâches doucement en fin de freinage. Tu t'arrêtes pile, en douceur, sans secouer tes passagers. Au lieu d'arriver vite et de freiner sec à la dernière seconde.",
       "Garde une vitesse stable : les coups d'accélérateur et de frein, c'est du carburant gaspillé.",
       "Coupe le moteur si tu es arrêté longtemps (sauf en circulation, où le stop & start de la voiture s'en charge)."
     ],
@@ -155,7 +155,7 @@
       "Reste courtois : un regard, un geste de la main, tu cèdes le passage sans forcer. La vitesse passe après la sécurité."
     ],
     "pourquoi": "Plus l'usager est fragile, plus une erreur lui coûte cher. Tu anticipes SES erreurs à lui, parce que c'est toi qui as la carrosserie autour de toi. À l'examen, laisser passer un piéton prioritaire n'est même pas « de la courtoisie » : c'est une obligation. Ne pas le faire, c'est éliminatoire.",
-    "erreur": "Dépasser un cycliste « au ras » sans changer de trajectoire, ou démarrer sec à un passage piéton dès que le feu passe au vert sans vérifier qu'il n'y a plus personne. Attention à l'inverse aussi : s'arrêter pour « laisser passer » quelqu'un qui n'est PAS prioritaire (ton feu est vert, le sien rouge) est un arrêt injustifié et dangereux — donc une faute.",
+    "erreur": "Dépasser un cycliste « au ras » sans changer de trajectoire, ou démarrer sec à un passage piéton dès que le feu passe au vert sans vérifier qu'il n'y a plus personne. Attention à l'inverse aussi : s'arrêter pour « laisser passer » quelqu'un qui n'est PAS prioritaire (ton feu est vert, le sien rouge) est un arrêt injustifié et dangereux. Donc une faute.",
     "bva": null,
     "questions": [
       {
@@ -191,7 +191,7 @@
       "Si tu fais une petite erreur, tu continues calmement. Une faute mineure ne fait pas tout rater.",
       "Manœuvre demandée : tu prends ton temps, vitesse lente, regard partout (vision directe, pas seulement les rétros). N'oublie pas le clignotant AVANT de t'arrêter pour la manœuvre, pas après."
     ],
-    "pourquoi": "L'inspecteur évalue ta sécurité et ton autonomie, pas la perfection. Il veut voir un conducteur qui se débrouille seul sans mettre personne en danger. Beaucoup d'élèves « n'entendent plus » l'inspecteur tellement ils stressent et partent perdants alors qu'ils l'avaient. Les remarques en cours d'examen sont souvent de la bienveillance pour faire mûrir ta conduite — et certaines « fautes » que tu crois graves n'en sont pas pour lui.",
+    "pourquoi": "L'inspecteur évalue ta sécurité et ton autonomie, pas la perfection. Il veut voir un conducteur qui se débrouille seul sans mettre personne en danger. Beaucoup d'élèves « n'entendent plus » l'inspecteur tellement ils stressent et partent perdants alors qu'ils l'avaient. Les remarques en cours d'examen sont souvent de la bienveillance pour faire mûrir ta conduite. Et certaines « fautes » que tu crois graves n'en sont pas pour lui.",
     "erreur": "Se figer ou abandonner après une petite faute (« là c'est foutu, je suis trop stressé »), alors que l'examen continue très bien. Ou conduire d'une façon inhabituelle (trop lent, trop crispé) pour « faire bien », ce qui crée justement des erreurs.",
     "bva": null,
     "questions": [

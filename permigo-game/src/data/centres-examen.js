@@ -37,11 +37,11 @@ export const CENTRES_EXAMEN = [
     acces: [
       {
         ico: "map",
-        texte: "RER A — arrêt Cergy-Préfecture, puis quelques minutes à pied.",
+        texte: "RER A. Arrêt Cergy-Préfecture, puis quelques minutes à pied.",
       },
       {
         ico: "compass",
-        texte: "Transilien ligne L — gare de Cergy, correspondances bus.",
+        texte: "Transilien ligne L. Gare de Cergy, correspondances bus.",
       },
       {
         ico: "car",
@@ -57,7 +57,7 @@ export const CENTRES_EXAMEN = [
         texte:
           "Compte 6 à 8 ronds-points sur un parcours type. Ce n'est pas un giratoire isolé qui " +
           "fatigue, c'est l'enchaînement : clignotant à l'approche, contrôle, sortie propre, on " +
-          "recommence. Travaille l'automatisme jusqu'à ce qu'il devienne réflexe — l'examinateur " +
+          "recommence. Travaille l'automatisme jusqu'à ce qu'il devienne réflexe. L'examinateur " +
           "juge ta constance, pas un coup de chance.",
       },
       {
@@ -74,13 +74,13 @@ export const CENTRES_EXAMEN = [
         texte:
           "L'infrastructure est moderne et roulante. Le piège est sournois : sur ces grands axes " +
           "fluides, on dépasse la limite sans s'en rendre compte. Garde un œil régulier sur les " +
-          "panneaux et ton compteur — une survitesse, même légère, est éliminatoire.",
+          "panneaux et ton compteur. Une survitesse, même légère, est éliminatoire.",
       },
     ],
 
     conseils: [
       "Repère le quartier des Gémeaux avant le jour J : les premières minutes seront beaucoup moins stressantes en terrain connu.",
-      "Sur giratoire : clignotant à droite seulement quand tu prends la sortie qui suit — jamais avant, sinon tu envoies un mauvais message.",
+      "Sur giratoire : clignotant à droite seulement quand tu prends la sortie qui suit. Jamais avant, sinon tu envoies un mauvais message.",
       "À chaque changement de direction, verbalise tes contrôles dans ta tête : ça force le regard et ça rassure l'examinateur.",
       "Vise une conduite « lisse » : anticipation, allure stable. À Cergy, la régularité bat la performance.",
     ],
@@ -92,7 +92,7 @@ export const CENTRES_EXAMEN = [
       },
       {
         q: "Je peux connaître le parcours exact à l'avance ?",
-        r: "Non — l'examinateur choisit son itinéraire le jour même parmi plusieurs. Mais les zones et les pièges reviennent toujours : c'est exactement ce qu'on te prépare ici.",
+        r: "Non. L'examinateur choisit son itinéraire le jour même parmi plusieurs. Mais les zones et les pièges reviennent toujours : c'est exactement ce qu'on te prépare ici.",
       },
       {
         q: "Quelle est la cause d'échec n°1 sur ce centre ?",
@@ -125,12 +125,12 @@ export const CENTRES_EXAMEN = [
       {
         ico: "map",
         texte:
-          "Transilien H ou J depuis Paris-Saint-Lazare ou Gare du Nord — descends à Argenteuil, puis bus ou 15 min à pied vers la rue d'Epinay.",
+          "Transilien H ou J depuis Paris-Saint-Lazare ou Gare du Nord. Descends à Argenteuil, puis bus ou 15 min à pied vers la rue d'Epinay.",
       },
       {
         ico: "compass",
         texte:
-          "Tramway T2 — direction Bezons/Pont-de-Bezons, puis bus local vers le centre ou rejoins à pied par les axes principaux.",
+          "Tramway T2. Direction Bezons/Pont-de-Bezons, puis bus local vers le centre ou rejoins à pied par les axes principaux.",
       },
       {
         ico: "car",
@@ -160,9 +160,9 @@ export const CENTRES_EXAMEN = [
     ],
     conseils: [
       "Fais au moins une dizaine d'heures de conduite spécifiquement autour de la rue d'Epinay et des axes voisins (Bezons, Sannois, Colombes) : connaître les carrefours difficiles à froid te sauvera du stress le jour J.",
-      "Entraîne-toi aux insertions sur voie rapide avec ton moniteur — accélération franche, regard miroirs-angle mort, prise de position sans flottement. C'est la compétence qui fait la différence sur ce centre.",
+      "Entraîne-toi aux insertions sur voie rapide avec ton moniteur. Accélération franche, regard miroirs-angle mort, prise de position sans flottement. C'est la compétence qui fait la différence sur ce centre.",
       "Soigne le scanning actif : guette les cyclistes sur les côtés, vérifie deux fois avant de t'engager dans un carrefour mal dégagé, et annonce tes vérifications à voix basse si ça t'aide à structurer.",
-      "La veille, repose-toi et relis mentalement les grandes étapes d'un examen (départ, voie rapide, retour centre-ville, arrivée). Ne tente pas de « mémoriser un parcours précis » — concentre-toi sur tes automatismes de conduite.",
+      "La veille, repose-toi et relis mentalement les grandes étapes d'un examen (départ, voie rapide, retour centre-ville, arrivée). Ne tente pas de « mémoriser un parcours précis ». Concentre-toi sur tes automatismes de conduite.",
     ],
     faq: [
       {
@@ -171,7 +171,7 @@ export const CENTRES_EXAMEN = [
       },
       {
         q: "Je peux connaître le parcours exact à l'avance ?",
-        r: "Non — les examens sont variés et l'inspecteur dirige en temps réel. Ce qui compte, c'est de maîtriser les types de situations du secteur (voie rapide, carrefours complexes, zones résidentielles) plutôt que de tenter d'apprendre un trajet par cœur.",
+        r: "Non. Les examens sont variés et l'inspecteur dirige en temps réel. Ce qui compte, c'est de maîtriser les types de situations du secteur (voie rapide, carrefours complexes, zones résidentielles) plutôt que de tenter d'apprendre un trajet par cœur.",
       },
       {
         q: "Quelle est la cause d'échec n°1 sur ce centre ?",
@@ -200,17 +200,17 @@ export const CENTRES_EXAMEN = [
     difficulteLabel: "Très difficile",
     quizTags: ["vitesse", "priorite", "manoeuvre"],
     resume:
-      "Bobigny fait partie des centres les plus exigeants d'Île-de-France. Entre les boulevards à fort trafic, les insertions sur voies rapides type A86 ou A3 et la densité urbaine permanente du 93, l'examen ici ne laisse aucune place à l'improvisation. Si tu maîtrises Bobigny, tu peux conduire n'importe où — alors autant en faire une force et arriver le jour J vraiment prêt.",
+      "Bobigny fait partie des centres les plus exigeants d'Île-de-France. Entre les boulevards à fort trafic, les insertions sur voies rapides type A86 ou A3 et la densité urbaine permanente du 93, l'examen ici ne laisse aucune place à l'improvisation. Si tu maîtrises Bobigny, tu peux conduire n'importe où. Alors autant en faire une force et arriver le jour J vraiment prêt.",
     acces: [
       {
         ico: "map",
         texte:
-          "Métro ligne 5 — stations Bobigny-Pablo Picasso ou Bobigny-Pantin-Raymond Queneau, à quelques minutes à pied.",
+          "Métro ligne 5. Stations Bobigny-Pablo Picasso ou Bobigny-Pantin-Raymond Queneau, à quelques minutes à pied.",
       },
       {
         ico: "compass",
         texte:
-          "Tramway T1 — terminus Bobigny-Pablo Picasso, correspondances bus RATP disponibles.",
+          "Tramway T1. Terminus Bobigny-Pablo Picasso, correspondances bus RATP disponibles.",
       },
       {
         ico: "car",
@@ -229,7 +229,7 @@ export const CENTRES_EXAMEN = [
         ico: "users",
         titre: "Un trafic dense et imprévisible",
         texte:
-          "Bobigny, c'est la Seine-Saint-Denis : flux de véhicules constant, usagers aux comportements variés, deux-roues qui se faufilent, piétons qui traversent hors passage. L'inspecteur ne sanctionne pas le trafic — il sanctionne ton manque d'anticipation face à lui.",
+          "Bobigny, c'est la Seine-Saint-Denis : flux de véhicules constant, usagers aux comportements variés, deux-roues qui se faufilent, piétons qui traversent hors passage. L'inspecteur ne sanctionne pas le trafic. Il sanctionne ton manque d'anticipation face à lui.",
       },
       {
         ico: "alert-triangle",
@@ -240,18 +240,18 @@ export const CENTRES_EXAMEN = [
     ],
     conseils: [
       "Entraîne-toi spécifiquement sur l'A86 et l'A3 avec ton moniteur avant l'examen : l'insertion sur voie rapide doit devenir un automatisme, pas une source de stress.",
-      "Répète le trajet autour du centre pendant tes heures de conduite accompagnée ou avec ton auto-école — les boulevards et carrefours de l'avenue Paul Vaillant Couturier reviennent souvent.",
+      "Répète le trajet autour du centre pendant tes heures de conduite accompagnée ou avec ton auto-école. Les boulevards et carrefours de l'avenue Paul Vaillant Couturier reviennent souvent.",
       "Surveille les panneaux de limitation en continu : les passages de 50 à 30 km/h et retour sont fréquents dans les zones résidentielles et aux abords des établissements scolaires.",
-      "Anticipe loin devant toi — dans ce secteur urbain dense, ce qui change de niveau c'est la capacité à lire la situation 3 à 4 secondes avant qu'elle n'arrive.",
+      "Anticipe loin devant toi. Dans ce secteur urbain dense, ce qui change de niveau c'est la capacité à lire la situation 3 à 4 secondes avant qu'elle n'arrive.",
     ],
     faq: [
       {
         q: "Bobigny, c'est un centre difficile ?",
-        r: "Oui, c'est l'un des centres les plus techniques d'Île-de-France. La densité urbaine, la présence de voies rapides dans le rayon d'examen et l'intensité du trafic en font un parcours noté 5/5 en difficulté. Ça ne veut pas dire que c'est impossible — ça veut dire qu'il faut arriver vraiment préparé.",
+        r: "Oui, c'est l'un des centres les plus techniques d'Île-de-France. La densité urbaine, la présence de voies rapides dans le rayon d'examen et l'intensité du trafic en font un parcours noté 5/5 en difficulté. Ça ne veut pas dire que c'est impossible. Ça veut dire qu'il faut arriver vraiment préparé.",
       },
       {
         q: "Je peux connaître le parcours exact à l'avance ?",
-        r: "Non — l'inspecteur choisit les directions en temps réel, et les itinéraires varient d'une session à l'autre. Ce qui compte, c'est de connaître le secteur dans son ensemble et de réagir juste à chaque situation, quelle que soit la rue empruntée.",
+        r: "Non. L'inspecteur choisit les directions en temps réel, et les itinéraires varient d'une session à l'autre. Ce qui compte, c'est de connaître le secteur dans son ensemble et de réagir juste à chaque situation, quelle que soit la rue empruntée.",
       },
       {
         q: "Quelle est la cause d'échec n°1 sur ce centre ?",
@@ -279,12 +279,12 @@ export const CENTRES_EXAMEN = [
     difficulteLabel: "Difficile",
     quizTags: ["vitesse", "rond_point", "priorite"],
     resume:
-      "Créteil t'emmène sur un terrain varié et exigeant : tu vas enchaîner les quartiers résidentiels denses, les grands axes à fort trafic, puis des insertions sur voies rapides à 90 km/h (A4, A86). Les giratoires sont omniprésents et la circulation hachée te demande de rester concentré de la première à la dernière seconde. Pas de panique — avec une bonne préparation et des automatismes solides, c'est tout à fait gérable. C'est le type de centre qui valorise les candidats vraiment à l'aise en conditions réelles.",
+      "Créteil t'emmène sur un terrain varié et exigeant : tu vas enchaîner les quartiers résidentiels denses, les grands axes à fort trafic, puis des insertions sur voies rapides à 90 km/h (A4, A86). Les giratoires sont omniprésents et la circulation hachée te demande de rester concentré de la première à la dernière seconde. Pas de panique. Avec une bonne préparation et des automatismes solides, c'est tout à fait gérable. C'est le type de centre qui valorise les candidats vraiment à l'aise en conditions réelles.",
     acces: [
       {
         ico: "map",
         texte:
-          "Métro ligne 8 — stations Créteil-Préfecture ou Créteil-Université, à moins de 10 minutes à pied du centre.",
+          "Métro ligne 8. Stations Créteil-Préfecture ou Créteil-Université, à moins de 10 minutes à pied du centre.",
       },
       {
         ico: "compass",
@@ -302,7 +302,7 @@ export const CENTRES_EXAMEN = [
         ico: "activity",
         titre: "Insertions sur voie rapide",
         texte:
-          "Le parcours peut inclure des bretelles d'accès vers l'A4 ou l'A86 où la vitesse monte à 90 km/h. Le saut de régime entre zone urbaine à 50 et voie rapide est abrupt. Anticipe l'accélération dès la bretelle et assure-toi d'avoir une case franche avant de t'insérer — l'examinateur surveille tes angles morts.",
+          "Le parcours peut inclure des bretelles d'accès vers l'A4 ou l'A86 où la vitesse monte à 90 km/h. Le saut de régime entre zone urbaine à 50 et voie rapide est abrupt. Anticipe l'accélération dès la bretelle et assure-toi d'avoir une case franche avant de t'insérer. L'examinateur surveille tes angles morts.",
       },
       {
         ico: "refresh-cw",
@@ -314,27 +314,27 @@ export const CENTRES_EXAMEN = [
         ico: "eye",
         titre: "Visibilité réduite aux intersections",
         texte:
-          "Dans les zones commerçantes et industrielles, le marquage au sol est souvent usé et la priorité moins évidente. Les camions en stationnement créent des angles morts constants. Réduis ta vitesse avant chaque carrefour ambigu et avance progressivement pour te faire voir — et pour voir.",
+          "Dans les zones commerçantes et industrielles, le marquage au sol est souvent usé et la priorité moins évidente. Les camions en stationnement créent des angles morts constants. Réduis ta vitesse avant chaque carrefour ambigu et avance progressivement pour te faire voir. Et pour voir.",
       },
     ],
     conseils: [
-      "Entraîne-toi spécifiquement à l'insertion sur voie rapide avec ton moniteur avant le jour J — c'est le point technique le plus stressant du parcours.",
+      "Entraîne-toi spécifiquement à l'insertion sur voie rapide avec ton moniteur avant le jour J. C'est le point technique le plus stressant du parcours.",
       "Repasse la règle des giratoires multi-voies : qui cède le passage, comment changer de voie sur l'anneau, comment signaler ta sortie. Beaucoup de fautes viennent de là.",
-      "La veille, repère l'itinéraire pour rejoindre le centre en transports — arriver en retard ou stressé plombe ta concentration dès le départ.",
+      "La veille, repère l'itinéraire pour rejoindre le centre en transports. Arriver en retard ou stressé plombe ta concentration dès le départ.",
       "Pendant l'examen, verbalise mentalement chaque vérification (rétros, angles morts, clignotant) : ça t'ancre dans le moment présent et réduit les oublis sous pression.",
     ],
     faq: [
       {
         q: "Créteil, c'est un centre difficile ?",
-        r: "Oui, on le classe parmi les centres difficiles d'Île-de-France. La diversité des situations — voies rapides, giratoires complexes, trafic dense — exige un niveau solide et des automatismes bien installés. Mais ça ne veut pas dire que c'est une loterie : les candidats bien préparés passent. Discute avec ton moniteur du nombre d'heures qu'il te recommande avant de te présenter.",
+        r: "Oui, on le classe parmi les centres difficiles d'Île-de-France. La diversité des situations (voies rapides, giratoires complexes, trafic dense) exige un niveau solide et des automatismes bien installés. Mais ça ne veut pas dire que c'est une loterie : les candidats bien préparés passent. Discute avec ton moniteur du nombre d'heures qu'il te recommande avant de te présenter.",
       },
       {
         q: "Je peux connaître le parcours exact à l'avance ?",
-        r: "Non — les examinateurs disposent de plusieurs parcours et les varient. Ce que tu peux faire, c'est rouler avec ton moniteur dans le secteur autour du centre pour t'habituer à l'ambiance, aux types de voies et aux giratoires récurrents. La familiarité avec la zone vaut bien mieux que de mémoriser un tracé.",
+        r: "Non. Les examinateurs disposent de plusieurs parcours et les varient. Ce que tu peux faire, c'est rouler avec ton moniteur dans le secteur autour du centre pour t'habituer à l'ambiance, aux types de voies et aux giratoires récurrents. La familiarité avec la zone vaut bien mieux que de mémoriser un tracé.",
       },
       {
         q: "Quelle est la cause d'échec n°1 sur ce centre ?",
-        r: "La gestion des insertions sur voie rapide et les erreurs aux giratoires multi-voies arrivent en tête. Mais derrière, c'est souvent le stress qui amplifie tout : un angle mort oublié ici, un stop mal marqué là. Travailler ses automatismes en conditions réelles — pas seulement en circulation douce — fait toute la différence.",
+        r: "La gestion des insertions sur voie rapide et les erreurs aux giratoires multi-voies arrivent en tête. Mais derrière, c'est souvent le stress qui amplifie tout : un angle mort oublié ici, un stop mal marqué là. Travailler ses automatismes en conditions réelles, pas seulement en circulation douce, fait toute la différence.",
       },
       {
         q: "Combien de temps dure l'examen ?",
@@ -342,7 +342,7 @@ export const CENTRES_EXAMEN = [
       },
       {
         q: "Je fais quoi la veille ?",
-        r: "Arrête les révisions intenses — ton cerveau a besoin de souffler. Prépare tes documents (convocation, pièce d'identité) la veille au soir pour ne pas chercher au dernier moment. Dors suffisamment, mange normalement le matin et arrive sur place avec quelques minutes d'avance pour te poser avant d'embarquer dans la voiture.",
+        r: "Arrête les révisions intenses. Ton cerveau a besoin de souffler. Prépare tes documents (convocation, pièce d'identité) la veille au soir pour ne pas chercher au dernier moment. Dors suffisamment, mange normalement le matin et arrive sur place avec quelques minutes d'avance pour te poser avant d'embarquer dans la voiture.",
       },
     ],
   },
@@ -406,7 +406,7 @@ export const CENTRES_EXAMEN = [
     faq: [
       {
         q: "Nanterre, c'est un centre difficile ?",
-        r: "Oui, franchement. Nanterre combine trafic urbain dense, passages en voie rapide sur l'A86 et une signalisation de zone parfois absente. C'est un centre qui discrimine vraiment les candidats préparés des autres. Avec un bon entraînement sur place, c'est tout à fait passable — mais il ne pardonne pas l'improvisation.",
+        r: "Oui, franchement. Nanterre combine trafic urbain dense, passages en voie rapide sur l'A86 et une signalisation de zone parfois absente. C'est un centre qui discrimine vraiment les candidats préparés des autres. Avec un bon entraînement sur place, c'est tout à fait passable. Mais il ne pardonne pas l'improvisation.",
       },
       {
         q: "Je peux connaître le parcours exact à l'avance ?",
@@ -462,13 +462,13 @@ export const CENTRES_EXAMEN = [
         ico: "activity",
         titre: "La N10 : trois vitesses en un kilomètre",
         texte:
-          "Sur la Nationale 10, la limite passe de 50 à 70 puis à 90 km/h avant de redescendre, parfois sur quelques centaines de mètres. Tu dois lire les panneaux en avance et ajuster ta vitesse de façon fluide — ni trop tôt, ni trop tard. L'inspecteur note chaque excès comme chaque conduite hésitante.",
+          "Sur la Nationale 10, la limite passe de 50 à 70 puis à 90 km/h avant de redescendre, parfois sur quelques centaines de mètres. Tu dois lire les panneaux en avance et ajuster ta vitesse de façon fluide. Ni trop tôt, ni trop tard. L'inspecteur note chaque excès comme chaque conduite hésitante.",
       },
       {
         ico: "eye",
         titre: "Priorités à droite en zone pavillonnaire",
         texte:
-          "Les quartiers résidentiels autour de Trappes comportent de nombreuses intersections sans marquage apparent. La règle de priorité à droite s'y applique pleinement. Beaucoup d'élèves partent confiants sur boulevard et relâchent leur vigilance dès qu'ils entrent dans ces rues — c'est là que ça coince.",
+          "Les quartiers résidentiels autour de Trappes comportent de nombreuses intersections sans marquage apparent. La règle de priorité à droite s'y applique pleinement. Beaucoup d'élèves partent confiants sur boulevard et relâchent leur vigilance dès qu'ils entrent dans ces rues. C'est là que ça coince.",
       },
       {
         ico: "refresh-cw",
@@ -479,14 +479,14 @@ export const CENTRES_EXAMEN = [
     ],
     conseils: [
       "Repère la N10 et entraîne-toi à enchaîner les changements de vitesse (50→70→90→50) sans à-coups : c'est un classique du parcours.",
-      "Dans les quartiers résidentiels, ralentis systématiquement avant chaque intersection non réglée — ne devine pas, vérifie.",
+      "Dans les quartiers résidentiels, ralentis systématiquement avant chaque intersection non réglée. Ne devine pas, vérifie.",
       "Aux giratoires à deux voies, décide ta sortie AVANT d'entrer et garde ta voie jusqu'au bout. Pas de slalom à l'intérieur.",
       "La veille, dors correctement et arrive au centre 15 min en avance : repérer les lieux te permet de démarrer serein plutôt que stressé.",
     ],
     faq: [
       {
         q: "Trappes, c'est un centre difficile ?",
-        r: "Pas particulièrement — on lui attribue une difficulté de 3/5, dans la moyenne des centres d'Île-de-France. Ce qui peut piéger, c'est la diversité du parcours : tu passes d'une zone calme à un axe rapide sans transition annoncée. Si tu as bien travaillé les priorités à droite et les insertions sur grand axe, tu as les clés pour t'en sortir.",
+        r: "Pas particulièrement. On lui attribue une difficulté de 3/5, dans la moyenne des centres d'Île-de-France. Ce qui peut piéger, c'est la diversité du parcours : tu passes d'une zone calme à un axe rapide sans transition annoncée. Si tu as bien travaillé les priorités à droite et les insertions sur grand axe, tu as les clés pour t'en sortir.",
       },
       {
         q: "Je peux connaître le parcours exact à l'avance ?",
@@ -494,7 +494,7 @@ export const CENTRES_EXAMEN = [
       },
       {
         q: "Quelle est la cause d'échec n°1 sur ce centre ?",
-        r: "Les priorités à droite non respectées dans les zones résidentielles et les mauvaises gestions de vitesse sur la N10 sont les deux erreurs les plus fréquentes. Beaucoup d'élèves perdent en vigilance dès qu'ils quittent une voie principale — or c'est exactement là que l'inspecteur attend une conduite irréprochable.",
+        r: "Les priorités à droite non respectées dans les zones résidentielles et les mauvaises gestions de vitesse sur la N10 sont les deux erreurs les plus fréquentes. Beaucoup d'élèves perdent en vigilance dès qu'ils quittent une voie principale. Or c'est exactement là que l'inspecteur attend une conduite irréprochable.",
       },
       {
         q: "Combien de temps dure l'examen ?",
@@ -522,7 +522,7 @@ export const CENTRES_EXAMEN = [
     resume:
       "Massy, c'est un examen qui ne te laisse pas le temps de chauffer : dès la sortie du " +
       "centre, dans le quartier Opéra, tu es tout de suite dans le bain. Le secteur mélange " +
-      "centre-ville dense, intersections en pagaille et ronds-points à enchaîner — rien " +
+      "centre-ville dense, intersections en pagaille et ronds-points à enchaîner. Rien " +
       "d'extrême, mais une exigence d'attention de la première à la dernière minute. Classé " +
       "3/5 dans l'Essonne, c'est un centre « juste » : il récompense ceux qui ont roulé le " +
       "secteur et gardé la tête froide. Bien préparé, tu en fais un terrain connu.",
@@ -531,7 +531,7 @@ export const CENTRES_EXAMEN = [
       {
         ico: "map",
         texte:
-          "RER B et RER C — gare de Massy-Palaiseau, puis quelques minutes vers le quartier Opéra.",
+          "RER B et RER C. Gare de Massy-Palaiseau, puis quelques minutes vers le quartier Opéra.",
       },
       {
         ico: "compass",
@@ -569,7 +569,7 @@ export const CENTRES_EXAMEN = [
         texte:
           "Le secteur alterne giratoires à lire vite et voies à sens unique. Le risque, c'est de " +
           "se tromper de file ou d'engager un sens interdit sous la pression. Anticipe la " +
-          "signalisation, vérifie les flèches au sol et choisis ta voie tôt — la lecture de la route " +
+          "signalisation, vérifie les flèches au sol et choisis ta voie tôt. La lecture de la route " +
           "prime sur la vitesse.",
       },
     ],
@@ -577,7 +577,7 @@ export const CENTRES_EXAMEN = [
     conseils: [
       "Va rouler le quartier Opéra avant le jour J : connaître le départ enlève l'essentiel du stress des premières minutes.",
       "À chaque stop, exagère ton arrêt : mieux vaut une seconde de trop qu'un arrêt jugé incomplet.",
-      "Sur les sens uniques, fie-toi aux flèches au sol et aux panneaux plutôt qu'à ton instinct — le secteur est piégeux.",
+      "Sur les sens uniques, fie-toi aux flèches au sol et aux panneaux plutôt qu'à ton instinct. Le secteur est piégeux.",
       "Garde une allure souple et régulière : à Massy, la constance rassure l'examinateur plus que la performance.",
     ],
 
@@ -588,7 +588,7 @@ export const CENTRES_EXAMEN = [
       },
       {
         q: "Qu'est-ce qui surprend le plus le jour de l'examen ?",
-        r: "Le départ : tu es tout de suite dans la circulation dense, sans phase d'échauffement. C'est mental — préparé à ça, tu n'es plus pris de court.",
+        r: "Le départ : tu es tout de suite dans la circulation dense, sans phase d'échauffement. C'est mental. Préparé à ça, tu n'es plus pris de court.",
       },
       {
         q: "Quelle est la cause d'échec n°1 ici ?",
@@ -618,14 +618,14 @@ export const CENTRES_EXAMEN = [
       "modernes d'un côté, ruelles du vieux village de l'autre, et au milieu une insertion sur " +
       "la Nationale 7 qui ne s'improvise pas. Le secteur teste ta capacité à passer d'un " +
       "environnement à l'autre sans perdre tes contrôles. Classé 3/5 dans l'Essonne, il n'a " +
-      "rien d'effrayant — mais il faut un regard mobile et de l'anticipation, surtout quand le " +
+      "rien d'effrayant. Mais il faut un regard mobile et de l'anticipation, surtout quand le " +
       "trafic se densifie autour de la gare et des centres commerciaux.",
 
     acces: [
       {
         ico: "map",
         texte:
-          "RER D — gare d'Évry-Courcouronnes Centre, puis quelques minutes vers l'avenue de la Préfecture.",
+          "RER D. Gare d'Évry-Courcouronnes Centre, puis quelques minutes vers l'avenue de la Préfecture.",
       },
       {
         ico: "compass",
@@ -695,7 +695,7 @@ export const CENTRES_EXAMEN = [
 
   {
     slug: "melun",
-    nom: "Melun – Vaux-le-Pénil",
+    nom: "Melun. Vaux-le-Pénil",
     departement: "Seine-et-Marne",
     deptNum: "77",
     adresse: "Avenue Georges Clemenceau, 77000 Vaux-le-Pénil (secteur Melun)",
@@ -710,7 +710,7 @@ export const CENTRES_EXAMEN = [
       "nombreux, parfois techniques, et souvent bordés d'une voie cyclable. Ajoute des zones 30 " +
       "et un centre-ville où le regard ne doit jamais se figer, et tu obtiens un examen 3/5 qui " +
       "récompense la maîtrise des ronds-points et la vigilance cycliste. Si ton parcours passe " +
-      "par le cœur de Melun, la difficulté peut grimper d'un cran — d'où l'intérêt de connaître le secteur.",
+      "par le cœur de Melun, la difficulté peut grimper d'un cran. D'où l'intérêt de connaître le secteur.",
 
     acces: [
       {
@@ -736,7 +736,7 @@ export const CENTRES_EXAMEN = [
         titre: "Les giratoires de Melun",
         texte:
           "C'est LA spécialité du centre : des ronds-points nombreux et parfois techniques. Le piège " +
-          "récurrent, c'est le positionnement — mauvaise file à l'entrée ou clignotant mal placé à la " +
+          "récurrent, c'est le positionnement. Mauvaise file à l'entrée ou clignotant mal placé à la " +
           "sortie. Choisis ta voie tôt, signale au bon moment et garde une trajectoire nette.",
       },
       {
@@ -759,7 +759,7 @@ export const CENTRES_EXAMEN = [
 
     conseils: [
       "Entraîne-toi aux ronds-points du secteur jusqu'à ce que le positionnement devienne un réflexe : c'est le cœur de l'examen ici.",
-      "À chaque sortie de giratoire, un coup d'œil angle mort droit pour le cycliste — fais-en un automatisme.",
+      "À chaque sortie de giratoire, un coup d'œil angle mort droit pour le cycliste. Fais-en un automatisme.",
       "En zone 30, anticipe le panneau et lève le pied avant d'y entrer plutôt que de freiner dedans.",
       "Si tu passes par le centre de Melun, reste souple : c'est la partie qui peut faire monter la difficulté.",
     ],
@@ -786,7 +786,7 @@ export const CENTRES_EXAMEN = [
 
   {
     slug: "lyon",
-    nom: "Lyon – Vénissieux",
+    nom: "Lyon. Vénissieux",
     departement: "Rhône",
     deptNum: "69",
     adresse: "9 rue Aristide Bruant, 69200 Vénissieux (secteur Lyon)",
@@ -800,18 +800,18 @@ export const CENTRES_EXAMEN = [
       "le plus souvent à Vénissieux ou Saint-Priest, parfois à Rillieux-la-Pape (plus corsé) ou Dardilly (plus tranquille). " +
       "Vénissieux, le plus proche de Lyon, te plonge dans l'urbain dense dès le premier mètre : pas d'échauffement, " +
       "des grands boulevards trompeurs et des giratoires à deux voies qui servent de juge de paix. Le Rhône tourne " +
-      "autour de 57 % de réussite, un peu sous la moyenne nationale — rien d'infranchissable, mais ça se prépare.",
+      "autour de 57 % de réussite, un peu sous la moyenne nationale. Rien d'infranchissable, mais ça se prépare.",
 
     acces: [
       {
         ico: "map",
         texte:
-          "Métro D — terminus Gare de Vénissieux, puis tram ou bus TCL vers le centre-ville.",
+          "Métro D. Terminus Gare de Vénissieux, puis tram ou bus TCL vers le centre-ville.",
       },
       {
         ico: "compass",
         texte:
-          "Tram T4 — plusieurs arrêts dans Vénissieux, correspondance à la Gare de Vénissieux.",
+          "Tram T4. Plusieurs arrêts dans Vénissieux, correspondance à la Gare de Vénissieux.",
       },
       {
         ico: "car",
@@ -833,7 +833,7 @@ export const CENTRES_EXAMEN = [
         ico: "eye",
         titre: "Un départ dans le vif, montée comprise",
         texte:
-          "Zéro mise en jambes ici : tu démarres directement dans un environnement dense — commerces, piétons, " +
+          "Zéro mise en jambes ici : tu démarres directement dans un environnement dense. Commerces, piétons, " +
           "arrêts de bus. Les candidats parlent aussi d'une belle montée dès le départ, avec un passage piéton très " +
           "fréquenté en haut. Traduction : démarrage en côte propre ET œil sur les piétons en même temps. Prépare " +
           "les deux, pas l'un après l'autre.",
@@ -842,7 +842,7 @@ export const CENTRES_EXAMEN = [
         ico: "alert-triangle",
         titre: "Les grands boulevards, faux amis",
         texte:
-          "Les axes larges à plusieurs voies donnent une impression de confort — et c'est exactement là que " +
+          "Les axes larges à plusieurs voies donnent une impression de confort. Et c'est exactement là que " +
           "beaucoup d'élèves ratent. On relâche l'attention, on laisse filer la vitesse, on oublie un contrôle au " +
           "changement de voie. Garde la même rigueur sur boulevard que dans une petite rue : c'est la constance " +
           "qui est jugée.",
@@ -850,7 +850,7 @@ export const CENTRES_EXAMEN = [
     ],
 
     conseils: [
-      "Roule le secteur avant le jour J : Vénissieux centre, les boulevards et les giratoires à deux voies — le terrain connu enlève la moitié du stress.",
+      "Roule le secteur avant le jour J : Vénissieux centre, les boulevards et les giratoires à deux voies. Le terrain connu enlève la moitié du stress.",
       "Travaille le démarrage en côte jusqu'au réflexe : frein à main ou point de patinage, mais zéro recul avec des piétons autour.",
       "Le tram T4 traverse la ville : aux carrefours avec les voies de tram, redouble d'attention sur la signalisation dédiée.",
       "Sur les grands boulevards, garde un œil régulier sur compteur et panneaux : le relâchement est la faute la plus fréquente ici.",
@@ -859,11 +859,11 @@ export const CENTRES_EXAMEN = [
     faq: [
       {
         q: "Il y a un centre d'examen dans Lyon ?",
-        r: "Non — les centres du Rhône sont tous en périphérie : Vénissieux, Saint-Priest, Rillieux-la-Pape, Dardilly, Givors ou Villefranche. Depuis Lyon, Vénissieux est le plus accessible (métro D + tram T4).",
+        r: "Non. Les centres du Rhône sont tous en périphérie : Vénissieux, Saint-Priest, Rillieux-la-Pape, Dardilly, Givors ou Villefranche. Depuis Lyon, Vénissieux est le plus accessible (métro D + tram T4).",
       },
       {
         q: "Vénissieux, c'est un centre difficile ?",
-        r: "Intermédiaire (3/5), au même niveau que Saint-Priest ou Givors — plus accessible que Rillieux-la-Pape, plus exigeant que Dardilly. Le Rhône est un poil sous la moyenne nationale de réussite, donc prépare-toi sérieusement.",
+        r: "Intermédiaire (3/5), au même niveau que Saint-Priest ou Givors. Plus accessible que Rillieux-la-Pape, plus exigeant que Dardilly. Le Rhône est un poil sous la moyenne nationale de réussite, donc prépare-toi sérieusement.",
       },
       {
         q: "Quelle est la cause d'échec n°1 sur ce centre ?",
@@ -882,7 +882,7 @@ export const CENTRES_EXAMEN = [
 
   {
     slug: "marseille",
-    nom: "Marseille – Saint-Henri",
+    nom: "Marseille. Saint-Henri",
     departement: "Bouches-du-Rhône",
     deptNum: "13",
     adresse: "99 chemin de la Pelouque, 13016 Marseille (quartier Saint-Henri)",
@@ -894,11 +894,11 @@ export const CENTRES_EXAMEN = [
 
     resume:
       "Saint-Henri, dans le 16e arrondissement, c'est LE centre de Marseille : environ 70 % des candidats " +
-      "marseillais passent ici, l'alternative étant Aubagne. Le décor est posé — quartiers nord entre collines et " +
+      "marseillais passent ici, l'alternative étant Aubagne. Le décor est posé. Quartiers nord entre collines et " +
       "littoral, l'A55 à deux pas, une circulation marseillaise qui ne fait pas de cadeau. Intersections aux " +
       "priorités pas toujours évidentes, ronds-points, insertions sur axes chargés et limitations qui alternent " +
       "entre 30 et 50 : tout y est. Avec un taux de réussite du département autour de 56 %, nettement sous la " +
-      "moyenne nationale, ce centre mérite son 4/5 — et une vraie préparation sur le secteur.",
+      "moyenne nationale, ce centre mérite son 4/5. Et une vraie préparation sur le secteur.",
 
     acces: [
       {
@@ -909,7 +909,7 @@ export const CENTRES_EXAMEN = [
       {
         ico: "compass",
         texte:
-          "TER — gare de l'Estaque (ligne Marseille–Miramas par la Côte Bleue), à quelques minutes du chemin de la Pelouque.",
+          "TER. Gare de l'Estaque (ligne Marseille–Miramas par la Côte Bleue), à quelques minutes du chemin de la Pelouque.",
       },
       {
         ico: "car",
@@ -932,7 +932,7 @@ export const CENTRES_EXAMEN = [
         ico: "refresh-cw",
         titre: "Ronds-points et insertions musclées",
         texte:
-          "Le parcours enchaîne plusieurs giratoires et des insertions sur des axes très fréquentés — avec l'A55 " +
+          "Le parcours enchaîne plusieurs giratoires et des insertions sur des axes très fréquentés. Avec l'A55 " +
           "en toile de fond du secteur. Le piège : hésiter. Observe tôt, choisis ton créneau et engage-toi " +
           "franchement, contrôles rétro + angle mort à l'appui. Une insertion molle gêne le flux autant qu'une " +
           "insertion forcée.",
@@ -941,15 +941,15 @@ export const CENTRES_EXAMEN = [
         ico: "alert-triangle",
         titre: "Le yo-yo 30/50 dans un secteur vallonné",
         texte:
-          "Les limitations alternent sans arrêt entre 30 et 50 km/h, et le relief du 16e — entre collines et " +
-          "mer — ajoute des arrêts en pente. Reste dans la bonne vitesse à chaque zone, et soigne tes démarrages " +
+          "Les limitations alternent sans arrêt entre 30 et 50 km/h, et le relief du 16e. Entre collines et " +
+          "mer. Ajoute des arrêts en pente. Reste dans la bonne vitesse à chaque zone, et soigne tes démarrages " +
           "en côte : un recul au feu ou une survitesse en zone 30, même légère, coûte très cher.",
       },
     ],
 
     conseils: [
       "Fais plusieurs heures de conduite dans les 15e et 16e arrondissements avant l'examen : la circulation du secteur ne ressemble à aucune autre, autant l'apprivoiser avant le jour J.",
-      "Blinde ta priorité à droite : à chaque intersection sans signalisation claire, pied levé et regard actif — c'est l'erreur la plus citée ici.",
+      "Blinde ta priorité à droite : à chaque intersection sans signalisation claire, pied levé et regard actif. C'est l'erreur la plus citée ici.",
       "Travaille le démarrage en côte jusqu'au réflexe : le relief du quartier ne te laissera pas y échapper.",
       "Garde tes distances de sécurité même quand ça bouchonne : se laisser coller au véhicule de devant est une faute que l'examinateur relève.",
     ],
@@ -957,11 +957,11 @@ export const CENTRES_EXAMEN = [
     faq: [
       {
         q: "Saint-Henri, c'est un centre difficile ?",
-        r: "Oui, on le classe 4/5. Le taux de réussite des Bouches-du-Rhône tourne autour de 56 %, nettement sous la moyenne nationale, et la circulation marseillaise demande une vigilance de tous les instants. Bien préparé sur le secteur, ça se passe — mais pas en improvisant.",
+        r: "Oui, on le classe 4/5. Le taux de réussite des Bouches-du-Rhône tourne autour de 56 %, nettement sous la moyenne nationale, et la circulation marseillaise demande une vigilance de tous les instants. Bien préparé sur le secteur, ça se passe. Mais pas en improvisant.",
       },
       {
         q: "C'est le seul centre pour passer à Marseille ?",
-        r: "C'est le seul dans Marseille même — environ 70 % des candidats marseillais passent ici. L'autre option du secteur est le centre d'Aubagne, un peu plus loin à l'est.",
+        r: "C'est le seul dans Marseille même. Environ 70 % des candidats marseillais passent ici. L'autre option du secteur est le centre d'Aubagne, un peu plus loin à l'est.",
       },
       {
         q: "Quelle est la cause d'échec n°1 sur ce centre ?",
@@ -980,7 +980,7 @@ export const CENTRES_EXAMEN = [
 
   {
     slug: "toulouse",
-    nom: "Toulouse – Lalande",
+    nom: "Toulouse. Lalande",
     departement: "Haute-Garonne",
     deptNum: "31",
     adresse: "2 rue de Lalande, 31200 Toulouse",
@@ -990,7 +990,7 @@ export const CENTRES_EXAMEN = [
     quizTags: ["rond_point", "vitesse", "priorite"],
 
     resume:
-      "Lalande, au nord de Toulouse, est le grand centre d'examen de la Ville rose — l'agglo compte aussi " +
+      "Lalande, au nord de Toulouse, est le grand centre d'examen de la Ville rose. L'agglo compte aussi " +
       "Darasse (31500) et Colomiers si ton auto-école t'y envoie. Le terrain de jeu : le nord toulousain, avec " +
       "la D820 (avenue des États-Unis) en colonne vertébrale, la rocade et l'A62 aux portes du quartier, des " +
       "giratoires en série et des communes résidentielles comme Aucamville, Launaguet ou Fenouillet juste à côté. " +
@@ -1001,7 +1001,7 @@ export const CENTRES_EXAMEN = [
       {
         ico: "map",
         texte:
-          "Métro B — station La Vache, puis quelques minutes de bus ou une vingtaine à pied vers la rue de Lalande.",
+          "Métro B. Station La Vache, puis quelques minutes de bus ou une vingtaine à pied vers la rue de Lalande.",
       },
       {
         ico: "compass",
@@ -1021,7 +1021,7 @@ export const CENTRES_EXAMEN = [
         titre: "Les giratoires du nord toulousain",
         texte:
           "Entre la D820, les abords de la rocade et les entrées des communes voisines, les ronds-points " +
-          "s'enchaînent — certains à plusieurs voies. C'est le point d'entraînement n°1 recommandé sur ce " +
+          "s'enchaînent. Certains à plusieurs voies. C'est le point d'entraînement n°1 recommandé sur ce " +
           "centre : voie choisie avant d'entrer, trajectoire tenue, clignotant de sortie au bon moment. " +
           "L'examinateur juge la répétition propre, pas un giratoire réussi par chance.",
       },
@@ -1040,13 +1040,13 @@ export const CENTRES_EXAMEN = [
         texte:
           "Cette ancienne nationale traverse tout le quartier : commerces, concessions autos, entrées et sorties " +
           "de parkings en continu, bus et piétons. Le trafic y est dense et les limitations alternent entre " +
-          "zones 30 et 50. Scanne les côtés en permanence et vérifie ta vitesse à chaque panneau — la survitesse " +
+          "zones 30 et 50. Scanne les côtés en permanence et vérifie ta vitesse à chaque panneau. La survitesse " +
           "d'inattention est le piège classique des grands axes.",
       },
     ],
 
     conseils: [
-      "Roule le secteur avant le jour J : Lalande, l'avenue des États-Unis et les communes voisines (Aucamville, Launaguet, Fenouillet) — leurs rues résidentielles demandent une vigilance particulière sur les priorités.",
+      "Roule le secteur avant le jour J : Lalande, l'avenue des États-Unis et les communes voisines (Aucamville, Launaguet, Fenouillet). Leurs rues résidentielles demandent une vigilance particulière sur les priorités.",
       "Travaille l'insertion sur la rocade avec ton moniteur jusqu'à ce qu'elle devienne un automatisme : c'est la compétence qui fait la différence ici.",
       "Sur la D820, lis les panneaux en avance : les passages 50 → 30 et retour s'enchaînent vite dans les zones commerçantes.",
       "Arrive 15 min en avance avec convocation et pièce d'identité : démarrer posé, c'est déjà des points de sauvés.",
@@ -1055,11 +1055,11 @@ export const CENTRES_EXAMEN = [
     faq: [
       {
         q: "Lalande, c'est un centre difficile ?",
-        r: "Intermédiaire (3/5). La Haute-Garonne est dans la moyenne nationale de réussite (autour de 60 %). Ce qui compte ici, c'est la maîtrise des giratoires, de l'insertion rocade et des grands axes — des situations qui se travaillent très bien à l'avance.",
+        r: "Intermédiaire (3/5). La Haute-Garonne est dans la moyenne nationale de réussite (autour de 60 %). Ce qui compte ici, c'est la maîtrise des giratoires, de l'insertion rocade et des grands axes. Des situations qui se travaillent très bien à l'avance.",
       },
       {
         q: "Il y a d'autres centres à Toulouse ?",
-        r: "Oui : Darasse, dans l'est toulousain (rue Xavier Darasse, 31500), et Colomiers dans l'ouest de l'agglo. Ton auto-école choisit le centre — la préparation reste la même : connaître le secteur où tu passes.",
+        r: "Oui : Darasse, dans l'est toulousain (rue Xavier Darasse, 31500), et Colomiers dans l'ouest de l'agglo. Ton auto-école choisit le centre. La préparation reste la même : connaître le secteur où tu passes.",
       },
       {
         q: "Quelle est la cause d'échec n°1 sur ce centre ?",
@@ -1077,7 +1077,7 @@ export const CENTRES_EXAMEN = [
   },
   {
     slug: "bordeaux",
-    nom: "Bordeaux – Mérignac",
+    nom: "Bordeaux. Mérignac",
     departement: "Gironde",
     deptNum: "33",
     adresse: "20 rue Thierry Sabine, 33700 Mérignac",
@@ -1092,19 +1092,19 @@ export const CENTRES_EXAMEN = [
       "métropole à Villenave-d'Ornon). Le secteur est moderne et roulant : giratoires en " +
       "cascade, grands axes type avenue Marcel Dassault, rocade toute proche et tram A qui " +
       "s'invite dans le paysage. La Gironde affiche un taux de réussite au-dessus de la moyenne " +
-      "nationale — ici, la préparation paie. Connaître les réflexes du secteur te met une vraie " +
+      "nationale. Ici, la préparation paie. Connaître les réflexes du secteur te met une vraie " +
       "longueur d'avance le jour J.",
 
     acces: [
       {
         ico: "map",
         texte:
-          "Tram A, branche aéroport — arrêts Cadéra-Issartier, Caroline Aigle ou Aéroport, puis correspondance bus ou marche dans la zone.",
+          "Tram A, branche aéroport. Arrêts Cadéra-Issartier, Caroline Aigle ou Aéroport, puis correspondance bus ou marche dans la zone.",
       },
       {
         ico: "compass",
         texte:
-          "Bus TBM — arrêt Institut Evering à une dizaine de minutes à pied du centre.",
+          "Bus TBM. Arrêt Institut Evering à une dizaine de minutes à pied du centre.",
       },
       {
         ico: "car",
@@ -1120,7 +1120,7 @@ export const CENTRES_EXAMEN = [
         texte:
           "Un parcours type dans le secteur peut aligner plus d'une dizaine de ronds-points. Ce n'est pas " +
           "un giratoire qui pose problème, c'est la répétition : clignotant à l'approche, contrôle, " +
-          "sortie propre, et on recommence. Travaille l'automatisme jusqu'au réflexe — l'examinateur " +
+          "sortie propre, et on recommence. Travaille l'automatisme jusqu'au réflexe. L'examinateur " +
           "juge ta constance sur toute la série, pas un passage réussi par chance.",
       },
       {
@@ -1129,7 +1129,7 @@ export const CENTRES_EXAMEN = [
         texte:
           "Les parcours du centre démarrent et se terminent souvent par des voies à accès limité : " +
           "la rocade et ses bretelles sont juste là. Insertion franche, angle mort vérifié, allure " +
-          "adaptée dès les premières minutes — tu n'as pas le temps de chauffer. Une insertion molle " +
+          "adaptée dès les premières minutes. Tu n'as pas le temps de chauffer. Une insertion molle " +
           "ou une hésitation à la bretelle coûte très cher.",
       },
       {
@@ -1146,7 +1146,7 @@ export const CENTRES_EXAMEN = [
     conseils: [
       "Va repérer la zone de l'aéroport avant le jour J : le centre n'est pas dans Bordeaux, et arriver en terrain connu enlève une grosse part du stress.",
       "Blinde tes insertions sur la rocade avec ton moniteur : accélération franche, rétro + angle mort, prise de position sans flottement. C'est le geste qui fait la différence ici.",
-      "Sur giratoire : clignotant à droite seulement quand tu prends la sortie qui suit — jamais avant. Sur une série de dix, l'examinateur voit tout de suite si c'est un réflexe ou du hasard.",
+      "Sur giratoire : clignotant à droite seulement quand tu prends la sortie qui suit. Jamais avant. Sur une série de dix, l'examinateur voit tout de suite si c'est un réflexe ou du hasard.",
       "Aux carrefours avec le tram, fie-toi aux feux et à la signalisation dédiée, pas à ton instinct : une rame silencieuse arrive plus vite qu'on ne le croit.",
     ],
 
@@ -1161,7 +1161,7 @@ export const CENTRES_EXAMEN = [
       },
       {
         q: "Je peux connaître le parcours exact à l'avance ?",
-        r: "Non — l'examinateur choisit son itinéraire le jour même parmi plusieurs. Mais les ingrédients reviennent toujours : giratoires, grands axes de la zone aéroportuaire et passage possible par la rocade. C'est exactement ce qu'on te prépare ici.",
+        r: "Non. L'examinateur choisit son itinéraire le jour même parmi plusieurs. Mais les ingrédients reviennent toujours : giratoires, grands axes de la zone aéroportuaire et passage possible par la rocade. C'est exactement ce qu'on te prépare ici.",
       },
       {
         q: "Combien de temps dure l'examen ?",
@@ -1176,7 +1176,7 @@ export const CENTRES_EXAMEN = [
 
   {
     slug: "lille",
-    nom: "Lille – Lomme",
+    nom: "Lille. Lomme",
     departement: "Nord",
     deptNum: "59",
     adresse: "57 avenue Roger Salengro, 59160 Lomme (Lille)",
@@ -1198,12 +1198,12 @@ export const CENTRES_EXAMEN = [
       {
         ico: "map",
         texte:
-          "Métro ligne 2 — station Bourg (Lomme), à quelques minutes à pied du secteur Salengro / République.",
+          "Métro ligne 2. Station Bourg (Lomme), à quelques minutes à pied du secteur Salengro / République.",
       },
       {
         ico: "compass",
         texte:
-          "Bus Ilévia — la ligne 10 dessert l'avenue de la République toute proche, correspondances vers le reste de la métropole.",
+          "Bus Ilévia. La ligne 10 dessert l'avenue de la République toute proche, correspondances vers le reste de la métropole.",
       },
       {
         ico: "car",
@@ -1229,7 +1229,7 @@ export const CENTRES_EXAMEN = [
           "Pérenchies, Sequedin, Saint-André : les itinéraires quittent volontiers Lomme pour le centre " +
           "d'un village voisin. Rues étroites, stationnement des deux côtés, intersections sans marquage " +
           "où la priorité à droite s'applique pleinement. C'est là qu'on relâche la garde après une " +
-          "portion roulante — et c'est exactement là que ça coince.",
+          "portion roulante. Et c'est exactement là que ça coince.",
       },
       {
         ico: "refresh-cw",
@@ -1252,7 +1252,7 @@ export const CENTRES_EXAMEN = [
     faq: [
       {
         q: "L'examen se passe dans Lille même ?",
-        r: "Non — le centre est à Lomme, commune associée de Lille, avenue Roger Salengro. Un autre centre dessert l'est de la métropole côté Lezennes / Villeneuve-d'Ascq. Vérifie bien l'adresse sur ta convocation.",
+        r: "Non. Le centre est à Lomme, commune associée de Lille, avenue Roger Salengro. Un autre centre dessert l'est de la métropole côté Lezennes / Villeneuve-d'Ascq. Vérifie bien l'adresse sur ta convocation.",
       },
       {
         q: "Lille, c'est un centre difficile ?",
@@ -1260,7 +1260,7 @@ export const CENTRES_EXAMEN = [
       },
       {
         q: "Je peux connaître le parcours exact à l'avance ?",
-        r: "Non — l'inspecteur choisit l'itinéraire le jour J parmi plusieurs. Mais les ingrédients reviennent : giratoires de Lomme, passage possible par l'A25 ou l'A22, et détour par un village voisin. Maîtrise les types de situations plutôt qu'un tracé par cœur.",
+        r: "Non. L'inspecteur choisit l'itinéraire le jour J parmi plusieurs. Mais les ingrédients reviennent : giratoires de Lomme, passage possible par l'A25 ou l'A22, et détour par un village voisin. Maîtrise les types de situations plutôt qu'un tracé par cœur.",
       },
       {
         q: "Combien de temps dure l'examen ?",
@@ -1275,7 +1275,7 @@ export const CENTRES_EXAMEN = [
 
   {
     slug: "nantes",
-    nom: "Nantes – Saint-Herblain",
+    nom: "Nantes. Saint-Herblain",
     departement: "Loire-Atlantique",
     deptNum: "44",
     adresse: "3 rue de la Johardière, 44800 Saint-Herblain",
@@ -1288,7 +1288,7 @@ export const CENTRES_EXAMEN = [
     resume:
       "Pour Nantes, l'examen part de Saint-Herblain, dans la zone de la Lorie à l'ouest de la " +
       "ville (un second centre dessert le sud de l'agglomération à Bouguenais). Bonne nouvelle : " +
-      "le secteur réussit au-dessus de la moyenne nationale — autour de 64 % contre ~57 %. La " +
+      "le secteur réussit au-dessus de la moyenne nationale. Autour de 64 % contre ~57 %. La " +
       "spécialité locale, ce sont les ronds-points : un parcours type en enchaîne une quinzaine, " +
       "avec quelques doubles giratoires en prime, le long des boulevards Salvador Allende et " +
       "Charles de Gaulle. Ajoute le tram et la possibilité d'une insertion sur voie rapide, et tu " +
@@ -1298,12 +1298,12 @@ export const CENTRES_EXAMEN = [
       {
         ico: "map",
         texte:
-          "Tram ligne 1 — terminus François Mitterrand, sur le boulevard Salvador Allende, puis correspondance bus vers la zone de la Lorie.",
+          "Tram ligne 1. Terminus François Mitterrand, sur le boulevard Salvador Allende, puis correspondance bus vers la zone de la Lorie.",
       },
       {
         ico: "compass",
         texte:
-          "Bus TAN — lignes 93 et C3, arrêt Apave au plus près du centre ; les lignes 50, 71 et 91 desservent aussi le secteur.",
+          "Bus TAN. Lignes 93 et C3, arrêt Apave au plus près du centre ; les lignes 50, 71 et 91 desservent aussi le secteur.",
       },
       {
         ico: "car",
@@ -1319,7 +1319,7 @@ export const CENTRES_EXAMEN = [
         texte:
           "Une quinzaine de ronds-points sur un parcours type, parfois trois sorties à enchaîner coup " +
           "sur coup, et des doubles giratoires typiques de l'agglo nantaise. La difficulté n'est pas " +
-          "technique, elle est dans la répétition : clignotant, contrôle, trajectoire, sortie propre — " +
+          "technique, elle est dans la répétition : clignotant, contrôle, trajectoire, sortie propre, " +
           "à la quinzième fois comme à la première. L'examinateur note ta constance.",
       },
       {
@@ -1335,10 +1335,10 @@ export const CENTRES_EXAMEN = [
         ico: "alert-triangle",
         titre: "Les voies rapides aux portes du secteur",
         texte:
-          "L'ouest nantais est bordé de voies rapides — périphérique, axes vers Rennes (N137) et " +
+          "L'ouest nantais est bordé de voies rapides. Périphérique, axes vers Rennes (N137) et " +
           "Vannes (N165). Une insertion peut s'inviter dans ton parcours : voie d'accélération utilisée " +
           "en entier, contrôles rétro + angle mort, allure adaptée au flux. Garde aussi tes distances de " +
-          "sécurité une fois inséré — c'est un point que les inspecteurs regardent de près ici.",
+          "sécurité une fois inséré. C'est un point que les inspecteurs regardent de près ici.",
       },
     ],
 
@@ -1346,7 +1346,7 @@ export const CENTRES_EXAMEN = [
       "Fais des ronds-points ta priorité d'entraînement : sur ce secteur, celui qui a l'automatisme giratoire a déjà fait 80 % du travail.",
       "Répète les carrefours avec tram sur le boulevard Allende : feux dédiés, plateforme, piétons. Le réflexe « je vérifie la rame avant de franchir » doit être ancré.",
       "Travaille une vraie insertion sur voie rapide avec ton moniteur : accélération franche dans la voie d'insertion, pas de timidité à 70 quand le flux est à 110.",
-      "Va rouler dans la zone de la Lorie avant le jour J : c'est une zone d'activités, pas un centre-ville — camions, entrées d'entreprises et giratoires ont leur rythme propre.",
+      "Va rouler dans la zone de la Lorie avant le jour J : c'est une zone d'activités, pas un centre-ville. Camions, entrées d'entreprises et giratoires ont leur rythme propre.",
     ],
 
     faq: [
@@ -1356,11 +1356,11 @@ export const CENTRES_EXAMEN = [
       },
       {
         q: "Nantes, c'est un centre difficile ?",
-        r: "Plutôt accessible (2/5). Le taux de réussite du secteur est au-dessus de la moyenne nationale (~64 % contre ~57 %). L'examen reste exigeant sur les automatismes — giratoires et tram en tête — mais il est réputé juste.",
+        r: "Plutôt accessible (2/5). Le taux de réussite du secteur est au-dessus de la moyenne nationale (~64 % contre ~57 %). L'examen reste exigeant sur les automatismes (giratoires et tram en tête) mais il est réputé juste.",
       },
       {
         q: "Je peux connaître le parcours exact à l'avance ?",
-        r: "Non — l'inspecteur choisit son itinéraire le jour même. Mais la recette locale ne change pas : beaucoup de giratoires, les boulevards Allende et Charles de Gaulle, le tram, et une insertion possible sur voie rapide. C'est exactement ce qu'on te prépare ici.",
+        r: "Non. L'inspecteur choisit son itinéraire le jour même. Mais la recette locale ne change pas : beaucoup de giratoires, les boulevards Allende et Charles de Gaulle, le tram, et une insertion possible sur voie rapide. C'est exactement ce qu'on te prépare ici.",
       },
       {
         q: "Combien de temps dure l'examen ?",
@@ -1384,7 +1384,7 @@ export const CENTRES_EXAMEN = [
     quizTags: ["cycliste", "priorite", "vitesse"],
 
     resume:
-      "Strasbourg, c'est la capitale française du vélo — et ça se sent le jour de l'examen. " +
+      "Strasbourg, c'est la capitale française du vélo. Et ça se sent le jour de l'examen. " +
       "Le centre du 40 rue Guynemer, dans le quartier de la Musau au sud de la ville, t'envoie " +
       "dans un secteur où cyclistes, tram et zones 30 se partagent la route en permanence. " +
       "Bonne nouvelle : le Bas-Rhin affiche un taux de réussite au-dessus de la moyenne " +
@@ -1395,7 +1395,7 @@ export const CENTRES_EXAMEN = [
       {
         ico: "map",
         texte:
-          "En tram + à pied : la Musau est entre Neudorf et la Meinau — compte 10 à 15 minutes à pied depuis les stations de tram du secteur.",
+          "En tram + à pied : la Musau est entre Neudorf et la Meinau. Compte 10 à 15 minutes à pied depuis les stations de tram du secteur.",
       },
       {
         ico: "compass",
@@ -1405,7 +1405,7 @@ export const CENTRES_EXAMEN = [
       {
         ico: "car",
         texte:
-          "En voiture : A35 puis les quartiers sud ; le parking du centre est réservé aux voitures d'auto-école — la plupart des candidats arrivent avec leur moniteur.",
+          "En voiture : A35 puis les quartiers sud ; le parking du centre est réservé aux voitures d'auto-école. La plupart des candidats arrivent avec leur moniteur.",
       },
     ],
 
@@ -1417,7 +1417,7 @@ export const CENTRES_EXAMEN = [
           "Strasbourg est la ville la plus cyclable de France : pistes partout, vélos qui " +
           "surgissent vite, des deux côtés, à toute heure. Chaque tourne-à-droite, chaque " +
           "insertion, chaque démarrage = rétro + angle mort, sans exception. C'est LE réflexe " +
-          "que l'examinateur juge ici — et la cause d'échec la plus bête à éviter.",
+          "que l'examinateur juge ici. Et la cause d'échec la plus bête à éviter.",
       },
       {
         ico: "alert-triangle",
@@ -1435,7 +1435,7 @@ export const CENTRES_EXAMEN = [
           "L'A35 et le tunnel de l'Étoile sont réputés souvent saturés aux heures de pointe, " +
           "et le centre-ville multiplie zones 30 et secteurs apaisés. Le piège : rester calé " +
           "sur la vitesse d'avant. Lis les panneaux en continu et adapte ton allure à chaque " +
-          "changement d'ambiance — c'est ce que l'examinateur regarde.",
+          "changement d'ambiance. C'est ce que l'examinateur regarde.",
       },
     ],
 
@@ -1453,7 +1453,7 @@ export const CENTRES_EXAMEN = [
       },
       {
         q: "Je peux connaître le parcours exact à l'avance ?",
-        r: "Non — l'examinateur choisit son itinéraire le jour même. Mais le secteur revient toujours : quartiers sud, axes partagés avec le tram, pistes cyclables. C'est exactement ce qu'on te prépare ici.",
+        r: "Non. L'examinateur choisit son itinéraire le jour même. Mais le secteur revient toujours : quartiers sud, axes partagés avec le tram, pistes cyclables. C'est exactement ce qu'on te prépare ici.",
       },
       {
         q: "Quelle est la cause d'échec n°1 sur ce centre ?",
@@ -1482,7 +1482,7 @@ export const CENTRES_EXAMEN = [
     quizTags: ["rond_point", "priorite", "vitesse"],
 
     resume:
-      "Le centre du Millénaire — la « Maison de la Sécurité Routière » — est LE centre " +
+      "Le centre du Millénaire, la « Maison de la Sécurité Routière », est LE centre " +
       "d'examen de Montpellier, posé entre Port Marianne et Odysseum. Le secteur enchaîne " +
       "giratoires, grands axes roulants et lignes de tram qui quadrillent la ville. Ajoute " +
       "le passage en ville 30 depuis 2021 et un taux de réussite en ville nettement sous la " +
@@ -1493,7 +1493,7 @@ export const CENTRES_EXAMEN = [
       {
         ico: "map",
         texte:
-          "Tram ligne 1 — arrêt Millénaire (direction Odysseum), puis quelques minutes à pied jusqu'à la rue Alfred Nobel.",
+          "Tram ligne 1. Arrêt Millénaire (direction Odysseum), puis quelques minutes à pied jusqu'à la rue Alfred Nobel.",
       },
       {
         ico: "compass",
@@ -1524,7 +1524,7 @@ export const CENTRES_EXAMEN = [
           "Le secteur Port Marianne / Odysseum enchaîne les giratoires, et certains ronds-points " +
           "de la ville sont réputés saturés chez les auto-écoles locales (la Lyre, Rieucoulon). " +
           "Le piège classique : mauvaise voie à l'entrée ou clignotant de sortie oublié. Choisis " +
-          "ta file tôt, tiens-la, signale ta sortie — à chaque fois.",
+          "ta file tôt, tiens-la, signale ta sortie. À chaque fois.",
       },
       {
         ico: "alert-triangle",
@@ -1533,14 +1533,14 @@ export const CENTRES_EXAMEN = [
           "Depuis août 2021, presque toute la ville est limitée à 30 km/h, sauf quelques grands " +
           "axes restés à 50. Résultat : des transitions de vitesse permanentes, et un 30 vite " +
           "dépassé sans s'en rendre compte en sortant d'un axe roulant. Lis les panneaux en " +
-          "continu et surveille ton compteur — la survitesse est éliminatoire.",
+          "continu et surveille ton compteur. La survitesse est éliminatoire.",
       },
     ],
 
     conseils: [
-      "Roule le triangle Millénaire – Port Marianne – Odysseum avec ton moniteur : le départ se joue dans ce secteur.",
+      "Roule le triangle Millénaire. Port Marianne. Odysseum avec ton moniteur : le départ se joue dans ce secteur.",
       "Blinde tes règles de tram : feu clignotant, priorité à la rame, vérification des deux sens avant chaque traversée.",
-      "Aux giratoires, décide ta sortie AVANT d'entrer et garde ta voie jusqu'au bout — pas de slalom dans l'anneau.",
+      "Aux giratoires, décide ta sortie AVANT d'entrer et garde ta voie jusqu'au bout. Pas de slalom dans l'anneau.",
       "Calibre-toi sur le 30 km/h : en ville 30, rouler « normalement » c'est déjà trop vite. Compteur, panneaux, régularité.",
     ],
 
@@ -1551,7 +1551,7 @@ export const CENTRES_EXAMEN = [
       },
       {
         q: "Je peux connaître le parcours exact à l'avance ?",
-        r: "Non — l'examinateur choisit l'itinéraire le jour même parmi plusieurs. Mais les ingrédients reviennent toujours : giratoires, plateformes de tram, transitions 30/50. Maîtrise-les et le tracé n'a plus d'importance.",
+        r: "Non. L'examinateur choisit l'itinéraire le jour même parmi plusieurs. Mais les ingrédients reviennent toujours : giratoires, plateformes de tram, transitions 30/50. Maîtrise-les et le tracé n'a plus d'importance.",
       },
       {
         q: "Quelle est la cause d'échec n°1 sur ce centre ?",
@@ -1563,14 +1563,14 @@ export const CENTRES_EXAMEN = [
       },
       {
         q: "Je fais quoi la veille ?",
-        r: "Repos, documents prêts, et un parcours mental des trois pièges du centre : tram, giratoires, ville 30. Le jour J, arrive 15 min en avance — le Millénaire est facile d'accès en tram.",
+        r: "Repos, documents prêts, et un parcours mental des trois pièges du centre : tram, giratoires, ville 30. Le jour J, arrive 15 min en avance. Le Millénaire est facile d'accès en tram.",
       },
     ],
   },
 
   {
     slug: "nice",
-    nom: "Nice – Les Iscles",
+    nom: "Nice. Les Iscles",
     departement: "Alpes-Maritimes",
     deptNum: "06",
     adresse: "Avenue Pierre Léonetti, 06200 Nice",
@@ -1592,12 +1592,12 @@ export const CENTRES_EXAMEN = [
       {
         ico: "map",
         texte:
-          "Tram ligne 3 — terminus Saint-Isidore, tout près du centre ; environ 30 minutes depuis le centre-ville de Nice.",
+          "Tram ligne 3. Terminus Saint-Isidore, tout près du centre ; environ 30 minutes depuis le centre-ville de Nice.",
       },
       {
         ico: "compass",
         texte:
-          "Bus Lignes d'Azur — plusieurs lignes desservent la plaine du Var et le secteur du stade Allianz Riviera.",
+          "Bus Lignes d'Azur. Plusieurs lignes desservent la plaine du Var et le secteur du stade Allianz Riviera.",
       },
       {
         ico: "car",
@@ -1613,8 +1613,8 @@ export const CENTRES_EXAMEN = [
         texte:
           "La plaine du Var enchaîne les giratoires qui desservent les grandes zones commerciales " +
           "du secteur (Lingostière, Nice Valley, Ikea). Résultat : des flux qui entrent et " +
-          "sortent en permanence, souvent pressés. Position, observation, clignotant de sortie — " +
-          "l'examinateur juge ta constance sur toute la série, pas un giratoire isolé.",
+          "sortent en permanence, souvent pressés. Position, observation, clignotant de sortie. " +
+          "L'examinateur juge ta constance sur toute la série, pas un giratoire isolé.",
       },
       {
         ico: "eye",
@@ -1680,22 +1680,22 @@ export const CENTRES_EXAMEN = [
     resume:
       "Bonne nouvelle d'entrée : l'Ille-et-Vilaine réussit le permis nettement mieux que la " +
       "moyenne nationale (environ 66 % contre ~60 %). Mais Rennes ville reste un vrai test : " +
-      "depuis septembre 2023, la quasi-totalité des rues est passée à 30 km/h, et la rocade — " +
-      "l'axe le plus chargé de Bretagne — peut s'inviter dans ton parcours. Le centre principal " +
+      "depuis septembre 2023, la quasi-totalité des rues est passée à 30 km/h, et la rocade " +
+      "(l'axe le plus chargé de Bretagne) peut s'inviter dans ton parcours. Le centre principal " +
       "est à Villejean, dans les locaux de la DDTM ; un second centre dessert l'agglo à " +
       "Saint-Jacques-de-la-Lande (42 allée de la Gautrais, près de l'aéroport). Bien préparé " +
-      "sur ces deux ambiances — ville apaisée et rocade rapide — tu pars avec une vraie avance.",
+      "sur ces deux ambiances (ville apaisée et rocade rapide), tu pars avec une vraie avance.",
 
     acces: [
       {
         ico: "map",
         texte:
-          "Métro ligne a — station J.F. Kennedy, à environ 5 minutes à pied de la rue Maurice Fabre.",
+          "Métro ligne a. Station J.F. Kennedy, à environ 5 minutes à pied de la rue Maurice Fabre.",
       },
       {
         ico: "compass",
         texte:
-          "Bus C4, 53 ou 54 — arrêt Kennedy Guyenne, à 300 m du centre (bâtiment de la DDTM).",
+          "Bus C4, 53 ou 54. Arrêt Kennedy Guyenne, à 300 m du centre (bâtiment de la DDTM).",
       },
       {
         ico: "car",
@@ -1709,8 +1709,8 @@ export const CENTRES_EXAMEN = [
         ico: "alert-triangle",
         titre: "La ville entière à 30 km/h",
         texte:
-          "Depuis le 4 septembre 2023, environ 95 % des rues de Rennes sont limitées à 30 km/h — " +
-          "seuls les grands axes d'entrée restent à 50. Le piège : suivre le flux et rouler à 40 " +
+          "Depuis le 4 septembre 2023, environ 95 % des rues de Rennes sont limitées à 30 km/h. " +
+          "Seuls les grands axes d'entrée restent à 50. Le piège : suivre le flux et rouler à 40 " +
           "« parce que ça roule ». L'inspecteur, lui, lit les panneaux. Cale-toi sur 30 par défaut " +
           "et guette les rares retours à 50.",
       },
@@ -1767,7 +1767,7 @@ export const CENTRES_EXAMEN = [
 
   {
     slug: "grenoble",
-    nom: "Grenoble – La Tronche",
+    nom: "Grenoble. La Tronche",
     departement: "Isère",
     deptNum: "38",
     adresse: "17 avenue du Grand Sablon, 38700 La Tronche",
@@ -1779,19 +1779,19 @@ export const CENTRES_EXAMEN = [
 
     resume:
       "Le centre d'examen de l'agglo grenobloise est à La Tronche, avenue du Grand Sablon, " +
-      "juste à côté du CHU — et le parcours t'emmène dans les communes voisines. Deux " +
+      "juste à côté du CHU. Et le parcours t'emmène dans les communes voisines. Deux " +
       "particularités locales dominent : la métropole est passée à 30 km/h presque partout " +
       "(la première grande agglo de France à l'avoir fait), et le tramway quadrille le secteur. " +
       "Ajoute des cyclistes très nombreux et quelques rues qui grimpent vers les premières " +
       "pentes de la Chartreuse, et tu as un examen 3/5 : rien d'extrême, mais une lecture de " +
       "la route qui doit être permanente. L'Isère réussit d'ailleurs un peu au-dessus de la " +
-      "moyenne nationale — la préparation paie.",
+      "moyenne nationale. La préparation paie.",
 
     acces: [
       {
         ico: "map",
         texte:
-          "Tram B — arrêt Grand Sablon (CHU), à quelques minutes à pied du centre.",
+          "Tram B. Arrêt Grand Sablon (CHU), à quelques minutes à pied du centre.",
       },
       {
         ico: "compass",
@@ -1801,7 +1801,7 @@ export const CENTRES_EXAMEN = [
       {
         ico: "car",
         texte:
-          "En voiture : par les quais de l'Isère ou la rocade Sud (N87) direction CHU. Stationnement autour du Grand Sablon souvent chargé — prévois de la marge.",
+          "En voiture : par les quais de l'Isère ou la rocade Sud (N87) direction CHU. Stationnement autour du Grand Sablon souvent chargé. Prévois de la marge.",
       },
     ],
 
@@ -1819,7 +1819,7 @@ export const CENTRES_EXAMEN = [
         ico: "alert-triangle",
         titre: "La métropole apaisée : 30 km/h par défaut",
         texte:
-          "Grenoble Alpes Métropole a généralisé le 30 km/h sur 45 de ses 49 communes — le 50 " +
+          "Grenoble Alpes Métropole a généralisé le 30 km/h sur 45 de ses 49 communes. Le 50 " +
           "est devenu l'exception. Le piège est le même qu'ailleurs, en pire : de longues avenues " +
           "droites où l'aiguille monte toute seule. Retiens la logique locale : 30 par défaut, " +
           "50 seulement là où c'est indiqué.",
@@ -1839,7 +1839,7 @@ export const CENTRES_EXAMEN = [
       "Roule le secteur La Tronche / CHU et les communes voisines avant le jour J : le départ avenue du Grand Sablon en terrain connu, ça change tout.",
       "Apprends à lire les carrefours à tram : feux dédiés, marquage, sens d'arrivée des rames. Un carrefour compris à l'avance est un carrefour réussi.",
       "Si le parcours grimpe vers Corenc ou Meylan, ça monte vraiment : soigne tes démarrages en côte pour ne pas reculer.",
-      "Cale-toi sur 30 km/h par défaut en agglo et vérifie ton compteur régulièrement — la survitesse « involontaire » reste une faute.",
+      "Cale-toi sur 30 km/h par défaut en agglo et vérifie ton compteur régulièrement. La survitesse « involontaire » reste une faute.",
     ],
 
     faq: [
@@ -1849,7 +1849,7 @@ export const CENTRES_EXAMEN = [
       },
       {
         q: "Le centre est à Grenoble ou à La Tronche ?",
-        r: "À La Tronche, au 17 avenue du Grand Sablon, juste à côté du CHU — c'est le centre qui dessert l'agglomération grenobloise. Le parcours peut ensuite explorer les communes autour.",
+        r: "À La Tronche, au 17 avenue du Grand Sablon, juste à côté du CHU. C'est le centre qui dessert l'agglomération grenobloise. Le parcours peut ensuite explorer les communes autour.",
       },
       {
         q: "Quelle est la cause d'échec n°1 sur ce centre ?",
@@ -1891,12 +1891,12 @@ export const CENTRES_EXAMEN = [
       {
         ico: "map",
         texte:
-          "TEOR T2 — la ligne dessert le plateau de la Grand'Mare (direction Tamarelle), arrêt à quelques minutes du centre Jean Texcier.",
+          "TEOR T2. La ligne dessert le plateau de la Grand'Mare (direction Tamarelle), arrêt à quelques minutes du centre Jean Texcier.",
       },
       {
         ico: "compass",
         texte:
-          "Plusieurs lignes du réseau Astuce montent sur les Hauts-de-Rouen depuis le centre-ville — compte 20 à 25 minutes depuis la rive droite.",
+          "Plusieurs lignes du réseau Astuce montent sur les Hauts-de-Rouen depuis le centre-ville. Compte 20 à 25 minutes depuis la rive droite.",
       },
       {
         ico: "car",
@@ -1922,7 +1922,7 @@ export const CENTRES_EXAMEN = [
           "La rocade Nord-Est passe littéralement sous le quartier, dans un tunnel de plus de " +
           "1,5 km. Si le parcours t'y emmène : insertion décidée, allure stable, distances de " +
           "sécurité rallongées et aucun changement de voie fantaisiste sous terre. C'est un " +
-          "environnement que peu de candidats ont travaillé — sois de ceux qui l'ont fait.",
+          "environnement que peu de candidats ont travaillé. Sois de ceux qui l'ont fait.",
       },
       {
         ico: "eye",
@@ -1938,7 +1938,7 @@ export const CENTRES_EXAMEN = [
     conseils: [
       "Fais tes heures de conduite sur le relief rouennais, pas seulement sur le plat : les côtes de la rive droite doivent devenir banales pour toi.",
       "Demande à ton moniteur un passage par la N28 et le tunnel de la Grand'Mare : rouler une fois sous terre enlève tout l'effet de surprise.",
-      "Aux carrefours avec TEOR, prends une seconde de plus pour lire les feux et le marquage — mieux vaut être lent et juste que rapide et faux.",
+      "Aux carrefours avec TEOR, prends une seconde de plus pour lire les feux et le marquage. Mieux vaut être lent et juste que rapide et faux.",
       "Vérifie sur ta convocation quel centre te concerne : Jean Texcier (rive droite) et Grand-Quevilly (rive gauche) n'ont pas du tout le même environnement.",
     ],
 
@@ -1953,7 +1953,7 @@ export const CENTRES_EXAMEN = [
       },
       {
         q: "Quelle est la cause d'échec n°1 sur ce centre ?",
-        r: "Le démarrage en côte raté — recul ou calage en pleine pente — et les erreurs de lecture aux carrefours TEOR. Deux points à travailler jusqu'à l'automatisme.",
+        r: "Le démarrage en côte raté (recul ou calage en pleine pente) et les erreurs de lecture aux carrefours TEOR. Deux points à travailler jusqu'à l'automatisme.",
       },
       {
         q: "Combien de temps dure l'examen ?",

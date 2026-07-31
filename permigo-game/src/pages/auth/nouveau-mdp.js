@@ -35,7 +35,7 @@ const I18N = {
     confirm: "Confirmer",
     save: "Enregistrer",
     later: "Plus tard",
-    session_expired: "Lien expiré — reconnecte-toi",
+    session_expired: "Lien expiré. Reconnecte-toi",
     err_generic: "Une erreur est survenue. Réessaie.",
     err_min: "Le mot de passe doit contenir au moins {n} caractères.",
     err_mismatch: "Les deux mots de passe ne correspondent pas.",
@@ -43,7 +43,7 @@ const I18N = {
     auth_password_short:
       "Le mot de passe doit contenir au moins 8 caractères.",
     auth_password_same: "Choisis un mot de passe différent de l'ancien.",
-    auth_session_missing: "Lien expiré — reconnecte-toi.",
+    auth_session_missing: "Lien expiré. Reconnecte-toi.",
   },
   en: {
     title: "New password",
@@ -56,14 +56,14 @@ const I18N = {
     confirm: "Confirm",
     save: "Save",
     later: "Later",
-    session_expired: "Link expired — log in again",
+    session_expired: "Link expired. Log in again",
     err_generic: "Something went wrong. Try again.",
     err_min: "Password must be at least {n} characters.",
     err_mismatch: "The two passwords don't match.",
     success: "Password updated ✓",
     auth_password_short: "Password must be at least 8 characters.",
     auth_password_same: "Choose a password different from your old one.",
-    auth_session_missing: "Link expired — log in again.",
+    auth_session_missing: "Link expired. Log in again.",
   },
   ar: {
     title: "كلمة مرور جديدة",
@@ -76,7 +76,7 @@ const I18N = {
     confirm: "تأكيد",
     save: "حفظ",
     later: "لاحقًا",
-    session_expired: "انتهت صلاحية الرابط — سجّل الدخول مجددًا",
+    session_expired: "انتهت صلاحية الرابط. سجّل الدخول مجددًا",
     err_generic: "حدث خطأ. حاول مجددًا.",
     err_min: "يجب أن تتكون كلمة المرور من {n} أحرف على الأقل.",
     err_mismatch: "كلمتا المرور غير متطابقتين.",
@@ -84,7 +84,7 @@ const I18N = {
     auth_password_short:
       "يجب أن تتكون كلمة المرور من 8 أحرف على الأقل.",
     auth_password_same: "اختر كلمة مرور مختلفة عن القديمة.",
-    auth_session_missing: "انتهت صلاحية الرابط — سجّل الدخول مجددًا.",
+    auth_session_missing: "انتهت صلاحية الرابط. سجّل الدخول مجددًا.",
   },
 };
 
@@ -128,7 +128,7 @@ export async function mount(root) {
     session = null;
   }
   if (!session) {
-    toast(t("session_expired", "Lien expiré — reconnecte-toi"), "error");
+    toast(t("session_expired", "Lien expiré. Reconnecte-toi"), "error");
     window.location.href = window.location.origin + "/#/login";
     return;
   }

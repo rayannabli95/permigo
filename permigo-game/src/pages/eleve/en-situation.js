@@ -54,14 +54,14 @@ const SI_I18N = {
     kicker_game: "Mini-game",
     h1_intro: "Scenario challenge",
     h1_game: "Road scenario",
-    sub_intro: "One scene, one decision. Show your road instincts.",
-    sub_game: "One scene, one decision. Apply the rules of the road.",
+    sub_intro: "One scene. One decision. Show your road instincts.",
+    sub_game: "One scene. One decision. Apply the rules of the road.",
     session_of: "Session of {n}",
     per_correct: "+{n} per correct answer",
     cta_intro: "Let’s go!",
     cta_game: "Play",
     done: "Done",
-    title_perfect: "Flawless, well done!",
+    title_perfect: "Flawless. Well done!",
     title_half: "You’ve already got the eye for it",
     title_welcome: "Welcome aboard!",
     sub_welcome: "Your journey and welcome chest are waiting for you.",
@@ -70,12 +70,12 @@ const SI_I18N = {
     round_done: "Round complete",
     title_flawless: "Flawless!",
     title_good: "Well done!",
-    title_keep: "Getting there, keep going!",
+    title_keep: "Getting there. Keep going!",
     sub_flawless: "You read the road like a pro.",
     sub_good: "A few more reflexes and you’ll have it locked in.",
     sub_keep: "Every mistake you catch here is one less on the real road.",
-    cap_max: "Today’s reward maxed out — come back tomorrow",
-    zero_next: "0 {word} — next one’s the one",
+    cap_max: "Today’s reward maxed out. Come back tomorrow",
+    zero_next: "0 {word}. Next one’s the one",
     cap_note: "Daily cap reached. Your {word} refill tomorrow.",
     collection: "Collection · {a}/{b} scenes seen",
     to_review: "To review",
@@ -90,14 +90,14 @@ const SI_I18N = {
     kicker_game: "لعبة مصغّرة",
     h1_intro: "تحدي الطريق",
     h1_game: "سيناريو الطريق",
-    sub_intro: "مشهد واحد، قرار واحد. أظهر حسّك في القيادة.",
-    sub_game: "مشهد واحد، قرار واحد. طبّق قانون السير.",
+    sub_intro: "مشهد واحد. قرار واحد. أظهر حسّك في القيادة.",
+    sub_game: "مشهد واحد. قرار واحد. طبّق قانون السير.",
     session_of: "جلسة من {n}",
     per_correct: "+{n} لكل إجابة صحيحة",
     cta_intro: "هيا بنا!",
     cta_game: "العب",
     done: "انتهى",
-    title_perfect: "بدون خطأ، أحسنت!",
+    title_perfect: "بدون خطأ. أحسنت!",
     title_half: "لديك بالفعل حسّ جيد",
     title_welcome: "مرحبًا بك معنا!",
     sub_welcome: "مسارك وصندوق الترحيب في انتظارك.",
@@ -106,12 +106,12 @@ const SI_I18N = {
     round_done: "انتهت الجولة",
     title_flawless: "بدون خطأ!",
     title_good: "أحسنت!",
-    title_keep: "الأمور تتحسن، واصل!",
+    title_keep: "الأمور تتحسن. واصل!",
     sub_flawless: "تقرأ الطريق كالمحترفين.",
     sub_good: "بضعة ردود أفعال أخرى وستتقنها تمامًا.",
     sub_keep: "كل خطأ تتعرّف عليه هنا هو خطأ أقل في درسك الحقيقي.",
-    cap_max: "بلغت مكافأة اليوم حدّها الأقصى — عد غدًا",
-    zero_next: "0 {word} — المحاولة القادمة ستكون الصحيحة",
+    cap_max: "بلغت مكافأة اليوم حدّها الأقصى. عد غدًا",
+    zero_next: "0 {word}. المحاولة القادمة ستكون الصحيحة",
     cap_note: "بلغت السقف اليومي. تتجدد {word} غدًا.",
     collection: "المجموعة · {a}/{b} مشهد تمت مشاهدته",
     to_review: "للمراجعة",
@@ -241,11 +241,11 @@ export async function mount(root, param) {
           isIntro
             ? sit(
                 "sub_intro",
-                "Une scène, une décision. Montre ton flair pour la route.",
+                "Une scène. Une décision. Montre ton flair pour la route.",
               )
             : sit(
                 "sub_game",
-                "Une scène, une décision. Applique le code de la route.",
+                "Une scène. Une décision. Applique le code de la route.",
               ),
         )}</p>
         <div class="sit-hero" aria-hidden="true">${renderSituationScene(demo.scene)}</div>
@@ -483,7 +483,7 @@ export async function mount(root, param) {
     if (isIntro) {
       const introTitre =
         pct === 100
-          ? sit("title_perfect", "Sans faute, bravo !")
+          ? sit("title_perfect", "Sans faute. Bravo !")
           : pct >= 50
             ? sit("title_half", "Tu as déjà l’œil")
             : sit("title_welcome", "Bienvenue à bord !");
@@ -533,7 +533,7 @@ export async function mount(root, param) {
         ? sit("title_flawless", "Sans faute !")
         : pct >= 60
           ? sit("title_good", "Bien joué !")
-          : sit("title_keep", "Ça rentre, continue !");
+          : sit("title_keep", "Ça rentre. Continue !");
     const sousTitre =
       pct === 100
         ? sit("sub_flawless", "Tu lis la route comme un chef.")
@@ -555,8 +555,8 @@ export async function mount(root, param) {
             credites > 0
               ? `${volantImg(20, { drop: true })} <b>+${credites}</b>&nbsp;${esc(sitVolantWord(credites))}`
               : gagnes > 0 && plafonne
-                ? `${volantImg(20)} ${esc(sit("cap_max", "Récompense du jour au max — reviens demain"))}`
-                : `${volantImg(20)} ${esc(sit("zero_next", "0 volant — la prochaine est la bonne").replace("{word}", sitVolantWord(0)))}`
+                ? `${volantImg(20)} ${esc(sit("cap_max", "Récompense du jour au max. Reviens demain"))}`
+                : `${volantImg(20)} ${esc(sit("zero_next", "0 volant. La prochaine est la bonne").replace("{word}", sitVolantWord(0)))}`
           }
         </div>
         ${

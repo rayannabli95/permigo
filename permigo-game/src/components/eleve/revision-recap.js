@@ -164,7 +164,7 @@ export function showRevisionRecap(summary = {}, opts = {}) {
   // l'effort plutôt que d'afficher un "0" sec.
   const sub =
     nPassed === 0 && nQuiz > 0
-      ? `${nQuiz} quiz testé${nQuiz > 1 ? "s" : ""} — c'est en se trompant qu'on mémorise`
+      ? `${nQuiz} quiz testé${nQuiz > 1 ? "s" : ""}. C'est en se trompant qu'on mémorise`
       : nQuiz > 0
         ? `${nQuiz} quiz joué${nQuiz > 1 ? "s" : ""} dans cette session de révision`
         : "Reviens demain pour réviser encore";

@@ -31,5 +31,9 @@ body {
   --chrome-bo: rgba(255,255,255,.12);       /* filets haut/bas */
   --chrome-btn: rgba(255,255,255,.08);      /* fond des boutons icône */
   --chrome-a: var(--a-lt, var(--a));        /* onglet actif : l'accent CLAIR passe sur fond nuit */
+  /* Le PETIT texte de l'onglet actif (libellé 9.5px) demande 4.5:1, pas 3:1.
+     L'accent clair seul tient sur un fond très sombre mais tombe à ~3:1 sur
+     les nuits violettes (ex. #423a96 de la révision) → on l'éclaircit. */
+  --chrome-a-sm: color-mix(in srgb, var(--a-lt, var(--a)) 60%, #fff);
 }`;
 }

@@ -70,7 +70,7 @@ export function a2hsStepsHTML(platform) {
         <div class="a2s-txt">Touche <b>Partager</b></div>
         <div class="a2s-num">1</div>
       </div>
-      <div class="a2s-point">le bouton bleu Partager — en bas, ou en haut de Safari</div>
+      <div class="a2s-point">le bouton bleu Partager. En bas, ou en haut de Safari</div>
       <div class="a2s-step">
         <div class="a2s-glyph plus">${PLUS_SVG}</div>
         <div class="a2s-txt"><b>« Sur l'écran d'accueil »</b></div>

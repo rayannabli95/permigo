@@ -330,7 +330,7 @@ export async function mount(root) {
   <div class="eq-error">
     <div class="eq-error-ico">${icon("alert-triangle", { size: 20 })}</div>
     <div class="eq-error-title">Impossible de charger l'équipe</div>
-    <div class="eq-error-sub">Vérifie ta connexion, puis réessaie.</div>
+    <div class="eq-error-sub">Vérifie ta connexion puis réessaie.</div>
     <button id="eq-retry" class="eq-retry-btn">${icon("refresh-cw", { size: 14 })} Réessayer</button>
   </div>
 </div>`;
@@ -532,10 +532,10 @@ function openInviteModal(me) {
           } catch {
             emailEl.focus();
             emailEl.select();
-            toast("Copie impossible — sélectionne le lien", "error");
+            toast("Copie impossible. Sélectionne le lien", "error");
           }
         });
-        toast("Invitation créée — email non envoyé", "info", 5000);
+        toast("Invitation créée. Email non envoyé", "info", 5000);
         emailEl.focus();
         emailEl.select();
         return;

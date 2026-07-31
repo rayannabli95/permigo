@@ -26,7 +26,7 @@ const STYLE_ID = "daily-quests-style";
 const DQ_I18N = {
   en: {
     claim: "Claim",
-    claim_aria: " — claim the reward",
+    claim_aria: ". Claim the reward",
     missing: "Quest not found.",
     pop_ok: "Quest complete ✓",
     pop_volants: "+{n} steering wheels",
@@ -37,12 +37,12 @@ const DQ_I18N = {
     quest_streak_keep: "Keep your streak",
     quest_quiz_perfect: "Get 1 perfect quiz",
     go: "Go",
-    go_aria: " — go there",
+    go_aria: ". Go there",
     inline_k: "Your quest today",
   },
   ar: {
     claim: "استلام",
-    claim_aria: " — استلم المكافأة",
+    claim_aria: ". استلم المكافأة",
     missing: "المهمة غير موجودة.",
     pop_ok: "أُنجزت المهمة ✓",
     pop_volants: "+{n} مقود",
@@ -53,7 +53,7 @@ const DQ_I18N = {
     quest_streak_keep: "حافظ على سلسلتك",
     quest_quiz_perfect: "حقّق اختبارًا بعلامة كاملة",
     go: "اذهب",
-    go_aria: " — اذهب إلى هناك",
+    go_aria: ". اذهب إلى هناك",
     inline_k: "مهمتك اليوم",
   },
 };
@@ -316,7 +316,7 @@ function renderInline(q) {
          ${route ? `data-route="${escAttr(route)}"` : ""}
          role="${ready || route ? "button" : "group"}"
          tabindex="${ready || route ? "0" : "-1"}"
-         aria-label="${escAttr(questTitle(q))}${ready ? escAttr(dqt("claim_aria", " — réclamer la récompense")) : route ? escAttr(dqt("go_aria", " — y aller")) : ""}">
+         aria-label="${escAttr(questTitle(q))}${ready ? escAttr(dqt("claim_aria", ". Réclamer la récompense")) : route ? escAttr(dqt("go_aria", ". Y aller")) : ""}">
       <span class="dq-in-t">
         <span class="dq-in-k">
           ${dqRtl(esc(dqt("inline_k", "Ta quête du jour")))}

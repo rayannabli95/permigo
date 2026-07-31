@@ -1000,7 +1000,7 @@ export async function mount(root) {
       console.error("[profil] logout failed", e);
       const { toast } = await import("@/components/common/toast.js");
       toast(
-        ptR("toast_logout_err", "Déconnexion impossible — réessaie"),
+        ptR("toast_logout_err", "Déconnexion impossible. Réessaie"),
         "error",
       );
     }
@@ -1290,7 +1290,7 @@ function _wireReferral(root, me) {
       } else {
         try {
           await navigator.clipboard.writeText(
-            ptR("referral_clipboard", "Mon code PermiGo : {code} — {url}", {
+            ptR("referral_clipboard", "Mon code PermiGo : {code}. {url}", {
               code,
               url: window.location.origin,
             }),
@@ -1392,7 +1392,7 @@ function _renderNotifToggle() {
         <div class="prf-notif-lbl">${pt("notifications", "Notifications")}</div>
         ${
           denied
-            ? `<div class="prf-notif-denied">${pt("notif_browser_help", "Bloquées par le navigateur — autorise-les dans les réglages")}</div>`
+            ? `<div class="prf-notif-denied">${pt("notif_browser_help", "Bloquées par le navigateur. Autorise-les dans les réglages")}</div>`
             : `<div class="prf-notif-sub">${enabled ? pt("notif_quiz_streak", "Quiz et streak actifs") : pt("notif_off", "Désactivées")}</div>`
         }
       </div>
@@ -1433,7 +1433,7 @@ function _wireNotifToggle(root) {
           sub.textContent = ptR("notif_quiz_streak", "Quiz et streak actifs");
       } else if (Notification.permission === "denied") {
         if (sub)
-          sub.outerHTML = `<div class="prf-notif-denied">${pt("notif_browser_help", "Bloquées par le navigateur — autorise-les dans les réglages")}</div>`;
+          sub.outerHTML = `<div class="prf-notif-denied">${pt("notif_browser_help", "Bloquées par le navigateur. Autorise-les dans les réglages")}</div>`;
         toggle?.remove();
       }
     }
@@ -1742,17 +1742,17 @@ const PROF_I18N = {
     ach_title: "Your achievements",
     ach_list_aria: "Your achievements (scrollable list)",
     next_kick: "Your next challenge",
-    all_done: "Everything validated — virtual licence unlocked",
+    all_done: "Everything validated. Virtual licence unlocked",
     next_skill: "Next skill",
     cta_review: "Revise now",
     settings: "Settings",
     row_notifs: "My notifications",
-    row_notifs_sub: "Validations, encouragements, reports",
+    row_notifs_sub: "Validations · encouragements · reports",
     row_reminders: "Revision reminders",
     notif_off: "Off",
     notif_rhythm: "Stay on track",
     notif_blocked: "Blocked by the browser",
-    row_settings_sub: "Theme, language, privacy",
+    row_settings_sub: "Theme · language · privacy",
     logout: "Log out",
     delete_account: "Delete my account",
     delete_sheet_transparency:
@@ -1767,7 +1767,7 @@ const PROF_I18N = {
     pseudo_taken_err: "This username is already taken.",
     pseudo_save_err: "Couldn't save.",
     toast_photo: "Photo updated ✓",
-    toast_logout_err: "Couldn't log out — try again",
+    toast_logout_err: "Couldn't log out. Try again",
     toast_pseudo_taken: "This username is already taken",
     toast_pseudo_save_err: "Couldn't save the username",
     toast_pseudo_saved: "Username saved",
@@ -1819,7 +1819,7 @@ const PROF_I18N = {
     referral_share_title: "Join PermiGo!",
     referral_share_text:
       "Use my code {code} on PermiGo and earn 50 steering wheels",
-    referral_clipboard: "My PermiGo code: {code} — {url}",
+    referral_clipboard: "My PermiGo code: {code}. {url}",
     link_copied: "Link copied",
     generating: "Generating…",
     generate_failed: "Unable to generate the code",
@@ -1828,7 +1828,7 @@ const PROF_I18N = {
     notifications: "Notifications",
     notifications_enabled: "enabled",
     notifications_disabled: "disabled",
-    notif_browser_help: "Blocked by the browser — allow them in the settings",
+    notif_browser_help: "Blocked by the browser. Allow them in the settings",
     notif_quiz_streak: "Quiz and streak active",
     licence_b: "Category B licence",
     instructor_default: "Instructor",
@@ -1848,9 +1848,9 @@ const PROF_I18N = {
     ranking_empty:
       "Your ranking will appear after your first validations this month.",
     account_settings: "Account settings",
-    teacher_notif_sub: "Validations, lessons, messages",
+    teacher_notif_sub: "Validations · lessons · messages",
     validations_followups: "Validations & follow-ups",
-    theme_subscription_security: "Theme, subscription, security",
+    theme_subscription_security: "Theme · subscription · security",
     ach_first_validation: "1st validation",
     ach_50_validations: "50 validations",
     ach_100_validations: "100 validations",
@@ -1878,17 +1878,17 @@ const PROF_I18N = {
     ach_title: "إنجازاتك",
     ach_list_aria: "إنجازاتك (قائمة قابلة للتمرير)",
     next_kick: "تحديك التالي",
-    all_done: "كل شيء مُتحقق — الرخصة الافتراضية مفتوحة",
+    all_done: "كل شيء مُتحقق. الرخصة الافتراضية مفتوحة",
     next_skill: "المهارة التالية",
     cta_review: "راجع الآن",
     settings: "الإعدادات",
     row_notifs: "إشعاراتي",
-    row_notifs_sub: "التحقّقات، التشجيعات، التقارير",
+    row_notifs_sub: "التحقّقات · التشجيعات · التقارير",
     row_reminders: "تذكيرات المراجعة",
     notif_off: "معطّلة",
     notif_rhythm: "حافظ على وتيرتك",
     notif_blocked: "محظورة من المتصفح",
-    row_settings_sub: "السمة، اللغة، الخصوصية",
+    row_settings_sub: "السمة · اللغة · الخصوصية",
     logout: "تسجيل الخروج",
     delete_account: "حذف حسابي",
     delete_sheet_transparency:
@@ -1903,7 +1903,7 @@ const PROF_I18N = {
     pseudo_taken_err: "هذا اللقب مأخوذ بالفعل.",
     pseudo_save_err: "تعذّر الحفظ.",
     toast_photo: "تم تحديث الصورة ✓",
-    toast_logout_err: "تعذّر تسجيل الخروج — أعد المحاولة",
+    toast_logout_err: "تعذّر تسجيل الخروج. أعد المحاولة",
     toast_pseudo_taken: "هذا اللقب مأخوذ بالفعل",
     toast_pseudo_save_err: "تعذّر حفظ اللقب",
     toast_pseudo_saved: "تم حفظ اللقب",
@@ -1954,7 +1954,7 @@ const PROF_I18N = {
     apply: "تطبيق",
     referral_share_title: "انضم إلى بيرميغو!",
     referral_share_text: "استخدم رمزي {code} على بيرميغو واربح 50 مقودًا",
-    referral_clipboard: "رمزي على بيرميغو: {code} — {url}",
+    referral_clipboard: "رمزي على بيرميغو: {code}. {url}",
     link_copied: "تم نسخ الرابط",
     generating: "جارٍ الإنشاء…",
     generate_failed: "تعذّر إنشاء الرمز",
@@ -1963,7 +1963,7 @@ const PROF_I18N = {
     notifications: "الإشعارات",
     notifications_enabled: "مفعّلة",
     notifications_disabled: "معطّلة",
-    notif_browser_help: "محظورة من المتصفح — اسمح بها في الإعدادات",
+    notif_browser_help: "محظورة من المتصفح. اسمح بها في الإعدادات",
     notif_quiz_streak: "الاختبارات والسلسلة مفعّلة",
     licence_b: "رخصة الفئة B",
     instructor_default: "مدرّب",
@@ -1981,9 +1981,9 @@ const PROF_I18N = {
     points: "نقطة",
     ranking_empty: "سيظهر تصنيفك بعد أول اعتماداتك هذا الشهر.",
     account_settings: "إعدادات الحساب",
-    teacher_notif_sub: "الاعتمادات، الحصص، الرسائل",
+    teacher_notif_sub: "الاعتمادات · الحصص · الرسائل",
     validations_followups: "الاعتمادات والمتابعات",
-    theme_subscription_security: "السمة، الاشتراك، الأمان",
+    theme_subscription_security: "السمة · الاشتراك · الأمان",
     ach_first_validation: "أول اعتماد",
     ach_50_validations: "50 اعتمادًا",
     ach_100_validations: "100 اعتماد",
@@ -2129,7 +2129,7 @@ async function mountEleveArene(root, me) {
   // « Compétence N » traduit ; le nom de la compétence (REMC) reste à sa source.
   const compLabel = (n) => ptR("comp_n", `Compétence ${n}`).replace("{n}", n);
   const nextName = st.allDone
-    ? ptR("all_done", "Tout est validé — permis virtuel débloqué")
+    ? ptR("all_done", "Tout est validé. Permis virtuel débloqué")
     : st.next?.n || ptR("next_skill", "Compétence suivante");
   const nextCode = `${compLabel(st.idx)} · ${esc(st.comp.name)}`;
 
@@ -2299,7 +2299,7 @@ async function mountEleveArene(root, me) {
     <div class="arn-set-list">
       <a class="arn-row" href="#/notifications">
         <span class="arn-row-ico">${medallion("message", "blue", { size: 30, shape: "tile" })}</span>
-        <span class="arn-row-lab">${pt("row_notifs", "Mes notifications")}<small>${pt("row_notifs_sub", "Validations, encouragements, comptes-rendus")}</small></span>
+        <span class="arn-row-lab">${pt("row_notifs", "Mes notifications")}<small>${pt("row_notifs_sub", "Validations · encouragements · comptes-rendus")}</small></span>
         <span class="arn-chev"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </a>
       ${
@@ -2314,7 +2314,7 @@ async function mountEleveArene(root, me) {
       }
       <a class="arn-row" href="#/settings">
         <span class="arn-row-ico">${medallion("reglages", "slate", { size: 30, shape: "tile" })}</span>
-        <span class="arn-row-lab">${pt("settings", "Réglages")}<small>${pt("row_settings_sub", "Thème, langue, confidentialité")}</small></span>
+        <span class="arn-row-lab">${pt("settings", "Réglages")}<small>${pt("row_settings_sub", "Thème · langue · confidentialité")}</small></span>
         <span class="arn-chev"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </a>
     </div>
@@ -2390,7 +2390,7 @@ function _wireEleveArene(root, me, avatarUrl) {
       console.error("[profil] logout", e);
       const { toast } = await import("@/components/common/toast.js");
       toast(
-        ptR("toast_logout_err", "Déconnexion impossible — réessaie"),
+        ptR("toast_logout_err", "Déconnexion impossible. Réessaie"),
         "error",
       );
     }
@@ -2858,7 +2858,7 @@ async function mountEnseignantArene(root, me) {
     <div class="enp-set-list">
       <a class="enp-row" href="#/notifications">
         <span class="enp-row-ico">${medallion("message", "blue", { size: 30, shape: "tile" })}</span>
-        <span class="enp-row-lab">${pt("row_notifs", "Mes notifications")}<small>${pt("teacher_notif_sub", "Validations, séances, messages")}</small></span>
+        <span class="enp-row-lab">${pt("row_notifs", "Mes notifications")}<small>${pt("teacher_notif_sub", "Validations · séances · messages")}</small></span>
         <span class="enp-chev"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </a>
       ${
@@ -2873,7 +2873,7 @@ async function mountEnseignantArene(root, me) {
       }
       <a class="enp-row" href="#/settings">
         <span class="enp-row-ico">${medallion("reglages", "slate", { size: 30, shape: "tile" })}</span>
-        <span class="enp-row-lab">${pt("account_settings", "Réglages du compte")}<small>${pt("theme_subscription_security", "Thème, abonnement, sécurité")}</small></span>
+        <span class="enp-row-lab">${pt("account_settings", "Réglages du compte")}<small>${pt("theme_subscription_security", "Thème · abonnement · sécurité")}</small></span>
         <span class="enp-chev"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       </a>
     </div>
@@ -2897,7 +2897,7 @@ async function mountEnseignantArene(root, me) {
       console.error("[profil] logout", e);
       const { toast } = await import("@/components/common/toast.js");
       toast(
-        ptR("toast_logout_err", "Déconnexion impossible — réessaie"),
+        ptR("toast_logout_err", "Déconnexion impossible. Réessaie"),
         "error",
       );
     }

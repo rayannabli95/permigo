@@ -368,7 +368,7 @@ async function uploadAndSet(userId, file, kind /* 'avatar' | 'banner' */) {
     .eq("id", userId);
   if (errUpd) {
     const { toast } = await import("@/components/common/toast.js");
-    toast("URL non persistée — réessaie", "error");
+    toast("URL non persistée. Réessaie", "error");
     return null;
   }
   return publicUrl;
@@ -381,7 +381,7 @@ async function safeRun(fn, label = "handler") {
   } catch (e) {
     console.error(`[profile-card] ${label} failed`, e);
     const { toast } = await import("@/components/common/toast.js");
-    toast("Action impossible — réessaie", "error");
+    toast("Action impossible. Réessaie", "error");
   }
 }
 

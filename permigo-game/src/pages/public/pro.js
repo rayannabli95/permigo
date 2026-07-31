@@ -141,7 +141,7 @@ export async function mount(root) {
         </div>
 
         <div class="pro-why">
-          <div class="pro-card"><span class="emo">🔥</span><div><b>Des élèves motivés</b><span>Ils travaillent leur conduite même entre deux leçons — moins d'absences, plus de régularité.</span></div></div>
+          <div class="pro-card"><span class="emo">🔥</span><div><b>Des élèves motivés</b><span>Ils travaillent leur conduite même entre deux leçons. Moins d'absences, plus de régularité.</span></div></div>
           <div class="pro-card"><span class="emo">👁️</span><div><b>Vous suivez leur engagement</b><span>D'un coup d'œil : qui avance, qui décroche. Vous gardez le lien.</span></div></div>
           <div class="pro-card"><span class="emo">⏱️</span><div><b>Un travail allégé</b><span>L'élève arrive préparé : vos leçons vont plus loin, plus vite.</span></div></div>
           <div class="pro-card"><span class="emo">✨</span><div><b>Une image moderne</b><span>Une auto-école qui rassure, engage et fidélise ses élèves.</span></div></div>
@@ -149,7 +149,7 @@ export async function mount(root) {
 
         <div class="pro-form" id="devis-form">
           <h2 class="pro-form-t">Demandez votre devis</h2>
-          <p class="pro-form-s">Gratuit et sans engagement — on vous recontacte vite.</p>
+          <p class="pro-form-s">Gratuit et sans engagement. On vous recontacte vite.</p>
 
           <div class="pro-q">
             <label>Vous êtes…</label>
@@ -293,7 +293,7 @@ export async function mount(root) {
     } catch (e) {
       console.error("[pro] devis insert failed", e);
       const msg = /rate|too many|limit/i.test(e?.message || "")
-        ? "Trop de demandes d'un coup — réessayez dans un instant, ou appelez-nous."
+        ? "Trop de demandes d'un coup. Réessayez dans un instant, ou appelez-nous."
         : "Oups, l'envoi a échoué. Réessayez, ou appelez-nous au " + TEL + ".";
       toast(msg, "error", 4500);
       submitBtn.disabled = false;
