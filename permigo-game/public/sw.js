@@ -7,7 +7,12 @@
  *  - Pas de tracking, juste pour permettre l'install PWA sur iOS / Android.
  */
 
-const CACHE_NAME = "permigo-v8"; // bump = purge du vieux cache (ajout offline.html au précache)
+// ⚠️ À BUMPER À CHAQUE FOIS QU'UNE IMAGE DE /public EST REMPLACÉE SANS
+// CHANGER DE NOM. Le cache est indexé par URL : même nom = l'ancienne image
+// reste servie À VIE sur les installations existantes.
+// v9 (31/07/2026) : le nouveau logo (#620) avait remplacé les PNG en place
+// sans bumper — tous les élèves déjà installés voyaient encore le P vert.
+const CACHE_NAME = "permigo-v9";
 // Scope auto-detect : ex '/permigo-v7/' sur GitHub Pages, '/' en local
 const SCOPE = self.registration
   ? self.registration.scope
@@ -175,11 +180,28 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Cache first pour assets
+  // ── Assets ────────────────────────────────────────────────────
+  // Deux régimes, parce que deux natures de fichiers :
+  //
+  //  · /assets/… → sortie de build Vite, le nom PORTE une empreinte
+  //    (index-BBVOiXL4.js). Un contenu qui change = un nom qui change, donc
+  //    le cache ne peut jamais être périmé → CACHE FIRST, zéro requête.
+  //
+  //  · tout le reste (les images de /public : logo, badges, skins…) → nom
+  //    FIXE, contenu remplaçable. C'est exactement le piège du 30/07 : le
+  //    nouveau logo a écrasé les PNG sans changer leur nom, et les
+  //    installations existantes ont continué à servir l'ancien à vie.
+  //    → STALE-WHILE-REVALIDATE : on répond depuis le cache tout de suite
+  //    (aucune perte de vitesse) MAIS on va chercher la version fraîche en
+  //    arrière-plan et on met le cache à jour. Un remplacement en place se
+  //    répare donc tout seul à la visite suivante, sans bump de version.
+  const versionne = url.pathname.includes("/assets/");
+
   event.respondWith(
     caches.match(event.request).then((cached) => {
-      if (cached) return cached;
-      return fetch(event.request)
+      if (cached && versionne) return cached;
+
+      const reseau = fetch(event.request)
         .then((resp) => {
           if (resp && resp.status === 200 && resp.type === "basic") {
             const clone = resp.clone();
@@ -190,6 +212,10 @@ self.addEventListener("fetch", (event) => {
           return resp;
         })
         .catch(() => cached);
+
+      // Il y a une copie en cache : on la sert IMMÉDIATEMENT, la requête
+      // réseau continue seule et rafraîchira le cache pour la prochaine fois.
+      return cached || reseau;
     }),
   );
 });
