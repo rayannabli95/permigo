@@ -1750,14 +1750,11 @@ export async function mount(root) {
       attemptsRes.value?.data || [],
       streak,
     );
-    // quest_validate_1 (« Valider 1 compétence ») retirée de l'affichage :
-    // l'élève ne valide JAMAIS lui-même (c'est le moniteur). Quête « morte »
-    // qu'il ne peut pas accomplir → masquée en attendant sa version reformulée
-    // (« Sois prêt pour ta prochaine compétence », branchée sur les fiches de
-    // révision, avec une vraie condition côté élève) qui doit la remplacer.
-    const todayQuests = (todayQuestsRes.value?.data || []).filter(
-      (q) => q.quest_id !== "quest_validate_1",
-    );
+    // quest_validate_1 était masquée ici (« l'élève ne valide jamais lui-même,
+    // c'est le moniteur ») — raison devenue fausse avec le pivot : l'élève
+    // certifie lui-même, et depuis le 31/07 la certification autonome fait
+    // avancer la quête (déclencheur sur self_validations). On l'affiche donc.
+    const todayQuests = todayQuestsRes.value?.data || [];
     if (todayQuestsRes.status === "rejected" || todayQuestsRes.value?.error) {
       console.error(
         "[accueil] get_today_quests:",
@@ -1947,7 +1944,7 @@ export async function mount(root) {
 
     // Composants non-bloquants injectés sous le fold
     if (accDiv) {
-      // Quêtes du jour — carrousel réclamable, juste sous le CTA king
+      // Quêtes du jour — deux lignes réclamables, sous le permis virtuel
       const anchorEl = accDiv.querySelector("#acc-action-anchor");
       if (anchorEl) {
         const dqHost = document.createElement("div");
@@ -2225,9 +2222,6 @@ function render({
   ${debriefCard}
   ${consolCard}
 
-  <!-- Ancre pour les quêtes du jour (mountDailyQuests) -->
-  <div id="acc-action-anchor"></div>
-
   <!-- ══ MISE EN SITUATION — jaquette générique (esprit « mode de jeu ») ══
        La carte d'accueil ne montre JAMAIS le scénario du jour : même image,
        même texte tous les jours. La vraie scène (question + réponses) ne se
@@ -2304,6 +2298,12 @@ function render({
     </div>
   </div>
 
+  <!-- Ancre pour les quêtes du jour (mountDailyQuests). Elles vivent SOUS le
+       permis virtuel : la quête du jour, c'est certifier une compétence, elle
+       se lit juste après le compteur qu'elle fait avancer. Avant, elle
+       s'insérait entre « Prépare ta leçon » et la mise en situation et
+       coupait en deux les deux grandes portes de l'accueil. -->
+  <div id="acc-action-anchor"></div>
 
   <!-- Tes ligues : École (REMC) + Révision (quiz solo), à égalité -->
   <div id="acc-lb-slot"></div>

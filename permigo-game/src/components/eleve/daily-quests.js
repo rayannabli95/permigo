@@ -14,6 +14,8 @@ import { playStar } from "@/utils/sound.js";
 import { flyVolants } from "@/components/eleve/volant-reward.js";
 import { refreshGemmes } from "@/utils/game-state.js";
 import { getLang } from "@/utils/lang.js";
+import { navigate } from "@/router.js";
+import { haptic } from "@/utils/haptic.js";
 
 const STYLE_ID = "daily-quests-style";
 
@@ -31,11 +33,13 @@ const DQ_I18N = {
     pop_ok: "Quest complete ✓",
     pop_volants: "+{n} steering wheels",
     quest_login: "Log in today",
-    quest_validate_1: "Validate 1 skill",
+    quest_validate_1: "Certify a skill",
     quest_quiz_1: "Pass 1 quiz",
     quest_quiz_3: "Pass 3 quizzes",
     quest_streak_keep: "Keep your streak",
     quest_quiz_perfect: "Get 1 perfect quiz",
+    go: "Go",
+    go_aria: " — go there",
   },
   ar: {
     title: "مهام اليوم",
@@ -47,11 +51,13 @@ const DQ_I18N = {
     pop_ok: "أُنجزت المهمة ✓",
     pop_volants: "+{n} مقود",
     quest_login: "سجّل الدخول اليوم",
-    quest_validate_1: "أتقِن مهارة واحدة",
+    quest_validate_1: "صادِق على مهارة",
     quest_quiz_1: "انجح في اختبار واحد",
     quest_quiz_3: "انجح في 3 اختبارات",
     quest_streak_keep: "حافظ على سلسلتك",
     quest_quiz_perfect: "حقّق اختبارًا بعلامة كاملة",
+    go: "اذهب",
+    go_aria: " — اذهب إلى هناك",
   },
 };
 function dqt(key, fr) {
@@ -76,6 +82,17 @@ function cleanQuestTitle(title) {
 function questTitle(q) {
   return dqt(q.quest_id, cleanQuestTitle(q.title));
 }
+
+// Où emmener l'élève quand la quête n'est pas encore faite. Sans ça, la carte
+// dit quoi faire sans dire où : « Certifier une compétence » demandait de
+// deviner qu'il fallait passer par le parcours.
+const QUEST_ROUTE = {
+  quest_validate_1: "#/parcours",
+  quest_quiz_1: "#/reviser",
+  quest_quiz_3: "#/reviser",
+  quest_quiz_perfect: "#/reviser",
+  quest_streak_keep: "#/reviser",
+};
 
 // img/mask = illustration PNG (éclair/badge/cahier) ; ico = icône SVG classique
 const CAT_CFG = {
@@ -173,11 +190,33 @@ function ensureStyle() {
     box-shadow: 0 5px 0 color-mix(in srgb, var(--adk) 55%, #000); white-space: nowrap;
   }
   .dq-card--ready:active .dq-claim { transform: translateY(2px); box-shadow: 0 3px 0 color-mix(in srgb, var(--adk) 55%, #000); }
+  /* Bouton « Y aller » : quête pas encore faite → on emmène l'élève à
+     l'endroit où la faire. Contour et non plein, pour que « Réclamer »
+     (récompense à prendre) reste le bouton le plus fort de la liste. */
+  .dq-go {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: color-mix(in srgb, var(--a) 12%, transparent);
+    border: 1.5px solid color-mix(in srgb, var(--a) 34%, transparent);
+    color: var(--a-txt);
+    font: 800 12.5px/1 'Archivo', sans-serif;
+    padding: 9px 14px; border-radius: 12px; white-space: nowrap;
+  }
+  .dq-card--go { cursor: pointer; }
+  .dq-card--go:active { transform: scale(.985); }
+  @media (hover:hover) and (pointer:fine) {
+    .dq-card--go:hover { border-color: color-mix(in srgb, var(--a) 40%, transparent); }
+    .dq-card--go:hover .dq-go { background: color-mix(in srgb, var(--a) 18%, transparent); }
+  }
   .dq-reward {
     display: inline-flex; align-items: center; gap: 4px;
     font: 800 12px/1 'Archivo', sans-serif; color: var(--a-txt); white-space: nowrap;
   }
   .dq-reward img { width: 17px; height: 17px; }
+  /* Récompense repliée sous la barre quand le rail droit porte « Y aller » */
+  .dq-meta { display: inline-flex; align-items: center; gap: 6px; margin-top: 5px; }
+  .dq-meta .dq-prog { margin-top: 0; }
+  .dq-meta .dq-reward { font-size: 11px; }
+  .dq-meta .dq-reward img { width: 14px; height: 14px; }
   .dq-done {
     display: inline-flex; align-items: center; gap: 4px;
     font: 800 12px/1 'Archivo', sans-serif; color: #15803d; white-space: nowrap;
@@ -326,6 +365,24 @@ export async function mountDailyQuests(root, { prefetchedQuests } = {}) {
       }
     });
   });
+
+  // Cartes « à faire » : la carte entière emmène à l'écran où la faire.
+  section.querySelectorAll(".dq-card--go").forEach((card) => {
+    const go = () => {
+      const route = card.dataset.route;
+      if (!route) return;
+      haptic("tap");
+      track("daily_quests.go", { quest_id: card.dataset.questId, route });
+      navigate(route);
+    };
+    card.addEventListener("click", go);
+    card.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        go();
+      }
+    });
+  });
 }
 
 function renderSection(quests) {
@@ -361,25 +418,44 @@ function renderCard(q) {
   // Barre : violet (le vert « fait » jurait avec la DA violette ; le « fait »
   // est déjà signalé par le libellé ✓). Fait = violet profond.
   const fillClr = done ? "var(--adk)" : "var(--a)";
+  // Quête en cours qui a une destination connue → la carte devient un chemin
+  // vers l'action, pas seulement un compteur.
+  const route = !ready && !done ? QUEST_ROUTE[q.quest_id] : null;
   const stCls = done
     ? "dq-card--claimed"
     : ready
       ? "dq-card--ready"
-      : "dq-card--pending";
+      : route
+        ? "dq-card--go"
+        : "dq-card--pending";
+  const actionable = ready || !!route;
 
-  // Rail droit : réclamer (état prêt) · récompense à gagner (en cours) · fait
+  const rewardChip =
+    q.reward_gemmes > 0
+      ? `<span class="dq-reward"><img src="/skins/volant-coin.webp" alt="" aria-hidden="true">+${q.reward_gemmes}</span>`
+      : "";
+
+  // Rail droit : réclamer (état prêt) · y aller (en cours) · récompense · fait
   const right = done
     ? `<span class="dq-done">${ill("coche", { size: 14 })} ${dqRtl(esc(dqt("done", "Fait")))}</span>`
     : ready
       ? `<span class="dq-claim">${dqRtl(esc(dqt("claim", "Réclamer")))}</span>`
-      : q.reward_gemmes > 0
-        ? `<span class="dq-reward"><img src="/skins/volant-coin.webp" alt="" aria-hidden="true">+${q.reward_gemmes}</span>`
-        : "";
+      : route
+        ? `<span class="dq-go">${dqRtl(esc(dqt("go", "Y aller")))} <span aria-hidden="true">→</span></span>`
+        : rewardChip;
+
+  // Barre de progression : sous elle, l'avancement et (si le rail droit porte
+  // le bouton) la récompense, qui n'a plus sa place à droite.
+  const meta =
+    !ready && !done
+      ? `<span class="dq-meta"><span class="dq-prog">${q.progress}/${q.target}</span>${route ? rewardChip : ""}</span>`
+      : "";
 
   return `
     <div class="dq-card ${stCls}" data-quest-id="${escAttr(String(q.quest_id))}"
-         role="${ready ? "button" : "article"}" tabindex="${ready ? "0" : "-1"}"
-         aria-label="${escAttr(questTitle(q))}${ready ? escAttr(dqt("claim_aria", " — réclamer la récompense")) : ""}">
+         ${route ? `data-route="${escAttr(route)}"` : ""}
+         role="${actionable ? "button" : "article"}" tabindex="${actionable ? "0" : "-1"}"
+         aria-label="${escAttr(questTitle(q))}${ready ? escAttr(dqt("claim_aria", " — réclamer la récompense")) : route ? escAttr(dqt("go_aria", " — y aller")) : ""}">
       <div class="dq-ico" style="background:${cat.color}18">
         ${
           cat.img
@@ -394,7 +470,7 @@ function renderCard(q) {
         <div class="dq-track">
           <div class="dq-fill" style="width:${pct}%;background:${fillClr}"></div>
         </div>
-        ${!ready && !done ? `<span class="dq-prog">${q.progress}/${q.target}</span>` : ""}
+        ${meta}
       </div>
       <div class="dq-right">${right}</div>
     </div>
