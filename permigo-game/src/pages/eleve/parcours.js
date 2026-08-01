@@ -47,11 +47,10 @@ const PRC_I18N = {
     retry: "Try again",
     fresh_unlock: "Just unlocked: {name}",
     chip_chap: "Chapter {n} of {t}",
-    suivi: "Overview",
-    suivi_aria: "My overview. Validated skills, lessons, exam",
+    suivi: "My skills",
+    suivi_aria: "My skills. Certified skills, lessons, exam",
     prog_chap: "Chapter progress",
-    jalons_word: "milestones",
-    aria_jalons: "{d} milestones out of {t} done",
+    aria_jalons: "{d} out of {t} done in this chapter",
     gate_one: "Validate 1 more skill from the previous chapter",
     gate_many: "Validate {n} more skills from the previous chapter",
     route_h2: "Your route",
@@ -109,11 +108,10 @@ const PRC_I18N = {
     retry: "أعد المحاولة",
     fresh_unlock: "فتحت للتو: {name}",
     chip_chap: "الفصل {n} من {t}",
-    suivi: "الملخّص",
-    suivi_aria: "ملخّصي. المهارات المُصادَق عليها، الدروس، الامتحان",
+    suivi: "مهاراتي",
+    suivi_aria: "مهاراتي. المهارات المُصادَق عليها، الدروس، الامتحان",
     prog_chap: "تقدّم الفصل",
-    jalons_word: "محطة",
-    aria_jalons: "{d} محطة من {t} مكتملة",
+    aria_jalons: "{d} من {t} مكتملة في هذا الفصل",
     gate_one: "صادق على مهارة إضافية واحدة من الفصل السابق",
     gate_many: "صادق على {n} مهارات إضافية من الفصل السابق",
     route_h2: "طريقك",
@@ -2340,10 +2338,12 @@ function renderChapterView(
             <span class="prc-cv-chip"><span class="dot" aria-hidden="true"></span>${prcD("chip_chap", `Chapitre ${currentIdx + 1} sur ${worldStates.length}`, { n: currentIdx + 1, t: worldStates.length })}</span>
             <!-- Mode condensé (hub mon-permis) gardé en OPTION : l'onglet
                  « Mon permis » ouvre désormais le parcours en direct
-                 (décision Rayan 2026-07-16), ce bouton donne le résumé. -->
-            <a class="prc-cv-suivi" href="#/mon-permis" aria-label="${prcT("suivi_aria", "Mon suivi. Compétences validées, leçons, examen")}">
+                 (décision Rayan 2026-07-16), ce bouton donne le résumé.
+                 Le mot « Suivi » ne disait rien à personne (retour Rayan
+                 31/07/2026) : le bouton dit maintenant où il mène. -->
+            <a class="prc-cv-suivi" href="#/mon-permis" aria-label="${prcT("suivi_aria", "Mes compétences. Compétences certifiées, leçons, examen")}">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="3.5" cy="6" r="1.6" fill="currentColor"/><circle cx="3.5" cy="12" r="1.6" fill="currentColor"/><circle cx="3.5" cy="18" r="1.6" fill="currentColor"/></svg>
-              <span>${prcD("suivi", "Suivi")}</span>
+              <span>${prcD("suivi", "Mes compétences")}</span>
             </a>
           </div>
           <h1 class="prc-cv-world-title">${nameBi(chapTitle, chapTr(world))}</h1>
@@ -2352,11 +2352,15 @@ function renderChapterView(
         <div class="prc-cv-world-prog">
           <div class="prc-cv-wp-top">
             <span>${prcD("prog_chap", "Progression du chapitre")}</span>
-            <b>${prcDyn(`${ws.done} / ${ws.total} ${prcT("jalons_word", "jalons")}`)}</b>
+            <!-- « jalons » ne parlait à personne (retour Rayan 31/07/2026) :
+                 le compte se lit tout seul, le mot ne servait à rien. -->
+            <b>${prcDyn(`${ws.done} / ${ws.total}`)}</b>
           </div>
           <div class="prc-cv-wp-bar"
                role="progressbar" aria-valuenow="${chapPct}" aria-valuemin="0" aria-valuemax="100"
-               aria-label="${prcT("aria_jalons", `${ws.done} jalons sur ${ws.total} acquis`, { d: ws.done, t: ws.total })}"
+               aria-label="${prcT("aria_jalons", `${ws.done} sur ${ws.total} dans ce chapitre`, { d: ws.done, t: ws.total })}">
+            <!-- Le « > » manquait ici : la barre avalait son propre remplissage
+                 comme un attribut, elle restait donc vide même à 7 / 7. -->
             <div class="prc-cv-wp-fill" style="width:${chapPct}%"></div>
           </div>
         </div>

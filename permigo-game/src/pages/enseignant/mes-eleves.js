@@ -709,42 +709,56 @@ async function loadData() {
   //    Côté frontend on marquera ensuite les "attitrés" (enseignant_id = me.id)
   // Les 3 requêtes (élèves / validations / examens) sont indépendantes →
   // en parallèle (Promise.all) : le chargement = la plus lente, pas la somme.
-  const [elevesRes, valsRes, examsRes, provMap, engRows] = await Promise.all([
-    sb
-      .from("profiles")
-      .select("id, prenom, nom, enseignant_id, last_active_at, avatar_url")
-      .eq("role", "eleve")
-      .order("prenom"),
-    fetchAllRows(() =>
+  const [elevesRes, valsRes, examsRes, provMap, engRows, certifsRes] =
+    await Promise.all([
       sb
-        .from("validations")
-        .select("eleve_id, competence_id, validated_at")
-        .eq("statut", "acquis"),
-    ),
-    fetchAllRows(() =>
+        .from("profiles")
+        .select("id, prenom, nom, enseignant_id, last_active_at, avatar_url")
+        .eq("role", "eleve")
+        .order("prenom"),
+      fetchAllRows(() =>
+        sb
+          .from("validations")
+          .select("eleve_id, competence_id, validated_at")
+          .eq("statut", "acquis"),
+      ),
+      fetchAllRows(() =>
+        sb
+          .from("examens")
+          .select("eleve_id, statut, date_examen, created_at")
+          .order("created_at", { ascending: false }),
+      ),
+      // Provenance CRM (RLS = mes élèves) → Map(eleve_id → {label,color}).
+      fetchProvenanceMap(),
+      // Engagement « vautour » de tous mes élèves (RPC SECURITY DEFINER agrégée).
+      // Best-effort : si la RPC n'est pas déployée, la liste marche sans étiquette.
       sb
-        .from("examens")
-        .select("eleve_id, statut, date_examen, created_at")
-        .order("created_at", { ascending: false }),
-    ),
-    // Provenance CRM (RLS = mes élèves) → Map(eleve_id → {label,color}).
-    fetchProvenanceMap(),
-    // Engagement « vautour » de tous mes élèves (RPC SECURITY DEFINER agrégée).
-    // Best-effort : si la RPC n'est pas déployée, la liste marche sans étiquette.
-    sb
-      .rpc("get_eleves_engagement")
-      .then((r) => {
-        if (r.error) {
-          console.error("[mes-eleves] engagement", r.error);
+        .rpc("get_eleves_engagement")
+        .then((r) => {
+          if (r.error) {
+            console.error("[mes-eleves] engagement", r.error);
+            return [];
+          }
+          return r.data || [];
+        })
+        .catch((error) => {
+          console.error("[mes-eleves] engagement", error);
           return [];
-        }
-        return r.data || [];
-      })
-      .catch((error) => {
-        console.error("[mes-eleves] engagement", error);
-        return [];
+        }),
+      // Certifications faites par les élèves eux-mêmes. Depuis le pivot du
+      // 17/07 c'est la voie NORMALE, plus un reliquat du mode solo. Elles
+      // étaient absentes de cet écran : un élève qui certifiait vingt
+      // compétences restait affiché à zéro chez son moniteur (audit 01/08).
+      // Best-effort : si la lecture échoue, l'écran marche comme avant.
+      fetchAllRows(() =>
+        sb
+          .from("self_validations")
+          .select("eleve_id, competence_id, validated_at"),
+      ).catch((error) => {
+        console.error("[mes-eleves] certifications élèves", error);
+        return { data: [], error: null };
       }),
-  ]);
+    ]);
   const engMap = new Map();
   (engRows || []).forEach((r) => engMap.set(r.eleve_id, r));
   const { data: elevesRaw, error: e1 } = elevesRes;
@@ -803,16 +817,26 @@ async function loadData() {
   const nowRecent = Date.now();
   const acquisSetByEleve = {};
   const recentByEleve = {};
-  (valsRaw || []).forEach((v) => {
+  // Les deux sources comptent. La validation du moniteur reste la sienne, la
+  // certification de l'élève est marquée à part pour qu'il sache d'où elle vient.
+  const certifSetByEleve = {};
+  const ajouter = (v, parEleve) => {
     if (!v.competence_id) return;
-    (acquisSetByEleve[v.eleve_id] ||= new Set()).add(v.competence_id);
+    const set = (acquisSetByEleve[v.eleve_id] ||= new Set());
+    const nouvelle = !set.has(v.competence_id);
+    set.add(v.competence_id);
+    if (parEleve)
+      (certifSetByEleve[v.eleve_id] ||= new Set()).add(v.competence_id);
     if (
+      nouvelle &&
       v.validated_at &&
       nowRecent - new Date(v.validated_at).getTime() <= RECENT_MS
     ) {
       recentByEleve[v.eleve_id] = (recentByEleve[v.eleve_id] || 0) + 1;
     }
-  });
+  };
+  (valsRaw || []).forEach((v) => ajouter(v, false));
+  (certifsRes?.data || []).forEach((v) => ajouter(v, true));
 
   // 3. Dernier examen par élève (le plus récent fait foi).
   const lastExamByEleve = {};
@@ -845,6 +869,8 @@ async function loadData() {
         ...e,
         acquis,
         acquisSet,
+        // Celles que l'élève a certifiées lui-même, pour l'afficher comme tel.
+        certifSet: certifSetByEleve[e.id] || new Set(),
         recentAcquis: recentByEleve[e.id] || 0,
         total: REMC_TOTAL,
         actif,

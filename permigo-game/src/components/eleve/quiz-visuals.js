@@ -97,10 +97,12 @@ function cockpitSVG(opts = {}) {
       </g>
       ${
         opts.wipers
-          ? [96, 208].map(
-              (px, i) =>
-                `<g transform="translate(${px},124)"><g class="qzv-wipe" style="animation-delay:${i * 0.12}s"><rect x="-2" y="-52" width="4" height="52" rx="2" fill="#12152b"/></g></g>`,
-            ).join("")
+          ? [96, 208]
+              .map(
+                (px, i) =>
+                  `<g transform="translate(${px},124)"><g class="qzv-wipe" style="animation-delay:${i * 0.12}s"><rect x="-2" y="-52" width="4" height="52" rx="2" fill="#12152b"/></g></g>`,
+              )
+              .join("")
           : ""
       }
       ${opts.pluie ? `<g class="qzv-ws-rain">${[26, 68, 112, 152, 198, 244, 288, 322].map((x, i) => `<line x1="${x}" y1="${14 + (i % 3) * 8}" x2="${x - 7}" y2="${34 + (i % 3) * 8}" stroke="rgba(170,200,255,.55)" stroke-width="2" stroke-linecap="round"/>`).join("")}</g>` : ""}
@@ -155,12 +157,13 @@ function cockpitSVG(opts = {}) {
     ? (opts.wheelDots === "915"
         ? DOT_ANSWER
         : [
-        [180, 154],
-        [234, 208],
-        [126, 208],
-        [141, 172],
-        [219, 172],
-      ])
+            [180, 154],
+            [234, 208],
+            [126, 208],
+            [141, 172],
+            [219, 172],
+          ]
+      )
         .map(
           ([x, y], i) =>
             `<circle class="qzv-dot" style="animation-delay:${i * 0.22}s" cx="${x}" cy="${y}" r="5.5" fill="${C.gold}" stroke="#3a1d00" stroke-width="1.4"/>`,
@@ -194,9 +197,23 @@ function cockpitSVG(opts = {}) {
   </svg>`;
 }
 
+/**
+ * La boîte de l'élève, pour ne pas lui dessiner une voiture qu'il ne conduit
+ * pas : trois pédales et une grille en H à quelqu'un qui roule en automatique
+ * (audit 01/08). null = inconnue, on dessine comme avant.
+ */
+let _boite = null;
+
+/** @param {'manuelle'|'auto'|null} v */
+export function setBoiteVisuels(v) {
+  _boite = v === "manuelle" || v === "auto" ? v : null;
+}
+
 // ── Brique 2 : pédalier (gros plan embrayage / frein / accél.) ──
 // opts: { hl:"embrayage"|"frein"|"accel", press:"frein"|…, vibr:bool }
+// En boîte automatique : deux pédales, et le frein passe à gauche.
 function pedalesSVG(opts = {}) {
+  const auto = _boite === "auto";
   const pedal = (key, x, w, h, label) => {
     const isHl = opts.hl === key;
     const isPress = opts.press === key;
@@ -224,9 +241,14 @@ function pedalesSVG(opts = {}) {
     <rect x="14" y="8" width="332" height="144" rx="18" fill="#141830"/>
     <path d="M 14 96 Q 180 78 346 96 L 346 134 Q 180 152 14 134 Z" fill="#1c2140" opacity=".8"/>
     <rect x="14" y="8" width="332" height="144" rx="18" fill="none" stroke="${C.dashHi}" stroke-width="2"/>
-    ${pedal("embrayage", 94, 48, 62, "Embrayage")}
+    ${
+      auto
+        ? `${pedal("frein", 140, 58, 62, "Frein")}
+    ${pedal("accel", 232, 40, 76, "Accélérateur")}`
+        : `${pedal("embrayage", 94, 48, 62, "Embrayage")}
     ${pedal("frein", 180, 58, 62, "Frein")}
-    ${pedal("accel", 264, 40, 76, "Accélérateur")}
+    ${pedal("accel", 264, 40, 76, "Accélérateur")}`
+    }
   </svg>`;
 }
 
@@ -358,7 +380,8 @@ function panneauSVG(type) {
 
 // ── Brique 6 : mini-scène routière iso (réutilise le moteur) ────
 // projection monde→écran locale (mêmes constantes que situation-scene.js)
-const PP = (x, y) => `${((x + y) * 46).toFixed(1)},${((x - y) * 24).toFixed(1)}`;
+const PP = (x, y) =>
+  `${((x + y) * 46).toFixed(1)},${((x - y) * 24).toFixed(1)}`;
 
 // trajectoires de manœuvre (pointillés dorés + pointe de flèche)
 const TRAJ = {
@@ -650,14 +673,28 @@ const SCENES = {
     kind: "autoroute",
     vehicules: [
       { ...MOI, d: 2.6, lane: 0.05 },
-      { id: "v1", at: "S", d: 1.4, lane: 0.7, couleur: "gris", clign: "gauche" },
+      {
+        id: "v1",
+        at: "S",
+        d: 1.4,
+        lane: 0.7,
+        couleur: "gris",
+        clign: "gauche",
+      },
     ],
   },
   autorouteBAU: {
     kind: "autoroute",
     vehicules: [
       { ...MOI, d: 2.8, lane: 0.05 },
-      { id: "v1", at: "S", d: 1.2, lane: 0.7, couleur: "gris", clign: "warning" },
+      {
+        id: "v1",
+        at: "S",
+        d: 1.2,
+        lane: 0.7,
+        couleur: "gris",
+        clign: "warning",
+      },
     ],
   },
   autorouteVoieGauche: {
@@ -684,7 +721,9 @@ const SCENES = {
 const sc = (k, o) => sceneHTML(SCENES[k], o);
 const cockpit = (o) => wrap("cockpit", cockpitSVG(o));
 const pedales = (o) => wrap("pedales", pedalesSVG(o));
-const levier = (o) => wrap("levier", levierSVG(o));
+// La grille en H n'existe pas en boîte automatique : mieux vaut pas de dessin
+// qu'un dessin faux, le texte de la question suffit.
+const levier = (o) => (_boite === "auto" ? "" : wrap("levier", levierSVG(o)));
 const feu = (e) => wrap("feu", feuSVG(e));
 const panneau = (t) => wrap("panneau", panneauSVG(t));
 
@@ -967,7 +1006,6 @@ const RULES = [
     re: /entrée d'agglo|panneau d'entrée|limite agglo|agglomération en france|vitesse max en ville|en ville, sans panneau/,
     vis: () => panneau("agglo"),
   },
-
 
   // ── Cockpit ─────────────────────────────────────────────────────
   {
