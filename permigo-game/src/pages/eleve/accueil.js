@@ -24,6 +24,14 @@ import { medallion } from "@/utils/medallions.js";
 import { volantImg } from "@/utils/volant.js";
 import { ASSETS } from "@/utils/assets.js";
 import { emotionalBanner } from "@/components/eleve/emotional-banner.js";
+import {
+  birthdateCardHTML,
+  wireBirthdateCard,
+} from "@/components/eleve/birthdate-card.js";
+import {
+  identityPromptHTML,
+  wireIdentityPrompt,
+} from "@/components/eleve/identity-prompt.js";
 import { getMyChests } from "@/utils/game-state.js";
 import { mountDailyQuests } from "@/components/eleve/daily-quests.js";
 import { toast } from "@/components/common/toast.js";
@@ -2336,6 +2344,17 @@ function render({
   <!-- Slot coffre (injecté async par _loadAndInjectChests) -->
   <div id="acc-chest-slot"></div>
 
+  <!-- Date de naissance : demandée ICI et pas à l'inscription. Carte posée
+       dans la page, jamais une modale — elle attend, elle ne bloque rien. -->
+  ${birthdateCardHTML(me)}
+
+  <!-- Prénom : demandé au classement (cf. identity-prompt.js). Le classement
+       est derrière le Pass, donc un élève rattaché à une auto-école pourrait
+       ne jamais y passer alors que son moniteur, lui, le cherche dans sa liste
+       sous « v1785612 ». On repose donc la même carte ici, et SEULEMENT dans
+       ce cas : un élève solo en découverte n'est embêté par personne. -->
+  ${me.auto_ecole_id ? identityPromptHTML(me) : ""}
+
 </div>
 
 <!-- STREAK BOTTOM SHEET -->
@@ -2399,6 +2418,9 @@ function wire(
     pendingNotif,
   },
 ) {
+  wireBirthdateCard(root);
+  wireIdentityPrompt(root);
+
   // Pastille 🎯 « Changer de thème » → feuille ciblée (3 suggestions)
   root.querySelector("#prep-theme-btn")?.addEventListener("click", () => {
     haptic("select");
