@@ -587,7 +587,7 @@ export function renderPermisMini({
     <div class="pcm-state">${esc(state.label)}</div>
   </div>
   <div class="pcm-name">${esc(fullName)}</div>
-  ${created_at ? `<div class="pcm-since">Inscrit·e le ${esc(formatDate(created_at))}</div>` : ""}
+  ${created_at ? `<div class="pcm-since">Membre depuis le ${esc(formatDate(created_at))}</div>` : ""}
   <div class="pcm-foot">
     <div class="pcm-prog-row">
       <span class="pcm-count"><b>${validated}</b> / ${total} compétences</span>

@@ -586,14 +586,8 @@ function renderLoadError(root, me, error) {
 }
 
 async function renderInto(root, _me) {
-
   // ─── Fetch en parallèle ────────────────────────────────────────
-  const [
-    valsAll,
-    elevesAll,
-    profileRes,
-    provMap,
-  ] = await Promise.all([
+  const [valsAll, elevesAll, profileRes, provMap] = await Promise.all([
     // Dernières validations (activité récente) — non utilisées dans ce design
     // mais gardées pour éviter de casser les listeners existants
     sb
@@ -610,11 +604,7 @@ async function renderInto(root, _me) {
       .eq("role", "eleve"),
 
     // Profil : prénom
-    sb
-      .from("profiles")
-      .select("prenom")
-      .eq("id", _me.id)
-      .maybeSingle(),
+    sb.from("profiles").select("prenom").eq("id", _me.id).maybeSingle(),
 
     // Provenance CRM (RLS = mes élèves) → Map(eleve_id → {label,color})
     fetchProvenanceMap(),
@@ -623,10 +613,7 @@ async function renderInto(root, _me) {
   // Erreur bloquante (réseau, RLS…) → vrai état d'erreur récupérable.
   // Avant : un toast de 3s puis un dashboard « normal mais vide » trompeur.
   const loadError =
-    valsAll.error ||
-    elevesAll.error ||
-    profileRes.error ||
-    null;
+    valsAll.error || elevesAll.error || profileRes.error || null;
   if (loadError) {
     renderLoadError(root, _me, loadError);
     return;
@@ -667,6 +654,20 @@ async function renderInto(root, _me) {
   const acquisAll = acquisRes.data;
   const acquisSetByEleve = {};
   (acquisAll || []).forEach((v) => {
+    if (!v.competence_id) return;
+    (acquisSetByEleve[v.eleve_id] ||= new Set()).add(v.competence_id);
+  });
+
+  // Les compétences que les élèves ont certifiées eux-mêmes comptent aussi.
+  // Depuis le pivot du 17/07 c'est la voie normale ; sans ça, un élève qui
+  // avance seul restait affiché à zéro sur ce tableau (audit 01/08).
+  // Best-effort : une lecture qui échoue ne doit pas vider le tableau.
+  const certifsRes = await fetchAllRows(() =>
+    sb.from("self_validations").select("eleve_id, competence_id"),
+  ).catch((error) => ({ data: [], error }));
+  if (certifsRes.error)
+    console.error("[aujourdhui] certifications élèves", certifsRes.error);
+  (certifsRes.data || []).forEach((v) => {
     if (!v.competence_id) return;
     (acquisSetByEleve[v.eleve_id] ||= new Set()).add(v.competence_id);
   });

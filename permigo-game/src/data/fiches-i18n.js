@@ -9,11 +9,17 @@ import { getLang } from "@/utils/lang.js";
 
 const FICHE_UI = {
   en: {
-    sub: "Tick your steps, then unlock the test.",
+    sub: "Tick your steps, then certify the skill.",
     deck: "Your deck",
     geste: "step",
     gestes: "steps",
-    cta: "Test yourself",
+    cta: "Certify this skill",
+    glossaire_h: "The words in this sheet",
+    cta_done: "Already yours. See it in My licence",
+    cta_done_note:
+      "You have already certified it. Keep reviewing it whenever you like.",
+    cta_warn:
+      "Do it in a lesson with your instructor first. You certify what you can do, not what you just read.",
     order: "Put them in order",
     coach: "Coach cards",
     methode: "The method",
@@ -29,11 +35,16 @@ const FICHE_UI = {
     monde: "World",
   },
   ar: {
-    sub: "علّم على خطواتك، ثمّ افتح الاختبار.",
+    sub: "علّم على خطواتك، ثمّ صادق على المهارة.",
     deck: "مجموعتك",
     geste: "خطوة",
     gestes: "خطوات",
-    cta: "اختبر نفسك",
+    cta: "صادق على هذه المهارة",
+    glossaire_h: "كلمات هذه البطاقة",
+    cta_done: "مكتسبة سلفًا. اعرضها في رخصتي",
+    cta_done_note: "لقد صادقت عليها سابقًا. واصل مراجعتها متى شئت.",
+    cta_warn:
+      "جرّبها أولًا في درس مع مدرّبك. أنت تصادق على ما تتقن فعله، لا على ما قرأته للتوّ.",
     order: "رتّبها بالترتيب",
     coach: "بطاقات المدرّب",
     methode: "الطريقة",
