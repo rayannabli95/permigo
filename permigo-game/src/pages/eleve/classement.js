@@ -40,6 +40,10 @@ import {
   arenePaliers,
 } from "@/components/common/arene-rank.js";
 import { recompensesTabs } from "@/components/eleve/recompenses-tabs.js";
+import {
+  identityPromptHTML,
+  wireIdentityPrompt,
+} from "@/components/eleve/identity-prompt.js";
 import { medallion } from "@/utils/medallions.js";
 
 const LIMIT = 50;
@@ -360,6 +364,8 @@ function _renderArena(state, data) {
 
   ${recompensesTabs("classement", { dark: true })}
 
+  ${identityPromptHTML(getCurUser(), { dark: true })}
+
   ${_renderScopebar(state, rows)}
   <div id="arn-body">${_renderBody(state, rows, data)}</div>
 
@@ -471,6 +477,11 @@ function _hofSection(hof) {
 
 // ─── Wire ────────────────────────────────────────────────────────
 function _wire(root, state, rerender) {
+  // Prénom : demandé ICI et pas à l'inscription. La carte s'enlève seule une
+  // fois remplie ; _wire() est rappelé à chaque rerender, elle ne réapparaît
+  // pas puisque le profil en cache porte désormais le prénom.
+  wireIdentityPrompt(root);
+
   // Bascule de portée (Mon école / National)
   root.querySelectorAll(".arn-scope button").forEach((b) => {
     b.addEventListener("click", () => {

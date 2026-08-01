@@ -51,19 +51,6 @@ const OB_I18N = {
     skip_aria: "Skip the intro",
     hero_lead:
       "I'm <b>PermiGo</b>. In 30 seconds we'll set up your app. Then you'll revise <b>2 min each evening</b>.",
-    sec_identity: "Let's get to know you",
-    id_prenom: "First name",
-    id_nom: "Last name",
-    id_naissance: "Date of birth",
-    id_parent: "A parent's email",
-    id_parent_micro:
-      "Under 15: a parent's consent is required. A confirmation link will be sent to them.",
-    id_code_label: "Instructor code",
-    id_code_opt: "if you have one",
-    id_code_help:
-      "Did your instructor give you a code? Enter it to join them. Otherwise, leave it empty.",
-    ph_prenom: "Your first name",
-    ph_nom: "Your last name",
     sec_avatar: "Profile picture",
     avatar_group_aria: "Choose your avatar",
     avatar_item_aria: "Avatar {n}",
@@ -86,16 +73,6 @@ const OB_I18N = {
     a2hs_plat_aria: "Switch the instructions platform (iPhone / Android)",
     cta: "Let's go",
     cue: "Scroll down to pick your colour",
-    code_checking: "Checking…",
-    code_invalid:
-      "✗ Code not found. Check with your instructor, or leave it empty.",
-    code_join: "✓ You're joining {ecole}",
-    code_err_generic: "Check failed. Try again.",
-    ecole_fallback: "your driving school",
-    toast_parent_required: "Enter a valid parent email.",
-    toast_save_failed: "Couldn't save. Try again.",
-    toast_join_failed:
-      "Couldn't link to your instructor right now. Your account is ready anyway.",
     notif_on_note: "<b>Reminders on</b>. See you tonight!",
     notif_on_announce: "Reminders on! You'll get 3 questions tonight.",
     notif_denied_note:
@@ -106,7 +83,6 @@ const OB_I18N = {
     a2hs_installing: "Installing…",
     plat_android: "On Android?",
     plat_iphone: "On iPhone?",
-    cta_saving: "Saving…",
     cta_going: "Let's go…",
     chest_title: "Welcome to PermiGo!",
     greet_generic: "there",
@@ -118,19 +94,6 @@ const OB_I18N = {
     skip_aria: "تخطّي المقدّمة",
     hero_lead:
       "أنا <b>بيرميغو</b>. في 30 ثانية نجهّز تطبيقك. بعدها تراجع <b>دقيقتين كل مساء</b>.",
-    sec_identity: "لنتعارف",
-    id_prenom: "الاسم",
-    id_nom: "اللقب",
-    id_naissance: "تاريخ الميلاد",
-    id_parent: "بريد أحد الوالدين",
-    id_parent_micro:
-      "أقل من 15 سنة: موافقة أحد الوالدين إلزامية. سيُرسَل إليه رابط تأكيد.",
-    id_code_label: "رمز المدرّب",
-    id_code_opt: "إن كان لديك واحد",
-    id_code_help:
-      "أعطاك مدرّبك رمزاً؟ أدخِله للانضمام إليه. وإلّا، اتركه فارغاً.",
-    ph_prenom: "اسمك",
-    ph_nom: "لقبك",
     sec_avatar: "صورة الملف",
     avatar_group_aria: "اختر صورتك الرمزية",
     avatar_item_aria: "صورة رمزية {n}",
@@ -151,14 +114,6 @@ const OB_I18N = {
     a2hs_plat_aria: "تغيير منصّة التعليمات (iPhone / Android)",
     cta: "لننطلق",
     cue: "انزل لاختيار لونك",
-    code_checking: "جارٍ التحقّق…",
-    code_invalid: "✗ الرمز غير موجود. تحقّق مع مدرّبك، أو اتركه فارغاً.",
-    code_join: "✓ أنت تنضمّ إلى {ecole}",
-    code_err_generic: "تعذّر التحقّق. أعد المحاولة.",
-    ecole_fallback: "مدرسة القيادة",
-    toast_parent_required: "أدخِل بريد أحد الوالدين صحيحاً.",
-    toast_save_failed: "تعذّر الحفظ. أعد المحاولة.",
-    toast_join_failed: "تعذّر ربطك بمدرّبك الآن. حسابك جاهز على أي حال.",
     notif_on_note: "<b>التذكيرات مفعّلة</b>. إلى اللقاء هذا المساء!",
     notif_on_announce: "التذكيرات مفعّلة! ستصلك 3 أسئلة هذا المساء.",
     notif_denied_note: "محظورة. فعّلها من الإعدادات إن غيّرت رأيك.",
@@ -168,7 +123,6 @@ const OB_I18N = {
     a2hs_installing: "جارٍ التثبيت…",
     plat_android: "تستعمل Android؟",
     plat_iphone: "تستعمل iPhone؟",
-    cta_saving: "جارٍ الحفظ…",
     cta_going: "لننطلق…",
     chest_title: "مرحباً بك في بيرميغو!",
     greet_generic: "بك",
@@ -204,24 +158,13 @@ export async function mount(root) {
   // A2HS : section conditionnelle (uniquement si pas déjà installée).
   const showA2HS = !isStandalone();
 
-  // Identité manquante : compte créé SANS formulaire d'inscription (typiquement
-  // « Continuer avec Google ») → le trigger DB n'a posé que prenom = préfixe de
-  // l'email. On collecte ici prénom / nom / date de naissance (⚠ déclenche le
-  // consentement parental <15 ans) + rattachement moniteur FACULTATIF — sinon
-  // ces comptes restaient définitivement sans identité ni moniteur.
-  const needsIdentity =
-    me.role === "eleve" && (!me.username || !me.date_naissance);
-  // Numéros de sections décalés quand l'étape identité s'insère en premier.
-  const secN = {
-    avatar: needsIdentity ? 2 : 1,
-    notif: needsIdentity ? 3 : 2,
-    a2hs: needsIdentity ? 4 : 3,
-  };
-  // Prénom pré-rempli seulement s'il ne vient pas du préfixe email (trigger).
-  const emailPrefix = (me.email || "").split("@")[0];
-  const idPrenomPrefill =
-    me.prenom && me.prenom !== emailPrefix ? me.prenom : "";
-
+  // ⚠️ Plus AUCUNE identité demandée ici (01/08/2026). Ni prénom, ni nom, ni
+  // date de naissance : ce tour de bienvenue ne doit rien réclamer avant que
+  // l'élève ait vu le produit. La date de naissance est demandée par une carte
+  // posée dans l'accueil (birthdate-card.js), le prénom au premier classement
+  // (identity-prompt.js). Les deux marchent quel que soit le chemin d'entrée,
+  // formulaire ou « Continuer avec Google ».
+  const secN = { avatar: 1, notif: 2, a2hs: 3 };
   // ─── État ──────────────────────────────────────────────────────
   const currentAvatar = optimizedAvatarUrl(me.avatar_url);
   let avatar =
@@ -236,10 +179,12 @@ export async function mount(root) {
   let notifAsked = false; // permission déjà demandée durant cette session
   let finishing = false;
 
-  // Prénom affiché : générique traduit si l'identité est encore à saisir.
-  const prenom = needsIdentity
-    ? ob("greet_generic", "toi")
-    : esc(me.prenom || me.nom || "toi");
+  // Prénom affiché : tant que l'élève n'a pas donné le sien, le déclencheur DB
+  // a posé le préfixe de son email. On ne salue PAS quelqu'un par « yanis27 » :
+  // dans ce cas on reste sur un « toi » traduit.
+  const emailPrefix = (me.email || "").split("@")[0];
+  const realPrenom = me.prenom && me.prenom !== emailPrefix ? me.prenom : null;
+  const prenom = realPrenom ? esc(realPrenom) : ob("greet_generic", "toi");
   const arrow = getLang() === "ar" ? "←" : "→";
   const ctaHTML = () =>
     `${ob("cta", "C'est parti")} <span class="ob-arrow" aria-hidden="true">${arrow}</span>`;
@@ -255,11 +200,7 @@ export async function mount(root) {
         <div class="ob-prog" role="progressbar" aria-label="${ob("prog_aria", "Progression")}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
           <i id="ob-prog-fill" style="width:8%"></i>
         </div>
-        ${
-          needsIdentity
-            ? "" /* pas de « Passer » : l'identité (date de naissance) est obligatoire */
-            : `<button class="ob-skip" id="ob-skip" type="button" aria-label="${ob("skip_aria", "Passer l'introduction")}">${ob("skip", "Passer")}</button>`
-        }
+        <button class="ob-skip" id="ob-skip" type="button" aria-label="${ob("skip_aria", "Passer l'introduction")}">${ob("skip", "Passer")}</button>
       </div>
 
       <!-- Annonces a11y -->
@@ -277,43 +218,6 @@ export async function mount(root) {
             <h1 class="ob-h1" id="ob-h1">${obGreet(prenom)}</h1>
             <p class="ob-lead">${obR("hero_lead", "Moi c'est <b>PermiGo</b>. En 30&nbsp;secondes, on prépare ton appli. Après, tu réviseras <b>2&nbsp;min par soir</b>.")}</p>
           </header>
-
-          ${
-            needsIdentity
-              ? `
-          <!-- ─── SECTION 0 : Identité (comptes Google / sans formulaire) ─── -->
-          <section class="ob-section" aria-labelledby="ob-sec0-t">
-            <div class="ob-sec-head">
-              <span class="ob-sec-num">1</span>
-              <h2 class="ob-sec-title" id="ob-sec0-t">${ob("sec_identity", "Fais connaissance")}</h2>
-            </div>
-            <div class="ob-card ob-id-card">
-              <div>
-                <label class="ob-id-label" for="ob-id-prenom">${ob("id_prenom", "Prénom")}</label>
-                <input class="ob-id-input" id="ob-id-prenom" type="text" autocomplete="given-name" placeholder="${ob("ph_prenom", "Ton prénom")}" value="${escAttr(idPrenomPrefill)}">
-              </div>
-              <div>
-                <label class="ob-id-label" for="ob-id-nom">${ob("id_nom", "Nom")}</label>
-                <input class="ob-id-input" id="ob-id-nom" type="text" autocomplete="family-name" placeholder="${ob("ph_nom", "Ton nom")}">
-              </div>
-              <div>
-                <label class="ob-id-label" for="ob-id-naissance">${ob("id_naissance", "Date de naissance")}</label>
-                <input class="ob-id-input" id="ob-id-naissance" type="date">
-              </div>
-              <div id="ob-id-parent-row" style="display:none">
-                <label class="ob-id-label" for="ob-id-parent">${ob("id_parent", "Email d'un parent")}</label>
-                <input class="ob-id-input" id="ob-id-parent" type="email" autocomplete="off" placeholder="parent@exemple.fr">
-                <p class="ob-micro">${ob("id_parent_micro", "Moins de 15 ans : l'accord d'un parent est obligatoire. Un lien de validation lui sera transmis.")}</p>
-              </div>
-              <div>
-                <label class="ob-id-label" for="ob-id-code">${ob("id_code_label", "Code moniteur")} <span class="ob-id-opt">${ob("id_code_opt", "si tu en as un")}</span></label>
-                <input class="ob-id-input ob-id-code" id="ob-id-code" type="text" maxlength="16" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="PERMIS75">
-                <p class="ob-micro" id="ob-id-code-help">${ob("id_code_help", "Ton moniteur t'a donné un code ? Tape-le pour le rejoindre. Sinon, laisse vide.")}</p>
-              </div>
-            </div>
-          </section>`
-              : ""
-          }
 
           <!-- ─── SECTION : Photo de profil ─── -->
           <section class="ob-section" aria-labelledby="ob-sec1-t">
@@ -454,193 +358,6 @@ export async function mount(root) {
 
   function announce(msg) {
     if (liveEl) liveEl.textContent = msg;
-  }
-
-  // ─── Étape identité (comptes sans formulaire d'inscription) ───
-  const idPrenom = root.querySelector("#ob-id-prenom");
-  const idNom = root.querySelector("#ob-id-nom");
-  const idNaissance = root.querySelector("#ob-id-naissance");
-  const idParentRow = root.querySelector("#ob-id-parent-row");
-  const idParent = root.querySelector("#ob-id-parent");
-  const idCode = root.querySelector("#ob-id-code");
-  const idCodeHelp = root.querySelector("#ob-id-code-help");
-
-  const emailValid = (v) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test((v || "").trim());
-  const normCode = (v) => (v || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
-  // Moins de 15 ans (âge du consentement numérique en France) — même règle
-  // que le formulaire public #/rejoindre.
-  const isMinorDate = (str) => {
-    if (!str) return false;
-    const b = new Date(str);
-    if (isNaN(b.getTime())) return false;
-    const t = new Date();
-    let age = t.getFullYear() - b.getFullYear();
-    const m = t.getMonth() - b.getMonth();
-    if (m < 0 || (m === 0 && t.getDate() < b.getDate())) age--;
-    return age < 15;
-  };
-  // Pseudo auto (l'élève le changera dans son profil s'il veut) :
-  // slug prénom (≤12 car. → respecte la contrainte username 3-16) + 4 chiffres.
-  const genUsername = (p) => {
-    const base =
-      (p || "eleve")
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[^a-z0-9]/g, "")
-        .slice(0, 12) || "eleve";
-    const safe = base.length >= 2 ? base : "eleve";
-    return safe + String(Math.floor(1000 + Math.random() * 9000));
-  };
-
-  let codeState = "empty"; // empty | checking | valid | invalid
-  let codeTimer = null;
-  const CODE_HELP_DEFAULT = obR(
-    "id_code_help",
-    "Ton moniteur t'a donné un code ? Tape-le pour le rejoindre. Sinon, laisse vide.",
-  );
-
-  const identityOk = () => {
-    if (!needsIdentity) return true;
-    const minor = isMinorDate(idNaissance.value);
-    return (
-      idPrenom.value.trim().length >= 2 &&
-      idNom.value.trim().length >= 1 &&
-      !!idNaissance.value &&
-      (!minor || emailValid(idParent?.value)) &&
-      (codeState === "empty" || codeState === "valid")
-    );
-  };
-  const updateCta = () => {
-    ctaBtn.disabled = !identityOk();
-  };
-
-  if (needsIdentity) {
-    // Pas de date dans le futur.
-    try {
-      idNaissance.max = new Date().toISOString().slice(0, 10);
-    } catch {}
-    [idPrenom, idNom, idParent].forEach((el) =>
-      el?.addEventListener("input", updateCta),
-    );
-    idNaissance.addEventListener("input", () => {
-      idParentRow.style.display = isMinorDate(idNaissance.value) ? "" : "none";
-      updateCta();
-    });
-    // Code moniteur facultatif — aperçu école en direct (comme #/rejoindre).
-    idCode.addEventListener("input", () => {
-      const v = normCode(idCode.value);
-      clearTimeout(codeTimer);
-      if (!v) {
-        codeState = "empty";
-        idCodeHelp.className = "ob-micro";
-        idCodeHelp.textContent = CODE_HELP_DEFAULT;
-        updateCta();
-        return;
-      }
-      codeState = "checking";
-      idCodeHelp.className = "ob-micro";
-      idCodeHelp.textContent = obR("code_checking", "Vérification…");
-      updateCta();
-      codeTimer = setTimeout(async () => {
-        try {
-          const { data, error } = await sb.rpc("get_join_code_info", {
-            p_code: v,
-          });
-          if (normCode(idCode.value) !== v) return; // saisie modifiée entre-temps
-          const info = Array.isArray(data) ? data[0] : data;
-          if (error || !info) {
-            codeState = "invalid";
-            idCodeHelp.className = "ob-micro err";
-            idCodeHelp.textContent = obR(
-              "code_invalid",
-              "✗ Code introuvable. Revérifie auprès de ton moniteur, ou laisse vide.",
-            );
-          } else {
-            codeState = "valid";
-            idCodeHelp.className = "ob-micro ok";
-            idCodeHelp.textContent = obR(
-              "code_join",
-              "✓ Tu rejoins {ecole}",
-            ).replace(
-              "{ecole}",
-              info.ecole_nom || obR("ecole_fallback", "ton auto-école"),
-            );
-          }
-        } catch {
-          codeState = "invalid";
-          idCodeHelp.className = "ob-micro err";
-          idCodeHelp.textContent = obR(
-            "code_err_generic",
-            "Vérification impossible. Réessaie.",
-          );
-        }
-        updateCta();
-      }, 400);
-    });
-    updateCta(); // CTA désactivé tant que l'identité n'est pas complète
-  }
-
-  // Enregistre l'identité (RPC signup partagée avec #/rejoindre) + rattachement
-  // moniteur éventuel. Renvoie { ok, consentRequired }.
-  async function saveIdentity() {
-    const { toast } = await import("@/components/common/toast.js");
-    const prenomV = idPrenom.value.trim();
-    const nomV = idNom.value.trim();
-    let profData = null;
-    let profErr = null;
-    for (let attempt = 0; attempt < 6; attempt++) {
-      const res = await sb.rpc("set_eleve_signup_profile", {
-        p_username: genUsername(prenomV),
-        p_nom: nomV,
-        p_prenom: prenomV,
-        p_date_naissance: idNaissance.value,
-        p_parent_email: idParent?.value.trim() || null,
-      });
-      profData = res.data;
-      profErr = res.error;
-      if (!profErr || !/username_taken/i.test(profErr.message || "")) break;
-    }
-    if (profErr) {
-      console.error("[onboarding] saveIdentity", profErr);
-      toast(
-        /parent_email_required/i.test(profErr.message || "")
-          ? obR("toast_parent_required", "Renseigne un email de parent valide.")
-          : obR("toast_save_failed", "Enregistrement impossible. Réessaie."),
-        "error",
-        4000,
-      );
-      return { ok: false };
-    }
-    const codeV = normCode(idCode.value);
-    if (codeV && codeState === "valid") {
-      const { error: joinErr } = await sb.rpc("join_moniteur_by_code", {
-        p_code: codeV,
-      });
-      if (joinErr && !/already_has_school/i.test(joinErr.message || "")) {
-        // Non bloquant : le compte est créé, le rattachement pourra se refaire.
-        console.error("[onboarding] join_moniteur_by_code", joinErr);
-        toast(
-          obR(
-            "toast_join_failed",
-            "Rattachement au moniteur impossible pour l'instant. Ton compte est quand même prêt.",
-          ),
-          "info",
-          4500,
-        );
-      }
-    }
-    const cr = Array.isArray(profData) ? profData[0] : profData;
-    setCurUser({
-      ...me,
-      prenom: prenomV,
-      nom: nomV,
-      date_naissance: idNaissance.value,
-    });
-    track("onboarding.identity_completed", {
-      minor: !!cr?.consent_required,
-      with_code: !!(codeV && codeState === "valid"),
-    });
-    return { ok: true, consentRequired: !!cr?.consent_required };
   }
 
   // ─── Barre de progression au scroll ───────────────────────────
@@ -906,34 +623,6 @@ export async function mount(root) {
     finishing = true;
     const withIntro = opts.intro !== false; // false depuis « Passer »
 
-    // Étape identité (comptes Google) : bloquante, enregistrée AVANT tout.
-    if (needsIdentity) {
-      if (!identityOk()) {
-        finishing = false;
-        updateCta();
-        root
-          .querySelector("#ob-sec0-t")
-          ?.scrollIntoView({ block: "center", behavior: "smooth" });
-        return;
-      }
-      ctaBtn.disabled = true;
-      ctaBtn.textContent = obR("cta_saving", "Enregistrement…");
-      const saved = await saveIdentity();
-      if (!saved.ok) {
-        finishing = false;
-        ctaBtn.innerHTML = ctaHTML();
-        updateCta();
-        return;
-      }
-      // Mineur : reboot → le mur de consentement parental prend le relais
-      // (route-guards le passe AVANT l'onboarding), l'élève finira le tour
-      // de bienvenue une fois l'accord donné.
-      if (saved.consentRequired) {
-        location.reload();
-        return;
-      }
-    }
-
     track("onboarding.completed", {
       avatar_chosen: !!avatar,
       accent_id: accentId,
@@ -1133,24 +822,6 @@ const STYLE = `<style>
   }
 
   /* ── Étape identité (comptes Google) ── */
-  .ob-id-card { display: flex; flex-direction: column; gap: 16px; }
-  .ob-id-label {
-    display: block; margin: 0 0 6px 2px;
-    font: 700 12px/1 'Archivo', sans-serif;
-    color: var(--ob-ink-2); text-transform: uppercase; letter-spacing: .05em;
-  }
-  .ob-id-opt { text-transform: none; letter-spacing: 0; font-weight: 600; color: var(--ob-ink-3); }
-  .ob-id-input {
-    width: 100%; box-sizing: border-box; height: 50px; padding: 0 14px;
-    border-radius: 13px; border: 1px solid var(--ob-line);
-    background: var(--ob-plate); color: var(--ob-ink);
-    font: 600 16px/1.3 'Archivo', sans-serif;
-    transition: border-color .15s, box-shadow .15s;
-  }
-  .ob-id-input::placeholder { color: var(--ob-ink-3); font-weight: 500; }
-  .ob-id-input:focus { outline: 0; border-color: var(--ob-or); box-shadow: 0 0 0 3px rgba(255,206,77,.22); }
-  .ob-id-input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(.8); cursor: pointer; }
-  .ob-id-code { text-transform: uppercase; letter-spacing: .14em; font-family: 'IBM Plex Mono', monospace; }
   .ob-micro.ok { color: #8fe85a; }
   .ob-micro.err { color: #ffb3b3; }
   .ob-cta:disabled { opacity: .55; cursor: default; filter: grayscale(.15); }
@@ -1423,15 +1094,6 @@ const STYLE = `<style>
   }
 
   /* Étape identité — variante claire */
-  html[data-theme="light"] .ob-id-label { color: var(--c-ink-2); }
-  html[data-theme="light"] .ob-id-opt { color: var(--c-ink-3); }
-  html[data-theme="light"] .ob-id-input {
-    background: var(--c-bg); color: var(--c-ink);
-    border-color: var(--c-lav-2); box-shadow: var(--c-shadow-soft);
-  }
-  html[data-theme="light"] .ob-id-input::placeholder { color: var(--c-ink-3); }
-  html[data-theme="light"] .ob-id-input:focus { border-color: var(--ob-violet); box-shadow: 0 0 0 3px rgba(124,77,255,.15); }
-  html[data-theme="light"] .ob-id-input[type="date"]::-webkit-calendar-picker-indicator { filter: none; }
   html[data-theme="light"] .ob-micro.ok { color: #3a8a01; }
   html[data-theme="light"] .ob-micro.err { color: #cc3344; }
 

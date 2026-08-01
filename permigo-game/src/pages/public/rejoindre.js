@@ -8,12 +8,18 @@
 //
 // Flow :
 //   1. Code (pré-rempli depuis l'URL) → get_join_code_info aperçoit l'école.
-//   2. Formulaire élève (email perso + prénom + nom + naissance + mdp).
-//      Le pseudo (username) est AUTO-GÉNÉRÉ depuis le prénom (genUsername) —
-//      plus de champ « Identifiant » : l'élève le changera dans l'app s'il veut.
+//   2. DEUX CHAMPS et c'est tout : email perso + mot de passe. Le pseudo est
+//      AUTO-GÉNÉRÉ depuis l'email (genUsername).
 //   3. Submit : sb.auth.signUp() → join_moniteur_by_code(code)
-//      → set_eleve_signup_profile() → consentement parental si mineur.
+//      → set_eleve_signup_minimal(pseudo).
 //   4. Redirige vers l'accueil élève.
+//
+// ⚠️ Ce qu'on ne demande PLUS ici, et où ça se demande maintenant :
+//   · date de naissance → carte dans l'accueil (birthdate-card.js). Obligation
+//     légale (accord d'un parent sous 15 ans), mais elle ne vaut pas de faire
+//     fuir quelqu'un avant qu'il ait vu le produit.
+//   · prénom → à la première visite d'un classement (identity-prompt.js).
+//     En attendant, le déclencheur pose la partie de l'email avant le @.
 //
 // ⚠️ Dépend de la migration 20260621120000_join_code.sql (RPC à appliquer).
 // ═══════════════════════════════════════════════════════════════
@@ -222,14 +228,6 @@ const SG_I18N = {
     join_school: "You're joining {school}{with}.",
     join_with: " with {name}",
     email_label: "Your email",
-    prenom_label: "First name",
-    prenom_ph: "Your first name",
-    nom_label: "Last name",
-    nom_ph: "Your last name",
-    naissance_label: "Date of birth",
-    parent_label: "A parent's email",
-    parent_italic:
-      "You're under 15: we need consent from your parent or legal guardian. A confirmation link will be sent to them.",
     pwd_label: "Password",
     pwd_ph: "8 characters minimum",
     pwd_hide_aria: "Hide password",
@@ -244,18 +242,8 @@ const SG_I18N = {
     code_notfound_short: "✗ Code not found.",
     toast_already_school:
       "This account is already linked to an instructor. Please log in.",
-    toast_parent_required: "Enter a valid parent email",
     toast_exists: "An account already exists with this email. Log in directly.",
     toast_generic: "Error while creating the account",
-    consent_title: "Almost there! We're waiting for your parent's consent",
-    consent_sub:
-      "Since you're under 15, a parent or guardian must give their consent before you can use PermiGo. Send them this link:",
-    consent_copy: "Copy the link",
-    consent_copied: "✓ Link copied",
-    consent_sub2:
-      "You can paste it into WhatsApp or a text to your parent. As soon as they approve, your account unlocks.",
-    consent_ok: "Got it",
-    consent_manual: "Select and copy the link manually",
   },
   ar: {
     title_solo: "حسابك المجاني",
@@ -277,14 +265,6 @@ const SG_I18N = {
     join_school: "أنت تنضمّ إلى {school}{with}.",
     join_with: " مع {name}",
     email_label: "بريدك الإلكتروني",
-    prenom_label: "الاسم",
-    prenom_ph: "اسمك",
-    nom_label: "اللقب",
-    nom_ph: "لقبك",
-    naissance_label: "تاريخ الميلاد",
-    parent_label: "بريد أحد الوالدين",
-    parent_italic:
-      "عمرك أقل من 15 سنة: علينا الحصول على موافقة أحد والديك أو وليّك الشرعي. سيُرسَل إليه رابط تأكيد.",
     pwd_label: "كلمة المرور",
     pwd_ph: "8 أحرف على الأقل",
     pwd_hide_aria: "إخفاء كلمة المرور",
@@ -298,18 +278,8 @@ const SG_I18N = {
     toast_code_invalid: "رمز المدرّب غير صالح. تحقّق منه مجدّداً.",
     code_notfound_short: "✗ الرمز غير موجود.",
     toast_already_school: "هذا الحساب مرتبط بمدرّب بالفعل. سجّل الدخول.",
-    toast_parent_required: "أدخِل بريد أحد الوالدين صحيحاً",
     toast_exists: "يوجد حساب بالفعل بهذا البريد. سجّل الدخول مباشرة.",
     toast_generic: "خطأ أثناء إنشاء الحساب",
-    consent_title: "اقتربت! ننتظر موافقة أحد والديك",
-    consent_sub:
-      "بما أنّ عمرك أقل من 15 سنة، يجب أن يوافق أحد والديك أو وليّك قبل أن تستعمل بيرميغو. أرسِل إليه هذا الرابط:",
-    consent_copy: "نسخ الرابط",
-    consent_copied: "✓ تمّ نسخ الرابط",
-    consent_sub2:
-      "يمكنك لصقه في واتساب أو رسالة نصية إلى والدك. بمجرّد موافقته، يُفتح حسابك.",
-    consent_ok: "فهمت",
-    consent_manual: "حدّد الرابط وانسخه يدوياً",
   },
 };
 function sgtR(key, fr) {
@@ -398,27 +368,6 @@ export async function mount(root) {
         </div>
 
         <div class="sg-row">
-          <label class="sg-label" for="sg-prenom">${sgt("prenom_label", "Prénom")}</label>
-          <input class="sg-input" id="sg-prenom" type="text" autocomplete="given-name" placeholder="${sgt("prenom_ph", "Ton prénom")}" />
-        </div>
-
-        <div class="sg-row">
-          <label class="sg-label" for="sg-nom">${sgt("nom_label", "Nom")}</label>
-          <input class="sg-input" id="sg-nom" type="text" autocomplete="family-name" placeholder="${sgt("nom_ph", "Ton nom")}" />
-        </div>
-
-        <div class="sg-row">
-          <label class="sg-label" for="sg-naissance">${sgt("naissance_label", "Date de naissance")}</label>
-          <input class="sg-input" id="sg-naissance" type="date" />
-        </div>
-
-        <div class="sg-row" id="sg-parent-block" style="display:none">
-          <label class="sg-label" for="sg-parent-email">${sgt("parent_label", "Email d'un parent")}</label>
-          <input class="sg-input" id="sg-parent-email" type="email" autocomplete="email" placeholder="parent@exemple.fr" />
-          <div class="sg-italic">${sgt("parent_italic", "Tu as moins de 15 ans : on doit recueillir l'accord de ton parent ou tuteur légal. Un lien de validation lui sera transmis.")}</div>
-        </div>
-
-        <div class="sg-row">
           <label class="sg-label" for="sg-password">${sgt("pwd_label", "Mot de passe")}</label>
           <div class="sg-pwd-wrap">
             <!-- Visible par défaut (type=text) : sur iPhone, un champ
@@ -444,11 +393,6 @@ export async function mount(root) {
     const joinIco = root.querySelector("#sg-join-ico");
     const joinTxt = root.querySelector("#sg-join-txt");
     const emailEl = root.querySelector("#sg-email");
-    const prenomEl = root.querySelector("#sg-prenom");
-    const nomEl = root.querySelector("#sg-nom");
-    const naissanceEl = root.querySelector("#sg-naissance");
-    const parentBlock = root.querySelector("#sg-parent-block");
-    const parentEmailEl = root.querySelector("#sg-parent-email");
     const pwdEl = root.querySelector("#sg-password");
     const pwdHelp = root.querySelector("#sg-pwd-help");
     const submitBtn = root.querySelector("#sg-submit");
@@ -457,19 +401,11 @@ export async function mount(root) {
     if (preserve) {
       if (codeEl && preserve.code) codeEl.value = preserve.code;
       emailEl.value = preserve.email || "";
-      prenomEl.value = preserve.prenom || "";
-      nomEl.value = preserve.nom || "";
-      naissanceEl.value = preserve.naissance || "";
-      if (parentEmailEl) parentEmailEl.value = preserve.parent || "";
       pwdEl.value = preserve.pwd || "";
     }
     const collectValues = () => ({
       code: codeEl?.value || "",
       email: emailEl.value,
-      prenom: prenomEl.value,
-      nom: nomEl.value,
-      naissance: naissanceEl.value,
-      parent: parentEmailEl?.value || "",
       pwd: pwdEl.value,
     });
 
@@ -507,16 +443,21 @@ export async function mount(root) {
       /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test((v || "").trim());
     const normCode = (v) => (v || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
 
-    // Pseudo auto-généré (plus de champ « Identifiant » dans le formulaire) :
-    // slug du prénom (sans accents) + 4 chiffres → 3-24 car., quasi jamais en
-    // collision. L'élève pourra le changer plus tard dans l'app.
-    const genUsername = (prenom) => {
+    // Pseudo auto-généré : le formulaire ne demande plus que l'email et le mot
+    // de passe, donc la base vient de l'email (avant le @), sans accents, + 4
+    // chiffres. L'élève le change quand il veut dans l'app, et son prénom lui
+    // est demandé le jour où il entre dans un classement.
+    // ⚠️ 12 caractères MAXIMUM avant les 4 chiffres : la colonne username porte
+    // une contrainte ^[A-Za-z0-9_]{3,16}$. Une adresse un peu longue faisait
+    // échouer l'inscription entière sur un 400 illisible (vu le 01/08).
+    const genUsername = (email) => {
       const base =
-        (prenom || "eleve")
+        String(email || "")
+          .split("@")[0]
           .toLowerCase()
           .normalize("NFD")
           .replace(/[^a-z0-9]/g, "")
-          .slice(0, 14) || "eleve";
+          .slice(0, 12) || "eleve";
       const safe = base.length >= 2 ? base : "eleve";
       return safe + String(Math.floor(1000 + Math.random() * 9000));
     };
@@ -528,23 +469,8 @@ export async function mount(root) {
     const validate = () => {
       const codeOk = solo || (codeValid && !codeChecking);
       const emailOk = emailValid(emailEl.value);
-      const prenomOk = prenomEl.value.trim().length >= 2;
-      const nomOk = nomEl.value.trim().length >= 1;
-      const dateOk = !!naissanceEl.value;
-      const minor = isMinorDate(naissanceEl.value);
-      const parentOk =
-        !minor ||
-        /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test((parentEmailEl?.value || "").trim());
       const pwdOk = pwdEl.value.length >= 8;
-      submitBtn.disabled = !(
-        codeOk &&
-        emailOk &&
-        prenomOk &&
-        nomOk &&
-        dateOk &&
-        parentOk &&
-        pwdOk
-      );
+      submitBtn.disabled = !(codeOk && emailOk && pwdOk);
 
       if (pwdEl.value && !pwdOk) {
         pwdEl.classList.add("error");
@@ -649,20 +575,8 @@ export async function mount(root) {
       }, 400);
     };
 
-    const updateMinor = () => {
-      if (!parentBlock) return;
-      parentBlock.style.display = isMinorDate(naissanceEl.value) ? "" : "none";
-    };
-
     codeEl.addEventListener("input", checkCode);
     emailEl.addEventListener("input", validate);
-    prenomEl.addEventListener("input", validate);
-    nomEl.addEventListener("input", validate);
-    naissanceEl.addEventListener("input", () => {
-      updateMinor();
-      validate();
-    });
-    parentEmailEl?.addEventListener("input", validate);
     pwdEl.addEventListener("input", validate);
 
     // Code pré-rempli (URL) ou restauré après changement de langue → vérifier.
@@ -692,10 +606,13 @@ export async function mount(root) {
       try {
         if (!accountCreated) {
           // 1. Sign up — le trigger handle_new_user_signup crée un profil "nu" élève
+          // Aucun prénom transmis : le déclencheur handle_new_user_signup pose
+          // la partie de l'email avant le @ comme prénom provisoire. L'élève
+          // donnera le vrai le jour où il entre dans un classement.
           const { error: authErr } = await sb.auth.signUp({
             email,
             password: pwdEl.value,
-            options: { data: { prenom: prenomEl.value.trim(), role: "eleve" } },
+            options: { data: { role: "eleve" } },
           });
           if (authErr) throw authErr;
 
@@ -740,50 +657,23 @@ export async function mount(root) {
           accountCreated = true;
         }
 
-        // 3. Pose le profil : pseudo AUTO-GÉNÉRÉ (plus de champ « Identifiant »),
-        //    nom, date, email parent si mineur. On retente avec un autre pseudo
-        //    en cas de collision (quasi impossible, mais défensif).
-        let consentToken = null;
-        let profData = null;
+        // 3. Pose le pseudo. C'est la SEULE chose écrite sur le profil ici :
+        //    la date de naissance est demandée dans l'accueil, le prénom au
+        //    premier classement. On retente avec un autre pseudo en cas de
+        //    collision (quasi impossible, mais défensif).
         let profErr = null;
         for (let attempt = 0; attempt < 6; attempt++) {
-          const res = await sb.rpc("set_eleve_signup_profile", {
-            p_username: genUsername(prenomEl.value.trim()),
-            p_nom: nomEl.value.trim(),
-            p_prenom: prenomEl.value.trim(),
-            p_date_naissance: naissanceEl.value,
-            p_parent_email: parentEmailEl?.value.trim() || null,
+          const res = await sb.rpc("set_eleve_signup_minimal", {
+            p_username: genUsername(email),
           });
-          profData = res.data;
           profErr = res.error;
           if (!profErr || !/username_taken/i.test(profErr.message || "")) break;
         }
-        if (profErr) {
-          if (/parent_email_required/i.test(profErr.message || "")) {
-            toast(
-              sgtR(
-                "toast_parent_required",
-                "Renseigne un email de parent valide",
-              ),
-              "error",
-              4000,
-            );
-            submitBtn.disabled = false;
-            submitBtn.textContent = sgtR("submit", "Créer mon compte");
-            updateMinor();
-            validate();
-            return;
-          }
-          throw profErr;
-        }
-        const cr = Array.isArray(profData) ? profData[0] : profData;
-        if (cr?.consent_required && cr?.consent_token)
-          consentToken = cr.consent_token;
+        if (profErr) throw profErr;
 
         track("signup.completed", {
           role: "eleve",
           from: solo ? "pass_solo" : "join_code",
-          minor: !!consentToken,
         });
         // Compte créé = LA conversion mesurable de la campagne pub. Avec 200 €
         // on n'aura jamais assez d'achats pour qu'un algorithme apprenne ; les
@@ -817,12 +707,6 @@ export async function mount(root) {
           }
         }
 
-        // 3bis. Élève mineur : compte en attente du consentement parental
-        if (consentToken) {
-          renderConsentPending(root, consentToken);
-          return;
-        }
-
         // 4. Succès → entrée dans l'app (l'onboarding élève gère l'add-to-home)
         window.location.href = "/#";
         window.location.reload();
@@ -849,55 +733,4 @@ export async function mount(root) {
   }
 
   renderForm();
-}
-
-// Moins de 15 ans (âge du consentement numérique en France)
-function isMinorDate(str) {
-  if (!str) return false;
-  const b = new Date(str);
-  if (isNaN(b.getTime())) return false;
-  const t = new Date();
-  let age = t.getFullYear() - b.getFullYear();
-  const m = t.getMonth() - b.getMonth();
-  if (m < 0 || (m === 0 && t.getDate() < b.getDate())) age--;
-  return age < 15;
-}
-
-// Écran post-signup pour un élève mineur : lien de consentement à transmettre au parent
-function renderConsentPending(root, token) {
-  track("signup.consent_pending");
-  const link = `${location.origin}/#/parental-consent?token=${encodeURIComponent(token)}`;
-  root.innerHTML = `${STYLE}
-    <div class="sg">
-      <div class="sg-card" style="text-align:center">
-        <div style="margin-bottom:10px;color:var(--gold);display:flex;justify-content:center">${icon("users", { size: 42 })}</div>
-        <h1 class="sg-title">${sgtR("consent_title", "Presque&nbsp;! On attend l'accord de ton parent")}</h1>
-        <p class="sg-sub">${sgtR("consent_sub", "Comme tu as moins de 15 ans, un parent ou tuteur doit donner son accord avant que tu puisses utiliser PermiGo. Envoie-lui ce lien&nbsp;:")}</p>
-        <div class="sg-row">
-          <input class="sg-input" id="sg-consent-link" type="text" readonly value="${escAttr(link)}" />
-        </div>
-        <button class="sg-btn" id="sg-copy-link" type="button">${icon("copy", { size: 16 })} ${sgt("consent_copy", "Copier le lien")}</button>
-        <p class="sg-sub" style="margin-top:16px;margin-bottom:0">${sgt("consent_sub2", "Tu peux le coller dans WhatsApp ou un SMS à ton parent. Dès qu'il valide, ton compte se débloque.")}</p>
-        <a class="sg-login-row" href="/#" style="display:block;margin-top:18px">${sgt("consent_ok", "J'ai compris")}</a>
-      </div>
-    </div>`;
-  const linkEl = root.querySelector("#sg-consent-link");
-  root.querySelector("#sg-copy-link")?.addEventListener("click", async () => {
-    try {
-      await navigator.clipboard.writeText(link);
-      const btn = root.querySelector("#sg-copy-link");
-      btn.textContent = sgtR("consent_copied", "✓ Lien copié");
-      setTimeout(() => {
-        btn.innerHTML = `${icon("copy", { size: 16 })} ${sgt("consent_copy", "Copier le lien")}`;
-      }, 2000);
-    } catch {
-      linkEl?.select();
-      const { toast } = await import("@/components/common/toast.js");
-      toast(
-        sgtR("consent_manual", "Sélectionne et copie le lien manuellement"),
-        "info",
-        3500,
-      );
-    }
-  });
 }
