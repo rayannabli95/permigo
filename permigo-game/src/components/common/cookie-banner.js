@@ -169,6 +169,27 @@ export function mountCookieBanner() {
   // reste conforme : c'est l'AFFICHAGE qu'on retarde, pas le consentement.
   let shown = false;
   let timer = 0;
+  // Hauteur réellement occupée en bas de l'écran, publiée en variable CSS.
+  // Les barres collantes des pages publiques (la page de vente en a une, avec
+  // le compte gratuit dedans) s'en servent pour se poser AU-DESSUS du bandeau.
+  // Sans ça, le bandeau les recouvrait purement et simplement : mesuré le
+  // 01/08/2026 sur www.permigo.fr, le bouton du compte gratuit n'était pas
+  // cliquable tant que le visiteur n'avait pas répondu.
+  // ⚠️ offsetHeight et PAS getBoundingClientRect().top : au moment où on
+  // mesure, le bandeau est encore translaté hors de l'écran par sa transition
+  // d'entrée, donc son « top » vaut plus que la hauteur de la fenêtre et la
+  // mesure tombait à 0. La hauteur, elle, est juste tout de suite.
+  // Ce qu'on publie est la hauteur SEULE ; le décalage bas (12 px + zone sûre)
+  // est ajouté côté CSS, là où env() est disponible.
+  const mesurer = () => {
+    try {
+      const h = banner.offsetHeight;
+      if (h > 0) document.body.style.setProperty("--ck-h", h + "px");
+    } catch {
+      /* pas de mesure possible → le repli CSS prend le relais */
+    }
+  };
+
   const show = () => {
     if (shown) return;
     shown = true;
@@ -178,7 +199,11 @@ export function mountCookieBanner() {
     document.body.classList.add("ck-open");
     window.removeEventListener("scroll", show);
     window.removeEventListener("touchmove", show);
-    requestAnimationFrame(() => banner.classList.add("on"));
+    requestAnimationFrame(() => {
+      banner.classList.add("on");
+      mesurer();
+    });
+    window.addEventListener("resize", mesurer, { passive: true });
   };
   timer = setTimeout(show, 4000);
   window.addEventListener("scroll", show, { passive: true });
@@ -188,6 +213,8 @@ export function mountCookieBanner() {
     setConsent(value);
     banner.classList.remove("on");
     document.body.classList.remove("ck-open");
+    document.body.style.removeProperty("--ck-h");
+    window.removeEventListener("resize", mesurer);
     popIntroBlocker(); // consentement répondu → le tuto peut démarrer
     const done = () => root.remove();
     banner.addEventListener("transitionend", done, { once: true });
