@@ -3,9 +3,11 @@
    Modifiable : ajuste les couleurs ici, tout le reste suit.
 ═══════════════════════════════════════════════════════════ */
 
-/* Fonts Nunito + JetBrains Mono : chargées via <link> dans index.html
-   (un @import dans le CSS bundlé bloque le premier rendu : le navigateur
-   ne découvre la requête qu'après avoir téléchargé et parsé ce fichier). */
+/* Les polices sont déclarées en @font-face DANS index.html et servies depuis
+   /fonts (plus aucun appel à Google depuis le 01/08/2026). Elles restent là-bas
+   et pas ici : un @import dans le CSS bundlé bloque le premier rendu, le
+   navigateur ne découvre la requête qu'après avoir téléchargé et parsé ce
+   fichier. */
 
 :root {
   /* ─ Accent principal : violet « Arène 3D » = la DA élève (raccord avec le
@@ -118,7 +120,9 @@
      L'univers moniteur garde la sienne (--ens-display / enseignant-arcade.css). ─ */
   --fd:'Archivo',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
   --fb:'Archivo',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
-  --fn:'JetBrains Mono','IBM Plex Mono','SF Mono',Menlo,monospace;
+  /* JetBrains Mono retirée le 01/08 : elle n'était nommée QUE dans cette pile,
+     jamais chargée nulle part. IBM Plex Mono, la suivante, prend sa place. */
+  --fn:'IBM Plex Mono','SF Mono',Menlo,monospace;
 
   /* ─ Interligne (respiration). Défaut confortable pour le TEXTE COURANT (éléments
      sans line-height explicite). Les titres et tout ce qui pose un `font:` shorthand
