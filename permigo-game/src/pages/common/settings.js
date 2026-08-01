@@ -18,6 +18,11 @@ import { optInPush, optOutPush, isPushEnabled } from "@/services/web-push.js";
 import { isStandalone, guessPlatform } from "@/utils/pwa.js";
 import { openInstallSheet } from "@/components/common/install-nudge.js";
 import {
+  chargerBoite,
+  boiteConnue,
+  enregistrerBoite,
+} from "@/utils/transmission.js";
+import {
   startCheckout,
   getSubscription,
   isActive,
@@ -32,6 +37,14 @@ const SET_I18N = {
     back: "Back",
     page_title: "Preferences",
     app_group: "App",
+    boite_group: "Your car",
+    boite_title: "Your gearbox",
+    boite_sub: "It decides which questions you get when you certify",
+    boite_aria: "Your gearbox",
+    boite_manuelle: "Manual",
+    boite_auto: "Automatic",
+    boite_ok: "Noted.",
+    boite_ko: "Couldn't save. Try again.",
     app_add_home: "Add to home screen",
     app_add_home_aria: "Add PermiGo to home screen",
     app_add_home_sub: "Open PermiGo in one tap like a real app",
@@ -142,8 +155,7 @@ const SET_I18N = {
     delete_confirm_instruction: "To confirm type exactly:",
     confirmation: "Confirmation",
     cancel: "Cancel",
-    delete_auth_note:
-      "To erase the authentication account, contact",
+    delete_auth_note: "To erase the authentication account, contact",
     delete_failed: "Unable to delete. Contact dpo@permigo.fr",
     delete_error: "Error. Contact dpo@permigo.fr",
   },
@@ -151,6 +163,14 @@ const SET_I18N = {
     back: "رجوع",
     page_title: "الإعدادات",
     app_group: "التطبيق",
+    boite_group: "سيارتك",
+    boite_title: "علبة السرعة لديك",
+    boite_sub: "هي التي تحدّد الأسئلة التي تُطرح عليك عند المصادقة",
+    boite_aria: "علبة السرعة لديك",
+    boite_manuelle: "يدوية",
+    boite_auto: "أوتوماتيكية",
+    boite_ok: "تمّ الحفظ.",
+    boite_ko: "تعذّر الحفظ. أعد المحاولة.",
     app_add_home: "أضف إلى الشاشة الرئيسية",
     app_add_home_aria: "أضف بيرميغو إلى الشاشة الرئيسية",
     app_add_home_sub: "افتح بيرميغو بلمسة واحدة مثل تطبيق حقيقي",
@@ -236,15 +256,12 @@ const SET_I18N = {
     sub_next_charge: "{base}. الدفعة التالية في {date}",
     sub_monthly_active: "الاشتراك الشهري مفعّل",
     sub_active: "الاشتراك مفعّل",
-    sub_pro_desc:
-      "بيرميغو برو. دفتر REMC رقمي، متابعة الطلاب، بلا إعلانات.",
+    sub_pro_desc: "بيرميغو برو. دفتر REMC رقمي، متابعة الطلاب، بلا إعلانات.",
     redirecting: "جارٍ التحويل…",
     checkout_failed:
       "تعذّر فتح الدفع. أعد المحاولة أو راسلنا: contact@permigo.fr",
-    push_install:
-      "ثبّت بيرميغو أولًا على شاشتك الرئيسية لتفعيل الإشعارات.",
-    push_blocked:
-      "الإشعارات محظورة. اسمح بها في إعدادات الهاتف.",
+    push_install: "ثبّت بيرميغو أولًا على شاشتك الرئيسية لتفعيل الإشعارات.",
+    push_blocked: "الإشعارات محظورة. اسمح بها في إعدادات الهاتف.",
     push_enabled: "تم تفعيل الإشعارات ✓",
     save_error: "خطأ في الحفظ",
     dnd_saved: "تم حفظ فترة عدم الإزعاج",
@@ -428,6 +445,18 @@ const STYLE = `<style>
   font-family: inherit; flex: none;
 }
 .st-save-btn:hover { background: var(--adk); }
+/* Deux choix côte à côte (boîte de vitesses) : un seul est actif. */
+.st-seg { display: flex; gap: 8px; }
+.st-seg button {
+  flex: 1; height: 44px; padding: 0 12px; cursor: pointer;
+  border: 1.5px solid var(--bo4); border-radius: var(--r-md);
+  background: var(--su); color: var(--ink);
+  font: 700 13.5px/1 'Archivo', sans-serif;
+}
+.st-seg button[aria-pressed="true"] {
+  background: var(--a); color: var(--a-ink); border-color: var(--a);
+}
+.st-seg button:disabled { opacity: .55; cursor: default; }
 .st-save-btn:disabled { opacity: .5; cursor: default; }
 
 /* Ne pas déranger */
@@ -734,6 +763,32 @@ ${
     : ""
 }
 
+${
+  me.role === "eleve"
+    ? `
+  <!-- TA VOITURE — la boîte décide des questions du quiz de certification :
+       on ne pose pas l'embrayage à quelqu'un qui n'en a pas (audit 01/08). -->
+  <div>
+    <div class="st-glabel">${st("boite_group", "Ta voiture")}</div>
+    <div class="st-section">
+      <div class="st-row col">
+        <div class="st-rhead">
+          <span class="st-ic" aria-hidden="true">${medallion("voiture", "cyan", { size: 32, shape: "tile" })}</span>
+          <div class="st-row-left">
+            <div class="st-row-title">${st("boite_title", "Ta boîte de vitesses")}</div>
+            <div class="st-row-sub">${st("boite_sub", "Elle décide des questions qu'on te pose pour certifier")}</div>
+          </div>
+        </div>
+        <div class="st-seg" id="st-boite" role="group" aria-label="${stA("boite_aria", "Ta boîte de vitesses")}">
+          <button type="button" data-boite="manuelle" aria-pressed="false">${st("boite_manuelle", "Manuelle")}</button>
+          <button type="button" data-boite="auto" aria-pressed="false">${st("boite_auto", "Automatique")}</button>
+        </div>
+      </div>
+    </div>
+  </div>`
+    : ""
+}
+
   <!-- NOTIFICATIONS -->
   <div>
     <div class="st-glabel">${st("notif_group", "Notifications")}</div>
@@ -997,6 +1052,34 @@ function wire(root, me, prefs) {
     navigate("/");
   });
 
+  // ── Ta boîte de vitesses ────────────────────────────────────────
+  // Elle décide des questions du quiz de certification. Lecture non
+  // bloquante : tant que la réponse n'est pas là, aucun des deux n'est actif.
+  const segBoite = root.querySelector("#st-boite");
+  if (segBoite) {
+    const peindre = (v) =>
+      segBoite.querySelectorAll("[data-boite]").forEach((b) => {
+        b.setAttribute("aria-pressed", String(b.dataset.boite === v));
+      });
+    chargerBoite().then(peindre);
+    segBoite.querySelectorAll("[data-boite]").forEach((bouton) => {
+      bouton.addEventListener("click", async () => {
+        const choix = bouton.dataset.boite;
+        if (boiteConnue() === choix) return;
+        peindre(choix);
+        const ok = await enregistrerBoite(choix);
+        track("settings.boite", { boite: choix });
+        toast(
+          ok
+            ? stR("boite_ok", "C'est noté.")
+            : stR("boite_ko", "Impossible d'enregistrer. Réessaie."),
+          ok ? "success" : "error",
+        );
+        if (!ok) peindre(boiteConnue());
+      });
+    });
+  }
+
   // Entrée moniteur → réglage de la roue de récompenses
   root
     .querySelector("#st-recompenses-row")
@@ -1124,10 +1207,7 @@ function wire(root, me, prefs) {
             6000,
           );
           subBtn.disabled = false;
-          subBtn.textContent = stR(
-            "sub_cta",
-            "S'abonner · 9,99 €/mois",
-          );
+          subBtn.textContent = stR("sub_cta", "S'abonner · 9,99 €/mois");
         }
       });
     }
@@ -1197,11 +1277,7 @@ function wire(root, me, prefs) {
             );
           return;
         }
-        toast(
-          stR("push_enabled", "Notifications activées ✓"),
-          "success",
-          2000,
-        );
+        toast(stR("push_enabled", "Notifications activées ✓"), "success", 2000);
       } else {
         await optOutPush();
       }
@@ -1364,11 +1440,7 @@ function wire(root, me, prefs) {
         a.click();
         a.remove();
         URL.revokeObjectURL(url);
-        toast(
-          stR("download_started", "Téléchargement lancé"),
-          "success",
-          3000,
-        );
+        toast(stR("download_started", "Téléchargement lancé"), "success", 3000);
         track("rgpd.data_exported", {});
       } catch (e) {
         console.error("[settings] export", e);

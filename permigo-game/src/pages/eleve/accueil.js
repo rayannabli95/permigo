@@ -2209,7 +2209,7 @@ function render({
               </span>
               <span class="acc2-prep-chev" aria-hidden="true">›</span>
             </button>`
-          : `<p class="acc2-hero-meta">${at("hero_meta", "Sois prêt·e en 5 min pour ta prochaine heure de conduite.")}</p>`
+          : `<p class="acc2-hero-meta">${at("hero_meta", "Sois prêt en 5 min pour ta prochaine heure de conduite.")}</p>`
       }
       <div class="acc2-hero-spacer" aria-hidden="true"></div>
       <div class="acc2-hero-cta-wrap">
