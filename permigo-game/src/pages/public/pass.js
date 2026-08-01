@@ -793,7 +793,9 @@ const STYLE = `<style>
     background: #fff; color: #231603; border-radius: 16px 16px 4px 16px; padding: 10px 14px;
     font: 700 13px/1.3 'Archivo', sans-serif; box-shadow: 0 8px 20px rgba(0,0,0,.4);
   }
-  .pv-bulle small { display: block; color: #8a7a52; font-weight: 600; font-size: 11px; }
+  /* #8a7a52 sur blanc ne donnait que 4,21 de contraste, l'AA en demande 4,5
+     (mesuré à l'axe le 01/08). Même brun doré, deux crans plus foncé : 5,28. */
+  .pv-bulle small { display: block; color: #7a6a45; font-weight: 600; font-size: 11px; }
 
   /* ── Sections ── */
   .pv-sec-title {
@@ -895,7 +897,10 @@ const STYLE = `<style>
   .pv-pass-tag {
     position: absolute; top: -11px; left: 16px; z-index: 1;
     font: 800 10.5px/1 'Archivo', sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #fff;
-    background: #e2513f; padding: 7px 12px; border-radius: 99px; box-shadow: 0 4px 10px rgba(0,0,0,.35);
+    /* Le rouge d'origine (#e2513f) ne portait le blanc qu'à 3,83 de contraste,
+       et cette pastille est écrite en 10,5 px espacé — la taille où ça se paie
+       le plus cher. Rouge plus profond, même chaleur : 5,03. */
+    background: #c73f2c; padding: 7px 12px; border-radius: 99px; box-shadow: 0 4px 10px rgba(0,0,0,.35);
   }
   .pv-err { font: 700 13px/1.4 'Archivo', sans-serif; color: #ffb4a8; text-align: center; margin: 4px 0 0; display: none; }
   .pv-err.on { display: block; }
