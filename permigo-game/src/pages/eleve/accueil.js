@@ -584,7 +584,17 @@ const STYLE = `<style>
   position: relative;
   border: 0;
   border-radius: 30px;
-  margin: 12px 16px 0;
+  /* Largeur POSÉE, jamais déduite. Sans ce width, aspect-ratio et min-height se
+     liguent : quand la hauteur mini l'emporte sur la hauteur du ratio, c'est la
+     LARGEUR qui grossit pour tenir le ratio (300 x 1.9 = 570px dans une colonne
+     de 448). Le hero débordait alors de sa colonne, à droite, sur tous les
+     écrans. Avec une largeur posée, le ratio ne calcule plus que la hauteur.
+     Même calcul que la jaquette juste dessous, donc les deux cartes s'alignent. */
+  width: calc(100% - 32px);
+  /* La marge basse est portée ICI : la jaquette « Mise en situation » n'a pas de
+     marge haute, les deux cartes se touchaient. Sur le hero, l'air vaut aussi
+     pour ce qui vient à sa place (compte-rendu, consolidation). */
+  margin: 12px 16px 14px;
   padding: 20px;
   overflow: hidden;
   isolation: isolate;
@@ -686,10 +696,13 @@ const STYLE = `<style>
 /* Le CTA se colle en bas de la colonne : le regard descend
    ciel → titre → thème → bouton, dans l'ordre de la décision. */
 .acc2-hero-spacer { flex: 1 1 auto; min-height: 10px; }
-/* Écrans large / desktop : la colonne texte ne doit pas s'étirer */
+/* Écrans large / desktop : le hero se pose, plus large que haut.
+   La colonne texte garde ses 63 % : le 46 % d'avant compensait un hero qui
+   s'étirait à 570px hors de sa colonne. Le hero fait maintenant la largeur de
+   la colonne à tous les écrans, et 46 % coupait « Prendre en main le poste
+   de conduite » en plein milieu. */
 @media (min-width: 560px) {
   .acc2-hero-v2 { aspect-ratio: 1.9; min-height: 300px; }
-  .acc2-hero-v2-txt { width: 46%; }
 }
 
 /* ════════════ CTA ROI — gros bouton violet 3D ══════════════════ */

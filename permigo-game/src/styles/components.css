@@ -113,11 +113,33 @@ body.has-chrome #app {
 #header-bar[hidden] { display: none; }
 body.has-chrome.no-top-chrome #app { padding-top: 0; }
 
+/* ─── Alignement de la colonne — dès que l'écran dépasse les 480px ───
+   Le contenu des pages est capé à 480px partout (`.acc2`, `.prc`…). Sans cette
+   règle, entre 481px et 767px le contenu se recentrait tout seul pendant que le
+   header et la barre du bas restaient étirés d'un bord à l'autre : colonne
+   étroite au milieu, chrome sur toute la largeur. C'est ce qu'on voit dans une
+   fenêtre de navigateur à moitié réduite. Le cap arrive donc au même moment que
+   le centrage du contenu. Le décor (fond de marque, ombre portée) reste réservé
+   aux vrais grands écrans, juste en dessous. ─── */
+@media (min-width: 481px) {
+  body.has-chrome #app {
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100dvh;
+  }
+  #header-bar,
+  #bottom-nav {
+    max-width: 480px;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%);
+    width: 480px;
+  }
+}
+
 /* ─── Desktop / iPad framing : l'app posée au centre, comme une vraie appli,
    sur un fond de marque doux (fini le « petit téléphone perdu dans le vide »).
-   Le contenu des pages est capé à 480px partout → la colonne matche, et le
-   décor autour est assumé et premium. Theme-aware (glow violet sur clair,
-   plus profond sur sombre). ─── */
+   Theme-aware (glow violet sur clair, plus profond sur sombre). ─── */
 @media (min-width: 768px) {
   body {
     /* Halos assez présents pour lire « décor voulu » — à 12 %/7 % l'écran
@@ -129,23 +151,12 @@ body.has-chrome.no-top-chrome #app { padding-top: 0; }
     background-attachment: fixed;
   }
   body.has-chrome #app {
-    max-width: 480px;
-    margin: 0 auto;
     background: var(--su2);
-    min-height: 100dvh;
     box-shadow:
       0 0 0 1px var(--bo),
       0 0 80px -12px color-mix(in srgb, var(--a) 26%, transparent),
       0 40px 90px -30px rgba(11,13,26,.38),
       0 12px 32px -18px rgba(11,13,26,.2);
-  }
-  #header-bar,
-  #bottom-nav {
-    max-width: 480px;
-    left: 50% !important;
-    right: auto !important;
-    transform: translateX(-50%);
-    width: 480px;
   }
 }
 
