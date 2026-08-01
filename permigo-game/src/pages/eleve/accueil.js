@@ -345,9 +345,19 @@ function eleveTourSteps() {
   ];
 }
 
+const HOME_SEEN_KEY = "pg-home-seen-v1";
+
 function maybeStartEleveTour() {
   try {
     if (localStorage.getItem(TOUR_KEY)) return;
+    // ⚠️ Jamais à la PREMIÈRE ouverture. Un élève qui vient de s'inscrire
+    // découvrait l'app à travers une modale « ÉTAPE 1/5 » posée sur un écran
+    // flouté : on lui expliquait des écrans qu'il n'avait pas encore vus.
+    // Il le voit à sa deuxième visite, quand les mots ont un sens.
+    if (!localStorage.getItem(HOME_SEEN_KEY)) {
+      localStorage.setItem(HOME_SEEN_KEY, "1");
+      return;
+    }
   } catch {
     return;
   }
@@ -2085,8 +2095,14 @@ function render({
   // Bandeau d'installation — visible TANT QUE l'app n'est pas installée
   // (sur iPhone, installer = la seule façon d'avoir les notifs). Il disparaît
   // tout seul une fois installée (isStandalone) : pas un popup qu'on oublie.
-  const installBanner = !isStandalone()
-    ? `<style>
+  // ⚠️ Pas AVANT la première victoire (audit du 01/08) : un compte tout neuf
+  // ouvrait l'app sur trois sollicitations empilées (tuto guidé, bandeau
+  // d'installation, alerte de série) et zéro contenu. On installe une app qui
+  // a déjà servi à quelque chose ; l'inverse, on le refuse par réflexe.
+  const _neverDidAnything = totalValidated === 0 && !streak.current_streak;
+  const installBanner =
+    !isStandalone() && !_neverDidAnything
+      ? `<style>
     .acc-install{display:flex;align-items:center;gap:10px;margin:0 16px 12px;padding:10px 12px;border-radius:14px;background:color-mix(in srgb, var(--a) 7%, transparent);border:1px solid color-mix(in srgb, var(--a) 22%, transparent);box-shadow:0 3px 10px -4px color-mix(in srgb, var(--a) 20%, transparent)}
     .acc-install-ico{flex:0 0 38px;width:38px;height:38px;display:flex;align-items:center;justify-content:center}
     .acc-install-ico .pg-med{filter:drop-shadow(0 3px 6px rgba(0,0,0,.14))}
@@ -2104,7 +2120,7 @@ function render({
       </div>
       <button class="acc-install-btn" id="acc-install-btn" type="button">${at("install_btn", "Installer")}</button>
     </div>`
-    : "";
+      : "";
   const isActive = streakSt !== "broken";
   // First-run: no competence validated AND no streak yet → student has never done anything
   const isFirstRun = totalValidated === 0 && !streak.current_streak;

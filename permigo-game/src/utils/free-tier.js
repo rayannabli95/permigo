@@ -18,6 +18,12 @@ const LS_KEY = "pg_freetier_v1";
 // quiz = nombre de QUESTIONS ; scène = nombre de contenus distincts.
 const FREE_QUOTAS = { quiz: 3, scene: 1 };
 
+// Jetons À VIE (pas quotidiens) : une seule fois, jamais renouvelés.
+// L'examen blanc de conduite est le meilleur argument de vente du produit — une
+// note honnête sur les critères de l'inspecteur crée le besoin bien mieux qu'un
+// argumentaire. Il était entièrement derrière le mur : on en offre UN.
+const FREE_ONCE = { "exam-conduite": 1 };
+
 // ⚠️ Les FICHES ne sont PLUS un quota quotidien (décision Rayan 30/07/2026,
 // campagne pub internationale). Avant : « 1 fiche par jour, n'importe laquelle »
 // — quelqu'un qui découvrait l'app le soir lisait UNE fiche et s'entendait dire
@@ -40,6 +46,7 @@ const DISCOVERY_ROUTES = new Set([
   "revision-conduite", // fiches de conduite (quota fiche en page)
   "quiz", // entraînement (quota questions en page)
   "en-situation", // mise en situation (quota scène en page)
+  "exam-conduite", // examen blanc de conduite : UNE fois à vie (jeton FREE_ONCE)
   // Comptes / neutres / upsell — jamais murés (l'élève doit pouvoir gérer son
   // compte, lire les mentions légales, ou aller vers l'achat).
   "profil",
@@ -111,7 +118,7 @@ function safeWrite(state) {
 }
 
 function freshState() {
-  return { day: todayKey(), used: {}, ref: {} };
+  return { day: todayKey(), used: {}, ref: {}, once: {} };
 }
 
 // Charge l'état du jour, en réinitialisant automatiquement au passage à un
@@ -121,11 +128,15 @@ function loadState() {
   const s = safeRead();
   if (!s || s.day !== todayKey()) {
     const fresh = freshState();
+    // ⚠️ Les jetons À VIE survivent au changement de jour : sans ça, « une fois »
+    // deviendrait « une fois par jour » à la première nuit.
+    if (s && s.once && typeof s.once === "object") fresh.once = s.once;
     safeWrite(fresh);
     return fresh;
   }
   if (!s.used || typeof s.used !== "object") s.used = {};
   if (!s.ref || typeof s.ref !== "object") s.ref = {};
+  if (!s.once || typeof s.once !== "object") s.once = {};
   return s;
 }
 
@@ -166,6 +177,25 @@ export function consumeFree(kind, ref = null, n = 1) {
   if (ref != null) s.ref[kind] = ref;
   safeWrite(s);
   return freeQuota(kind, ref);
+}
+
+/**
+ * Ce jeton à vie est-il encore disponible ?
+ * @param {'exam-conduite'} kind
+ */
+export function freeOnceAvailable(kind) {
+  const max = FREE_ONCE[kind] ?? 0;
+  const s = loadState();
+  return (s.once[kind] || 0) < max;
+}
+
+/** Consomme le jeton à vie. Renvoie true s'il était encore disponible. */
+export function consumeFreeOnce(kind) {
+  if (!freeOnceAvailable(kind)) return false;
+  const s = loadState();
+  s.once[kind] = (s.once[kind] || 0) + 1;
+  safeWrite(s);
+  return true;
 }
 
 // ─── i18n des compteurs ──────────────────────────────────────────
