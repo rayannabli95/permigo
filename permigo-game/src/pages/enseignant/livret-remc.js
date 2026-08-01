@@ -606,10 +606,10 @@ function _renderTheoryRow() {
 // de conduite lues, heure préférée, niveau d'engagement. Best-effort : rien à
 // afficher si la RPC n'a pas répondu (bloc masqué, pas d'erreur à l'écran).
 const _TIER_LABEL = {
-  determine: { lbl: "Déterminé·e", cls: "determine" },
-  regulier: { lbl: "Régulier·e", cls: "regulier" },
+  determine: { lbl: "Déterminé", cls: "determine" },
+  regulier: { lbl: "Régulier", cls: "regulier" },
   decroche: { lbl: "Décroche", cls: "decroche" },
-  nouveau: { lbl: "Pas encore actif·ve", cls: "nouveau" },
+  nouveau: { lbl: "Pas encore là", cls: "nouveau" },
 };
 
 function _renderEngagementCard() {
@@ -652,7 +652,7 @@ function _renderEngagementCard() {
   // « vers 1 h » (du matin) surprend plus qu'il n'informe → « la nuit ».
   if (hour != null)
     foot.push(
-      hour <= 5 ? "Plutôt actif·ve la nuit" : `Plutôt actif·ve vers ${hour} h`,
+      hour <= 5 ? "Plutôt là la nuit" : `Plutôt là vers ${hour} h`,
     );
   const footHtml = foot.length
     ? `<div class="lr-eng-foot">${foot.join(' <span class="lr-eng-sep">·</span> ')}</div>`

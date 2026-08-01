@@ -13,7 +13,7 @@
 //   1. Relire la fiche de la compétence (rappel condensé + lien fiche).
 //   2. Quiz de validation (quiz-engine.js, questions post_validation DB).
 //   3. Score ≥ 80% → question de certification UNIFIÉE : « Tu te sens
-//      prêt·e à passer à la suite ? » — l'élève certifie ce qui s'est
+//      prêt à passer à la suite ? ». L'élève certifie ce qui s'est
 //      passé en vraie leçon (crédibilité : il n'a aucun intérêt à tricher,
 //      son moniteur voit ses certifications).
 //   4. Oui → RPC self_validate_competence (correction SERVEUR, table
@@ -37,11 +37,14 @@ import { refreshGemmes } from "@/utils/game-state.js";
 import { getLang } from "@/utils/lang.js";
 import { findCarte } from "@/data/cartes.js";
 
-const NB_QUESTIONS = 5; // plus que le quiz-récap (3) : la note ≥80% doit avoir du sens
-const SEUIL = 80;
+const NB_QUESTIONS = 5; // plus que le quiz-récap (3) : la barre doit avoir du sens
+const SEUIL = 80; // barre INTERNE, jamais affichée : on ne parle pas en pourcentage
+// Ce que l'élève lit : un nombre de bonnes réponses, pas une note sur cent
+// (décision Rayan, 31/07/2026).
+const MIN_JUSTES = Math.ceil((NB_QUESTIONS * SEUIL) / 100);
 
 // ── i18n de la COQUE « certifier une compétence » (EN/AR) — le cœur du
-// pivot (« Tu te sens prêt·e ? »). Dict LOCAL, repli FR intégral. Le CONTENU
+// pivot (« Tu te sens prêt ? »). Dict LOCAL, repli FR intégral. Le CONTENU
 // (nom de compétence, étapes de la fiche) reste en français. RTL : par
 // <span dir="rtl"> autour du texte arabe affiché uniquement (app LTR).
 const VS_I18N = {
@@ -61,12 +64,12 @@ const VS_I18N = {
     hero_p:
       "Your instructor validated it in a lesson, or you already own this move? Prove it in 2 steps.",
     already_t: "Already certified",
-    already_s: "Quiz passed at {p}% on {date}.",
+    already_s: "Certified on {date}.",
     step1_t: "Re-read the method",
     step1_s: "A quick reminder of what you need to know.",
     fiche_link: "See the full sheet (fiche)",
     step2_t: "The validation quiz",
-    step2_s: "{n} questions · you need at least {s}% to validate.",
+    step2_s: "{n} questions. You need {j} right to certify.",
     cta_retry: "Retake the quiz",
     cta_start: "Start the validation quiz",
     hint: "Be honest with yourself. This quiz never replaces a real driving lesson.",
@@ -77,16 +80,14 @@ const VS_I18N = {
     ok_kick: "Certified by you",
     ok_title: "Skill certified!",
     ok_p: "“{n}” is now done in your journey.",
-    ok_score: "Quiz passed at {p}%",
     ok_volants: "+{n} Steering wheels (volants)",
     ok_cta: "Find this skill in My licence",
     fail_kick: "Not yet",
     fail_title: "Almost!",
-    fail_p:
-      "{p}% on “{n}”. You need {s}% to validate. Re-read the sheet and try again.",
+    fail_p: "“{n}” isn't yours yet. Re-read the sheet, then try again.",
     fail_retry: "Re-read the sheet and retry",
     fail_back: "Back to the journey",
-    cf_kick: "Quiz passed at {p}%",
+    cf_kick: "Quiz passed",
     cf_title: "Do you feel ready to move on?",
     cf_p: "By certifying “{n}”, you confirm this move is done in a real lesson. Your instructor can see your certifications.",
     cf_yes: "Yes I certify",
@@ -106,12 +107,12 @@ const VS_I18N = {
     hero_p:
       "صادق عليها مدرّبك في درس، أو أنت تتقن هذه الحركة أصلًا؟ أثبت ذلك في خطوتين.",
     already_t: "مُصادَق عليها سابقًا",
-    already_s: "نجحت في الاختبار بنسبة {p}% بتاريخ {date}.",
+    already_s: "مُصادَق عليها بتاريخ {date}.",
     step1_t: "أعد قراءة الطريقة",
     step1_s: "تذكير سريع بما يجب أن تتقنه.",
     fiche_link: "اعرض البطاقة الكاملة (fiche)",
     step2_t: "اختبار المصادقة",
-    step2_s: "{n} أسئلة · تحتاج إلى {s}% على الأقل للمصادقة.",
+    step2_s: "{n} أسئلة. تحتاج إلى {j} إجابات صحيحة للمصادقة.",
     cta_retry: "أعد الاختبار",
     cta_start: "ابدأ اختبار المصادقة",
     hint: "كن صادقًا مع نفسك. هذا الاختبار لا يعوّض درس قيادة حقيقيًا.",
@@ -122,16 +123,14 @@ const VS_I18N = {
     ok_kick: "صادقت عليها بنفسك",
     ok_title: "تمت المصادقة على المهارة!",
     ok_p: "«{n}» أصبحت الآن مكتملة في مسارك.",
-    ok_score: "نجحت في الاختبار بنسبة {p}%",
     ok_volants: "+{n} مقود (volants)",
     ok_cta: "اعثر على هذه المهارة في رخصتي",
     fail_kick: "ليس بعد",
     fail_title: "اقتربت!",
-    fail_p:
-      "{p}% في «{n}». تحتاج إلى {s}% للمصادقة. أعد قراءة البطاقة وحاول مجددًا.",
+    fail_p: "«{n}» ليست مكتسبة بعد. أعد قراءة البطاقة ثم حاول مجددًا.",
     fail_retry: "أعد قراءة البطاقة وحاول مجددًا",
     fail_back: "العودة إلى المسار",
-    cf_kick: "نجحت في الاختبار بنسبة {p}%",
+    cf_kick: "نجحت في الاختبار",
     cf_title: "هل تشعر أنك جاهز للانتقال إلى ما بعدها؟",
     cf_p: "بمصادقتك على «{n}» تؤكد أن هذه الحركة أُنجزت في درس حقيقي. يمكن لمدرّبك رؤية مصادقاتك.",
     cf_yes: "نعم أصادق",
@@ -322,7 +321,7 @@ function introScreen(sub, cat, already, fiche) {
         <div>${medallion("check", "violet", { size: 40 })}</div>
         <div class="vs-already-tx">
           <b>${vsD("already_t", "Déjà certifiée")}</b>
-          <span>${vsD("already_s", `Quiz réussi à ${Math.round(already.score)}% le ${alreadyDate}.`, { p: Math.round(already.score), date: alreadyDate })}</span>
+          <span>${vsD("already_s", `Certifiée le ${alreadyDate}.`, { date: alreadyDate })}</span>
         </div>
       </div>`
     : "";
@@ -353,7 +352,7 @@ function introScreen(sub, cat, already, fiche) {
         <div class="vs-step-n">2</div>
         <div class="vs-step-tx">
           <b>${vsD("step2_t", "Le quiz de validation")}</b>
-          <span>${vsD("step2_s", `${NB_QUESTIONS} questions · il te faut au moins ${SEUIL}% pour valider.`, { n: NB_QUESTIONS, s: SEUIL })}</span>
+          <span>${vsD("step2_s", `${NB_QUESTIONS} questions. Il t'en faut ${MIN_JUSTES} justes pour certifier.`, { n: NB_QUESTIONS, j: MIN_JUSTES })}</span>
         </div>
       </div>
     </div>
@@ -411,7 +410,7 @@ function failScreen(sub, scorePct) {
     <div class="vsr-med">${medallion("faute", "orange", { size: 96 })}</div>
     <span class="vsr-kick">${icon("x", { size: 13 })} ${vsD("fail_kick", "Pas encore")}</span>
     <h1 class="vsr-ttl">${vsD("fail_title", "Presque !")}</h1>
-    <p class="vsr-p">${vsD("fail_p", `${scorePct}% sur « ${sub.n} ». Il te faut ${SEUIL}% pour valider. Relis la fiche et retente.`, { p: scorePct, n: sub.n, s: SEUIL })}</p>
+    <p class="vsr-p">${vsD("fail_p", `« ${sub.n} » n'est pas encore acquise. Relis la fiche, puis retente.`, { n: sub.n })}</p>
     <button class="vsr-cta" id="vs-retry" type="button">${vsD("fail_retry", "Relire la fiche et retenter")}</button>
     <button class="vsr-ghost" id="vs-cta-parcours" type="button">${vsD("fail_back", "Retour au parcours")}</button>
   </div>`;
@@ -585,8 +584,8 @@ async function handleComplete(
 function confirmScreen(sub, scorePct) {
   return `${STYLE}<div class="vsr anim-slide-up">
     <div class="vsr-med">${medallion("check", "violet", { size: 96 })}</div>
-    <span class="vsr-kick">${icon("check", { size: 13 })} ${vsD("cf_kick", `Quiz réussi à ${scorePct}%`, { p: scorePct })}</span>
-    <h1 class="vsr-ttl">${vsD("cf_title", "Tu te sens prêt·e à passer à la suite ?")}</h1>
+    <span class="vsr-kick">${icon("check", { size: 13 })} ${vsD("cf_kick", "Quiz réussi")}</span>
+    <h1 class="vsr-ttl">${vsD("cf_title", "Tu te sens prêt à passer à la suite ?")}</h1>
     <p class="vsr-p">${vsD("cf_p", `En certifiant « ${sub.n} », tu confirmes que ce geste est acquis en vraie leçon. Ton enseignant peut voir tes certifications.`, { n: sub.n })}</p>
     <button class="vsr-cta" id="vs-certify" type="button">${vsD("cf_yes", "Oui je certifie")} ${icon("shield", { size: 16 })}</button>
     <button class="vsr-ghost" id="vs-not-yet" type="button">${vsD("cf_no", "Pas encore")}</button>
