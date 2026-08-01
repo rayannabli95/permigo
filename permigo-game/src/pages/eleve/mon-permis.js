@@ -76,17 +76,11 @@ const MP_I18N = {
     hero_aria: "{n} skills out of {t}",
     hero_chap: "Current chapter:",
     hero_all_done: "All chapters validated",
-    s1_title: "My skills",
-    s1_sub: "the 4 chapters of the Permis B (the French driving licence)",
-    s1_err: "“My skills” is unavailable. Check your connection and try again.",
     s2_err: "“My lessons” is unavailable. Check your connection and try again.",
     retry: "Try again",
     lbl_done: "done",
     lbl_locked: "upcoming",
     lbl_progress: "in progress",
-    renvoi_t: "Want to train? Head to Practice.",
-    renvoi_s:
-      "Here you see your validated progress. Training happens in Practice.",
     s2_title: "My lessons",
     s2_sub: "your instructor's lesson reports",
     cr_lesson_of: "Lesson of {date}",
@@ -146,16 +140,11 @@ const MP_I18N = {
     hero_aria: "{n} مهارة من {t}",
     hero_chap: "الفصل الحالي:",
     hero_all_done: "اكتملت جميع الفصول",
-    s1_title: "مهاراتي",
-    s1_sub: "الفصول الأربعة لرخصة القيادة الفرنسية (Permis B)",
-    s1_err: "تعذّر تحميل «مهاراتي». تحقّق من اتصالك ثم أعد المحاولة.",
     s2_err: "تعذّر تحميل «دروسي». تحقّق من اتصالك ثم أعد المحاولة.",
     retry: "أعد المحاولة",
     lbl_done: "مكتمل",
     lbl_locked: "لاحقًا",
     lbl_progress: "جارٍ",
-    renvoi_t: "تريد التدرّب؟ توجّه إلى المراجعة.",
-    renvoi_s: "هنا تقدّمك المُصادَق عليه. التدريب يكون في قسم المراجعة.",
     s2_title: "دروسي",
     s2_sub: "تقارير مدرّبك عن الدروس",
     cr_lesson_of: "درس يوم {date}",
@@ -237,17 +226,7 @@ function mpDyn(escaped) {
 }
 
 // ─── STYLE (scopé .mp-*, tokens theme-aware — jamais --surface/--border/--muted) ──
-// ── Nom de chapitre : FR + traduction en petit italique (en/ar), repli FR ──
-function mpNameBi(fr, tr) {
-  const f = esc(fr ?? "");
-  const l = getLang();
-  if (l === "fr" || !tr || tr === fr) return f;
-  const t = l === "ar" ? `<span dir="rtl">${esc(tr)}</span>` : esc(tr);
-  return `${f}<span class="mp-comp-tr">${t}</span>`;
-}
-
 const STYLE = `<style>
-.mp-comp-tr { display:block; font-size:.8em; font-style:italic; font-weight:500; opacity:.72; margin-top:1px; line-height:1.2; }
 .mp {
   --gold-1:#ffe9a8; --gold-2:#ffd24a; --gold-3:#ff9c1c; --gold-deep:#c87d12; --gold-ink:#7a5510;
   max-width: 480px; margin: 0 auto; padding: 14px 15px 32px;
@@ -310,6 +289,8 @@ const STYLE = `<style>
 /* ══ TIMELINE — numéros violets + filet ══ */
 .mp-tl { position: relative; }
 .mp-step { position: relative; padding: 0 0 26px 44px; }
+/* Seule étape restante : plus de puce ni de frise, donc plus de gouttière. */
+.mp-step-seul { padding-left: 0; }
 .mp-step:last-child { padding-bottom: 6px; }
 .mp-step::before {
   content: ""; position: absolute; left: 15px; top: 36px; bottom: -2px; width: 2px;
@@ -327,35 +308,7 @@ const STYLE = `<style>
 .mp-step-s { font-size: 10.5px; font-weight: 800; color: var(--mu2); text-align: right; }
 
 /* ── Étape 1 : les 4 blocs C1-C4 ── */
-.mp-comps { display: flex; flex-direction: column; gap: 9px; }
-.mp-comp {
-  display: flex; align-items: center; gap: 12px; padding: 11px 13px; border-radius: 17px; cursor: pointer;
-  background: var(--su); border: 1px solid var(--bo); font: inherit; color: inherit; text-align: left;
-  box-shadow: 0 4px 0 var(--bg2), 0 1px 2px rgba(10,13,26,.04);
-  transition: transform .16s cubic-bezier(.23,1,.32,1); min-height: 44px;
-}
-.mp-comp:active { transform: translateY(2px); }
-.mp-comp-b { flex: 1; min-width: 0; }
-.mp-comp-t { font: 700 14px/1.12 'Archivo', system-ui, sans-serif; }
-.mp-comp-bar { margin-top: 6px; height: 6px; border-radius: 4px; background: var(--bg2); overflow: hidden; }
-.mp-comp-bar i { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--adk), var(--a)); }
-.mp-comp.done .mp-comp-bar i { background: linear-gradient(90deg, var(--grd), var(--gr)); }
-.mp-comp-n { flex: none; text-align: right; }
-.mp-comp-n b { display: block; font: 800 14px/1 'Archivo', system-ui, sans-serif; color: var(--a-txt); }
-.mp-comp.done .mp-comp-n b { color: var(--gr-txt); }
-.mp-comp.locked .mp-comp-n b { color: var(--mu2); }
-.mp-comp-n span { font-size: 9px; font-weight: 800; color: var(--mu2); text-transform: uppercase; letter-spacing: .06em; }
-.mp-comp.locked { opacity: .72; }
-.mp-comp.locked .mp-comp-t { color: var(--mu); }
 
-.mp-renvoi {
-  display: flex; align-items: center; gap: 10px; width: 100%; margin-top: 10px; padding: 11px 13px; border-radius: 15px; cursor: pointer;
-  background: color-mix(in srgb, var(--a) 8%, var(--su)); border: 1px dashed color-mix(in srgb, var(--a) 40%, transparent);
-  font: inherit; color: inherit; text-align: left; min-height: 44px;
-}
-.mp-renvoi p { flex: 1; font-size: 12px; font-weight: 800; color: var(--a-txt); line-height: 1.35; }
-.mp-renvoi p i { display: block; font-style: normal; font-size: 10.5px; font-weight: 700; color: var(--mu2); margin-top: 2px; }
-.mp-renvoi svg { width: 16px; height: 16px; flex: none; color: var(--a-txt); }
 
 /* ── Étape 2 : mes leçons (comptes-rendus) ── */
 
@@ -452,7 +405,7 @@ const STYLE = `<style>
 .mp-skel { animation: mpPulse 1.3s ease-in-out infinite; }
 
 @media (prefers-reduced-motion: reduce) {
-  .mp-comp, .mp-hero-track i { transition: none; }
+  .mp-hero-track i { transition: none; }
   .mp-skel { animation: none; }
 }
 </style>`;
@@ -471,11 +424,6 @@ function skeleton() {
 // Médaillon d'un chapitre selon son état — grammaire dédiée « permis
 // virtuel » (check/vert = acquis, étoile/or = en cours, cadenas/slate =
 // à venir), distincte des médaillons-monde du jeu (parcours.js).
-function chapMedallion(status) {
-  if (status === "complete") return medallion("check", "green", { size: 40 });
-  if (status === "locked") return medallion("cadenas", "slate", { size: 40 });
-  return medallion("etoile", "gold", { size: 40 });
-}
 
 // ─── Chip moniteur ───────────────────────────────────────────────
 function renderChip(moniteurPrenom) {
@@ -510,71 +458,6 @@ function renderHero({ totalAcquis, currentTitre, allDone, solo }) {
       <span>${mpD("hero_chap", "Chapitre en cours :")} <b>${esc(chapLabel)}</b></span>
       <span>${pct}&nbsp;%</span>
     </div>
-  </section>`;
-}
-
-// ─── Étape 1 : mes compétences ─────────────────────────────────
-function renderStep1({ worldStates, step1Failed }) {
-  if (step1Failed) {
-    return `<section class="mp-step" id="mp-step-comps">
-      <span class="mp-step-num" aria-hidden="true">1</span>
-      <div class="mp-step-h"><h2 class="mp-step-t">${mpD("s1_title", "Mes compétences")}</h2></div>
-      <div class="mp-err">
-        <p>${mpD("s1_err", "« Mes compétences » indisponible. Vérifie ta connexion puis réessaie.")}</p>
-        <button id="mp-retry-1" type="button">${mpD("retry", "Réessayer")}</button>
-      </div>
-    </section>`;
-  }
-
-  const compsHtml = worldStates
-    .map((ws) => {
-      const cls =
-        ws.status === "complete"
-          ? "done"
-          : ws.status === "locked"
-            ? "locked"
-            : "";
-      const pct = ws.total ? Math.round((ws.done / ws.total) * 100) : 0;
-      const lbl =
-        ws.status === "complete"
-          ? mpTR("lbl_done", "acquis")
-          : ws.status === "locked"
-            ? mpTR("lbl_locked", "à venir")
-            : mpTR("lbl_progress", "en cours");
-      const titre = ws.world?.titre || "";
-      return `<button class="mp-comp ${cls}" type="button" data-chap="${ws.idx}" aria-label="${escAttr(titre)}. ${ws.done} sur ${ws.total} ${escAttr(lbl)}">
-        ${chapMedallion(ws.status)}
-        <div class="mp-comp-b">
-          <div class="mp-comp-t">${mpNameBi(titre, worldTr(ws.world?.id, getLang())?.titre)}</div>
-          <div class="mp-comp-bar" aria-hidden="true"><i style="width:${pct}%"></i></div>
-        </div>
-        <div class="mp-comp-n"><b>${ws.done}/${ws.total}</b><span>${esc(lbl)}</span></div>
-      </button>`;
-    })
-    .join("");
-
-  // Retrait des heures de conduite (30/07/2026, décision Rayan : « on ne parle
-  // pas d'heures de conduite dans l'application »). Le bloc affichait
-  // « X h de conduite · N leçons avec {moniteur} », lu depuis
-  // `sessions_moniteur` — une table que PLUS PERSONNE ne peut remplir depuis
-  // le retrait de la saisie de séance (lot 4 du pivot, #608). Sa dernière
-  // ligne date du 06/06/2026 : 3 élèves voyaient un compteur GELÉ à vie, et
-  // tous les autres ne voyaient rien. Un chiffre qui ne bouge plus est pire
-  // que pas de chiffre. Ce hub compte des COMPÉTENCES, pas des heures.
-
-  return `<section class="mp-step" id="mp-step-comps">
-    <span class="mp-step-num" aria-hidden="true">1</span>
-    <div class="mp-step-h">
-      <h2 class="mp-step-t">${mpD("s1_title", "Mes compétences")}</h2>
-      <span class="mp-step-s">${mpD("s1_sub", "les 4 chapitres du permis B")}</span>
-    </div>
-    <div class="mp-comps">${compsHtml}</div>
-    <button class="mp-renvoi" id="mp-btn-reviser" type="button">
-      ${medallion("eclair", "gold", { size: 28 })}
-      <p>${mpD("renvoi_t", "Envie de t'entraîner ? Direction Réviser.")}
-        <i>${mpD("renvoi_s", "Ici tu vois ta progression validée. L'entraînement se passe dans Réviser.")}</i></p>
-      ${CHEVRON}
-    </button>
   </section>`;
 }
 
@@ -641,10 +524,16 @@ function renderExamCountdown(examDate, examMod) {
   </div>`;
 }
 
-function renderStep3({ examMod, examData, examDate, solo = false, num = 3 }) {
+function renderStep3({
+  examMod,
+  examData,
+  examDate,
+  solo = false,
+  num = null,
+}) {
   if (!examMod || examData?.loadFailed) {
-    return `<section class="mp-step" id="mp-step-exam">
-      <span class="mp-step-num" aria-hidden="true">${num}</span>
+    return `<section class="mp-step ${num ? "" : "mp-step-seul"}" id="mp-step-exam">
+      ${num ? `<span class="mp-step-num" aria-hidden="true">${num}</span>` : ""}
       <div class="mp-step-h"><h2 class="mp-step-t">${mpD("s3_title", "L'examen")}</h2></div>
       <div class="mp-err">
         <p>${mpD("s3_err", "« L'examen » indisponible. Vérifie ta connexion puis réessaie.")}</p>
@@ -719,8 +608,8 @@ function renderStep3({ examMod, examData, examDate, solo = false, num = 3 }) {
     })
     .join("");
 
-  return `<section class="mp-step" id="mp-step-exam">
-    <span class="mp-step-num" aria-hidden="true">${num}</span>
+  return `<section class="mp-step ${num ? "" : "mp-step-seul"}" id="mp-step-exam">
+    ${num ? `<span class="mp-step-num" aria-hidden="true">${num}</span>` : ""}
     <div class="mp-step-h">
       <h2 class="mp-step-t">${mpD("s3_title", "L'examen")}</h2>
       <span class="mp-step-s">${mpD("s3_sub", "le jour J se prépare ici")}</span>
@@ -750,23 +639,6 @@ function renderStep3({ examMod, examData, examDate, solo = false, num = 3 }) {
 function wire(root, ctx) {
   const { examMod } = ctx;
 
-  root.querySelectorAll(".mp-comp[data-chap]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      haptic("tap");
-      track("mon_permis.chapter_tap", { chap: btn.dataset.chap });
-      navigate("/parcours");
-    });
-  });
-
-  root.querySelector("#mp-btn-reviser")?.addEventListener("click", () => {
-    haptic("tap");
-    track("mon_permis.go_reviser");
-    navigate("/reviser");
-  });
-
-  root
-    .querySelector("#mp-retry-1")
-    ?.addEventListener("click", () => mount(root));
   root
     .querySelector("#mp-retry-2")
     ?.addEventListener("click", () => mount(root));
@@ -929,8 +801,7 @@ export async function mount(root) {
     ${renderChip(moniteurPrenom)}
     ${step1Failed ? "" : renderHero({ totalAcquis, currentTitre, allDone, solo })}
     <div class="mp-tl">
-      ${renderStep1({ worldStates, step1Failed })}
-      ${renderStep3({ examMod, examData, examDate, solo, num: 2 })}
+      ${renderStep3({ examMod, examData, examDate, solo })}
     </div>
   </div>`;
 
