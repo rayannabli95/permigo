@@ -66,6 +66,15 @@ const VS_I18N = {
     comp_fallback: "Skill",
     blocked:
       "Your instructor already validated this skill. Nothing to do here.",
+    blocked_m:
+      "Your instructor already validated this skill. You can still replay the driving scene to keep the move sharp.",
+    blocked_cta: "Replay the driving scene",
+    blocked_hint:
+      "This practice changes nothing in your journey. It's just for the hand.",
+    ent_kick: "Practice",
+    ent_title: "The move is still there",
+    ent_p: "“{n}” stays done in your journey. This practice changes nothing.",
+    ent_cta: "Back to the journey",
     hero_p:
       "Have you worked on this move in a lesson with your instructor? Certify it in 2 steps.",
     already_t: "Already certified",
@@ -135,6 +144,13 @@ const VS_I18N = {
     retry: "أعد المحاولة",
     comp_fallback: "مهارة",
     blocked: "سبق أن صادق مدرّبك على هذه المهارة. لا شيء تفعله هنا.",
+    blocked_m: "سبق أن صادق مدرّبك على هذه المهارة. ويمكنك مع ذلك إعادة المشهد العملي للحفاظ على الحركة.",
+    blocked_cta: "أعد المشهد العملي",
+    blocked_hint: "هذا التمرين لا يغيّر شيئًا في مسارك. إنه لليد فقط.",
+    ent_kick: "تمرين",
+    ent_title: "الحركة ما زالت حاضرة",
+    ent_p: "«{n}» تبقى مكتسبة في مسارك. وهذا التمرين لا يغيّر شيئًا.",
+    ent_cta: "العودة إلى المسار",
     hero_p: "هل تدرّبت على هذه الحركة في درس مع مدرّبك؟ صادق عليها في خطوتين.",
     already_t: "مُصادَق عليها سابقًا",
     already_s: "مُصادَق عليها بتاريخ {date}.",
@@ -144,7 +160,8 @@ const VS_I18N = {
     step2_t: "اختبار المصادقة",
     step2_s: "{n} أسئلة. تحتاج إلى {j} إجابات صحيحة للمصادقة.",
     step2_m_t: "المشهد العملي",
-    step2_m_s: "تركب السيارة وتؤدّي الحركة. ثم تُغلق بضعة أسئلة عملية المصادقة.",
+    step2_m_s:
+      "تركب السيارة وتؤدّي الحركة. ثم تُغلق بضعة أسئلة عملية المصادقة.",
     cta_m_start: "اركب السيارة",
     cta_m_retry: "أعد المشهد",
     hint_m: "كن صادقًا مع نفسك. لا شيء من هذا يعوّض درس قيادة حقيقيًا.",
@@ -333,13 +350,32 @@ function notFoundScreen() {
   </div>`;
 }
 
-function blockedScreen(sub) {
+function blockedScreen(sub, avecMission) {
+  // « Rien à faire ici » était vrai quand il n'y avait qu'un quiz de
+  // certification derrière. Avec une mise en situation, il reste quelque chose
+  // à faire : s'entraîner. Le geste s'entretient, la certification non.
   return `${STYLE}<div class="vs">
     ${topBar(sub?.n || vsTR("comp_fallback", "Compétence"))}
     <div class="vs-card vs-warn">
-      ${icon("alert-circle", { size: 20 })}
-      <p>${vsD("blocked", "Ton moniteur a déjà validé cette compétence. Rien à faire ici.")}</p>
+      ${icon("check-circle", { size: 20 })}
+      <p>${
+        avecMission
+          ? vsD(
+              "blocked_m",
+              "Ton enseignant a déjà validé cette compétence. Tu peux quand même refaire la mise en situation pour entretenir le geste.",
+            )
+          : vsD(
+              "blocked",
+              "Ton moniteur a déjà validé cette compétence. Rien à faire ici.",
+            )
+      }</p>
     </div>
+    ${
+      avecMission
+        ? `<button class="vs-cta" id="vs-rejouer" type="button">${icon("zap", { size: 18 })} ${vsD("blocked_cta", "Refaire la mise en situation")}</button>
+           <p class="vs-hint">${vsD("blocked_hint", "Cet entraînement ne change rien à ton parcours. Il est juste là pour la main.")}</p>`
+        : ""
+    }
   </div>`;
 }
 
@@ -450,8 +486,15 @@ function introScreen(sub, cat, already, fiche, avecMission) {
           <b>${avecMission ? vsD("step2_m_t", "La mise en situation") : vsD("step2_t", "Le quiz de certification")}</b>
           <span>${
             avecMission
-              ? vsD("step2_m_s", "Tu montes dans la voiture et tu fais le geste. Quelques questions ferment la certification.")
-              : vsD("step2_s", `${NB_QUESTIONS} questions. Il t'en faut ${MIN_JUSTES} justes pour certifier.`, { n: NB_QUESTIONS, j: MIN_JUSTES })
+              ? vsD(
+                  "step2_m_s",
+                  "Tu montes dans la voiture et tu fais le geste. Quelques questions ferment la certification.",
+                )
+              : vsD(
+                  "step2_s",
+                  `${NB_QUESTIONS} questions. Il t'en faut ${MIN_JUSTES} justes pour certifier.`,
+                  { n: NB_QUESTIONS, j: MIN_JUSTES },
+                )
           }</span>
         </div>
       </div>
@@ -616,17 +659,23 @@ export async function mount(root, param) {
   const already = selfRes.value.data || null;
   const fiche = await fichePromise;
 
-  if (acquisMoniteur) {
-    root.innerHTML = blockedScreen(sub);
-    wireBack(root);
-    return;
-  }
-
   // La boîte est peut-être inconnue à ce stade : on demande alors les missions
   // sans filtre. Le libellé peut donc annoncer une mise en situation qui sera
   // filtrée juste après, jamais l'inverse (aucune compétence n'a de mission
   // pour une seule boîte sans en avoir pour l'autre).
   const avecMission = missionsPour(compId, await chargerBoite()).length > 0;
+
+  if (acquisMoniteur) {
+    // Acquise ne veut pas dire fermée. Un geste, ça s'entretient : la mission
+    // reste rejouable pour s'entraîner, elle ne certifie simplement plus rien.
+    root.innerHTML = blockedScreen(sub, avecMission);
+    wireBack(root);
+    root.querySelector("#vs-rejouer")?.addEventListener("click", () => {
+      haptic("tap");
+      rejouerLaMission(root, me, compId, sub, cat);
+    });
+    return;
+  }
 
   root.innerHTML = introScreen(sub, cat, already, fiche, avecMission);
   wireIntro(root, me, compId, sub, cat);
@@ -688,19 +737,7 @@ async function lancerLaCertification(root, me, compId, sub, cat, btn) {
     return;
   }
 
-  // La mission se monte sur <body>, PAS dans #app : un parent animé en
-  // `transform` redevient le bloc de référence d'un `position:fixed` et la
-  // scène se retrouvait coincée dans la colonne de la page, avec la barre de
-  // nav par-dessus. (Même piège que les overlays du tuto.)
-  const hote = document.createElement("div");
-  hote.className = "mp-host";
-  document.body.appendChild(hote);
-  document.body.classList.add("mp-open");
-
-  const fermer = () => {
-    hote.remove();
-    document.body.classList.remove("mp-open");
-  };
+  const { hote, fermer } = ouvrirLaScene();
 
   monterMissions(hote, {
     code: compId,
@@ -720,6 +757,70 @@ async function lancerLaCertification(root, me, compId, sub, cat, btn) {
       navigate("#/parcours");
     },
   });
+}
+
+/**
+ * Ouvre la surface plein écran qui reçoit la mission.
+ *
+ * Sur <body>, PAS dans #app : un parent animé en `transform` redevient le bloc
+ * de référence d'un `position:fixed`, et la scène se retrouve coincée dans la
+ * colonne de la page avec la barre de nav par-dessus. (Même piège que les
+ * overlays du tuto.)
+ */
+function ouvrirLaScene() {
+  const hote = document.createElement("div");
+  hote.className = "mp-host";
+  document.body.appendChild(hote);
+  document.body.classList.add("mp-open");
+  return {
+    hote,
+    fermer() {
+      hote.remove();
+      document.body.classList.remove("mp-open");
+    },
+  };
+}
+
+/**
+ * Rejouer la mise en situation d'une compétence DÉJÀ acquise.
+ *
+ * Aucun quiz derrière, aucune écriture : la compétence est acquise, elle le
+ * reste. C'est de l'entretien du geste, pas une certification. Sans ça, un
+ * élève dont l'enseignant a tout validé tombait sur « rien à faire ici » et
+ * ne pouvait plus jamais toucher une scène.
+ */
+function rejouerLaMission(root, me, compId, sub, cat) {
+  const { hote, fermer } = ouvrirLaScene();
+  track("valider_seul.mission_rejouee", { competence_id: compId });
+
+  const revenir = () => {
+    fermer();
+    mount(root, compId);
+  };
+
+  monterMissions(hote, {
+    code: compId,
+    boite: null, // la boîte est déjà connue côté données, le filtre suit
+    onReussite: () => {
+      fermer();
+      haptic("success");
+      root.innerHTML = entrainementFiniScreen(sub);
+      wireResult(root, me, compId, sub, cat);
+    },
+    // Un entraînement ne se rate pas : on repart simplement de l'écran d'avant.
+    onEchec: revenir,
+    onQuitter: revenir,
+  });
+}
+
+function entrainementFiniScreen(sub) {
+  return `${STYLE}<div class="vsr anim-slide-up">
+    <div class="vsr-med">${medallion("check", "violet", { size: 96 })}</div>
+    <span class="vsr-kick">${icon("check", { size: 13 })} ${vsD("ent_kick", "Entraînement")}</span>
+    <h1 class="vsr-ttl">${vsD("ent_title", "Le geste est encore là")}</h1>
+    <p class="vsr-p">${vsD("ent_p", `« ${sub.n} » reste acquise dans ton parcours. Cet entraînement n'y change rien.`, { n: sub.n })}</p>
+    <button class="vsr-cta" id="vs-cta-parcours" type="button">${vsD("ent_cta", "Retour au parcours")}</button>
+  </div>`;
 }
 
 /**
