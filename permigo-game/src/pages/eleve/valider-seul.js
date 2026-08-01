@@ -36,6 +36,7 @@ import { burstConfetti } from "@/components/common/confetti.js";
 import { refreshGemmes } from "@/utils/game-state.js";
 import { getLang } from "@/utils/lang.js";
 import { findCarte } from "@/data/cartes.js";
+import { chargerBoite, enregistrerBoite } from "@/utils/transmission.js";
 
 const NB_QUESTIONS = 5; // plus que le quiz-récap (3) : la barre doit avoir du sens
 const SEUIL = 80; // barre INTERNE, jamais affichée : on ne parle pas en pourcentage
@@ -50,7 +51,7 @@ const MIN_JUSTES = Math.ceil((NB_QUESTIONS * SEUIL) / 100);
 const VS_I18N = {
   en: {
     back: "Back",
-    kick: "Self-certification",
+    kick: "Certification",
     loading: "Loading…",
     nf_title: "Skill not found",
     nf_body: "This skill doesn't exist. Go back to your journey to pick one.",
@@ -62,16 +63,16 @@ const VS_I18N = {
     blocked:
       "Your instructor already validated this skill. Nothing to do here.",
     hero_p:
-      "Your instructor validated it in a lesson, or you already own this move? Prove it in 2 steps.",
+      "Have you worked on this move in a lesson with your instructor? Certify it in 2 steps.",
     already_t: "Already certified",
     already_s: "Certified on {date}.",
     step1_t: "Re-read the method",
     step1_s: "A quick reminder of what you need to know.",
     fiche_link: "See the full sheet (fiche)",
-    step2_t: "The validation quiz",
+    step2_t: "The certification quiz",
     step2_s: "{n} questions. You need {j} right to certify.",
     cta_retry: "Retake the quiz",
-    cta_start: "Start the validation quiz",
+    cta_start: "Start the quiz",
     hint: "Be honest with yourself. This quiz never replaces a real driving lesson.",
     toast_noq: "No questions on this skill yet. Try again later.",
     toast_nopressure: "No pressure. Come back when you feel it.",
@@ -85,6 +86,9 @@ const VS_I18N = {
     fail_kick: "Not yet",
     fail_title: "Almost!",
     fail_p: "“{n}” isn't yours yet. Re-read the sheet, then try again.",
+    fail_title_loin: "Let's go back to the sheet",
+    fail_p_loin:
+      "Some landmarks are still missing on “{n}”. Re-read the sheet calmly, and bring it up with your instructor at your next lesson.",
     fail_retry: "Re-read the sheet and retry",
     fail_back: "Back to the journey",
     cf_kick: "Quiz passed",
@@ -92,10 +96,19 @@ const VS_I18N = {
     cf_p: "By certifying “{n}”, you confirm this move is done in a real lesson. Your instructor can see your certifications.",
     cf_yes: "Yes I certify",
     cf_no: "Not yet",
+    boite_kick: "One question first",
+    boite_title: "Which car do you drive?",
+    boite_p:
+      "The questions aren't the same with or without a clutch. We'll ask you the ones for your car.",
+    boite_manuelle: "Manual gearbox",
+    boite_manuelle_s: "Three pedals and a gear lever",
+    boite_auto: "Automatic gearbox",
+    boite_auto_s: "Two pedals and a P R N D selector",
+    boite_hint: "You can change this in your settings.",
   },
   ar: {
     back: "رجوع",
-    kick: "مصادقة ذاتية",
+    kick: "مصادقة",
     loading: "جارٍ التحميل…",
     nf_title: "المهارة غير موجودة",
     nf_body: "هذه المهارة غير موجودة. عد إلى مسارك لاختيار واحدة.",
@@ -104,8 +117,7 @@ const VS_I18N = {
     retry: "أعد المحاولة",
     comp_fallback: "مهارة",
     blocked: "سبق أن صادق مدرّبك على هذه المهارة. لا شيء تفعله هنا.",
-    hero_p:
-      "صادق عليها مدرّبك في درس، أو أنت تتقن هذه الحركة أصلًا؟ أثبت ذلك في خطوتين.",
+    hero_p: "هل تدرّبت على هذه الحركة في درس مع مدرّبك؟ صادق عليها في خطوتين.",
     already_t: "مُصادَق عليها سابقًا",
     already_s: "مُصادَق عليها بتاريخ {date}.",
     step1_t: "أعد قراءة الطريقة",
@@ -114,7 +126,7 @@ const VS_I18N = {
     step2_t: "اختبار المصادقة",
     step2_s: "{n} أسئلة. تحتاج إلى {j} إجابات صحيحة للمصادقة.",
     cta_retry: "أعد الاختبار",
-    cta_start: "ابدأ اختبار المصادقة",
+    cta_start: "ابدأ الاختبار",
     hint: "كن صادقًا مع نفسك. هذا الاختبار لا يعوّض درس قيادة حقيقيًا.",
     toast_noq: "لا أسئلة على هذه المهارة بعد. أعد المحاولة لاحقًا.",
     toast_nopressure: "لا ضغط. عد متى شعرت بالجاهزية.",
@@ -128,6 +140,9 @@ const VS_I18N = {
     fail_kick: "ليس بعد",
     fail_title: "اقتربت!",
     fail_p: "«{n}» ليست مكتسبة بعد. أعد قراءة البطاقة ثم حاول مجددًا.",
+    fail_title_loin: "نعود إلى البطاقة",
+    fail_p_loin:
+      "ما زالت تنقصك بعض المعالم في «{n}». أعد قراءة البطاقة بهدوء، وتحدّث عنها مع مدرّبك في الدرس القادم.",
     fail_retry: "أعد قراءة البطاقة وحاول مجددًا",
     fail_back: "العودة إلى المسار",
     cf_kick: "نجحت في الاختبار",
@@ -135,6 +150,15 @@ const VS_I18N = {
     cf_p: "بمصادقتك على «{n}» تؤكد أن هذه الحركة أُنجزت في درس حقيقي. يمكن لمدرّبك رؤية مصادقاتك.",
     cf_yes: "نعم أصادق",
     cf_no: "ليس بعد",
+    boite_kick: "سؤال واحد أولًا",
+    boite_title: "أي سيارة تقود؟",
+    boite_p:
+      "الأسئلة ليست نفسها مع وجود القابض أو بدونه. سنطرح عليك أسئلة سيارتك.",
+    boite_manuelle: "علبة سرعة يدوية",
+    boite_manuelle_s: "ثلاث دواسات وعصا نقل السرعات",
+    boite_auto: "علبة سرعة أوتوماتيكية",
+    boite_auto_s: "دواستان ومُحدِّد P R N D",
+    boite_hint: "يمكنك تغيير ذلك في الإعدادات.",
   },
 };
 function vsTR(key, fr, vars) {
@@ -255,7 +279,7 @@ function catMedallion(ico, size = 40) {
 function topBar(title) {
   return `<div class="vs-top">
       <button class="vs-back" aria-label="${vsT("back", "Retour")}">←</button>
-      <div><p class="vs-kick">${vsD("kick", "Validation autonome")}</p><h1 class="vs-h1" tabindex="-1">${esc(title)}</h1></div>
+      <div><p class="vs-kick">${vsD("kick", "Certification")}</p><h1 class="vs-h1" tabindex="-1">${esc(title)}</h1></div>
     </div>`;
 }
 
@@ -303,6 +327,48 @@ function loadErrorScreen(sub) {
   </div>`;
 }
 
+/**
+ * La boîte de vitesses, demandée une seule fois, juste avant le premier quiz.
+ *
+ * Audit du 01/08/2026 : les questions de certification étaient écrites pour la
+ * boîte manuelle. Sur « Démarrer et s'arrêter », les six questions parlaient de
+ * l'embrayage. On demande donc la voiture de l'élève au moment exact où la
+ * réponse change ce qu'il va lire, et jamais plus ensuite.
+ */
+function boiteScreen(sub) {
+  return `${STYLE}
+    <style>
+    .vs-boite { display:flex; flex-direction:column; gap:11px; margin-top:18px; }
+    .vs-boite button { display:flex; align-items:center; gap:13px; width:100%; padding:16px 17px; cursor:pointer;
+      text-align:left; border-radius:17px; border:1.5px solid var(--bo); background:var(--su); }
+    .vs-boite button:active { transform:scale(.985); }
+    .vs-boite b { display:block; font:800 15px/1.2 'Archivo',sans-serif; color:var(--ink); }
+    .vs-boite span { display:block; font:500 12.5px/1.35 'Archivo',sans-serif; color:var(--mu); margin-top:3px; }
+    .vs-boite i { flex:none; width:40px; height:40px; border-radius:12px; display:grid; place-items:center;
+      background:color-mix(in srgb, var(--a) 12%, transparent); color:var(--a-txt,var(--a));
+      font:800 14px/1 'Archivo',sans-serif; font-style:normal; }
+    </style>
+    <div class="vs anim-slide-up">
+    ${topBar(sub.n)}
+    <div class="vs-card vs-hero">
+      <p class="vs-hero-cat">${vsD("boite_kick", "Une question avant")}</p>
+      <h2 class="vs-hero-ttl">${vsD("boite_title", "Tu conduis quelle voiture ?")}</h2>
+      <p class="vs-hero-p">${vsD("boite_p", "Les questions ne sont pas les mêmes avec ou sans embrayage. On te pose celles de ta voiture.")}</p>
+    </div>
+    <div class="vs-boite">
+      <button type="button" data-boite="manuelle">
+        <i aria-hidden="true">1-5</i>
+        <span class="vs-boite-tx"><b>${vsD("boite_manuelle", "Boîte manuelle")}</b><span>${vsD("boite_manuelle_s", "Trois pédales et un levier de vitesses")}</span></span>
+      </button>
+      <button type="button" data-boite="auto">
+        <i aria-hidden="true">PRND</i>
+        <span class="vs-boite-tx"><b>${vsD("boite_auto", "Boîte automatique")}</b><span>${vsD("boite_auto_s", "Deux pédales et un sélecteur P R N D")}</span></span>
+      </button>
+    </div>
+    <p class="vs-hint">${vsD("boite_hint", "Tu pourras le changer dans tes réglages.")}</p>
+  </div>`;
+}
+
 function introScreen(sub, cat, already, fiche) {
   const ficheHref = `#/revision-conduite/${encodeURIComponent(String(sub.c ?? ""))}`;
   const steps = (fiche?.methode || []).slice(0, 4);
@@ -333,7 +399,7 @@ function introScreen(sub, cat, already, fiche) {
       <div class="vs-hero-med">${catMedallion(cat?.ico, 56)}</div>
       <p class="vs-hero-cat">${esc(cat?.name || "")}</p>
       <h2 class="vs-hero-ttl">${esc(sub.n)}</h2>
-      <p class="vs-hero-p">${vsD("hero_p", "Ton moniteur te l'a validée en leçon, ou tu maîtrises déjà ce geste ? Prouve-le en 2 étapes.")}</p>
+      <p class="vs-hero-p">${vsD("hero_p", "Tu as travaillé ce geste en leçon avec ton enseignant ? Certifie-le en 2 étapes.")}</p>
     </div>
 
     ${alreadyBanner}
@@ -351,13 +417,13 @@ function introScreen(sub, cat, already, fiche) {
       <div class="vs-step">
         <div class="vs-step-n">2</div>
         <div class="vs-step-tx">
-          <b>${vsD("step2_t", "Le quiz de validation")}</b>
+          <b>${vsD("step2_t", "Le quiz de certification")}</b>
           <span>${vsD("step2_s", `${NB_QUESTIONS} questions. Il t'en faut ${MIN_JUSTES} justes pour certifier.`, { n: NB_QUESTIONS, j: MIN_JUSTES })}</span>
         </div>
       </div>
     </div>
 
-    <button class="vs-cta" id="vs-start-quiz" type="button">${icon("zap", { size: 18 })} ${already ? vsD("cta_retry", "Repasser le quiz") : vsD("cta_start", "Commencer le quiz de validation")}</button>
+    <button class="vs-cta" id="vs-start-quiz" type="button">${icon("zap", { size: 18 })} ${already ? vsD("cta_retry", "Repasser le quiz") : vsD("cta_start", "Commencer le quiz")}</button>
     <p class="vs-hint">${vsD("hint", "Sois honnête avec toi-même. Ce quiz ne remplace pas une vraie leçon de conduite.")}</p>
   </div>`;
 }
@@ -405,12 +471,30 @@ function successScreen(sub, scorePct, volants = 0) {
   </div>`;
 }
 
+/**
+ * L'écran d'échec disait « Presque ! » à quelqu'un qui n'avait rien eu de
+ * juste (audit 01/08). C'est gentil, c'est faux, et ça n'aide pas à savoir
+ * quoi relire. On distingue donc celui qui a frôlé de celui qui découvre.
+ */
 function failScreen(sub, scorePct) {
+  const presque = scorePct >= 50;
   return `${STYLE}<div class="vsr fail anim-slide-up">
     <div class="vsr-med">${medallion("faute", "orange", { size: 96 })}</div>
     <span class="vsr-kick">${icon("x", { size: 13 })} ${vsD("fail_kick", "Pas encore")}</span>
-    <h1 class="vsr-ttl">${vsD("fail_title", "Presque !")}</h1>
-    <p class="vsr-p">${vsD("fail_p", `« ${sub.n} » n'est pas encore acquise. Relis la fiche, puis retente.`, { n: sub.n })}</p>
+    <h1 class="vsr-ttl">${presque ? vsD("fail_title", "Presque !") : vsD("fail_title_loin", "On reprend depuis la fiche")}</h1>
+    <p class="vsr-p">${
+      presque
+        ? vsD(
+            "fail_p",
+            `« ${sub.n} » n'est pas encore acquise. Relis la fiche, puis retente.`,
+            { n: sub.n },
+          )
+        : vsD(
+            "fail_p_loin",
+            `Il manque encore des repères sur « ${sub.n} ». Relis la fiche tranquillement, et parles-en à ton enseignant à ta prochaine leçon.`,
+            { n: sub.n },
+          )
+    }</p>
     <button class="vsr-cta" id="vs-retry" type="button">${vsD("fail_retry", "Relire la fiche et retenter")}</button>
     <button class="vsr-ghost" id="vs-cta-parcours" type="button">${vsD("fail_back", "Retour au parcours")}</button>
   </div>`;
@@ -498,27 +582,60 @@ function wireIntro(root, me, compId, sub, cat) {
     const btn = root.querySelector("#vs-start-quiz");
     if (btn) btn.disabled = true;
     haptic("tap");
-    track("valider_seul.quiz_start", { competence_id: compId });
 
-    const launched = await lancerQuiz({
-      competenceId: compId,
-      type: "post_validation",
-      nbQuestions: NB_QUESTIONS,
-      onComplete: (score, total, answers) =>
-        handleComplete(root, me, compId, sub, cat, score, total, answers),
-    });
-
-    if (launched === null) {
-      if (btn) btn.disabled = false;
-      toast(
-        vsTR(
-          "toast_noq",
-          "Pas encore de questions sur cette compétence. Réessaie plus tard.",
-        ),
-        "info",
-      );
+    // Boîte inconnue : on la demande une fois, ici, parce que la réponse
+    // change les questions qu'il va lire juste après.
+    if (!(await chargerBoite())) {
+      track("valider_seul.boite_demandee", { competence_id: compId });
+      root.innerHTML = boiteScreen(sub);
+      wireBoite(root, me, compId, sub, cat);
+      return;
     }
+
+    await lancerLeQuiz(root, me, compId, sub, cat, btn);
   });
+}
+
+function wireBoite(root, me, compId, sub, cat) {
+  wireBack(root);
+  root.querySelectorAll("[data-boite]").forEach((bouton) => {
+    bouton.addEventListener("click", async () => {
+      const choix = bouton.dataset.boite;
+      haptic("tap");
+      root.querySelectorAll("[data-boite]").forEach((b) => (b.disabled = true));
+      await enregistrerBoite(choix);
+      track("valider_seul.boite_choisie", {
+        competence_id: compId,
+        boite: choix,
+      });
+      await lancerLeQuiz(root, me, compId, sub, cat, null);
+    });
+  });
+}
+
+async function lancerLeQuiz(root, me, compId, sub, cat, btn) {
+  track("valider_seul.quiz_start", { competence_id: compId });
+  const launched = await lancerQuiz({
+    competenceId: compId,
+    type: "post_validation",
+    nbQuestions: NB_QUESTIONS,
+    onComplete: (score, total, answers) =>
+      handleComplete(root, me, compId, sub, cat, score, total, answers),
+  });
+
+  if (launched === null) {
+    toast(
+      vsTR(
+        "toast_noq",
+        "Pas encore de questions sur cette compétence. Réessaie plus tard.",
+      ),
+      "info",
+    );
+    // Retour sur l'écran d'accueil : sinon l'élève reste devant des boutons
+    // désactivés, sans rien à faire.
+    if (btn) btn.disabled = false;
+    else await mount(root, compId);
+  }
 }
 
 async function handleComplete(

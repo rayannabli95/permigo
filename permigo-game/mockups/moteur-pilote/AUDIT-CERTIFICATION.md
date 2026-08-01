@@ -159,7 +159,39 @@ pas s'il l'a faite avec moi, ni ce qu'il a répondu, ni quoi en faire. Mon table
 de bord ne bouge pas, donc dans les faits ça ne me sert à rien. Au mieux je
 l'ignore, au pire ça me braque contre l'appli devant l'élève.
 
-## Ce que je propose de corriger, dans cet ordre
+## ✅ Corrigé le 01/08/2026 (même PR)
+
+1. **La boîte automatique.** `profiles.transmission` et
+   `questions_competence.boite` existent, 23 questions ont été marquées
+   « manuelle » et **23 questions ont été écrites pour l'automatique** en FR,
+   EN et AR. Aucune compétence ne descend sous six questions disponibles,
+   quelle que soit la boîte. La boîte est demandée une fois, juste avant le
+   premier quiz de certification, et se change dans les réglages. Le moteur de
+   quiz filtre, avec un repli si la colonne manque.
+   **Trouvé en vérifiant** : le VISUEL du quiz dessinait aussi trois pédales et
+   une grille en H. Il suit maintenant la boîte (deux pédales, frein à gauche ;
+   pas de grille du tout en automatique).
+2. **Le moniteur voit les certifications.** Elles comptent dans « Aujourd'hui »
+   et « Mes élèves », donc dans la préparation à l'examen. Le badge du livret
+   s'appelle « Certifiée par l'élève », sans pourcentage et sans « avant
+   rattachement ».
+3. **Un seul mot.** Le bandeau dit « Certification » (et non « Validation
+   autonome »), l'étape 2 « Le quiz de certification », le bouton « Commencer
+   le quiz ».
+4. **La phrase d'accueil** dit la même chose que la prévention : « Tu as
+   travaillé ce geste en leçon avec ton enseignant ? Certifie-le en 2 étapes. »
+5. **L'écran d'échec** ne dit plus « Presque ! » à quelqu'un qui n'a presque
+   rien eu de juste. Il renvoie à la fiche et à l'enseignant.
+6. **« Une erreur de boîte est éliminatoire »** est corrigé en base, dans les
+   trois langues.
+
+**Restent ouverts** : les six questions par compétence (rater puis retenter
+retombe sur les mêmes), le vocabulaire de métier jamais expliqué, ce que vaut
+vraiment une certification, la route de certification non murée pour le compte
+gratuit, et 31 tirets longs qui traînent encore dans la banque de questions en
+base (le balayage du 31/07 n'a nettoyé que le dépôt).
+
+## Ce que je proposais de corriger, dans cet ordre
 
 1. **Demander la boîte à l'inscription** (une question, deux boutons), puis
    filtrer les questions et écrire les questions manquantes en automatique.

@@ -651,9 +651,7 @@ function _renderEngagementCard() {
     );
   // « vers 1 h » (du matin) surprend plus qu'il n'informe → « la nuit ».
   if (hour != null)
-    foot.push(
-      hour <= 5 ? "Plutôt là la nuit" : `Plutôt là vers ${hour} h`,
-    );
+    foot.push(hour <= 5 ? "Plutôt là la nuit" : `Plutôt là vers ${hour} h`);
   const footHtml = foot.length
     ? `<div class="lr-eng-foot">${foot.join(' <span class="lr-eng-sep">·</span> ')}</div>`
     : "";
@@ -1009,12 +1007,21 @@ function renderComp(sub) {
   const cfg = STATUT_CFG[statut] || STATUT_CFG.null;
   const chipMod = CHIP_CLASS[statut] || "";
 
-  // Auto-validée en solo et pas encore évaluée par le moniteur : badge info
-  // à la place du statut vide — le moniteur sait que l'élève a déjà bossé
-  // ce geste seul (quiz ≥80 %), et peut confirmer en séance.
+  // Certifiée par l'élève et pas encore évaluée par le moniteur.
+  //
+  // Le libellé disait « Auto-validée (quiz 82 %) avant rattachement » : ça
+  // sonnait comme « il s'est mis la note tout seul », ça affichait un
+  // pourcentage, et « avant rattachement » datait d'avant le pivot du 17/07,
+  // où l'élève certifie lui-même son parcours par défaut (audit 01/08).
   const selfVal = !statut ? _selfValsMap[sub.c] : null;
+  const dateCertif = selfVal?.validated_at
+    ? new Date(selfVal.validated_at).toLocaleDateString("fr-FR", {
+        day: "numeric",
+        month: "long",
+      })
+    : null;
   const badge = selfVal
-    ? `<span class="lr-comp-badge ens-chip lr-comp-auto" title="Validée en autonomie (quiz ${Math.round(selfVal.score)}%) avant rattachement. À confirmer en séance">Auto-validée</span>`
+    ? `<span class="lr-comp-badge ens-chip lr-comp-auto" title="${escAttr(`L'élève a certifié cette compétence${dateCertif ? ` le ${dateCertif}` : ""} après l'avoir travaillée en leçon. Tu peux la confirmer en séance.`)}">Certifiée par l'élève</span>`
     : `<span class="lr-comp-badge ens-chip ${chipMod}">${cfg.label}</span>`;
 
   const medKey = STATUT_MED[statut];
