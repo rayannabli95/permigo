@@ -25,6 +25,9 @@ import "@/components/eleve/pilote.css";
 /** Fautes tolérées sur toute la chaîne avant le retour à la fiche. */
 const LIMITE_ERREURS = 4;
 
+/** Nomme les trajectoires à l'écran, dans l'ordre où la mission les donne. */
+const LETTRES = ["a", "b", "c", "d"];
+
 /** Les couleurs de chaque famille de compétence, pour la teinte de la scène. */
 const TEINTES = {
   C1: ["#8b6dff", "#4e2cc7"],
@@ -142,21 +145,23 @@ export function monterMissions(
             .join("")
         : "";
 
+    // Les trois lignes viennent de la mission, jamais du composant : chaque
+    // décor a sa géométrie, et une trajectoire figée ici ne collerait qu'au
+    // virage. `LETTRES` ne sert qu'à nommer les lignes à l'écran.
     const trajets =
-      interactif && m.mode === "trajectory"
+      interactif && m.mode === "trajectory" && Array.isArray(m.paths)
         ? `<svg class="mp-trajectory-svg" viewBox="0 0 360 260" aria-label="${escAttr("Choix de trajectoire")}">
-          <g class="mp-trajectory-choice path-a" role="button" tabindex="0" data-reponse="cut" aria-label="${escAttr("Trajectoire A, couper vers la ligne centrale")}">
-            <path class="mp-path-hit" d="M180 245 C180 178 95 145 119 68"/>
-            <path class="mp-path-visible" d="M180 245 C180 178 95 145 119 68"/>
-          </g>
-          <g class="mp-trajectory-choice path-b" role="button" tabindex="0" data-reponse="safe" aria-label="${escAttr("Trajectoire B, rester dans sa voie")}">
-            <path class="mp-path-hit" d="M205 245 C211 180 166 153 190 61"/>
-            <path class="mp-path-visible" d="M205 245 C211 180 166 153 190 61"/>
-          </g>
-          <g class="mp-trajectory-choice path-c" role="button" tabindex="0" data-reponse="edge" aria-label="${escAttr("Trajectoire C, longer le bord extérieur")}">
-            <path class="mp-path-hit" d="M233 245 C253 184 242 143 272 78"/>
-            <path class="mp-path-visible" d="M233 245 C253 184 242 143 272 78"/>
-          </g>
+          ${m.paths
+            .map(
+              (p, i) => `
+          <g class="mp-trajectory-choice path-${LETTRES[i] || "a"}" role="button" tabindex="0"
+            data-reponse="${escAttr(p.id)}"
+            aria-label="${escAttr(`Trajectoire ${(LETTRES[i] || "a").toUpperCase()}, ${p.label}`)}">
+            <path class="mp-path-hit" d="${escAttr(p.d)}"/>
+            <path class="mp-path-visible" d="${escAttr(p.d)}"/>
+          </g>`,
+            )
+            .join("")}
         </svg>`
         : "";
 
@@ -181,9 +186,12 @@ export function monterMissions(
       return `<section class="mp-interaction mp-trajectory-interaction">
         ${scene(m, true)}
         <div class="mp-path-legend">
-          <span><i class="mp-line-a"></i>A · Coupe</span>
-          <span><i class="mp-line-b"></i>B · Reste dans la voie</span>
-          <span><i class="mp-line-c"></i>C · Longe le bord</span>
+          ${(m.paths || [])
+            .map(
+              (p, i) =>
+                `<span><i class="mp-line-${LETTRES[i] || "a"}"></i>${esc((LETTRES[i] || "a").toUpperCase())} · ${esc(p.legend || p.label)}</span>`,
+            )
+            .join("")}
         </div>
       </section>`;
     }

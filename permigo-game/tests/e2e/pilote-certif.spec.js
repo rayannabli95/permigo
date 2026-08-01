@@ -6,6 +6,8 @@
 // acquise », sinon l'écran de certification est muré.
 import { test, expect } from "@playwright/test";
 import { ELEVE } from "./_creds.js";
+import { REMC } from "../../src/data/remc.js";
+import { competencesAvecMission } from "../../src/data/missions-pilote.js";
 
 async function connecte(page) {
   await page.route(/\/rest\/v1\/(self_)?validations/, (route) =>
@@ -51,8 +53,21 @@ test.describe("Mode Pilote — la mission avant les questions", () => {
   });
 
   test("une compétence sans mission garde le quiz seul", async ({ page }) => {
+    // La cible est lue dans les données, jamais écrite en dur : chaque lot de
+    // missions couvre de nouvelles compétences, et un code figé ici finit par
+    // en désigner une qui a désormais sa mission. C'est ce qui a rendu ce test
+    // rouge après le lot du chapitre 1.
+    const avecMission = competencesAvecMission();
+    const orphelines = REMC.flatMap((w) => w.subs.map((s) => s.c)).filter(
+      (c) => !avecMission.includes(c),
+    );
+    test.skip(
+      orphelines.length === 0,
+      "toutes les compétences ont désormais leur mission",
+    );
+
     await connecte(page);
-    await page.goto("/#/valider-seul/C1b");
+    await page.goto(`/#/valider-seul/${orphelines[0]}`);
     await page.click("#vs-start-quiz");
     await passeLaBoite(page);
     await expect(page.locator(".mp-scene")).toHaveCount(0);
