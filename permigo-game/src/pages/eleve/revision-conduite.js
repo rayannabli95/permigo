@@ -36,6 +36,12 @@ import {
 } from "@/data/conduite-meta.js";
 import { loadFiche } from "@/data/fiches-loader.js";
 import { chromeNight } from "@/utils/chrome-night.js";
+import { chargerBoite } from "@/utils/transmission.js";
+import {
+  marquerTermes,
+  poserLexique,
+  brancherGlossaire,
+} from "@/components/eleve/glossaire.js";
 
 const ficheCache = new Map();
 const quizCache = new Map();
@@ -1427,6 +1433,29 @@ export async function mount(root, param) {
     </div>`;
 
     wireFicheDeck(f, flatSteps, flatStepsTR, coach, rtl);
+
+    // Les mots de moniteur (« commodo », « patinage », « rétrograder »)
+    // arrivaient sans jamais être définis, y compris pour un élève qui
+    // apprend le français (audit 01/08). Ils sont soulignés une fois par
+    // fiche, un tap ouvre la définition. On attend la boîte pour ne pas
+    // souligner « débrayer » à quelqu'un qui roule en automatique.
+    const zoneFiche = root.querySelector(".fd");
+    if (zoneFiche) {
+      brancherGlossaire(zoneFiche);
+      chargerBoite()
+        .then((boite) => {
+          if (root.querySelector(".fd") !== zoneFiche) return; // fiche changée
+          marquerTermes(zoneFiche, boite);
+          poserLexique(
+            zoneFiche,
+            boite,
+            ui("glossaire_h", "Les mots de la fiche"),
+          );
+        })
+        .catch(() => {
+          /* pas de glossaire plutôt qu'une fiche cassée */
+        });
+    }
   }
 
   function wireFicheDeck(f, flatSteps, flatStepsTR, coach = [], rtl = false) {
