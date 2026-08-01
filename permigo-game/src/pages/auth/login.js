@@ -58,7 +58,9 @@ const I18N = {
     mode_pwd: "← Utiliser mon mot de passe",
     send_code: "Envoyer le code",
     verify_code: "Vérifier le code",
-    foot1: "Pas encore de compte ?",
+    foot0: "Pas encore de compte ?",
+    foot0_link: "Crée ton compte élève · gratuit",
+    foot1: "Moniteur indépendant ?",
     foot1_link: "Crée ton compte moniteur",
     foot2: "Élève avec un code moniteur ?",
     foot2_link: "Rejoins ton moniteur",
@@ -92,11 +94,9 @@ const I18N = {
     auth_invalid_otp: "Code invalide ou expiré.",
     auth_expired_token: "Le lien a expiré. Demande un nouveau code.",
     auth_password_required: "Mot de passe requis.",
-    auth_password_short:
-      "Le mot de passe doit contenir au moins 6 caractères.",
+    auth_password_short: "Le mot de passe doit contenir au moins 6 caractères.",
     auth_user_registered: "Un compte existe déjà pour cet email.",
-    auth_email_rate:
-      "Trop de tentatives. Réessaie dans quelques minutes.",
+    auth_email_rate: "Trop de tentatives. Réessaie dans quelques minutes.",
     auth_code_rate: "Trop de codes envoyés. Réessaie dans 60 secondes.",
     auth_wait_code: "Attends 60 secondes avant de renvoyer un code.",
     auth_otp_signup:
@@ -122,7 +122,9 @@ const I18N = {
     mode_pwd: "← Use my password",
     send_code: "Send the code",
     verify_code: "Verify the code",
-    foot1: "No account yet?",
+    foot0: "No account yet?",
+    foot0_link: "Create your student account · free",
+    foot1: "Driving instructor?",
     foot1_link: "Create your instructor account",
     foot2: "Student with an instructor code?",
     foot2_link: "Join your instructor",
@@ -183,7 +185,9 @@ const I18N = {
     mode_pwd: "استخدم كلمة مرورك",
     send_code: "إرسال الرمز",
     verify_code: "التحقق من الرمز",
-    foot1: "ليس لديك حساب بعد؟",
+    foot0: "ليس لديك حساب بعد؟",
+    foot0_link: "أنشئ حسابك كطالب · مجاناً",
+    foot1: "مدرّب قيادة مستقل؟",
     foot1_link: "أنشئ حساب مدرّب",
     foot2: "طالب لديه رمز مدرّب؟",
     foot2_link: "انضم إلى مدرّبك",
@@ -210,8 +214,7 @@ const I18N = {
     role_student: "طالب",
     role_instructor: "مدرّب",
     role_manager: "مدير",
-    auth_invalid_credentials:
-      "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+    auth_invalid_credentials: "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
     auth_email_unconfirmed: "البريد غير مؤكّد. تحقق من صندوق بريدك.",
     auth_user_not_found: "لا يوجد حساب لهذا البريد الإلكتروني.",
     auth_invalid_otp: "الرمز غير صالح أو منتهي الصلاحية.",
@@ -559,7 +562,7 @@ function template() {
             ${["fr", "en", "ar"]
               .map(
                 (l) =>
-                  `<button type="button" class="lg-lang${activeLang() === l ? " on" : ""}" data-lang="${l}" aria-pressed="${activeLang() === l}">${l === "ar" ? "ع" : l.toUpperCase()}</button>`,
+                  `<button type="button" class="lg-lang${activeLang() === l ? " on" : ""}" data-lang="${l}" aria-pressed="${activeLang() === l}">${l === "ar" ? "العربية" : l.toUpperCase()}</button>`,
               )
               .join("")}
           </div>
@@ -641,11 +644,17 @@ function template() {
               : ""
           }
 
+          <!-- ⚠️ Un élève SANS code moniteur n'avait aucune porte ici : les deux
+               seules lignes menaient au compte moniteur ou au code. Le compte
+               gratuit passe donc en premier. -->
           <p class="lg-foot"${rtlAttr()}>
-            ${text("foot1", "Pas encore de compte ?")} <a href="/#/creer-compte">${text("foot1_link", "Crée ton compte moniteur")}</a>
+            ${text("foot0", "Pas encore de compte ?")} <a href="/#/rejoindre?solo=1">${text("foot0_link", "Crée ton compte élève · gratuit")}</a>
           </p>
           <p class="lg-foot"${rtlAttr()}>
             ${text("foot2", "Élève avec un code moniteur ?")} <a href="/#/rejoindre">${text("foot2_link", "Rejoins ton moniteur")}</a>
+          </p>
+          <p class="lg-foot"${rtlAttr()}>
+            ${text("foot1", "Moniteur indépendant ?")} <a href="/#/creer-compte">${text("foot1_link", "Crée ton compte moniteur")}</a>
           </p>
         </form>
       </main>
@@ -1084,10 +1093,7 @@ function wire(root) {
           shake();
           return;
         }
-        toast(
-          t("code_sent", "Code envoyé. Vérifie ta boîte mail"),
-          "success",
-        );
+        toast(t("code_sent", "Code envoyé. Vérifie ta boîte mail"), "success");
         setMode("otp-verify");
       } else if (mode === "otp-verify") {
         const token = otpIn.value.trim();

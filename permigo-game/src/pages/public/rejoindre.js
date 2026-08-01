@@ -202,10 +202,10 @@ const STYLE = `<style>
 // de langue pilote un re-rendu COMPLET (renderForm) : tout bascule aussitôt. ───
 const SG_I18N = {
   en: {
-    title_solo: "Create your student account",
+    title_solo: "Your free account",
     title_join: "Join your instructor",
     sub_solo:
-      "2 minutes and you're in the app. If you bought a Pass, use the same email as your payment.",
+      "3 lessons yours for good · 3 questions and 1 scene every day. No card needed. If you bought a Pass, use the same email as your payment.",
     sub_join:
       "Enter the code your instructor gave you, then create your account.",
     role_badge: "Student",
@@ -258,10 +258,10 @@ const SG_I18N = {
     consent_manual: "Select and copy the link manually",
   },
   ar: {
-    title_solo: "أنشئ حسابك كطالب",
+    title_solo: "حسابك المجاني",
     title_join: "انضمّ إلى مدرّبك",
     sub_solo:
-      "دقيقتان وتدخل التطبيق. إن اشتريت باقة، استعمل البريد نفسه الذي دفعت به.",
+      "3 دروس لك إلى الأبد · 3 أسئلة وسيناريو واحد كل يوم. بدون بطاقة بنكية. إن اشتريت باقة، استعمل البريد نفسه الذي دفعت به.",
     sub_join: "أدخِل رمز مدرّبك ثم أنشئ حسابك.",
     role_badge: "طالب",
     already_connected: "أنت مسجّل الدخول بالفعل باسم {name}.",
@@ -359,8 +359,8 @@ export async function mount(root) {
     <div class="sg">
       <div class="sg-card">
         <img class="sg-logo" src="/skins/avatars/permigo-badge-icon.png" alt="PermiGo" width="88" height="88" />
-        <h1 class="sg-title">${solo ? sgt("title_solo", "Crée ton compte élève") : sgt("title_join", "Rejoins ton moniteur")}</h1>
-        <p class="sg-sub">${solo ? sgt("sub_solo", "2 minutes, et tu entres dans l'app. Si tu as pris un Pass, utilise le même email que ton paiement.") : sgt("sub_join", "Entre le code de ton moniteur puis crée ton compte.")}</p>
+        <h1 class="sg-title">${solo ? sgt("title_solo", "Ton compte gratuit") : sgt("title_join", "Rejoins ton moniteur")}</h1>
+        <p class="sg-sub">${solo ? sgt("sub_solo", "3 leçons à toi pour toujours · 3 questions et 1 scène chaque jour. Sans carte bancaire. Si tu as pris un Pass, utilise le même email que ton paiement.") : sgt("sub_join", "Entre le code de ton moniteur puis crée ton compte.")}</p>
         <div style="text-align:center"><span class="sg-role-badge">${sgt("role_badge", "Élève")}</span></div>
         ${connectedBanner}
 

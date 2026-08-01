@@ -182,7 +182,28 @@
       var RATE = 1;       // vitesse naturelle (le logo se dessine sur 1,25 s)
       var SEEN = 2;       // on ferme après ces secondes de vidéo vues (durée : 2,07 s)
       var CAP = 3400;     // filet : le splash ne retarde jamais plus le boot
+      var STEP = 210;     // un « bonjour » toutes les 210 ms
+      var LAND = 0.6;     // sa langue se pose 0,6 s avant la fin
       var closed = false;
+
+      /* ⚠️ Le moment de marque coûte 2 à 3,4 secondes alors que la page est
+         prête à 800 ms en 4G (mesuré le 01/08/2026). Pour quelqu'un qui NOUS
+         CONNAÎT (app installée, ou visiteur déjà venu qui a répondu aux
+         cookies), c'est un plaisir. Pour un inconnu venu d'une pub, ce sont
+         les 2 secondes pendant lesquelles il décide de rester ou de partir.
+         Version courte pour lui : le logo se dessine quand même (vitesse 1,6)
+         et les bonjours défilent plus vite, mais on rend la main sous 1 s. */
+      var known = false;
+      try {
+        known = !!localStorage.getItem('permigo_cookie_consent') ||
+                !!localStorage.getItem('permigo_lang_explicit');
+      } catch (e) { /* mode privé strict */ }
+      var installed = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) ||
+                      navigator.standalone === true;
+      var QUICK = !known && !installed;
+      if (QUICK) {
+        RATE = 1.8; SEEN = 1.15; CAP = 900; STEP = 105; LAND = 0.45;
+      }
 
       /* « Bonjour » défile dans toutes les langues et se POSE sur celle de
          l'élève. C'est la promesse du produit en une seconde : PermiGo
@@ -240,12 +261,12 @@
       function fallback() {
         if (sp.classList.contains('is-fallback')) return;
         sp.classList.add('is-fallback'); // logo fixe (le poster)
-        setTimeout(close, 600);          // rien à regarder → on ne fait pas patienter
+        setTimeout(close, QUICK ? 200 : 600); // rien à regarder → on ne fait pas patienter
       }
 
       var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
       if (reduce || !v) {
-        setTimeout(close, 700);         // mouvement réduit : pas de défilé
+        setTimeout(close, QUICK ? 300 : 700); // mouvement réduit : pas de défilé
         return;
       }
 
@@ -261,7 +282,7 @@
       kick();
       v.addEventListener('canplay', kick, { once: true });
       // Décodage trop lent / lecture jamais partie → logo fixe plutôt que vide.
-      setTimeout(function () { if (v.paused || !v.currentTime) fallback(); }, 900);
+      setTimeout(function () { if (v.paused || !v.currentTime) fallback(); }, QUICK ? 450 : 900);
 
       /* On se cale sur le temps de la VIDÉO, pas sur un setTimeout : pendant le
          boot le thread principal est saturé et les timers dérivent (mesuré :
@@ -269,8 +290,6 @@
          La même boucle fait défiler les « bonjour » — un setInterval dérivait
          tellement qu'on n'en voyait que 4 sur les 16. */
       var t0 = performance.now();
-      var STEP = 210;                   // un « bonjour » toutes les 210 ms
-      var LAND = 0.6;                   // sa langue se pose 0,6 s avant la fin
       var next = 0, hi = 0;
       (function watch() {
         if (closed) return;
