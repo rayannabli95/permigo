@@ -347,7 +347,7 @@ export function openInviteEleveModal(me) {
         const isDup = /duplicate|unique/i.test(invErr.message || "");
         results.push({
           email,
-          error: isDup ? "Déjà invité(e)" : invErr.message,
+          error: isDup ? "Invitation déjà envoyée" : invErr.message,
         });
         continue;
       }

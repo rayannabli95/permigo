@@ -65,14 +65,10 @@ const ACC_I18N = {
     prep_pill_aria: "Your next lesson's topic: {t}. Tap to change",
     hero_meta: "Be ready in 5 min for your next driving hour.",
     cta_king: "I'm getting ready",
-    debrief_k: "After your lesson",
-    debrief_t: 'How did "{t}" go?',
-    debrief_s: "Coming back to the same move several times. That's normal.",
-    debrief_keep: "Still tricky",
-    debrief_keep_s: "Back to the sheet",
-    debrief_next: "It went well",
-    debrief_next_s: "Certify the skill",
-    debrief_next_s_done: "Next topic",
+    debrief_aria: "Your lesson on {t}",
+    debrief_t: "How did it go?",
+    debrief_keep: "Not there yet",
+    debrief_next: "Moving on",
     debrief_later: "Haven't had my lesson yet",
     consol_aria_cons: "Consolidation quiz. 2 questions, 30 seconds",
     consol_aria_rec: "Recap quiz. 3 questions",
@@ -143,7 +139,6 @@ const ACC_I18N = {
     freeze_ok_toast: "Streak frozen for 24 h.",
     freeze_ok_btn: "✓ Streak frozen",
     freeze_fail: "The freeze failed. Try again.",
-    debrief_keep_toast: "Consolidating. That's how you improve 💪",
     debrief_new_toast: "New lesson to prepare: {t}",
     sheet_aria: "Choose your next lesson's topic",
     sheet_h: "What's your next lesson?",
@@ -167,14 +162,10 @@ const ACC_I18N = {
     prep_pill_aria: "موضوع درسك القادم: {t}. اضغط للتغيير",
     hero_meta: "كن مستعدّاً في 5 دقائق لساعة قيادتك القادمة.",
     cta_king: "أستعدّ",
-    debrief_k: "بعد درسك",
-    debrief_t: "كيف سار «{t}»؟",
-    debrief_s: "العودة عدة مرات إلى الحركة نفسها. هذا طبيعي.",
+    debrief_aria: "درسك حول {t}",
+    debrief_t: "كيف سار الأمر؟",
     debrief_keep: "ما زلت أجد صعوبة",
-    debrief_keep_s: "نعود إلى البطاقة",
-    debrief_next: "سار الأمر جيداً",
-    debrief_next_s: "أثبّت المهارة",
-    debrief_next_s_done: "الموضوع التالي",
+    debrief_next: "أنتقل إلى التالي",
     debrief_later: "لم آخذ درسي بعد",
     consol_aria_cons: "اختبار ترسيخ. سؤالان، 30 ثانية",
     consol_aria_rec: "اختبار مراجعة. 3 أسئلة",
@@ -242,7 +233,6 @@ const ACC_I18N = {
     freeze_ok_toast: "جُمّدت السلسلة لمدة 24 ساعة.",
     freeze_ok_btn: "✓ جُمّدت السلسلة",
     freeze_fail: "فشل التجميد. أعد المحاولة.",
-    debrief_keep_toast: "نرسّخ المهارة. هكذا نتقدّم 💪",
     debrief_new_toast: "درس جديد للتحضير: {t}",
     sheet_aria: "اختر موضوع درسك القادم",
     sheet_h: "ما موضوع درسك القادم؟",
@@ -907,14 +897,15 @@ const STYLE = `<style>
 .acc2-consol-s { display: block; margin-top: 2px; font: 700 11.5px/1.3 'Archivo', sans-serif; color: var(--mu); }
 .acc2-consol-arr { color: var(--a-txt); font-weight: 800; font-size: 17px; flex: 0 0 auto; }
 
-/* ═══ « Après ta leçon » — le débrief SANS note ni agenda ═══
-   Une question, deux réponses honnêtes, un report discret. Chaque bouton
-   annonce sa conséquence sur sa 2e ligne : « je galère » ramène à la fiche,
-   « c'était bon » ouvre la certification. Consolider n'est jamais un échec. */
+/* ═══ Le débrief SANS note ni agenda ═══
+   Trois blocs, pas six : le thème en sourdine, la question en grand, deux
+   réponses. Le kicker, la ligne rassurante et les sous-titres de boutons ont
+   sauté — une carte de fil se lit en une seconde ou ne se lit pas.
+   « Je galère » ramène à la fiche, « c'était bon » ouvre la certification. */
 .acc2-debrief {
   width: calc(100% - 32px);
   margin: 12px 16px 0;
-  padding: 15px 16px 13px;
+  overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--a) 22%, var(--bo));
   border-radius: 18px;
   background: linear-gradient(150deg,
@@ -922,44 +913,41 @@ const STYLE = `<style>
     var(--su) 70%);
   box-shadow: 0 8px 22px -14px color-mix(in srgb, var(--a) 40%, transparent);
 }
-.acc2-debrief-k {
-  font: 800 11px/1 'Archivo', sans-serif;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--a-txt);
-  margin: 0 0 7px;
+/* Bandeau : la route déjà faite à gauche, la voiture à l'arrêt à droite.
+   Chargement paresseux volontaire : le hero juste dessous garde la priorité. */
+.acc2-debrief-img {
+  display: block;
+  width: 100%;
+  height: 92px;
+  object-fit: cover;
+  object-position: center 58%;
 }
-.acc2-debrief-t {
-  font: 800 15.5px/1.3 'Archivo', sans-serif;
-  color: var(--ink);
-  margin: 0 0 4px;
-}
-.acc2-debrief-s {
-  font: 600 12px/1.45 'Archivo', sans-serif;
+.acc2-debrief-bd { padding: 13px 16px 13px; }
+/* Le thème en sourdine : l'élève doit savoir DE QUOI on parle, pas le lire. */
+.acc2-debrief-th {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: 700 11.5px/1.25 'Archivo', sans-serif;
   color: var(--mu);
-  margin: 0 0 12px;
+  margin: 0 0 5px;
+}
+.acc2-debrief-th svg { flex: 0 0 auto; opacity: .75; }
+.acc2-debrief-t {
+  font: 800 19px/1.2 'Archivo', sans-serif;
+  color: var(--ink);
+  margin: 0 0 13px;
 }
 .acc2-debrief-row { display: flex; gap: 8px; }
 .acc2-debrief-btn {
   flex: 1;
   min-width: 0;
-  min-height: 56px;
+  min-height: 48px;
   border-radius: 13px;
-  padding: 9px 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
+  padding: 12px 8px;
+  font: 800 13.5px/1.2 'Archivo', sans-serif;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-}
-.acc2-debrief-btn b {
-  font: 800 13.5px/1.2 'Archivo', sans-serif;
-}
-.acc2-debrief-btn span {
-  font: 700 10.5px/1.2 'Archivo', sans-serif;
-  opacity: .72;
 }
 .acc2-debrief-btn:active { transform: scale(.97); }
 .acc2-debrief-btn.keep {
@@ -1560,6 +1548,20 @@ const PREP_THEME_KEY = "pg-prep-theme";
 // ~4 h plus tard — heuristique sans agenda, charte : pas de planning).
 const PREP_CYCLE_KEY = "pg-prep-cycle";
 const PREP_DEBRIEF_AFTER_MS = 4 * 3600 * 1000;
+// L'app ne connaît PAS la date de la prochaine leçon (règle produit : pas
+// d'agenda). Le débrief parie donc sur « préparé il y a 4 h = leçon passée ».
+// Le pari est faux pour qui prépare 3 jours à l'avance : chaque « Pas encore
+// eu ma leçon » ESPACE la relance au lieu de reposer la question toutes les
+// 4 h. Au-delà du dernier palier on garde 24 h, jamais plus insistant.
+const PREP_DEBRIEF_SNOOZE_MS = [
+  4 * 3600 * 1000,
+  12 * 3600 * 1000,
+  24 * 3600 * 1000,
+];
+function debriefDelayFor(laterCount) {
+  const i = Math.min(laterCount || 0, PREP_DEBRIEF_SNOOZE_MS.length - 1);
+  return PREP_DEBRIEF_SNOOZE_MS[i];
+}
 const PREP_HINT_MIN_MS = 60 * 1000;
 
 function loadPrepCycle() {
@@ -2181,24 +2183,21 @@ function render({
     _prepCycle.code === prep.code &&
     _prepCycle.startedAt &&
     !_prepCycle.answered &&
-    Date.now() - _prepCycle.startedAt > PREP_DEBRIEF_AFTER_MS;
+    Date.now() - _prepCycle.startedAt > debriefDelayFor(_prepCycle.later);
   const debriefCard = _debriefDue
     ? `
-  <section class="acc2-debrief" id="acc-debrief" aria-label="${escAttr(atR("debrief_k", "Après ta leçon"))}">
-    <p class="acc2-debrief-k">🚗 ${at("debrief_k", "Après ta leçon")}</p>
-    <p class="acc2-debrief-t">${_rtl(esc(atR("debrief_t", "Ça a donné quoi sur « {t} » ?").replace("{t}", ficheTitre(prep.code, prep.titre))))}</p>
-    <p class="acc2-debrief-s">${at("debrief_s", "Revenir plusieurs fois sur un même geste. C'est normal.")}</p>
-    <div class="acc2-debrief-row">
-      <button class="acc2-debrief-btn keep" id="debrief-keep" type="button">
-        <b>${at("debrief_keep", "Je galère encore")}</b>
-        <span>${at("debrief_keep_s", "On revoit la fiche")}</span>
-      </button>
-      <button class="acc2-debrief-btn next" id="debrief-next" type="button">
-        <b>${at("debrief_next", "C'était bon")}</b>
-        <span>${prep.done ? at("debrief_next_s_done", "Thème suivant") : at("debrief_next_s", "Je certifie la compétence")}</span>
-      </button>
+  <section class="acc2-debrief" id="acc-debrief" aria-label="${escAttr(atR("debrief_aria", "Ta leçon sur {t}").replace("{t}", ficheTitre(prep.code, prep.titre)))}">
+    <img class="acc2-debrief-img" src="/skins/debrief-lecon-2026-08-01.webp" alt=""
+         aria-hidden="true" width="1100" height="349" loading="lazy" decoding="async">
+    <div class="acc2-debrief-bd">
+      <p class="acc2-debrief-th">${icon("car", { size: 14, strokeWidth: 2.2 })}${_rtl(esc(ficheTitre(prep.code, prep.titre)))}</p>
+      <p class="acc2-debrief-t">${at("debrief_t", "Ça a donné quoi ?")}</p>
+      <div class="acc2-debrief-row">
+        <button class="acc2-debrief-btn keep" id="debrief-keep" type="button">${at("debrief_keep", "J'ai encore du mal")}</button>
+        <button class="acc2-debrief-btn next" id="debrief-next" type="button">${at("debrief_next", "Je passe à la suite")}</button>
+      </div>
+      <button class="acc2-debrief-later" id="debrief-later" type="button">${at("debrief_later", "Pas encore eu ma leçon")}</button>
     </div>
-    <button class="acc2-debrief-later" id="debrief-later" type="button">${at("debrief_later", "Pas encore eu ma leçon")}</button>
   </section>`
     : "";
 
@@ -2625,6 +2624,7 @@ function wire(
           startedAt: Date.now(),
           hinted: same ? cyc.hinted || false : false,
           answered: false,
+          later: 0, // nouvelle prep = nouveau cycle → on repart à 4 h
         });
         track("prep.step_started", { code: prep.code, step });
       }
@@ -2704,9 +2704,15 @@ function wire(
   root.querySelector("#debrief-later")?.addEventListener("click", () => {
     haptic("tap");
     track("prep.debrief_later", { code: prep?.code });
-    // Report discret : on redemandera ~4 h plus tard, jamais de relance lourde
+    // Report discret, et de plus en plus long : 4 h, puis 12 h, puis 24 h.
+    // Celui qui prépare 3 jours à l'avance n'est plus relancé 18 fois.
     const cyc = loadPrepCycle();
-    if (cyc) savePrepCycle({ ...cyc, startedAt: Date.now() });
+    if (cyc)
+      savePrepCycle({
+        ...cyc,
+        startedAt: Date.now(),
+        later: (cyc.later || 0) + 1,
+      });
     _closeDebrief();
   });
 }
