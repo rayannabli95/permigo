@@ -176,6 +176,21 @@ const STYLE = `<style>
 .prq-back:active{ transform:scale(.94); }
 .prq-logout{ display:block; margin:20px auto 0; background:none; border:none; cursor:pointer;
   font-weight:700; font-size:13px; color:#9a8fd0; text-decoration:underline; text-underline-offset:3px; }
+/* ─── Arabe : l'écran se retourne ────────────────────────────────
+   Sans dir="rtl", cet écran restait en miroir pour un arabophone : la flèche de
+   retour à gauche, le prix à droite, le bouclier avant le texte, et surtout la
+   ponctuation des phrases arabes rejetée du mauvais bout (bidi en paragraphe
+   LTR). Le dir retourne SEUL les rangées en flex ; ne restent à redresser que
+   les positions absolues et les alignements, qui sont physiques.
+   ⚠️ On ne touche PAS au <html> : la bascule reste enfermée dans cette page,
+   dont tout le CSS vit ici. Le champ de code, lui, garde dir="ltr" : les codes
+   moniteur sont en lettres latines (PERMIS75). */
+.prq[dir="rtl"] .prq-tier{ text-align:right; }
+.prq[dir="rtl"] .prq-tprice{ text-align:left; }
+.prq[dir="rtl"] .prq-badge{ right:auto; left:14px; }
+.prq[dir="rtl"] .prq-back{ left:auto; right:14px; }
+.prq[dir="rtl"] .prq-back svg{ transform:scaleX(-1); }
+.prq[dir="rtl"] .prq-bulle{ border-radius:16px 16px 4px 16px; }
 @media (prefers-reduced-motion: reduce){ .prq *{ transition:none!important; } }
 </style>`;
 
@@ -214,7 +229,7 @@ export async function mount(root, me) {
     </button>`,
   ).join("");
 
-  root.innerHTML = `${STYLE}<div class="prq">
+  root.innerHTML = `${STYLE}<div class="prq"${getLang() === "ar" ? ' dir="rtl" lang="ar"' : ""}>
     ${dansApp ? `<button class="prq-back" id="prq-back" type="button" aria-label="${pt("back", "Retour")}">${BACK_SVG}</button>` : ""}
     <div class="prq-mascot"><img src="${MASCOTTE}" alt="" width="600" height="400" /></div>
     <div class="prq-head">
@@ -230,7 +245,7 @@ export async function mount(root, me) {
       <div class="prq-code-lab">${pt("code_lab", "J'ai un code de mon moniteur")}</div>
       <div class="prq-code-help">${pt("code_help", "Ton moniteur paie pour toi : entre son code, c'est gratuit.")}</div>
       <div class="prq-code-row">
-        <input class="prq-code-in" id="prq-code" type="text" autocomplete="off" maxlength="12" placeholder="${pt("code_ph", "EX : PERMIS75")}" />
+        <input class="prq-code-in" id="prq-code" type="text" dir="ltr" autocomplete="off" maxlength="12" placeholder="${pt("code_ph", "EX : PERMIS75")}" />
         <button class="prq-code-btn" id="prq-code-btn" type="button">${pt("code_btn", "Valider")}</button>
       </div>
       <div class="prq-msg" id="prq-msg" role="status" aria-live="polite"></div>
