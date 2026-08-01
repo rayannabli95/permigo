@@ -57,12 +57,14 @@ const ACC_I18N = {
     prep_pill_aria: "Your next lesson's topic: {t}. Tap to change",
     hero_meta: "Be ready in 5 min for your next driving hour.",
     cta_king: "I'm getting ready",
-    debrief_k: "Let's look back at your lesson",
-    debrief_t: 'Did you go over "{t}" with your instructor?',
-    debrief_s:
-      "Some skills take several lessons. That's normal. We keep going together.",
-    debrief_keep: "I'll practise more",
-    debrief_next: "Next lesson →",
+    debrief_k: "After your lesson",
+    debrief_t: 'How did "{t}" go?',
+    debrief_s: "Coming back to the same move several times. That's normal.",
+    debrief_keep: "Still tricky",
+    debrief_keep_s: "Back to the sheet",
+    debrief_next: "It went well",
+    debrief_next_s: "Certify the skill",
+    debrief_next_s_done: "Next topic",
     debrief_later: "Haven't had my lesson yet",
     consol_aria_cons: "Consolidation quiz. 2 questions, 30 seconds",
     consol_aria_rec: "Recap quiz. 3 questions",
@@ -157,11 +159,14 @@ const ACC_I18N = {
     prep_pill_aria: "موضوع درسك القادم: {t}. اضغط للتغيير",
     hero_meta: "كن مستعدّاً في 5 دقائق لساعة قيادتك القادمة.",
     cta_king: "أستعدّ",
-    debrief_k: "لنعُد إلى درسك",
-    debrief_t: "هل راجعت «{t}» مع مدرّبك؟",
-    debrief_s: "بعض المهارات تحتاج عدة دروس. هذا طبيعي. نواصل معاً.",
-    debrief_keep: "أواصل التدريب",
-    debrief_next: "الدرس التالي ←",
+    debrief_k: "بعد درسك",
+    debrief_t: "كيف سار «{t}»؟",
+    debrief_s: "العودة عدة مرات إلى الحركة نفسها. هذا طبيعي.",
+    debrief_keep: "ما زلت أجد صعوبة",
+    debrief_keep_s: "نعود إلى البطاقة",
+    debrief_next: "سار الأمر جيداً",
+    debrief_next_s: "أثبّت المهارة",
+    debrief_next_s_done: "الموضوع التالي",
     debrief_later: "لم آخذ درسي بعد",
     consol_aria_cons: "اختبار ترسيخ. سؤالان، 30 ثانية",
     consol_aria_rec: "اختبار مراجعة. 3 أسئلة",
@@ -894,9 +899,10 @@ const STYLE = `<style>
 .acc2-consol-s { display: block; margin-top: 2px; font: 700 11.5px/1.3 'Archivo', sans-serif; color: var(--mu); }
 .acc2-consol-arr { color: var(--a-txt); font-weight: 800; font-size: 17px; flex: 0 0 auto; }
 
-/* ═══ « Revenons sur ta leçon » — le débrief SANS note ni agenda ═══
-   Deux choix équivalents (consolider n'est jamais un échec), un report
-   discret. Ton chaleureux, jamais culpabilisant. */
+/* ═══ « Après ta leçon » — le débrief SANS note ni agenda ═══
+   Une question, deux réponses honnêtes, un report discret. Chaque bouton
+   annonce sa conséquence sur sa 2e ligne : « je galère » ramène à la fiche,
+   « c'était bon » ouvre la certification. Consolider n'est jamais un échec. */
 .acc2-debrief {
   width: calc(100% - 32px);
   margin: 12px 16px 0;
@@ -928,12 +934,24 @@ const STYLE = `<style>
 .acc2-debrief-row { display: flex; gap: 8px; }
 .acc2-debrief-btn {
   flex: 1;
-  min-height: 44px;
+  min-width: 0;
+  min-height: 56px;
   border-radius: 13px;
-  padding: 11px 8px;
-  font: 800 13px/1.2 'Archivo', sans-serif;
+  padding: 9px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+}
+.acc2-debrief-btn b {
+  font: 800 13.5px/1.2 'Archivo', sans-serif;
+}
+.acc2-debrief-btn span {
+  font: 700 10.5px/1.2 'Archivo', sans-serif;
+  opacity: .72;
 }
 .acc2-debrief-btn:active { transform: scale(.97); }
 .acc2-debrief-btn.keep {
@@ -1849,7 +1867,9 @@ export async function mount(root) {
       if (!code) code = prepSuggestions[0]?.code || null;
       const fiche = code ? getFiche(code) : null;
       if (fiche) {
-        prep = { code, titre: fiche.titre };
+        // `done` = compétence déjà certifiée → le débrief propose alors le
+        // thème suivant au lieu de la certification (elle est déjà acquise).
+        prep = { code, titre: fiche.titre, done: validated.has(code) };
         prepMondes = MONDES.map((m) => ({
           n: m.n,
           nom: m.nom,
@@ -2142,9 +2162,11 @@ function render({
       : 0;
   const _heroHref = prep ? prepHrefFor(prep.code, _prepStep) : "#/reviser";
 
-  // Bloc « Revenons sur ta leçon » : la prep a été lancée il y a > 4 h →
-  // la leçon a plausiblement eu lieu. Jamais de note, jamais « échec » :
-  // consolider est un choix aussi valorisé que passer à la suite.
+  // Bloc « Après ta leçon » : la prep a été lancée il y a > 4 h → la leçon a
+  // plausiblement eu lieu. Jamais de note, jamais « échec » : consolider est
+  // un choix aussi valorisé que certifier. Les deux réponses MÈNENT quelque
+  // part (fiche ou certification) — une question sans conséquence ne sert à
+  // rien, l'élève le sent tout de suite.
   const _debriefDue =
     prep &&
     _prepCycle &&
@@ -2154,13 +2176,19 @@ function render({
     Date.now() - _prepCycle.startedAt > PREP_DEBRIEF_AFTER_MS;
   const debriefCard = _debriefDue
     ? `
-  <section class="acc2-debrief" id="acc-debrief" aria-label="${escAttr(atR("debrief_k", "Revenons sur ta leçon"))}">
-    <p class="acc2-debrief-k">🚗 ${at("debrief_k", "Revenons sur ta leçon")}</p>
-    <p class="acc2-debrief-t">${_rtl(esc(atR("debrief_t", "Tu as revu « {t} » avec ton enseignant ?").replace("{t}", ficheTitre(prep.code, prep.titre))))}</p>
-    <p class="acc2-debrief-s">${at("debrief_s", "Certaines compétences demandent plusieurs leçons. C'est normal. On continue ensemble.")}</p>
+  <section class="acc2-debrief" id="acc-debrief" aria-label="${escAttr(atR("debrief_k", "Après ta leçon"))}">
+    <p class="acc2-debrief-k">🚗 ${at("debrief_k", "Après ta leçon")}</p>
+    <p class="acc2-debrief-t">${_rtl(esc(atR("debrief_t", "Ça a donné quoi sur « {t} » ?").replace("{t}", ficheTitre(prep.code, prep.titre))))}</p>
+    <p class="acc2-debrief-s">${at("debrief_s", "Revenir plusieurs fois sur un même geste. C'est normal.")}</p>
     <div class="acc2-debrief-row">
-      <button class="acc2-debrief-btn keep" id="debrief-keep" type="button">${at("debrief_keep", "Je consolide encore")}</button>
-      <button class="acc2-debrief-btn next" id="debrief-next" type="button">${at("debrief_next", "Leçon suivante →")}</button>
+      <button class="acc2-debrief-btn keep" id="debrief-keep" type="button">
+        <b>${at("debrief_keep", "Je galère encore")}</b>
+        <span>${at("debrief_keep_s", "On revoit la fiche")}</span>
+      </button>
+      <button class="acc2-debrief-btn next" id="debrief-next" type="button">
+        <b>${at("debrief_next", "C'était bon")}</b>
+        <span>${prep.done ? at("debrief_next_s_done", "Thème suivant") : at("debrief_next_s", "Je certifie la compétence")}</span>
+      </button>
     </div>
     <button class="acc2-debrief-later" id="debrief-later" type="button">${at("debrief_later", "Pas encore eu ma leçon")}</button>
   </section>`
@@ -2205,6 +2233,11 @@ function render({
 
   ${renderStreakSos({ streak, streakSt, gemmes, href: _sosHref })}
 
+  <!-- Le débrief passe AVANT le hero : sans ça la page dit « prépare X »
+       juste au-dessus de « ta leçon sur X, ça a donné quoi ? ». On solde
+       la leçon passée, ensuite seulement on pousse la suivante. -->
+  ${debriefCard}
+
   <!-- ══ HERO FOCAL — Prépare ta leçon (grand) ══ -->
   <section class="acc2-hero-v2 acc2-hero--${_scene}" aria-label="${escAttr(atR("hero_aria", "Prépare ta prochaine leçon"))}">
     <img class="acc2-hero-bg" src="/skins/prepare-lecon/${_scene}.webp" alt="" aria-hidden="true"
@@ -2240,7 +2273,6 @@ function render({
   <!-- Compte-rendu du moniteur (injecté async) — juste sous le hero, au-dessus
        du fold : c'est la porte d'entrée la plus fiable vers le retour du moniteur. -->
   <div id="acc-cr-top-slot"></div>
-  ${debriefCard}
   ${consolCard}
 
   <!-- ══ MISE EN SITUATION — jaquette générique (esprit « mode de jeu ») ══
@@ -2589,18 +2621,31 @@ function wire(
     // C'est le seul cas où une compétence acquise reste dans « Prépare ».
     if (prep?.code) writePrepTheme(prep.code, true);
     _closeDebrief();
-    toast(
-      atR(
-        "debrief_keep_toast",
-        "On consolide. C'est comme ça qu'on progresse 💪",
-      ),
-      "success",
-    );
+    // Consolider = revoir la fiche du MÊME thème (elle porte les images et
+    // le quiz). Un toast seul ne consolide rien : dire « je galère » doit
+    // ouvrir le contenu, sinon la question ne sert à rien.
+    if (prep?.code) navigate(`#/revision-conduite/${prep.code}`);
   });
   root.querySelector("#debrief-next")?.addEventListener("click", () => {
     haptic("select");
-    track("prep.debrief_next", { code: prep?.code });
-    // Thème suivant = première suggestion différente du thème courant
+    track("prep.debrief_next", {
+      code: prep?.code,
+      already_done: !!prep?.done,
+    });
+
+    // Compétence pas encore certifiée → on l'emmène DROIT à la certification
+    // (#/valider-seul, quiz 5 questions corrigé serveur). clearPrepTheme()
+    // efface aussi le cycle : si le quiz passe, le hero prend la suite du
+    // parcours ; s'il échoue, la compétence reste non acquise donc elle
+    // revient d'elle-même en tête des suggestions.
+    if (prep?.code && !prep.done) {
+      clearPrepTheme();
+      _closeDebrief();
+      navigate(`#/valider-seul/${prep.code}`);
+      return;
+    }
+
+    // Déjà certifiée → il n'y a rien à valider : on passe au thème suivant.
     const next =
       (prepSuggestions || []).find((s) => s.code !== prep?.code) || null;
     if (next) {
@@ -2619,6 +2664,7 @@ function wire(
       if (prep) {
         prep.code = next.code;
         prep.titre = next.titre;
+        prep.done = false;
       }
       toast(
         atR("debrief_new_toast", "Nouvelle leçon à préparer : {t}").replace(
