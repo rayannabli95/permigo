@@ -92,11 +92,9 @@
        préfixe simple type /sw.js sont servis). Toute nouvelle origine
        (script, frame, connect…) doit donc être ajoutée ICI.
        accounts.google.com/gsi = bouton Google officiel (GIS) du login. -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://eu-assets.i.posthog.com https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://eu.i.posthog.com https://eu-assets.i.posthog.com https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; manifest-src 'self'; worker-src 'self';" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://eu-assets.i.posthog.com https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; font-src 'self'; img-src 'self' data: blob: https://*.supabase.co; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://eu.i.posthog.com https://eu-assets.i.posthog.com https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; manifest-src 'self'; worker-src 'self';" />
 
   <!-- ╔══ Preconnects critiques ══╗ -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preconnect" href="https://arrfmdagdqtrtfbhxlty.supabase.co" crossorigin />
   <link rel="dns-prefetch" href="https://arrfmdagdqtrtfbhxlty.supabase.co" />
 
@@ -105,12 +103,52 @@
        « Prépare ta leçon ». Axe 400→900 (un seul fichier variable) : les
        déclarations demandaient jusqu'à 900 alors que seul 500→800 était
        chargé, le navigateur fabriquait un faux gras.
-       Les deux monos restent pour les CHIFFRES (compteurs, dates, scores) :
+       La mono reste pour les CHIFFRES (compteurs, dates, scores) :
        chasse fixe = les nombres ne dansent pas quand ils changent.
        Retirées le 30/07 (plus une seule déclaration dans src/) : Plus Jakarta
        Sans, Inter, Nunito, Fredoka, Baloo 2 — et Manrope / Fredoka One, que
        des pages moniteur demandaient sans qu'elles soient chargées ici. -->
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400..900&family=IBM+Plex+Mono:wght@500;600;700&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet" />
+  <!-- ⚠️ Servies depuis NOTRE domaine depuis le 01/08/2026, plus depuis
+       fonts.googleapis.com. Trois raisons : deux connexions vers un tiers
+       avant le premier texte affiché, une feuille de style bloquante de plus
+       sur la page qui reçoit la publicité, et l'adresse IP du visiteur
+       envoyée à Google avant même qu'il ait répondu au bandeau de
+       consentement. 96 Ko au total, mis en cache par le service worker.
+       JetBrains Mono est abandonnée au passage : elle n'était nommée que
+       dans la pile de repli de --fn, jamais déclarée nulle part. IBM Plex
+       Mono prend sa place, c'est déjà la suivante dans la pile. -->
+  <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <style>
+    /* Archivo — un seul fichier variable par sous-ensemble, axe 400→900. */
+    @font-face {
+      font-family: 'Archivo'; font-style: normal; font-weight: 400 900;
+      font-display: swap; src: url(/fonts/archivo-latin-ext.woff2) format('woff2');
+      unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+    @font-face {
+      font-family: 'Archivo'; font-style: normal; font-weight: 400 900;
+      font-display: swap; src: url(/fonts/archivo-latin.woff2) format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    /* IBM Plex Mono — les CHIFFRES (compteurs, dates, scores) : chasse fixe,
+       les nombres ne dansent pas quand ils changent. Latin seul : on n'écrit
+       jamais de prose dans cette police. */
+    @font-face {
+      font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 500;
+      font-display: swap; src: url(/fonts/plexmono-500-latin.woff2) format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    @font-face {
+      font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 600;
+      font-display: swap; src: url(/fonts/plexmono-600-latin.woff2) format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    @font-face {
+      font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 700;
+      font-display: swap; src: url(/fonts/plexmono-700-latin.woff2) format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+  </style>
 
   <!-- ╔══ Écran de chargement (logo animé) — critical CSS inline ══╗
        Inliné ici (pas dans le bundle) pour s'afficher AVANT que le JS charge.

@@ -14,7 +14,11 @@
 // sans bumper — tous les élèves déjà installés voyaient encore le P vert.
 // v10 (31/07/2026) : offline.html est pré-caché ET a changé (Archivo, vrai
 // logo, textes sans tirets) — sans bump, les installés gardent l'ancienne.
-const CACHE_NAME = "permigo-v10";
+// v11 (01/08/2026) : index.html est PRÉ-CACHÉ et il a changé (les polices ne
+// viennent plus de Google, elles sont déclarées en @font-face vers /fonts).
+// Sans bump, un élève déjà installé garderait l'ancienne page à vie et
+// continuerait d'appeler fonts.googleapis.com.
+const CACHE_NAME = "permigo-v11";
 // Scope auto-detect : ex '/permigo-v7/' sur GitHub Pages, '/' en local
 const SCOPE = self.registration
   ? self.registration.scope
@@ -26,6 +30,9 @@ const ASSETS = [
   SCOPE_PATH + "offline.html",
   SCOPE_PATH + "permigo-logo.png",
   SCOPE_PATH + "manifest.webmanifest",
+  // La police du texte : pré-cachée pour que la page hors ligne et le premier
+  // écran s'affichent dans la bonne typo sans attendre le réseau.
+  SCOPE_PATH + "fonts/archivo-latin.woff2",
 ];
 
 self.addEventListener("install", (event) => {
