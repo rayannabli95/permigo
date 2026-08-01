@@ -26,6 +26,12 @@ export function renderArt(visual) {
   if (visual === "city-light") return artCityLight();
   if (visual === "exterior") return artExterior();
   if (visual === "parking") return artParking();
+  if (visual === "mirror") return artMirror();
+  if (visual === "overtake") return artOvertake({ cyclist: true });
+  if (visual === "overtake-oncoming")
+    return artOvertake({ cyclist: true, oncoming: true });
+  if (visual === "overtake-empty") return artOvertake({});
+  if (visual === "overtake-top") return artOvertakeTop();
   return artCockpit();
 }
 
@@ -179,4 +185,45 @@ function artParking() {
     <span class="art-pk-slot"></span>
     <span class="art-pk-car art-pk-car-b"></span>
     <span class="art-pk-car art-pk-player"><i></i></span>`;
+}
+
+// Le poste de conduite vu par le conducteur : les deux miroirs, et la vitre
+// latérale gauche où passe un deux-roues qu'aucun miroir ne montre. Ajouté
+// pour le chapitre 2 (prendre l'information avant de bouger).
+function artMirror() {
+  return `
+    <div class="art-mr-cabin"></div>
+    <div class="art-mr-window">
+      <span class="art-mr-far"></span>
+      <span class="art-mr-bike"><i></i><b></b></span>
+    </div>
+    <div class="art-mr-inner"><span></span><i></i></div>
+    <div class="art-mr-side"><span></span></div>
+    <div class="art-mr-dash"><i></i><i></i></div>`;
+}
+
+// Route à double sens vue du conducteur. Trois variantes qui partagent le même
+// style : la route nue, la route avec un cycliste, et la route avec le cycliste
+// ET la voiture qui arrive en face. Cette dernière change la bonne réponse,
+// donc elle doit changer le décor : l'élève ne peut pas décider sur une scène
+// qui ne montre pas ce dont on lui parle.
+function artOvertake({ cyclist, oncoming }) {
+  return `
+    <div class="art-ov-sky"></div>
+    <div class="art-ov-field"></div>
+    <div class="art-ov-road"><span class="art-ov-center"></span></div>
+    ${oncoming ? `<span class="art-ov-oncoming"><i></i><i></i></span>` : ""}
+    ${cyclist ? `<span class="art-ov-cyclist"><i></i><b></b></span>` : ""}
+    <div class="art-ov-hood"></div>`;
+}
+
+// Le même dépassement, mais vu de dessus. En vue subjective les trois
+// trajectoires se superposent et ne veulent plus rien dire : l'écart latéral
+// y vaut quelques pixels. De dessus, un mètre se voit.
+function artOvertakeTop() {
+  return `
+    <div class="art-ot-verge"></div>
+    <div class="art-ot-road"><span class="art-ot-center"></span></div>
+    <span class="art-ot-cyclist"><i></i></span>
+    <span class="art-ot-player"><i></i></span>`;
 }

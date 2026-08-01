@@ -824,9 +824,9 @@ body.mp-open #header-bar {
   padding: 5px 6px;
   border: 1px solid rgb(255 255 255 / 8%);
   border-radius: 10px;
-  color: #9d90b7;
+  color: #cbbfe4;
   background: rgb(255 255 255 / 3%);
-  font-size: 6.5px;
+  font-size: 10px;
   font-weight: 800;
   line-height: 1.2;
 }
@@ -836,6 +836,20 @@ body.mp-open #header-bar {
   height: 4px;
   flex: 0 0 auto;
   border-radius: 99px;
+}
+
+/* La pastille de légende reprend la couleur de sa ligne dans la scène.
+   Sans ces règles, les repères A, B et C restaient invisibles. */
+.mp-path-legend .mp-line-a {
+  background: #ff776e;
+}
+
+.mp-path-legend .mp-line-b {
+  background: #41d99a;
+}
+
+.mp-path-legend .mp-line-c {
+  background: #5ab9ff;
 }
 
 /* Scene art */
@@ -2089,4 +2103,305 @@ body.mp-open #header-bar {
   border-radius: 3px;
   background: rgb(20 12 40 / 45%);
   transform: translateY(-50%);
+}
+
+/* ── Décor « les miroirs et l'angle mort » ────────────────────────────────
+   Vue du conducteur. Les deux miroirs sont bien visibles, et le deux-roues
+   n'apparaît QUE dans la vitre latérale : c'est tout le sujet de la scène.
+   Posé en pourcentage comme le créneau, pour que les zones tactiles suivent
+   la largeur de la scène. */
+.mp-art-mirror {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #1d1638, #120d26);
+}
+.art-mr-cabin {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    90% 70% at 70% 40%,
+    rgb(122 100 190 / 22%),
+    transparent 70%
+  );
+}
+/* La vitre latérale gauche : la seule ouverture qui montre l'angle mort. */
+.art-mr-window {
+  position: absolute;
+  left: 5%;
+  top: 21%;
+  width: 36%;
+  height: 46%;
+  overflow: hidden;
+  border: 2px solid rgb(255 255 255 / 12%);
+  border-radius: 6px 14px 10px 6px;
+  background: linear-gradient(180deg, #5b7fb8 0%, #6d6f92 52%, #3b3752 53%);
+}
+.art-mr-far {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 53%;
+  height: 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    rgb(247 233 161 / 55%) 0 14px,
+    transparent 14px 30px
+  );
+}
+/* Le deux-roues : une silhouette, pas un dessin. Il suffit qu'on le lise. */
+.art-mr-bike {
+  position: absolute;
+  left: 46%;
+  top: 52%;
+  width: 26%;
+  height: 32%;
+}
+.art-mr-bike i {
+  position: absolute;
+  left: 12%;
+  bottom: 0;
+  width: 76%;
+  height: 34%;
+  border-radius: 4px;
+  background: #241a3d;
+}
+.art-mr-bike b {
+  position: absolute;
+  left: 30%;
+  top: 0;
+  width: 40%;
+  height: 62%;
+  border-radius: 40% 40% 30% 30%;
+  background: linear-gradient(180deg, #ffd88a, #e0872f);
+}
+.art-mr-inner {
+  position: absolute;
+  left: 35%;
+  top: 4%;
+  width: 30%;
+  height: 15%;
+  border: 2px solid rgb(255 255 255 / 14%);
+  border-radius: 9px;
+  background: linear-gradient(180deg, #46608c, #2a2b45 58%, #34314b 59%);
+  box-shadow: 0 5px 12px rgb(0 0 0 / 40%);
+}
+.art-mr-inner span,
+.art-mr-side span {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 58%;
+  height: 2px;
+  border-radius: 99px;
+  background: rgb(247 233 161 / 45%);
+}
+.art-mr-inner i {
+  position: absolute;
+  left: 50%;
+  bottom: -22%;
+  width: 8%;
+  height: 24%;
+  background: rgb(255 255 255 / 12%);
+  transform: translateX(-50%);
+}
+.art-mr-side {
+  position: absolute;
+  left: 4%;
+  top: 70%;
+  width: 18%;
+  height: 17%;
+  border: 2px solid rgb(255 255 255 / 14%);
+  border-radius: 7px;
+  background: linear-gradient(180deg, #46608c, #2a2b45 56%, #34314b 57%);
+  box-shadow: 0 5px 12px rgb(0 0 0 / 40%);
+}
+.art-mr-dash {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 58%;
+  height: 26%;
+  display: flex;
+  gap: 8%;
+  align-items: center;
+  justify-content: center;
+  border-radius: 22px 0 0;
+  background: linear-gradient(180deg, #2a2247, #171130);
+}
+.art-mr-dash i {
+  width: 22%;
+  aspect-ratio: 1;
+  border: 2px solid rgb(255 255 255 / 10%);
+  border-radius: 50%;
+  background: rgb(255 255 255 / 4%);
+}
+
+/* ── Décor « la route à double sens » ─────────────────────────────────────
+   Le cycliste devant à droite. La variante avec la voiture en face partage
+   tout le décor : seule la voiture change, et elle change la bonne réponse. */
+.mp-art-overtake,
+.mp-art-overtake-oncoming,
+.mp-art-overtake-empty {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #3d4f88 0%, #6a6ba4 38%, #2a2647 39%);
+}
+.art-ov-sky {
+  position: absolute;
+  inset: 0 0 62% 0;
+  background: linear-gradient(180deg, #4a5f9e, #9393c4);
+}
+.art-ov-field {
+  position: absolute;
+  inset: 36% 0 0 0;
+  background: linear-gradient(180deg, #3c6a4e, #24422f);
+}
+/* La route en perspective : large en bas, pincée à l'horizon. Le fond clair
+   du bloc dépasse du bitume découpé juste au-dessus : ce liseré fait les deux
+   lignes de rive, sans deux éléments de plus à positionner. */
+.art-ov-road {
+  position: absolute;
+  inset: 38% 0 0 0;
+  background: rgb(247 243 255 / 62%);
+  clip-path: polygon(38% 0%, 62% 0%, 108% 100%, -8% 100%);
+}
+.art-ov-road::before {
+  position: absolute;
+  content: "";
+  inset: 0;
+  background: linear-gradient(180deg, #4a4657, #33304a);
+  clip-path: polygon(38.8% 0%, 61.2% 0%, 105% 100%, -5% 100%);
+}
+.art-ov-center {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2.4%;
+  background: repeating-linear-gradient(
+    180deg,
+    rgb(247 233 161 / 85%) 0 9%,
+    transparent 9% 20%
+  );
+  transform: translateX(-50%);
+  clip-path: polygon(42% 0%, 58% 0%, 100% 100%, 0% 100%);
+}
+/* Le cycliste : posé sur le bord droit, à la bonne distance pour qu'on
+   comprenne qu'il faut s'écarter et pas le frôler. */
+.art-ov-cyclist {
+  position: absolute;
+  left: 55%;
+  top: 60%;
+  width: 8%;
+  height: 22%;
+}
+.art-ov-cyclist i {
+  position: absolute;
+  left: 26%;
+  bottom: 0;
+  width: 48%;
+  height: 40%;
+  border-radius: 3px;
+  background: #211a3a;
+}
+.art-ov-cyclist b {
+  position: absolute;
+  left: 12%;
+  top: 0;
+  width: 76%;
+  height: 66%;
+  border-radius: 45% 45% 26% 26%;
+  background: linear-gradient(180deg, #ffe27a, #f08a3a);
+}
+.art-ov-oncoming {
+  position: absolute;
+  left: 41%;
+  top: 44%;
+  width: 7%;
+  height: 9%;
+  display: flex;
+  gap: 14%;
+  align-items: flex-end;
+  border-radius: 3px 3px 2px 2px;
+  background: #6f6ba8;
+}
+.art-ov-oncoming i {
+  width: 34%;
+  height: 34%;
+  margin-bottom: 12%;
+  border-radius: 50%;
+  background: #fff6d4;
+  box-shadow: 0 0 7px rgb(255 246 212 / 80%);
+}
+/* ── Le même dépassement vu de dessus ─────────────────────────────────────
+   Route verticale, ta voie à droite. C'est la seule vue où un écart d'un
+   mètre se lit à l'écran. */
+.mp-art-overtake-top {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #2f5240, #1e3b2d);
+}
+.art-ot-verge {
+  position: absolute;
+  inset: 0 16% 0 16%;
+  background: rgb(247 243 255 / 55%);
+}
+.art-ot-road {
+  position: absolute;
+  inset: 0 17% 0 17%;
+  background: linear-gradient(90deg, #423e55, #34314c);
+}
+.art-ot-center {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: repeating-linear-gradient(
+    180deg,
+    rgb(247 233 161 / 85%) 0 22px,
+    transparent 22px 44px
+  );
+  transform: translateX(-50%);
+}
+.art-ot-cyclist,
+.art-ot-player {
+  position: absolute;
+  border-radius: 5px;
+}
+/* Étroit et allongé : de dessus un vélo ne doit pas ressembler à une voiture. */
+.art-ot-cyclist {
+  left: 63.5%;
+  top: 26%;
+  width: 5%;
+  height: 16%;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #ffe27a, #f08a3a);
+}
+.art-ot-player {
+  left: 61%;
+  top: 70%;
+  width: 12%;
+  height: 20%;
+  background: linear-gradient(180deg, #9b86e0, #5a44a8);
+}
+.art-ot-cyclist i,
+.art-ot-player i {
+  position: absolute;
+  right: 14%;
+  left: 14%;
+  top: 16%;
+  height: 26%;
+  border-radius: 3px;
+  background: rgb(20 12 40 / 42%);
+}
+.art-ov-hood {
+  position: absolute;
+  right: -6%;
+  bottom: -14%;
+  left: -6%;
+  height: 26%;
+  border-radius: 46% 46% 0 0;
+  background: linear-gradient(180deg, #4d3f7d, #2b2450);
+  box-shadow: 0 -6px 16px rgb(0 0 0 / 34%);
 }

@@ -212,15 +212,22 @@ export const MISSIONS = [
     paths: [
       {
         id: "cut",
-        label: "Couper vers la ligne centrale",
-        className: "path-cut",
+        label: "couper vers la ligne centrale",
+        legend: "Coupe",
+        d: "M180 245 C180 178 95 145 119 68",
       },
       {
         id: "safe",
-        label: "Suivre sa voie et regarder la sortie",
-        className: "path-safe",
+        label: "suivre sa voie et regarder la sortie",
+        legend: "Reste dans la voie",
+        d: "M205 245 C211 180 166 153 190 61",
       },
-      { id: "edge", label: "Longer le bord extérieur", className: "path-edge" },
+      {
+        id: "edge",
+        label: "longer le bord extérieur",
+        legend: "Longe le bord",
+        d: "M233 245 C253 184 242 143 272 78",
+      },
     ],
     solution: "safe",
     hint: "La route n’est pas un circuit : ta trajectoire reste au centre de ta voie.",
@@ -858,6 +865,456 @@ export const MISSIONS = [
     why: "Être autonome sur une manœuvre, c'est décider soi-même du moment. Le contrôle autour vient avant, la décision vient de toi.",
     transfer:
       "À ta prochaine leçon, demande à ton enseignant de ne rien dire pendant une manœuvre entière.",
+  },
+
+  // ── Chapitre 2 : circuler avec les autres ──────────────────────────────
+  // Le chapitre 1 apprenait à faire marcher la voiture. Ici l'élève ne
+  // commande plus une machine, il partage une route. Chaque mission part
+  // donc d'un autre usager, jamais d'une pédale.
+  {
+    ...commun,
+    id: "c2a-angle-mort",
+    competence: "C2a",
+    order: 1,
+    boites: ["manuelle", "auto"],
+    mode: "spot",
+    modeLabel: "Trouver",
+    title: "Le motard que personne ne voit",
+    objective: "Aller chercher l'information qu'aucun miroir ne donne.",
+    prompt:
+      "Tu vas déboîter vers la gauche. Touche l'endroit qui montre ce que les miroirs cachent.",
+    visual: "mirror",
+    hotspots: [
+      {
+        id: "inner-mirror",
+        label: "Rétroviseur intérieur",
+        x: 35,
+        y: 4,
+        w: 30,
+        h: 15,
+      },
+      {
+        id: "blind-spot",
+        label: "Vitre latérale gauche",
+        x: 5,
+        y: 21,
+        w: 36,
+        h: 46,
+      },
+      {
+        id: "side-mirror",
+        label: "Rétroviseur extérieur gauche",
+        x: 4,
+        y: 70,
+        w: 18,
+        h: 17,
+      },
+      { id: "dash", label: "Tableau de bord", x: 46, y: 76, w: 40, h: 22 },
+    ],
+    solution: "blind-spot",
+    hint: "Un deux-roues peut rouler juste à côté de ta portière. Aucun miroir ne le cadre.",
+    retry:
+      "Ce miroir montre l'arrière, pas le côté. Cherche l'ouverture où ta tête doit tourner.",
+    success: "Coup d'œil par la vitre : l'angle mort est levé.",
+    why: "Les miroirs laissent une zone aveugle le long de la voiture. Un regard rapide par la vitre est le seul moyen de la couvrir.",
+    transfer:
+      "Pendant ta prochaine leçon, tourne la tête avant chaque déboîtement et dis à voix haute ce que tu vois.",
+  },
+  {
+    ...commun,
+    id: "c2a-regard-loin",
+    competence: "C2a",
+    order: 2,
+    boites: ["manuelle", "auto"],
+    mode: "decision",
+    modeLabel: "Décider",
+    title: "Le regard qui porte loin",
+    objective: "Placer son regard là où l'information arrive en premier.",
+    prompt: "Tu roules en ville dans une file. Où poses-tu les yeux ?",
+    visual: "city-light",
+    choices: [
+      { id: "bumper", label: "Sur le pare-chocs de la voiture devant toi" },
+      { id: "far", label: "Loin devant, par-dessus la file" },
+      { id: "speedo", label: "Sur le compteur, pour tenir la limite" },
+    ],
+    solution: "far",
+    hint: "Ce que tu vois au dernier moment, tu le subis. Ce que tu vois tôt, tu le prépares.",
+    retry:
+      "Ce point ne te donne aucune avance. Cherche l'endroit qui t'annonce ce qui arrive.",
+    success: "Regard porté loin : tu vois venir au lieu de réagir.",
+    why: "Le regard lointain te donne quelques secondes d'avance. C'est ce temps qui transforme un freinage d'urgence en simple ralentissement.",
+    transfer:
+      "Sur ta prochaine leçon en ville, annonce le feu ou le carrefour avant que ton enseignant en parle.",
+  },
+  {
+    ...commun,
+    id: "c2b-limite",
+    competence: "C2b",
+    order: 1,
+    boites: ["manuelle", "auto"],
+    mode: "decision",
+    modeLabel: "Décider",
+    title: "La limite n'est pas un objectif",
+    objective: "Régler sa vitesse sur ce qu'on voit, pas sur le panneau.",
+    prompt:
+      "Rue étroite limitée à 30. Une école sort et des enfants longent le trottoir. Tu roules à combien ?",
+    visual: "city-light",
+    choices: [
+      { id: "thirty", label: "À 30 puisque c'est autorisé" },
+      {
+        id: "under",
+        label: "Bien en dessous de 30 tant que la rue est pleine",
+      },
+      { id: "keep", label: "À 50 jusqu'au prochain panneau" },
+    ],
+    solution: "under",
+    hint: "Un panneau donne un maximum. Il ne promet jamais que cette vitesse est sûre.",
+    retry:
+      "Un enfant peut traverser sans regarder. Cette vitesse ne te laisse pas de marge.",
+    success: "Vitesse réglée sur la rue, pas sur le panneau.",
+    why: "La limite est un plafond légal. La bonne vitesse est celle qui te permet de t'arrêter sur la distance que tu vois libre.",
+    transfer:
+      "Pendant ta prochaine leçon, choisis toi-même ta vitesse dans une rue chargée et explique ton choix.",
+  },
+  {
+    ...commun,
+    id: "c2b-ralentir-manuelle",
+    competence: "C2b",
+    order: 2,
+    boites: ["manuelle"],
+    mode: "sequence",
+    modeLabel: "Ordonner",
+    title: "Ralentir sans surprendre",
+    objective:
+      "Construire un ralentissement qui reste doux pour tout le monde.",
+    prompt:
+      "Un rétrécissement approche. Remets les gestes dans l'ordre, du premier au dernier.",
+    visual: "start-manual",
+    steps: [
+      { id: "mirror", label: "Contrôler le rétroviseur", symbol: "◉" },
+      { id: "lift", label: "Lever le pied de l'accélérateur", symbol: "↑" },
+      { id: "brake", label: "Freiner progressivement", symbol: "●" },
+      { id: "gear", label: "Passer le rapport adapté", symbol: "H" },
+      { id: "release", label: "Relâcher le frein en douceur", symbol: "↗" },
+    ],
+    sequence: ["mirror", "lift", "brake", "gear", "release"],
+    hint: "Avant de ralentir, tu regardes ce qui te suit. Le rapport se choisit une fois la vitesse basse.",
+    retry:
+      "Pas encore. Un ralentissement commence par une information, pas par une pédale.",
+    success: "Ralentissement propre reconstruit.",
+    why: "Le contrôle arrière prévient un freinage surprise pour celui qui te suit. Le rapport se change après avoir ralenti, pas pendant.",
+    transfer:
+      "À ta prochaine leçon, jette un œil au rétroviseur avant chaque freinage prévu.",
+  },
+  {
+    ...commun,
+    id: "c2b-ralentir-auto",
+    competence: "C2b",
+    order: 2,
+    boites: ["auto"],
+    mode: "sequence",
+    modeLabel: "Ordonner",
+    title: "Ralentir sans surprendre",
+    objective:
+      "Construire un ralentissement qui reste doux pour tout le monde.",
+    prompt:
+      "Un rétrécissement approche. Remets les gestes dans l'ordre, du premier au dernier.",
+    visual: "start-automatic",
+    steps: [
+      { id: "mirror", label: "Contrôler le rétroviseur", symbol: "◉" },
+      { id: "lift", label: "Lever le pied de l'accélérateur", symbol: "↑" },
+      { id: "brake", label: "Freiner progressivement", symbol: "●" },
+      { id: "hold", label: "Garder le frein jusqu'au repère", symbol: "≡" },
+      { id: "release", label: "Relâcher le frein en douceur", symbol: "↗" },
+    ],
+    sequence: ["mirror", "lift", "brake", "hold", "release"],
+    hint: "Avant de ralentir, tu regardes ce qui te suit. Ton pied droit fait tout le reste.",
+    retry:
+      "Pas encore. Un ralentissement commence par une information, pas par une pédale.",
+    success: "Ralentissement propre reconstruit.",
+    why: "Le contrôle arrière prévient un freinage surprise pour celui qui te suit. Relâcher le frein d'un coup en fin de ralentissement relance la voiture toute seule.",
+    transfer:
+      "À ta prochaine leçon, jette un œil au rétroviseur avant chaque freinage prévu.",
+  },
+  {
+    ...commun,
+    id: "c2c-place-dans-voie",
+    competence: "C2c",
+    order: 1,
+    boites: ["manuelle", "auto"],
+    mode: "spot",
+    modeLabel: "Trouver",
+    title: "Ta place sur la route",
+    objective: "Tenir le milieu de sa voie plutôt qu'un bord.",
+    prompt: "La route est libre. Touche l'endroit où roulent tes roues.",
+    visual: "overtake-empty",
+    hotspots: [
+      // Les zones suivent la perspective de la route : plus on monte dans la
+      // scène, plus le bitume est étroit. Elles sont volontairement basses.
+      {
+        id: "center-line",
+        label: "Collé à la ligne du milieu",
+        x: 43,
+        y: 64,
+        w: 12,
+        h: 26,
+      },
+      {
+        id: "lane-middle",
+        label: "Au milieu de ta voie",
+        x: 57,
+        y: 64,
+        w: 14,
+        h: 26,
+      },
+      {
+        id: "right-edge",
+        label: "Collé au bord droit",
+        x: 74,
+        y: 70,
+        w: 16,
+        h: 22,
+      },
+      {
+        id: "other-lane",
+        label: "Sur la voie d'en face",
+        x: 22,
+        y: 68,
+        w: 17,
+        h: 22,
+      },
+    ],
+    solution: "lane-middle",
+    hint: "Ta voie a deux bords. Tu ne colles ni l'un ni l'autre.",
+    retry:
+      "Ce bord te laisse sans marge d'un côté. Cherche la place qui garde de l'espace des deux côtés.",
+    success: "Milieu de voie tenu : de la marge des deux côtés.",
+    why: "Rouler au milieu de ta voie te laisse de la place pour t'écarter d'un piéton, d'un nid de poule ou d'une voiture qui déborde.",
+    transfer:
+      "Pendant ta prochaine leçon, demande à ton enseignant de te dire si tu tires vers un bord sans t'en rendre compte.",
+  },
+  {
+    ...commun,
+    id: "c2c-voie-giratoire",
+    competence: "C2c",
+    order: 2,
+    boites: ["manuelle", "auto"],
+    mode: "decision",
+    modeLabel: "Décider",
+    title: "La bonne voie sur l'anneau",
+    objective: "Choisir sa file avant d'entrer sur un giratoire.",
+    prompt:
+      "Giratoire à deux voies. Tu sors à la première sortie. Tu entres par quelle file ?",
+    visual: "roundabout",
+    choices: [
+      { id: "right", label: "La file de droite" },
+      { id: "left", label: "La file de gauche, elle tourne mieux" },
+      { id: "late", label: "N'importe laquelle, tu choisiras sur l'anneau" },
+    ],
+    solution: "right",
+    hint: "Tu ressors presque tout de suite. Inutile d'aller chercher l'intérieur de l'anneau.",
+    retry:
+      "Cette file t'oblige à couper devant quelqu'un pour rejoindre ta sortie.",
+    success: "File de droite : ta sortie est déjà sous ta roue.",
+    why: "Une sortie proche se prend par la file de droite. Choisir sa file avant d'entrer évite de traverser l'anneau au dernier moment.",
+    transfer:
+      "Au prochain giratoire, annonce ta file avant d'y arriver, pas une fois dessus.",
+  },
+  {
+    ...commun,
+    id: "c2e-cycliste",
+    competence: "C2e",
+    order: 1,
+    boites: ["manuelle", "auto"],
+    mode: "trajectory",
+    modeLabel: "Tracer",
+    title: "Un mètre de respect",
+    objective: "Dépasser un cycliste avec l'écart que la loi impose.",
+    prompt:
+      "Vue de dessus. La voie de gauche est libre. Choisis la trajectoire qui dépasse ce cycliste.",
+    visual: "overtake-top",
+    paths: [
+      // Vue de dessus, route verticale : ta voie occupe la moitié droite. Les
+      // trois lignes partent de ta voiture et remontent le long du cycliste.
+      {
+        id: "close",
+        label: "frôler le cycliste sans s'écarter",
+        legend: "Frôle le cycliste",
+        d: "M237 232 C237 192 219 156 219 104 C219 68 231 46 234 22",
+      },
+      {
+        id: "meter",
+        label: "s'écarter d'un bon mètre en empiétant sur la voie de gauche",
+        legend: "S'écarte d'un mètre",
+        d: "M237 232 C237 194 172 158 172 104 C172 62 226 44 234 22",
+      },
+      {
+        id: "wide",
+        label: "déborder jusqu'au bord opposé de la chaussée",
+        legend: "Déborde jusqu'au bord",
+        d: "M237 232 C237 194 90 160 90 104 C90 54 222 46 234 22",
+      },
+    ],
+    solution: "meter",
+    hint: "Un mètre en ville, un mètre cinquante en dehors. Ni moins, ni toute la chaussée.",
+    retry:
+      "Cette ligne serre trop le cycliste ou t'emmène trop loin dans la voie d'en face.",
+    success: "Écart tenu : le cycliste garde sa place et toi la tienne.",
+    why: "Un cycliste peut se déporter pour éviter un trou ou une grille. L'écart d'un mètre est ce qui absorbe ce mouvement.",
+    transfer:
+      "Au prochain cycliste, attends d'avoir la place puis dépasse en t'écartant franchement.",
+  },
+  {
+    ...commun,
+    id: "c2e-voiture-en-face",
+    competence: "C2e",
+    order: 2,
+    boites: ["manuelle", "auto"],
+    mode: "decision",
+    modeLabel: "Décider",
+    title: "La voiture arrive en face",
+    objective: "Renoncer à un dépassement qui n'a plus la place.",
+    prompt:
+      "Tu allais dépasser le cycliste. Une voiture arrive en face. Tu fais quoi ?",
+    visual: "overtake-oncoming",
+    choices: [
+      { id: "rush", label: "Tu dépasses vite avant qu'elle arrive" },
+      {
+        id: "squeeze",
+        label: "Tu passes en restant dans ta voie sans t'écarter",
+      },
+      {
+        id: "wait",
+        label: "Tu restes derrière à bonne distance et tu attends",
+      },
+    ],
+    solution: "wait",
+    hint: "Le mètre d'écart n'est pas négociable. S'il ne rentre pas, le dépassement non plus.",
+    retry:
+      "Cette solution enlève de la place au cycliste ou à la voiture d'en face. Un dépassement se refuse quand la place manque.",
+    success: "Dépassement reporté : tout le monde garde sa place.",
+    why: "Un dépassement se prépare et s'annule aussi facilement. Attendre quelques secondes coûte moins qu'un cycliste serré contre le trottoir.",
+    transfer:
+      "Au prochain cycliste, dis à voix haute si tu as la place de dépasser ou non avant de bouger le volant.",
+  },
+  {
+    ...commun,
+    id: "c2g-annoncer",
+    competence: "C2g",
+    order: 1,
+    boites: ["manuelle", "auto"],
+    mode: "sequence",
+    modeLabel: "Ordonner",
+    title: "Annoncer avant d'agir",
+    objective: "Prévenir les autres dans l'ordre qui les protège.",
+    prompt: "Tu vas changer de voie. Remets la chaîne dans l'ordre.",
+    visual: "cockpit",
+    steps: [
+      { id: "inner", label: "Rétroviseur intérieur", symbol: "◉" },
+      { id: "outer", label: "Rétroviseur extérieur", symbol: "◎" },
+      { id: "signal", label: "Clignotant", symbol: "→" },
+      { id: "blind", label: "Coup d'œil dans l'angle mort", symbol: "↖" },
+      { id: "move", label: "Déplacer la voiture", symbol: "≈" },
+    ],
+    sequence: ["inner", "outer", "signal", "blind", "move"],
+    hint: "Tu prends l'information, tu annonces, puis tu vérifies une dernière fois juste avant de bouger.",
+    retry:
+      "Pas encore. Le clignotant ne vient ni en premier ni en dernier : il annonce une intention déjà réfléchie.",
+    success: "Chaîne d'annonce reconstruite.",
+    why: "Le clignotant prévient, il ne demande pas la permission. Le dernier coup d'œil vérifie que personne n'est arrivé pendant que tu annonçais.",
+    transfer:
+      "Pendant ta prochaine leçon, annonce chaque changement de voie à voix haute dans cet ordre.",
+  },
+  {
+    ...commun,
+    id: "c2g-pieton",
+    competence: "C2g",
+    order: 2,
+    boites: ["manuelle", "auto"],
+    mode: "decision",
+    modeLabel: "Décider",
+    title: "Le piéton qui hésite",
+    objective: "Se faire comprendre d'un piéton sans lui donner un ordre.",
+    prompt:
+      "Un piéton attend au bord du passage et te regarde. Comment tu communiques ?",
+    visual: "city-light",
+    choices: [
+      { id: "horn", label: "Un coup de klaxon pour l'inviter à traverser" },
+      { id: "flash", label: "Un appel de phares pour lui dire d'y aller" },
+      {
+        id: "eyes",
+        label: "Tu ralentis, tu t'arrêtes et tu croises son regard",
+      },
+    ],
+    solution: "eyes",
+    hint: "La meilleure façon de dire à un piéton qu'il peut passer, c'est de s'arrêter vraiment.",
+    retry:
+      "Ce signal peut le lancer devant une voiture que tu ne vois pas. Cherche la réponse qui ne décide pas à sa place.",
+    success: "Voiture arrêtée et regard croisé : le message est clair.",
+    why: "Un klaxon ou un appel de phares lance le piéton sur ta parole. Une voiture immobile lui laisse le temps de vérifier lui-même l'autre voie.",
+    transfer:
+      "Au prochain passage piéton, arrête-toi complètement et laisse la personne décider de son départ.",
+  },
+  {
+    ...commun,
+    id: "c2h-sortie-tard",
+    competence: "C2h",
+    order: 1,
+    boites: ["manuelle", "auto"],
+    mode: "decision",
+    modeLabel: "Décider",
+    title: "La sortie annoncée trop tard",
+    objective: "Garder le contrôle quand le guidage se trompe de tempo.",
+    prompt:
+      "Le GPS annonce ta sortie cinquante mètres avant. Tu es sur la voie de gauche. Tu fais quoi ?",
+    visual: "gps",
+    choices: [
+      { id: "cross", label: "Tu traverses les voies tout de suite" },
+      {
+        id: "continue",
+        label: "Tu continues et tu reprends la route plus loin",
+      },
+      { id: "stop", label: "Tu ralentis fort pour te donner le temps" },
+    ],
+    solution: "continue",
+    hint: "Rater une sortie coûte cinq minutes. Traverser deux voies en urgence coûte bien plus.",
+    retry:
+      "Cette manœuvre surprend tout le monde autour de toi pour gagner quelques secondes.",
+    success: "Sortie ratée, trajet sauvé.",
+    why: "Conduire en autonomie, c'est décider soi-même. Un guidage en retard est une information, pas un ordre.",
+    transfer:
+      "À ta prochaine leçon avec GPS, dis à voix haute quand tu choisis de ne pas suivre une consigne trop tardive.",
+  },
+  {
+    ...commun,
+    id: "c2h-sans-panneau",
+    competence: "C2h",
+    order: 2,
+    boites: ["manuelle", "auto"],
+    mode: "diagnostic",
+    modeLabel: "Diagnostiquer",
+    title: "Le carrefour sans panneau",
+    objective: "Trancher seul quand aucune signalisation ne répond.",
+    prompt: "Aucun panneau ne t'annonce la règle. Quelle décision prends-tu ?",
+    visual: "intersection",
+    symptom:
+      "Tu arrives à un carrefour sans panneau, sans marquage au sol et sans feu.",
+    choices: [
+      { id: "pass", label: "Tu passes puisque rien ne t'oblige à t'arrêter" },
+      {
+        id: "right",
+        label: "Tu ralentis et tu cèdes à celui qui vient de ta droite",
+      },
+      { id: "speed", label: "Tu accélères pour passer avant les autres" },
+    ],
+    solution: "right",
+    hint: "Quand rien n'est écrit, une règle s'applique par défaut. Elle vient toujours du même côté.",
+    retry:
+      "L'absence de panneau ne te donne aucune priorité. Cherche la règle qui reste quand il n'y a plus de signalisation.",
+    success: "Priorité à droite appliquée.",
+    why: "Sans signalisation, la priorité à droite s'applique. Un conducteur autonome connaît cette règle par défaut et n'attend pas qu'on la lui rappelle.",
+    transfer:
+      "Pendant ta prochaine leçon, repère un carrefour sans panneau et annonce la règle avant d'y arriver.",
   },
 ];
 
