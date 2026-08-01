@@ -10,6 +10,8 @@
 // `eleveAccess.gated` n'est jamais vrai pour eux (cf. main.js + PR #541).
 // ═══════════════════════════════════════════════════════════════
 
+import { getLang } from "@/utils/lang.js";
+
 const LS_KEY = "pg_freetier_v1";
 
 // Quotas quotidiens par « jour Paris » (cf. todayKey, même approche que roue.js).
@@ -166,16 +168,45 @@ export function consumeFree(kind, ref = null, n = 1) {
   return freeQuota(kind, ref);
 }
 
+// ─── i18n des compteurs ──────────────────────────────────────────
+// Le compte gratuit est la porte d'entrée de la campagne internationale : un
+// arabophone qui arrive par la pub voit ces compteurs TOUS LES JOURS. Ils
+// doivent parler sa langue, sinon la promesse de la pub tombe dès l'écran 1.
+// « Pass » = باقة, « mise en situation » = سيناريو الطريق (et surtout pas
+// « موقف », qui veut aussi dire « parking »).
+const FT_I18N = {
+  en: {
+    lessons: (n) => `Free account: the first ${n} lessons`,
+    quiz: (used, max) => `Discovery: ${used}/${max} questions today`,
+    scene_left: "Discovery: 1 scenario today",
+    scene_done: "Discovery: today's scenario played",
+    mode: "Discovery mode",
+  },
+  ar: {
+    lessons: (n) => `حساب مجاني: أول ${n} دروس`,
+    quiz: (used, max) => `الاكتشاف: ${used}/${max} أسئلة اليوم`,
+    scene_left: "الاكتشاف: سيناريو واحد اليوم",
+    scene_done: "الاكتشاف: لعبت سيناريو اليوم",
+    mode: "وضع الاكتشاف",
+  },
+};
+
 /** Libellé de compteur discret, ex. « Découverte : 2/3 questions aujourd'hui ». */
 export function discoveryCounterLabel(kind) {
+  const d = FT_I18N[getLang()] || null;
   if (kind === "fiche")
-    return `Compte gratuit : les ${FREE_SUBS.length} premières leçons`;
+    return d
+      ? d.lessons(FREE_SUBS.length)
+      : `Compte gratuit : les ${FREE_SUBS.length} premières leçons`;
   const q = freeQuota(kind);
   if (kind === "quiz")
-    return `Découverte : ${q.used}/${q.max} questions aujourd'hui`;
-  if (kind === "scene")
-    return q.remaining > 0
-      ? "Découverte : 1 scène aujourd'hui"
-      : "Découverte : scène du jour jouée";
-  return "Mode découverte";
+    return d
+      ? d.quiz(q.used, q.max)
+      : `Découverte : ${q.used}/${q.max} questions aujourd'hui`;
+  if (kind === "scene") {
+    if (q.remaining > 0)
+      return d ? d.scene_left : "Découverte : 1 scène aujourd'hui";
+    return d ? d.scene_done : "Découverte : scène du jour jouée";
+  }
+  return d ? d.mode : "Mode découverte";
 }

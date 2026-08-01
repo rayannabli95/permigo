@@ -12,11 +12,84 @@ import { esc } from "@/utils/escape.js";
 import { icon } from "@/utils/icons.js";
 import { track } from "@/services/analytics.js";
 import { getCurUser } from "@/auth/cur-user.js";
+import { getLang } from "@/utils/lang.js";
 import {
   discoveryCounterLabel,
   freeQuota,
   FREE_SUBS,
 } from "@/utils/free-tier.js";
+
+// ─── i18n (traduction seule, repli FR) ───────────────────────────
+// Cet écran est le SEUL que le compte gratuit revoit tous les jours. Le laisser
+// en français, c'est promettre « ton app dans ta langue » dans la pub puis
+// accueillir l'élève en français au premier mur. « Pass » = باقة, « mise en
+// situation » = سيناريو الطريق (jamais « موقف » : ça veut aussi dire parking).
+const FTW_I18N = {
+  en: {
+    quota_kick: "Discovery mode",
+    quota_title: "That is your taste of PermiGo for today",
+    quota_sub:
+      "Come back tomorrow for a fresh round. Or open your whole course right now.",
+    lesson_kick: "Free account",
+    lesson_title: "You finished the free lessons",
+    lesson_sub:
+      "The first 3 are yours for good. The rest of the course opens with your Pass.",
+    route_kick: "Discovery mode",
+    route_title: "Here is your whole course",
+    route_sub:
+      "This part opens with your Pass. The full training. Your progress. Your rewards.",
+    perk0_t: "Training without limits",
+    perk0_d: "Questions · lesson sheets · road scenarios",
+    perk1_t: "Your progress and your rewards",
+    perk1_d: "Skills · chests · steering wheels · ranking",
+    perk2_t: "Mock exam and certification",
+    perk2_d: "Everything you need to be ready on test day",
+    unlock: "Open my course",
+    explore: "Keep exploring",
+    banner_free: "Free account",
+    banner_lessons: (n) => `First ${n} lessons`,
+    banner_quiz: (u, m) => `${u}/${m} questions`,
+    banner_scene: (u, m) => `${u}/${m} scenario`,
+  },
+  ar: {
+    quota_kick: "وضع الاكتشاف",
+    quota_title: "لقد جرّبت PermiGo اليوم",
+    quota_sub: "عُد غداً لجولة جديدة. أو افتح مسارك كاملاً الآن.",
+    lesson_kick: "حساب مجاني",
+    lesson_title: "أنهيت الدروس المجانية",
+    lesson_sub:
+      "الدروس الثلاثة الأولى لك إلى الأبد. بقية المسار تُفتح مع باقتك.",
+    route_kick: "وضع الاكتشاف",
+    route_title: "هذا مسارك كاملاً",
+    route_sub: "هذا الجزء يُفتح مع باقتك. التدريب الكامل وتقدّمك ومكافآتك.",
+    perk0_t: "تدريب بلا حدود",
+    perk0_d: "أسئلة · دروس · سيناريوهات الطريق",
+    perk1_t: "تقدّمك ومكافآتك",
+    perk1_d: "المهارات · الصناديق · المقاود · الترتيب",
+    perk2_t: "امتحان تجريبي وشهادة",
+    perk2_d: "كل ما تحتاجه لتكون جاهزاً يوم الامتحان",
+    unlock: "افتح مساري",
+    explore: "متابعة الاستكشاف",
+    banner_free: "حساب مجاني",
+    banner_lessons: (n) => `أول ${n} دروس`,
+    banner_quiz: (u, m) => `${u}/${m} أسئلة`,
+    banner_scene: (u, m) => `${u}/${m} سيناريو`,
+  },
+};
+
+/** Traduit et échappe. Repli sur le français si la clé manque. */
+function wt(key, fr, ...args) {
+  const l = getLang();
+  const v = l !== "fr" ? FTW_I18N[l]?.[key] : null;
+  if (typeof v === "function") return esc(v(...args));
+  return esc(v || fr);
+}
+
+/** L'arabe se lit de droite à gauche : sinon la ponctuation et les compteurs
+ *  « 2/3 » se posent du mauvais côté, et l'icône d'un bloc reste à gauche. */
+function isAr() {
+  return getLang() === "ar";
+}
 
 const COPY = {
   quota: {
@@ -104,6 +177,10 @@ const STYLE = `<style>
   font:700 14px/1 'Archivo',sans-serif; color:#b3aede;
   text-decoration:underline; text-underline-offset:3px; }
 .ftw-note{ text-align:center; font-size:11.5px; font-weight:600; color:#8f86c4; margin:16px 0 0; }
+/* Arabe : le conteneur porte dir="rtl", donc les rangées d'avantages se
+   retournent toutes seules (l'icône passe à droite). On ne redresse à la main
+   que ce que le flux ne retourne pas : l'alignement du texte des rangées. */
+.ftw[dir="rtl"] .ftw-perk .tx{ text-align:right; }
 @media (prefers-reduced-motion: reduce){ .ftw-unlock{ transition:none; } }
 </style>`;
 
@@ -129,31 +206,34 @@ export async function mountFreeTierWall(
 
   // Une fiche murée = « tu as fini les leçons offertes » (définitif), pas
   // « reviens demain » (le quota quotidien, lui, ne concerne que quiz + scène).
-  const c =
+  const ck =
     reason === "quota" && kind === "fiche"
-      ? COPY.lesson
-      : COPY[reason] || COPY.quota;
+      ? "lesson"
+      : COPY[reason]
+        ? reason
+        : "quota";
+  const c = COPY[ck];
   const counter =
     reason === "quota" && kind
       ? `<p class="ftw-note">${esc(discoveryCounterLabel(kind))}</p>`
       : "";
 
-  root.innerHTML = `${STYLE}<div class="ftw">
+  root.innerHTML = `${STYLE}<div class="ftw"${isAr() ? ' dir="rtl" lang="ar"' : ""}>
     <div>
       <div class="ftw-badge" aria-hidden="true">${icon(c.ico, { size: 34, strokeWidth: 2 })}</div>
-      <div class="ftw-kick">${esc(c.kick)}</div>
-      <h1 class="ftw-title" tabindex="-1">${esc(c.title)}</h1>
-      <p class="ftw-sub">${esc(c.sub)}</p>
+      <div class="ftw-kick">${wt(`${ck}_kick`, c.kick)}</div>
+      <h1 class="ftw-title" tabindex="-1">${wt(`${ck}_title`, c.title)}</h1>
+      <p class="ftw-sub">${wt(`${ck}_sub`, c.sub)}</p>
       <div class="ftw-perks">
         ${PERKS.map(
-          ([ico, t, s]) => `<div class="ftw-perk">
+          ([ico, t, s], i) => `<div class="ftw-perk">
             <span class="ico" aria-hidden="true">${icon(ico, { size: 18, strokeWidth: 2.2 })}</span>
-            <span class="tx"><b>${esc(t)}</b><span>${esc(s)}</span></span>
+            <span class="tx"><b>${wt(`perk${i}_t`, t)}</b><span>${wt(`perk${i}_d`, s)}</span></span>
           </div>`,
         ).join("")}
       </div>
-      <button class="ftw-unlock" id="ftw-unlock" type="button">Débloquer mon parcours</button>
-      <button class="ftw-explore" id="ftw-explore" type="button">Continuer à explorer</button>
+      <button class="ftw-unlock" id="ftw-unlock" type="button">${wt("unlock", "Débloquer mon parcours")}</button>
+      <button class="ftw-explore" id="ftw-explore" type="button">${wt("explore", "Continuer à explorer")}</button>
       ${counter}
     </div>
   </div>`;
@@ -200,12 +280,12 @@ export function discoveryBannerHTML() {
   const s = freeQuota("scene");
   // Les fiches ne sont plus un quota : les 3 premières leçons sont ouvertes en
   // permanence (cf. free-tier.js). On affiche donc un acquis, pas un décompte.
-  return `${BANNER_STYLE}<div class="ft-banner" role="status">
-    <b>Compte gratuit</b>
+  return `${BANNER_STYLE}<div class="ft-banner" role="status"${isAr() ? ' dir="rtl" lang="ar"' : ""}>
+    <b>${wt("banner_free", "Compte gratuit")}</b>
     <span class="items">
-      <span>${FREE_SUBS.length} premières leçons</span>
-      <span>${q.used}/${q.max} questions</span>
-      <span>${s.used}/${s.max} scène</span>
+      <span>${wt("banner_lessons", `${FREE_SUBS.length} premières leçons`, FREE_SUBS.length)}</span>
+      <span>${wt("banner_quiz", `${q.used}/${q.max} questions`, q.used, q.max)}</span>
+      <span>${wt("banner_scene", `${s.used}/${s.max} scène`, s.used, s.max)}</span>
     </span>
   </div>`;
 }
