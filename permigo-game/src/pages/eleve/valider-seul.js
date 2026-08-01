@@ -37,6 +37,10 @@ import { refreshGemmes } from "@/utils/game-state.js";
 import { getLang } from "@/utils/lang.js";
 import { findCarte } from "@/data/cartes.js";
 import { chargerBoite, enregistrerBoite } from "@/utils/transmission.js";
+import {
+  monterMissions,
+  missionsPour,
+} from "@/components/eleve/pilote-mission.js";
 
 const NB_QUESTIONS = 5; // plus que le quiz-récap (3) : la barre doit avoir du sens
 const SEUIL = 80; // barre INTERNE, jamais affichée : on ne parle pas en pourcentage
@@ -71,6 +75,18 @@ const VS_I18N = {
     fiche_link: "See the full sheet (fiche)",
     step2_t: "The certification quiz",
     step2_s: "{n} questions. You need {j} right to certify.",
+    step2_m_t: "The driving scene",
+    step2_m_s:
+      "You get in the car and you make the move. A few questions then close the certification.",
+    cta_m_start: "Get in the car",
+    cta_m_retry: "Play the scene again",
+    hint_m:
+      "Be honest with yourself. None of this replaces a real driving lesson.",
+    mr_kick: "Not yet",
+    mr_title: "Let's go back to the sheet",
+    mr_p: "The move isn't in place yet on “{n}”. Re-read the sheet calmly, then come back and do it again.",
+    mr_retry: "Re-read the sheet and retry",
+    mr_back: "Back to the journey",
     cta_retry: "Retake the quiz",
     cta_start: "Start the quiz",
     hint: "Be honest with yourself. This quiz never replaces a real driving lesson.",
@@ -127,6 +143,16 @@ const VS_I18N = {
     fiche_link: "اعرض البطاقة الكاملة (fiche)",
     step2_t: "اختبار المصادقة",
     step2_s: "{n} أسئلة. تحتاج إلى {j} إجابات صحيحة للمصادقة.",
+    step2_m_t: "المشهد العملي",
+    step2_m_s: "تركب السيارة وتؤدّي الحركة. ثم تُغلق بضعة أسئلة عملية المصادقة.",
+    cta_m_start: "اركب السيارة",
+    cta_m_retry: "أعد المشهد",
+    hint_m: "كن صادقًا مع نفسك. لا شيء من هذا يعوّض درس قيادة حقيقيًا.",
+    mr_kick: "ليس بعد",
+    mr_title: "نعود إلى البطاقة",
+    mr_p: "الحركة لم تستقرّ بعد في «{n}». أعد قراءة البطاقة بهدوء ثم عد لتؤدّيها من جديد.",
+    mr_retry: "أعد قراءة البطاقة وحاول مجددًا",
+    mr_back: "العودة إلى المسار",
     cta_retry: "أعد الاختبار",
     cta_start: "ابدأ الاختبار",
     hint: "كن صادقًا مع نفسك. هذا الاختبار لا يعوّض درس قيادة حقيقيًا.",
@@ -373,7 +399,7 @@ function boiteScreen(sub) {
   </div>`;
 }
 
-function introScreen(sub, cat, already, fiche) {
+function introScreen(sub, cat, already, fiche, avecMission) {
   const ficheHref = `#/revision-conduite/${encodeURIComponent(String(sub.c ?? ""))}`;
   const steps = (fiche?.methode || []).slice(0, 4);
   const ficheList = steps.length
@@ -421,16 +447,28 @@ function introScreen(sub, cat, already, fiche) {
       <div class="vs-step">
         <div class="vs-step-n">2</div>
         <div class="vs-step-tx">
-          <b>${vsD("step2_t", "Le quiz de certification")}</b>
-          <span>${vsD("step2_s", `${NB_QUESTIONS} questions. Il t'en faut ${MIN_JUSTES} justes pour certifier.`, { n: NB_QUESTIONS, j: MIN_JUSTES })}</span>
+          <b>${avecMission ? vsD("step2_m_t", "La mise en situation") : vsD("step2_t", "Le quiz de certification")}</b>
+          <span>${
+            avecMission
+              ? vsD("step2_m_s", "Tu montes dans la voiture et tu fais le geste. Quelques questions ferment la certification.")
+              : vsD("step2_s", `${NB_QUESTIONS} questions. Il t'en faut ${MIN_JUSTES} justes pour certifier.`, { n: NB_QUESTIONS, j: MIN_JUSTES })
+          }</span>
         </div>
       </div>
     </div>
 
     <!-- La phrase honnête passe AVANT le bouton : sous le bouton, personne
          ne la lisait (audit 01/08). -->
-    <p class="vs-hint">${vsD("hint", "Sois honnête avec toi-même. Ce quiz ne remplace pas une vraie leçon de conduite.")}</p>
-    <button class="vs-cta" id="vs-start-quiz" type="button">${icon("zap", { size: 18 })} ${already ? vsD("cta_retry", "Repasser le quiz") : vsD("cta_start", "Commencer le quiz")}</button>
+    <p class="vs-hint">${avecMission ? vsD("hint_m", "Sois honnête avec toi-même. Rien de tout ça ne remplace une vraie leçon de conduite.") : vsD("hint", "Sois honnête avec toi-même. Ce quiz ne remplace pas une vraie leçon de conduite.")}</p>
+    <button class="vs-cta" id="vs-start-quiz" type="button">${icon("zap", { size: 18 })} ${
+      already
+        ? avecMission
+          ? vsD("cta_m_retry", "Refaire la mise en situation")
+          : vsD("cta_retry", "Repasser le quiz")
+        : avecMission
+          ? vsD("cta_m_start", "Monter dans la voiture")
+          : vsD("cta_start", "Commencer le quiz")
+    }</button>
   </div>`;
 }
 
@@ -584,7 +622,13 @@ export async function mount(root, param) {
     return;
   }
 
-  root.innerHTML = introScreen(sub, cat, already, fiche);
+  // La boîte est peut-être inconnue à ce stade : on demande alors les missions
+  // sans filtre. Le libellé peut donc annoncer une mise en situation qui sera
+  // filtrée juste après, jamais l'inverse (aucune compétence n'a de mission
+  // pour une seule boîte sans en avoir pour l'autre).
+  const avecMission = missionsPour(compId, await chargerBoite()).length > 0;
+
+  root.innerHTML = introScreen(sub, cat, already, fiche, avecMission);
   wireIntro(root, me, compId, sub, cat);
 }
 
@@ -604,7 +648,7 @@ function wireIntro(root, me, compId, sub, cat) {
       return;
     }
 
-    await lancerLeQuiz(root, me, compId, sub, cat, btn);
+    await lancerLaCertification(root, me, compId, sub, cat, btn);
   });
 }
 
@@ -620,9 +664,77 @@ function wireBoite(root, me, compId, sub, cat) {
         competence_id: compId,
         boite: choix,
       });
-      await lancerLeQuiz(root, me, compId, sub, cat, null);
+      await lancerLaCertification(root, me, compId, sub, cat, null);
     });
   });
+}
+
+/**
+ * La certification en deux temps : la MISSION puis les QUESTIONS.
+ *
+ * La mission (Mode Pilote) est l'épreuve : l'élève agit dans une scène, il
+ * touche la commande, il remet les gestes dans l'ordre. Les questions restent
+ * derrière parce que c'est le SERVEUR qui certifie : `self_validate_competence`
+ * corrige lui-même les réponses de la banque et refuse tout ce qui vient d'un
+ * score déclaré par le téléphone. Sans elles, n'importe qui se déclarerait
+ * certifié.
+ *
+ * Les compétences sans mission gardent le chemin d'avant : questions seules.
+ */
+async function lancerLaCertification(root, me, compId, sub, cat, btn) {
+  const boite = await chargerBoite();
+  if (!missionsPour(compId, boite).length) {
+    await lancerLeQuiz(root, me, compId, sub, cat, btn);
+    return;
+  }
+
+  // La mission se monte sur <body>, PAS dans #app : un parent animé en
+  // `transform` redevient le bloc de référence d'un `position:fixed` et la
+  // scène se retrouvait coincée dans la colonne de la page, avec la barre de
+  // nav par-dessus. (Même piège que les overlays du tuto.)
+  const hote = document.createElement("div");
+  hote.className = "mp-host";
+  document.body.appendChild(hote);
+  document.body.classList.add("mp-open");
+
+  const fermer = () => {
+    hote.remove();
+    document.body.classList.remove("mp-open");
+  };
+
+  monterMissions(hote, {
+    code: compId,
+    boite,
+    onReussite: () => {
+      fermer();
+      lancerLeQuiz(root, me, compId, sub, cat, null);
+    },
+    onEchec: () => {
+      fermer();
+      haptic("warning");
+      root.innerHTML = missionRateeScreen(sub);
+      wireResult(root, me, compId, sub, cat);
+    },
+    onQuitter: () => {
+      fermer();
+      navigate("#/parcours");
+    },
+  });
+}
+
+/**
+ * La mission est ratée : on renvoie à la fiche, sans quiz derrière.
+ * « S'il rate il doit relire la fiche de révision » (Rayan, 31/07/2026).
+ */
+function missionRateeScreen(sub) {
+  return `${STYLE}<div class="vsr fail anim-slide-up">
+    <div class="vsr-med">${medallion("faute", "orange", { size: 96 })}</div>
+    <span class="vsr-kick">${icon("x", { size: 13 })} ${vsD("mr_kick", "Pas encore")}</span>
+    <h1 class="vsr-ttl">${vsD("mr_title", "On reprend depuis la fiche")}</h1>
+    <p class="vsr-p">${vsD("mr_p", `Le geste n'est pas encore en place sur « ${sub.n} ». Relis la fiche tranquillement, puis reviens le refaire.`, { n: sub.n })}</p>
+    <button class="vsr-cta" id="vs-retry" type="button">${vsD("mr_retry", "Relire la fiche et retenter")}</button>
+    <button class="vsr-ghost" id="vs-cta-parcours" type="button">${vsD("mr_back", "Retour au parcours")}</button>
+  </div>`;
 }
 
 async function lancerLeQuiz(root, me, compId, sub, cat, btn) {
