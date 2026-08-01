@@ -121,10 +121,7 @@ const RVC_I18N = {
     one_min: "1 min",
     find_fault: "Find the mistake",
     spot_error: "Spot the error",
-    order_done: "Perfect order!",
-    order_done_body: "All {count} steps of “{title}”: done.",
     back_card: "Back to the card",
-    order_hint: "Put them in the right order. Your turn.",
     skill_fallback: "this skill",
     cert_done_kicker: "Already in My licence",
     cert_done_title: "Already self-certified",
@@ -169,10 +166,7 @@ const RVC_I18N = {
     one_min: "دقيقة واحدة",
     find_fault: "اعثر على الخطأ",
     spot_error: "اكتشف الخطأ",
-    order_done: "ترتيب ممتاز!",
-    order_done_body: "رتّبت خطوات « {title} » وعددها {count}.",
     back_card: "العودة إلى البطاقة",
-    order_hint: "رتّبها بالترتيب الصحيح. دورك.",
     skill_fallback: "هذه المهارة",
     cert_done_kicker: "موجودة بالفعل في رخصتي",
     cert_done_title: "سبق أن اعتمدتها بنفسك",
@@ -442,14 +436,6 @@ const STYLE = `<style>
 .rvc-done { text-align:center; padding:40px 16px; }
 .rvc-done-e { font-size:54px; animation: rvcrise .35s cubic-bezier(.23,1,.32,1) both; }
 .rvc-done-t { font:800 22px 'Archivo',sans-serif; margin:10px 0 4px; }
-.rvc-ohint { color:var(--mu,#64748b); font-size:13px; margin:2px 0 14px; }
-.rvc-oslot { display:flex; align-items:center; gap:10px; padding:11px 12px; border-radius:12px; margin-bottom:8px; background: color-mix(in srgb,#10b981 12%, transparent); font-size:14px; line-height:1.35; animation: rvcrise .25s cubic-bezier(.23,1,.32,1); }
-.rvc-onum { width:22px; height:22px; border-radius:50%; background:#10b981; color:#fff; font:700 12px 'IBM Plex Mono',monospace; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-.rvc-opool { display:flex; flex-direction:column; gap:8px; margin-top:6px; }
-.rvc-ochip { width:100%; text-align:left; border:1px solid var(--bo3,#e2e8f0); background:var(--su,#fff); color:var(--ink); border-radius:12px; padding:12px; cursor:pointer; font:600 14px/1.35 'Archivo',sans-serif; transition: transform .12s ease-out; }
-.rvc-ochip:active { transform: scale(0.985); }
-.rvc-shake { animation: rvcshake .35s; border-color:#ef4444 !important; }
-@keyframes rvcshake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
 
 @media (prefers-reduced-motion: reduce) { .rvc *, .rvc *::before { transition:none !important; animation:none !important; } }
 </style>`;
@@ -882,8 +868,6 @@ export async function mount(root, param) {
   // certification, le garde-fou serveur tranchera.
   const CERT_CACHE = new Map();
   const estAcquise = (c) => CERT_CACHE.get(c) === true;
-  let orderPlaced = [];
-  let orderPool = [];
   let mondeN = null;
   let lastFicheTracked = null; // évite de re-tracker/markRead à chaque coche de geste
 
@@ -921,7 +905,6 @@ export async function mount(root, param) {
   function render() {
     if (view === "fiche") return renderFicheDeck();
     if (view === "quiz") return renderQuiz();
-    if (view === "order") return renderOrder();
     if (view === "monde") return renderMonde();
     return renderHome();
   }
@@ -1358,7 +1341,6 @@ export async function mount(root, param) {
     const introHtml = `<div class="fd-intro"><span class="fd-intro-ic" aria-hidden="true">${SPARK_IC}</span><p>${bi(introFr, introTr)}</p></div>`;
 
     const BACK = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="#3d2f7a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-    const SHUF = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 7h11M4 12h11M4 17h7" stroke="#3d2f7a" stroke-width="2" stroke-linecap="round"/><path d="M18 8l3 3-3 3" stroke="#3d2f7a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
     const competenceTxt =
       lang !== "fr" && tr?.competence ? tr.competence : f.competence;
@@ -1409,26 +1391,21 @@ export async function mount(root, param) {
       ${srcHtml}
 
       <div class="fd-actions">
-        <div class="fd-warn">
+        <!-- La prévention ne sert qu'AVANT : une fois la compétence acquise,
+             elle n'a plus rien à prévenir et le bouton dit déjà tout. -->
+        ${
+          estAcquise(f.code)
+            ? ""
+            : `<div class="fd-warn">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 8v5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="16.6" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/></svg>
-          <p>${esc(
-            estAcquise(f.code)
-              ? ui(
-                  "cta_done_note",
-                  "Tu l'as déjà certifiée. Continue à la revoir quand tu veux.",
-                )
-              : ui(
-                  "cta_warn",
-                  "Fais-la d'abord en leçon avec ton enseignant. On certifie ce que tu sais faire, pas ce que tu viens de lire.",
-                ),
-          )}</p>
-        </div>
+          <p>${esc(ui("cta_warn", "Fais-la d'abord en leçon avec ton enseignant. On certifie ce que tu sais faire, pas ce que tu viens de lire."))}</p>
+        </div>`
+        }
         <button class="fd-cta" data-certif-fiche><span>${esc(
           estAcquise(f.code)
             ? ui("cta_done", "Déjà acquise. Voir dans Mon permis")
             : ui("cta", "Certifie la compétence"),
         )}</span></button>
-        ${total >= 3 ? `<button class="fd-secondary" data-order>${SHUF}<span>${esc(ui("order", "Remets dans l’ordre"))}</span></button>` : ""}
       </div>
     </div>`;
 
@@ -1530,84 +1507,6 @@ export async function mount(root, param) {
           /* état indéterminé : on laisse la certification joignable */
         });
     }
-    root.querySelector("[data-order]")?.addEventListener("click", () => {
-      orderPlaced = [];
-      const flat = flatSteps && flatSteps.length ? flatSteps : f.methode || [];
-      const translated =
-        flatStepsTR && flatStepsTR.length === flat.length ? flatStepsTR : null;
-      orderPool = flat
-        .map((t, i) => ({ i, t: translated ? translated[i] : t }))
-        .sort(() => Math.random() - 0.5);
-      view = "order";
-      render();
-    });
-  }
-
-  function renderOrder() {
-    const f = getFiche(code);
-    const steps = (f && f.methode) || [];
-    const title = f ? rvcFicheTitle(f) : "";
-    if (!f || steps.length < 2) {
-      view = "fiche";
-      return render();
-    }
-    if (orderPlaced.length === steps.length) {
-      markRevised(code);
-      haptic("success");
-      root.innerHTML = `${STYLE}<div class="rvc"><div class="rvc-done">
-        <div class="rvc-done-e">${medallion("check", "green", { size: 64 })}</div>
-        <div class="rvc-done-t">${rvcText("order_done", "Dans l’ordre. Nickel !")}</div>
-        <p class="rvc-sub">${rvcText("order_done_body", "Les {count} étapes de « {title} » : pliées.", { count: steps.length, title })}</p>
-        <button class="rvc-go" data-next>${rvcText("continue", "Continuer")}</button>
-      </div></div>`;
-      root.querySelector("[data-next]").addEventListener("click", () => {
-        view = "fiche";
-        render();
-      });
-      return;
-    }
-    const placed = orderPlaced
-      .map(
-        (p, idx) =>
-          `<div class="rvc-oslot"><span class="rvc-onum">${idx + 1}</span><span>${rvcDisplay(p.t)}</span></div>`,
-      )
-      .join("");
-    const pool = orderPool
-      .map(
-        (p) =>
-          `<button class="rvc-ochip" data-oi="${p.i}">${rvcDisplay(p.t)}</button>`,
-      )
-      .join("");
-    root.innerHTML = `${STYLE}<div class="rvc">
-      <div class="rvc-top">
-        <button class="rvc-back" aria-label="${escAttr(rvcT("back_card", "Retour à la fiche"))}">←</button>
-        <h1 class="rvc-h1" style="font-size:17px">${rvcDisplay(title)}</h1>
-      </div>
-      <div class="rvc-prog">${orderPlaced.length + 1} / ${steps.length}</div>
-      <p class="rvc-ohint">${rvcText("order_hint", "Dans le bon ordre. À toi.")}</p>
-      ${placed}
-      <div class="rvc-opool">${pool}</div>
-    </div>`;
-    root.querySelector(".rvc-back").addEventListener("click", () => {
-      view = "fiche";
-      render();
-    });
-    root.querySelectorAll(".rvc-ochip").forEach((b) =>
-      b.addEventListener("click", (e) => {
-        const i = Number(b.getAttribute("data-oi"));
-        if (i === orderPlaced.length) {
-          orderPlaced.push(orderPool.find((x) => x.i === i));
-          orderPool = orderPool.filter((x) => x.i !== i);
-          haptic("select");
-          render();
-        } else {
-          haptic("warning");
-          const el = e.currentTarget;
-          el.classList.add("rvc-shake");
-          setTimeout(() => el.classList.remove("rvc-shake"), 350);
-        }
-      }),
-    );
   }
 
   async function startQuiz() {
