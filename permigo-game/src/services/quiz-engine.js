@@ -19,6 +19,35 @@ import {
 import { wireQuestionSpeech, stopSpeaking } from "@/utils/speech.js";
 import { getLang } from "@/utils/lang.js";
 import { recordCompetenceAnswer } from "@/utils/weak-points.js";
+import { chargerBoite } from "@/utils/transmission.js";
+import { setBoiteVisuels } from "@/components/eleve/quiz-visuals.js";
+
+/**
+ * Va chercher la banque de questions.
+ *
+ * `boite` non nulle : on garde les questions communes aux deux boîtes
+ * (`boite is null`) et celles écrites pour la sienne. Aucune compétence ne
+ * descend sous six questions disponibles, quelle que soit la boîte.
+ */
+function chargerQuestions({ competenceId, type, lang, nbQuestions, boite }) {
+  let requete = sb
+    .from("questions_competence")
+    .select(
+      "id, competence_id, type, question, options, correct_index, explanation, difficulty" +
+        (lang !== "fr"
+          ? ", question_translations(lang, question, options, explanation)"
+          : ""),
+    )
+    .eq("competence_id", competenceId)
+    .eq("type", type);
+
+  if (boite) requete = requete.or(`boite.is.null,boite.eq.${boite}`);
+
+  // Tire plus large que nécessaire : le shuffle+slice pioche ensuite
+  // nbQuestions dans le pool, donc deux tentatives ne tombent pas sur les
+  // mêmes questions dès que la banque dépasse nbQuestions.
+  return requete.limit(Math.max(nbQuestions * 3, 15));
+}
 import {
   playCorrect,
   playWrong,
@@ -46,20 +75,32 @@ export async function lancerQuiz({
   onComplete,
 }) {
   const lang = getLang();
-  const { data: questions, error } = await sb
-    .from("questions_competence")
-    .select(
-      "id, competence_id, type, question, options, correct_index, explanation, difficulty" +
-        (lang !== "fr"
-          ? ", question_translations(lang, question, options, explanation)"
-          : ""),
-    )
-    .eq("competence_id", competenceId)
-    .eq("type", type)
-    // Tire plus large que nécessaire : le shuffle+slice ci-dessous pioche
-    // ensuite nbQuestions dans le pool — deux tentatives ne tombent donc
-    // pas sur les mêmes questions dès que la banque dépasse nbQuestions.
-    .limit(Math.max(nbQuestions * 3, 15));
+  // La boîte de l'élève écarte les questions qui ne s'adressent pas à elle :
+  // on ne demande pas l'embrayage à quelqu'un qui n'en a pas (audit 01/08).
+  const boite = await chargerBoite();
+  // Et les dessins suivent : pas de troisième pédale ni de grille en H à
+  // quelqu'un qui roule en automatique.
+  setBoiteVisuels(boite);
+  let { data: questions, error } = await chargerQuestions({
+    competenceId,
+    type,
+    lang,
+    nbQuestions,
+    boite,
+  });
+
+  // Filet : si le filtre échoue (colonne absente sur ce serveur), on rejoue
+  // sans lui, plutôt que de laisser l'élève devant un quiz qui ne s'ouvre pas.
+  if (boite && error) {
+    console.warn("[quiz] filtre boîte ignoré", error);
+    ({ data: questions, error } = await chargerQuestions({
+      competenceId,
+      type,
+      lang,
+      nbQuestions,
+      boite: null,
+    }));
+  }
 
   if (error || !questions?.length) {
     console.error("[quiz]", error);
@@ -68,11 +109,7 @@ export async function lancerQuiz({
     track("quiz.no_questions", { competence_id: competenceId, type });
     try {
       const { toast } = await import("@/components/common/toast.js");
-      toast(
-        "Ce quiz n'est pas encore prêt. Réessaie plus tard.",
-        "info",
-        4000,
-      );
+      toast("Ce quiz n'est pas encore prêt. Réessaie plus tard.", "info", 4000);
     } catch {}
     return null;
   }

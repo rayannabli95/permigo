@@ -763,7 +763,7 @@ export function buildVerdict({ baseAcquis = 0, solo = false } = {}) {
       level: "high",
       text: xt(
         "verdict_high",
-        `Prêt·e pour l’examen. Tes ${BASE_TOTAL} compétences de base sont validées.`,
+        `Prêt pour l’examen. Tes ${BASE_TOTAL} compétences de base sont validées.`,
       ).replace("{n}", String(BASE_TOTAL)),
     };
   }
@@ -772,7 +772,7 @@ export function buildVerdict({ baseAcquis = 0, solo = false } = {}) {
       level: "mid",
       text: xt(
         "verdict_mid",
-        `Bientôt prêt·e. ${baseRestantes} compétence${baseRestantes > 1 ? "s" : ""} de base à valider.`,
+        `Bientôt prêt. ${baseRestantes} compétence${baseRestantes > 1 ? "s" : ""} de base à valider.`,
       ).replace("{n}", String(baseRestantes)),
     };
   }

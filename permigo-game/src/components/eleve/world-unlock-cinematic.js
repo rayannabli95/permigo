@@ -192,7 +192,7 @@ function playUnlockCinematic({
           : `
         <button class="wuc-cta wuc-cta-final" id="wuc-cta" type="button">
           <span class="wuc-cta-lbl">${icon("trophy", { size: 18 })} ${wucD("cta_final", "TU AS CONQUIS TOUS LES CHAPITRES")}</span>
-          <span class="wuc-cta-name">${wucD("cta_final_sub", "Tu es prêt·e pour l'examen")}</span>
+          <span class="wuc-cta-name">${wucD("cta_final_sub", "Tu es prêt pour l'examen")}</span>
         </button>
       `
       }

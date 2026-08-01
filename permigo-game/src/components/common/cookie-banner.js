@@ -153,8 +153,6 @@ export function mountCookieBanner() {
       </div>
     </div>`;
   document.body.appendChild(root);
-  // Réserve l'espace bas (cf. body.ck-open dans STYLE) tant que le bandeau est là.
-  document.body.classList.add("ck-open");
   // Tant que la question cookies n'a pas de réponse, le tuto guidé attend
   // (canal « bloqueur » : le garde-fou 8 s des popups ne s'applique pas).
   pushIntroBlocker();
@@ -170,6 +168,9 @@ export function mountCookieBanner() {
     if (shown) return;
     shown = true;
     clearTimeout(timer);
+    // La réserve d'espace bas n'est posée qu'AVEC le bandeau : sinon l'app
+    // gardait un vide de 130 px pendant les 4 secondes d'attente.
+    document.body.classList.add("ck-open");
     window.removeEventListener("scroll", show);
     window.removeEventListener("touchmove", show);
     requestAnimationFrame(() => banner.classList.add("on"));
