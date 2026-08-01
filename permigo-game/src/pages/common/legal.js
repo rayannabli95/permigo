@@ -18,7 +18,7 @@ const CONTENT = {
       },
       {
         heading: "Données collectées",
-        body: "Données de progression pédagogique (compétences validées, quiz, streak), profil pseudonymisé (prénom, email), historique d'apprentissage. Aucune donnée bancaire, NEPH ou adresse postale n'est collectée.",
+        body: "Données de progression pédagogique (compétences validées, quiz, streak), profil pseudonymisé (prénom, email), historique d'apprentissage. Si tu prends un Pass, on conserve la trace de l'achat (email, montant, date) transmise par Stripe. Aucun numéro de carte bancaire, aucun NEPH et aucune adresse postale ne sont collectés.",
       },
       {
         heading: "Finalité du traitement",
@@ -42,8 +42,12 @@ const CONTENT = {
         body: "Accès, rectification, effacement, portabilité, opposition. Exercez-les via dpo@permigo.fr. Réclamation possible auprès de la CNIL (cnil.fr).",
       },
       {
-        heading: "Cookies",
-        body: "Cookies fonctionnels uniquement (session auth). Aucun cookie publicitaire ou de tracking tiers.",
+        heading: "Cookies et mesure d'audience",
+        body: "Les cookies strictement nécessaires (session de connexion) sont toujours actifs : la loi ne demande pas ton accord pour eux. Si tu choisis « Tout accepter » dans le bandeau, deux mesures s'ajoutent : une mesure d'audience interne (PostHog et Vercel Analytics, hébergées dans l'Union européenne) qui nous dit quels écrans servent vraiment, et le pixel Meta (Facebook, Instagram) qui nous dit quelle publicité t'a fait connaître PermiGo. Tu peux refuser d'un clic (« Essentiels uniquement ») : rien n'est chargé, aucun cookie n'est posé. Tu peux changer d'avis à tout moment en effaçant les cookies de ton navigateur. Aucune publicité n'est affichée dans l'application.",
+      },
+      {
+        heading: "Qui reçoit tes données",
+        body: "Supabase (base de données et connexion, Union européenne), Vercel (hébergement du site et mesure d'audience), Stripe (paiement du Pass : PermiGo ne voit jamais ton numéro de carte), PostHog (mesure d'audience, Union européenne) et, uniquement si tu as accepté la mesure publicitaire, Meta Platforms Ireland. Ce dernier transfert peut impliquer les États-Unis ; il s'appuie sur le cadre de protection des données UE-États-Unis et sur les clauses contractuelles types de la Commission européenne. Tes données ne sont jamais vendues.",
       },
     ],
   },
@@ -119,7 +123,7 @@ const LEGAL_I18N = {
         },
         {
           heading: "Data collected",
-          body: "Learning progress data (validated skills, quizzes, streak), pseudonymised profile (first name, email), and learning history. No banking data, NEPH number or postal address is collected.",
+          body: "Learning progress data (validated skills, quizzes, streak), pseudonymised profile (first name, email), and learning history. If you buy a Pass, we keep a record of the purchase (email, amount, date) sent to us by Stripe. No card number, NEPH number or postal address is collected.",
         },
         {
           heading: "Purpose of processing",
@@ -142,8 +146,12 @@ const LEGAL_I18N = {
           body: "Access, rectification, erasure, portability and objection. Exercise these rights by contacting dpo@permigo.fr. You may lodge a complaint with the CNIL (cnil.fr).",
         },
         {
-          heading: "Cookies",
-          body: "Functional cookies only (authentication session). No advertising or third-party tracking cookies.",
+          heading: "Cookies and audience measurement",
+          body: "Strictly necessary cookies (your sign-in session) are always on: the law does not require your consent for those. If you choose \"Accept all\" in the banner, two measurements are added: internal audience measurement (PostHog and Vercel Analytics, hosted in the European Union) which tells us which screens are actually useful, and the Meta pixel (Facebook, Instagram) which tells us which ad brought you to PermiGo. You can refuse in one click (\"Essential only\"): nothing is loaded, no cookie is set. You can change your mind at any time by clearing your browser cookies. No advertising is shown inside the app.",
+        },
+        {
+          heading: "Who receives your data",
+          body: "Supabase (database and sign-in, European Union), Vercel (site hosting and audience measurement), Stripe (Pass payment: PermiGo never sees your card number), PostHog (audience measurement, European Union) and, only if you accepted advertising measurement, Meta Platforms Ireland. That last transfer may involve the United States; it relies on the EU-US Data Privacy Framework and on the European Commission's standard contractual clauses. Your data is never sold.",
         },
       ],
     },
@@ -213,7 +221,7 @@ const LEGAL_I18N = {
         },
         {
           heading: "البيانات التي نجمعها",
-          body: "بيانات التقدم التعليمي (المهارات المعتمدة، الاختبارات، سلسلة النشاط)، والملف الشخصي المستعار (الاسم الأول، البريد الإلكتروني)، وسجل التعلم. لا نجمع أي بيانات مصرفية أو رقم NEPH أو عنوان بريدي.",
+          body: "بيانات التقدم التعليمي (المهارات المعتمدة، الاختبارات، سلسلة النشاط)، والملف الشخصي المستعار (الاسم الأول، البريد الإلكتروني)، وسجل التعلم. وإذا اشتريت باقة، نحتفظ بسجل الشراء (البريد الإلكتروني والمبلغ والتاريخ) الوارد من Stripe. ولا نجمع أي رقم بطاقة مصرفية ولا رقم NEPH ولا عنوانًا بريديًا.",
         },
         {
           heading: "غرض المعالجة",
@@ -236,8 +244,12 @@ const LEGAL_I18N = {
           body: "الوصول والتصحيح والحذف وقابلية النقل والاعتراض. يمكنك ممارسة هذه الحقوق عبر dpo@permigo.fr. ويمكنك تقديم شكوى إلى اللجنة الوطنية للمعلومات والحريات CNIL ‏(cnil.fr).",
         },
         {
-          heading: "ملفات تعريف الارتباط",
-          body: "نستخدم ملفات تعريف ارتباط وظيفية فقط (جلسة المصادقة). ولا نستخدم ملفات إعلانية أو ملفات تتبع تابعة لجهات خارجية.",
+          heading: "ملفات تعريف الارتباط وقياس الجمهور",
+          body: "ملفات تعريف الارتباط الضرورية تمامًا (جلسة تسجيل الدخول) تعمل دائمًا، ولا يشترط القانون موافقتك عليها. وإذا اخترت «قبول الكل» في الشريط، يُضاف قياسان: قياس داخلي للجمهور (PostHog وVercel Analytics، مستضافان في الاتحاد الأوروبي) يخبرنا أي الشاشات مفيدة فعلًا، وبكسل Meta ‏(فيسبوك وإنستغرام) الذي يخبرنا أي إعلان عرّفك على PermiGo. يمكنك الرفض بنقرة واحدة («الضروري فقط»): لا يُحمَّل شيء ولا يُوضع أي ملف. ويمكنك تغيير رأيك في أي وقت بمسح ملفات تعريف الارتباط من متصفحك. ولا تُعرض أي إعلانات داخل التطبيق.",
+        },
+        {
+          heading: "من يتلقّى بياناتك",
+          body: "Supabase ‏(قاعدة البيانات وتسجيل الدخول، الاتحاد الأوروبي)، وVercel ‏(استضافة الموقع وقياس الجمهور)، وStripe ‏(دفع الباقة: لا يرى PermiGo رقم بطاقتك أبدًا)، وPostHog ‏(قياس الجمهور، الاتحاد الأوروبي)، وكذلك Meta Platforms Ireland إذا قبلت القياس الإعلاني فقط. وقد يشمل هذا النقل الأخير الولايات المتحدة، ويستند إلى إطار حماية البيانات بين الاتحاد الأوروبي والولايات المتحدة وإلى البنود التعاقدية النموذجية للمفوضية الأوروبية. ولا تُباع بياناتك أبدًا.",
         },
       ],
     },
