@@ -482,15 +482,11 @@ export async function mount(root) {
       <div class="gal anim-slide-up">
         ${recompensesTabs("galerie")}
         <div class="gal-hd">
-          <h1 class="gal-title">Ma collection</h1>
-          <p class="gal-sub">${unlockedTrophies + unlockedPermisBg} récompense${unlockedTrophies + unlockedPermisBg > 1 ? "s" : ""} débloquée${unlockedTrophies + unlockedPermisBg > 1 ? "s" : ""} sur ${trophees.length + permisTiers.length}.</p>
-        </div>
-        <div class="gal-tabs" role="tablist">
-          <button class="gal-tab ${activeTab === "trophees" ? "active" : ""}" data-tab="trophees" role="tab" aria-selected="${activeTab === "trophees"}">Trophées</button>
-          <button class="gal-tab ${activeTab === "permis" ? "active" : ""}" data-tab="permis" role="tab" aria-selected="${activeTab === "permis"}">Fonds permis</button>
+          <h1 class="gal-title">Fonds de permis</h1>
+          <p class="gal-sub">${unlockedPermisBg} fond${unlockedPermisBg > 1 ? "s" : ""} débloqué${unlockedPermisBg > 1 ? "s" : ""} sur ${permisTiers.length}. Tes cartes de compétence sont dans l'onglet <b>Cartes</b>.</p>
         </div>
         <div id="gal-content">
-          ${activeTab === "trophees" ? renderTrophees() : renderPermisTiers()}
+          ${renderPermisTiers()}
         </div>
       </div>`;
 

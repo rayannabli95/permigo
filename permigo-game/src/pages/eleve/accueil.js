@@ -31,7 +31,6 @@ import {
 import { renderSituationScene } from "@/components/eleve/situation-scene.js";
 import { getScenesVues } from "@/utils/situations-vues.js";
 import { getMyChests } from "@/utils/game-state.js";
-import { mountFeedbackFeed } from "@/components/eleve/feedback-feed.js";
 import { mountDailyQuests } from "@/components/eleve/daily-quests.js";
 import { toast } from "@/components/common/toast.js";
 import { navigate } from "@/router.js";
@@ -450,7 +449,11 @@ const STYLE = `<style>
   background: var(--acc-hero-bg);
   border: 1px solid var(--acc-hero-border);
   border-radius: 30px;
-  margin: 12px 16px 0;
+  /* Marge basse portée par le hero (et pas par la carte suivante) : les marges
+     verticales de deux blocs voisins fusionnent, donc ce 26 gagne sur le 12 ou
+     le 20 de ce qui suit. Résultat : la mascotte ne colle jamais à la carte
+     d'en dessous, quelle qu'elle soit (scène du jour, débrief, consolidation). */
+  margin: 12px 16px 26px;
   padding: 24px 22px 22px;
   overflow: visible;
   isolation: isolate;
@@ -501,7 +504,7 @@ const STYLE = `<style>
 .acc2-hero-floor {
   position: absolute;
   right: 18px;
-  bottom: 8px;
+  bottom: 10px;
   width: 120px;
   height: 20px;
   border-radius: 50%;
@@ -514,7 +517,9 @@ const STYLE = `<style>
 .acc2-hero-mascot {
   position: absolute;
   right: -14px;
-  bottom: -6px;
+  /* Les pieds posés SUR l'ombre au sol, à l'intérieur de la carte : avant, la
+     mascotte débordait sous le hero et venait toucher la carte suivante. */
+  bottom: 12px;
   width: 156px;
   z-index: 1;
   filter:
@@ -1527,7 +1532,7 @@ export async function mount(root) {
         // Validation autonome (élève solo, cf. valider-seul.js) : table
         // séparée de `validations`, fusionnée en lecture pour que le permis
         // virtuel compte aussi les compétences auto-validées (sinon un solo
-        // reste affiché « 0/31 » à vie). Même pattern que mon-permis.js.
+        // reste affiché « 0/31 » à vie). Même pattern que examen.js.
         sb
           .from("self_validations")
           .select("competence_id")
@@ -1784,17 +1789,9 @@ export async function mount(root) {
           )
           .catch(() => {});
       }
-      // Remonté AU-DESSUS de la section premium : les retours du moniteur sont la preuve
-      // d'autorité de l'élève, ils ne doivent pas finir tout en bas de page.
-      Promise.resolve()
-        .then(() =>
-          mountFeedbackFeed(accDiv, {
-            eleveId: me.id,
-            limit: 5,
-            anchorEl: accDiv.querySelector("#acc-cr-slot"),
-          }),
-        )
-        .catch(() => {});
+      // Retrait du moniteur (lot 4 du pivot, 30/07/2026) : le feed « Retours de
+      // ton moniteur » vivait ici. Le moniteur n'écrit plus rien → le feed ne
+      // pouvait plus qu'afficher un musée figé au mois de juillet.
     }
 
     // Leaderboard async
@@ -1805,14 +1802,8 @@ export async function mount(root) {
       .checkAndRender(root, { afterSelector: ".acc2-hero-v2" })
       .catch(() => {});
 
-    // Quiz éclair actif poussé par le moniteur — bandeau prioritaire
-    _loadAndInjectFlashQuiz(root, me).catch(() => {});
-
     // Coffres disponibles — teaser non-bloquant injecté sous l'action du jour
     _loadAndInjectChests(root);
-    Promise.resolve()
-      .then(() => _loadAndInjectCompteRendu(root, me))
-      .catch(() => {});
 
     // Onboarding premier login : géré en amont par main.js (page plein écran
     // pages/onboarding/index.js, gate first_value_action_at). Rien à faire ici.
@@ -2067,7 +2058,7 @@ function render({
 
   <!-- ══ SCÈNE DU JOUR — En situation (panneau nuit, comme le jeu) ══ -->
   <style>
-    .acc2-sitday{display:block;width:calc(100% - 32px);text-align:left;margin:0 16px 14px;padding:13px 15px 11px;border:0;border-radius:20px;cursor:pointer;position:relative;overflow:hidden;color:#ece8ff;background:radial-gradient(120% 80% at 50% 0%,rgba(110,70,220,.35) 0%,transparent 60%),linear-gradient(180deg,#181241 0%,#0c0a26 100%);box-shadow:0 10px 24px -8px rgba(24,18,65,.45)}
+    .acc2-sitday{display:block;width:calc(100% - 32px);text-align:left;margin:20px 16px 0;padding:13px 15px 11px;border:0;border-radius:20px;cursor:pointer;position:relative;overflow:hidden;color:#ece8ff;background:radial-gradient(120% 80% at 50% 0%,rgba(110,70,220,.35) 0%,transparent 60%),linear-gradient(180deg,#181241 0%,#0c0a26 100%);box-shadow:0 10px 24px -8px rgba(24,18,65,.45)}
     .acc2-sitday:active{transform:scale(.985)}
     .acc2-sitday-k{display:flex;align-items:center;gap:7px;font:800 11px/1 'Baloo 2','Fredoka',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#ffcb3d}
     .acc2-sitday-k .th{background:#ffcb3d;color:#3a1d00;border-radius:999px;padding:3px 9px;letter-spacing:.02em}
@@ -2157,10 +2148,8 @@ function render({
   <!-- ══ BELOW FOLD ══ -->
   <!-- Note : l'entraînement (examen blanc, révision conduite, en situation,
        centre d'examen) vit dans les onglets « Réviser » et « Mon permis ».
-       L'accueil ne garde ici que ce qui vient du moniteur + les coffres. -->
-
-  <!-- Compte-rendu non lu du moniteur (injecté async) -->
-  <div id="acc-cr-slot"></div>
+       Depuis le retrait du moniteur (lot 4 du pivot), plus rien ici ne vient
+       de lui : l'accueil ne garde que ce que l'élève déclenche. -->
 
   <!-- Slot coffre (injecté async par _loadAndInjectChests) -->
   <div id="acc-chest-slot"></div>
@@ -2662,79 +2651,9 @@ async function _loadAndInjectLeagues(root) {
   }
 }
 
-// Exportée (chantier nav simplifiée, hub « Mon permis ») : mon-permis.js
-// réutilise CETTE lecture (même table, même tri) pour son étape ② « Mes
-// leçons », sans filtre read_at (contrairement à la bannière ci-dessous qui
-// ne montre QUE le non-lu) — le hub affiche le dernier compte-rendu, lu ou
-// pas, avec juste un badge « Nouveau » si non lu.
-export async function fetchLastCompteRendu(me) {
-  if (!me) return null;
-  try {
-    const { data, error } = await sb
-      .from("comptes_rendus")
-      .select(
-        "id, session_date, created_at, acquis, en_cours, a_retravailler, note, read_at",
-      )
-      .eq("eleve_id", me.id)
-      .order("created_at", { ascending: false })
-      .limit(1);
-    if (error || !data?.length) return null;
-    return data[0];
-  } catch {
-    return null;
-  }
-}
-
-async function _loadAndInjectCompteRendu(root, me) {
-  try {
-    if (!me) return;
-    const { data, error } = await sb
-      .from("comptes_rendus")
-      .select("id, created_at, read_at")
-      .eq("eleve_id", me.id)
-      .is("read_at", null)
-      .order("created_at", { ascending: false })
-      .limit(1);
-    if (error || !data?.length) return;
-    const cr = data[0];
-    const slot = root.querySelector("#acc-cr-slot");
-    if (!slot) return;
-    slot.innerHTML = `
-      <style>
-      .acc2-cr-banner{display:flex;align-items:center;gap:12px;margin:14px 16px 0;padding:14px 14px 14px 16px;background:color-mix(in srgb,var(--a) 8%,var(--su));border:1px solid color-mix(in srgb,var(--a) 20%,transparent);border-radius:18px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .12s;text-decoration:none}
-      .acc2-cr-banner:active{background:color-mix(in srgb,var(--a) 14%,var(--su))}
-      .acc2-cr-ico{flex:0 0 40px;width:40px;height:40px;display:flex;align-items:center;justify-content:center}
-      .acc2-cr-ico .pg-med{filter:drop-shadow(0 3px 6px rgba(0,0,0,.16))}
-      .acc2-cr-txt{flex:1;min-width:0}
-      .acc2-cr-t{font:700 13.5px/1.2 'Plus Jakarta Sans',sans-serif;color:var(--ink)}
-      .acc2-cr-s{font:500 11.5px/1.3 'Inter',sans-serif;color:var(--mu);margin-top:2px}
-      .acc2-cr-arr{flex:0 0 24px;width:24px;height:24px;border-radius:50%;background:var(--a);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:800}
-      </style>
-      <div class="acc2-cr-banner" id="acc-cr-banner" role="button" tabindex="0"
-           aria-label="${escAttr(atR("cr_aria", "Ton moniteur t’a envoyé un compte-rendu · appuie pour le lire"))}">
-        <div class="acc2-cr-ico" aria-hidden="true">${medallion("fiches", "violet", { size: 38 })}</div>
-        <div class="acc2-cr-txt">
-          <div class="acc2-cr-t">${at("cr_t", "Ton moniteur t’a envoyé un compte-rendu")}</div>
-          <div class="acc2-cr-s">${at("cr_s", "Lis son retour sur ta leçon.")}</div>
-        </div>
-        <div class="acc2-cr-arr" aria-hidden="true">›</div>
-      </div>`;
-    const banner = slot.querySelector("#acc-cr-banner");
-    const go = () => {
-      track("accueil.cr_banner.tapped", { cr_id: cr.id });
-      navigate(`#/compte-rendu/${cr.id}`);
-    };
-    banner?.addEventListener("click", go);
-    banner?.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        go();
-      }
-    });
-  } catch (e) {
-    console.warn("[accueil] compte-rendu banner", e);
-  }
-}
+// Retrait du moniteur (lot 4 du pivot, 30/07/2026) : `fetchLastCompteRendu` et
+// la bannière « Ton moniteur t'a envoyé un compte-rendu » vivaient ici. Le
+// moniteur n'émet plus de compte-rendu → plus rien à annoncer sur l'accueil.
 
 async function _loadAndInjectChests(root) {
   try {
@@ -2778,98 +2697,10 @@ async function _loadAndInjectChests(root) {
   }
 }
 
-async function _loadAndInjectFlashQuiz(root, me) {
-  try {
-    const nowIso = new Date().toISOString();
-    const { data } = await sb
-      .from("flash_quizzes")
-      .select("id, expires_at")
-      .eq("sent_to", me.id)
-      .is("responded_at", null)
-      .gt("expires_at", nowIso)
-      .order("sent_at", { ascending: false })
-      .limit(1);
+// Retrait du moniteur (lot 4 du pivot, 30/07/2026) : le bandeau « ⚡ Quiz éclair
+// de ton moniteur » vivait ici. L'envoi côté moniteur est supprimé → plus aucun
+// quiz éclair ne peut arriver, et sa page #/flash-quiz n'existe plus.
 
-    const fq = data?.[0];
-    if (!fq) return;
-
-    const hero = root.querySelector(".acc2-hero-v2");
-    if (!hero) return;
-    if (root.querySelector("#acc-flashq")) return; // déjà injecté (garde anti double-mount)
-
-    const expiresMs = new Date(fq.expires_at).getTime();
-    const fmt = (ms) => {
-      const s = Math.max(0, Math.ceil(ms / 1000));
-      return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
-    };
-
-    if (!document.getElementById("acc-flashq-styles")) {
-      const st = document.createElement("style");
-      st.id = "acc-flashq-styles";
-      st.textContent = `
-        .acc2-flashq{display:flex;align-items:center;gap:12px;margin:14px 16px 0;padding:14px 16px;border-radius:var(--r-lg);cursor:pointer;
-          background:linear-gradient(135deg,#f59e0b,#f97316);box-shadow:0 6px 20px rgba(249,115,22,.32);animation:fqBannerIn .4s var(--ease-snap)}
-        @keyframes fqBannerIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
-        .acc2-flashq:active{transform:scale(.99)}
-        .acc2-fq-ico{display:inline-flex;flex:none;line-height:0;animation:fqWiggle 1.4s ease-in-out infinite}
-        .acc2-fq-ico .pg-med{filter:drop-shadow(0 2px 5px rgba(0,0,0,.28))}
-        @keyframes fqWiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-12deg)}75%{transform:rotate(12deg)}}
-        .acc2-fq-text{flex:1;min-width:0}
-        .acc2-fq-title{font:800 15px/1.2 'Plus Jakarta Sans',sans-serif;color:#fff}
-        .acc2-fq-sub{font:600 12.5px/1.3 'Inter',sans-serif;color:rgba(255,255,255,.88);margin-top:2px}
-        .acc2-fq-clock{font:800 18px/1 'IBM Plex Mono',monospace;color:#fff;background:rgba(0,0,0,.18);padding:8px 12px;border-radius:var(--r);flex-shrink:0}
-        @media(prefers-reduced-motion:reduce){.acc2-fq-ico{animation:none}}`;
-      document.head.appendChild(st);
-    }
-
-    hero.insertAdjacentHTML(
-      "afterend",
-      `
-      <div class="acc2-flashq" id="acc-flashq" role="button" tabindex="0" aria-label="${escAttr(atR("fq_aria", "Quiz éclair de ton moniteur, réponds maintenant"))}">
-        <span class="acc2-fq-ico" aria-hidden="true">${medallion("eclair", "gold", { size: 34 })}</span>
-        <div class="acc2-fq-text">
-          <div class="acc2-fq-title">${at("fq_title", "Quiz éclair de ton moniteur")}</div>
-          <div class="acc2-fq-sub">${at("fq_sub", "3 questions · réponds maintenant")}</div>
-        </div>
-        <span class="acc2-fq-clock" id="acc-fq-clock">${esc(fmt(expiresMs - Date.now()))}</span>
-      </div>`,
-    );
-
-    const el = root.querySelector("#acc-flashq");
-    if (!el) return;
-    const clockEl = el.querySelector("#acc-fq-clock");
-    if (!clockEl) return;
-    const iv = setInterval(() => {
-      if (!document.body.contains(el)) {
-        clearInterval(iv);
-        return;
-      }
-      const left = expiresMs - Date.now();
-      if (left <= 0) {
-        clearInterval(iv);
-        el.remove();
-        return;
-      }
-      clockEl.textContent = fmt(left);
-    }, 500);
-
-    const open = () => {
-      track("flash_quiz.banner_tapped", { flash_quiz_id: fq.id });
-      navigate(`#/flash-quiz/${fq.id}`);
-    };
-    el.addEventListener("click", open);
-    el.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        open();
-      }
-    });
-  } catch (e) {
-    /* silent */
-  }
-}
-
-// ─── Helpers ─────────────────────────────────────────────────────
 function _dKey(d) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }

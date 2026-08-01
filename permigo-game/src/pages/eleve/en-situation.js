@@ -22,6 +22,7 @@ import {
   renderSituationScene,
   buildFocusFX,
   actorScreenDelta,
+  actorFadesOut,
 } from "@/components/eleve/situation-scene.js";
 import { addGemmes } from "@/utils/game-state.js";
 import { volantImg, volantLabel } from "@/utils/volant.js";
@@ -267,6 +268,10 @@ export async function mount(root, param) {
           if (tiles > 0) {
             const { dx, dy } = actorScreenDelta(s.scene, st.veh, tiles);
             el.style.transform = `translate(${dx}px, ${dy}px)`;
+            // Trajectoire courbe (anneau, bretelle) : l'acteur s'en va et
+            // s'efface — la carrosserie iso ne sait pas tourner, donc on ne le
+            // laisse jamais finir sa ligne droite dans le décor.
+            if (actorFadesOut(s.scene, st.veh)) el.style.opacity = "0";
           }
         }, st.delai || 60);
       }
@@ -562,7 +567,7 @@ body.sit-immersive #app { padding-top: 0 !important; padding-bottom: 0 !importan
 .sit-scene, .sit-hero { margin: 4px -8px 0; }
 .sit-scene svg, .sit-hero svg { width: 100%; height: auto; max-height: 38dvh; display: block; }
 .sit-scene svg { animation: sitFloat 7s ease-in-out infinite alternate; }
-.sit-veh { transition: transform 1.6s cubic-bezier(.45,.05,.3,1); will-change: transform; }
+.sit-veh { transition: transform 1.6s cubic-bezier(.45,.05,.3,1), opacity .55s ease .95s; will-change: transform; }
 .sit-clign { opacity: 0; }
 .sit-veh.clign-droit .sit-clign-droit, .sit-veh.clign-gauche .sit-clign-gauche { opacity: 1; animation: sitBlink .72s steps(2, jump-none) infinite; }
 .sit-pieton-bob { animation: sitBob 1.6s ease-in-out infinite; }

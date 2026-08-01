@@ -27,8 +27,6 @@ import { statutCfg } from "@/utils/statut-label.js";
 import { renderUserAvatar } from "@/components/common/avatar.js";
 import { fmtName } from "@/utils/fmt-name.js";
 import { openInviteEleveModal } from "@/services/invite-eleve.js";
-import { getMoniteurState } from "@/data/moniteur-levels.js";
-import { getLeague } from "@/utils/league-shared.js";
 import { startTour } from "@/components/common/guided-tour.js";
 import { haptic } from "@/utils/haptic.js";
 import { onPopupsSettled } from "@/utils/intro-overlays.js";
@@ -47,9 +45,9 @@ const MONITEUR_TOUR_STEPS = [
     text: "Invite un élève. Il reçoit un lien, crée son compte en 1 minute et t’est rattaché tout seul. C’est le point de départ.",
   },
   {
-    sel: "#aj-cta-seance",
-    title: "Valide après la leçon",
-    text: "Coche les compétences réussies. Le livret de ton élève se met à jour aussitôt. Fini le papier.",
+    sel: "#aj-cta-eleves",
+    title: "Regarde qui avance",
+    text: "Tes élèves certifient eux-mêmes leurs compétences après la leçon. Toi, tu vois qui progresse et qui bloque, sans rien saisir.",
   },
   {
     sel: '.bn-tab[data-id="eleves"]',
@@ -90,10 +88,6 @@ function maybeStartMoniteurTour() {
 // ─── CSS ──────────────────────────────────────────────────────────
 const STYLE = `<style>
   /* ── Reset local ── */
-  /* Le FAB « séance » global (#bn-seance-fab) fait doublon avec le gros
-     bouton « Valider une séance » de cette page ET chevauche le footer →
-     on le masque ICI seulement (il reste sur les autres pages moniteur). */
-  #bn-seance-fab { display: none !important; }
   .aj-page {
     padding: 0 0 calc(84px + env(safe-area-inset-bottom, 0px));
     max-width: 600px;
@@ -444,15 +438,6 @@ async function fetchAllRows(buildQuery) {
   }
 }
 
-function todayISO() {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function yesterdayISO() {
-  const d = new Date(Date.now() - 86400000);
-  return d.toISOString().slice(0, 10);
-}
-
 function initiales(prenom, nom) {
   const p = (prenom || "").trim()[0] || "";
   const n = (nom || "").trim()[0] || "";
@@ -527,18 +512,12 @@ export async function mount(root) {
 
 // ─── Render principal ─────────────────────────────────────────────
 async function renderInto(root, _me) {
-  const today = todayISO();
-  const yesterday = yesterdayISO();
 
   // ─── Fetch en parallèle ────────────────────────────────────────
   const [
     valsAll,
     elevesAll,
-    todayValsRes,
-    yesterdayValsRes,
     profileRes,
-    totalValsRes,
-    leagueRes,
     provMap,
   ] = await Promise.all([
     // Dernières validations (activité récente) — non utilisées dans ce design
@@ -556,22 +535,6 @@ async function renderInto(root, _me) {
       .select("id, prenom, nom, last_active_at, enseignant_id, avatar_url")
       .eq("role", "eleve"),
 
-    // Validations d'aujourd'hui
-    sb
-      .from("validations")
-      .select("id", { count: "exact", head: true })
-      .eq("validated_by", _me.id)
-      .gte("validated_at", today + "T00:00:00Z")
-      .lt("validated_at", today + "T23:59:59Z"),
-
-    // Validations d'hier
-    sb
-      .from("validations")
-      .select("id", { count: "exact", head: true })
-      .eq("validated_by", _me.id)
-      .gte("validated_at", yesterday + "T00:00:00Z")
-      .lt("validated_at", yesterday + "T23:59:59Z"),
-
     // Profil : prénom
     sb
       .from("profiles")
@@ -579,24 +542,13 @@ async function renderInto(root, _me) {
       .eq("id", _me.id)
       .maybeSingle(),
 
-    // Total validations cumulées
-    sb
-      .from("validations")
-      .select("id", { count: "exact", head: true })
-      .eq("validated_by", _me.id),
-
-    // Ligue
-    Promise.resolve(
-      sb.rpc("get_league_leaderboard", { p_role: "enseignant", p_limit: 50 }),
-    ).catch(() => ({ data: null })),
-
     // Provenance CRM (RLS = mes élèves) → Map(eleve_id → {label,color})
     fetchProvenanceMap(),
   ]);
 
   // Erreur bloquante (réseau, RLS…) → vrai état d'erreur récupérable.
   // Avant : un toast de 3s puis un dashboard « normal mais vide » trompeur.
-  const loadError = valsAll.error || elevesAll.error || todayValsRes.error;
+  const loadError = valsAll.error || elevesAll.error;
   if (loadError) {
     console.error("[aujourdhui] chargement", loadError);
     toast("« Aujourd’hui » indisponible", "error");
@@ -626,20 +578,15 @@ async function renderInto(root, _me) {
   });
 
   const prenom = profileRes?.data?.prenom || "";
-  const totalValsCount = totalValsRes?.count ?? 0;
-  const moniteurState = getMoniteurState(totalValsCount);
 
-  // KPI hero
-  const todayCount = todayValsRes?.count ?? 0;
-  const yesterdayCount = yesterdayValsRes?.count ?? 0;
-  const deltaVsHier = todayCount - yesterdayCount;
+  // Retrait du moniteur (lot 4 du pivot, 30/07/2026) : le héros comptait
+  // « Tes validations du jour » (validations.validated_by). Le moniteur ne
+  // valide plus → ce compteur resterait bloqué à 0 À VIE, avec un sous-titre
+  // qui renvoyait vers un bouton supprimé. Il compte maintenant ce qu'il peut
+  // vraiment constater : ses élèves qui ont bossé aujourd'hui.
 
-  // Ma ligue
-  const leagueRows = leagueRes?.data || [];
-  const myLeagueRow = leagueRows.find((r) => r.is_me) || null;
-  const myWeeklyPts = myLeagueRow?.weekly_pts ?? 0;
-  const myLeague = getLeague(myWeeklyPts);
-  const myRank = myLeagueRow?.rank_pos ?? null;
+  // Retrait de la gamification moniteur (30/07/2026) : palier, ligue et rang
+  // se lisaient ici (tous sur validations.validated_by). Supprimés.
 
   // Élèves que j'ai validé + qui me sont attitrés
   const { data: elevesValides } = await fetchAllRows(() =>
@@ -719,30 +666,29 @@ async function renderInto(root, _me) {
 
   // ─── Hero HTML ────────────────────────────────────────────────
   const prenomEsc = prenom ? esc(fmtName(prenom)) : "";
-  const deltaHtml =
-    deltaVsHier !== 0
-      ? `<b>${deltaVsHier > 0 ? "+" + deltaVsHier : deltaVsHier}</b> vs hier`
-      : "pareil qu’hier";
+  // Élèves qui ont ouvert l'app aujourd'hui (last_active_at ≥ minuit local).
+  const minuit = new Date();
+  minuit.setHours(0, 0, 0, 0);
+  const minuitIso = minuit.toISOString();
+  const actifsAujourdhui = elevesEnFormation.filter(
+    (e) => (elevesMap[e.id]?.last_active_at || "") >= minuitIso,
+  ).length;
 
-  // Flamme PNG pour le record
-  const flammeHtml = `<img src="/skins/permigo-streak-flame-v1.webp" alt="" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;display:inline-block;margin-right:2px;filter:drop-shadow(0 1px 3px rgba(255,150,0,.5))">`;
-
-  // À 0 validation : pas de célébration à vide. Trophée en sourdine +
-  // message d'amorçage vers le CTA, au lieu d'un « 0 » triomphal avec
-  // « record à battre » et « pareil qu'hier ».
-  const heroEmpty = todayCount === 0;
+  // À 0 actif : pas de célébration à vide. Trophée en sourdine + on renvoie
+  // vers le Radar de relance, qui reste sa vraie action.
+  const heroEmpty = actifsAujourdhui === 0;
   const heroSubHtml = heroEmpty
-    ? `<b>Valide ta première compétence du jour</b> avec « Valider une séance »`
-    : `${deltaHtml} &nbsp;·&nbsp; record ${flammeHtml} à battre`;
+    ? `Personne n’a encore ouvert PermiGo aujourd’hui. <b>Le radar t’aide à les relancer.</b>`
+    : `sur ${nbElevesActifs} élève${nbElevesActifs > 1 ? "s" : ""} en formation`;
+
   const trophyMutedStyle = heroEmpty
     ? ' style="opacity:.4;filter:grayscale(.75) drop-shadow(0 14px 20px rgba(40,20,90,.3));animation:none"'
     : "";
 
-  // Pastille badge top dept — on montre si rang connu + top quartile
-  const topBadgeHtml =
-    myRank !== null && myRank <= 5
-      ? `<span class="aj-hero-badge"><img src="/skins/trophy-streak-7d.webp" alt="">Top ${myRank} du département</span>`
-      : `<span class="aj-hero-badge">Ta ligue&nbsp;: ${myLeague ? esc(myLeague.name) : "à venir"}</span>`;
+  // Retrait de la gamification moniteur (30/07/2026) : la pastille « Top N du
+  // département / Ta ligue » vivait ici. Rien ne la remplace — « élèves prêts »
+  // est déjà dans les tuiles du bas, on ne le dit pas deux fois.
+  const topBadgeHtml = "";
 
   // ─── Roster élèves ────────────────────────────────────────────
   function renderRosterCard(e) {
@@ -801,11 +747,6 @@ async function renderInto(root, _me) {
     </div>`;
   }
 
-  // Ligue footer
-  const ligueVal = myLeague
-    ? `${esc(myLeague.name)}${myRank ? " · #" + myRank : ""}`
-    : "Hors-ligue";
-
   // ─── Render ───────────────────────────────────────────────────
   root.innerHTML = `
     ${STYLE}
@@ -821,8 +762,8 @@ async function renderInto(root, _me) {
       <div class="aj-hero">
         <div class="aj-hero-halo"${heroEmpty ? ' style="opacity:.3"' : ""}></div>
         <div class="aj-hero-content">
-          <div class="aj-hero-label">Tes validations du jour</div>
-          <div class="aj-hero-big">${todayCount}<span class="aj-hero-big-unit">compétence${todayCount > 1 ? "s" : ""}</span></div>
+          <div class="aj-hero-label">Tes élèves actifs aujourd’hui</div>
+          <div class="aj-hero-big">${actifsAujourdhui}<span class="aj-hero-big-unit">élève${actifsAujourdhui > 1 ? "s" : ""}</span></div>
           <div class="aj-hero-sub">${heroSubHtml}</div>
           ${topBadgeHtml}
         </div>
@@ -860,10 +801,11 @@ async function renderInto(root, _me) {
           : roster.map(renderRosterCard).join("")
       }
 
-      <!-- Bouton 3D Valider une séance -->
+      <!-- Retrait du moniteur (lot 4 du pivot) : « Valider une séance » ouvrait
+           la saisie, supprimée. Son action utile est maintenant d'OBSERVER. -->
       <div class="aj-cta-wrap">
-        <button class="aj-cta" id="aj-cta-seance" type="button">
-          Valider une séance
+        <button class="aj-cta" id="aj-cta-eleves" type="button">
+          Voir mes élèves
         </button>
       </div>
 
@@ -874,13 +816,6 @@ async function renderInto(root, _me) {
           <div>
             <div class="aj-ft-val">${nbElevesActifs > 0 ? nbPrets : "—"}</div>
             <div class="aj-ft-lbl">${nbPrets >= 2 ? "élèves prêts" : "élève prêt"}</div>
-          </div>
-        </div>
-        <div class="aj-ft">
-          <img src="/skins/couronne.png" alt="" loading="lazy" width="32" height="32">
-          <div>
-            <div class="aj-ft-val">${esc(ligueVal)}</div>
-            <div class="aj-ft-lbl">ta ligue</div>
           </div>
         </div>
       </div>
@@ -896,11 +831,11 @@ async function renderInto(root, _me) {
   `;
 
   // ─── Listeners ────────────────────────────────────────────────
-  // Bouton Valider une séance
-  root.querySelector("#aj-cta-seance")?.addEventListener("click", () => {
+  // Bouton principal : la liste de ses élèves (observation)
+  root.querySelector("#aj-cta-eleves")?.addEventListener("click", () => {
     haptic("impact");
-    track("aujourdhui.cta_seance.clicked");
-    navigate("#/log-session");
+    track("aujourdhui.cta_eleves.clicked");
+    navigate("#/eleves");
   });
 
   // Voir tout les élèves

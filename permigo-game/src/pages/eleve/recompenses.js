@@ -53,6 +53,8 @@ import {
   mountLeagueHero,
   LEAGUE_HERO_CSS,
 } from "@/components/eleve/league-hero.js";
+import { CARTES, CARTES_TOTAL } from "@/data/cartes.js";
+import { icon } from "@/utils/icons.js";
 
 // ─── Petites constantes locales (dupliquées volontairement — même convention
 // que reviser.js : pas de dépendance page→page pour 2-3 valeurs) ──────────
@@ -380,17 +382,6 @@ function renderHero(ctx) {
         <span class="rec-claim-n">${coffresToOpen}</span>
       </a>`);
   }
-  if (freshTrophies.length > 0) {
-    claims.push(`
-      <a class="rec-claim" href="#/trophees" data-track="claim_trophee">
-        ${medallion("trophee", "violet", { size: 34 })}
-        <span class="rec-claim-b">
-          <span class="rec-claim-t">Trophée à réclamer</span>
-          <span class="rec-claim-s">${esc(freshTrophies[0].title)}</span>
-        </span>
-        <span class="rec-claim-n">${freshTrophies.length}</span>
-      </a>`);
-  }
 
   const capLine1 = anyBig
     ? `<div class="rec-hero-cap">
@@ -554,47 +545,46 @@ function renderCollectionTile(t) {
   </a>`;
 }
 
-// ─── Onglet Trophées (résumé trophees.js) ─────────────────────
-function renderTropheesPanel(ctx) {
-  const { unlockedDefs, lockedDefs, freshTrophies } = ctx;
-  const total = CATALOG.length;
+// ─── Onglet Cartes (aperçu → ouvre la collection swipe #/cartes) ──────
+// Remplace l'ancien onglet Trophées (décision Rayan 30/07). Aperçu en
+// éventail de 4 cartes illustrées + CTA vers le deck complet.
+function renderCartesPanel(ctx) {
+  const validated = ctx?.validatedCount ?? 0;
+  // Aperçu : 1 carte par monde (belles illus emblématiques).
+  const fan = ["C1e", "C2d", "C3a", "C4c"]
+    .map((id) => CARTES.find((c) => c.id === id))
+    .filter(Boolean);
+  const fanHtml = fan
+    .map(
+      (c, i) =>
+        `<img class="rec-carte-fan" src="${esc(c.img)}" alt=""
+          style="--i:${i}; z-index:${i}; --rot:${(i - 1.5) * 9}deg" loading="lazy">`,
+    )
+    .join("");
 
-  const claimHtml = freshTrophies.length
-    ? `
-    <a class="rec-gold-card" href="#/trophees" data-track="trophee_claim_card">
-      <span class="rec-gold-k">Nouveau</span>
-      <div class="rec-star-row">
-        <span style="width:56px;height:56px;flex:none;display:flex;align-items:center;justify-content:center">${badgeMarkup(freshTrophies[0], 56)}</span>
-        <div class="rec-star-txt">
-          <div class="rec-star-t">${esc(freshTrophies[0].title)}</div>
-          <div class="rec-star-s">${esc(freshTrophies[0].body || "")}</div>
-        </div>
-      </div>
-      <div class="rec-star-foot"><span></span><span class="rec-go-shop">Voir mes trophées</span></div>
-    </a>`
-    : "";
-
-  const preview = [
-    ...unlockedDefs.slice(0, 4),
-    ...lockedDefs.slice(0, 6 - Math.min(4, unlockedDefs.length)),
-  ].slice(0, 6);
-  const gridHtml = preview.length
-    ? `<div class="rec-sec-h"><h2>Mes trophées</h2><span>${unlockedDefs.length} sur ${total} débloqués</span></div>
-       <div class="rec-tro-grid">${preview.map((t) => renderTrophyTile(t, ctx.unlockedSet.has(t.key))).join("")}</div>`
-    : "";
-
-  return `${claimHtml}${gridHtml}
-    <a class="rec-tout-voir" href="#/trophees" data-track="tout_voir_trophees">Tout voir mes trophées →</a>`;
-}
-
-function renderTrophyTile(t, unlocked) {
-  const color = RARITY_COLOR[t.rarity] || "var(--mu2)";
   return `
-  <a class="rec-tro${unlocked ? "" : " locked"}" href="#/trophees" data-track="trophee_item">
-    ${unlocked ? `<span class="rec-tro-dot" style="background:${color}" aria-hidden="true"></span>` : ""}
-    ${badgeMarkup(t, 48)}
-    <div class="rec-tro-t">${unlocked ? esc(t.title) : "???"}</div>
-  </a>`;
+    <style>
+    .rec-cartes-hero { position:relative; border-radius:22px; overflow:hidden; padding:22px 20px 20px; margin-bottom:14px;
+      background:radial-gradient(120% 80% at 50% 0%, rgba(110,70,220,.28), transparent 60%), linear-gradient(180deg,#181241,#0f0d24); }
+    .rec-cartes-fan { position:relative; height:140px; display:flex; align-items:center; justify-content:center; margin-bottom:16px; }
+    .rec-carte-fan { position:absolute; width:78px; aspect-ratio:5/7; object-fit:cover; border-radius:11px;
+      box-shadow:0 10px 22px -8px rgba(0,0,0,.6); border:1.5px solid rgba(255,255,255,.15);
+      transform:translateX(calc((var(--i) - 1.5) * 52px)) rotate(var(--rot)); transition:transform .3s; }
+    .rec-cartes-hd { text-align:center; color:#fff; }
+    .rec-cartes-hd h2 { font:800 18px/1.2 'Plus Jakarta Sans',sans-serif; margin:0 0 5px; }
+    .rec-cartes-hd p { font:500 12.5px/1.5 'Inter',sans-serif; color:#cabfef; margin:0 0 14px; }
+    .rec-cartes-cta { display:inline-flex; align-items:center; gap:8px; text-decoration:none;
+      padding:12px 22px; border-radius:13px; font:800 13.5px/1 'Plus Jakarta Sans',sans-serif; color:#4a2500;
+      background:linear-gradient(180deg,#ffd76e,#f0a93f); box-shadow:0 6px 16px rgba(240,169,63,.4); }
+    </style>
+    <div class="rec-cartes-hero">
+      <div class="rec-cartes-fan">${fanHtml}</div>
+      <div class="rec-cartes-hd">
+        <h2>Ta collection de cartes</h2>
+        <p>Une carte illustrée par compétence — ${CARTES_TOTAL} à débloquer en certifiant ton parcours.${validated > 0 ? ` Déjà ${validated} acquise${validated > 1 ? "s" : ""} par ton moniteur.` : ""}</p>
+        <a class="rec-cartes-cta" href="#/cartes" data-track="ouvrir_collection_cartes">${icon("image", { size: 16 })} Ouvrir ma collection</a>
+      </div>
+    </div>`;
 }
 
 // ─── Mount ────────────────────────────────────────────────────
@@ -712,13 +702,13 @@ export async function mount(root) {
     <div class="rec-tabs" role="tablist" aria-label="Salles Récompenses">
       <button class="rec-tab on" role="tab" aria-selected="true" data-p="boutique">Boutique</button>
       <button class="rec-tab" role="tab" aria-selected="false" data-p="collection">Ma collection</button>
-      <button class="rec-tab" role="tab" aria-selected="false" data-p="trophees">Trophées</button>
+      <button class="rec-tab" role="tab" aria-selected="false" data-p="cartes">Cartes</button>
       <button class="rec-tab" role="tab" aria-selected="false" data-p="ligue">Ligue</button>
     </div>
 
     <div class="rec-panel on" id="rec-p-boutique" role="tabpanel">${renderBoutiquePanel(ctx)}</div>
     <div class="rec-panel" id="rec-p-collection" role="tabpanel">${renderCollectionPanel(ctx)}</div>
-    <div class="rec-panel" id="rec-p-trophees" role="tabpanel">${renderTropheesPanel(ctx)}</div>
+    <div class="rec-panel" id="rec-p-cartes" role="tabpanel">${renderCartesPanel(ctx)}</div>
     <div class="rec-panel" id="rec-p-ligue" role="tabpanel"><div id="rec-ligue-slot"></div></div>
   </div>`;
 

@@ -4,8 +4,33 @@ import path from 'path';
 // Base : / par défaut (Vercel). Override possible via VITE_BASE.
 const base = process.env.VITE_BASE || '/';
 
+// Prototypes strictement locaux : leurs entrées HTML imbriquées ne sont pas
+// ajoutées au build Rollup. Ces réécritures ne s'appliquent qu'au serveur Vite.
+function localLabRoutes() {
+  const routes = {
+    '/lab/bridge-angle-mort': '/lab/bridge-angle-mort/index.html',
+    '/lab/prepare-lesson-hero': '/lab/prepare-lesson-hero/index.html',
+  };
+
+  return {
+    name: 'local-lab-routes',
+    apply: 'serve',
+    configureServer(server) {
+      server.middlewares.use((req, _res, next) => {
+        const [pathname, query] = (req.url || '').split('?');
+        const entry = routes[pathname];
+        if (entry) {
+          req.url = `${entry}${query ? `?${query}` : ''}`;
+        }
+        next();
+      });
+    },
+  };
+}
+
 export default defineConfig({
   base,
+  plugins: [localLabRoutes()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),

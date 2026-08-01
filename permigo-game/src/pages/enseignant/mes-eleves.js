@@ -346,8 +346,6 @@ const STYLE = `<style>
     display: inline-flex; align-items: center; gap: 3px;
   }
 
-  /* FAB « Séance » retiré ici : le FAB global #bn-seance-fab (nav-bottom)
-     est déjà monté pour l'enseignant sur toutes ses pages. */
 
   /* ── En-tête « Pupitre » : recherche + 3 compteurs vivants (remplace le
      hero « à traiter en priorité » — chaque compteur est une porte) ── */
@@ -1403,9 +1401,6 @@ function wire() {
     openInviteEleveModal(_me);
   });
 
-  // FAB « Séance » : le FAB global #bn-seance-fab (nav-bottom, enseignant)
-  // couvre déjà cette page → on a retiré le doublon local #me-fab.
-
   // Recherche — filtre transversal tous les groupes du pipeline (onglet Liste)
   const searchEl = _root.querySelector(".me-search");
   const clearBtn = _root.querySelector("#me-search-clear");
@@ -1679,9 +1674,11 @@ async function wireRows() {
           dx > 30 ? "color-mix(in srgb, var(--a) 6%, transparent)" : "";
       },
       onSwipeRight: () => {
+        // Retrait du moniteur (lot 4 du pivot) : le glissé ouvrait la saisie de
+        // séance. Il ouvre maintenant le livret, en lecture.
         haptic("select");
-        track("eleve.swipe_validate", { eleve_id: id });
-        navigate(`#/log-session?eleveId=${id}`);
+        track("eleve.swipe_livret", { eleve_id: id });
+        navigate(`#/livret/${id}`);
       },
       onEnd: () => {
         row.style.transform = "";
@@ -1816,9 +1813,6 @@ function openQuickMenu(eleveId, anchorRow) {
              </button>`
           : ""
       }
-      <button class="me-qm-item" data-action="valider">
-        <span class="me-qm-ico">${icon("check", { size: 14, strokeWidth: 2.5 })}</span> Enregistrer une séance
-      </button>
       <button class="me-qm-item" data-action="livret">
         <span class="me-qm-ico">${icon("arrow-right", { size: 14, strokeWidth: 2.5 })}</span> Ouvrir le livret de compétences
       </button>
@@ -1864,8 +1858,7 @@ function openQuickMenu(eleveId, anchorRow) {
     btn.addEventListener("click", () => {
       const action = btn.dataset.action;
       close();
-      if (action === "valider") navigate(`#/log-session?eleveId=${eleveId}`);
-      else if (action === "livret") navigate(`#/livret/${eleveId}`);
+      if (action === "livret") navigate(`#/livret/${eleveId}`);
       else if (action === "provenance" && eleve)
         openProvenanceEditor({
           eleveId,

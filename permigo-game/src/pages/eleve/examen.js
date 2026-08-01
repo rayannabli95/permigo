@@ -315,10 +315,10 @@ const STYLE = `<style>
 </style>`;
 
 // ─── Constants ───────────────────────────────────────────────────
-// ⚠️ LS_KEY_DATE/LS_KEY_REVISED, les seuils et la readiness sont réutilisés
-// tels quels par le hub « Mon permis » (mon-permis.js, chantier nav
-// simplifiée) via les exports ci-dessous — AUCUNE re-déclaration de seuil,
-// la readiness reste gelée (même règle moniteur, même vérité) dans les 2 écrans.
+// ⚠️ LS_KEY_DATE/LS_KEY_REVISED, les seuils et la readiness sont exposés via
+// les exports ci-dessous. Ils servaient au hub timeline « Mon permis »,
+// supprimé le 01/08/2026 — les exports restent : AUCUN autre écran ne doit
+// re-déclarer un seuil, la readiness reste gelée (un seul calcul dans l'app).
 const LS_KEY_DATE = "permigo:exam_date";
 const LS_KEY_REVISED = "permigo:has_revised";
 const COMPS_TARGET = 16; // > 50% of 31
@@ -343,8 +343,8 @@ const TIPS = [
   },
 ];
 
-// ─── Helpers (exportés : réutilisés tels quels par mon-permis.js — même
-// mécanisme localStorage, ne PAS dupliquer la lecture/écriture de la date) ──
+// ─── Helpers (exportés : tout écran qui touche à la date d'examen passe par
+// ici — même mécanisme localStorage, ne PAS dupliquer lecture/écriture) ──
 export function parseSavedDate() {
   try {
     const v = localStorage.getItem(LS_KEY_DATE);
@@ -390,8 +390,8 @@ function isRevised() {
   }
 }
 
-// ─── Data (exportée : mon-permis.js appelle CETTE MÊME fonction pour son
-// étape ③ « L'examen » — un seul calcul de readiness dans toute l'app) ────
+// ─── Data (exportée : tout écran qui affiche la readiness appelle CETTE
+// MÊME fonction — un seul calcul de readiness dans toute l'app) ───────────
 export async function loadData(meId) {
   const [validRes, streakRes, quizRes, predictRes, selfValRes] =
     await Promise.allSettled([
@@ -417,7 +417,7 @@ export async function loadData(meId) {
 
       // Validation autonome (élève solo, valider-seul.js) : fusionnée pour
       // que la readiness ne reste pas bloquée à 0/31 pour un compte sans
-      // moniteur. Même pattern que mon-permis.js / accueil.js.
+      // moniteur. Même pattern que accueil.js.
       sb.from("self_validations").select("competence_id").eq("eleve_id", meId),
     ]);
 
@@ -579,22 +579,21 @@ function renderPredict(data) {
 </div>`;
 }
 
-// Exportée : mon-permis.js en a besoin pour situer son hero « X/31 » sur les
-// mêmes bases que la readiness (aucune re-déclaration).
+// Exportée : un hero « X/31 » doit se situer sur les mêmes bases que la
+// readiness (aucune re-déclaration ailleurs).
 export const BASE_TOTAL = 24; // C1+C2+C3 (mêmes bases que la readiness moniteur)
 
 // Verdict 3 niveaux — EXTRAIT de renderChecklist (même calcul, zéro
 // changement de comportement) pour être réutilisable sans dupliquer les
-// seuils. mon-permis.js appelle cette fonction telle quelle pour son
-// étape ③ : la readiness reste gelée, jamais recalculée « à la main ».
+// seuils : la readiness reste gelée, jamais recalculée « à la main ».
 export function buildVerdict({ baseAcquis = 0, solo = false }) {
   const baseRestantes = Math.max(0, BASE_TOTAL - baseAcquis);
   if (baseAcquis >= BASE_TOTAL) {
     return {
       level: "high",
-      text: solo
-        ? `Prêt pour l’examen. Tes ${BASE_TOTAL} compétences de base sont validées.`
-        : `Prêt pour l’examen. Ton moniteur a validé tes ${BASE_TOTAL} compétences de base.`,
+      // Retrait du moniteur (lot 4 du pivot, 30/07/2026) : ce n'est plus lui qui
+      // valide → une seule formulation, vraie pour tout le monde.
+      text: `Prêt pour l’examen. Tes ${BASE_TOTAL} compétences de base sont validées.`,
     };
   }
   if (baseAcquis >= 18) {

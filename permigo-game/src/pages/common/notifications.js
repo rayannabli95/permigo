@@ -23,7 +23,7 @@ function notifRoute(n) {
     case "new_message":
       return d.thread_id ? `#/messages/${d.thread_id}` : "#/messages";
     case "achievement_unlocked":
-      return "#/trophees";
+      return "#/cartes";
     case "streak_at_risk":
     case "streak_risk":
     case "post_validation_quiz":
@@ -34,10 +34,9 @@ function notifRoute(n) {
     case "session_refused":
       return "#/";
     case "comp_acquise":
-      // Chantier nav simplifiée : une compétence validée par le moniteur est
-      // de la VRAIE progression (table validations) → le hub « Mon permis »,
-      // pas le jeu #/parcours (élève-only, aucun autre rôle ne reçoit ce type).
-      return "#/mon-permis";
+      // Le hub timeline « Mon permis » est supprimé (01/08/2026) : une
+      // compétence acquise se voit dans le parcours, qui EST le suivi.
+      return "#/parcours";
     case "relance":
       return d.link || "#/parcours";
     case "emotional_nudge":
@@ -51,9 +50,11 @@ function notifRoute(n) {
     case "moniteur_recap":
       return "#/profil";
     case "compte_rendu":
-      return d.compte_rendu_id
-        ? `#/compte-rendu/${d.compte_rendu_id}`
-        : "#/parcours";
+      // Retrait du moniteur (lot 4 du pivot, 30/07/2026) : la page
+      // #/compte-rendu/{id} est supprimée. Les notifications DÉJÀ reçues
+      // restent lisibles dans la cloche et retombent sur le parcours — jamais
+      // sur un lien mort (le router ferait « page non chargée »).
+      return "#/parcours";
     default:
       // Fallback robuste : honorer un lien explicite posé par la source.
       return d.route || d.link || "#/";

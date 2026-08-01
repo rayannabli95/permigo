@@ -3,8 +3,8 @@
 //
 // DA « Arène 3D / Coffre » (Supercell / Clash Royale) : nuit-violet + or,
 // coffre qui s'ouvre, volants qui jaillissent, mascotte, bouton plastique
-// 3D vert GO. Auto-suffisant (n'utilise PAS le moteur générique commun —
-// celui-ci reste réservé au moniteur via tier-unlock.js).
+// 3D vert GO. Auto-suffisant (n'utilise PAS le moteur générique commun
+// unlock-screen.js).
 //
 // Récompense RÉELLE : +25 volants crédités (addGemmes) au moment de l'écran,
 // une seule fois par compétence (les appelants gardent le ledger anti-doublon).

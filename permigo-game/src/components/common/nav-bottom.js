@@ -73,26 +73,18 @@ const TABS = {
         "revision-conduite",
         "exam-conduite",
         "jeu-faute",
-        "flash-quiz",
       ],
     },
     {
       // Décision Rayan (2026-07-16) : l'onglet « Mon permis » ouvre
-      // DIRECTEMENT le parcours immersif (#/parcours) — le hub condensé
-      // « mon-permis » (compétences/leçons/examen en 3 étapes) reste
-      // accessible en option depuis le parcours (bouton « Suivi ») et
-      // continue d'allumer cet onglet via `match`.
+      // DIRECTEMENT le parcours immersif (#/parcours). Le hub condensé
+      // « mon-permis » qui vivait à côté est supprimé (01/08/2026) : il
+      // faisait doublon avec ce parcours. Ses satellites (examen, centre
+      // d'examen, séances) restent des sous-pages de cet onglet.
       id: "parcours",
       label: "Mon permis",
       ico: "map",
-      match: [
-        "mon-permis",
-        "examen",
-        "centre-examen",
-        "compte-rendu",
-        "sessions",
-        "mes-lecons",
-      ],
+      match: ["examen", "centre-examen", "sessions"],
     },
     {
       id: "recompenses",
@@ -121,23 +113,9 @@ const TABS = {
       ico: "users",
       match: ["relances", "classement-eleves", "bilan"],
     },
-    // « Mon blason » (chantier nav simplifiée) fusionne Parcours + Trophées +
-    // Ligue en une seule page statut/fierté. `parcours` = ancienne route hub
-    // (parcours-pro.js, retiré) qui atterrit maintenant sur mon-blason.js —
-    // gardée en match pour que l'onglet s'allume aussi sur les vieux liens.
-    // `parcours-complet`/`trophees-moniteur`/`ligue-semaine` restent de VRAIES
-    // sous-pages satellites du même onglet (pas fusionnées).
-    {
-      id: "mon-blason",
-      label: "Mon blason",
-      ico: "trophy",
-      match: [
-        "parcours",
-        "parcours-complet",
-        "trophees-moniteur",
-        "ligue-semaine",
-      ],
-    },
+    // Retrait de la gamification moniteur (30/07/2026) : l'onglet « Mon blason »
+    // (paliers + trophées + ligue, tous calculés sur ses validations) est retiré.
+    // Sa nav ne garde que de l'observation : Aujourd'hui · Mes élèves · Stats.
     { id: "insights", label: "Stats", ico: "chart" },
   ],
   gerant: [
@@ -267,63 +245,9 @@ const STYLE = `
   @keyframes bnDotPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.25); } }
   @media (prefers-reduced-motion: reduce) { .bn-dot { animation: none; } }
 
-  /* ── FAB flottant "Séance" (enseignant seulement) ── */
-  @keyframes bnFabIn {
-    from { opacity: 0; transform: scale(.85) translateY(6px); }
-    to   { opacity: 1; transform: scale(1)   translateY(0);   }
-  }
-  /* Masqué sur la page validation : on y EST déjà (le FAB recouvrait le
-     bouton « Enregistrer la séance »). Idem quand un footer CTA est présent. */
-  body:has(.vs) #bn-seance-fab { display: none; }
-  /* Quand le FAB est visible, le contenu doit pouvoir défiler AU-DESSUS de
-     lui (sinon il recouvre la dernière carte des listes — mes-élèves, radar). */
-  body.has-chrome:has(#bn-seance-fab) #app {
-    padding-bottom: calc(148px + env(safe-area-inset-bottom, 0px));
-  }
-  #bn-seance-fab {
-    position: fixed;
-    right: 20px;
-    bottom: calc(76px + env(safe-area-inset-bottom, 0px));
-    z-index: 310;
-    width: 56px; height: 56px;
-    border-radius: 50%;
-    /* Vert plastique : visible en clair ET en nuit (var(--ink) s'inversait en
-       blanc en dark → « + » blanc invisible sur cercle blanc). */
-    background: linear-gradient(to bottom, var(--a-lt) 0%, var(--a) 48%, var(--adk) 100%);
-    color: var(--a-ink);
-    border: none; padding: 0;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    -webkit-tap-highlight-color: transparent;
-    box-shadow:
-      0 8px 20px -6px color-mix(in srgb, var(--adk) 50%, transparent),
-      0 3px 8px -2px rgba(10,13,26,.2),
-      inset 0 1.5px 0 0 rgba(255,255,255,.28);
-    animation: bnFabIn .3s var(--ease-spring) both;
-    transition: transform .15s var(--ease-spring), box-shadow .15s ease;
-  }
-  #bn-seance-fab:active {
-    transform: scale(.9);
-    box-shadow: 0 4px 12px -4px rgba(10,13,26,.5), inset 0 0 0 1px rgba(255,255,255,.12);
-  }
-  @media (hover: hover) and (pointer: fine) {
-    #bn-seance-fab:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 24px -8px rgba(10,13,26,.6), inset 0 0 0 1px rgba(255,255,255,.12);
-    }
-  }
-  #bn-seance-fab:focus-visible {
-    outline: 2px solid var(--a);
-    outline-offset: 3px;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    #bn-seance-fab { animation: none !important; transition: none !important; }
-  }
-
-  /* FAB haut = 76+56=132px du bas — on pousse #app pour que rien ne se cache dessous */
-  body.has-enseignant-fab #app {
-    padding-bottom: calc(140px + env(safe-area-inset-bottom, 0px));
-  }
+  /* Retrait du moniteur (lot 4 du pivot, 30/07/2026) : le FAB « + Séance »
+     (#bn-seance-fab, son animation bnFabIn et ses marges de bas de page)
+     vivait ici. Le moniteur n'a plus d'action d'écriture → plus de FAB. */
 `;
 
 export function mountBottomNav(role) {
@@ -345,8 +269,6 @@ export function mountBottomNav(role) {
     return;
   }
   existing?.remove();
-  document.getElementById("bn-seance-fab")?.remove();
-  document.body.classList.remove("has-enseignant-fab");
 
   const tabs = TABS[role] || TABS.eleve;
   // Traduction des libellés — élève uniquement (voir NAV_I18N).
@@ -408,20 +330,10 @@ export function mountBottomNav(role) {
     });
   });
 
-  // FAB flottant "Séance" — monté uniquement pour les enseignants
-  if (role === "enseignant") {
-    const fab = document.createElement("button");
-    fab.id = "bn-seance-fab";
-    fab.type = "button";
-    fab.setAttribute("aria-label", "Enregistrer une séance");
-    fab.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
-    fab.addEventListener("click", () => {
-      haptic("select");
-      location.hash = "#/log-session";
-    });
-    document.body.appendChild(fab);
-    document.body.classList.add("has-enseignant-fab");
-  }
+  // Retrait du moniteur (lot 4 du pivot, 30/07/2026) : le FAB « + » ouvrait la
+  // saisie de séance (#/log-session), supprimée. Le moniteur n'a plus d'action
+  // d'écriture → plus de FAB. (Règle le doublon Inviter / + au passage : il ne
+  // reste que « Inviter un élève », sa vraie action.)
 
   window.addEventListener("hashchange", _updateActive);
   window.addEventListener("resize", _onResize);
@@ -429,8 +341,6 @@ export function mountBottomNav(role) {
 
 export function unmountBottomNav() {
   document.querySelector("#bottom-nav")?.remove();
-  document.getElementById("bn-seance-fab")?.remove();
-  document.body.classList.remove("has-enseignant-fab");
   window.removeEventListener("hashchange", _updateActive);
   window.removeEventListener("resize", _onResize);
 }

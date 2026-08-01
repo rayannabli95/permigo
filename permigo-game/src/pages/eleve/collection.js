@@ -64,24 +64,37 @@ const STYLE = `<style>
 /* Le deck */
 .col-stage { position:relative; height:min(58vh,470px); margin:12px 0 6px;
   perspective:1200px; touch-action:pan-y; user-select:none; }
+/* ATTENTION : pas de propriete filter ici. Un filter sur le parent d'un
+   conteneur preserve-3d casse le backface-visibility (le recto transparait
+   au verso). L'ombre vit donc sur les faces, pas sur .col-card. */
 .col-card { position:absolute; inset:0; margin:auto; width:min(78vw,320px); aspect-ratio:5/7;
-  perspective:1100px; will-change:transform; --rc:#9fb0c3;
-  filter: drop-shadow(0 22px 34px rgba(6,7,20,.55)); }
+  perspective:1100px; will-change:transform; --rc:#9fb0c3; }
 .col-card.is-anim { transition:transform .42s cubic-bezier(.4,0,.2,1); }
 
 /* conteneur qui pivote (recto ↔ verso) */
-.col-flip { position:absolute; inset:0; transform-style:preserve-3d; transition:transform .55s cubic-bezier(.4,0,.2,1); }
+.col-flip { position:absolute; inset:0; transform-style:preserve-3d; transition:transform .55s cubic-bezier(.4,0,.2,1); will-change:transform; }
 .col-card.flipped .col-flip { transform:rotateY(180deg); }
+/* Le backface-visibility seul ne suffit pas : selon le navigateur, les ENFANTS
+   d'une face (titre, pastilles) continuent d'être peints et le recto apparaît
+   en miroir au verso. On échange donc franchement les deux faces à MI-rotation
+   (transition d'opacité de durée nulle, retardée à la moitié des .55s). */
 .col-face { position:absolute; inset:0; border-radius:24px; overflow:hidden; -webkit-backface-visibility:hidden; backface-visibility:hidden;
-  background:#0f0d24; box-shadow: inset 0 0 0 2.5px color-mix(in srgb, var(--rc) 82%, transparent); }
-.col-back { transform:rotateY(180deg); background:linear-gradient(180deg,#1a1442,#0d0b22); }
+  background:#0a0a10;
+  box-shadow: 0 22px 45px -18px rgba(0,0,0,.65), inset 0 0 0 2.5px color-mix(in srgb, var(--rc) 82%, transparent);
+  transition: opacity 0s linear .28s; }
+.col-back { transform:rotateY(180deg); background:#0a0a10; isolation:isolate; opacity:0; }
+.col-card.flipped .col-front { opacity:0; }
+.col-card.flipped .col-back { opacity:1; }
 
 .col-card-img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; }
 .col-card-shade { position:absolute; inset:0; background:linear-gradient(180deg,transparent 42%,rgba(6,7,20,.15) 60%,rgba(6,7,20,.86) 100%); }
 .col-card-meta { position:absolute; left:0; right:0; bottom:0; padding:15px 16px 16px; color:#fff; z-index:2; }
 .col-card-world { display:inline-flex; align-items:center; gap:6px; font:800 9.5px/1 'Inter',sans-serif; letter-spacing:.14em; text-transform:uppercase;
   padding:5px 10px; border-radius:99px; background:rgba(255,255,255,.16); backdrop-filter:blur(4px); margin-bottom:9px; }
-.col-card-name { font:800 19px/1.15 'Plus Jakarta Sans',sans-serif; margin:0 0 4px; text-shadow:0 2px 12px rgba(0,0,0,.5); }
+/* color explicite : base.css pose une couleur sur h1..h4, et une règle directe
+   bat TOUJOURS la couleur héritée du parent. Sans ça le titre passe en encre
+   sombre sur la carte (illisible en thème clair). */
+.col-card-name { font:800 19px/1.15 'Plus Jakarta Sans',sans-serif; margin:0 0 4px; color:#fff; text-shadow:0 2px 12px rgba(0,0,0,.5); }
 .col-card-idx { font:700 11px/1 'IBM Plex Mono',monospace; opacity:.8; }
 .col-card-date { display:inline-flex; align-items:center; gap:5px; font:600 11px/1 'Inter',sans-serif; color:#8ef0b0; margin-top:8px; }
 
@@ -109,14 +122,29 @@ const STYLE = `<style>
   50%{ box-shadow: inset 0 0 0 3px rgba(255,231,150,1), 0 0 26px 0 rgba(255,207,90,.7); }
 }
 
-/* dos de carte : la pédagogie de la compétence certifiée */
-.col-back-in { position:absolute; inset:0; padding:20px 18px; display:flex; flex-direction:column; color:#e9e6f7; }
-.col-back-rar { font:800 8.5px/1 'Inter',sans-serif; letter-spacing:.12em; text-transform:uppercase; color:var(--rc); }
-.col-back-ttl { font:800 16px/1.25 'Plus Jakarta Sans',sans-serif; margin:7px 0 13px; color:#fff; }
-.col-back-list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
-.col-back-list li { display:flex; gap:9px; font:500 12px/1.42 'Inter',sans-serif; color:#cfc9ea; }
-.col-back-list li b { color:var(--rc); font:800 11px/1.5 'IBM Plex Mono',monospace; flex-shrink:0; }
-.col-back-hint { margin-top:auto; padding-top:12px; font:600 11px/1.4 'Inter',sans-serif; color:rgba(255,255,255,.4); text-align:center; }
+/* ── dos de carte : DA « WHOOP » ──────────────────────────────
+   Noir profond, tout en BLANC, typo condensée, micro-labels en
+   majuscules très espacées, filets fins, une seule couleur d'accent. */
+/* fond du verso : l'illustration floutée + un voile sombre pour la lisibilité */
+.col-back-bg { position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+  filter:blur(17px) saturate(1.15) brightness(.5); transform:scale(1.18); }
+.col-back-veil { position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(8,8,16,.62) 0%, rgba(8,8,16,.76) 55%, rgba(8,8,16,.88) 100%); }
+.col-back-in { position:absolute; inset:0; padding:22px 20px; display:flex; flex-direction:column;
+  color:#fff; }
+.col-back-top { display:flex; align-items:center; justify-content:space-between; gap:8px;
+  padding-bottom:11px; border-bottom:1px solid rgba(255,255,255,.12); }
+.col-back-lbl { font:700 8.5px/1 'Inter',sans-serif; letter-spacing:.22em; text-transform:uppercase; color:rgba(255,255,255,.45); }
+.col-back-dot { width:6px; height:6px; border-radius:50%; background:var(--rc); box-shadow:0 0 8px var(--rc); flex-shrink:0; }
+.col-back-ttl { font:800 19px/1.2 'Plus Jakarta Sans',sans-serif; margin:15px 0 4px; color:#fff; letter-spacing:-.01em; }
+.col-back-sub { font:600 9px/1 'Inter',sans-serif; letter-spacing:.2em; text-transform:uppercase; color:rgba(255,255,255,.4); margin-bottom:17px; }
+.col-back-list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0; }
+.col-back-list li { display:flex; gap:12px; align-items:flex-start; padding:11px 0;
+  border-top:1px solid rgba(255,255,255,.08); font:500 12.5px/1.45 'Inter',sans-serif; color:rgba(255,255,255,.88); }
+.col-back-list li:first-child { border-top:0; }
+.col-back-list li b { color:var(--rc); font:800 10px/1.6 'Inter',sans-serif; letter-spacing:.08em; flex-shrink:0; width:14px; }
+.col-back-hint { margin-top:auto; padding-top:14px; font:700 8.5px/1 'Inter',sans-serif; letter-spacing:.18em;
+  text-transform:uppercase; color:rgba(255,255,255,.3); text-align:center; }
 
 /* carte verrouillée */
 .col-card.locked .col-card-img { filter:grayscale(1) brightness(.32) blur(2px); transform:scale(1.05); }
@@ -152,6 +180,9 @@ const STYLE = `<style>
   .col-card.is-anim { transition:none; }
   .col-card.reveal { animation:none; }
   .col-card-gloss { animation:none; }
+  /* pas de rotation → l'échange des faces doit être immédiat, sans délai */
+  .col-flip { transition:none; }
+  .col-face { transition:none; }
 }
 </style>`;
 
@@ -184,11 +215,19 @@ function backFace(carte) {
         )
         .join("")}</ul>`
     : `<p style="font:500 13px/1.5 'Inter',sans-serif;color:#cfc9ea">Compétence certifiée de ton parcours.</p>`;
-  return `<div class="col-back-in">
-    <div class="col-back-rar">${esc(carte.rarity.label)} · ${esc(carte.tname)}</div>
+  // L'illustration reste visible derrière, floutée et assombrie : le dos
+  // garde l'identité de la carte au lieu d'un aplat noir.
+  return `<img class="col-back-bg" src="${esc(carte.img)}" alt="" loading="lazy" draggable="false">
+  <div class="col-back-veil"></div>
+  <div class="col-back-in">
+    <div class="col-back-top">
+      <span class="col-back-lbl">Carte ${String(carte.idx).padStart(2, "0")} / ${CARTES_TOTAL}</span>
+      <span class="col-back-lbl" style="display:flex;align-items:center;gap:6px">${esc(carte.rarity.label)} <i class="col-back-dot"></i></span>
+    </div>
     <h4 class="col-back-ttl">${esc(f?.titre || carte.n)}</h4>
+    <div class="col-back-sub">${esc(carte.tname)}</div>
     ${list}
-    <p class="col-back-hint">Appuie pour retourner la carte</p>
+    <p class="col-back-hint">Appuie pour retourner</p>
   </div>`;
 }
 

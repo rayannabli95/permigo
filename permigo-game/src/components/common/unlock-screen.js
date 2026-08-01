@@ -8,7 +8,8 @@
 // Primitive partagée — NE PAS appeler directement depuis une page.
 // Utilise un wrapper de rôle :
 //   - élève   : @/components/eleve/competence-unlock.js → showCompetenceUnlock()
-//   - moniteur : @/components/enseignant/tier-unlock.js  → showTierUnlock()
+// (le wrapper moniteur tier-unlock.js est supprimé depuis le retrait de sa
+//  gamification, 30/07/2026 — il n'y a plus de palier à débloquer.)
 //
 // showUnlockScreen(config) retourne une Promise résolue à la fermeture
 // ('cta' | 'close').
