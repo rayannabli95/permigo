@@ -92,7 +92,9 @@
        préfixe simple type /sw.js sont servis). Toute nouvelle origine
        (script, frame, connect…) doit donc être ajoutée ICI.
        accounts.google.com/gsi = bouton Google officiel (GIS) du login. -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://eu-assets.i.posthog.com https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://eu.i.posthog.com https://eu-assets.i.posthog.com https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; manifest-src 'self'; worker-src 'self';" />
+  <!-- COPIE D'AUDIT — règle de sécurité relâchée : l'app parle au serveur local
+       (et au téléphone via le partage de connexion), pas au vrai Supabase. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' data: blob: http: https:; img-src * data: blob:; connect-src *;" />
 
   <!-- ╔══ Preconnects critiques ══╗ -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -110,7 +112,9 @@
        Retirées le 30/07 (plus une seule déclaration dans src/) : Plus Jakarta
        Sans, Inter, Nunito, Fredoka, Baloo 2 — et Manrope / Fredoka One, que
        des pages moniteur demandaient sans qu'elles soient chargées ici. -->
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400..900&family=IBM+Plex+Mono:wght@500;600;700&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet" />
+  <!-- COPIE D'AUDIT — polices servies en local (sans réseau, Google Fonts ne
+       répond pas et toute l'app tomberait sur la police système). -->
+  <link href="/fonts-avion/fonts.css" rel="stylesheet" />
 
   <!-- ╔══ Écran de chargement (logo animé) — critical CSS inline ══╗
        Inliné ici (pas dans le bundle) pour s'afficher AVANT que le JS charge.
