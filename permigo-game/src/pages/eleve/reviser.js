@@ -49,12 +49,9 @@ const RV_I18N = {
     hero_cta: "Play a scene",
     rail: "More ways to practise",
     exam_t: "Mock exam",
-    exam_s: "Scored out of 31 like exam day",
     fiches_t: "Revision sheets",
-    fiches_s: "Moves rather than theory",
     fiches_m: "Sheets",
     centre_t: "Exam centre",
-    centre_s: "Your centre on exam day",
     centre_m: "Exam day",
     centre_v: "View",
   },
@@ -74,12 +71,9 @@ const RV_I18N = {
     hero_cta: "العب مشهدًا",
     rail: "طرق أخرى للتدرّب",
     exam_t: "امتحان تجريبي",
-    exam_s: "الدرجة من 31 كما في يوم الامتحان",
     fiches_t: "بطاقات المراجعة",
-    fiches_s: "الحركة قبل النظري",
     fiches_m: "بطاقات",
     centre_t: "مركز الامتحان",
-    centre_s: "مركزك يوم الامتحان",
     centre_m: "يوم الامتحان",
     centre_v: "عرض",
   },
@@ -183,7 +177,6 @@ ${chromeNight("#241a52", "#1a1340")}
 .rv4-badge img { width:64px; height:64px; object-fit:contain; display:block; filter:drop-shadow(0 5px 8px rgba(0,0,0,.5)); }
 .rv4-itx { flex:1; min-width:0; }
 .rv4-itx h3 { font:800 16px/1.15 'Archivo',sans-serif; letter-spacing:-.02em; color:#fff; margin:0; }
-.rv4-itx p { margin:2px 0 0; font:600 12.5px/1.3 'Archivo',sans-serif; color:#b3aede; }
 .rv4-meta { flex:none; text-align:right; font:800 12.5px/1.1 'Archivo',sans-serif; letter-spacing:-.01em; color:#f5c451; }
 .rv4-meta small { display:block; font:700 9.5px/1 'Archivo',sans-serif; letter-spacing:.08em; text-transform:uppercase; color:#9089c7; margin-bottom:3px; }
 
@@ -228,10 +221,10 @@ function render({
       ? `<small${R}>${rv("best", "Record")}</small>${examBest} %`
       : `<small${R}>${rv("goal", "Objectif")}</small>/31`;
 
-  const item = (id, badge, title, sub, meta) => `
+  const item = (id, badge, title, meta) => `
     <button class="rv4-item" data-go="${id}">
       <span class="rv4-badge"><img src="${badge}" alt="" width="512" height="512" loading="lazy" decoding="async"></span>
-      <span class="rv4-itx"><h3${R}>${title}</h3><p${R}>${sub}</p></span>
+      <span class="rv4-itx"><h3${R}>${title}</h3></span>
       <span class="rv4-meta">${meta}</span>
     </button>`;
 
@@ -259,9 +252,9 @@ function render({
 
     <div class="rv4-rail">
       <div class="rv4-railhead"><span${R}>${rv("rail", "Aussi pour s'entraîner")}</span><div class="rule"></div></div>
-      ${item("exam-conduite", BADGE.exam, rv("exam_t", "Examen blanc"), rv("exam_s", "Noté sur 31 comme le jour J"), examMeta)}
-      ${item("revision-conduite", BADGE.fiche, rv("fiches_t", "Fiches de révision"), rv("fiches_s", "Le geste plutôt que le code"), `<small${R}>${rv("fiches_m", "Fiches")}</small>${fichesLues} / ${fichesTotal}`)}
-      ${item("centre-examen", BADGE.centre, rv("centre_t", "Centre d'examen"), rv("centre_s", "Ton centre le jour J"), `<small${R}>${rv("centre_m", "Le jour J")}</small>${rv("centre_v", "Voir")}`)}
+      ${item("exam-conduite", BADGE.exam, rv("exam_t", "Examen blanc"), examMeta)}
+      ${item("revision-conduite", BADGE.fiche, rv("fiches_t", "Fiches de révision"), `<small${R}>${rv("fiches_m", "Fiches")}</small>${fichesLues} / ${fichesTotal}`)}
+      ${item("centre-examen", BADGE.centre, rv("centre_t", "Centre d'examen"), `<small${R}>${rv("centre_m", "Le jour J")}</small>${rv("centre_v", "Voir")}`)}
     </div>
 
   </div></div>`;
