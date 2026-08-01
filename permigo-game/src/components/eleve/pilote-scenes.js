@@ -25,6 +25,7 @@ export function renderArt(visual) {
   if (visual === "gps") return artGps();
   if (visual === "city-light") return artCityLight();
   if (visual === "exterior") return artExterior();
+  if (visual === "parking") return artParking();
   return artCockpit();
 }
 
@@ -165,4 +166,17 @@ function artExterior() {
       <small class="art-car-plate">PG-2026</small>
     </div>
     <span class="art-floor-shadow"></span>`;
+}
+
+// Vue de dessus d'un créneau. Tout est posé en POURCENTAGE, pas en pixels :
+// les zones tactiles des missions sont elles aussi en pourcentage de la scène,
+// et un décor calé en pixels les décalerait dès que la largeur change.
+function artParking() {
+  return `
+    <div class="art-pk-road"><span></span></div>
+    <div class="art-pk-kerb"></div>
+    <span class="art-pk-car art-pk-car-a"></span>
+    <span class="art-pk-slot"></span>
+    <span class="art-pk-car art-pk-car-b"></span>
+    <span class="art-pk-car art-pk-player"><i></i></span>`;
 }
