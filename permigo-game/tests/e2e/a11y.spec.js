@@ -186,33 +186,18 @@ test("a11y · fiche compétence dialog", async ({ page }) => {
   ).toHaveLength(0);
 });
 
-// ─── Page : Validation enseignant ───────────────────────────────────
-test("a11y · validation enseignant", async ({ page }) => {
-  await loginAs(page, EMAIL_ENSEIGNANT);
-  await page.waitForSelector(".aj-page, .vs, .me-list", { timeout: 20_000 });
-  await page.evaluate(() => {
-    location.hash = "#/validation";
-  });
-  await page.waitForSelector(".vs", { timeout: 10_000 });
-
-  const results = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
-    .analyze();
-
-  const { blocking, warnings } = splitViolations(results.violations);
-
-  if (warnings.length) {
-    console.warn(
-      `[a11y validation] ${warnings.length} moderate/minor violations:\n` +
-        warnings.map(formatViolation).join("\n"),
-    );
-  }
-
-  expect(
-    blocking,
-    `Critical/serious a11y violations on validation:\n${blocking.map(formatViolation).join("\n")}`,
-  ).toHaveLength(0);
-});
+// ─── Page : Validation enseignant — SUPPRIMÉE ───────────────────────
+// Le test visait `#/validation`, la saisie de séance du moniteur. Cette
+// route a été retirée VOLONTAIREMENT le 30/07/2026 (lot 4 du pivot : le
+// moniteur n'écrit plus rien, il observe — cf. le commentaire dans
+// router.js). Le test échouait donc sur `waitForSelector(".vs")`, jamais
+// sur une vraie violation : il faisait passer une suppression assumée pour
+// un défaut d'accessibilité, et polluait chaque lecture de la suite.
+//
+// Le geste équivalent existe toujours, mais CÔTÉ ÉLÈVE : `#/valider-seul/{id}`
+// (« Certifier une compétence »). Il n'est pas couvert ici — il demande une
+// compétence prête à certifier sur le compte de test, donc une préparation
+// de données ; à écrire quand ce fixture existera.
 
 // ─── Page : Profil (élève = « Carte de joueur » Arène, racine .arn) ──
 test("a11y · profil", async ({ page }) => {
