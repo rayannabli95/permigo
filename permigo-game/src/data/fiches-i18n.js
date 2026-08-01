@@ -14,6 +14,7 @@ const FICHE_UI = {
     geste: "step",
     gestes: "steps",
     cta: "Certify this skill",
+    glossaire_h: "The words in this sheet",
     cta_done: "Already yours. See it in My licence",
     cta_done_note:
       "You have already certified it. Keep reviewing it whenever you like.",
@@ -39,6 +40,7 @@ const FICHE_UI = {
     geste: "خطوة",
     gestes: "خطوات",
     cta: "صادق على هذه المهارة",
+    glossaire_h: "كلمات هذه البطاقة",
     cta_done: "مكتسبة سلفًا. اعرضها في رخصتي",
     cta_done_note: "لقد صادقت عليها سابقًا. واصل مراجعتها متى شئت.",
     cta_warn:

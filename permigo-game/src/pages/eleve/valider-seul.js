@@ -82,6 +82,8 @@ const VS_I18N = {
     ok_title: "Skill certified!",
     ok_p: "“{n}” is now done in your journey.",
     ok_volants: "+{n} Steering wheels (volants)",
+    ok_vaut:
+      "It becomes done in My licence, and your instructor can see it. It replaces neither the lesson nor the test.",
     ok_cta: "Find this skill in My licence",
     fail_kick: "Not yet",
     fail_title: "Almost!",
@@ -136,6 +138,8 @@ const VS_I18N = {
     ok_title: "تمت المصادقة على المهارة!",
     ok_p: "«{n}» أصبحت الآن مكتملة في مسارك.",
     ok_volants: "+{n} مقود (volants)",
+    ok_vaut:
+      "تصبح مكتسبة في «رخصتي»، ويراها مدرّبك. وهي لا تعوّض الدرس ولا الامتحان.",
     ok_cta: "اعثر على هذه المهارة في رخصتي",
     fail_kick: "ليس بعد",
     fail_title: "اقتربت!",
@@ -423,8 +427,10 @@ function introScreen(sub, cat, already, fiche) {
       </div>
     </div>
 
-    <button class="vs-cta" id="vs-start-quiz" type="button">${icon("zap", { size: 18 })} ${already ? vsD("cta_retry", "Repasser le quiz") : vsD("cta_start", "Commencer le quiz")}</button>
+    <!-- La phrase honnête passe AVANT le bouton : sous le bouton, personne
+         ne la lisait (audit 01/08). -->
     <p class="vs-hint">${vsD("hint", "Sois honnête avec toi-même. Ce quiz ne remplace pas une vraie leçon de conduite.")}</p>
+    <button class="vs-cta" id="vs-start-quiz" type="button">${icon("zap", { size: 18 })} ${already ? vsD("cta_retry", "Repasser le quiz") : vsD("cta_start", "Commencer le quiz")}</button>
   </div>`;
 }
 
@@ -455,6 +461,7 @@ function successScreen(sub, scorePct, volants = 0) {
     @keyframes vsrShine { to { transform:translateX(120%); } }
     @keyframes vsrGloss { 0%{background-position:120% 0;} 50%{background-position:-20% 0;} 100%{background-position:120% 0;} }
     .vsr-name { font:800 17px/1.25 'Archivo',sans-serif; color:#fff; margin:2px 0 0; max-width:300px; }
+    .vsr-vaut { font:600 12.5px/1.5 'Archivo',sans-serif; color:rgba(255,255,255,.72); margin:9px auto 0; max-width:310px; }
     .vsr-cta-carte { width:100%; max-width:340px; margin-top:20px; padding:15px; border:0; border-radius:14px; cursor:pointer;
       font:800 14px/1 'Archivo',sans-serif; color:#4a2500;
       background:linear-gradient(180deg,#ffd76e,#f0a93f); box-shadow:0 6px 0 #b46a10, 0 12px 22px rgba(0,0,0,.4); }
@@ -465,6 +472,11 @@ function successScreen(sub, scorePct, volants = 0) {
     ${carteBlock || `<div class="vsr-med">${medallion("check", "violet", { size: 96 })}</div>`}
     <h1 class="vsr-ttl">${vsD("ok_title", "Compétence certifiée")}</h1>
     <p class="vsr-name">${esc(sub.n)}</p>
+    <!-- Ce que ça vaut, dit une fois, au moment où on vient de le donner.
+         Aucun écran ne le disait (audit 01/08) : entre « compétence
+         certifiée », une carte à collectionner et des volants, un élève ne
+         sait plus s'il est dans un jeu ou dans un suivi sérieux. -->
+    <p class="vsr-vaut">${vsD("ok_vaut", "Elle passe en acquise dans Mon permis, et ton enseignant la voit. Ça ne remplace ni la leçon ni l'examen.")}</p>
     ${volants > 0 ? `<span class="vsr-volants"><img src="/skins/volant-coin.webp" alt="volant"> +${volants}</span>` : ""}
     ${carte ? `<button class="vsr-cta-carte" id="vs-cta-carte" type="button">${vsD("ok_cta_carte", "Voir ma carte")}</button>` : ""}
     <button class="vsr-ghost" id="vs-cta-parcours" type="button" data-comp="${escAttr(sub.c)}">${vsD("ok_cta", "Retrouve cette compétence dans Mon permis")}</button>
