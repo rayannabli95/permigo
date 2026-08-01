@@ -1316,6 +1316,312 @@ export const MISSIONS = [
     transfer:
       "Pendant ta prochaine leçon, repère un carrefour sans panneau et annonce la règle avant d'y arriver.",
   },
+
+  // ── Chapitre 3 : quand les conditions se dégradent ─────────────────────
+  // Ici la route ne change pas de règles, elle change de marges. Chaque
+  // mission part donc d'une marge qui rétrécit : la lumière, l'adhérence,
+  // la vitesse des autres, l'espace pour se ranger.
+  {
+    ...commun,
+    id: "c3a-feux-de-route",
+    competence: "C3a",
+    order: 2,
+    boites: ["manuelle", "auto"],
+    mode: "decision",
+    modeLabel: "Décider",
+    title: "Les pleins phares",
+    objective: "Rendre la route aux autres dès qu'ils apparaissent.",
+    prompt:
+      "Route de campagne sans éclairage, tu roules en pleins phares. Une voiture apparaît en face. Tu fais quoi ?",
+    visual: "night",
+    choices: [
+      {
+        id: "switch",
+        label: "Tu repasses en feux de croisement dès que tu la vois",
+      },
+      { id: "keep", label: "Tu gardes les pleins phares jusqu'au croisement" },
+      { id: "flash", label: "Tu fais un appel de phares pour la prévenir" },
+    ],
+    solution: "switch",
+    hint: "Tes pleins phares éclairent bien. Ils éblouissent aussi bien.",
+    retry:
+      "Cette réaction envoie ta lumière dans les yeux de l'autre conducteur au pire moment.",
+    success: "Feux de croisement repassés : personne n'est ébloui.",
+    why: "Un conducteur ébloui ne voit plus la route pendant plusieurs secondes. Les pleins phares se coupent dès qu'un véhicule apparaît devant toi ou que tu en suis un.",
+    transfer:
+      "Sur ta prochaine leçon de nuit hors agglomération, coupe et rallume tes pleins phares sans quitter la route des yeux.",
+  },
+  {
+    ...commun,
+    id: "c3b-brouillard",
+    competence: "C3b",
+    order: 3,
+    boites: ["manuelle", "auto"],
+    mode: "decision",
+    modeLabel: "Décider",
+    title: "Le brouillard tombe",
+    objective: "Choisir l'éclairage qui aide au lieu de gêner.",
+    prompt: "Tu ne vois plus à cinquante mètres. Tu allumes quoi ?",
+    visual: "rain",
+    choices: [
+      { id: "high", label: "Les pleins phares, pour voir plus loin" },
+      {
+        id: "fog",
+        label: "Les feux de croisement, plus les feux de brouillard",
+      },
+      { id: "day", label: "Rien, tes feux de jour suffisent" },
+    ],
+    solution: "fog",
+    hint: "Dans le brouillard, une lumière trop haute te revient dans les yeux.",
+    retry:
+      "Cet éclairage t'aveugle toi-même ou ne montre pas ta voiture aux autres.",
+    success: "Croisement et brouillard : tu vois et on te voit.",
+    why: "Les pleins phares se réfléchissent sur les gouttes et forment un mur blanc. Les feux de croisement passent sous le brouillard, et les feux de brouillard élargissent près du sol.",
+    transfer:
+      "Repère la commande des feux de brouillard dans la voiture, à l'arrêt, avant d'en avoir besoin.",
+  },
+  {
+    ...commun,
+    id: "c3c-aquaplaning",
+    competence: "C3c",
+    order: 1,
+    boites: ["manuelle", "auto"],
+    mode: "decision",
+    modeLabel: "Décider",
+    title: "La voiture se met à flotter",
+    objective: "Traverser une perte d'adhérence sans l'aggraver.",
+    prompt:
+      "Grosse flaque à vitesse soutenue. Le volant devient léger et le bruit des pneus disparaît. Ton geste ?",
+    visual: "rain",
+    choices: [
+      { id: "brake", label: "Tu freines fort pour ralentir tout de suite" },
+      {
+        id: "lift",
+        label: "Tu lèves le pied doucement et tu tiens le volant droit",
+      },
+      { id: "steer", label: "Tu braques pour sortir de la flaque" },
+    ],
+    solution: "lift",
+    hint: "Tes pneus ne touchent plus la route. Un geste fort ne sera transmis à rien.",
+    retry:
+      "Ce geste part dans le vide tant que les pneus flottent, puis frappe d'un coup quand ils reprennent.",
+    success: "Pied levé, volant droit : la voiture retrouve la route.",
+    why: "En aquaplanage les roues glissent sur un film d'eau. Freiner ou braquer ne fait rien pendant la glisse, puis tout d'un coup au moment où l'adhérence revient.",
+    transfer:
+      "Après la prochaine grosse pluie, demande à ton enseignant à quelle vitesse ce risque commence sur votre route habituelle.",
+  },
+  {
+    ...commun,
+    id: "c3c-verglas",
+    competence: "C3c",
+    order: 2,
+    boites: ["manuelle", "auto"],
+    mode: "diagnostic",
+    modeLabel: "Diagnostiquer",
+    title: "La route qui brille",
+    objective: "Reconnaître une plaque de verglas avant de rouler dessus.",
+    prompt: "Ces trois indices vont ensemble. Que décides-tu ?",
+    visual: "rain",
+    symptom:
+      "Le thermomètre affiche 1 °C, la chaussée brille par plaques, et le bruit des pneus s'est adouci.",
+    choices: [
+      { id: "wet", label: "C'est de la pluie, tu continues normalement" },
+      {
+        id: "ice",
+        label:
+          "C'est peut-être du verglas, tu ralentis bien avant et sans à-coup",
+      },
+      { id: "test", label: "Tu freines un coup pour tester l'adhérence" },
+    ],
+    solution: "ice",
+    hint: "Trois indices qui vont ensemble valent une certitude. Tu n'as pas besoin d'attendre le quatrième.",
+    retry:
+      "Cette réaction te fait découvrir l'adhérence au moment où tu ne peux plus rien corriger.",
+    success: "Verglas suspecté : tu ralentis avant d'être dessus.",
+    why: "Une plaque de verglas ne se voit pas toujours. Le froid, les reflets et le silence des pneus arrivent ensemble, et un ralentissement anticipé est la seule marge qui reste.",
+    transfer:
+      "Cet hiver, prends l'habitude de regarder la température extérieure avant de partir.",
+  },
+  {
+    ...commun,
+    id: "c3e-insertion",
+    competence: "C3e",
+    order: 1,
+    boites: ["manuelle", "auto"],
+    mode: "sequence",
+    modeLabel: "Ordonner",
+    title: "Entrer dans le flot",
+    objective: "S'insérer à la vitesse des autres et pas à la sienne.",
+    prompt:
+      "Vue de dessus. Tu arrives par la voie d'insertion. Remets la chaîne dans l'ordre.",
+    visual: "motorway",
+    steps: [
+      { id: "look", label: "Regarder le trafic qui arrive", symbol: "◉" },
+      { id: "speed", label: "Accélérer à la vitesse du flot", symbol: "↑" },
+      { id: "signal", label: "Clignotant à gauche", symbol: "←" },
+      { id: "blind", label: "Coup d'œil dans l'angle mort", symbol: "↖" },
+      { id: "merge", label: "S'insérer dans un espace", symbol: "≈" },
+    ],
+    sequence: ["look", "speed", "signal", "blind", "merge"],
+    hint: "La voie d'insertion sert à prendre de la vitesse, pas à attendre.",
+    retry:
+      "Pas encore. On regarde avant d'accélérer, et on n'entre jamais plus lentement que ceux qui roulent déjà.",
+    success: "Insertion reconstruite.",
+    why: "Arriver au bout de la voie d'insertion trop lentement oblige tout le monde à freiner. La vitesse s'attrape sur la bretelle, pas une fois dans le flot.",
+    transfer:
+      "À ta prochaine entrée sur voie rapide, regarde le compteur en fin de bretelle et compare avec le trafic.",
+  },
+  {
+    ...commun,
+    id: "c3e-panne",
+    competence: "C3e",
+    order: 2,
+    boites: ["manuelle", "auto"],
+    mode: "sequence",
+    modeLabel: "Ordonner",
+    title: "En panne sur la bande d'arrêt",
+    objective: "Se mettre à l'abri avant de s'occuper de la voiture.",
+    prompt:
+      "Vue de dessus. Ta voiture s'arrête sur la bande d'arrêt d'urgence. Remets les gestes dans l'ordre.",
+    visual: "motorway-shoulder",
+    steps: [
+      { id: "warning", label: "Feux de détresse", symbol: "△" },
+      { id: "vest", label: "Enfiler le gilet dans la voiture", symbol: "▣" },
+      { id: "exit", label: "Sortir par le côté droit", symbol: "→" },
+      { id: "rail", label: "Passer derrière la glissière", symbol: "▤" },
+      { id: "call", label: "Appeler les secours", symbol: "☎" },
+    ],
+    sequence: ["warning", "vest", "exit", "rail", "call"],
+    hint: "Le gilet se met avant d'ouvrir la portière, jamais après.",
+    retry:
+      "Pas encore. Tant que tu es exposé au trafic, aucun autre geste ne compte.",
+    success: "Mise en sécurité reconstruite.",
+    why: "Le danger n'est pas la panne, c'est de rester au bord des voies. Le gilet à l'intérieur, la sortie côté droit et la glissière te mettent hors d'atteinte en moins d'une minute.",
+    transfer:
+      "Vérifie où sont rangés le gilet et le triangle dans la voiture où tu apprends.",
+  },
+  {
+    ...commun,
+    id: "c3f-tunnel-entree",
+    competence: "C3f",
+    order: 1,
+    boites: ["manuelle", "auto"],
+    mode: "sequence",
+    modeLabel: "Ordonner",
+    title: "Le trou noir",
+    objective: "Préparer ses yeux avant de perdre la lumière.",
+    prompt: "Un tunnel approche. Remets les gestes dans l'ordre.",
+    visual: "tunnel",
+    steps: [
+      { id: "glasses", label: "Enlever les lunettes de soleil", symbol: "◐" },
+      { id: "lights", label: "Allumer les feux de croisement", symbol: "☀" },
+      { id: "radio", label: "Mettre la radio du tunnel", symbol: "≋" },
+      { id: "gap", label: "Allonger la distance devant", symbol: "↔" },
+    ],
+    sequence: ["glasses", "lights", "radio", "gap"],
+    hint: "Tout se prépare avant l'entrée. À l'intérieur il est trop tard pour chercher un bouton.",
+    retry:
+      "Pas encore. Commence par ce qui te rend la vue au moment où la lumière tombe.",
+    success: "Entrée de tunnel préparée.",
+    why: "Tes yeux mettent plusieurs secondes à s'adapter au noir. Pendant ce temps tu roules sans rien voir, et la distance devant toi est la seule marge qui te reste.",
+    transfer:
+      "Au prochain tunnel, allume tes feux avant l'entrée et pas une fois dedans.",
+  },
+  {
+    ...commun,
+    id: "c3f-tunnel-arret",
+    competence: "C3f",
+    order: 2,
+    boites: ["manuelle", "auto"],
+    mode: "decision",
+    modeLabel: "Décider",
+    title: "Bloqué sous la montagne",
+    objective: "Réagir à un arrêt long dans un tunnel.",
+    prompt:
+      "Le trafic s'arrête dans le tunnel et ne repart pas. Tu fais quoi ?",
+    visual: "tunnel",
+    choices: [
+      { id: "uturn", label: "Tu fais demi-tour vers l'entrée" },
+      {
+        id: "hazard",
+        label: "Feux de détresse, moteur coupé, et tu écoutes la radio",
+      },
+      { id: "idle", label: "Tu attends moteur tournant sans rien changer" },
+    ],
+    solution: "hazard",
+    hint: "Dans un tunnel, l'air et la visibilité comptent autant que la circulation.",
+    retry:
+      "Cette réaction met les autres en danger ou remplit le tunnel de gaz d'échappement.",
+    success: "Détresse allumée, moteur coupé, radio branchée.",
+    why: "Un demi-tour dans un tunnel envoie une voiture à contresens dans un espace sans échappatoire. Les feux de détresse préviennent ceux qui arrivent, et le moteur coupé garde l'air respirable.",
+    transfer:
+      "Au prochain tunnel, repère la fréquence radio affichée à l'entrée.",
+  },
+  {
+    ...commun,
+    id: "c3g-masque",
+    competence: "C3g",
+    order: 1,
+    boites: ["manuelle", "auto"],
+    mode: "spot",
+    modeLabel: "Trouver",
+    title: "Ce que le véhicule cache",
+    objective: "Regarder l'endroit d'où un piéton peut surgir.",
+    prompt:
+      "Un véhicule est arrêté à droite. Touche l'endroit d'où quelqu'un peut sortir sans te voir.",
+    visual: "intersection",
+    hotspots: [
+      {
+        id: "front",
+        label: "Devant le véhicule arrêté",
+        x: 6,
+        y: 40,
+        w: 24,
+        h: 14,
+      },
+      { id: "sky", label: "Le ciel", x: 35, y: 4, w: 27, h: 18 },
+      { id: "lane", label: "Le milieu de ta voie", x: 35, y: 64, w: 28, h: 30 },
+      { id: "roof", label: "Le toit du bâtiment", x: 68, y: 8, w: 24, h: 18 },
+    ],
+    solution: "front",
+    hint: "Quelqu'un qui traverse devant un véhicule arrêté ne te voit pas, et toi non plus.",
+    retry:
+      "Rien ne peut surgir de là. Cherche l'endroit que le véhicule arrêté te cache.",
+    success: "Zone masquée repérée avant d'arriver dessus.",
+    why: "Un véhicule arrêté est un mur : il cache un piéton jusqu'au dernier instant. Ralentir et décaler son regard devant lui est la seule façon de gagner du temps.",
+    transfer:
+      "En ville, ralentis à chaque véhicule arrêté et regarde sous sa carrosserie s'il y a des pieds.",
+  },
+  {
+    ...commun,
+    id: "c3g-carrefour-bouche",
+    competence: "C3g",
+    order: 2,
+    boites: ["manuelle", "auto"],
+    mode: "decision",
+    modeLabel: "Décider",
+    title: "Vert mais bouché",
+    objective: "Ne pas bloquer un carrefour qu'on ne peut pas dégager.",
+    prompt:
+      "Ton feu passe au vert, mais la file d'en face n'avance pas. Tu t'engages ?",
+    visual: "city-light",
+    choices: [
+      { id: "go", label: "Oui, ton feu est vert" },
+      {
+        id: "wait",
+        label: "Non, tu attends d'avoir la place de ressortir",
+      },
+      { id: "half", label: "Tu avances au milieu pour prendre ta place" },
+    ],
+    solution: "wait",
+    hint: "Un feu vert autorise à passer. Il ne promet pas qu'il y a de la place de l'autre côté.",
+    retry:
+      "Cette manœuvre te laisse en travers du carrefour quand les autres passeront au vert.",
+    success: "Carrefour laissé libre.",
+    why: "S'engager sans pouvoir dégager bloque tous les autres et te met en travers de leur passage. Le feu vert n'y change rien.",
+    transfer:
+      "À ton prochain feu vert en ville dense, vérifie la sortie avant d'avancer.",
+  },
 ];
 
 export const MODE_INFO = {

@@ -32,6 +32,9 @@ export function renderArt(visual) {
     return artOvertake({ cyclist: true, oncoming: true });
   if (visual === "overtake-empty") return artOvertake({});
   if (visual === "overtake-top") return artOvertakeTop();
+  if (visual === "motorway") return artMotorway(false);
+  if (visual === "motorway-shoulder") return artMotorway(true);
+  if (visual === "tunnel") return artTunnel();
   return artCockpit();
 }
 
@@ -226,4 +229,38 @@ function artOvertakeTop() {
     <div class="art-ot-road"><span class="art-ot-center"></span></div>
     <span class="art-ot-cyclist"><i></i></span>
     <span class="art-ot-player"><i></i></span>`;
+}
+
+// Voie rapide vue de dessus, la circulation va de gauche à droite. Vue de
+// dessus parce que l'insertion est une histoire d'espace entre deux voitures,
+// et qu'un espace ne se juge pas en vue subjective.
+//
+// `shoulder` remplace la voie d'insertion par la bande d'arrêt d'urgence et
+// sa glissière : une mise en sécurité se joue derrière cette glissière, elle
+// doit donc être dans la scène.
+function artMotorway(shoulder) {
+  return `
+    <div class="art-mw-road"><span class="art-mw-lane"></span></div>
+    ${
+      shoulder
+        ? `<div class="art-mw-shoulder"><i></i></div>`
+        : `<div class="art-mw-ramp"></div>`
+    }
+    <span class="art-mw-car art-mw-car-a"></span>
+    ${shoulder ? "" : `<span class="art-mw-car art-mw-car-b"></span>`}
+    <span class="art-mw-player"><i></i></span>`;
+}
+
+// L'entrée d'un tunnel, vue du conducteur : la lumière du jour, la bouche
+// noire, et la rampe de lampes qui s'enfonce.
+function artTunnel() {
+  return `
+    <div class="art-tn-sky"></div>
+    <div class="art-tn-rock"></div>
+    <div class="art-tn-mouth">
+      <span class="art-tn-lamps">${"<i></i>".repeat(6)}</span>
+      <span class="art-tn-inner-road"></span>
+    </div>
+    <div class="art-tn-road"><span></span></div>
+    <div class="art-ov-hood"></div>`;
 }
