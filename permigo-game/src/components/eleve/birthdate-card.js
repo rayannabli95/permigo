@@ -62,8 +62,12 @@ const STYLE = `<style>
   .bdc{margin:18px 16px 4px;padding:16px;border-radius:18px;
     background:var(--su);border:1px solid var(--bo);
     font-family:'Archivo',sans-serif}
+  /* ⚠️ PAS var(--a) ici : l'accent violet en 10,5px gras sur fond clair donne
+     un contraste de 4,31 quand l'AA en exige 4,5 (attrapé par la suite a11y
+     le 01/08). --mu passe dans les deux thèmes ; l'accent reste sur le bouton,
+     là où la surface est pleine. */
   .bdc-k{font:700 10.5px/1 'Archivo',sans-serif;letter-spacing:.09em;
-    text-transform:uppercase;color:var(--a);margin:0 0 8px}
+    text-transform:uppercase;color:var(--mu);margin:0 0 8px}
   .bdc-t{font:800 17px/1.25 'Archivo',sans-serif;color:var(--ink);margin:0 0 6px}
   .bdc-s{font:500 13.5px/1.5 'Archivo',sans-serif;color:var(--mu);margin:0 0 14px}
   .bdc-l{display:block;font:700 11px/1 'Archivo',sans-serif;letter-spacing:.05em;
