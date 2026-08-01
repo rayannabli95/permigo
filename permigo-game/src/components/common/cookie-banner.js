@@ -130,7 +130,12 @@ const STYLE = `<style>
     -webkit-tap-highlight-color: transparent;
   }
   .ck-btn:active { transform: scale(.97); }
-  .ck-btn-accept { background: var(--a); color: var(--a-ink); box-shadow: 0 6px 18px -6px color-mix(in srgb, var(--a) 50%, transparent); }
+  /* Violet PermiGo en dur, PAS var(--a) : l'accent par défaut ne portait le
+     blanc qu'à 4,32 quand l'AA en demande 4,5, et surtout var(--a) est
+     PERSONNALISABLE — en vert ou en cyan, --a-ink est un encre FONCÉE qui
+     s'effondre sur ce fond. Ce bandeau s'affiche de toute façon à un visiteur
+     qui n'a encore choisi aucune couleur. Contraste ici : 7,38. */
+  .ck-btn-accept { background: #4a3fc9; color: #fff; box-shadow: 0 6px 18px -6px rgba(74,63,201,.5); }
   .ck-btn-refuse { background: var(--bg); color: var(--ink, #1e293b); border-color: var(--bo); }
 </style>`;
 
