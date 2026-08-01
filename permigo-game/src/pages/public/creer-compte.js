@@ -104,6 +104,15 @@ const STYLE = `<style>
     margin: 0 0 18px;
   }
   /* Badge rôle = pastille dorée plastique */
+  /* Trois preuves de ce que le moniteur VOIT (pas de promesse en l'air). */
+  .sg-proof { list-style: none; margin: 18px 0 22px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .sg-proof li {
+    display: flex; flex-direction: column; gap: 1px;
+    padding: 10px 13px; border-radius: 13px;
+    background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1);
+  }
+  .sg-proof b { font: 800 13.5px/1.25 'Archivo', sans-serif; color: #fff; }
+  .sg-proof span { font: 600 12px/1.4 'Archivo', sans-serif; color: rgba(255,255,255,.62); }
   .sg-role-badge {
     display: inline-block;
     margin: 0 0 18px;
@@ -260,9 +269,19 @@ export async function mount(root) {
                onerror="this.style.display='none';this.nextElementSibling.style.display='grid';">
           <span class="sg-logo-fb" aria-hidden="true"><b>P</b></span>
         </div>
-        <h1 class="sg-title">Crée ton compte moniteur</h1>
-        <p class="sg-sub">Des élèves qui arrivent préparés à chaque leçon. Ton tableau de bord est prêt en 30 secondes.</p>
+        <h1 class="sg-title">Tes élèves arrivent préparés. Tu ne remplis rien.</h1>
+        <p class="sg-sub">Ils préparent chaque leçon dans l'app. Toi tu vois qui s'entraîne, qui avance et qui décroche.</p>
         <div style="text-align:center"><span class="sg-role-badge">Moniteur indépendant</span></div>
+
+        <!-- ⚠️ Cette promesse ne vivait QUE dans le tour guidé, donc APRÈS
+             l'inscription : elle ne convainquait personne. Les trois preuves
+             ci-dessous correspondent à des écrans réels (Aujourd'hui, Mes élèves,
+             Livret REMC), on ne promet rien qui n'existe pas. -->
+        <ul class="sg-proof">
+          <li><b>Qui a préparé sa leçon</b><span>Avant même de monter en voiture</span></li>
+          <li><b>Qui décroche</b><span>Repéré sans que tu aies à demander</span></li>
+          <li><b>Où en est chaque élève</b><span>Les 31 compétences du livret</span></li>
+        </ul>
         ${connectedBanner}
 
         <div class="sg-row">
@@ -301,8 +320,9 @@ export async function mount(root) {
 
         <button class="sg-btn" id="sg-submit" disabled>Créer mon compte</button>
         <div class="sg-trust">
-          <span>${icon("check", { size: 13, strokeWidth: 2.5 })} Sans engagement</span>
+          <span>${icon("check", { size: 13, strokeWidth: 2.5 })} 9,99 € par mois. Sans engagement</span>
           <span>${icon("check", { size: 13, strokeWidth: 2.5 })} Jusqu'à 100 élèves. Gratuit pour eux</span>
+          <span>${icon("check", { size: 13, strokeWidth: 2.5 })} Résiliable en ligne en un clic</span>
         </div>
         <div class="sg-sep"></div>
         <div class="sg-login-row">Déjà un compte&nbsp;? <a href="/#/login">Se connecter</a></div>
