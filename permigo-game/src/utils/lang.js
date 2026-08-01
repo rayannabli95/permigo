@@ -22,6 +22,18 @@
 import { sb } from "@/auth/auth.js";
 
 const STORAGE_KEY = "permigo_lang";
+// Marqueur de CHOIX HUMAIN (sélecteur, inscription, réglages, lien de campagne).
+// ⚠️ Sans lui, on ne distinguait pas « l'élève a choisi le français » de « on a
+// écrit le défaut français au démarrage » — et ce défaut écrasait la langue du
+// téléphone pour TOUS les visiteurs (page de vente en français sur un téléphone
+// arabe, mesuré le 01/08/2026). Le miroir STORAGE_KEY reste la source de rendu ;
+// ce marqueur dit seulement si on a le droit de le considérer comme une décision.
+const EXPLICIT_KEY = "permigo_lang_explicit";
+// Origine du miroir. « auto » = DEVINÉ depuis le téléphone. Sans cette marque,
+// une langue devinée devenait un choix au rechargement suivant (la migration
+// « un miroir non-fr est forcément un choix » l'adoptait) et l'anglais collait
+// à un élève qui n'avait rien demandé.
+const SRC_KEY = "permigo_lang_src";
 
 export const LANGS = ["fr", "en", "ar"];
 export const LANG_LABELS = { fr: "Français", en: "English", ar: "العربية" };
@@ -30,12 +42,54 @@ function isLang(v) {
   return v === "fr" || v === "en" || v === "ar";
 }
 
+/** Langue du téléphone, ramenée aux langues que l'app parle vraiment. */
+export function browserLang() {
+  try {
+    const list =
+      navigator.languages && navigator.languages.length
+        ? navigator.languages
+        : [navigator.language || ""];
+    for (const raw of list) {
+      const l = String(raw).slice(0, 2).toLowerCase();
+      if (isLang(l)) return l;
+    }
+  } catch {
+    /* SSR / indispo */
+  }
+  return null;
+}
+
+/**
+ * Le choix HUMAIN mémorisé, ou null. Sert à décider si on a le droit d'écrire
+ * en base : une langue simplement DEVINÉE ne doit jamais devenir une préférence.
+ */
+export function explicitLang() {
+  try {
+    const v = localStorage.getItem(STORAGE_KEY);
+    if (!isLang(v)) return null;
+    if (localStorage.getItem(EXPLICIT_KEY) === "1") return v;
+    if (localStorage.getItem(SRC_KEY) === "auto") return null; // deviné par nous
+    // Migration des installations d'avant le marqueur : seul « fr » pouvait être
+    // écrit automatiquement (c'était le défaut). Un miroir en/ar est donc forcément
+    // un vrai choix — on le reconnaît et on pose le marqueur.
+    if (v !== "fr") {
+      localStorage.setItem(EXPLICIT_KEY, "1");
+      return v;
+    }
+  } catch {
+    /* mode privé */
+  }
+  return null;
+}
+
 export function isRTL(lang) {
   return (lang || getLang()) === "ar";
 }
 
 // ─── Apply (miroir localStorage + attribut lang pour l'a11y) ───
-export function applyLang(lang) {
+// `explicit: false` = langue DEVINÉE (téléphone). On pose le miroir pour que
+// toute l'app s'affiche dans cette langue, mais on ne la grave pas comme un choix.
+export function applyLang(lang, { explicit = true } = {}) {
   const l = isLang(lang) ? lang : "fr";
   try {
     document.documentElement.setAttribute("lang", l);
@@ -54,6 +108,12 @@ export function applyLang(lang) {
   }
   try {
     localStorage.setItem(STORAGE_KEY, l);
+    if (explicit) {
+      localStorage.setItem(EXPLICIT_KEY, "1");
+      localStorage.removeItem(SRC_KEY);
+    } else {
+      localStorage.setItem(SRC_KEY, "auto");
+    }
   } catch {
     /* mode privé */
   }
@@ -116,7 +176,9 @@ export async function syncLangFromPrefs(sb2 = sb) {
     }
     return;
   }
-  const local = getLang(); // choix mémorisé côté client (ou 'fr')
+  // ⚠️ On raisonne sur le choix HUMAIN, pas sur le miroir : une langue devinée
+  // depuis le téléphone ne doit jamais être écrite en base comme une préférence.
+  const chosen = explicitLang();
   try {
     const { data } = await sb2.rpc("get_my_preferences");
     const l = data?.language;
@@ -128,10 +190,10 @@ export async function syncLangFromPrefs(sb2 = sb) {
     // La base est au défaut 'fr'/null MAIS l'élève a un choix explicite en local
     // (ex. posé à l'inscription avant que la persistance n'aboutisse) → on GARDE
     // son choix et on RÉPARE la base. Évite le retour intempestif au français.
-    if (local === "en" || local === "ar") {
-      applyLang(local);
+    if (chosen === "en" || chosen === "ar") {
+      applyLang(chosen);
       try {
-        await sb2.rpc("set_my_preferences", { p_data: { language: local } });
+        await sb2.rpc("set_my_preferences", { p_data: { language: chosen } });
       } catch {
         /* le miroir localStorage tient déjà la préférence */
       }
@@ -140,7 +202,14 @@ export async function syncLangFromPrefs(sb2 = sb) {
   } catch {
     /* fallback ci-dessous */
   }
-  applyLang(local);
+  // Aucun choix nulle part → français, comme avant.
+  // ⚠️ La détection par le téléphone s'arrête à la porte du compte : elle sert
+  // le VISITEUR (page de vente, connexion, inscription), là où il n'a encore
+  // rien pu choisir. Un élève connecté, lui, a toujours choisi sa langue à
+  // l'inscription. La laisser deviner ici ferait basculer en anglais partiel
+  // un élève français dont le téléphone est en anglais, sans qu'il ait rien
+  // demandé (l'app n'est traduite qu'à moitié).
+  applyLang(chosen || "fr", { explicit: !!chosen });
 }
 
 // ─── Écriture (upsert via RPC — même chemin que le thème) ──────
@@ -156,7 +225,13 @@ export async function saveLang(sb2, lang) {
 
 // ─── Init rapide (avant auth — lit l'URL puis localStorage) ────
 export function initLangEarly() {
-  // Un lien de campagne porte une intention EXPLICITE et récente : il gagne
-  // sur le miroir local et DEVIENT la préférence (applyLang écrit le miroir).
-  applyLang(langFromUrl() || getLang());
+  // Ordre unique, le même partout (page de vente, connexion, inscription, app) :
+  //   1. le lien de campagne  2. le choix humain mémorisé  3. le téléphone  4. le français
+  // ⚠️ Le point 4 ne doit JAMAIS être persisté comme un choix : c'est ce qui
+  // rendait le point 3 inatteignable et servait du français à toute la terre.
+  const url = langFromUrl();
+  if (url) return applyLang(url); // intention explicite et récente
+  const chosen = explicitLang();
+  if (chosen) return applyLang(chosen);
+  applyLang(browserLang() || "fr", { explicit: false });
 }

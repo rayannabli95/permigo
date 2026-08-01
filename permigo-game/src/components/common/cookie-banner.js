@@ -15,10 +15,33 @@ import { getLang } from "@/utils/lang.js";
 
 // i18n coque (EN/AR), repli FR.
 const CK_I18N = {
-  en: { aria: "Cookie preferences", title: "Cookies & privacy", txt: "We use the strict minimum to sign you in, plus audience measurement to improve the app and see where our visitors come from, including Facebook if you accept all. No ads inside the app.", privacy: "Privacy policy", essential: "Essential only", accept: "Accept all" },
-  ar: { aria: "تفضيلات ملفات تعريف الارتباط", title: "ملفات تعريف الارتباط والخصوصية", txt: "نستخدم الحد الأدنى الضروري لتسجيل دخولك، إضافةً إلى قياس الجمهور لتحسين التطبيق ومعرفة مصدر زوّارنا، بما في ذلك فيسبوك إذا قبلت الكل. لا إعلانات داخل التطبيق.", privacy: "سياسة الخصوصية", essential: "الضروري فقط", accept: "قبول الكل" },
+  en: {
+    aria: "Cookie preferences",
+    title: "Cookies & privacy",
+    txt: "We use the strict minimum to sign you in, plus audience measurement to improve the app and see where our visitors come from, including Facebook if you accept all. No ads inside the app.",
+    privacy: "Privacy policy",
+    essential: "Essential only",
+    accept: "Accept all",
+    txt_short: "Audience measurement to improve the app. No ads.",
+    essential_short: "Refuse",
+    accept_short: "Accept",
+  },
+  ar: {
+    aria: "تفضيلات ملفات تعريف الارتباط",
+    title: "ملفات تعريف الارتباط والخصوصية",
+    txt: "نستخدم الحد الأدنى الضروري لتسجيل دخولك، إضافةً إلى قياس الجمهور لتحسين التطبيق ومعرفة مصدر زوّارنا، بما في ذلك فيسبوك إذا قبلت الكل. لا إعلانات داخل التطبيق.",
+    privacy: "سياسة الخصوصية",
+    essential: "الضروري فقط",
+    accept: "قبول الكل",
+    txt_short: "قياس الجمهور لتحسين التطبيق. بدون إعلانات.",
+    essential_short: "رفض",
+    accept_short: "قبول",
+  },
 };
-function ckt(k, fr) { const l = getLang(); return (l !== "fr" && CK_I18N[l]?.[k]) || fr; }
+function ckt(k, fr) {
+  const l = getLang();
+  return (l !== "fr" && CK_I18N[l]?.[k]) || fr;
+}
 
 const KEY = "permigo_cookie_consent";
 const COOKIE_NAME = "pg_consent";
@@ -63,6 +86,11 @@ function setConsent(value) {
 }
 
 const STYLE = `<style>
+  /* ⚠️ Bandeau COMPACT et TARDIF. Version précédente : un pavé de 4 lignes
+     affiché à 800 ms qui couvrait le tiers bas d'un iPhone 13, donc le billet
+     ET le bouton principal de la page de vente (mesuré le 01/08/2026). Le
+     premier geste demandé au visiteur était un geste juridique. Aucun traceur
+     non essentiel n'est posé avant le choix, donc le différer reste conforme. */
   .ck-banner {
     position: fixed;
     left: 50%; bottom: calc(12px + env(safe-area-inset-bottom, 0px));
@@ -72,33 +100,32 @@ const STYLE = `<style>
     width: min(520px, calc(100vw - 24px));
     background: var(--su, #fff);
     border: 1px solid var(--bo);
-    border-radius: 20px;
+    border-radius: 16px;
     box-shadow: 0 16px 48px -12px rgba(11,13,26,.28);
-    padding: 18px 18px 16px;
+    padding: 10px 12px;
     z-index: 9000;
     transition: transform .42s cubic-bezier(.22,1,.32,1);
     font-family: 'Archivo', sans-serif;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
   }
   /* Dans l'app (chrome monté), le bandeau se pose AU-DESSUS de la barre de nav
      (~60px) au lieu de la recouvrir → les onglets restent tappables. Et pendant
      qu'il est ouvert, on réserve l'espace bas sur #app pour que les CTA de bas
      de page (ex. « Ton centre d'examen » sur Réviser) ne soient plus masqués. */
   body.has-chrome .ck-banner { bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
-  body.ck-open.has-chrome #app { padding-bottom: calc(210px + env(safe-area-inset-bottom, 0px)); }
+  body.ck-open.has-chrome #app { padding-bottom: calc(130px + env(safe-area-inset-bottom, 0px)); }
   .ck-banner.on { transform: translateX(-50%) translateY(0); }
   @media (prefers-reduced-motion: reduce) { .ck-banner { transition: none; } }
-  .ck-ttl {
-    font: 800 15px/1.3 'Archivo', sans-serif;
-    color: var(--ink); margin: 0 0 6px;
-    display: flex; align-items: center; gap: 7px;
+  .ck-txt {
+    flex: 1 1 190px; min-width: 0;
+    font: 500 12px/1.4 'Archivo', sans-serif; color: var(--ink); margin: 0;
   }
-  .ck-txt { font: 500 12.5px/1.55 'Archivo', sans-serif; color: var(--ink); margin: 0 0 14px; }
   .ck-txt a { color: var(--ink, var(--a-ink)); text-decoration: underline; }
-  .ck-row { display: flex; gap: 8px; }
+  .ck-row { display: flex; gap: 8px; flex: 0 1 auto; }
   .ck-btn {
-    flex: 1; padding: 12px 14px; border-radius: 12px;
-    font: 700 13.5px/1 'Archivo', sans-serif;
-    cursor: pointer; min-height: 46px; border: 1px solid transparent;
+    padding: 10px 14px; border-radius: 12px; white-space: nowrap;
+    font: 700 13px/1 'Archivo', sans-serif;
+    cursor: pointer; min-height: 44px; border: 1px solid transparent;
     transition: transform .12s, opacity .12s;
     -webkit-tap-highlight-color: transparent;
   }
@@ -116,25 +143,41 @@ export function mountCookieBanner() {
   root.id = "ck-banner-root";
   root.innerHTML = `${STYLE}
     <div class="ck-banner" role="dialog" aria-label="${ckt("aria", "Préférences cookies")}" aria-live="polite" dir="${getLang() === "ar" ? "rtl" : "ltr"}">
-      <div class="ck-ttl">${ckt("title", "Cookies & confidentialité")}</div>
       <p class="ck-txt">
-        ${ckt("txt", "On utilise le strict nécessaire pour te connecter, plus une mesure d\u0027audience pour améliorer l\u0027app et savoir d\u0027où viennent nos visiteurs, dont Facebook si tu acceptes tout. Aucune publicité dans l\u0027app.")}
+        ${ckt("txt_short", "Mesure d\u0027audience pour améliorer l\u0027app. Aucune publicité.")}
         <a href="#/legal/privacy">${ckt("privacy", "Politique de confidentialité")}</a>
       </p>
       <div class="ck-row">
-        <button class="ck-btn ck-btn-refuse" id="ck-essential" type="button">${ckt("essential", "Essentiels uniquement")}</button>
-        <button class="ck-btn ck-btn-accept" id="ck-all" type="button">${ckt("accept", "Tout accepter")}</button>
+        <button class="ck-btn ck-btn-refuse" id="ck-essential" type="button">${ckt("essential_short", "Refuser")}</button>
+        <button class="ck-btn ck-btn-accept" id="ck-all" type="button">${ckt("accept_short", "Accepter")}</button>
       </div>
     </div>`;
   document.body.appendChild(root);
-  // Réserve l'espace bas (cf. body.ck-open dans STYLE) tant que le bandeau est là.
-  document.body.classList.add("ck-open");
   // Tant que la question cookies n'a pas de réponse, le tuto guidé attend
   // (canal « bloqueur » : le garde-fou 8 s des popups ne s'applique pas).
   pushIntroBlocker();
 
   const banner = root.querySelector(".ck-banner");
-  requestAnimationFrame(() => banner.classList.add("on"));
+  // Apparition DIFFEREE : 4 secondes, ou au premier scroll si le visiteur bouge
+  // avant. Les 3 premieres secondes appartiennent a l'offre, pas au juridique.
+  // Rien n'est pose entre-temps (l'analytics attend deja le choix) donc differer
+  // reste conforme : c'est l'AFFICHAGE qu'on retarde, pas le consentement.
+  let shown = false;
+  let timer = 0;
+  const show = () => {
+    if (shown) return;
+    shown = true;
+    clearTimeout(timer);
+    // La réserve d'espace bas n'est posée qu'AVEC le bandeau : sinon l'app
+    // gardait un vide de 130 px pendant les 4 secondes d'attente.
+    document.body.classList.add("ck-open");
+    window.removeEventListener("scroll", show);
+    window.removeEventListener("touchmove", show);
+    requestAnimationFrame(() => banner.classList.add("on"));
+  };
+  timer = setTimeout(show, 4000);
+  window.addEventListener("scroll", show, { passive: true });
+  window.addEventListener("touchmove", show, { passive: true });
 
   const close = (value) => {
     setConsent(value);

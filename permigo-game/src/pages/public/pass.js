@@ -26,6 +26,7 @@ import { startPassCheckout } from "@/services/billing.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { illMask } from "@/utils/illustrations.js";
 import { fbTrack } from "@/services/meta-pixel.js";
+import { applyLang, browserLang, explicitLang } from "@/utils/lang.js";
 
 const LOGO = "/p-badge.png";
 
@@ -38,18 +39,23 @@ const STR = {
     // Phrase-mission (décision Rayan 17/07) : LE but de l'app en une phrase,
     // en gros. « Réserve ta place » vit déjà dans le CTA, « 90 jours » sur le
     // billet — rien ne se perd.
+    docTitle:
+      "PermiGo. Le compagnon qui te prépare avant chaque heure de conduite",
     h1: `Prépare ta leçon <br><em>avant de monter en voiture.</em>`,
-    lead: `La seule app qui bosse ta <strong>conduite</strong> entre les leçons. Pas une énième app de code.`,
+    // ⚠️ Pas de « la seule app » : allégation de supériorité invérifiable
+    // (pratiques commerciales trompeuses). On dit ce qu'on fait, pas qu'on est seul.
+    lead: `L'app qui travaille ta <strong>conduite</strong> entre les leçons. Pas une énième app de code.`,
     tTitle: `OBJECTIF PERMIS<br>EN 90 JOURS`,
     tSub: "Conduite · mini-jeux · simulations d'examen",
-    tBoardLbl: "Embarquement",
-    tBoard: "JUIL. 2026",
+    tBoardLbl: "Départ",
     tDureeLbl: "Accès",
     tDuree: "3 MOIS",
     tOffre: "Tarif exceptionnel",
     tStrike: "29,97 €",
     tPrice: "24,99 €",
-    cta: `Réserver ma place · <s>29,97 €</s> 24,99 €`,
+    freeCta: "Commencer gratuitement",
+    freeNote: "3 leçons offertes · sans carte bancaire",
+    cta: `Ouvrir tout mon parcours · <s>29,97 €</s> 24,99 €`,
     ctaNote: `Paiement sécurisé Stripe · <b>Satisfait ou remboursé sous 3 jours</b><br><small>*Prix de lancement : il remontera après cette promo.</small>`,
     bulle: "3 compétences validées !",
     bulleSub: "cette semaine",
@@ -149,17 +155,20 @@ const STR = {
       ],
       [
         "Je galère avec le français, ça ira ?",
-        "Oui. Phrases courtes, mots simples, mini-jeux visuels. Et cette page existe en anglais (bouton EN en haut). Par message, on t'aide pas à pas.",
+        "Oui. Phrases courtes, mots simples, mini-jeux visuels. Et cette page existe en anglais et en arabe (boutons EN et AR en haut). Par message, on t'aide pas à pas.",
       ],
       [
         "Je peux annuler ou être remboursé ?",
         `Pendant les 3 premiers jours : <strong>satisfait ou remboursé</strong>. Ensuite, le mensuel s'annule à tout moment en un clic (les billets Or et Platine sont des paiements uniques). Tu pars ? <a href="#/avis-depart">Dis-nous pourquoi ici</a>. Ça nous aide à améliorer l'app.`,
       ],
     ],
-    foot: `Paiement sécurisé par Stripe · Satisfait ou remboursé sous 3 jours<br><a href="#/legal">Mentions légales</a> · Moniteur indépendant ? <a href="#/creer-compte">Crée ton espace</a>`,
-    stickyName: "Billet Or · 3 mois",
-    stickyPrice: "24,99 € · essai 3 jours",
-    stickyBtn: "Réserver ma place",
+    foot: `Paiement sécurisé par Stripe · Satisfait ou remboursé sous 3 jours<br><a href="#/legal">Mentions légales</a> · <a href="#/rejoindre?solo=1">Créer un compte gratuit</a>`,
+    pros: `Moniteur indépendant ? <a href="#/creer-compte">Crée ton espace</a> · Auto-école ? <a href="#/pro">Demander un devis</a>`,
+    // Barre collante : la porte gratuite à gauche, l'achat à droite. Avant, elle
+    // ne proposait QUE de payer — et le compte gratuit n'avait aucune porte.
+    stickyName: "Ou commencer",
+    stickyPrice: "gratuitement",
+    stickyBtn: "Ouvrir tout · 24,99 €",
     cancelNote:
       "Paiement annulé. Rien n'a été débité. Ton billet t'attend juste en dessous. 👇",
     successT: "Bienvenue dans l'aventure ! 🚀",
@@ -178,18 +187,20 @@ const STR = {
     login: "Log in",
     langBtn: "FR",
     kicker: "Launch offer*",
+    docTitle: "PermiGo. Prepare every driving lesson before you get in the car",
     h1: `Prepare every lesson <br><em>before you get in the car.</em>`,
-    lead: `The only app that trains your <strong>driving</strong> between lessons. Not just another code-test app.`,
+    lead: `The app that trains your <strong>driving</strong> between lessons. Not just another code-test app.`,
     tTitle: `LICENCE GOAL:<br>90 DAYS`,
     tSub: "Driving · mini-games · exam simulations",
-    tBoardLbl: "Boarding",
-    tBoard: "JUL 2026",
+    tBoardLbl: "Start",
     tDureeLbl: "Access",
     tDuree: "3 MONTHS",
     tOffre: "Special price",
     tStrike: "€29.97",
     tPrice: "€24.99",
-    cta: `Book my seat · <s>€29.97</s> €24.99`,
+    freeCta: "Start for free",
+    freeNote: "3 lessons included · no card needed",
+    cta: `Open my full course · <s>€29.97</s> €24.99`,
     ctaNote: `Secure Stripe checkout · <b>3-day money-back guarantee</b><br><small>*Launch price. It will go up after this promo.</small>`,
     bulle: "3 skills validated!",
     bulleSub: "this week",
@@ -297,10 +308,11 @@ const STR = {
         `First 3 days: <strong>money-back guarantee</strong>. After that, the monthly plan cancels anytime in one click (Gold and Platinum are one-time payments). Leaving? <a href="#/avis-depart">Tell us why here</a>. It helps us improve.`,
       ],
     ],
-    foot: `Secure payment by Stripe · 3-day money-back guarantee<br><a href="#/legal">Legal notice</a> · Driving instructor? <a href="#/creer-compte">Create your space</a>`,
-    stickyName: "Gold Ticket · 3 months",
-    stickyPrice: "€24.99 · 3-day trial",
-    stickyBtn: "Book my seat",
+    foot: `Secure payment by Stripe · 3-day money-back guarantee<br><a href="#/legal">Legal notice</a> · <a href="#/rejoindre?solo=1">Create a free account</a>`,
+    pros: `Driving instructor? <a href="#/creer-compte">Create your space</a> · Driving school? <a href="#/pro">Ask for a quote</a>`,
+    stickyName: "Or start",
+    stickyPrice: "for free",
+    stickyBtn: "Open all · €24.99",
     cancelNote:
       "Payment cancelled. Nothing was charged. Your ticket is waiting below. 👇",
     successT: "Welcome aboard! 🚀",
@@ -319,18 +331,20 @@ const STR = {
     login: "تسجيل الدخول",
     langBtn: "FR",
     kicker: "عرض الإطلاق*",
+    docTitle: "PermiGo. حضّر كل درس قيادة قبل أن تركب السيارة",
     h1: `حضِّر كل درس <br><em>قبل أن تركب السيارة.</em>`,
-    lead: `التطبيق الوحيد الذي يدرّبك على <strong>القيادة</strong> بين الدروس. وليس مجرّد تطبيق آخر لاختبار الكود.`,
+    lead: `التطبيق الذي يدرّبك على <strong>القيادة</strong> بين الدروس. وليس مجرّد تطبيق آخر لاختبار الكود.`,
     tTitle: `الهدف: رخصة القيادة<br>في 90 يوماً`,
     tSub: "قيادة · ألعاب مصغّرة · محاكاة الامتحان",
-    tBoardLbl: "الصعود",
-    tBoard: "يوليو 2026",
+    tBoardLbl: "الانطلاق",
     tDureeLbl: "المدة",
     tDuree: "3 أشهر",
     tOffre: "سعر استثنائي",
     tStrike: "€29.97",
     tPrice: "€24.99",
-    cta: `احجز مقعدي · <s>€29.97</s> €24.99`,
+    freeCta: "ابدأ مجاناً",
+    freeNote: "3 دروس هدية · بدون بطاقة بنكية",
+    cta: `افتح مساري كاملاً · <s>€29.97</s> €24.99`,
     ctaNote: `دفع آمن عبر Stripe · <b>مضمون أو استرداد أموالك خلال 3 أيام</b><br><small>*سعر الإطلاق. سيرتفع بعد انتهاء هذا العرض.</small>`,
     bulle: "تم التحقق من 3 مهارات!",
     bulleSub: "هذا الأسبوع",
@@ -438,10 +452,11 @@ const STR = {
         `أول 3 أيام: <strong>مضمون أو استرداد أموالك</strong>. بعد ذلك، يُلغى الاشتراك الشهري في أي وقت بنقرة واحدة (التذكرتان الذهبية والبلاتينية دفعة واحدة فقط). هل ستغادر؟ <a href="#/avis-depart">أخبرنا بالسبب هنا</a>. هذا يساعدنا على التحسّن.`,
       ],
     ],
-    foot: `دفع آمن عبر Stripe · مضمون أو استرداد أموالك خلال 3 أيام<br><a href="#/legal">الإشعارات القانونية</a> · مدرّب قيادة مستقل؟ <a href="#/creer-compte">أنشئ مساحتك</a>`,
-    stickyName: "التذكرة الذهبية · 3 أشهر",
-    stickyPrice: "€24.99 · تجربة 3 أيام",
-    stickyBtn: "احجز مقعدي",
+    foot: `دفع آمن عبر Stripe · مضمون أو استرداد أموالك خلال 3 أيام<br><a href="#/legal">الإشعارات القانونية</a> · <a href="#/rejoindre?solo=1">أنشئ حساباً مجانياً</a>`,
+    pros: `مدرّب قيادة مستقل؟ <a href="#/creer-compte">أنشئ مساحتك</a> · مدرسة قيادة؟ <a href="#/pro">اطلب عرض سعر</a>`,
+    stickyName: "أو ابدأ",
+    stickyPrice: "مجاناً",
+    stickyBtn: "افتح الكل · €24.99",
     cancelNote:
       "تمّ إلغاء الدفع. لم يُخصم أي مبلغ. تذكرتك في انتظارك أدناه. 👇",
     successT: "مرحباً بك على متن الرحلة! 🚀",
@@ -587,6 +602,9 @@ const STYLE = `<style>
   .pv-t-meta { display: flex; gap: 14px; margin-top: 12px; }
   .pv-t-meta div b { display: block; font: 700 10px/1 'Archivo', sans-serif; letter-spacing: .14em; text-transform: uppercase; color: var(--tik-lbl); margin-bottom: 2px; }
   .pv-t-meta div span { font: 600 13px/1 'IBM Plex Mono', monospace; }
+  /* L'arabe n'a pas de glyphes dans IBM Plex Mono : le mois se disloquait
+     (« أ غسطس »). On repasse sur la police de marque pour le billet en arabe. */
+  .pv[dir="rtl"] .pv-t-meta div span { font-family: 'Archivo', sans-serif; }
   .pv-t-stub .n { font: 700 9.5px/1.25 'Archivo', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--tik-lbl); }
   .pv-t-strike { font: 700 13px/1 'Archivo', sans-serif; color: var(--tik-lbl); text-decoration: line-through; }
   .pv-t-price { font: 800 22px/1 'Archivo', sans-serif; text-shadow: 0 1px 0 rgba(255,255,255,.45); }
@@ -609,6 +627,18 @@ const STYLE = `<style>
   .pv-cta-hero s { opacity: .55; font-weight: 700; font-size: 14px; margin-right: 2px; }
   .pv-cta-hero:active { transform: translateY(4px); box-shadow: inset 0 3px 0 rgba(255,255,255,.55), 0 2px 0 #a86e00, 0 4px 8px rgba(0,0,0,.3); }
   .pv-cta-hero[disabled] { opacity: .65; cursor: wait; }
+  /* Porte gratuite : violet plein (celui de l'app), posée AU-DESSUS du bouton
+     doré. L'or reste la couleur de l'achat, le violet celle de l'entrée. */
+  .pv-cta-free {
+    display: block; width: 100%; max-width: 340px; margin: 26px auto 0;
+    border: 0; cursor: pointer; border-radius: 18px; padding: 17px;
+    font: 800 17px/1 'Archivo', sans-serif; color: #fff; text-shadow: 0 1.5px 0 rgba(0,0,0,.28);
+    background: linear-gradient(180deg, var(--in) 0%, var(--in-dp) 70%, var(--in-dk));
+    box-shadow: inset 0 3px 0 rgba(255,255,255,.28), 0 6px 0 var(--in-dk), 0 12px 26px rgba(0,0,0,.4);
+    transition: transform .1s ease, box-shadow .1s ease;
+  }
+  .pv-cta-free:active { transform: translateY(4px); box-shadow: inset 0 3px 0 rgba(255,255,255,.35), 0 2px 0 var(--in-dk), 0 4px 8px rgba(0,0,0,.3); }
+  .pv-free-note { text-align: center; font: 600 12.5px/1.6 'Archivo', sans-serif; color: var(--ink-mu); margin: 10px 0 18px; }
   .pv-cta-note { text-align: center; font: 600 12.5px/1.6 'Archivo', sans-serif; color: var(--ink-dim); margin: 12px 0 0; }
   .pv-cta-note b { color: var(--ink-soft); }
   .pv-cta-note small { font-size: 11px; color: #655a97; }
@@ -770,6 +800,9 @@ const STYLE = `<style>
 
   .pv-foot { text-align: center; padding: 36px 0 10px; font: 600 12px/1.7 'Archivo', sans-serif; color: var(--ink-dim); }
   .pv-foot a { color: var(--ink-soft); }
+  /* Moniteurs et auto-écoles : deux segments payants qui n'avaient aucune porte
+     (la page #/pro n'était liée depuis nulle part). */
+  .pv-foot-pros { display: inline-block; margin-top: 10px; color: var(--ink-dim); }
 
   /* ── Barre CTA collante ── */
   .pv-sticky {
@@ -779,8 +812,16 @@ const STYLE = `<style>
     border-top: 1.5px solid rgba(255,206,77,.25);
   }
   .pv-sticky-inner { display: flex; align-items: center; gap: 12px; width: 100%; max-width: 480px; margin: 0 auto; }
-  .pv-sticky-txt { font: 700 12.5px/1.25 'Archivo', sans-serif; color: var(--ink-soft); white-space: nowrap; }
-  .pv-sticky-txt b { display: block; color: var(--gold); font-size: 14.5px; }
+  /* Moitié gauche de la barre collante : elle affichait un prix, elle ouvre
+     maintenant le compte gratuit. C'est l'élément le plus vu de la page. */
+  .pv-sticky-free {
+    flex: none; min-height: 46px; padding: 6px 10px; border: 0; cursor: pointer;
+    background: none; border-radius: 12px; text-align: start;
+    font: 700 12.5px/1.25 'Archivo', sans-serif; color: var(--ink-soft); white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .pv-sticky-free b { display: block; color: var(--go); font-size: 14.5px; }
+  .pv-sticky-free:active { background: rgba(255,255,255,.08); }
   .pv-sticky-btn {
     flex: 1; border: 0; cursor: pointer; border-radius: 14px; padding: 13px 14px;
     font: 800 15px/1 'Archivo', sans-serif; color: #4a3300; text-shadow: 0 1px 0 rgba(255,255,255,.35);
@@ -852,20 +893,54 @@ function getLang() {
     return p;
   }
 
+  // Ordre unique, partagé avec utils/lang.js :
+  //   lien de campagne → choix humain (cette page, puis l'app) → téléphone → français.
+  // ⚠️ Le miroir `permigo_lang` NE compte plus comme un choix : le boot y écrivait
+  // « fr » par défaut, ce qui rendait la ligne du téléphone inatteignable et servait
+  // une page française à un visiteur arabophone (mesuré le 01/08/2026).
   const stored = localStorage.getItem("pv_lang");
   if (ok(stored)) return stored;
   if (ok(p)) return p;
-  const appStored = localStorage.getItem("permigo_lang");
-  if (appStored === "fr" || appStored === "en" || appStored === "ar")
-    return appStored;
-  const browserLang = (navigator.language || "fr").toLowerCase();
-  if (browserLang.startsWith("fr")) return "fr";
-  if (browserLang.startsWith("ar")) return "ar";
-  return "en";
+  const chosen = explicitLang();
+  if (ok(chosen)) return chosen;
+  return browserLang() || "fr";
+}
+
+/**
+ * Langue de la page pour le navigateur et pour les moteurs : `<html lang>` et le
+ * titre d'onglet. Sans ça, un lecteur d'écran lisait l'arabe avec une voix
+ * française et l'onglet restait en français dans les trois langues.
+ */
+function applyPageLang(lang, L) {
+  try {
+    document.documentElement.setAttribute("lang", lang);
+    if (L?.docTitle) document.title = L.docTitle;
+  } catch {
+    /* SSR / indispo */
+  }
+}
+
+/**
+ * Date de départ du billet. ⚠️ Elle était écrite en dur (« JUIL. 2026 ») : au
+ * 1er août 2026 le billet annonçait un départ passé, donc une offre expirée.
+ * On affiche le mois courant, dans la langue de la page.
+ */
+function boardLabel(lang) {
+  const d = new Date();
+  const loc = lang === "ar" ? "ar" : lang === "en" ? "en-GB" : "fr-FR";
+  try {
+    const s = new Intl.DateTimeFormat(loc, {
+      month: "short",
+      year: "numeric",
+    }).format(d);
+    return lang === "ar" ? s : s.toUpperCase();
+  } catch {
+    return `${d.getMonth() + 1}/${d.getFullYear()}`;
+  }
 }
 
 /** Le billet d'or. stamped = billet validé (écran de succès). */
-function renderTicket(L, { stamped = false } = {}) {
+function renderTicket(L, { stamped = false, lang = "fr" } = {}) {
   return `
     <div class="pv-ticket-scene pv-rev">
       <div class="pv-ticket">
@@ -875,7 +950,7 @@ function renderTicket(L, { stamped = false } = {}) {
             <div class="pv-t-title">${L.tTitle}</div>
             <div class="pv-t-sub">${L.tSub}</div>
             <div class="pv-t-meta">
-              <div><b>${L.tBoardLbl}</b><span>${L.tBoard}</span></div>
+              <div><b>${L.tBoardLbl}</b><span>${boardLabel(lang)}</span></div>
               <div><b>${L.tDureeLbl}</b><span>${L.tDuree}</span></div>
             </div>
           </div>
@@ -898,6 +973,8 @@ export async function mount(root) {
   const q = hashQuery();
   const checkout = q.get("checkout");
   const planParam = q.get("plan");
+
+  applyPageLang(lang, L);
 
   track("pass.view", {
     logged: !!me,
@@ -923,7 +1000,7 @@ export async function mount(root) {
           <a class="pv-logo" href="#/pass" aria-label="PermiGo"><img src="${LOGO}" alt="PermiGo"></a>
         </header>
         <div class="pv-wrap">
-          <div class="pv-result">${renderTicket(L, { stamped: true })}</div>
+          <div class="pv-result">${renderTicket(L, { stamped: true, lang })}</div>
           <h1 class="pv-result-title">${L.successT}</h1>
           <p class="pv-result-intro">${L.successIntro(label)}</p>
           <div class="pv-steps">
@@ -932,7 +1009,7 @@ export async function mount(root) {
           <p class="pv-result-guarantee">${L.successGuarantee}</p>
           <button class="pv-result-cta" id="pv-home" type="button">${me ? L.successCta : L.successCtaSolo}</button>
         </div>
-        <footer class="pv-foot">${L.foot}</footer>
+        <footer class="pv-foot">${L.foot}<br><span class="pv-foot-pros">${L.pros}</span></footer>
       </div>`;
     root.querySelectorAll(".pv-rev").forEach((el) => el.classList.add("in"));
     root.querySelector("#pv-home")?.addEventListener("click", () => {
@@ -968,7 +1045,13 @@ export async function mount(root) {
         <p class="pv-lead">${L.lead}</p>
       </section>
 
-      ${renderTicket(L)}
+      ${renderTicket(L, { lang })}
+
+      <!-- La porte gratuite passe DEVANT l'achat : le compte gratuit existe
+           depuis le 30/07 et n'avait aucun lien depuis le site (un visiteur sans
+           code moniteur ne pouvait tout simplement pas entrer). -->
+      <button class="pv-cta-free" id="pv-free" type="button">${L.freeCta}</button>
+      <p class="pv-free-note">${L.freeNote}</p>
 
       <button class="pv-cta-hero" data-plan="pass3" type="button">${L.cta}</button>
       <p class="pv-cta-note">${L.ctaNote}</p>
@@ -1106,12 +1189,12 @@ export async function mount(root) {
         </div>
       </section>
 
-      <footer class="pv-foot">${L.foot}</footer>
+      <footer class="pv-foot">${L.foot}<br><span class="pv-foot-pros">${L.pros}</span></footer>
     </div>
 
     <div class="pv-sticky">
       <div class="pv-sticky-inner">
-        <div class="pv-sticky-txt">${L.stickyName}<b>${L.stickyPrice}</b></div>
+        <button class="pv-sticky-free" id="pv-sticky-free" type="button">${L.stickyName}<b>${L.stickyPrice}</b></button>
         <button class="pv-sticky-btn" data-plan="pass3" type="button">${L.stickyBtn}</button>
       </div>
     </div>
@@ -1153,6 +1236,20 @@ function wire(root, me, lang, L) {
     location.hash = "#/login";
   });
 
+  // Porte gratuite (hero + barre collante) → inscription élève sans code moniteur.
+  // Évènement SÉPARÉ de l'achat : on veut voir laquelle des deux portes travaille.
+  const goFree = (from) => {
+    track("pass.free_click", { from, lang, logged: !!me });
+    fbTrack("Lead", { content_name: "compte_gratuit" });
+    location.hash = "#/rejoindre?solo=1";
+  };
+  root
+    .querySelector("#pv-free")
+    ?.addEventListener("click", () => goFree("hero"));
+  root
+    .querySelector("#pv-sticky-free")
+    ?.addEventListener("click", () => goFree("sticky"));
+
   // Bascule FR/EN : on clique la langue VOULUE (FR ou EN), pas une bascule
   // aveugle. On mémorise puis on re-rend la page entière.
   root.querySelectorAll(".pv-lang-opt").forEach((opt) => {
@@ -1160,6 +1257,10 @@ function wire(root, me, lang, L) {
       const next = opt.dataset.lang;
       if (next === lang) return;
       localStorage.setItem("pv_lang", next);
+      // Un clic ici est un CHOIX : toute l'app suit (inscription, quiz, réglages).
+      // Avant, la page de vente basculait seule et l'élève retombait en français
+      // dès qu'il créait son compte.
+      applyLang(next);
       track("pass.lang_switch", { lang: next });
       mount(root);
     });
