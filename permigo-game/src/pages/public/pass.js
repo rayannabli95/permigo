@@ -975,10 +975,20 @@ const STYLE = `<style>
   /* ── Barre CTA collante ── */
   .pv-sticky {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+    transition: bottom .42s cubic-bezier(.22,1,.32,1);
     padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
     background: rgba(18,11,44,.94); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
     border-top: 1.5px solid rgba(255,206,77,.25);
   }
+  /* Le bandeau cookies est en z-index 9000 et se pose en bas : il RECOUVRAIT
+     cette barre, donc le bouton du compte gratuit et le bouton d'achat, tant
+     que le visiteur n'avait pas répondu (mesuré en prod le 01/08/2026). La
+     barre se lève au-dessus de lui le temps qu'il choisisse. --ck-h est
+     publiée par cookie-banner.js ; le repli couvre le cas où elle manque. */
+  body.ck-open .pv-sticky {
+    bottom: calc(var(--ck-h, 96px) + 20px + env(safe-area-inset-bottom, 0px));
+  }
+  @media (prefers-reduced-motion: reduce) { .pv-sticky { transition: none; } }
   .pv-sticky-inner { display: flex; align-items: center; gap: 12px; width: 100%; max-width: 480px; margin: 0 auto; }
   /* Moitié gauche de la barre collante : elle affichait un prix, elle ouvre
      maintenant le compte gratuit. C'est l'élément le plus vu de la page. */
