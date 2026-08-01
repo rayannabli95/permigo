@@ -22,6 +22,11 @@ import { medallion } from "@/utils/medallions.js";
 import { recordAnswer } from "@/utils/weak-points.js";
 import { getLang } from "@/utils/lang.js";
 import {
+  isFreeTierUser,
+  freeOnceAvailable,
+  consumeFreeOnce,
+} from "@/utils/free-tier.js";
+import {
   PHASES,
   FAMILLES,
   BONUS,
@@ -83,8 +88,7 @@ const I18N = {
     quit_aria: "خروج",
     confirm_quit: "الخروج من الامتحان التجريبي؟",
     title: "امتحان قيادة تجريبي",
-    intro_sub:
-      "8 مراحل مثل الامتحان الحقيقي. اختر التصرف الصحيح في كل موقف.",
+    intro_sub: "8 مراحل مثل الامتحان الحقيقي. اختر التصرف الصحيح في كل موقف.",
     scored: "التنقيط من {total}",
     pass_from: "النجاح من {threshold}",
     serious_fault: "خطأ خطير واحد = رسوب",
@@ -111,8 +115,7 @@ const I18N = {
     clean_solo: "لا شيء يحتاج إلى مراجعة. واصل هكذا.",
     clean_instructor:
       "لا شيء يحتاج إلى مراجعة، أداء ممتاز. اعرض هذه الدرجة على مدرّبك.",
-    real_score_note:
-      "هذا تدريب. درجتك الحقيقية من {total} يمنحها لك المفتش.",
+    real_score_note: "هذا تدريب. درجتك الحقيقية من {total} يمنحها لك المفتش.",
     share_score: "شارك درجتي",
     back_revisions: "العودة إلى المراجعات",
     share_kicker: "امتحان قيادة تجريبي",
@@ -291,6 +294,29 @@ export async function unmount() {
 
 export async function mount(root) {
   track("page_view", { page: "exam_conduite" });
+
+  // Compte gratuit : UN examen blanc offert, à vie. C'est la meilleure preuve
+  // de valeur du produit (une note honnête sur les critères de l'inspecteur).
+  // Une fois le jeton consommé, on retombe sur le mur habituel.
+  {
+    const _me = getCurUser();
+    if (isFreeTierUser(_me)) {
+      if (freeOnceAvailable("exam-conduite")) {
+        consumeFreeOnce("exam-conduite");
+        track("freetier.exam_offert");
+      } else {
+        document.body.classList.remove("exc2-immersive");
+        const { mountFreeTierWall } =
+          await import("@/components/eleve/free-tier-wall.js");
+        return mountFreeTierWall(root, {
+          me: _me,
+          reason: "route",
+          routeName: "exam-conduite",
+        });
+      }
+    }
+  }
+
   document.body.classList.add("exc2-immersive");
 
   const phases = PHASES;
@@ -542,18 +568,14 @@ export async function mount(root) {
         ${
           r.weak
             ? `<div class="exc2-weakmsg">${richTxt(
-                isSoloEleve(getCurUser())
-                  ? "weak_solo"
-                  : "weak_instructor",
+                isSoloEleve(getCurUser()) ? "weak_solo" : "weak_instructor",
                 isSoloEleve(getCurUser())
                   ? "Ton point faible : {label}. C’est là que tu gagnes le plus de points. Retravaille-le à ta prochaine session."
                   : "Ton point faible : {label}. C’est là que tu gagnes le plus de points. Montre-le à ton moniteur pour la prochaine leçon.",
                 { label: `<b>${esc(FAMILLES[r.weak].label)}</b>` },
               )}</div>`
             : `<div class="exc2-weakmsg">${txt(
-                isSoloEleve(getCurUser())
-                  ? "clean_solo"
-                  : "clean_instructor",
+                isSoloEleve(getCurUser()) ? "clean_solo" : "clean_instructor",
                 isSoloEleve(getCurUser())
                   ? "Rien à retravailler. Continue comme ça."
                   : "Rien à retravailler, c’est propre. Montre ce score à ton moniteur.",
