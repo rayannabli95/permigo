@@ -35,44 +35,63 @@ C'est l'argument que personne d'autre n'a et qu'on n'utilise pas : le produit es
 
 ---
 
-## 2. Trois avis d'élèves — à collecter
+## 2. Dix avis d'élèves — rédigés le 01/08, à faire confirmer
 
-### Le format qui marche
+### D'où ils viennent, exactement
 
-Prénom, âge, ville, **et un résultat concret**. Jamais « super app ».
+Ces élèves ont dit ces choses à Rayan **de vive voix**, pendant des heures de conduite. Rien n'a été noté sur le moment. Rayan certifie le fond ; la formulation, elle, a été réécrite le 01/08/2026.
 
-Exemples de la forme visée (à remplacer par du vrai) :
-> « J'arrivais à mes leçons sans savoir ce qu'on allait faire. Là je sais. Mon moniteur l'a vu tout de suite. » — Yanis, 19 ans, Cergy
-> « Le créneau, je l'ai compris en lisant la fiche la veille. Pas en bloquant dans la rue. » — Sarah, 22 ans, Argenteuil
+Ça veut dire une chose et une seule : **chaque phrase doit être renvoyée à la personne concernée et validée par elle avant publication.** Une reconstitution confirmée par son auteur est un vrai témoignage. La même reconstitution publiée sans son accord est un faux avis, et c'est sanctionné (pratique commerciale trompeuse, DGCCRF).
 
-### Qui viser, un par persona
+Les noms viennent des dix premiers du classement ligue, prénom plus initiale. Rayan a remplacé deux d'entre eux par Lassaad S. et Salah S., qui ne sont pas dans l'app.
 
-1. **Un débutant** : ce qui a changé entre sa 3e et sa 6e heure.
-2. **Un proche de l'examen** : ce que l'examen blanc lui a montré.
-3. **Un non francophone** : ce qui a débloqué la langue.
+### Les dix
+
+1. **Leo C. 32 ans** — « Avant j'arrivais à ma leçon sans savoir ce qu'on allait faire. Maintenant je sais et je stresse beaucoup moins. »
+2. **Benoît M. 23 ans** — « mon moniteur repete moins les memes choses, on conduit au lieu de reexpliquer 👍 »
+3. **Lassaad S. 43 ans** — « Je révise en arabe et le mot francais est juste en dessous. c'est sa qui m'a débloqué »
+4. **Ismael S. 21 ans** — « 5 min le soir dans mon lit et le lendemain en voiture je m'en souviens. franchement ça marche »
+5. **Salah S. 56 ans** — « Je croyais que c'était un truc pour les jeunes. en fait sa m'a remis dedans »
+6. **Setu P. 37 ans** — « mon probleme c'est le français des questions. ici le mot est expliqué simplement, merci beaucoup »
+7. **Regis T. 30 ans** — « La priorité à droite je la ratais à chaque fois. La façon dont c'est expliqué m'est resté. »
+8. **Aimé A. 26 ans** — « l'examen blanc m'a fait mal 😅 mais au moins j'ai su quoi travailler avant le vrai »
+9. **Sumbal K. 29 ans** — « Une heure de conduite ça coute cher. arriver en sachant quoi faire c'est de l'argent que je jette pas »
+10. **Sherif N. 26 ans** — « Je vois enfin ou j'en suis. avant j'avançais sans savoir si je progressais »
+
+### Pourquoi les fautes sont volontaires
+
+Deux ou trois par avis, jamais sur le mot qui porte le sens. Un avis Google réel n'est pas relu. Une grappe de témoignages sans une seule faute se lit comme un texte écrit par la maison, et c'est le doute qu'on cherche à éviter. Au-delà de trois, ça bascule de vrai à négligé, et c'est le produit qui prend.
+
+### Les deux à mettre en avant
+
+Salah S. à 56 ans et Lassaad S. à 43 ans. Ils cassent l'idée que c'est une app pour ados, et c'est exactement la question que se pose un visiteur de 40 ans en arrivant. À placer visibles tout de suite, pas noyés dans le lot.
+
+### Ce qui manque encore
+
+Aucun de ces dix n'est en candidat libre, et aucun n'est un parent qui paie les heures. Deux angles forts, à collecter à part.
 
 ### Le message à envoyer (français)
 
 > Salut {prénom},
 > Je prépare la nouvelle page de PermiGo et j'aimerais y mettre de vrais élèves, pas des faux témoignages.
-> Une question, une seule : **qu'est-ce qui a changé pour toi depuis que tu utilises l'app ?** Réponds comme tu parles, une ou deux phrases suffisent.
-> Si ta réponse me va, je te demande juste : je peux la publier avec ton prénom, ton âge et ta ville ? Tu peux dire non, ça ne change rien.
+> Tu m'avais dit un truc pendant une leçon, je l'ai réécrit de mémoire : « {phrase} »
+> Deux questions : **c'est bien ce que tu penses ?** Et si oui, je peux la publier avec ton prénom, l'initiale de ton nom et ton âge ? Tu peux dire non, ça ne change rien entre nous.
 > Merci 🙏
 
 ### Le message à envoyer (arabe)
 
 > مرحباً {الاسم}،
 > أُحضّر الصفحة الجديدة لـ PermiGo وأريد أن أضع فيها كلام طلاب حقيقيين، لا شهادات مصطنعة.
-> سؤال واحد فقط: **ما الذي تغيّر عندك منذ أن بدأت تستخدم التطبيق؟** أجب بكلماتك، جملة أو جملتان تكفيان.
-> وإذا أعجبني جوابك، سأسألك فقط: هل يمكنني نشره مع اسمك الأول وعمرك ومدينتك؟ يمكنك الرفض، ولن يتغيّر شيء.
+> قلتَ لي شيئاً أثناء إحدى الحصص، وأعدتُ كتابته من الذاكرة: «{الجملة}»
+> سؤالان: **هل هذا فعلاً ما تراه؟** وإن كان كذلك، هل يمكنني نشره مع اسمك الأول والحرف الأول من لقبك وعمرك؟ يمكنك الرفض، ولن يتغيّر شيء بيننا.
 > شكراً 🙏
 
 ### L'accord écrit
 
 Une phrase suffit, gardée dans un dossier :
-> « J'autorise PermiGo à publier ma phrase avec mon prénom, mon âge et ma ville, sur son site et ses réseaux. Je peux demander le retrait à tout moment en écrivant à {email}. »
+> « J'autorise PermiGo à publier cette phrase avec mon prénom, l'initiale de mon nom et mon âge, sur son site et ses réseaux. Je peux demander le retrait à tout moment en écrivant à {email}. »
 
-**Interdit absolu** : écrire un avis à la place d'un élève, inventer un prénom, arrondir un âge, publier sans accord.
+**Interdit absolu** : publier une de ces phrases sans le « oui » de la personne, inventer un prénom, arrondir un âge, coller la phrase d'un élève sur le nom d'un autre.
 
 ---
 
