@@ -263,9 +263,13 @@ export function monterMissions(
   function faute(m) {
     fautes += 1;
     etat.essais += 1;
+    const indiceAvant = etat.indice;
     etat.indice = etat.essais >= m.attemptsBeforeHint;
     playWrong();
-    haptic("error");
+    haptic("error"); // deux coups secs : on a touché la mauvaise chose
+    // Le coup de pouce qui apparaît a sa propre secousse, sinon il arrive en
+    // silence au milieu d'un écran que l'élève relit déjà.
+    if (etat.indice && !indiceAvant) setTimeout(() => haptic("notify"), 260);
     if (fautes >= LIMITE_ERREURS) {
       track("pilote_mission_echec", { code, mission: m.id, fautes });
       onEchec?.();
@@ -278,7 +282,7 @@ export function monterMissions(
     etat.resolu = true;
     etat.retour = { ton: "success", titre: m.success, texte: m.why };
     playCorrect();
-    haptic("success");
+    haptic("validate"); // la montée, la même que pour une compétence validée
     track("pilote_mission_reussie", {
       code,
       mission: m.id,
@@ -305,12 +309,15 @@ export function monterMissions(
       }
       etat.choisis.push(id);
       if (etat.choisis.length === m.sequence.length) reussi(m);
-      else
+      else {
+        // Chaque maillon posé a son cran. La chaîne se sent sous le doigt.
+        haptic("impact");
         etat.retour = {
           ton: "progress",
           titre: "Bon enchaînement",
           texte: "Continue le scénario dans ta tête.",
         };
+      }
       dessiner();
       return;
     }
@@ -327,23 +334,32 @@ export function monterMissions(
 
   function suite() {
     if (index + 1 < missions.length) {
+      haptic("swipe");
       index += 1;
       etat = nouvelEtat();
       dessiner();
-      hote.scrollIntoView?.({ block: "start", behavior: "smooth" });
+      hote.scrollTo?.({ top: 0, behavior: "smooth" });
       return;
     }
     playVictory();
+    haptic("unlock"); // le crescendo de fin de chaîne
     track("pilote_chaine_reussie", { code, missions: missions.length, fautes });
     onReussite?.();
   }
 
   function brancher() {
-    hote
-      .querySelector("[data-quitter]")
-      ?.addEventListener("click", () => onQuitter?.());
+    hote.querySelector("[data-quitter]")?.addEventListener("click", () => {
+      haptic("tap");
+      onQuitter?.();
+    });
     hote.querySelector("[data-suite]")?.addEventListener("click", suite);
     hote.querySelectorAll("[data-reponse]").forEach((el) => {
+      // Le doigt sent le contact AVANT de savoir s'il a bon : c'est ce
+      // décalage qui donne l'impression de toucher une vraie commande.
+      // `pointerdown` et pas `click` : sur mobile le clic arrive trop tard.
+      el.addEventListener("pointerdown", () => {
+        if (!etat.resolu) haptic("impact");
+      });
       el.addEventListener("click", () => repondre(el.dataset.reponse));
       // Les trajectoires sont des <g> SVG : le clavier ne les active pas seul.
       el.addEventListener("keydown", (e) => {
@@ -355,6 +371,7 @@ export function monterMissions(
   }
 
   etat = nouvelEtat();
+  haptic("nav"); // on entre dans la voiture
   track("pilote_chaine_ouverte", {
     code,
     missions: missions.length,
