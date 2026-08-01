@@ -25,6 +25,7 @@ import { track } from "@/services/analytics.js";
 import { startPassCheckout } from "@/services/billing.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { illMask } from "@/utils/illustrations.js";
+import { esc } from "@/utils/escape.js";
 import { fbTrack } from "@/services/meta-pixel.js";
 import { applyLang, browserLang, explicitLang } from "@/utils/lang.js";
 
@@ -130,6 +131,10 @@ const STR = {
     stampT: "Satisfait ou remboursé sous 3 jours",
     stampD:
       "Teste tout pendant 3 jours. Pas convaincu ? Remboursé. Ensuite, le mensuel s'annule à tout moment, en un clic.",
+    secAvis: "Ce qu'en disent nos élèves",
+    secAvisSub:
+      "Dix élèves de l'auto-école. Ils ont relu et validé leur phrase.",
+    avisAge: "ans",
     secProof: "S'entraîner régulièrement paie",
     proofA: "Conduite accompagnée (entraînement régulier)",
     proofAVal: "74,7 %",
@@ -277,6 +282,10 @@ const STR = {
     stampT: "3-day money-back guarantee",
     stampD:
       "Try everything for 3 days. Not convinced? Refunded. After that, the monthly plan cancels anytime, in one click.",
+    secAvis: "What our students say",
+    secAvisSub:
+      "Ten students from the driving school. Each one read and approved their own line.",
+    avisAge: "years old",
     secProof: "Regular practice pays off",
     proofA: "Accompanied driving (regular practice)",
     proofAVal: "74.7%",
@@ -421,6 +430,10 @@ const STR = {
     stampT: "مضمون أو استرداد أموالك خلال 3 أيام",
     stampD:
       "جرّب كل شيء لمدة 3 أيام. غير مقتنع؟ تُستردّ أموالك. بعد ذلك، يُلغى الاشتراك الشهري في أي وقت، بنقرة واحدة.",
+    secAvis: "ماذا يقول طلابنا",
+    secAvisSub:
+      "عشرة طلاب من مدرسة تعليم القيادة. كلّ واحد قرأ جملته ووافق على نشرها.",
+    avisAge: "سنة",
     secProof: "التدرّب المنتظم يؤتي ثماره",
     proofA: "القيادة المرافَقة (تدرّب منتظم)",
     proofAVal: "74.7%",
@@ -472,6 +485,127 @@ const STR = {
     successCtaSolo: "أنشئ حسابي · وصول فوري",
   },
 };
+
+// ─── Avis d'élèves ────────────────────────────────────────────────
+// Dix élèves de l'auto-école, tous validés par eux avant publication le
+// 01/08/2026 (procédure et accords écrits : docs/PREUVES-A-COLLECTER).
+// Prénom + initiale, jamais le nom entier.
+//
+// ⚠️ La version française est celle qu'ils ont validée, fautes comprises :
+// un avis réel n'est pas relu, et une grappe de témoignages sans une seule
+// faute se lit comme un texte écrit par la maison. Les traductions, elles,
+// sont propres — on ne fabrique pas les fautes de quelqu'un dans une langue
+// qu'il n'a pas écrite.
+//
+// Les deux avis de 43 et 56 ans passent en tête : ils cassent l'idée d'une
+// app pour ados, qui est la première objection d'un visiteur de 40 ans.
+const AVIS = [
+  {
+    n: "Salah S.",
+    age: 56,
+    fr: "Je croyais que c'était un truc pour les jeunes. en fait sa m'a remis dedans",
+    en: "I thought this was a thing for kids. turns out it got me back into it",
+    ar: "ظننتُ أنه شيء للشباب. لكنه في الحقيقة أعادني إلى الأجواء",
+  },
+  {
+    n: "Lassaad S.",
+    age: 43,
+    fr: "Je révise en arabe et le mot francais est juste en dessous. c'est sa qui m'a débloqué",
+    en: "I revise in Arabic and the French word sits right underneath. that's what unlocked it for me",
+    ar: "أراجع بالعربية والكلمة الفرنسية تحتها مباشرة. هذا ما فكّ عقدتي",
+  },
+  {
+    n: "Leo C.",
+    age: 32,
+    fr: "Avant j'arrivais à ma leçon sans savoir ce qu'on allait faire. Maintenant je sais et je stresse beaucoup moins.",
+    en: "I used to turn up to my lesson with no idea what we'd be doing. Now I know, and I stress far less.",
+    ar: "كنتُ أصل إلى الحصة دون أن أعرف ماذا سنفعل. الآن أعرف، وتوتّري أقلّ بكثير.",
+  },
+  {
+    n: "Regis T.",
+    age: 30,
+    fr: "La priorité à droite je la ratais à chaque fois. La façon dont c'est expliqué m'est resté.",
+    en: "I got priority to the right wrong every single time. The way it's explained here stuck with me.",
+    ar: "كنتُ أخطئ في أولوية اليمين في كل مرة. طريقة الشرح هنا رسخت عندي.",
+  },
+  {
+    n: "Ismael S.",
+    age: 21,
+    fr: "5 min le soir dans mon lit et le lendemain en voiture je m'en souviens. franchement ça marche",
+    en: "5 min in bed at night and the next day in the car I remember it. honestly it works",
+    ar: "5 دقائق في السرير مساءً، وفي اليوم التالي داخل السيارة أتذكّرها. صدقاً إنها تنفع",
+  },
+  {
+    n: "Setu P.",
+    age: 37,
+    fr: "mon probleme c'est le français des questions. ici le mot est expliqué simplement, merci beaucoup",
+    en: "my problem is the French in the questions. here the word is explained simply, thank you very much",
+    ar: "مشكلتي هي الفرنسية في الأسئلة. هنا تُشرح الكلمة ببساطة، شكراً جزيلاً",
+  },
+  {
+    n: "Benoît M.",
+    age: 23,
+    fr: "mon moniteur repete moins les memes choses, on conduit au lieu de reexpliquer 👍",
+    en: "my instructor repeats himself less, we drive instead of going over it again 👍",
+    ar: "مدرّبي صار يكرّر أقل، صرنا نقود بدل إعادة الشرح 👍",
+  },
+  {
+    n: "Aimé A.",
+    age: 26,
+    fr: "l'examen blanc m'a fait mal 😅 mais au moins j'ai su quoi travailler avant le vrai",
+    en: "the mock test hurt 😅 but at least I knew what to work on before the real one",
+    ar: "الامتحان التجريبي كان قاسياً 😅 لكنني عرفتُ على الأقل ما عليّ العمل عليه قبل الحقيقي",
+  },
+  {
+    n: "Sumbal K.",
+    age: 29,
+    fr: "Une heure de conduite ça coute cher. arriver en sachant quoi faire c'est de l'argent que je jette pas",
+    en: "An hour behind the wheel is expensive. turning up knowing what to do is money I'm not throwing away",
+    ar: "ساعة القيادة مكلفة. أن تصل وأنت تعرف ماذا تفعل يعني مالاً لا ترميه",
+  },
+  {
+    n: "Sherif N.",
+    age: 26,
+    fr: "Je vois enfin ou j'en suis. avant j'avançais sans savoir si je progressais",
+    en: "I can finally see where I stand. before, I was moving along with no idea if I was improving",
+    ar: "أخيراً أرى أين وصلت. من قبل كنتُ أتقدّم دون أن أعرف إن كنتُ أتحسّن",
+  },
+];
+
+// ⚠️ <bdi> autour du nom : dans la page en arabe (conteneur dir="rtl"), le
+// point final d'un nom latin saute à gauche et « Regis T. » s'affiche
+// « .Regis T ». <bdi> isole la direction du fragment, c'est fait pour ça.
+
+/** Initiales pour la pastille (« Salah S. » → « SS »). */
+function avisInitiales(nom) {
+  return nom
+    .split(/\s+/)
+    .map((m) => m[0] || "")
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}
+
+/**
+ * Rend une tranche d'avis.
+ * @param {number} from index de départ
+ * @param {number} to   index de fin (exclu)
+ */
+function renderAvis(lang, L, from, to) {
+  const ans = L.avisAge;
+  return AVIS.slice(from, to)
+    .map(
+      (a) => `
+      <figure class="pv-avis">
+        <blockquote>${esc(a[lang] || a.fr)}</blockquote>
+        <figcaption>
+          <span class="pv-avis-ini" aria-hidden="true">${esc(avisInitiales(a.n))}</span>
+          <span class="pv-avis-qui"><b><bdi>${esc(a.n)}</bdi></b><span>${a.age} ${esc(ans)}</span></span>
+        </figcaption>
+      </figure>`,
+    )
+    .join("");
+}
 
 // Montants en euros, pour la mesure publicitaire uniquement (Meta apprend « qui
 // achète combien »). ⚠️ Ce n'est PAS ce qui est facturé : le vrai prix vit dans
@@ -777,6 +911,35 @@ const STYLE = `<style>
     background: rgba(20,40,4,.6);
   }
 
+  /* ── Avis d'élèves (validés par eux, cf. docs/PREUVES-A-COLLECTER) ── */
+  .pv-avis-lot { display: grid; gap: 12px; margin-top: 18px; }
+  .pv-avis {
+    margin: 0; padding: 15px 16px; border-radius: 18px;
+    background: rgba(255,255,255,.055); border: 1px solid rgba(255,255,255,.1);
+  }
+  .pv-avis blockquote {
+    margin: 0 0 12px; font: 500 14.5px/1.55 'Archivo', sans-serif; color: var(--pv-ink);
+  }
+  /* Guillemets écrits en clair : dans un littéral de gabarit JS, un
+     échappement CSS « \\201C » est lu par JS avant CSS et casse le build. */
+  .pv-avis blockquote::before { content: "“"; }
+  .pv-avis blockquote::after { content: "”"; }
+  .pv-avis figcaption { display: flex; align-items: center; gap: 10px; }
+  .pv-avis-ini {
+    flex: 0 0 34px; width: 34px; height: 34px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: linear-gradient(180deg, #4a3fc9, #2f2688);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.22);
+    font: 800 12px/1 'Archivo', sans-serif; color: #fff; letter-spacing: .04em;
+  }
+  .pv-avis-qui { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  .pv-avis-qui b { font: 800 13px/1.2 'Archivo', sans-serif; color: var(--pv-ink); }
+  /* --ink-mu et pas --ink-dim : en 11,5 px sur le fond nuit, --ink-dim tombe
+     autour de 3,6 de contraste quand l'AA en demande 4,5. Même leçon que la
+     carte de date de naissance le 01/08. */
+  .pv-avis-qui span { font: 600 11.5px/1.2 'Archivo', sans-serif; color: var(--ink-mu); }
+  @media (min-width: 620px) { .pv-avis-lot { grid-template-columns: 1fr 1fr; } }
+
   /* ── Preuve ── */
   .pv-proof { margin-top: 20px; }
   .pv-bar-lbl { display: flex; justify-content: space-between; gap: 12px; font: 600 13px 'Archivo', sans-serif; margin-bottom: 6px; color: var(--ink-soft); }
@@ -1050,6 +1213,12 @@ export async function mount(root) {
            dans le premier chargement) et sans compte ni appel réseau. -->
       <div id="pv-demo"></div>
 
+      <!-- Trois avis AVANT le billet : la scène montre ce que c'est, les avis
+           disent que ça marche, et seulement après on parle d'argent. Les deux
+           premiers ont 56 et 43 ans — la première objection d'un visiteur de
+           40 ans est « c'est pour les jeunes ». -->
+      <div class="pv-avis-lot pv-avis-haut">${renderAvis(lang, L, 0, 3)}</div>
+
       ${renderTicket(L, { lang })}
 
       <!-- La porte gratuite passe DEVANT l'achat : le compte gratuit existe
@@ -1161,6 +1330,10 @@ export async function mount(root) {
         <b>${L.stampT}</b>
         <span>${L.stampD}</span>
       </div>
+
+      <h2 class="pv-sec-title pv-rev">${L.secAvis}</h2>
+      <p class="pv-sec-sub">${L.secAvisSub}</p>
+      <div class="pv-avis-lot pv-rev">${renderAvis(lang, L, 3, AVIS.length)}</div>
 
       <h2 class="pv-sec-title pv-rev">${L.secProof}</h2>
       <div class="pv-proof pv-rev">
