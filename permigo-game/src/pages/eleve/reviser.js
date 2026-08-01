@@ -176,9 +176,9 @@ ${chromeNight("#241a52", "#1a1340")}
 .rv4-badge { flex:none; width:64px; height:64px; display:grid; place-items:center; }
 .rv4-badge img { width:64px; height:64px; object-fit:contain; display:block; filter:drop-shadow(0 5px 8px rgba(0,0,0,.5)); }
 .rv4-itx { flex:1; min-width:0; }
-.rv4-itx h3 { font:800 16px/1.15 'Archivo',sans-serif; letter-spacing:-.02em; color:#fff; margin:0; }
-.rv4-meta { flex:none; text-align:right; font:800 12.5px/1.1 'Archivo',sans-serif; letter-spacing:-.01em; color:#f5c451; }
-.rv4-meta small { display:block; font:700 9.5px/1 'Archivo',sans-serif; letter-spacing:.08em; text-transform:uppercase; color:#9089c7; margin-bottom:3px; }
+.rv4-itx h3 { font:800 19.5px/1.15 'Archivo',sans-serif; letter-spacing:-.025em; color:#fff; margin:0; }
+.rv4-meta { flex:none; text-align:right; font:800 14px/1.1 'Archivo',sans-serif; letter-spacing:-.01em; color:#f5c451; }
+.rv4-meta small { display:block; font:700 10px/1 'Archivo',sans-serif; letter-spacing:.08em; text-transform:uppercase; color:#9089c7; margin-bottom:3px; }
 
 /* Skeleton */
 .rv4-skel { border-radius:18px; background:rgba(255,255,255,.05); animation:rv4pulse 1.2s ease-in-out infinite; }
