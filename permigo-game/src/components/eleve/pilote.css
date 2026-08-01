@@ -2405,3 +2405,197 @@ body.mp-open #header-bar {
   background: linear-gradient(180deg, #4d3f7d, #2b2450);
   box-shadow: 0 -6px 16px rgb(0 0 0 / 34%);
 }
+
+/* ── Décor « voie rapide », vue de dessus ─────────────────────────────────
+   La circulation va de gauche à droite. La scène d'une mission « Ordonner »
+   fait 145 px de haut pour 366 de large : une route verticale y serait
+   écrasée, donc tout est posé à l'horizontale.
+
+   Deux variantes qui partagent le même style. `motorway` montre la voie
+   d'insertion qui se pince vers le point de raccordement. `motorway-shoulder`
+   montre la bande d'arrêt d'urgence et sa glissière, parce qu'une mise en
+   sécurité se joue derrière cette glissière et nulle part ailleurs. */
+.mp-art-motorway,
+.mp-art-motorway-shoulder {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #2f5240, #1e3b2d);
+}
+.art-mw-road {
+  position: absolute;
+  inset: 8% 0 auto 0;
+  height: 44%;
+  background: linear-gradient(180deg, #423e55, #34314c);
+  box-shadow:
+    inset 0 2px 0 rgb(247 243 255 / 45%),
+    inset 0 -2px 0 rgb(247 243 255 / 45%);
+}
+/* La ligne discontinue entre les deux voies de circulation. */
+.art-mw-lane {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 3px;
+  background: repeating-linear-gradient(
+    90deg,
+    rgb(247 243 255 / 78%) 0 22px,
+    transparent 22px 48px
+  );
+  transform: translateY(-50%);
+}
+/* La voie d'insertion : large en amont, pincée au point de raccordement. */
+.art-mw-ramp {
+  position: absolute;
+  left: 0;
+  top: 52%;
+  width: 82%;
+  height: 34%;
+  background: linear-gradient(180deg, #3d3950, #302d47);
+  clip-path: polygon(0% 0%, 100% 0%, 0% 100%);
+}
+/* La bande d'arrêt d'urgence, et la glissière derrière laquelle on s'abrite. */
+.art-mw-shoulder {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 52%;
+  height: 17%;
+  background: repeating-linear-gradient(
+    90deg,
+    rgb(60 56 78 / 92%) 0 16px,
+    rgb(74 70 92 / 92%) 16px 32px
+  );
+}
+.art-mw-shoulder i {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 5px;
+  border-radius: 99px;
+  background: linear-gradient(180deg, #9d94bb, #6a6288);
+}
+.art-mw-car,
+.art-mw-player {
+  position: absolute;
+  width: 15%;
+  height: 15%;
+  border-radius: 5px;
+}
+.art-mw-car {
+  background: linear-gradient(180deg, #7b6ba8, #4a3f74);
+}
+.art-mw-car-a {
+  left: 22%;
+  top: 13%;
+}
+.art-mw-car-b {
+  left: 54%;
+  top: 33%;
+}
+.art-mw-player {
+  left: 14%;
+  top: 61%;
+  background: linear-gradient(180deg, #ffd88a, #e0a133);
+}
+/* La variante « panne » range la voiture sur la bande, pas sur la bretelle. */
+.mp-art-motorway-shoulder .art-mw-player {
+  top: 54%;
+  left: 30%;
+}
+.art-mw-player i {
+  position: absolute;
+  top: 16%;
+  bottom: 16%;
+  right: 18%;
+  width: 26%;
+  border-radius: 3px;
+  background: rgb(20 12 40 / 45%);
+}
+
+/* ── Décor « entrée de tunnel » ───────────────────────────────────────────
+   Vue du conducteur. Le contraste entre le jour et la bouche noire est le
+   sujet de la scène : c'est lui qui aveugle pendant quelques secondes. */
+.mp-art-tunnel {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #4a5f9e, #6f6f9e);
+}
+.art-tn-sky {
+  position: absolute;
+  inset: 0 0 66% 0;
+  background: linear-gradient(180deg, #5a72b4, #9aa0cd);
+}
+.art-tn-rock {
+  position: absolute;
+  inset: 6% 0 0 0;
+  background: linear-gradient(180deg, #5c5470, #3d374f);
+  clip-path: polygon(
+    0% 22%,
+    18% 4%,
+    50% 0%,
+    82% 5%,
+    100% 24%,
+    100% 100%,
+    0% 100%
+  );
+}
+/* La bouche : presque noire, pour que l'entrée se lise comme un trou. */
+.art-tn-mouth {
+  position: absolute;
+  left: 26%;
+  top: 22%;
+  width: 48%;
+  height: 56%;
+  overflow: hidden;
+  border: 3px solid rgb(180 172 210 / 42%);
+  border-radius: 46% 46% 4px 4px;
+  background: radial-gradient(70% 90% at 50% 100%, #241d3c, #0b0716 72%);
+}
+.art-tn-lamps {
+  position: absolute;
+  left: 50%;
+  top: 22%;
+  display: flex;
+  gap: 9%;
+  width: 62%;
+  transform: translateX(-50%);
+}
+.art-tn-lamps i {
+  flex: 1;
+  height: 4px;
+  border-radius: 99px;
+  background: #ffe9a8;
+  box-shadow: 0 0 9px rgb(255 233 168 / 75%);
+}
+.art-tn-inner-road {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 54%;
+  height: 40%;
+  background: linear-gradient(180deg, transparent, rgb(120 112 156 / 45%));
+  clip-path: polygon(38% 0%, 62% 0%, 100% 100%, 0% 100%);
+  transform: translateX(-50%);
+}
+.art-tn-road {
+  position: absolute;
+  inset: 66% 0 0 0;
+  background: linear-gradient(180deg, #4a4657, #33304a);
+  clip-path: polygon(36% 0%, 64% 0%, 106% 100%, -6% 100%);
+}
+.art-tn-road span {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2.6%;
+  background: repeating-linear-gradient(
+    180deg,
+    rgb(247 233 161 / 85%) 0 12%,
+    transparent 12% 26%
+  );
+  transform: translateX(-50%);
+  clip-path: polygon(42% 0%, 58% 0%, 100% 100%, 0% 100%);
+}
