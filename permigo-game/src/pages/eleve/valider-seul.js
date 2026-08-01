@@ -144,7 +144,8 @@ const VS_I18N = {
     retry: "أعد المحاولة",
     comp_fallback: "مهارة",
     blocked: "سبق أن صادق مدرّبك على هذه المهارة. لا شيء تفعله هنا.",
-    blocked_m: "سبق أن صادق مدرّبك على هذه المهارة. ويمكنك مع ذلك إعادة المشهد العملي للحفاظ على الحركة.",
+    blocked_m:
+      "سبق أن صادق مدرّبك على هذه المهارة. ويمكنك مع ذلك إعادة المشهد العملي للحفاظ على الحركة.",
     blocked_cta: "أعد المشهد العملي",
     blocked_hint: "هذا التمرين لا يغيّر شيئًا في مسارك. إنه لليد فقط.",
     ent_kick: "تمرين",
@@ -772,13 +773,19 @@ function ouvrirLaScene() {
   hote.className = "mp-host";
   document.body.appendChild(hote);
   document.body.classList.add("mp-open");
-  return {
-    hote,
-    fermer() {
-      hote.remove();
-      document.body.classList.remove("mp-open");
-    },
+
+  const fermer = () => {
+    window.removeEventListener("hashchange", fermer);
+    hote.remove();
+    document.body.classList.remove("mp-open");
   };
+
+  // La scène vit sur <body>, donc le routeur ne la balaie pas quand la page
+  // change. Sans ça, un retour arrière du navigateur ou un lien profond
+  // laissait l'habitacle collé par-dessus l'app, sans aucun moyen d'en sortir.
+  window.addEventListener("hashchange", fermer);
+
+  return { hote, fermer };
 }
 
 /**
@@ -789,7 +796,11 @@ function ouvrirLaScene() {
  * élève dont l'enseignant a tout validé tombait sur « rien à faire ici » et
  * ne pouvait plus jamais toucher une scène.
  */
-function rejouerLaMission(root, me, compId, sub, cat) {
+async function rejouerLaMission(root, me, compId, sub, cat) {
+  // On relit la boîte : sans elle, un élève en automatique se voyait servir
+  // la mission d'embrayage. Un entraînement doit parler la voiture qu'il
+  // conduit, comme la certification.
+  const boite = await chargerBoite();
   const { hote, fermer } = ouvrirLaScene();
   track("valider_seul.mission_rejouee", { competence_id: compId });
 
@@ -800,7 +811,7 @@ function rejouerLaMission(root, me, compId, sub, cat) {
 
   monterMissions(hote, {
     code: compId,
-    boite: null, // la boîte est déjà connue côté données, le filtre suit
+    boite,
     onReussite: () => {
       fermer();
       haptic("success");

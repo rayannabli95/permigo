@@ -24,8 +24,6 @@
   --world-dark: #4e2cc7;
 }
 
-
-
 .mp-game {
   position: relative;
   width: min(100%, 430px);
@@ -35,7 +33,6 @@
   background: var(--night);
   isolation: isolate;
 }
-
 
 .mp-icon-button {
   width: 44px;
@@ -55,11 +52,9 @@
     border-color 160ms ease;
 }
 
-
 .mp-icon-button:active {
   transform: scale(0.96);
 }
-
 
 .mp-icon-button svg {
   width: 20px;
@@ -69,7 +64,6 @@
   stroke-linejoin: round;
   stroke-width: 2;
 }
-
 
 .mp-primary-button,
 .mp-secondary-button {
@@ -89,7 +83,6 @@
     filter 160ms ease;
 }
 
-
 .mp-primary-button {
   border: 0;
   color: #352006;
@@ -99,7 +92,6 @@
     0 14px 24px rgb(0 0 0 / 28%),
     inset 0 2px 0 rgb(255 255 255 / 70%);
 }
-
 
 .mp-primary-button svg,
 .mp-secondary-button svg {
@@ -111,14 +103,12 @@
   stroke-width: 2.4;
 }
 
-
 .mp-primary-button:active {
   transform: translateY(3px);
   box-shadow:
     0 3px 0 #985d0f,
     0 8px 14px rgb(0 0 0 / 22%);
 }
-
 
 .mp-hub-head,
 .mp-screen-head,
@@ -128,7 +118,6 @@
   justify-content: space-between;
   gap: 12px;
 }
-
 
 .mp-path-line {
   position: absolute;
@@ -140,20 +129,17 @@
   pointer-events: none;
 }
 
-
 .mp-mission-row.is-left .mp-path-line {
   right: 23px;
   border-left: 0;
   border-radius: 0 22px 0 0;
 }
 
-
 .mp-mission-row.is-right .mp-path-line {
   left: 23px;
   border-right: 0;
   border-radius: 22px 0 0;
 }
-
 
 /* Briefing */
 
@@ -163,10 +149,13 @@
   padding: max(16px, env(safe-area-inset-top, 0px)) 16px
     calc(34px + env(safe-area-inset-bottom, 0px));
   background:
-    radial-gradient(circle at 83% 9%, color-mix(in srgb, var(--world, #8b6dff) 23%, transparent), transparent 16rem),
+    radial-gradient(
+      circle at 83% 9%,
+      color-mix(in srgb, var(--world, #8b6dff) 23%, transparent),
+      transparent 16rem
+    ),
     linear-gradient(180deg, #1b103c, #100922 58%);
 }
-
 
 .mp-brief-visual .mp-scene {
   width: 326px;
@@ -175,11 +164,9 @@
   box-shadow: 0 25px 50px rgb(0 0 0 / 43%);
 }
 
-
 .mp-brief-card .mp-primary-button {
   margin-top: 19px;
 }
-
 
 /* Gameplay */
 
@@ -197,7 +184,11 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   background:
-    radial-gradient(120% 80% at 50% 0%, var(--night-3, #281957) 0%, transparent 62%),
+    radial-gradient(
+      120% 80% at 50% 0%,
+      var(--night-3, #281957) 0%,
+      transparent 62%
+    ),
     var(--night, #100922);
 }
 /* Le chrome de l'app n'a rien à faire au-dessus d'une mission plein écran. */
@@ -230,17 +221,14 @@ body.mp-open #header-bar {
   color: rgb(246 241 255 / 74%);
 }
 
-
 .mp-dark-button {
   background: rgb(10 5 25 / 55%);
   backdrop-filter: blur(8px);
 }
 
-
 .mp-mission-progress {
   flex: 1;
 }
-
 
 .mp-progress-label {
   display: block;
@@ -252,7 +240,6 @@ body.mp-open #header-bar {
   text-align: center;
 }
 
-
 .mp-mission-progress > div {
   height: 8px;
   overflow: hidden;
@@ -261,7 +248,6 @@ body.mp-open #header-bar {
   background: #0c0719;
   box-shadow: inset 0 2px 4px rgb(0 0 0 / 45%);
 }
-
 
 .mp-mission-progress > div span {
   display: block;
@@ -272,11 +258,9 @@ body.mp-open #header-bar {
   transition: width 240ms var(--ease-out);
 }
 
-
 .mp-play-title {
   margin-top: 19px;
 }
-
 
 .mp-play-title p {
   margin: 0 0 7px;
@@ -286,7 +270,6 @@ body.mp-open #header-bar {
   letter-spacing: 0.12em;
 }
 
-
 .mp-play-title h1 {
   margin: 0;
   font-size: 25px;
@@ -294,11 +277,9 @@ body.mp-open #header-bar {
   letter-spacing: -0.035em;
 }
 
-
 .mp-interaction {
   margin-top: 15px;
 }
-
 
 .mp-scene {
   position: relative;
@@ -313,25 +294,27 @@ body.mp-open #header-bar {
     inset 0 1px 0 rgb(255 255 255 / 8%);
 }
 
-
 .mp-scene-scan {
   position: absolute;
   z-index: 6;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(180deg, transparent, rgb(255 255 255 / 3%) 50%, transparent);
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgb(255 255 255 / 3%) 50%,
+    transparent
+  );
   background-size: 100% 9px;
   opacity: 0.2;
   mix-blend-mode: screen;
 }
-
 
 .mp-scene-art {
   position: absolute;
   inset: 0;
   overflow: hidden;
 }
-
 
 .mp-scene-tag {
   position: absolute;
@@ -348,7 +331,6 @@ body.mp-open #header-bar {
   letter-spacing: 0.1em;
   backdrop-filter: blur(5px);
 }
-
 
 .mp-hotspot {
   position: absolute;
@@ -370,7 +352,6 @@ body.mp-open #header-bar {
     background-color 160ms ease;
 }
 
-
 .mp-hotspot::before,
 .mp-hotspot span {
   content: "";
@@ -381,14 +362,12 @@ body.mp-open #header-bar {
   transform: translate(-50%, -50%);
 }
 
-
 .mp-hotspot::before {
   width: 18px;
   height: 18px;
   border: 1px solid rgb(255 255 255 / 48%);
   box-shadow: 0 0 0 4px rgb(139 109 255 / 14%);
 }
-
 
 .mp-hotspot span {
   width: 5px;
@@ -397,11 +376,9 @@ body.mp-open #header-bar {
   box-shadow: 0 0 8px #b59eff;
 }
 
-
 .mp-hotspot:active {
   transform: scale(0.96);
 }
-
 
 .mp-hotspot.is-hint {
   border-color: #f4c75e;
@@ -409,12 +386,10 @@ body.mp-open #header-bar {
   box-shadow: 0 0 0 4px rgb(244 199 94 / 8%);
 }
 
-
 .mp-hotspot.is-hint::before {
   border-color: #f4c75e;
   box-shadow: 0 0 0 7px rgb(244 199 94 / 14%);
 }
-
 
 .mp-scene-instruction {
   margin: 10px 0 0;
@@ -424,11 +399,9 @@ body.mp-open #header-bar {
   text-align: center;
 }
 
-
 .mp-choice-interaction .mp-scene {
   height: 184px;
 }
-
 
 .mp-symptom {
   position: relative;
@@ -443,7 +416,6 @@ body.mp-open #header-bar {
   box-shadow: 0 8px 18px rgb(0 0 0 / 25%);
 }
 
-
 .mp-symptom small {
   color: #ff9892;
   font-size: 7px;
@@ -451,19 +423,16 @@ body.mp-open #header-bar {
   letter-spacing: 0.1em;
 }
 
-
 .mp-symptom strong {
   font-size: 10px;
   line-height: 1.35;
 }
-
 
 .mp-choice-list {
   display: grid;
   gap: 8px;
   margin-top: 13px;
 }
-
 
 .mp-answer-card {
   min-height: 60px;
@@ -476,8 +445,11 @@ body.mp-open #header-bar {
   border: 1px solid rgb(255 255 255 / 10%);
   border-radius: 17px;
   color: #eee8fb;
-  background:
-    linear-gradient(145deg, rgb(255 255 255 / 7%), rgb(255 255 255 / 3%));
+  background: linear-gradient(
+    145deg,
+    rgb(255 255 255 / 7%),
+    rgb(255 255 255 / 3%)
+  );
   cursor: pointer;
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 5%);
   transition:
@@ -486,28 +458,23 @@ body.mp-open #header-bar {
     background-color 160ms ease;
 }
 
-
 .mp-answer-card:active {
   transform: scale(0.985);
 }
 
-
 .mp-answer-card:disabled {
   cursor: default;
 }
-
 
 .mp-answer-card.is-wrong {
   border-color: rgb(255 118 110 / 42%);
   background: rgb(255 118 110 / 9%);
 }
 
-
 .mp-answer-card.is-correct {
   border-color: rgb(56 217 148 / 48%);
   background: rgb(56 217 148 / 10%);
 }
-
 
 .mp-answer-index {
   width: 35px;
@@ -522,18 +489,15 @@ body.mp-open #header-bar {
   font-weight: 950;
 }
 
-
 .mp-answer-card > span:nth-child(2) {
   font-size: 10px;
   font-weight: 850;
   line-height: 1.35;
 }
 
-
 .mp-answer-state {
   color: #72e3ae;
 }
-
 
 .mp-answer-state svg {
   width: 21px;
@@ -544,11 +508,9 @@ body.mp-open #header-bar {
   stroke-width: 2.7;
 }
 
-
 .mp-play-bottom {
   margin-top: 13px;
 }
-
 
 .mp-feedback {
   min-height: 63px;
@@ -562,7 +524,6 @@ body.mp-open #header-bar {
   background: rgb(255 255 255 / 4%);
 }
 
-
 .mp-feedback > span:first-child {
   width: 35px;
   height: 35px;
@@ -575,7 +536,6 @@ body.mp-open #header-bar {
   font-weight: 950;
 }
 
-
 .mp-feedback > span:first-child svg {
   width: 20px;
   fill: none;
@@ -585,18 +545,15 @@ body.mp-open #header-bar {
   stroke-width: 2.7;
 }
 
-
 .mp-feedback p {
   display: grid;
   gap: 4px;
   margin: 0;
 }
 
-
 .mp-feedback strong {
   font-size: 10px;
 }
-
 
 .mp-feedback small {
   color: #9d90b7;
@@ -604,12 +561,10 @@ body.mp-open #header-bar {
   line-height: 1.4;
 }
 
-
 .mp-feedback-success {
   border-color: rgb(56 217 148 / 27%);
   background: rgb(56 217 148 / 8%);
 }
-
 
 .mp-feedback-success > span:first-child {
   border-color: rgb(56 217 148 / 35%);
@@ -617,17 +572,14 @@ body.mp-open #header-bar {
   background: rgb(56 217 148 / 10%);
 }
 
-
 .mp-feedback-success small {
   color: #a7d8c2;
 }
-
 
 .mp-feedback-retry {
   border-color: rgb(255 118 110 / 26%);
   background: rgb(255 118 110 / 7%);
 }
-
 
 .mp-feedback-retry > span:first-child {
   border-color: rgb(255 118 110 / 35%);
@@ -635,12 +587,10 @@ body.mp-open #header-bar {
   background: rgb(255 118 110 / 9%);
 }
 
-
 .mp-feedback-progress {
   border-color: color-mix(in srgb, var(--world) 28%, transparent);
   background: color-mix(in srgb, var(--world) 7%, transparent);
 }
-
 
 .mp-hint {
   display: grid;
@@ -655,7 +605,6 @@ body.mp-open #header-bar {
   background: rgb(244 199 94 / 7%);
 }
 
-
 .mp-hint > span:first-child {
   width: 35px;
   height: 35px;
@@ -666,7 +615,6 @@ body.mp-open #header-bar {
   background: rgb(244 199 94 / 11%);
 }
 
-
 .mp-hint svg {
   width: 20px;
   fill: none;
@@ -676,12 +624,10 @@ body.mp-open #header-bar {
   stroke-width: 2;
 }
 
-
 .mp-hint > span:last-child {
   display: grid;
   gap: 3px;
 }
-
 
 .mp-hint small {
   color: #d1aa54;
@@ -690,17 +636,14 @@ body.mp-open #header-bar {
   letter-spacing: 0.1em;
 }
 
-
 .mp-hint strong {
   font-size: 9px;
   line-height: 1.4;
 }
 
-
 .mp-success-button {
   margin-top: 12px;
 }
-
 
 /* Sequence */
 
@@ -708,14 +651,12 @@ body.mp-open #header-bar {
   height: 145px;
 }
 
-
 .mp-sequence-lane {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 5px;
   margin-top: 10px;
 }
-
 
 .mp-sequence-slot {
   position: relative;
@@ -733,12 +674,10 @@ body.mp-open #header-bar {
   text-align: center;
 }
 
-
 .mp-sequence-slot small {
   font-size: 7px;
   font-weight: 950;
 }
-
 
 .mp-sequence-slot i {
   width: 16px;
@@ -747,12 +686,10 @@ body.mp-open #header-bar {
   background: rgb(255 255 255 / 13%);
 }
 
-
 .mp-sequence-slot strong {
   font-size: 6.5px;
   line-height: 1.2;
 }
-
 
 .mp-sequence-slot.is-filled {
   border-style: solid;
@@ -761,11 +698,9 @@ body.mp-open #header-bar {
   background: rgb(56 217 148 / 8%);
 }
 
-
 .mp-sequence-slot.is-filled small {
   color: #66dca2;
 }
-
 
 .mp-sequence-bank {
   display: grid;
@@ -773,7 +708,6 @@ body.mp-open #header-bar {
   gap: 7px;
   margin-top: 10px;
 }
-
 
 .mp-sequence-card {
   min-height: 52px;
@@ -794,17 +728,14 @@ body.mp-open #header-bar {
     border-color 160ms ease;
 }
 
-
 .mp-sequence-card:active {
   transform: scale(0.97);
 }
-
 
 .mp-sequence-card:disabled {
   opacity: 0.28;
   cursor: default;
 }
-
 
 .mp-sequence-card > span {
   width: 33px;
@@ -819,19 +750,16 @@ body.mp-open #header-bar {
   font-weight: 950;
 }
 
-
 .mp-sequence-card strong {
   font-size: 8px;
   line-height: 1.3;
 }
-
 
 /* Trajectory */
 
 .mp-trajectory-interaction .mp-scene {
   height: 275px;
 }
-
 
 .mp-trajectory-svg {
   position: absolute;
@@ -841,12 +769,10 @@ body.mp-open #header-bar {
   height: 100%;
 }
 
-
 .mp-trajectory-choice {
   cursor: pointer;
   outline: none;
 }
-
 
 .mp-path-hit {
   fill: none;
@@ -854,7 +780,6 @@ body.mp-open #header-bar {
   stroke-width: 28;
   pointer-events: stroke;
 }
-
 
 .mp-path-visible {
   fill: none;
@@ -868,26 +793,21 @@ body.mp-open #header-bar {
     filter 150ms ease;
 }
 
-
 .path-a .mp-path-visible {
   stroke: #ff776e;
 }
-
 
 .path-b .mp-path-visible {
   stroke: #41d99a;
 }
 
-
 .path-c .mp-path-visible {
   stroke: #5ab9ff;
 }
 
-
 .mp-trajectory-choice:focus-visible .mp-path-visible {
   stroke-width: 11;
 }
-
 
 .mp-path-legend {
   display: grid;
@@ -895,7 +815,6 @@ body.mp-open #header-bar {
   gap: 6px;
   margin-top: 9px;
 }
-
 
 .mp-path-legend span {
   min-height: 37px;
@@ -912,14 +831,12 @@ body.mp-open #header-bar {
   line-height: 1.2;
 }
 
-
 .mp-path-legend i {
   width: 17px;
   height: 4px;
   flex: 0 0 auto;
   border-radius: 99px;
 }
-
 
 /* Scene art */
 
@@ -930,10 +847,14 @@ body.mp-open #header-bar {
   overflow: hidden;
   border-bottom: 3px solid #0b0813;
   background:
-    linear-gradient(150deg, transparent 0 44%, rgb(255 255 255 / 8%) 45% 47%, transparent 48%),
+    linear-gradient(
+      150deg,
+      transparent 0 44%,
+      rgb(255 255 255 / 8%) 45% 47%,
+      transparent 48%
+    ),
     linear-gradient(#8177bd, #aaa5cf);
 }
-
 
 .art-road {
   position: absolute;
@@ -946,7 +867,6 @@ body.mp-open #header-bar {
   transform: translateX(-50%);
 }
 
-
 .art-road::after {
   content: "";
   position: absolute;
@@ -957,7 +877,6 @@ body.mp-open #header-bar {
   transform: translateX(-50%);
 }
 
-
 .art-dash {
   position: absolute;
   inset: 91px 15px auto;
@@ -966,7 +885,6 @@ body.mp-open #header-bar {
   background: linear-gradient(#272132, #0e0b15);
   box-shadow: inset 0 5px 10px rgb(255 255 255 / 4%);
 }
-
 
 .art-dial {
   position: absolute;
@@ -979,16 +897,13 @@ body.mp-open #header-bar {
   box-shadow: inset 0 0 0 4px #17131d;
 }
 
-
 .art-dial-left {
   left: 34px;
 }
 
-
 .art-dial-right {
   right: 34px;
 }
-
 
 .art-screen {
   position: absolute;
@@ -1007,7 +922,6 @@ body.mp-open #header-bar {
   transform: translateX(-50%);
 }
 
-
 .art-stalk {
   position: absolute;
   z-index: 3;
@@ -1019,18 +933,15 @@ body.mp-open #header-bar {
   box-shadow: 0 4px 8px rgb(0 0 0 / 35%);
 }
 
-
 .art-stalk-left {
   left: 48px;
   transform: rotate(-8deg);
 }
 
-
 .art-stalk-right {
   right: 48px;
   transform: rotate(8deg);
 }
-
 
 .art-wheel {
   position: absolute;
@@ -1053,7 +964,6 @@ body.mp-open #header-bar {
   transform: translateX(-50%);
 }
 
-
 .art-wheel span {
   width: 42px;
   height: 34px;
@@ -1065,7 +975,6 @@ body.mp-open #header-bar {
   font-weight: 950;
 }
 
-
 .art-pedals {
   position: absolute;
   right: 18px;
@@ -1075,7 +984,6 @@ body.mp-open #header-bar {
   gap: 7px;
 }
 
-
 .art-pedals i {
   width: 29px;
   height: 46px;
@@ -1084,17 +992,14 @@ body.mp-open #header-bar {
   background: repeating-linear-gradient(90deg, #24202b 0 3px, #3c3544 3px 5px);
 }
 
-
 .art-pedals i:nth-child(2) {
   height: 53px;
 }
-
 
 .art-pedals i:nth-child(3) {
   width: 25px;
   height: 59px;
 }
-
 
 .art-start-grid,
 .art-garage-grid,
@@ -1108,7 +1013,6 @@ body.mp-open #header-bar {
   background-size: 28px 28px;
 }
 
-
 .art-footwell {
   position: absolute;
   left: 15px;
@@ -1121,7 +1025,6 @@ body.mp-open #header-bar {
   box-shadow: inset 0 8px 15px rgb(0 0 0 / 34%);
 }
 
-
 .art-pedal-large,
 .art-pedal-small,
 .art-pedal-clutch {
@@ -1133,24 +1036,20 @@ body.mp-open #header-bar {
   background: repeating-linear-gradient(90deg, #292332 0 4px, #463d50 4px 7px);
 }
 
-
 .art-pedal-large {
   right: 67px;
   height: 67px;
 }
-
 
 .art-pedal-small {
   right: 22px;
   height: 76px;
 }
 
-
 .art-pedal-clutch {
   right: 113px;
   height: 67px;
 }
-
 
 .art-foot {
   position: absolute;
@@ -1165,7 +1064,6 @@ body.mp-open #header-bar {
   transform: rotate(13deg);
   transform-origin: bottom;
 }
-
 
 .art-selector {
   position: absolute;
@@ -1184,13 +1082,11 @@ body.mp-open #header-bar {
     0 12px 24px rgb(0 0 0 / 30%);
 }
 
-
 .art-selector span {
   color: #796d8e;
   font-size: 12px;
   font-weight: 950;
 }
-
 
 .art-selector span.is-active {
   width: 36px;
@@ -1203,7 +1099,6 @@ body.mp-open #header-bar {
   box-shadow: 0 0 14px rgb(244 199 94 / 46%);
 }
 
-
 .art-selector i {
   position: absolute;
   left: -8px;
@@ -1214,7 +1109,6 @@ body.mp-open #header-bar {
   background: linear-gradient(90deg, #171021, #49365f);
   transform: rotate(-12deg);
 }
-
 
 .art-warning-dash {
   position: absolute;
@@ -1232,7 +1126,6 @@ body.mp-open #header-bar {
     0 16px 25px rgb(0 0 0 / 34%);
 }
 
-
 .art-warning-dial {
   aspect-ratio: 1;
   display: grid;
@@ -1242,7 +1135,6 @@ body.mp-open #header-bar {
   background: #050407;
 }
 
-
 .art-warning-dial i {
   width: 3px;
   height: 35%;
@@ -1251,7 +1143,6 @@ body.mp-open #header-bar {
   transform: rotate(38deg);
   transform-origin: bottom;
 }
-
 
 .art-warning-screen {
   height: 54px;
@@ -1264,7 +1155,6 @@ body.mp-open #header-bar {
   font-size: 8px;
   font-weight: 900;
 }
-
 
 .art-warning-light {
   position: absolute;
@@ -1284,7 +1174,6 @@ body.mp-open #header-bar {
   transform: translateX(-50%);
 }
 
-
 .art-warning-dash > small {
   position: absolute;
   left: 50%;
@@ -1296,7 +1185,6 @@ body.mp-open #header-bar {
   transform: translateX(-50%);
 }
 
-
 .art-city-sky,
 .art-light-sky,
 .art-emergency-sky {
@@ -1304,7 +1192,6 @@ body.mp-open #header-bar {
   inset: 0;
   background: linear-gradient(#8f86c1 0 45%, #cac6dd 46% 55%, #5f6170 56%);
 }
-
 
 .art-building {
   position: absolute;
@@ -1319,18 +1206,15 @@ body.mp-open #header-bar {
   box-shadow: inset -8px 0 0 rgb(0 0 0 / 15%);
 }
 
-
 .art-building i {
   height: 19px;
   background: #f4d891;
   opacity: 0.75;
 }
 
-
 .art-building-left {
   left: 0;
 }
-
 
 .art-building-right {
   right: 0;
@@ -1338,7 +1222,6 @@ body.mp-open #header-bar {
   height: 166px;
   background: #57416b;
 }
-
 
 .art-main-road {
   position: absolute;
@@ -1351,7 +1234,6 @@ body.mp-open #header-bar {
   transform: translateX(-50%);
 }
 
-
 .art-main-road span {
   position: absolute;
   left: 50%;
@@ -1360,7 +1242,6 @@ body.mp-open #header-bar {
   background: repeating-linear-gradient(#f8e9a6 0 18px, transparent 18px 33px);
   transform: translateX(-50%);
 }
-
 
 .art-side-road {
   position: absolute;
@@ -1372,15 +1253,17 @@ body.mp-open #header-bar {
   clip-path: polygon(0 28%, 100% 0, 100% 100%, 0 72%);
 }
 
-
 .art-side-road span {
   position: absolute;
   top: 50%;
   width: 100%;
   height: 3px;
-  background: repeating-linear-gradient(90deg, #f8e9a6 0 14px, transparent 14px 25px);
+  background: repeating-linear-gradient(
+    90deg,
+    #f8e9a6 0 14px,
+    transparent 14px 25px
+  );
 }
-
 
 .art-parked-car {
   position: absolute;
@@ -1393,7 +1276,6 @@ body.mp-open #header-bar {
   box-shadow: 0 7px 11px rgb(0 0 0 / 28%);
 }
 
-
 .art-parked-car i,
 .art-parked-car b {
   position: absolute;
@@ -1404,16 +1286,13 @@ body.mp-open #header-bar {
   background: #16121d;
 }
 
-
 .art-parked-car i {
   left: 7px;
 }
 
-
 .art-parked-car b {
   right: 7px;
 }
-
 
 .art-crosswalk {
   position: absolute;
@@ -1421,12 +1300,15 @@ body.mp-open #header-bar {
   bottom: 53px;
   width: 115px;
   height: 37px;
-  background: repeating-linear-gradient(90deg, #ece8dc 0 13px, transparent 13px 21px);
+  background: repeating-linear-gradient(
+    90deg,
+    #ece8dc 0 13px,
+    transparent 13px 21px
+  );
   clip-path: polygon(15% 0, 85% 0, 100% 100%, 0 100%);
   opacity: 0.77;
   transform: translateX(-50%);
 }
-
 
 .art-top-road {
   position: absolute;
@@ -1436,18 +1318,15 @@ body.mp-open #header-bar {
   transform: translate(-50%, -50%);
 }
 
-
 .art-top-road-v {
   width: 95px;
   height: 120%;
 }
 
-
 .art-top-road-h {
   width: 120%;
   height: 95px;
 }
-
 
 .art-roundabout-ring {
   position: absolute;
@@ -1464,14 +1343,12 @@ body.mp-open #header-bar {
   transform: translate(-50%, -50%);
 }
 
-
 .art-roundabout-ring span {
   position: absolute;
   inset: 13px;
   border: 2px dashed #f3e79e;
   border-radius: 50%;
 }
-
 
 .art-top-car {
   position: absolute;
@@ -1481,13 +1358,11 @@ body.mp-open #header-bar {
   box-shadow: 0 3px 5px rgb(0 0 0 / 33%);
 }
 
-
 .art-top-car-player {
   left: 48%;
   bottom: 18px;
   background: #9b7cff;
 }
-
 
 .art-top-car-other {
   left: 22%;
@@ -1495,7 +1370,6 @@ body.mp-open #header-bar {
   background: #ff8b63;
   transform: rotate(90deg);
 }
-
 
 .art-exit-arrow {
   position: absolute;
@@ -1507,21 +1381,22 @@ body.mp-open #header-bar {
   filter: drop-shadow(0 3px 6px rgb(0 0 0 / 35%));
 }
 
-
 .art-bend-svg {
   width: 100%;
   height: 100%;
 }
 
-
 .art-night-sky {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 50% 31%, rgb(105 91 147 / 24%), transparent 11rem),
+    radial-gradient(
+      circle at 50% 31%,
+      rgb(105 91 147 / 24%),
+      transparent 11rem
+    ),
     linear-gradient(#0d1334, #161229 58%, #080710);
 }
-
 
 .art-night-sky i {
   position: absolute;
@@ -1537,12 +1412,10 @@ body.mp-open #header-bar {
   opacity: 0.6;
 }
 
-
 .art-night-sky i:nth-child(1) {
   left: 17px;
   top: 38px;
 }
-
 
 .art-night-sky i:nth-child(2) {
   left: 63px;
@@ -1550,13 +1423,11 @@ body.mp-open #header-bar {
   transform: scale(0.7);
 }
 
-
 .art-night-sky i:nth-child(3) {
   left: 7px;
   top: 132px;
   transform: scale(0.5);
 }
-
 
 .art-night-road {
   position: absolute;
@@ -1569,7 +1440,6 @@ body.mp-open #header-bar {
   transform: translateX(-50%);
 }
 
-
 .art-night-road span {
   position: absolute;
   left: 50%;
@@ -1578,7 +1448,6 @@ body.mp-open #header-bar {
   background: repeating-linear-gradient(#f4dc76 0 17px, transparent 17px 31px);
 }
 
-
 .art-night-road b {
   position: absolute;
   right: 13%;
@@ -1586,7 +1455,6 @@ body.mp-open #header-bar {
   height: 100%;
   background: #f2f0ec;
 }
-
 
 .art-oncoming {
   position: absolute;
@@ -1598,7 +1466,6 @@ body.mp-open #header-bar {
   background: #1b1922;
   transform: translateX(-50%);
 }
-
 
 .art-oncoming i {
   position: absolute;
@@ -1612,16 +1479,13 @@ body.mp-open #header-bar {
     0 0 35px rgb(255 244 184 / 70%);
 }
 
-
 .art-oncoming i:first-child {
   left: 10px;
 }
 
-
 .art-oncoming i:last-child {
   right: 10px;
 }
-
 
 .art-right-edge {
   position: absolute;
@@ -1635,7 +1499,6 @@ body.mp-open #header-bar {
   transform-origin: bottom;
 }
 
-
 .art-night-dash {
   position: absolute;
   left: -3%;
@@ -1646,13 +1509,11 @@ body.mp-open #header-bar {
   background: #08060e;
 }
 
-
 .art-rain-sky {
   position: absolute;
   inset: 0;
   background: linear-gradient(#4d5d72, #798895 43%, #3e414c 44%);
 }
-
 
 .art-rain-road {
   position: absolute;
@@ -1667,7 +1528,6 @@ body.mp-open #header-bar {
   transform: translateX(-50%);
 }
 
-
 .art-rain-road span {
   position: absolute;
   left: 50%;
@@ -1675,7 +1535,6 @@ body.mp-open #header-bar {
   height: 100%;
   background: repeating-linear-gradient(#f3dd83 0 17px, transparent 17px 31px);
 }
-
 
 .art-rain-car {
   position: absolute;
@@ -1689,7 +1548,6 @@ body.mp-open #header-bar {
   transform: translateX(-50%);
 }
 
-
 .art-rain-car i,
 .art-rain-car b {
   position: absolute;
@@ -1701,23 +1559,19 @@ body.mp-open #header-bar {
   box-shadow: 0 0 8px #ff6d65;
 }
 
-
 .art-rain-car i {
   left: 10px;
 }
 
-
 .art-rain-car b {
   right: 10px;
 }
-
 
 .art-rain-lines {
   position: absolute;
   inset: 0;
   overflow: hidden;
 }
-
 
 .art-rain-lines i {
   position: relative;
@@ -1729,7 +1583,6 @@ body.mp-open #header-bar {
   transform: rotate(12deg);
 }
 
-
 .art-wiper {
   position: absolute;
   bottom: 8px;
@@ -1740,18 +1593,15 @@ body.mp-open #header-bar {
   transform-origin: bottom center;
 }
 
-
 .art-wiper-left {
   left: 35px;
   transform: rotate(-41deg);
 }
 
-
 .art-wiper-right {
   right: 26px;
   transform: rotate(41deg);
 }
-
 
 .art-emergency-road {
   position: absolute;
@@ -1764,7 +1614,6 @@ body.mp-open #header-bar {
   transform: translateX(-50%);
 }
 
-
 .art-emergency-road span {
   position: absolute;
   left: 50%;
@@ -1772,7 +1621,6 @@ body.mp-open #header-bar {
   height: 100%;
   background: repeating-linear-gradient(#f3df8a 0 18px, transparent 18px 32px);
 }
-
 
 .art-obstacle {
   position: absolute;
@@ -1792,7 +1640,6 @@ body.mp-open #header-bar {
   transform: translateX(-50%);
 }
 
-
 .art-obstacle i {
   position: absolute;
   bottom: -12px;
@@ -1801,11 +1648,9 @@ body.mp-open #header-bar {
   background: #ddd8cc;
 }
 
-
 .art-obstacle b {
   font-size: 31px;
 }
-
 
 .art-player-hood {
   position: absolute;
@@ -1820,7 +1665,6 @@ body.mp-open #header-bar {
   transform: translateX(-50%);
 }
 
-
 .art-brake-wave {
   position: absolute;
   left: 50%;
@@ -1830,19 +1674,16 @@ body.mp-open #header-bar {
   transform: translateX(-50%);
 }
 
-
 .art-brake-wave-a {
   width: 184px;
   height: 55px;
 }
-
 
 .art-brake-wave-b {
   width: 247px;
   height: 83px;
   opacity: 0.5;
 }
-
 
 .art-map-grid {
   background:
@@ -1851,13 +1692,11 @@ body.mp-open #header-bar {
   background-size: 36px 36px;
 }
 
-
 .art-map-road {
   position: absolute;
   background: #514963;
   box-shadow: inset 0 0 0 2px #6f657e;
 }
-
 
 .art-map-road-main {
   left: 46%;
@@ -1867,7 +1706,6 @@ body.mp-open #header-bar {
   transform: rotate(-8deg);
 }
 
-
 .art-map-road-exit {
   right: 3px;
   top: 51px;
@@ -1875,7 +1713,6 @@ body.mp-open #header-bar {
   height: 54px;
   transform: rotate(-25deg);
 }
-
 
 .art-map-route {
   position: absolute;
@@ -1888,7 +1725,6 @@ body.mp-open #header-bar {
   box-shadow: 0 0 13px rgb(155 124 255 / 54%);
   transform: rotate(-8deg);
 }
-
 
 .art-map-car {
   position: absolute;
@@ -1906,7 +1742,6 @@ body.mp-open #header-bar {
   transform: rotate(-8deg);
 }
 
-
 .art-map-exit {
   position: absolute;
   right: 26px;
@@ -1918,7 +1753,6 @@ body.mp-open #header-bar {
   font-size: 7px;
   font-weight: 950;
 }
-
 
 .art-gps-card {
   position: absolute;
@@ -1935,18 +1769,15 @@ body.mp-open #header-bar {
   backdrop-filter: blur(7px);
 }
 
-
 .art-gps-card small {
   color: #a98efc;
   font-size: 6px;
   font-weight: 950;
 }
 
-
 .art-gps-card strong {
   font-size: 9px;
 }
-
 
 .art-light-city {
   position: absolute;
@@ -1960,32 +1791,26 @@ body.mp-open #header-bar {
   opacity: 0.62;
 }
 
-
 .art-light-city i {
   flex: 1;
   background: #463a5d;
 }
 
-
 .art-light-city i:nth-child(1) {
   height: 66px;
 }
-
 
 .art-light-city i:nth-child(2) {
   height: 91px;
 }
 
-
 .art-light-city i:nth-child(3) {
   height: 58px;
 }
 
-
 .art-light-city i:nth-child(4) {
   height: 80px;
 }
-
 
 .art-light-road {
   position: absolute;
@@ -1998,7 +1823,6 @@ body.mp-open #header-bar {
   transform: translateX(-50%);
 }
 
-
 .art-light-road span {
   position: absolute;
   left: 50%;
@@ -2006,7 +1830,6 @@ body.mp-open #header-bar {
   height: 100%;
   background: repeating-linear-gradient(#f3df8a 0 17px, transparent 17px 31px);
 }
-
 
 .art-traffic-light {
   position: absolute;
@@ -2022,7 +1845,6 @@ body.mp-open #header-bar {
   box-shadow: 0 8px 12px rgb(0 0 0 / 29%);
 }
 
-
 .art-traffic-light::after {
   content: "";
   position: absolute;
@@ -2034,7 +1856,6 @@ body.mp-open #header-bar {
   transform: translateX(-50%);
 }
 
-
 .art-traffic-light i {
   width: 15px;
   height: 15px;
@@ -2042,18 +1863,15 @@ body.mp-open #header-bar {
   background: #35303a;
 }
 
-
 .art-traffic-light i.is-red {
   background: #ff5c55;
   box-shadow: 0 0 10px #ff5c55;
 }
 
-
 .art-garage-grid {
   opacity: 0.14;
   background-size: 31px 31px;
 }
-
 
 .art-car-side {
   position: absolute;
@@ -2072,7 +1890,6 @@ body.mp-open #header-bar {
   transform: translateX(-50%);
 }
 
-
 .art-car-window {
   position: absolute;
   left: 72px;
@@ -2083,7 +1900,6 @@ body.mp-open #header-bar {
   background: linear-gradient(145deg, #44365f, #181326);
 }
 
-
 .art-car-door {
   position: absolute;
   left: 123px;
@@ -2093,7 +1909,6 @@ body.mp-open #header-bar {
   border: 1px solid rgb(255 255 255 / 16%);
   border-radius: 7px 7px 14px 14px;
 }
-
 
 .art-car-wheel {
   position: absolute;
@@ -2106,23 +1921,19 @@ body.mp-open #header-bar {
   box-shadow: 0 5px 8px rgb(0 0 0 / 35%);
 }
 
-
 .art-car-wheel-left {
   left: 35px;
 }
 
-
 .art-car-wheel-right {
   right: 31px;
 }
-
 
 .art-car-wheel.is-flat {
   height: 42px;
   bottom: -18px;
   border-radius: 50% 50% 34% 34%;
 }
-
 
 .art-car-mirror {
   position: absolute;
@@ -2134,7 +1945,6 @@ body.mp-open #header-bar {
   border-radius: 12px 7px 11px 8px;
   background: #272034;
 }
-
 
 .art-car-plate {
   position: absolute;
@@ -2148,7 +1958,6 @@ body.mp-open #header-bar {
   font-weight: 900;
 }
 
-
 .art-floor-shadow {
   position: absolute;
   left: 50%;
@@ -2160,7 +1969,6 @@ body.mp-open #header-bar {
   filter: blur(8px);
   transform: translateX(-50%);
 }
-
 
 .mp-outcome-main .mp-primary-button {
   margin-top: 19px;
@@ -2179,12 +1987,16 @@ body.mp-open #header-bar {
   border: 1px solid rgba(244, 199, 94, 0.34);
 }
 .mp-transfer small {
-  font: 800 10px/1 "Archivo", sans-serif;
+  font:
+    800 10px/1 "Archivo",
+    sans-serif;
   letter-spacing: 0.1em;
   color: var(--gold);
 }
 .mp-transfer strong {
-  font: 700 14px/1.45 "Archivo", sans-serif;
+  font:
+    700 14px/1.45 "Archivo",
+    sans-serif;
   color: #f6f1ff;
 }
 
@@ -2192,7 +2004,89 @@ body.mp-open #header-bar {
 .mp-play-count {
   min-width: 44px;
   text-align: center;
-  font: 800 13px/1 "Archivo", sans-serif;
+  font:
+    800 13px/1 "Archivo",
+    sans-serif;
   color: rgba(246, 241, 255, 0.66);
   font-variant-numeric: tabular-nums;
+}
+
+/* ── Décor « créneau », vue de dessus ─────────────────────────────────────
+   Ajouté pour le chapitre 1 (manœuvres). Positionné en POURCENTAGE : les
+   zones tactiles des missions le sont aussi, et un décor calé en pixels les
+   décalerait dès que la scène change de largeur. */
+.mp-art-parking {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #221a3d, #14102a);
+}
+.art-pk-road {
+  position: absolute;
+  inset: 26% 0 0;
+  background: linear-gradient(180deg, #3a3550, #2b2740);
+}
+.art-pk-road span {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 62%;
+  height: 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    #f7e9a1 0 22px,
+    transparent 22px 44px
+  );
+  opacity: 0.7;
+}
+.art-pk-kerb {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 20%;
+  height: 6%;
+  background: linear-gradient(180deg, #6f6a86, #4a4560);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 35%);
+}
+.art-pk-car {
+  position: absolute;
+  height: 17%;
+  border-radius: 7px;
+  background: linear-gradient(180deg, #7b6ba8, #4a3f74);
+  box-shadow: 0 6px 12px rgb(0 0 0 / 34%);
+}
+.art-pk-car-a {
+  left: 8%;
+  top: 28%;
+  width: 24%;
+}
+.art-pk-car-b {
+  left: 64%;
+  top: 28%;
+  width: 24%;
+}
+/* La place libre entre les deux voitures : c'est la cible de la manœuvre. */
+.art-pk-slot {
+  position: absolute;
+  left: 34%;
+  top: 27%;
+  width: 28%;
+  height: 19%;
+  border: 2px dashed rgb(247 233 161 / 62%);
+  border-radius: 8px;
+}
+.art-pk-player {
+  left: 38%;
+  top: 58%;
+  width: 24%;
+  background: linear-gradient(180deg, #ffd88a, #e0a133);
+}
+.art-pk-player i {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  width: 22%;
+  height: 44%;
+  border-radius: 3px;
+  background: rgb(20 12 40 / 45%);
+  transform: translateY(-50%);
 }
