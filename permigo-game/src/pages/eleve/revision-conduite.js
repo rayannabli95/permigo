@@ -36,6 +36,12 @@ import {
 } from "@/data/conduite-meta.js";
 import { loadFiche } from "@/data/fiches-loader.js";
 import { chromeNight } from "@/utils/chrome-night.js";
+import { chargerBoite } from "@/utils/transmission.js";
+import {
+  marquerTermes,
+  poserLexique,
+  brancherGlossaire,
+} from "@/components/eleve/glossaire.js";
 
 const ficheCache = new Map();
 const quizCache = new Map();
@@ -130,7 +136,7 @@ const RVC_I18N = {
     quiz_passed: "Quiz passed",
     cert_prompt: "Ready to certify this skill?",
     cert_prompt_body:
-      "You have just reviewed “{title}”. Certify it to move it forward in {product}. An official five-question quiz confirms you have acquired it.",
+      "You have just reviewed “{title}”. Certify it to move it forward in {product}. Five questions confirm you have acquired it.",
     certify: "Certify this skill",
     later: "Later",
   },
@@ -178,7 +184,7 @@ const RVC_I18N = {
     quiz_passed: "نجحت في الاختبار",
     cert_prompt: "هل أنت مستعد لاعتماد هذه المهارة؟",
     cert_prompt_body:
-      "لقد راجعت للتو « {title} ». اعتمدها لتتقدم في « {product} ». ويؤكد اختبار رسمي من خمسة أسئلة أنك أتقنتها.",
+      "لقد راجعت للتو « {title} ». اعتمدها لتتقدم في « {product} ». وخمسة أسئلة تؤكد أنك أتقنتها.",
     certify: "اعتماد هذه المهارة",
     later: "لاحقاً",
   },
@@ -586,6 +592,12 @@ ${chromeNight("#5a4fc0", "#423a96")}
 .fd-source b{ color:#ffe4a6; font-weight:700; }
 
 .fd-actions{ padding:16px 18px 0; }
+/* Prévention avant la certification : on certifie ce qu'on sait FAIRE, pas ce
+   qu'on vient de lire (décision Rayan, 31/07/2026). */
+.fd-warn{ display:flex; align-items:flex-start; gap:9px; margin:0 0 12px; padding:11px 13px; border-radius:14px;
+  background:rgba(255,228,166,.10); border:1px solid rgba(255,228,166,.28); }
+.fd-warn svg{ width:16px; height:16px; flex:none; margin-top:1px; color:#ffe4a6; }
+.fd-warn p{ margin:0; font-family:'Archivo',sans-serif; font-size:12px; line-height:1.45; font-weight:600; color:#e6dcff; }
 .fd-cta{ display:flex; align-items:center; justify-content:center; gap:10px; width:100%; height:60px; border:none; border-radius:20px; cursor:pointer; position:relative;
   background:linear-gradient(180deg,#ffe9b0 0%,#f6c85f 38%,#f0a93f 72%,#e2951f 100%);
   box-shadow:0 6px 0 #b46a10, 0 12px 20px rgba(180,106,16,.35), inset 0 2px 0 rgba(255,255,255,.7); transition:transform .1s ease, box-shadow .1s ease; }
@@ -865,6 +877,11 @@ export async function mount(root, param) {
   let view = deep ? (pAction === "quiz" ? "quiz" : "fiche") : "home";
   let code = deep;
   let focusId = null;
+  // Compétences déjà acquises (moniteur ou certification par l'élève), par code.
+  // Renseigné après coup : tant que la réponse n'est pas là, on propose la
+  // certification, le garde-fou serveur tranchera.
+  const CERT_CACHE = new Map();
+  const estAcquise = (c) => CERT_CACHE.get(c) === true;
   let orderPlaced = [];
   let orderPool = [];
   let mondeN = null;
@@ -1376,7 +1393,7 @@ export async function mount(root, param) {
           <span class="fd-tag"><span class="fd-dot"></span><b>${esc(f.code)} · ${esc(competenceTxt)} · ${esc(ui("monde", "Monde"))} ${esc(String(f.monde))}</b></span>
         </div>
         <h1 class="fd-title fd-gold">${bi(f.titre, tr?.titre)}</h1>
-        <div class="fd-sub">${esc(ui("sub", "Coche tes gestes puis débloque le test."))}</div>
+        <div class="fd-sub">${esc(ui("sub", "Coche tes gestes puis certifie la compétence."))}</div>
         <div class="fd-xp">
           <div class="fd-xp-top"><span class="lab">${esc(ui("deck", "Ton deck"))}</span><span class="cnt fd-gold">${count}<small> / ${total} ${esc(ui(total > 1 ? "gestes" : "geste", total > 1 ? "gestes" : "geste"))}</small></span></div>
           <div class="fd-bar"><div class="fill" style="width:${count ? Math.max(pct, 4) : 0}%"></div></div>
@@ -1392,12 +1409,53 @@ export async function mount(root, param) {
       ${srcHtml}
 
       <div class="fd-actions">
-        <button class="fd-cta" data-quiz><span>${esc(ui("cta", "Teste-toi"))}</span></button>
+        <div class="fd-warn">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 8v5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="16.6" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/></svg>
+          <p>${esc(
+            estAcquise(f.code)
+              ? ui(
+                  "cta_done_note",
+                  "Tu l'as déjà certifiée. Continue à la revoir quand tu veux.",
+                )
+              : ui(
+                  "cta_warn",
+                  "Fais-la d'abord en leçon avec ton enseignant. On certifie ce que tu sais faire, pas ce que tu viens de lire.",
+                ),
+          )}</p>
+        </div>
+        <button class="fd-cta" data-certif-fiche><span>${esc(
+          estAcquise(f.code)
+            ? ui("cta_done", "Déjà acquise. Voir dans Mon permis")
+            : ui("cta", "Certifie la compétence"),
+        )}</span></button>
         ${total >= 3 ? `<button class="fd-secondary" data-order>${SHUF}<span>${esc(ui("order", "Remets dans l’ordre"))}</span></button>` : ""}
       </div>
     </div>`;
 
     wireFicheDeck(f, flatSteps, flatStepsTR, coach, rtl);
+
+    // Les mots de moniteur (« commodo », « patinage », « rétrograder »)
+    // arrivaient sans jamais être définis, y compris pour un élève qui
+    // apprend le français (audit 01/08). Ils sont soulignés une fois par
+    // fiche, un tap ouvre la définition. On attend la boîte pour ne pas
+    // souligner « débrayer » à quelqu'un qui roule en automatique.
+    const zoneFiche = root.querySelector(".fd");
+    if (zoneFiche) {
+      brancherGlossaire(zoneFiche);
+      chargerBoite()
+        .then((boite) => {
+          if (root.querySelector(".fd") !== zoneFiche) return; // fiche changée
+          marquerTermes(zoneFiche, boite);
+          poserLexique(
+            zoneFiche,
+            boite,
+            ui("glossaire_h", "Les mots de la fiche"),
+          );
+        })
+        .catch(() => {
+          /* pas de glossaire plutôt qu'une fiche cassée */
+        });
+    }
   }
 
   function wireFicheDeck(f, flatSteps, flatStepsTR, coach = [], rtl = false) {
@@ -1438,10 +1496,40 @@ export async function mount(root, param) {
         });
       }),
     );
-    root.querySelector("[data-quiz]")?.addEventListener("click", () => {
+    // La fiche mène désormais DIRECTEMENT à la certification (décision Rayan,
+    // 31/07/2026) : « Teste-toi » ouvrait un quiz de révision, qui proposait
+    // ensuite un second quiz pour certifier — deux quiz d'affilée pour un
+    // élève qui voulait juste avancer. Le quiz de révision reste joignable
+    // depuis la quête du jour (deep-link `{code}:quiz`).
+    root.querySelector("[data-certif-fiche]")?.addEventListener("click", () => {
       focusId = null;
-      startQuiz();
+      haptic("tap");
+      // Déjà acquise : la certification n'a plus rien à dire, on montre où elle
+      // vit désormais plutôt qu'un écran fermé.
+      if (estAcquise(f.code)) {
+        navigate("#/mon-permis");
+        return;
+      }
+      track("revision_conduite_certif_go", { code: f.code, from: "fiche" });
+      navigate(`#/valider-seul/${f.code}`);
     });
+
+    // L'état de certification arrive après coup (lecture serveur non bloquante).
+    // On le met en cache et on redessine : le libellé et la destination du
+    // bouton sortent TOUS LES DEUX du cache, ils ne peuvent pas se contredire
+    // même si la fiche se redessine entre-temps. Hors-ligne, le cache reste
+    // vide → la certification demeure joignable, valider-seul sait dire
+    // « déjà certifiée ».
+    if (!CERT_CACHE.has(f.code)) {
+      certState(f.code)
+        .then(({ moniteur, certified }) => {
+          CERT_CACHE.set(f.code, moniteur || certified);
+          if (view === "fiche" && code === f.code) render();
+        })
+        .catch(() => {
+          /* état indéterminé : on laisse la certification joignable */
+        });
+    }
     root.querySelector("[data-order]")?.addEventListener("click", () => {
       orderPlaced = [];
       const flat = flatSteps && flatSteps.length ? flatSteps : f.methode || [];
@@ -1688,7 +1776,7 @@ export async function mount(root, param) {
         <div class="pont-med">${CHECK}</div>
         <span class="pont-kick">${rvcText("cert_done_kicker", "Déjà dans Mon permis")}</span>
         <h1 class="pont-ttl">${rvcText("cert_done_title", "Déjà certifiée par toi")}</h1>
-        <p class="pont-p">${rvcRich("cert_done_body", "« {title} » est déjà acquise dans ton parcours. Beau boulot — continue à réviser quand tu veux.", { title: titre })}</p>
+        <p class="pont-p">${rvcRich("cert_done_body", "« {title} » est déjà acquise dans ton parcours. Beau boulot. Continue à réviser quand tu veux.", { title: titre })}</p>
         <button class="pont-cta" data-continue type="button">${rvcText("cert_keep", "Continuer à réviser")}</button>
         <button class="pont-link" data-revoir type="button">${rvcText("cert_review", "Revoir dans Mon permis →")}</button>
       </div>`;
@@ -1697,8 +1785,8 @@ export async function mount(root, param) {
       root.innerHTML = `${PONT_STYLE}<div class="pont anim-slide-up">
         <div class="pont-med">${BOUCLIER}</div>
         <span class="pont-kick">${rvcText("quiz_passed", "Quiz réussi")}</span>
-        <h1 class="pont-ttl">${rvcText("cert_prompt", "Prêt·e à certifier cette compétence ?")}</h1>
-        <p class="pont-p">${rvcRich("cert_prompt_body", "Tu viens de réviser « {title} ». Certifie-la pour la faire avancer dans {product} — un quiz officiel de 5 questions confirme que c'est acquis.", { title: titre, product: rvcT("my_licence", "Mon permis") })}</p>
+        <h1 class="pont-ttl">${rvcText("cert_prompt", "Prêt à certifier cette compétence ?")}</h1>
+        <p class="pont-p">${rvcRich("cert_prompt_body", "Tu viens de réviser « {title} ». Certifie-la pour la faire avancer dans {product}. Cinq questions confirment que c'est acquis.", { title: titre, product: rvcT("my_licence", "Mon permis") })}</p>
         <button class="pont-cta" data-certify type="button">${rvcText("certify", "Certifier cette compétence")}</button>
         <button class="pont-ghost" data-continue type="button">${rvcText("later", "Plus tard")}</button>
       </div>`;
