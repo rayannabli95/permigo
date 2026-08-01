@@ -578,8 +578,10 @@ const STYLE = `<style>
   .pv-t-inner { display: flex; position: relative; }
   .pv-t-main { flex: 1; padding: 18px 14px 16px 18px; }
   .pv-t-stub { width: 104px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 12px 6px; text-align: center; }
-  .pv-t-brand { display: flex; align-items: center; gap: 7px; font: 800 14px/1 'Archivo', sans-serif; text-shadow: 0 1px 0 rgba(255,255,255,.4); }
-  .pv-t-brand img { width: 22px; height: 22px; filter: drop-shadow(0 1px 1px rgba(90,60,5,.4)); }
+  /* Pas de logo sur le billet : le badge de marque est violet foncé, il faisait
+     une pastille sombre en plein milieu de l'or (décision Rayan, 01/08/2026).
+     Le mot PERMIGO suffit — il était déjà juste à côté. */
+  .pv-t-brand { display: flex; align-items: center; letter-spacing: .08em; font: 800 14px/1 'Archivo', sans-serif; text-shadow: 0 1px 0 rgba(255,255,255,.4); }
   .pv-t-title { font: 800 23px/1.05 'Archivo', sans-serif; margin: 9px 0 3px; letter-spacing: -.01em; text-shadow: 0 1px 0 rgba(255,255,255,.45), 0 -1px 0 rgba(90,60,5,.3); }
   .pv-t-sub { font: 600 11.5px/1.4 'Archivo', sans-serif; color: var(--tik-mu); }
   .pv-t-meta { display: flex; gap: 14px; margin-top: 12px; }
@@ -869,7 +871,7 @@ function renderTicket(L, { stamped = false } = {}) {
       <div class="pv-ticket">
         <div class="pv-t-inner">
           <div class="pv-t-main">
-            <div class="pv-t-brand"><img src="${LOGO}" alt="" width="22" height="22">PERMIGO</div>
+            <div class="pv-t-brand">PERMIGO</div>
             <div class="pv-t-title">${L.tTitle}</div>
             <div class="pv-t-sub">${L.tSub}</div>
             <div class="pv-t-meta">
