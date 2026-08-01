@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta
+      name="description"
+      content="Quatre prototypes pédagogiques actifs pour préparer la compétence C1a de PermiGo."
+    />
+    <title>PermiGo — Laboratoire pédagogique C1a</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="lab">
+      <aside class="lab-panel" aria-label="Choix de la maquette">
+        <div class="lab-brand">
+          <span class="lab-brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32">
+              <path d="M7 21.5C7 15 10.4 10 16 10s9 5 9 11.5" />
+              <path d="M10 21.5a6 6 0 0 1 12 0" />
+              <circle cx="16" cy="21.5" r="2.8" />
+            </svg>
+          </span>
+          <span>PermiGo · Labo</span>
+        </div>
+
+        <div class="lab-intro">
+          <p class="lab-kicker">Même contenu · 4 pédagogies</p>
+          <h1>Et si l’élève faisait avant de lire&nbsp;?</h1>
+          <p>
+            Objectif témoin&nbsp;: <strong>C1a · Prendre en main le poste de conduite</strong>.
+            Les quatre pistes remplacent la fiche par une action.
+          </p>
+        </div>
+
+        <a class="engine-launch" href="../moteur-pilote/">
+          <span>
+            <small>NOUVEAU · MOTEUR COMPLET</small>
+            <strong>Lancer le Mode Pilote</strong>
+          </span>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M5 12h14M14 7l5 5-5 5"></path>
+          </svg>
+        </a>
+
+        <nav class="variant-nav" aria-label="Variantes pédagogiques">
+          <button class="variant-tab" type="button" data-variant="cockpit">
+            <span class="variant-letter">A</span>
+            <span>
+              <strong>Cockpit à explorer</strong>
+              <small>Trouver une commande</small>
+            </span>
+          </button>
+          <button class="variant-tab" type="button" data-variant="mission">
+            <span class="variant-letter">B</span>
+            <span>
+              <strong>Mission dans la voiture</strong>
+              <small>Faire le geste pour de vrai</small>
+            </span>
+          </button>
+          <button class="variant-tab" type="button" data-variant="erreur">
+            <span class="variant-letter">C</span>
+            <span>
+              <strong>Atelier des erreurs</strong>
+              <small>Diagnostiquer puis réparer</small>
+            </span>
+          </button>
+          <button class="variant-tab" type="button" data-variant="sequence">
+            <span class="variant-letter">D</span>
+            <span>
+              <strong>Mémoire du geste</strong>
+              <small>Retirer les aides peu à peu</small>
+            </span>
+          </button>
+        </nav>
+
+        <section class="test-note" aria-live="polite">
+          <p class="test-note-label">Hypothèse testée</p>
+          <h2 id="hypothesis-title"></h2>
+          <p id="hypothesis-copy"></p>
+          <dl class="test-facts">
+            <div>
+              <dt>À observer</dt>
+              <dd id="test-observe"></dd>
+            </div>
+            <div>
+              <dt>Risque</dt>
+              <dd id="test-risk"></dd>
+            </div>
+          </dl>
+        </section>
+      </aside>
+
+      <main class="preview-area">
+        <div class="preview-toolbar">
+          <div>
+            <span class="preview-dot" aria-hidden="true"></span>
+            Prototype interactif · 390 × 844
+          </div>
+          <button id="reset-prototype" class="reset-button" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 11a8 8 0 1 1 2.35 5.65M4 11V6m0 5h5" />
+            </svg>
+            Recommencer
+          </button>
+        </div>
+
+        <div class="phone">
+          <div class="phone-status" aria-hidden="true">
+            <span>9:41</span>
+            <span class="phone-island"></span>
+            <span class="phone-signals">
+              <svg viewBox="0 0 44 14">
+                <path d="M1 11h3V7H1zm5 0h3V5H6zm5 0h3V2h-3z" />
+                <path d="M19 5c3.2-3 8.8-3 12 0m-9 3c1.7-1.5 4.3-1.5 6 0" />
+                <rect x="34" y="2" width="8" height="9" rx="2" />
+              </svg>
+            </span>
+          </div>
+          <div id="prototype" class="prototype" aria-live="polite"></div>
+          <div class="phone-home" aria-hidden="true"></div>
+        </div>
+      </main>
+    </div>
+
+    <script type="module" src="./prototype.js"></script>
+  </body>
+</html>
