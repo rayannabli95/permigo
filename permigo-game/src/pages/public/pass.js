@@ -35,7 +35,7 @@ const STR = {
   fr: {
     login: "Se connecter",
     langBtn: "EN",
-    kicker: "Offre de lancement*",
+    kicker: "Auto-école ou candidat libre",
     // Phrase-mission (décision Rayan 17/07) : LE but de l'app en une phrase,
     // en gros. « Réserve ta place » vit déjà dans le CTA, « 90 jours » sur le
     // billet — rien ne se perd.
@@ -56,7 +56,7 @@ const STR = {
     freeCta: "Commencer gratuitement",
     freeNote: "3 leçons offertes · sans carte bancaire",
     cta: `Ouvrir tout mon parcours · <s>29,97 €</s> 24,99 €`,
-    ctaNote: `Paiement sécurisé Stripe · <b>Satisfait ou remboursé sous 3 jours</b><br><small>*Prix de lancement : il remontera après cette promo.</small>`,
+    ctaNote: `Paiement sécurisé Stripe · <b>Satisfait ou remboursé sous 3 jours</b><br><small>Moins qu'une demi-heure de conduite.</small>`,
     bulle: "3 compétences validées !",
     bulleSub: "cette semaine",
     secCode: `Préparer le permis, c'est <em>bien plus</em> que conduire.`,
@@ -95,9 +95,9 @@ const STR = {
     ],
     mathsNote: "Une leçon mal préparée = 55 € de perdus.",
     mathsSrc: "Sources : UFC-Que Choisir (budget permis) · Sécurité routière",
-    secPass: "Trois billets. Un objectif.",
+    secPass: "Deux façons. Un objectif.",
     secPassSub:
-      "Le même contenu partout. Plus tu vois loin, moins tu paies : 3 mois au mensuel = 29,97 €.",
+      "Le même contenu dans les deux. Trois mois au mensuel coûtent 29,97 €. Le billet Or les met à 24,99 €.",
     passes: {
       mensuel: {
         name: "Billet Mensuel",
@@ -159,7 +159,7 @@ const STR = {
       ],
       [
         "Je peux annuler ou être remboursé ?",
-        `Pendant les 3 premiers jours : <strong>satisfait ou remboursé</strong>. Ensuite, le mensuel s'annule à tout moment en un clic (les billets Or et Platine sont des paiements uniques). Tu pars ? <a href="#/avis-depart">Dis-nous pourquoi ici</a>. Ça nous aide à améliorer l'app.`,
+        `Pendant les 3 premiers jours : <strong>satisfait ou remboursé</strong>. Ensuite, le mensuel s'annule à tout moment en un clic (le billet Or est un paiement unique). Tu pars ? <a href="#/avis-depart">Dis-nous pourquoi ici</a>. Ça nous aide à améliorer l'app.`,
       ],
     ],
     foot: `Paiement sécurisé par Stripe · Satisfait ou remboursé sous 3 jours<br><a href="#/legal">Mentions légales</a> · <a href="#/rejoindre?solo=1">Créer un compte gratuit</a>`,
@@ -186,7 +186,7 @@ const STR = {
   en: {
     login: "Log in",
     langBtn: "FR",
-    kicker: "Launch offer*",
+    kicker: "Driving school or self-taught",
     docTitle: "PermiGo. Prepare every driving lesson before you get in the car",
     h1: `Prepare every lesson <br><em>before you get in the car.</em>`,
     lead: `The app that trains your <strong>driving</strong> between lessons. Not just another code-test app.`,
@@ -201,7 +201,7 @@ const STR = {
     freeCta: "Start for free",
     freeNote: "3 lessons included · no card needed",
     cta: `Open my full course · <s>€29.97</s> €24.99`,
-    ctaNote: `Secure Stripe checkout · <b>3-day money-back guarantee</b><br><small>*Launch price. It will go up after this promo.</small>`,
+    ctaNote: `Secure Stripe checkout · <b>3-day money-back guarantee</b><br><small>Less than half an hour of driving lessons.</small>`,
     bulle: "3 skills validated!",
     bulleSub: "this week",
     secCode: `Getting your licence takes <em>more</em> than driving.`,
@@ -242,9 +242,9 @@ const STR = {
     ],
     mathsNote: "One unprepared lesson = €55 wasted.",
     mathsSrc: "Sources: UFC-Que Choisir (licence budget) · Sécurité routière",
-    secPass: "Three tickets. One goal.",
+    secPass: "Two ways. One goal.",
     secPassSub:
-      "Same content everywhere. The longer you commit, the less you pay: 3 months on monthly = €29.97.",
+      "Same content in both. Three months on the monthly plan cost €29.97. The Gold ticket makes it €24.99.",
     passes: {
       mensuel: {
         name: "Monthly Ticket",
@@ -305,7 +305,7 @@ const STR = {
       ],
       [
         "Can I cancel or get a refund?",
-        `First 3 days: <strong>money-back guarantee</strong>. After that, the monthly plan cancels anytime in one click (Gold and Platinum are one-time payments). Leaving? <a href="#/avis-depart">Tell us why here</a>. It helps us improve.`,
+        `First 3 days: <strong>money-back guarantee</strong>. After that, the monthly plan cancels anytime in one click (the Gold ticket is a one-time payment). Leaving? <a href="#/avis-depart">Tell us why here</a>. It helps us improve.`,
       ],
     ],
     foot: `Secure payment by Stripe · 3-day money-back guarantee<br><a href="#/legal">Legal notice</a> · <a href="#/rejoindre?solo=1">Create a free account</a>`,
@@ -330,7 +330,7 @@ const STR = {
   ar: {
     login: "تسجيل الدخول",
     langBtn: "FR",
-    kicker: "عرض الإطلاق*",
+    kicker: "مدرسة قيادة أو مترشّح حر",
     docTitle: "PermiGo. حضّر كل درس قيادة قبل أن تركب السيارة",
     h1: `حضِّر كل درس <br><em>قبل أن تركب السيارة.</em>`,
     lead: `التطبيق الذي يدرّبك على <strong>القيادة</strong> بين الدروس. وليس مجرّد تطبيق آخر لاختبار الكود.`,
@@ -345,7 +345,7 @@ const STR = {
     freeCta: "ابدأ مجاناً",
     freeNote: "3 دروس هدية · بدون بطاقة بنكية",
     cta: `افتح مساري كاملاً · <s>€29.97</s> €24.99`,
-    ctaNote: `دفع آمن عبر Stripe · <b>مضمون أو استرداد أموالك خلال 3 أيام</b><br><small>*سعر الإطلاق. سيرتفع بعد انتهاء هذا العرض.</small>`,
+    ctaNote: `دفع آمن عبر Stripe · <b>مضمون أو استرداد أموالك خلال 3 أيام</b><br><small>أقل من نصف ساعة قيادة.</small>`,
     bulle: "تم التحقق من 3 مهارات!",
     bulleSub: "هذا الأسبوع",
     secCode: `الحصول على الرخصة يتطلّب <em>أكثر</em> من مجرّد القيادة.`,
@@ -386,9 +386,9 @@ const STR = {
     ],
     mathsNote: "درس غير مُحضَّر = €55 ضائعة.",
     mathsSrc: "المصادر: UFC-Que Choisir (ميزانية الرخصة) · Sécurité routière",
-    secPass: "ثلاث تذاكر. هدف واحد.",
+    secPass: "طريقتان. هدف واحد.",
     secPassSub:
-      "المحتوى نفسه في كل الباقات. كلما التزمت مدةً أطول، دفعت أقل: 3 أشهر بالاشتراك الشهري = €29.97.",
+      "المحتوى نفسه في الاثنتين. ثلاثة أشهر بالاشتراك الشهري تكلّف €29.97. التذكرة الذهبية تجعلها €24.99.",
     passes: {
       mensuel: {
         name: "التذكرة الشهرية",
@@ -449,7 +449,7 @@ const STR = {
       ],
       [
         "هل يمكنني الإلغاء أو استرداد أموالي؟",
-        `أول 3 أيام: <strong>مضمون أو استرداد أموالك</strong>. بعد ذلك، يُلغى الاشتراك الشهري في أي وقت بنقرة واحدة (التذكرتان الذهبية والبلاتينية دفعة واحدة فقط). هل ستغادر؟ <a href="#/avis-depart">أخبرنا بالسبب هنا</a>. هذا يساعدنا على التحسّن.`,
+        `أول 3 أيام: <strong>مضمون أو استرداد أموالك</strong>. بعد ذلك، يُلغى الاشتراك الشهري في أي وقت بنقرة واحدة (التذكرة الذهبية دفعة واحدة فقط). هل ستغادر؟ <a href="#/avis-depart">أخبرنا بالسبب هنا</a>. هذا يساعدنا على التحسّن.`,
       ],
     ],
     foot: `دفع آمن عبر Stripe · مضمون أو استرداد أموالك خلال 3 أيام<br><a href="#/legal">الإشعارات القانونية</a> · <a href="#/rejoindre?solo=1">أنشئ حساباً مجانياً</a>`,
@@ -1144,18 +1144,10 @@ export async function mount(root) {
         </div>
       </article>
 
-      <article class="pv-pass pv-pass-std pv-rev">
-        <div class="pv-pass-main">
-          <div class="pv-pass-name">${P.pass6.name}</div>
-          <div class="pv-pass-desc">${P.pass6.desc}</div>
-        </div>
-        <div class="pv-pass-cut">
-          <span class="pv-eco">${P.pass6.eco}</span>
-          <div class="pv-pass-strike">${P.pass6.strike}</div>
-          <div class="pv-pass-price">${P.pass6.price}</div>
-          <button class="pv-pass-btn" data-plan="pass6" type="button">${P.pass6.btn}</button>
-        </div>
-      </article>
+      <!-- ⚠️ Plus de billet Platine ici : le mur interne (pass-requis.js) n'affiche
+           que DEUX offres depuis la décision du 31/07. Un élève qui voyait Platine
+           sur la page publique et ne le retrouvait plus dans l'app se demandait ce
+           qu'on lui cachait. Les constantes pass6 restent (anciens liens, webhook). -->
 
       <p class="pv-err" id="pv-err">${L.err}</p>
 
