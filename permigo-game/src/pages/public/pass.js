@@ -28,7 +28,7 @@ import { illMask } from "@/utils/illustrations.js";
 import { fbTrack } from "@/services/meta-pixel.js";
 import { applyLang, browserLang, explicitLang } from "@/utils/lang.js";
 
-const LOGO = "/p-badge.png";
+const LOGO = "/p-badge.webp"; // 8 Ko au lieu de 64 : le PNG reste pour le reste de l'app
 
 // ── Textes FR / EN ─────────────────────────────────────────────
 const STR = {
@@ -78,7 +78,7 @@ const STR = {
         d: "Créneau, autoroute, giratoire : une fiche claire avant de monter en voiture.",
       },
       {
-        img: "/skins/badge-medaille.png",
+        img: "/skins/badge-medaille.webp",
         t: "Simulation d'examen de conduite",
         d: "Notée sur les mêmes critères que l'inspecteur. Le jour J, zéro surprise.",
       },
@@ -221,7 +221,7 @@ const STR = {
         d: "Parking, motorway, roundabouts: a clear sheet before you get in the car.",
       },
       {
-        img: "/skins/badge-medaille.png",
+        img: "/skins/badge-medaille.webp",
         t: "Driving exam simulation",
         d: "Scored on the examiner's own criteria. No surprises on test day.",
       },
@@ -365,7 +365,7 @@ const STR = {
         d: "الركن، الطريق السريع، الدوّارات: بطاقة واضحة قبل أن تركب السيارة.",
       },
       {
-        img: "/skins/badge-medaille.png",
+        img: "/skins/badge-medaille.webp",
         t: "محاكاة امتحان القيادة",
         d: "تُقيَّم بنفس معايير الممتحن. يوم الامتحان، لا مفاجآت.",
       },
@@ -552,11 +552,11 @@ const STYLE = `<style>
   .pv-login { font: 700 14px/1 'Archivo', sans-serif; color: var(--ink-soft); background: none; border: 0; padding: 10px 8px; cursor: pointer; border-radius: 12px; }
 
   /* ── Hero ── */
-  .pv-hero { text-align: center; padding-top: 20px; }
+  .pv-hero { text-align: center; padding-top: 10px; }
   .pv-kicker { font: 700 12px/1 'Archivo', sans-serif; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-mu); }
-  .pv-h1 { font: 800 clamp(36px, 10vw, 44px)/1.05 'Archivo', sans-serif; color: var(--pv-ink); margin: 12px 0 10px; text-shadow: 0 3px 0 rgba(12,7,32,.8); }
+  .pv-h1 { font: 800 clamp(30px, 8.4vw, 40px)/1.06 'Archivo', sans-serif; color: var(--pv-ink); margin: 9px 0 8px; text-shadow: 0 3px 0 rgba(12,7,32,.8); }
   .pv-h1 em { font-style: normal; color: var(--gold); }
-  .pv-lead { font: 600 15.5px/1.55 'Archivo', sans-serif; color: var(--ink-soft); max-width: 330px; margin: 0 auto; }
+  .pv-lead { font: 600 14.5px/1.5 'Archivo', sans-serif; color: var(--ink-soft); max-width: 330px; margin: 0 auto; }
   .pv-lead strong { color: var(--gold); }
 
   /* ── LE billet d'or ── */
@@ -1045,6 +1045,11 @@ export async function mount(root) {
         <p class="pv-lead">${L.lead}</p>
       </section>
 
+      <!-- La démonstration passe AVANT le billet et avant le prix : on montre,
+           puis on demande. Montée à la demande (le moteur de scène n'est pas
+           dans le premier chargement) et sans compte ni appel réseau. -->
+      <div id="pv-demo"></div>
+
       ${renderTicket(L, { lang })}
 
       <!-- La porte gratuite passe DEVANT l'achat : le compte gratuit existe
@@ -1059,7 +1064,7 @@ export async function mount(root) {
       <div class="pv-stage pv-rev" aria-hidden="true">
         <div class="pv-phone"><img src="/showcase/eleve-parcours.webp" alt="" width="390" height="844" loading="lazy" decoding="async"></div>
         <img class="pv-coin" src="/skins/volant-coin.webp" alt="" loading="lazy" decoding="async">
-        <img class="pv-mascot" src="/skins/mascot-celebrate.png" alt="" loading="lazy" decoding="async">
+        <img class="pv-mascot" src="/skins/mascot-celebrate.webp" alt="" loading="lazy" decoding="async">
         <div class="pv-bulle">${L.bulle}<small>${L.bulleSub}</small></div>
       </div>
 
@@ -1228,13 +1233,25 @@ function wire(root, me, lang, L) {
     location.hash = "#/login";
   });
 
-  // Porte gratuite (hero + barre collante) → inscription élève sans code moniteur.
-  // Évènement SÉPARÉ de l'achat : on veut voir laquelle des deux portes travaille.
-  const goFree = (from) => {
+  // Démonstration jouable. Chargée après le rendu pour ne pas retarder le
+  // premier affichage ; si elle échoue, la page reste vendable telle quelle.
+  const demoHost = root.querySelector("#pv-demo");
+  if (demoHost) {
+    import("@/components/public/demo-situation.js")
+      .then(({ mountDemoSituation }) =>
+        mountDemoSituation(demoHost, lang, () => goFree("demo")),
+      )
+      .catch(() => demoHost.remove());
+  }
+
+  // Porte gratuite (hero, démonstration, barre collante) → inscription élève
+  // sans code moniteur. Évènement SÉPARÉ de l'achat : on veut voir laquelle des
+  // portes travaille.
+  function goFree(from) {
     track("pass.free_click", { from, lang, logged: !!me });
     fbTrack("Lead", { content_name: "compte_gratuit" });
     location.hash = "#/rejoindre?solo=1";
-  };
+  }
   root
     .querySelector("#pv-free")
     ?.addEventListener("click", () => goFree("hero"));

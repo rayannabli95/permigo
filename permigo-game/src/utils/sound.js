@@ -35,9 +35,21 @@ function play(name, vol = 0.4) {
   } catch {}
 }
 
-// Précharger click + success : les navigateurs créent l'élément Audio même sans autoplay
-_get("click");
-_get("success");
+// Préchargement DIFFÉRÉ au PREMIER GESTE. Avant, deux mp3 (~90 Ko) tombaient au
+// boot sur tous les visiteurs, y compris la page de vente publique où aucun son
+// ne joue jamais. Le premier geste est de toute façon le moment où iOS débloque
+// l'audio : rien n'est perdu, et la première vue s'allège d'autant.
+function _preloadOnce() {
+  _get("click");
+  _get("success");
+}
+if (typeof window !== "undefined") {
+  window.addEventListener("pointerdown", _preloadOnce, {
+    once: true,
+    passive: true,
+  });
+  window.addEventListener("keydown", _preloadOnce, { once: true });
+}
 
 // ─── Exports existants — haptic.js, reward-reveal.js, celebrate-screen.js déjà câblés ───
 export const playClick = () => play("click");
