@@ -316,6 +316,37 @@ body.mp-open #header-bar {
   overflow: hidden;
 }
 
+/* Une photo dans une scène de nuit.
+   L'étalonnage a été validé à l'écran le 30/07/2026 : la photo est prise en
+   lumière du jour neutre, c'est le CSS qui fait la nuit. Deux radiales
+   par-dessus, une violette en haut et une vignette en bas.
+   ⚠️ Ne PAS ajouter de calque violet plat : ça éclaircit les noirs et tout
+   vire au mauve. */
+.mp-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.38) contrast(1.12) brightness(0.68);
+}
+
+.mp-scene-art:has(.mp-photo)::after {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      120% 70% at 50% -10%,
+      color-mix(in srgb, var(--world) 34%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      130% 90% at 50% 118%,
+      rgb(12 7 26 / 94%),
+      transparent 64%
+    );
+  content: "";
+}
+
 .mp-scene-tag {
   position: absolute;
   z-index: 9;

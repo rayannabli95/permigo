@@ -705,11 +705,16 @@ export const MISSIONS = [
     mode: "reglage",
     modeLabel: "Doser",
     title: "Le freinage qui ne secoue personne",
-    objective: "Sentir la différence entre freiner fort et freiner brutalement.",
+    objective:
+      "Sentir la différence entre freiner fort et freiner brutalement.",
     prompt:
       "Un feu passe au rouge à cinquante mètres. Pousse la pédale comme tu le ferais.",
     visual: "pedales-manuelle",
-    commande: { label: "Pédale de frein", article: "la pédale de frein", depart: 0 },
+    commande: {
+      label: "Pédale de frein",
+      article: "la pédale de frein",
+      depart: 0,
+    },
     crans: [
       { id: "effleure", label: "À peine" },
       { id: "franc", label: "Franc puis relâché" },
@@ -907,9 +912,12 @@ export const MISSIONS = [
     modeLabel: "Décider",
     title: "Le pneu lisse",
     objective: "Relier l'état des pneus à ce qui se passe sous la pluie.",
+    // ⚠️ La question ne prétend PAS que ce pneu-là est lisse : la photo montre
+    // un pneu usé qui a encore ses sillons. Un énoncé qui décrit autre chose
+    // que ce qu'on voit à l'écran abîme la confiance dans tout le reste.
     prompt:
-      "Les sillons de ce pneu ont presque disparu. Il pleut. Que risques-tu ?",
-    visual: "pneu-use",
+      "Regarde les sillons. Quand ils s'effacent et qu'il pleut, que risques-tu ?",
+    visual: "photo-pneu",
     choices: [
       { id: "eau", label: "La voiture flotte au lieu d'accrocher" },
       { id: "bruit", label: "Le pneu fait surtout beaucoup plus de bruit" },
@@ -933,32 +941,33 @@ export const MISSIONS = [
     competence: "C1g",
     order: 4,
     boites: ["manuelle", "auto"],
-    mode: "diagnostic",
-    modeLabel: "Diagnostiquer",
+    // ⚠️ Cette mission demandait « quel bocal ne va pas ? » sur un capot
+    // DESSINÉ, où un niveau bas se voyait à sa couleur. Sur une vraie photo un
+    // niveau ne se truque pas, et le jour de l'examen la question n'est de
+    // toute façon pas « lequel est bas » mais « montrez-moi le liquide de
+    // refroidissement ». La mission devient donc ce qu'elle aurait dû être :
+    // trouver la pièce dans un vrai compartiment moteur.
+    mode: "spot",
+    modeLabel: "Trouver",
     title: "Sous le capot",
-    objective: "Repérer le niveau qui manque parmi les quatre.",
-    prompt: "Tu ouvres le capot. Un bocal ne va pas. Lequel ?",
-    visual: "capot-bas",
-    symptom: "Le compartiment moteur, capot levé.",
-    choices: [
-      { id: "refroid", label: "Le refroidissement est presque à sec" },
-      {
-        id: "laveglace",
-        label: "Le lave-glace réclame un plein avant de partir",
-      },
-      {
-        id: "aucun",
-        label: "Les quatre niveaux sont bons, la voiture peut rouler",
-      },
+    objective: "Situer les bocaux dans un vrai compartiment moteur.",
+    prompt:
+      "Le capot est ouvert. Touche le bocal de liquide de refroidissement.",
+    visual: "photo-capot",
+    hotspots: [
+      { id: "refroid", label: "Vase d'expansion", x: 10, y: 32, w: 16, h: 24 },
+      { id: "huile", label: "Jauge d'huile", x: 33, y: 40, w: 11, h: 14 },
+      { id: "frein", label: "Liquide de frein", x: 57, y: 29, w: 11, h: 14 },
+      { id: "laveglace", label: "Lave-glace", x: 76, y: 66, w: 12, h: 16 },
     ],
     solution: "refroid",
-    hint: "Compare la hauteur des liquides. L'un des quatre n'a presque plus rien.",
+    hint: "Cherche un bocal translucide avec un bouchon, à gauche du moteur.",
     retry:
-      "Le lave-glace se refait n'importe quand. Cherche celui qui empêche de rouler.",
-    success: "Refroidissement presque vide. Repéré avant de partir.",
-    why: "Sans liquide de refroidissement, le moteur monte en température et peut se détruire en quelques kilomètres. Le voyant de température prévient souvent trop tard pour éviter la casse.",
+      "Ce n'est pas celui-là. Le refroidissement se lit à travers son bocal, sans rien ouvrir.",
+    success: "C'est le vase d'expansion. Le niveau se lit à travers.",
+    why: "Le jour de l'examen on te demande de montrer une pièce et de dire à quoi elle sert. Le vase d'expansion est translucide justement pour qu'on lise le niveau sans rien ouvrir, entre les repères mini et maxi, moteur froid.",
     transfer:
-      "Demande à ton enseignant de te montrer les repères mini et maxi sur le bocal de refroidissement.",
+      "Demande à ton enseignant d'ouvrir le capot et de te faire nommer les quatre bocaux à voix haute.",
   },
   {
     ...commun,
@@ -1166,7 +1175,8 @@ export const MISSIONS = [
     modeLabel: "Balayer",
     title: "Ce qui va bouger en premier",
     objective: "Explorer toute la scène avant de choisir ce qui compte.",
-    prompt: "Balaye la rue du doigt, puis touche ce qui va changer ta conduite.",
+    prompt:
+      "Balaye la rue du doigt, puis touche ce qui va changer ta conduite.",
     visual: "city-light",
     indices: [
       { id: "ballon", label: "Ballon sur la chaussée", x: 30, y: 70 },
@@ -1407,9 +1417,30 @@ export const MISSIONS = [
       departY: 88,
     },
     spots: [
-      { id: "serre", label: "Contre les voitures garées", x: 62, y: 30, w: 10, h: 30 },
-      { id: "juste", label: "Au milieu de la voie", x: 51, y: 30, w: 10, h: 30 },
-      { id: "empiete", label: "Sur la ligne du milieu", x: 38, y: 30, w: 10, h: 30 },
+      {
+        id: "serre",
+        label: "Contre les voitures garées",
+        x: 62,
+        y: 30,
+        w: 10,
+        h: 30,
+      },
+      {
+        id: "juste",
+        label: "Au milieu de la voie",
+        x: 51,
+        y: 30,
+        w: 10,
+        h: 30,
+      },
+      {
+        id: "empiete",
+        label: "Sur la ligne du milieu",
+        x: 38,
+        y: 30,
+        w: 10,
+        h: 30,
+      },
     ],
     solution: "juste",
     hint: "Une portière qui s'ouvre fait un mètre. Garde-toi cette largeur.",
@@ -1520,8 +1551,22 @@ export const MISSIONS = [
     },
     spots: [
       { id: "large", label: "Largement à gauche", x: 36, y: 22, w: 12, h: 20 },
-      { id: "serre", label: "Juste à côté du cycliste", x: 53, y: 22, w: 10, h: 20 },
-      { id: "attendre", label: "Derrière le cycliste", x: 60, y: 55, w: 12, h: 20 },
+      {
+        id: "serre",
+        label: "Juste à côté du cycliste",
+        x: 53,
+        y: 22,
+        w: 10,
+        h: 20,
+      },
+      {
+        id: "attendre",
+        label: "Derrière le cycliste",
+        x: 60,
+        y: 55,
+        w: 12,
+        h: 20,
+      },
     ],
     solution: "large",
     hint: "Un cycliste peut se déporter d'un coup pour éviter un trou. Laisse-lui cette place.",
@@ -1823,9 +1868,14 @@ export const MISSIONS = [
     modeLabel: "Doser",
     title: "L'arrière qui part",
     objective: "Corriger une glissade sans en provoquer une deuxième.",
-    prompt: "Sur le mouillé, l'arrière commence à partir. Pousse ta correction.",
+    prompt:
+      "Sur le mouillé, l'arrière commence à partir. Pousse ta correction.",
     visual: "rain",
-    commande: { label: "Correction au volant", article: "la correction", depart: 0 },
+    commande: {
+      label: "Correction au volant",
+      article: "la correction",
+      depart: 0,
+    },
     crans: [
       { id: "rien", label: "Ne rien faire" },
       { id: "douce", label: "Corriger doucement" },
@@ -1921,9 +1971,30 @@ export const MISSIONS = [
       departY: 78,
     },
     spots: [
-      { id: "serre", label: "Entre les deux premières", x: 16, y: 30, w: 10, h: 15 },
-      { id: "large", label: "Dans le grand espace", x: 48, y: 30, w: 16, h: 15 },
-      { id: "queue", label: "Tout au bout, derrière", x: 86, y: 30, w: 13, h: 15 },
+      {
+        id: "serre",
+        label: "Entre les deux premières",
+        x: 16,
+        y: 30,
+        w: 10,
+        h: 15,
+      },
+      {
+        id: "large",
+        label: "Dans le grand espace",
+        x: 48,
+        y: 30,
+        w: 16,
+        h: 15,
+      },
+      {
+        id: "queue",
+        label: "Tout au bout, derrière",
+        x: 86,
+        y: 30,
+        w: 13,
+        h: 15,
+      },
     ],
     solution: "large",
     hint: "Vise l'espace où tu tiens sans forcer personne à freiner.",
