@@ -49,10 +49,42 @@ const PHOTOS = {
 };
 
 /**
+ * Les scènes illustrées, pour les missions « Balayer ».
+ *
+ * Une photo se regarde, une illustration se FOUILLE : le balayage demande à
+ * l'élève de trouver trois objets dans une rue, et un objet ne se trouve pas
+ * s'il est écrit. Ces scènes gardent donc leurs couleurs pleines, sans le
+ * virage nuit des photos, sinon les indices se noient dans le gris.
+ *
+ * ⚠️ Toutes en 4/3, et la scène est calée en 4/3 pour ces missions : les
+ * indices sont posés en pourcentage de la SCÈNE, et un `object-fit: cover` sur
+ * une boîte d'un autre format les décalerait de l'objet qu'ils désignent.
+ */
+const ILLUSTRATIONS = {
+  "rue-bus": {
+    src: "/pilote/rue-bus-2026-08-02.webp",
+    alt: "Une rue au coucher du soleil, un bus arrêté le long du trottoir",
+  },
+  "rue-ballon": {
+    src: "/pilote/rue-ballon-2026-08-02.webp",
+    alt: "Une rue pavillonnaire au coucher du soleil, un ballon sur la chaussée",
+  },
+  "tour-voiture": {
+    src: "/pilote/tour-voiture-2026-08-02.webp",
+    alt: "Une voiture garée, vue de trois quarts avant",
+  },
+};
+
+/**
  * @param {string} visual nom du décor, de la pièce ou de la photo
  * @param {object} [options] réglages passés à la pièce (usure, rapport, niveau)
  */
 export function renderArt(visual, options = {}) {
+  const illu = ILLUSTRATIONS[visual];
+  if (illu) {
+    return `<img class="mp-illu" src="${illu.src}" alt="" loading="eager"
+      decoding="async" width="1200" height="900" aria-hidden="true">`;
+  }
   const photo = PHOTOS[visual];
   if (photo) {
     // `loading="eager"` : la scène est le premier écran de la mission, une
