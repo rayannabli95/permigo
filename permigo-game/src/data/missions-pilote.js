@@ -962,6 +962,33 @@ export const MISSIONS = [
   },
   {
     ...commun,
+    id: "c1g-balayage",
+    competence: "C1g",
+    order: 5,
+    boites: ["manuelle", "auto"],
+    mode: "balayage",
+    modeLabel: "Balayer",
+    title: "Le tour qui ne saute rien",
+    objective: "Faire le tour complet avant de désigner ce qui cloche.",
+    prompt:
+      "Fais le tour de la voiture du doigt, puis touche ce qui t'empêche de partir.",
+    visual: "exterior",
+    indices: [
+      { id: "pneu", label: "Roue affaissée", x: 74, y: 76 },
+      { id: "vitre", label: "Vitre baissée", x: 42, y: 34 },
+      { id: "plaque", label: "Plaque sale", x: 20, y: 72 },
+    ],
+    solution: "pneu",
+    hint: "Ce qui touche la route passe avant ce qui touche le confort.",
+    retry:
+      "Ça se répare en dix secondes et ça n'empêche personne de rouler. Cherche plus bas.",
+    success: "Roue affaissée. Repérée avant de monter.",
+    why: "Le tour de voiture ne sert à rien si le regard s'arrête au premier détail. Il faut le faire en entier, toujours dans le même ordre, pour que les défauts qui comptent ne restent pas derrière soi.",
+    transfer:
+      "Avant ta prochaine leçon, fais le tour complet en partant de la portière conducteur et en revenant au même point.",
+  },
+  {
+    ...commun,
     id: "c1h-creneau",
     competence: "C1h",
     order: 1,
@@ -1128,6 +1155,32 @@ export const MISSIONS = [
     why: "Le regard lointain te donne quelques secondes d'avance. C'est ce temps qui transforme un freinage d'urgence en simple ralentissement.",
     transfer:
       "Sur ta prochaine leçon en ville, annonce le feu ou le carrefour avant que ton enseignant en parle.",
+  },
+  {
+    ...commun,
+    id: "c2a-balayage",
+    competence: "C2a",
+    order: 3,
+    boites: ["manuelle", "auto"],
+    mode: "balayage",
+    modeLabel: "Balayer",
+    title: "Ce qui va bouger en premier",
+    objective: "Explorer toute la scène avant de choisir ce qui compte.",
+    prompt: "Balaye la rue du doigt, puis touche ce qui va changer ta conduite.",
+    visual: "city-light",
+    indices: [
+      { id: "ballon", label: "Ballon sur la chaussée", x: 30, y: 70 },
+      { id: "feu", label: "Feu encore vert", x: 62, y: 22 },
+      { id: "affiche", label: "Panneau publicitaire", x: 14, y: 26 },
+    ],
+    solution: "ballon",
+    hint: "Un objet qui roule tout seul n'est jamais seul très longtemps.",
+    retry:
+      "Ça se voit, mais ça ne va pas surgir devant toi. Cherche ce qui annonce quelqu'un.",
+    success: "Un ballon qui roule. Un enfant arrive derrière.",
+    why: "Prendre l'information, ce n'est pas regarder loin devant en ligne droite. C'est balayer, et savoir hiérarchiser : parmi tout ce que tu vois, un seul élément annonce quelqu'un qui va traverser sans regarder.",
+    transfer:
+      "Pendant ta prochaine leçon, nomme à voix haute un élément que tu vois et dis s'il peut bouger.",
   },
   {
     ...commun,
@@ -2002,6 +2055,32 @@ export const MISSIONS = [
     why: "S'engager sans pouvoir dégager bloque tous les autres et te met en travers de leur passage. Le feu vert n'y change rien.",
     transfer:
       "À ton prochain feu vert en ville dense, vérifie la sortie avant d'avancer.",
+  },
+  {
+    ...commun,
+    id: "c3g-balayage",
+    competence: "C3g",
+    order: 3,
+    boites: ["manuelle", "auto"],
+    mode: "balayage",
+    modeLabel: "Balayer",
+    title: "La rue qui cache du monde",
+    objective: "Trouver la zone masquée d'où quelqu'un peut sortir.",
+    prompt: "Balaye la rue, puis touche l'endroit d'où le danger peut sortir.",
+    visual: "city-light",
+    indices: [
+      { id: "bus", label: "Bus à l'arrêt", x: 70, y: 56 },
+      { id: "terrasse", label: "Terrasse de café", x: 22, y: 40 },
+      { id: "velo", label: "Vélo attaché", x: 18, y: 76 },
+    ],
+    solution: "bus",
+    hint: "Cherche ce qui cache quelqu'un debout, pas ce qui l'occupe assis.",
+    retry:
+      "Ça remplit la rue sans rien masquer de ta trajectoire. Cherche ce qui bouche la vue.",
+    success: "Un bus à l'arrêt. On traverse devant, sans regarder.",
+    why: "En ville dense, le danger n'est presque jamais visible : il est derrière quelque chose. Un bus à l'arrêt masque les piétons qui le contournent par l'avant, et eux ne te voient pas non plus.",
+    transfer:
+      "Au prochain bus arrêté que tu croises, ralentis et décale-toi avant d'arriver à sa hauteur.",
   },
 ];
 
