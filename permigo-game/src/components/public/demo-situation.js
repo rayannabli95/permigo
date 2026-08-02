@@ -44,41 +44,39 @@ const STR = {
     alt: "Croisement sans panneau ni feu. Un camion arrive par ta droite.",
     q: "Un camion arrive par ta droite. Qui passe en premier ?",
     r: { v1: "Le camion", moi: "Toi" },
-    // Une ligne, pas trois. Personne ne lit un paragraphe pour une réponse
-    // qu'il vient de donner, et la scène qui se joue dit déjà l'essentiel.
-    ok: "Bien vu.",
-    okSub: "Il vient de ta droite. Il passe.",
-    ko: "Presque.",
-    koSub: "Il vient de ta droite. Il passe avant toi.",
+    // Une ligne, pas trois, et sans point final. Personne ne lit un
+    // paragraphe pour une réponse qu'il vient de donner, et la scène qui se
+    // joue dit déjà l'essentiel.
+    ok: "Bien vu",
+    okSub: "Il vient de ta droite donc il passe",
+    ko: "Presque",
+    koSub: "Il vient de ta droite donc il passe avant toi",
     retry: "Réessayer",
     cta: "Continuer gratuitement",
-    more: "Il y a 59 scènes comme celle-ci dans l'app.",
   },
   en: {
     kick: "Try it now",
     alt: "Crossroads with no sign and no lights. A truck is coming from your right.",
     q: "A truck is coming from your right. Who goes first?",
     r: { v1: "The truck", moi: "You" },
-    ok: "Well spotted.",
-    okSub: "It comes from your right. It goes first.",
-    ko: "Almost.",
-    koSub: "It comes from your right. It goes before you.",
+    ok: "Well spotted",
+    okSub: "It comes from your right so it goes first",
+    ko: "Almost",
+    koSub: "It comes from your right so it goes before you",
     retry: "Try again",
     cta: "Continue for free",
-    more: "There are 59 scenes like this one in the app.",
   },
   ar: {
     kick: "جرّب الآن",
     alt: "تقاطع بلا لافتة ولا إشارة. شاحنة قادمة من يمينك.",
     q: "شاحنة قادمة من يمينك. من يمرّ أولًا؟",
     r: { v1: "الشاحنة", moi: "أنت" },
-    ok: "أحسنت.",
-    okSub: "هي قادمة من يمينك. تمرّ أولًا.",
-    ko: "تقريبًا.",
-    koSub: "هي قادمة من يمينك. تمرّ قبلك.",
+    ok: "أحسنت",
+    okSub: "هي قادمة من يمينك فتمرّ أولًا",
+    ko: "تقريبًا",
+    koSub: "هي قادمة من يمينك فتمرّ قبلك",
     retry: "أعد المحاولة",
     cta: "تابع مجاناً",
-    more: "في التطبيق 59 سيناريو مثل هذا.",
   },
 };
 
@@ -188,7 +186,6 @@ const STYLE = `<style>
   .dmo-fb.ko { border-inline-start-color: var(--gold); }
   .dmo-fb b { display: block; font: 800 16px/1.3 'Archivo', sans-serif; color: #fff; margin-bottom: 3px; }
   .dmo-fb span { font: 600 13.5px/1.5 'Archivo', sans-serif; color: var(--ink-soft); }
-  .dmo-more { display: block; text-align: center; font: 600 12px/1.5 'Archivo', sans-serif; color: #b9b2e8; margin: 10px 0 0; }
   /* Le bouton qui compte passe en or : c'est le seul élément doré plein de la
      carte, rien d'autre ne lui dispute le regard. */
   .dmo-cta {
@@ -300,7 +297,6 @@ export function mountDemoSituation(host, lang, onContinue) {
           <b>${juste ? L.ok : L.ko}</b>
           <span>${juste ? L.okSub : L.koSub}</span>
         </div>
-        ${juste ? `<span class="dmo-more">${L.more}</span>` : ""}
         <button class="dmo-cta" id="dmo-cta" type="button">${L.cta}</button>
         ${juste ? "" : `<button class="dmo-retry" id="dmo-retry" type="button">${L.retry}</button>`}`;
       after.querySelector("#dmo-cta")?.addEventListener("click", () => {
