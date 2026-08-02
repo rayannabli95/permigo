@@ -28,6 +28,13 @@ import { illMask } from "@/utils/illustrations.js";
 import { esc, escAttr } from "@/utils/escape.js";
 import { fbTrack } from "@/services/meta-pixel.js";
 import { applyLang, browserLang, explicitLang } from "@/utils/lang.js";
+// La démonstration jouable voyage AVEC la page, elle n'est plus chargée à part.
+// Elle l'était (deux imports différés, ~10 Ko), et le jour où l'un des deux ne
+// répondait pas — un déploiement pendant qu'un onglet est resté ouvert suffit,
+// les noms de fichiers changent et l'ancien renvoie 404 — le bloc s'effaçait
+// tout seul, sans un mot. Le visiteur arrivait sur la page de vente sans la
+// seule chose qui lui montre le produit. 10 Ko contre ça, c'est donné.
+import { mountDemoSituation } from "@/components/public/demo-situation.js";
 
 const LOGO = "/p-badge.webp"; // 8 Ko au lieu de 64 : le PNG reste pour le reste de l'app
 
@@ -1539,16 +1546,10 @@ function wire(root, me, lang, L) {
     location.hash = "#/login";
   });
 
-  // Démonstration jouable. Chargée après le rendu pour ne pas retarder le
-  // premier affichage ; si elle échoue, la page reste vendable telle quelle.
+  // Démonstration jouable. Montée avec le reste de la page : elle est là ou la
+  // page ne s'affiche pas du tout, plus de disparition silencieuse.
   const demoHost = root.querySelector("#pv-demo");
-  if (demoHost) {
-    import("@/components/public/demo-situation.js")
-      .then(({ mountDemoSituation }) =>
-        mountDemoSituation(demoHost, lang, () => goFree("demo")),
-      )
-      .catch(() => demoHost.remove());
-  }
+  if (demoHost) mountDemoSituation(demoHost, lang, () => goFree("demo"));
 
   // Porte gratuite (hero, démonstration, barre collante) → inscription élève
   // sans code moniteur. Évènement SÉPARÉ de l'achat : on veut voir laquelle des
