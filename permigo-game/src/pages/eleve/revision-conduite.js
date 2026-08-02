@@ -549,9 +549,26 @@ ${chromeNight("#5a4fc0", "#423a96")}
 /* Carte coach = bouton (demande Rayan 22/07 : tap → lecture en grand). */
 .fd-cc{ position:relative; border-radius:14px; padding:11px 10px 12px; background:#f6f4ff; border:1px solid #e6e2fb; border-top-color:#fff;
   box-shadow:0 3px 0 rgba(20,12,60,.28), inset 0 1px 0 rgba(255,255,255,.8); display:flex; flex-direction:column; gap:7px;
-  width:100%; text-align:left; font-family:inherit; cursor:pointer;
+  width:100%; text-align:left; font-family:inherit; cursor:pointer; overflow:hidden;
   -webkit-tap-highlight-color:transparent; transition:transform .1s ease; }
 .fd-cc:active{ transform:scale(.97); }
+/* Reflet qui balaie la carte, le même que les cartes de collection quand une
+   compétence se débloque (collection.js, .col-card-gloss). Différence : là-bas
+   la carte est sombre, une bande blanche suffit. Ici le fond est clair (#f6f4ff),
+   donc la bande est bordée d'un violet très doux de chaque côté, sinon le reflet
+   ne se voit pas. Bande à 55 % : elle passe sur le texte sans l'effacer.
+   Chaque carte part un peu plus tard que la précédente : la vague traverse la
+   grille au lieu que les six cartes clignotent ensemble. */
+.fd-cc::after{ content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; z-index:1;
+  background:linear-gradient(115deg, transparent 46.5%, rgba(110,84,214,.09) 49%, rgba(255,255,255,.82) 50.5%, rgba(255,255,255,.82) 51.5%, rgba(110,84,214,.09) 53%, transparent 55.5%);
+  background-size:250% 250%; background-position:130% 0;
+  animation:fdGloss 5.5s ease-in-out 1s infinite; }
+@keyframes fdGloss{ 0%,100%{ background-position:130% 0; } 50%{ background-position:-30% 0; } }
+.fd-cc:nth-child(2)::after{ animation-delay:1.18s; }
+.fd-cc:nth-child(3)::after{ animation-delay:1.36s; }
+.fd-cc:nth-child(4)::after{ animation-delay:1.54s; }
+.fd-cc:nth-child(5)::after{ animation-delay:1.72s; }
+.fd-cc:nth-child(6)::after{ animation-delay:1.9s; }
 .fd-cc-zoom{ position:absolute; top:8px; right:8px; width:22px; height:22px; border-radius:7px;
   display:flex; align-items:center; justify-content:center;
   background:rgba(90,79,192,.08); border:1px solid rgba(90,79,192,.16); }
@@ -605,7 +622,9 @@ ${chromeNight("#5a4fc0", "#423a96")}
 .fd-title .fd-fr{ -webkit-text-fill-color:#cabef7; color:#cabef7; background:none;
   font-family:'Archivo',sans-serif; font-size:.5em; font-weight:600; line-height:1.25; filter:none; }
 .fd-seclab h2[dir="rtl"]{ direction:rtl; }
-@media (prefers-reduced-motion: reduce){ .fd *{ transition:none!important; animation:none!important; } }
+/* Les pseudo-éléments doivent être nommés : « animation » ne s'hérite pas, donc
+   .fd * seul laissait tourner le reflet des cartes coach. */
+@media (prefers-reduced-motion: reduce){ .fd *, .fd *::before, .fd *::after{ transition:none!important; animation:none!important; } }
 </style>`;
 
 const LS_GESTES_KEY = "rvc_gestes_v1"; // { [code]: number[] } — index des gestes cochés
