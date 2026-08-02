@@ -383,7 +383,7 @@ export async function mount(root) {
         .maybeSingle(),
       // Validation autonome (élève solo, valider-seul.js) : table séparée de
       // `validations`, fusionnée pour ne pas laisser la collection bloquée.
-      // Même pattern que accueil.js / mon-permis.js.
+      // Même pattern que accueil.js.
       sb.from("self_validations").select("competence_id").eq("eleve_id", me.id),
     ]);
     unlockedMap = new Map(

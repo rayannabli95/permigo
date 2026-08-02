@@ -47,8 +47,8 @@ const PRC_I18N = {
     retry: "Try again",
     fresh_unlock: "Just unlocked: {name}",
     chip_chap: "Chapter {n} of {t}",
-    suivi: "My skills",
-    suivi_aria: "My skills. Certified skills, lessons, exam",
+    examen_cta: "The exam",
+    examen_aria: "The exam. Your date, your countdown, where you stand",
     prog_chap: "Chapter progress",
     aria_jalons: "{d} out of {t} done in this chapter",
     gate_one: "Validate 1 more skill from the previous chapter",
@@ -108,8 +108,8 @@ const PRC_I18N = {
     retry: "أعد المحاولة",
     fresh_unlock: "فتحت للتو: {name}",
     chip_chap: "الفصل {n} من {t}",
-    suivi: "مهاراتي",
-    suivi_aria: "مهاراتي. المهارات المُصادَق عليها، الدروس، الامتحان",
+    examen_cta: "الامتحان",
+    examen_aria: "الامتحان. موعدك، العدّ التنازلي، وأين وصلت",
     prog_chap: "تقدّم الفصل",
     aria_jalons: "{d} من {t} مكتملة في هذا الفصل",
     gate_one: "صادق على مهارة إضافية واحدة من الفصل السابق",
@@ -1154,7 +1154,7 @@ const STYLE = `<style>
   box-shadow: 0 2px 10px -4px rgba(255,156,28,.5);
 }
 .prc-cv-chip .dot { width: 7px; height: 7px; border-radius: 50%; background: linear-gradient(#ffd24a, #ff9c1c); box-shadow: 0 0 8px #ffb840; }
-/* ── Bouton « Suivi » → hub mon-permis (mode condensé gardé en option) ── */
+/* ── Bouton discret du hero → la page de l'examen ── */
 .prc-cv-meta-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .prc-cv-suivi {
   position: relative;
@@ -2199,11 +2199,10 @@ function spawnArrow(node, compId) {
 }
 
 // ─── Logique métier ───────────────────────────────────────────────
-// Exportée (chantier nav simplifiée, hub « Mon permis ») : mon-permis.js
-// réutilise EXACTEMENT ces états/seuils pour ses 4 chapitres C1-C4 — aucune
-// re-déclaration des seuils de déblocage (UNLOCK_REQ reste privé ici, la
-// fonction encapsule déjà la règle).
-export function computeWorldStates(validatedMap) {
+// Les états des 4 chapitres C1-C4 et leurs seuils de déblocage vivent ICI et
+// nulle part ailleurs (UNLOCK_REQ reste privé, la fonction encapsule la règle).
+// Elle était exportée pour le hub « mon-permis », supprimé le 02/08/2026.
+function computeWorldStates(validatedMap) {
   const states = REMC.map((cat, idx) => {
     const world = WORLDS[idx];
     const subs = cat.subs;
@@ -2336,14 +2335,14 @@ function renderChapterView(
         <div class="prc-cv-world-meta">
           <div class="prc-cv-meta-top">
             <span class="prc-cv-chip"><span class="dot" aria-hidden="true"></span>${prcD("chip_chap", `Chapitre ${currentIdx + 1} sur ${worldStates.length}`, { n: currentIdx + 1, t: worldStates.length })}</span>
-            <!-- Mode condensé (hub mon-permis) gardé en OPTION : l'onglet
-                 « Mon permis » ouvre désormais le parcours en direct
-                 (décision Rayan 2026-07-16), ce bouton donne le résumé.
-                 Le mot « Suivi » ne disait rien à personne (retour Rayan
-                 31/07/2026) : le bouton dit maintenant où il mène. -->
-            <a class="prc-cv-suivi" href="#/mon-permis" aria-label="${prcT("suivi_aria", "Mes compétences. Compétences certifiées, leçons, examen")}">
-              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="3.5" cy="6" r="1.6" fill="currentColor"/><circle cx="3.5" cy="12" r="1.6" fill="currentColor"/><circle cx="3.5" cy="18" r="1.6" fill="currentColor"/></svg>
-              <span>${prcD("suivi", "Mes compétences")}</span>
+            <!-- Ce bouton menait au hub condensé « mon permis », qui
+                 redisait les compétences que cette page dessine déjà
+                 (supprimé le 02/08/2026). Il mène maintenant à l'examen :
+                 c'était la SEULE chose que le hub apportait, et la page
+                 #/examen n'avait plus aucune porte dans toute l'app. -->
+            <a class="prc-cv-suivi" href="#/examen" aria-label="${prcT("examen_aria", "L'examen. Ta date, ton compte à rebours, où tu en es")}">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.6" stroke="currentColor" stroke-width="2.2"/><path d="M3.5 9.6h17M8.2 3v4M15.8 3v4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+              <span>${prcD("examen_cta", "L'examen")}</span>
             </a>
           </div>
           <h1 class="prc-cv-world-title">${nameBi(chapTitle, chapTr(world))}</h1>

@@ -847,7 +847,7 @@ export async function mount(root) {
     sb.rpc("get_eleve_leaderboard", { p_scope: "ecole", p_limit: 50 }),
     // Validation autonome (élève solo, valider-seul.js) : table séparée de
     // `validations`, fusionnée pour ne pas laisser le palier permis bloqué.
-    // Même pattern que accueil.js / mon-permis.js.
+    // Même pattern que accueil.js.
     sb.from("self_validations").select("competence_id").eq("eleve_id", me.id),
   ]);
 

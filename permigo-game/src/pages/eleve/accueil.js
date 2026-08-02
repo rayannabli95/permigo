@@ -1748,7 +1748,7 @@ export async function mount(root) {
         // Validation autonome (élève solo, cf. valider-seul.js) : table
         // séparée de `validations`, fusionnée en lecture pour que le permis
         // virtuel compte aussi les compétences auto-validées (sinon un solo
-        // reste affiché « 0/31 » à vie). Même pattern que mon-permis.js.
+        // reste affiché « 0/31 » à vie).
         sb
           .from("self_validations")
           .select("competence_id")
@@ -2883,11 +2883,6 @@ async function _loadAndInjectLeagues(root) {
   }
 }
 
-// Exportée (chantier nav simplifiée, hub « Mon permis ») : mon-permis.js
-// réutilise CETTE lecture (même table, même tri) pour son étape ② « Mes
-// leçons », sans filtre read_at (contrairement à la bannière ci-dessous qui
-// ne montre QUE le non-lu) — le hub affiche le dernier compte-rendu, lu ou
-// pas, avec juste un badge « Nouveau » si non lu.
 // Retrait du moniteur (lot 4 du pivot, 30/07/2026) : `fetchLastCompteRendu()`,
 // `_crApercu()` et la bannière « Ton moniteur t'a envoyé un compte-rendu »
 // vivaient ici. Le moniteur n'émet plus de compte-rendu → plus rien à annoncer.

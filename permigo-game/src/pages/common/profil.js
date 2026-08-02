@@ -2088,7 +2088,7 @@ async function mountEleveArene(root, me) {
       sb.rpc("get_my_achievements"),
       // Validation autonome (élève solo, valider-seul.js) : table séparée de
       // `validations`, fusionnée en lecture pour que le profil élève solo ne
-      // reste pas figé à 0/31. Même pattern que accueil.js / mon-permis.js.
+      // reste pas figé à 0/31. Même pattern que accueil.js.
       sb.from("self_validations").select("competence_id").eq("eleve_id", me.id),
     ]);
 

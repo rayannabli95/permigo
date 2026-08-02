@@ -575,7 +575,7 @@ export async function mount(root, openKey = null) {
         .maybeSingle(),
       // Validation autonome (élève solo, valider-seul.js) : table séparée de
       // `validations`, fusionnée pour ne pas laisser le compteur de trophées
-      // bloqué. Même pattern que accueil.js / mon-permis.js.
+      // bloqué. Même pattern que accueil.js.
       sb.from("self_validations").select("competence_id").eq("eleve_id", me.id),
     ]);
     // Si la RPC échoue, on NE jette PAS : on rend quand même la grille (tout
