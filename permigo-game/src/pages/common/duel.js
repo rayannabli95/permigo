@@ -104,6 +104,22 @@ ${chromeNight("#241a52", "#1a1340")}
   border-radius:16px; border:1px solid #3a3178; background:rgba(255,255,255,.04);
   color:#cfc7ff; font:800 15px/1 'Archivo',sans-serif; -webkit-tap-highlight-color:transparent; }
 
+/* ===== Le QR de la partie =====
+   Dans une soirée tout le monde est dans la même pièce : tendre son écran
+   bat l'envoi d'un lien. Et il n'y a PAS de scanner à coder, l'appareil
+   photo d'un iPhone ou d'un Android lit déjà les QR tout seul. */
+.du-qr { margin-top:22px; padding:18px 18px 16px; border-radius:22px; text-align:center;
+  background:linear-gradient(180deg,#2c2264,#241a56); border:1px solid rgba(245,196,81,.28);
+  box-shadow:0 22px 44px -20px rgba(8,4,30,.9); }
+.du-qrbox { width:min(230px,62vw); aspect-ratio:1; margin:0 auto; display:grid; place-items:center;
+  background:#fff; border-radius:16px; padding:12px;
+  box-shadow:0 10px 24px -12px rgba(0,0,0,.7); }
+/* image-rendering pixelated : sans lui le lissage du navigateur bave sur les
+   modules et certains téléphones ne décrochent plus le code. */
+.du-qrbox img { width:100%; height:100%; display:block; image-rendering:pixelated; }
+.du-qrhint { margin:14px 2px 0; font:700 14px/1.4 'Archivo',sans-serif; color:#cfc7ff; }
+.du-qrfail { font:600 13px/1.4 'Archivo',sans-serif; color:#8c85bd; padding:20px; }
+
 .du-lab { display:block; font:800 11px/1 'Archivo',sans-serif; letter-spacing:.14em;
   text-transform:uppercase; color:#9089c7; margin:0 2px 10px; }
 .du-block { margin-top:22px; }
@@ -239,8 +255,12 @@ function vueCreation(me, etat) {
     <p class="du-sub">10 questions dans tout le programme.<br>Le meilleur score prend le titre.</p>
     ${
       etat.code
-        ? `<div class="du-block">
-             <span class="du-lab">Le lien de la partie</span>
+        ? `<div class="du-qr">
+             <div class="du-qrbox" id="du-qrbox"><span class="du-qrfail">…</span></div>
+             <p class="du-qrhint">Tes amis visent ce carré avec leur appareil photo.</p>
+           </div>
+           <div class="du-block">
+             <span class="du-lab">Ou envoie le lien</span>
              <div class="du-link">${esc(lien)}</div>
              <button class="du-cta" data-partager style="margin-top:12px">Envoyer le lien</button>
              <button class="du-ghost" data-copier>Copier</button>
@@ -497,6 +517,27 @@ export async function mount(root, param) {
   cableArrivee(root, etat);
 }
 
+// Dessine le QR APRÈS le rendu, jamais pendant : la bibliothèque arrive en
+// import différé et son échec ne doit pas vider l'écran (déjà vu le 02/08 sur
+// la landing). Le lien et le bouton de partage sont posés avant, ils restent
+// là quoi qu'il arrive.
+async function dessineQr(root, lien) {
+  const boite = root.querySelector("#du-qrbox");
+  if (!boite) return;
+  try {
+    const { default: qrcode } = await import("qrcode-generator");
+    // Type 0 = la plus petite version qui accepte le texte. Correction « M » :
+    // le carré reste lisible même photographié de travers ou sur un écran sale.
+    const qr = qrcode(0, "M");
+    qr.addData(lien);
+    qr.make();
+    boite.innerHTML = `<img src="${qr.createDataURL(8, 2)}" alt="Le carré à viser pour rejoindre la partie" width="256" height="256">`;
+  } catch (e) {
+    console.error("[duel:qr]", e);
+    boite.innerHTML = `<span class="du-qrfail">Le carré n'a pas pu s'afficher. Envoie le lien juste en dessous.</span>`;
+  }
+}
+
 function cableCreation(root, me, etat) {
   root.querySelector("[data-retour]")?.addEventListener("click", () => {
     navigate("/reviser");
@@ -523,6 +564,7 @@ function cableCreation(root, me, etat) {
   });
 
   const lien = etat.code ? `${location.origin}/#/duel/${etat.code}` : "";
+  if (lien) dessineQr(root, lien);
 
   root.querySelector("[data-partager]")?.addEventListener("click", async () => {
     haptic("tap");
