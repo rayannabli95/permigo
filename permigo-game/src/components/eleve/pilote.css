@@ -347,6 +347,36 @@ body.mp-open #header-bar {
   content: "";
 }
 
+/* Une scène illustrée. Elle garde ses couleurs : c'est une rue au coucher du
+   soleil qu'on doit FOUILLER, pas une photo qu'on regarde. Juste un voile
+   sombre en bas pour que le libellé blanc d'un indice reste lisible. */
+.mp-illu {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mp-scene-art:has(.mp-illu)::after {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    130% 80% at 50% 116%,
+    rgb(12 7 26 / 58%),
+    transparent 60%
+  );
+  content: "";
+}
+
+/* Les indices sont posés en pourcentage de la SCÈNE et l'image la remplit en
+   `cover`. Si la boîte n'a pas le format de l'image, `cover` rogne un bord et
+   décale chaque indice de l'objet qu'il désigne. On fige donc la scène au 4/3
+   des illustrations, au lieu de sa hauteur fixe habituelle. */
+.mp-balayage-interaction .mp-scene:has(.mp-illu) {
+  height: auto;
+  aspect-ratio: 4 / 3;
+}
+
 .mp-scene-tag {
   position: absolute;
   z-index: 9;
@@ -1082,9 +1112,13 @@ body.mp-open #header-bar {
   background: rgb(14 8 32 / 78%);
   font-size: 11px;
   font-weight: 700;
+  white-space: nowrap;
   opacity: 0;
   cursor: pointer;
-  transform: translate(-50%, -50%) scale(0.9);
+  /* C'est la PASTILLE qui doit tomber sur l'objet, pas le milieu de la pilule :
+     en centrant l'ensemble, un libellé long décalait le repère de cinquante
+     pixels et il ne désignait plus rien. La pastille est à 11 px du bord. */
+  transform: translate(-11px, -50%) scale(0.9);
   transition:
     opacity 240ms var(--ease-out),
     transform 240ms var(--ease-out);
@@ -1092,7 +1126,19 @@ body.mp-open #header-bar {
 
 .mp-balayage-indice.is-vu {
   opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
+  transform: translate(-11px, -50%) scale(1);
+}
+
+/* Près du bord droit, le libellé partirait hors de la scène : il bascule à
+   gauche de la pastille, qui elle ne bouge pas. */
+.mp-balayage-indice[data-cote="gauche"] {
+  padding: 5px 6px 5px 9px;
+  flex-direction: row-reverse;
+  transform: translate(calc(-100% + 11px), -50%) scale(0.9);
+}
+
+.mp-balayage-indice[data-cote="gauche"].is-vu {
+  transform: translate(calc(-100% + 11px), -50%) scale(1);
 }
 
 .mp-balayage-indice i {

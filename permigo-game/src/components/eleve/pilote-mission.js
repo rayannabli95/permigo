@@ -360,6 +360,7 @@ export function monterMissions(
               type="button" data-indice="${escAttr(ind.id)}"
               ${vu && !etat.resolu ? `data-reponse="${escAttr(ind.id)}"` : "disabled"}
               aria-hidden="${vu ? "false" : "true"}" tabindex="${vu && !etat.resolu ? "0" : "-1"}"
+              ${ind.x > 55 ? 'data-cote="gauche"' : ""}
               style="--ind-x:${ind.x}%;--ind-y:${ind.y}%"><i></i><small>${esc(ind.label)}</small></button>`;
           })
           .join("")}
@@ -377,12 +378,15 @@ export function monterMissions(
         }
         <span class="mp-scene-tag">${esc(m.modeLabel)}</span>
       </div>
-      <p class="mp-scene-instruction">${esc(
-        etat.balaye.length >= cases.length
-          ? "Touche maintenant ce qui peut changer ta conduite."
-          : "Passe le doigt sur la scène pour la balayer, puis touche ce que tu retiens.",
-      )}</p>
+      <p class="mp-scene-instruction">${esc(consigneBalayage())}</p>
     </section>`;
+  }
+
+  /** La consigne du balayage, avant et après que le voile soit entièrement levé. */
+  function consigneBalayage() {
+    return etat.balaye.length >= BALAYAGE.colonnes * BALAYAGE.lignes
+      ? "Touche maintenant ce qui peut changer ta conduite."
+      : "Passe le doigt sur la scène pour la balayer, puis touche ce que tu retiens.";
   }
 
   /** La case du voile qui couvre un indice, selon sa position en pourcentage. */
@@ -645,12 +649,19 @@ export function monterMissions(
         btn.dataset.reponse = ind.id;
         btn.addEventListener("click", () => repondre(ind.id), { once: true });
       });
+      // La scène ne se redessine pas pendant le glissement, sinon le pointeur
+      // se perd au premier carreau. La consigne se met donc à jour à la main.
+      const consigne = hote.querySelector(".mp-scene-instruction");
+      if (consigne) consigne.textContent = consigneBalayage();
     };
 
-    const caseSous = (e) => {
-      const el = document.elementFromPoint(e.clientX, e.clientY);
-      return el?.dataset?.case !== undefined ? el : null;
-    };
+    // ⚠️ `elementsFromPoint` au PLURIEL. Un indice déjà révélé se pose par-dessus
+    // le voile : avec le singulier, le doigt qui passe dessus tombait sur la
+    // pastille et la case restait couverte à vie, sans moyen de la lever.
+    const caseSous = (e) =>
+      document
+        .elementsFromPoint(e.clientX, e.clientY)
+        .find((el) => el?.dataset?.case !== undefined) || null;
 
     let actif = null;
     voile.addEventListener("pointerdown", (e) => {
