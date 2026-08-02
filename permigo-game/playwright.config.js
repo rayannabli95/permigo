@@ -1,5 +1,15 @@
 import { defineConfig, devices } from "@playwright/test";
 
+// Port réglable par `PERMIGO_E2E_PORT`, 5173 par défaut.
+//
+// Pourquoi : `reuseExistingServer` est à `true`. Si un serveur de dev traîne
+// déjà sur 5173, Playwright le RÉUTILISE, quel que soit le dossier d'où il a
+// été lancé. On croit alors tester sa branche et on teste le code d'un autre
+// dossier. Ça produit des rouges ET des verts également mensongers.
+// Depuis un worktree : `PERMIGO_E2E_PORT=5180 npm run test`.
+const PORT = process.env.PERMIGO_E2E_PORT || "5173";
+const BASE = `http://localhost:${PORT}`;
+
 export default defineConfig({
   testDir: "./tests/e2e",
   timeout: 30_000,
@@ -16,7 +26,7 @@ export default defineConfig({
   workers: 1,
   reporter: "list",
   use: {
-    baseURL: "http://localhost:5173",
+    baseURL: BASE,
     headless: true,
     screenshot: "only-on-failure",
     trace: "on-first-retry",
@@ -32,8 +42,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npm run dev",
-    url: "http://localhost:5173",
+    command: `vite --port ${PORT} --strictPort`,
+    url: BASE,
     reuseExistingServer: true,
     timeout: 20_000,
   },

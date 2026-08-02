@@ -378,7 +378,7 @@ export async function route(root, me) {
   // revenir explorer l'accueil / Réviser via la nav du bas. Les surfaces de
   // découverte (accueil, Réviser, quiz, fiches, en-situation) passent ici et
   // appliquent elles-mêmes leurs quotas du jour.
-  if (isFreeTierUser(me) && !isDiscoveryAllowedRoute(routeName)) {
+  if (isFreeTierUser(me) && !isDiscoveryAllowedRoute(routeName, param)) {
     await _unmountCurrent();
     const dir = _navDir(location.hash || "#/");
     const { mountFreeTierWall } =

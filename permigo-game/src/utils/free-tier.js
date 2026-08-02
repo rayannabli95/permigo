@@ -47,6 +47,10 @@ const DISCOVERY_ROUTES = new Set([
   "quiz", // entraînement (quota questions en page)
   "en-situation", // mise en situation (quota scène en page)
   "exam-conduite", // examen blanc de conduite : UNE fois à vie (jeton FREE_ONCE)
+  // Certification : ouverte SEULEMENT sur les 3 sous-compétences gratuites.
+  // Le filtrage par code se fait dans isDiscoveryAllowedRoute(), la présence
+  // ici ne suffit pas. Cf. le commentaire de FREE_SUBS_ROUTES juste dessous.
+  "valider-seul",
   // Comptes / neutres / upsell — jamais murés (l'élève doit pouvoir gérer son
   // compte, lire les mentions légales, ou aller vers l'achat).
   "profil",
@@ -83,9 +87,24 @@ export function isFreeTierUser(me) {
   );
 }
 
-/** Cette route est-elle jouable en mode découverte, ou murée vers le paywall ? */
-export function isDiscoveryAllowedRoute(routeName) {
-  return DISCOVERY_ROUTES.has(routeName || "default");
+// Routes ouvertes en découverte, mais SEULEMENT sur les sous-compétences
+// gratuites. Le nom de la route ne suffit pas : c'est son paramètre qui décide.
+//
+// Sans ce filtre, ouvrir la certification en découverte l'ouvrirait sur les 31
+// compétences, et le mur du produit tomberait entièrement.
+const FREE_SUBS_ROUTES = new Set(["valider-seul"]);
+
+/**
+ * Cette route est-elle jouable en mode découverte, ou murée vers le paywall ?
+ *
+ * @param {string} routeName ex. "reviser", "valider-seul"
+ * @param {string|null} param le segment qui suit, ex. le code d'une compétence
+ */
+export function isDiscoveryAllowedRoute(routeName, param = null) {
+  const nom = routeName || "default";
+  if (!DISCOVERY_ROUTES.has(nom)) return false;
+  if (FREE_SUBS_ROUTES.has(nom)) return isFreeSub(param);
+  return true;
 }
 
 // Jour « Paris » — même repli local que roue.js todayKey() (l'appareil de
