@@ -64,11 +64,15 @@ const VS_I18N = {
       "We couldn't verify this skill. Check your connection and try again.",
     retry: "Try again",
     comp_fallback: "Skill",
-    blocked:
-      "Your instructor already validated this skill. Nothing to do here.",
+    blocked_q:
+      "Your instructor already validated this skill. You can still retake the quiz to keep the move sharp.",
     blocked_m:
       "Your instructor already validated this skill. You can still replay the driving scene to keep the move sharp.",
+    self: "You already certified this skill. The quiz stays open for as much practice as you want.",
+    self_m:
+      "You already certified this skill. The driving scene stays open for as much practice as you want.",
     blocked_cta: "Replay the driving scene",
+    blocked_quiz: "Retake the quiz",
     blocked_hint:
       "This practice changes nothing in your journey. It's just for the hand.",
     ent_kick: "Practice",
@@ -77,8 +81,6 @@ const VS_I18N = {
     ent_cta: "Back to the journey",
     hero_p:
       "Have you worked on this move in a lesson with your instructor? Certify it in 2 steps.",
-    already_t: "Already certified",
-    already_s: "Certified on {date}.",
     step1_t: "Re-read the method",
     step1_s: "A quick reminder of what you need to know.",
     fiche_link: "See the full sheet (fiche)",
@@ -88,7 +90,6 @@ const VS_I18N = {
     step2_m_s:
       "You get in the car and you make the move. A few questions then close the certification.",
     cta_m_start: "Get in the car",
-    cta_m_retry: "Play the scene again",
     hint_m:
       "Be honest with yourself. None of this replaces a real driving lesson.",
     mr_kick: "Not yet",
@@ -96,7 +97,6 @@ const VS_I18N = {
     mr_p: "The move isn't in place yet on “{n}”. Re-read the sheet calmly, then come back and do it again.",
     mr_retry: "Re-read the sheet and retry",
     mr_back: "Back to the journey",
-    cta_retry: "Retake the quiz",
     cta_start: "Start the quiz",
     hint: "Be honest with yourself. This quiz never replaces a real driving lesson.",
     toast_noq: "No questions on this skill yet. Try again later.",
@@ -143,18 +143,21 @@ const VS_I18N = {
     load_body: "تعذّر التحقق من هذه المهارة. افحص اتصالك وحاول مجددًا.",
     retry: "أعد المحاولة",
     comp_fallback: "مهارة",
-    blocked: "سبق أن صادق مدرّبك على هذه المهارة. لا شيء تفعله هنا.",
+    blocked_q:
+      "سبق أن صادق مدرّبك على هذه المهارة. ويمكنك مع ذلك إعادة الاختبار للحفاظ على الحركة.",
     blocked_m:
       "سبق أن صادق مدرّبك على هذه المهارة. ويمكنك مع ذلك إعادة المشهد العملي للحفاظ على الحركة.",
+    self: "لقد صادقت سلفًا على هذه المهارة. ويبقى الاختبار مفتوحًا للتدرّب كما تشاء.",
+    self_m:
+      "لقد صادقت سلفًا على هذه المهارة. ويبقى المشهد العملي مفتوحًا للتدرّب كما تشاء.",
     blocked_cta: "أعد المشهد العملي",
+    blocked_quiz: "أعد الاختبار",
     blocked_hint: "هذا التمرين لا يغيّر شيئًا في مسارك. إنه لليد فقط.",
     ent_kick: "تمرين",
     ent_title: "الحركة ما زالت حاضرة",
     ent_p: "«{n}» تبقى مكتسبة في مسارك. وهذا التمرين لا يغيّر شيئًا.",
     ent_cta: "العودة إلى المسار",
     hero_p: "هل تدرّبت على هذه الحركة في درس مع مدرّبك؟ صادق عليها في خطوتين.",
-    already_t: "مُصادَق عليها سابقًا",
-    already_s: "مُصادَق عليها بتاريخ {date}.",
     step1_t: "أعد قراءة الطريقة",
     step1_s: "تذكير سريع بما يجب أن تتقنه.",
     fiche_link: "اعرض البطاقة الكاملة (fiche)",
@@ -164,14 +167,12 @@ const VS_I18N = {
     step2_m_s:
       "تركب السيارة وتؤدّي الحركة. ثم تُغلق بضعة أسئلة عملية المصادقة.",
     cta_m_start: "اركب السيارة",
-    cta_m_retry: "أعد المشهد",
     hint_m: "كن صادقًا مع نفسك. لا شيء من هذا يعوّض درس قيادة حقيقيًا.",
     mr_kick: "ليس بعد",
     mr_title: "نعود إلى البطاقة",
     mr_p: "الحركة لم تستقرّ بعد في «{n}». أعد قراءة البطاقة بهدوء ثم عد لتؤدّيها من جديد.",
     mr_retry: "أعد قراءة البطاقة وحاول مجددًا",
     mr_back: "العودة إلى المسار",
-    cta_retry: "أعد الاختبار",
     cta_start: "ابدأ الاختبار",
     hint: "كن صادقًا مع نفسك. هذا الاختبار لا يعوّض درس قيادة حقيقيًا.",
     toast_noq: "لا أسئلة على هذه المهارة بعد. أعد المحاولة لاحقًا.",
@@ -276,11 +277,15 @@ const STYLE = `<style>
   transition: transform .15s, opacity .15s; }
 .vs-cta:disabled { opacity:.55; cursor:not-allowed; }
 .vs-cta:not(:disabled):active { transform: scale(.98); }
+a.vs-cta { text-decoration:none; }
+/* Deuxième porte d'un écran d'entraînement : présente, jamais dominante. */
+.vs-second { width:100%; margin-top:11px; padding:15px; border-radius:15px; cursor:pointer; text-decoration:none;
+  border:1.5px solid var(--bo); background:var(--su); color:var(--ink);
+  font:800 14.5px/1 'Archivo',sans-serif;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  transition: transform .15s; }
+.vs-second:active { transform: scale(.98); }
 .vs-hint { text-align:center; margin:10px 0 0; font:600 12px/1.5 'Archivo',sans-serif; color:var(--mu2); }
-
-.vs-already { display:flex; align-items:center; gap:12px; }
-.vs-already-tx b { display:block; font:800 15px/1.3 'Archivo',sans-serif; }
-.vs-already-tx span { font:500 12.5px/1.5 'Archivo',sans-serif; color:var(--mu); }
 
 /* ── Écran résultat : DA Arène nuit-violet + or (célébration) ── */
 .vsr { position:relative; min-height: calc(100dvh - 60px); padding: 30px 20px calc(120px + env(safe-area-inset-bottom));
@@ -351,32 +356,54 @@ function notFoundScreen() {
   </div>`;
 }
 
-function blockedScreen(sub, avecMission) {
-  // « Rien à faire ici » était vrai quand il n'y avait qu'un quiz de
-  // certification derrière. Avec une mise en situation, il reste quelque chose
-  // à faire : s'entraîner. Le geste s'entretient, la certification non.
+/**
+ * L'écran d'une compétence DÉJÀ acquise. Ce n'est plus une porte fermée.
+ *
+ * « Rien à faire ici » était vrai quand il n'y avait qu'un quiz de
+ * certification derrière. Aujourd'hui il reste toujours quelque chose à
+ * faire : rejouer la mise en situation, ou refaire le quiz. Le geste
+ * s'entretient, la certification non.
+ *
+ * `parMoi` : la compétence a été certifiée par l'élève lui-même (et non
+ * validée par son enseignant) — la phrase ne peut pas être la même.
+ */
+function blockedScreen(sub, avecMission, parMoi = false) {
+  // Le « : » n'est pas encodé : c'est le séparateur que lit revision-conduite
+  // pour ouvrir le quiz directement, pas une donnée.
+  const quizHref = `#/revision-conduite/${encodeURIComponent(String(sub?.c ?? ""))}:quiz`;
+  const phrase = parMoi
+    ? avecMission
+      ? vsD(
+          "self_m",
+          "Tu as déjà certifié cette compétence. La mise en situation reste ouverte pour t'entraîner autant que tu veux.",
+        )
+      : vsD(
+          "self",
+          "Tu as déjà certifié cette compétence. Le quiz reste ouvert pour t'entraîner autant que tu veux.",
+        )
+    : avecMission
+      ? vsD(
+          "blocked_m",
+          "Ton enseignant a déjà validé cette compétence. Tu peux quand même refaire la mise en situation pour entretenir le geste.",
+        )
+      : vsD(
+          "blocked_q",
+          "Ton enseignant a déjà validé cette compétence. Tu peux quand même refaire le quiz pour entretenir le geste.",
+        );
+
   return `${STYLE}<div class="vs">
     ${topBar(sub?.n || vsTR("comp_fallback", "Compétence"))}
     <div class="vs-card vs-warn">
       ${icon("check-circle", { size: 20 })}
-      <p>${
-        avecMission
-          ? vsD(
-              "blocked_m",
-              "Ton enseignant a déjà validé cette compétence. Tu peux quand même refaire la mise en situation pour entretenir le geste.",
-            )
-          : vsD(
-              "blocked",
-              "Ton moniteur a déjà validé cette compétence. Rien à faire ici.",
-            )
-      }</p>
+      <p>${phrase}</p>
     </div>
     ${
       avecMission
         ? `<button class="vs-cta" id="vs-rejouer" type="button">${icon("zap", { size: 18 })} ${vsD("blocked_cta", "Refaire la mise en situation")}</button>
-           <p class="vs-hint">${vsD("blocked_hint", "Cet entraînement ne change rien à ton parcours. Il est juste là pour la main.")}</p>`
-        : ""
+           <a class="vs-second" href="${escAttr(quizHref)}">${vsD("blocked_quiz", "Refaire le quiz")}</a>`
+        : `<a class="vs-cta" href="${escAttr(quizHref)}">${icon("zap", { size: 18 })} ${vsD("blocked_quiz", "Refaire le quiz")}</a>`
     }
+    <p class="vs-hint">${vsD("blocked_hint", "Cet entraînement ne change rien à ton parcours. Il est juste là pour la main.")}</p>
   </div>`;
 }
 
@@ -436,27 +463,15 @@ function boiteScreen(sub) {
   </div>`;
 }
 
-function introScreen(sub, cat, already, fiche, avecMission) {
+// Cet écran ne voit plus que des compétences PAS ENCORE acquises : une
+// compétence déjà certifiée part sur l'écran d'entraînement (blockedScreen)
+// avant d'arriver ici. Le bandeau « déjà certifiée » et les libellés
+// « repasser le quiz » sont donc partis avec.
+function introScreen(sub, cat, fiche, avecMission) {
   const ficheHref = `#/revision-conduite/${encodeURIComponent(String(sub.c ?? ""))}`;
   const steps = (fiche?.methode || []).slice(0, 4);
   const ficheList = steps.length
     ? `<ul class="vs-fiche-list">${steps.map((s, i) => `<li><b>${String(i + 1).padStart(2, "0")}</b>${esc(s)}</li>`).join("")}</ul>`
-    : "";
-
-  const alreadyDate = already
-    ? new Date(already.validated_at).toLocaleDateString(
-        { fr: "fr-FR", en: "en-GB", ar: "ar" }[getLang()] || "fr-FR",
-        { day: "numeric", month: "long" },
-      )
-    : "";
-  const alreadyBanner = already
-    ? `<div class="vs-card vs-already">
-        <div>${medallion("check", "violet", { size: 40 })}</div>
-        <div class="vs-already-tx">
-          <b>${vsD("already_t", "Déjà certifiée")}</b>
-          <span>${vsD("already_s", `Certifiée le ${alreadyDate}.`, { date: alreadyDate })}</span>
-        </div>
-      </div>`
     : "";
 
   return `${STYLE}<div class="vs anim-slide-up">
@@ -468,8 +483,6 @@ function introScreen(sub, cat, already, fiche, avecMission) {
       <h2 class="vs-hero-ttl">${esc(sub.n)}</h2>
       <p class="vs-hero-p">${vsD("hero_p", "Tu as travaillé ce geste en leçon avec ton enseignant ? Certifie-le en 2 étapes.")}</p>
     </div>
-
-    ${alreadyBanner}
 
     <div class="vs-steps">
       <div class="vs-step">
@@ -505,13 +518,9 @@ function introScreen(sub, cat, already, fiche, avecMission) {
          ne la lisait (audit 01/08). -->
     <p class="vs-hint">${avecMission ? vsD("hint_m", "Sois honnête avec toi-même. Rien de tout ça ne remplace une vraie leçon de conduite.") : vsD("hint", "Sois honnête avec toi-même. Ce quiz ne remplace pas une vraie leçon de conduite.")}</p>
     <button class="vs-cta" id="vs-start-quiz" type="button">${icon("zap", { size: 18 })} ${
-      already
-        ? avecMission
-          ? vsD("cta_m_retry", "Refaire la mise en situation")
-          : vsD("cta_retry", "Repasser le quiz")
-        : avecMission
-          ? vsD("cta_m_start", "Monter dans la voiture")
-          : vsD("cta_start", "Commencer le quiz")
+      avecMission
+        ? vsD("cta_m_start", "Monter dans la voiture")
+        : vsD("cta_start", "Commencer le quiz")
     }</button>
   </div>`;
 }
@@ -666,11 +675,19 @@ export async function mount(root, param) {
   // pour une seule boîte sans en avoir pour l'autre).
   const avecMission = missionsPour(compId, await chargerBoite()).length > 0;
 
-  if (acquisMoniteur) {
-    // Acquise ne veut pas dire fermée. Un geste, ça s'entretient : la mission
-    // reste rejouable pour s'entraîner, elle ne certifie simplement plus rien.
-    root.innerHTML = blockedScreen(sub, avecMission);
+  // Acquise ne veut pas dire fermée. Un geste, ça s'entretient : la mission et
+  // le quiz restent rejouables pour s'entraîner, ils ne certifient simplement
+  // plus rien. Vaut pour les deux façons d'être acquise — validée par
+  // l'enseignant, ou certifiée par l'élève lui-même. Avant, la certification
+  // par soi renvoyait sur l'écran « certifie-le en 2 étapes », qui reproposait
+  // une certification déjà faite (remonté par Rayan, 02/08/2026).
+  if (acquisMoniteur || already) {
+    root.innerHTML = blockedScreen(sub, avecMission, !acquisMoniteur);
     wireBack(root);
+    track("valider_seul.entrainement_propose", {
+      competence_id: compId,
+      avec_mission: avecMission,
+    });
     root.querySelector("#vs-rejouer")?.addEventListener("click", () => {
       haptic("tap");
       rejouerLaMission(root, me, compId, sub, cat);
@@ -678,7 +695,7 @@ export async function mount(root, param) {
     return;
   }
 
-  root.innerHTML = introScreen(sub, cat, already, fiche, avecMission);
+  root.innerHTML = introScreen(sub, cat, fiche, avecMission);
   wireIntro(root, me, compId, sub, cat);
 }
 

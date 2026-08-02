@@ -1403,7 +1403,7 @@ export async function mount(root, param) {
         }
         <button class="fd-cta" data-certif-fiche><span>${esc(
           estAcquise(f.code)
-            ? ui("cta_done", "Déjà acquise. Voir dans Mon permis")
+            ? ui("cta_done", "Rejoue cette compétence")
             : ui("cta", "Certifie la compétence"),
         )}</span></button>
       </div>
@@ -1481,13 +1481,17 @@ export async function mount(root, param) {
     root.querySelector("[data-certif-fiche]")?.addEventListener("click", () => {
       focusId = null;
       haptic("tap");
-      // Déjà acquise : la certification n'a plus rien à dire, on montre où elle
-      // vit désormais plutôt qu'un écran fermé.
-      if (estAcquise(f.code)) {
-        navigate("#/mon-permis");
-        return;
-      }
-      track("revision_conduite_certif_go", { code: f.code, from: "fiche" });
+      // Acquise ou pas, le bouton mène au MÊME endroit. Avant, une compétence
+      // déjà acquise renvoyait sur Mon permis : l'élève qui voulait juste
+      // rejouer la mise en situation se retrouvait sur une page de suivi, sans
+      // aucun moyen de revenir jouer (remonté par Rayan, 02/08/2026).
+      // #/valider-seul sait quoi proposer selon l'état : certifier, ou
+      // s'entraîner sans enjeu.
+      track("revision_conduite_certif_go", {
+        code: f.code,
+        from: "fiche",
+        acquise: estAcquise(f.code),
+      });
       navigate(`#/valider-seul/${f.code}`);
     });
 
