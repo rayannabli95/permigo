@@ -542,9 +542,6 @@ ${chromeNight("#5a4fc0", "#423a96")}
 .fd-shot figcaption{ padding:9px 12px 11px; font-size:11.5px; line-height:1.35; color:#3d2f7a; font-weight:600; }
 
 .fd-coach-wrap{ margin-top:6px; }
-/* auto-fit : 2 cartes par ligne sur mobile, 3 dès qu'il y a la place. Avant,
-   une grille à N colonnes écrasait les cartes au-delà de trois (une fiche
-   ICRI complète en compte jusqu'à six). */
 /* Le crochet qui donne envie d'ouvrir une carte : la mascotte pointe la
    promesse. Choix Rayan 02/08 : ce qui fait cliquer, ce n'est pas le résumé du
    contenu, c'est ce que l'élève y gagne. */
@@ -562,22 +559,31 @@ ${chromeNight("#5a4fc0", "#423a96")}
   animation:fdHookNod 3.4s ease-in-out 1.2s infinite; }
 @keyframes fdHookNod{ 0%,72%,100%{ transform:rotate(0) translateY(0); } 80%{ transform:rotate(-5deg) translateY(-3px); } 88%{ transform:rotate(4deg) translateY(-1px); } }
 .fd-coach-hook p{ margin:0; font:800 13.5px/1.35 'Archivo',sans-serif; color:#ffe4a6; }
-.fd-coach{ display:grid; grid-template-columns:repeat(auto-fit,minmax(148px,1fr)); gap:9px; padding:0 18px; align-items:stretch; }
+/* Le deck : les cartes s'empilent au lieu de se ranger en grille (demande
+   Rayan 02/08). touch-action:pan-y garde le scroll vertical de la page pendant
+   qu'on glisse la carte horizontalement. */
+.fd-coach{ position:relative; height:clamp(196px,28vh,240px); margin:0 18px; touch-action:pan-y; user-select:none; -webkit-user-select:none; }
 /* Carte coach = bouton (demande Rayan 22/07 : tap → lecture en grand). */
-.fd-cc{ position:relative; border-radius:14px; padding:11px 10px 12px; background:#f6f4ff; border:1px solid #e6e2fb; border-top-color:#fff;
-  box-shadow:0 3px 0 rgba(20,12,60,.28), inset 0 1px 0 rgba(255,255,255,.8); display:flex; flex-direction:column; gap:7px;
-  width:100%; text-align:left; font-family:inherit; cursor:pointer; overflow:hidden;
-  -webkit-tap-highlight-color:transparent; transition:transform .1s ease; }
-.fd-cc:active{ transform:scale(.97); }
+.fd-cc{ position:absolute; inset:0; border-radius:18px; padding:14px 14px 15px; background:#f6f4ff; border:1px solid #e6e2fb; border-top-color:#fff;
+  box-shadow:0 8px 0 -2px rgba(20,12,60,.26), 0 16px 30px -14px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.8);
+  display:flex; flex-direction:column; gap:9px;
+  width:100%; text-align:left; font-family:inherit; cursor:grab; overflow:hidden;
+  -webkit-tap-highlight-color:transparent; will-change:transform; }
+.fd-cc.is-anim{ transition:transform .42s cubic-bezier(.4,0,.2,1), opacity .42s cubic-bezier(.4,0,.2,1); }
+.fd-cc:active{ cursor:grabbing; }
+/* Les cartes du dessous : réduites, remontées, hors du parcours de tabulation. */
+.fd-cc[data-depth="1"]{ transform:translateY(-14px) scale(.935); filter:brightness(.96); }
+.fd-cc[data-depth="2"]{ transform:translateY(-26px) scale(.87); filter:brightness(.92); }
+.fd-cc[data-depth]:not([data-depth="0"]){ pointer-events:none; }
 /* Reflet qui balaie la carte, le même que les cartes de collection quand une
    compétence se débloque (collection.js, .col-card-gloss). Deux différences.
    Là-bas la carte est sombre et une bande blanche suffit ; ici le fond est clair
    (#f6f4ff) donc la bande est bordée d'un violet très doux, sinon on ne la voit
    pas. Et là-bas la lumière fait l'aller-retour ; ici elle part toujours de la
    gauche puis se repose hors champ, sinon ça ne se lit pas comme un swipe.
-   Chaque carte démarre 0,42 s après la précédente : la lumière traverse la
-   grille de carte en carte au lieu que les six clignotent ensemble. */
-.fd-cc::after{ content:""; position:absolute; top:-55%; bottom:-55%; left:0; width:34%; pointer-events:none; z-index:1;
+   Seule la carte du dessus brille : sur les couches du dessous on ne verrait
+   qu'un liseré qui clignote. */
+.fd-cc[data-depth="0"]::after{ content:""; position:absolute; top:-55%; bottom:-55%; left:0; width:34%; pointer-events:none; z-index:1;
   background:linear-gradient(90deg, transparent 0%, rgba(110,84,214,.10) 24%, rgba(255,255,255,.95) 47%, rgba(255,255,255,.95) 53%, rgba(110,84,214,.10) 76%, transparent 100%);
   transform:rotate(18deg) translateX(-170%);
   animation:fdGloss 4s cubic-bezier(.4,0,.5,1) 1s infinite; }
@@ -585,16 +591,12 @@ ${chromeNight("#5a4fc0", "#423a96")}
    hors champ le reste du cycle. Une course plus longue passerait l'essentiel du
    temps hors de la carte et on ne verrait qu'un éclair. */
 @keyframes fdGloss{ 0%{ transform:rotate(18deg) translateX(-170%); } 32%,100%{ transform:rotate(18deg) translateX(330%); } }
-.fd-cc:nth-child(2)::after{ animation-delay:1.42s; }
-.fd-cc:nth-child(3)::after{ animation-delay:1.84s; }
-.fd-cc:nth-child(4)::after{ animation-delay:2.26s; }
-.fd-cc:nth-child(5)::after{ animation-delay:2.68s; }
-.fd-cc:nth-child(6)::after{ animation-delay:3.1s; }
-.fd-cc-zoom{ position:absolute; top:8px; right:8px; width:22px; height:22px; border-radius:7px;
+.fd-cc-zoom{ position:absolute; top:12px; right:12px; width:28px; height:28px; border-radius:9px;
   display:flex; align-items:center; justify-content:center;
   background:rgba(90,79,192,.08); border:1px solid rgba(90,79,192,.16); }
-.fd-ic{ width:34px; height:34px; border-radius:11px; flex:none; display:flex; align-items:center; justify-content:center;
+.fd-ic{ width:40px; height:40px; border-radius:13px; flex:none; display:flex; align-items:center; justify-content:center;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 2px 4px rgba(20,12,60,.2); }
+.fd-ic svg{ width:22px; height:22px; }
 .fd-cc.err .fd-ic{ background:linear-gradient(180deg,#ffe3d6,#ffd0bd); border:1px solid rgba(230,90,50,.4); }
 .fd-cc.why .fd-ic{ background:linear-gradient(180deg,#ece5ff,#ddd2ff); border:1px solid rgba(124,95,224,.4); }
 .fd-cc.auto .fd-ic{ background:linear-gradient(180deg,#dcebff,#c6ddff); border:1px solid rgba(63,130,214,.4); }
@@ -603,14 +605,29 @@ ${chromeNight("#5a4fc0", "#423a96")}
 .fd-cc.rsk .fd-ic{ background:linear-gradient(180deg,#ffdfe4,#ffc9d2); border:1px solid rgba(200,50,80,.4); }
 .fd-cc.inf .fd-ic{ background:linear-gradient(180deg,#dcf0dd,#c6e6ca); border:1px solid rgba(45,150,90,.4); }
 /* Spans display:block (pas de h4/p dans un <button> — contenu phrasé only). */
-.fd-cc-h{ display:block; font-family:'Archivo',sans-serif; font-weight:800; font-size:11px; letter-spacing:.02em; line-height:1.15; margin:0; }
+.fd-cc-h{ display:block; font-family:'Archivo',sans-serif; font-weight:800; font-size:15px; letter-spacing:.01em; line-height:1.15; margin:0; padding-right:34px; }
 .fd-cc.err .fd-cc-h{ color:#c2410c; }
 .fd-cc.why .fd-cc-h{ color:#5b3fbf; }
 .fd-cc.auto .fd-cc-h{ color:#1e5fa8; }
 .fd-cc.ctx .fd-cc-h{ color:#0f6f68; }
 .fd-cc.rsk .fd-cc-h{ color:#b02a45; }
 .fd-cc.inf .fd-cc-h{ color:#1f7a45; }
-.fd-cc-p{ display:block; font-size:10.5px; line-height:1.4; color:#6b5fa0; font-weight:500; margin:0; }
+/* Le texte est coupé à la hauteur de la carte, sinon les cartes ne peuvent pas
+   s'empiler. Rien n'est perdu : le tap ouvre la lecture en grand, et le dégradé
+   du bas dit qu'il y a une suite. */
+.fd-cc-p{ display:block; font-size:13.5px; line-height:1.5; color:#5f5497; font-weight:500; margin:0;
+  flex:1; min-height:0; overflow:hidden;
+  -webkit-mask-image:linear-gradient(180deg,#000 calc(100% - 28px),transparent 100%);
+          mask-image:linear-gradient(180deg,#000 calc(100% - 28px),transparent 100%); }
+
+/* Commandes du deck : compteur encadré de deux chevrons, pour qui ne glisse pas. */
+.fd-cd-ctrls{ display:flex; align-items:center; justify-content:center; gap:18px; margin-top:14px; }
+.fd-cd-arrow{ width:44px; height:44px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  background:rgba(255,255,255,.09); border:1px solid rgba(255,255,255,.17); color:#ede8ff;
+  box-shadow:0 5px 14px -6px rgba(0,0,0,.55); transition:transform .1s ease; }
+.fd-cd-arrow:active{ transform:scale(.92); }
+.fd-cd-count{ font:800 13.5px/1 'Archivo',sans-serif; color:#cabff2; min-width:56px; text-align:center; font-variant-numeric:tabular-nums; }
+.fd-cd-tip{ text-align:center; margin:9px 0 0; font:600 11.5px/1.4 'Archivo',sans-serif; color:rgba(222,215,255,.55); }
 
 .fd-source{ text-align:center; font-size:10.5px; color:#c9bdf5; font-weight:600; margin:18px 18px 0; }
 .fd-source b{ color:#ffe4a6; font-weight:700; }
@@ -1286,6 +1303,9 @@ export async function mount(root, param) {
     const INF_IC = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="8.6" cy="9" r="3.1" fill="#2d965a"/><path d="M3 19c0-3.1 2.5-5.2 5.6-5.2s5.6 2.1 5.6 5.2z" fill="#2d965a"/><circle cx="16.8" cy="10.2" r="2.4" fill="#2d965a" opacity=".55"/><path d="M13.4 19c0-2.5 1.9-4.1 3.9-4.1 1.6 0 3.7 1 3.7 4.1z" fill="#2d965a" opacity=".55"/></svg>`;
     // Loupe discrète (affordance) : la carte se tape pour lire en grand.
     const ZOOM_IC = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><circle cx="10.5" cy="10.5" r="6.5" stroke="#8579b8" stroke-width="2"/><path d="M15.5 15.5L21 21" stroke="#8579b8" stroke-width="2" stroke-linecap="round"/><path d="M10.5 8v5M8 10.5h5" stroke="#8579b8" stroke-width="1.8" stroke-linecap="round"/></svg>`;
+    // Chevrons du deck (pour qui ne glisse pas : souris, clavier, lecteur d'écran).
+    const CD_LEFT = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    const CD_RIGHT = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
     // Ordre ICRI (Intérêt → Contexte → Risque → Influence) : l'élève lit
     // d'abord à quoi ça sert, puis quand ça tombe, ce qu'il encourt, et l'effet
     // sur les autres. L'erreur type et la boîte auto ferment la série.
@@ -1341,6 +1361,17 @@ export async function mount(root, param) {
     // Carte = <button> tapable (≥ 44px) → bottom-sheet « lecture en grand »
     // (demande Rayan 22/07 : « c'est tout petit »). Spans block, pas de h4/p
     // dans un <button> (contenu phrasé uniquement).
+    //
+    // Deck empilé et non plus grille (demande Rayan 02/08 : « je veux empiler
+    // une sur l'autre et on swipe »). Même mécanique que la collection : trois
+    // couches, la carte du dessus se glisse à gauche ou à droite. Le texte est
+    // tronqué à hauteur fixe pour que les cartes s'empilent proprement ; le tap
+    // ouvre la lecture en grand, donc rien n'est perdu.
+    // Le HTML de chaque carte est mémorisé sur la carte elle-même : le deck est
+    // reconstruit en JS à chaque glissement, hors de cette portée.
+    coach.forEach((c, i) => {
+      c.html = `<button type="button" class="fd-cc ${c.k}" data-coach="${i}" aria-haspopup="dialog"><span class="fd-cc-zoom" aria-hidden="true">${ZOOM_IC}</span><span class="fd-ic">${c.ic}</span><span class="fd-cc-h">${esc(c.h)}</span><span class="fd-cc-p">${bi(c.fr, c.tr)}</span></button>`;
+    });
     const coachHtml = coach.length
       ? `<div class="fd-coach-wrap">
           ${seclab("Cartes coach", lang !== "fr" ? ui("coach", "Cartes coach") : null)}
@@ -1348,14 +1379,17 @@ export async function mount(root, param) {
             <span class="fd-hook-av" aria-hidden="true"><img src="/skins/mascot-point.png" alt="" /></span>
             <p>${esc(ui("coach_hook", "Deux minutes ici t'évitent une leçon de plus"))}</p>
           </div>
-          <div class="fd-coach">
-            ${coach
-              .map(
-                (c, i) =>
-                  `<button type="button" class="fd-cc ${c.k}" data-coach="${i}" aria-haspopup="dialog"><span class="fd-cc-zoom" aria-hidden="true">${ZOOM_IC}</span><span class="fd-ic">${c.ic}</span><span class="fd-cc-h">${esc(c.h)}</span><span class="fd-cc-p">${bi(c.fr, c.tr)}</span></button>`,
-              )
-              .join("")}
-          </div>
+          <div class="fd-coach" data-cdeck></div>
+          ${
+            coach.length > 1
+              ? `<div class="fd-cd-ctrls">
+              <button type="button" class="fd-cd-arrow" data-cd="prev" aria-label="${escAttr(ui("cd_prev", "Carte précédente"))}">${CD_LEFT}</button>
+              <span class="fd-cd-count" data-cd-count aria-live="polite">1 / ${coach.length}</span>
+              <button type="button" class="fd-cd-arrow" data-cd="next" aria-label="${escAttr(ui("cd_next", "Carte suivante"))}">${CD_RIGHT}</button>
+            </div>
+            <p class="fd-cd-tip">${esc(ui("cd_tip", "Glisse pour passer à la suivante"))}</p>`
+              : ""
+          }
         </div>`
       : "";
 
@@ -1502,10 +1536,108 @@ export async function mount(root, param) {
         window.scrollTo(0, y);
       }),
     );
-    // Carte coach → bottom-sheet « lecture en grand » (demande Rayan 22/07).
-    root.querySelectorAll("[data-coach]").forEach((btn) =>
-      btn.addEventListener("click", () => {
-        const c = coach[Number(btn.getAttribute("data-coach"))];
+    // ── Deck des cartes coach : empilées, on glisse pour passer à la suivante
+    // (demande Rayan 02/08). Trois couches comme la collection ; le tap ouvre
+    // toujours la lecture en grand (demande Rayan 22/07).
+    const cdeck = root.querySelector("[data-cdeck]");
+    if (cdeck && coach.length) {
+      const counter = root.querySelector("[data-cd-count]");
+      let cur = 0;
+      let ignoreClickUntil = 0; // un glissement ne doit pas ouvrir la fiche
+
+      const buildCoachDeck = () => {
+        cdeck.textContent = "";
+        const depth = Math.min(3, coach.length);
+        for (let d = depth - 1; d >= 0; d--) {
+          const idx = (cur + d) % coach.length;
+          const holder = document.createElement("div");
+          holder.innerHTML = coach[idx].html;
+          const el = holder.firstElementChild;
+          el.dataset.depth = String(d);
+          el.dataset.coach = String(idx);
+          if (d > 0) {
+            // Les cartes du dessous sont décoratives : ni tabulation ni voix.
+            el.setAttribute("aria-hidden", "true");
+            el.tabIndex = -1;
+          }
+          cdeck.appendChild(el);
+        }
+        if (counter) counter.textContent = `${cur + 1} / ${coach.length}`;
+        makeCoachDraggable(cdeck.lastElementChild);
+      };
+
+      const advanceCoach = (dir) => {
+        if (coach.length < 2) return;
+        const top = cdeck.lastElementChild;
+        if (!top) return;
+        haptic("tap");
+        const out = dir > 0 ? -1 : 1; // glissé vers la gauche = suivante
+        top.classList.add("is-anim");
+        top.style.transform = `translateX(${out * 130}%) rotate(${out * 14}deg)`;
+        top.style.opacity = "0";
+        // transitionend part DEUX fois (transform + opacity) : on ne rebâtit
+        // le deck qu'une seule.
+        let done = false;
+        const after = () => {
+          if (done) return;
+          done = true;
+          cur = (cur + dir + coach.length) % coach.length;
+          buildCoachDeck();
+        };
+        top.addEventListener("transitionend", after);
+        setTimeout(after, 470); // filet si la transition ne se déclenche pas
+      };
+
+      function makeCoachDraggable(top) {
+        if (!top || coach.length < 2) return;
+        let startX = 0,
+          startY = 0,
+          dx = 0,
+          dy = 0,
+          moved = 0,
+          axis = null,
+          dragging = false;
+        top.addEventListener("pointerdown", (e) => {
+          dragging = true;
+          startX = e.clientX;
+          startY = e.clientY;
+          dx = dy = moved = 0;
+          axis = null;
+          top.classList.remove("is-anim");
+          top.setPointerCapture?.(e.pointerId);
+        });
+        top.addEventListener("pointermove", (e) => {
+          if (!dragging) return;
+          dx = e.clientX - startX;
+          dy = e.clientY - startY;
+          moved = Math.max(moved, Math.abs(dx) + Math.abs(dy));
+          // L'axe se décide une fois pour toutes : sinon un scroll vertical de
+          // la page emmène la carte avec lui.
+          if (!axis && moved > 8)
+            axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+          if (axis !== "x") return;
+          top.style.transform = `translate(${dx}px, ${dy * 0.18}px) rotate(${dx / 22}deg)`;
+        });
+        const end = () => {
+          if (!dragging) return;
+          dragging = false;
+          if (moved >= 8) ignoreClickUntil = Date.now() + 260;
+          if (axis === "x" && Math.abs(dx) > 70) {
+            advanceCoach(dx < 0 ? 1 : -1);
+          } else {
+            top.classList.add("is-anim");
+            top.style.transform = "";
+          }
+        };
+        top.addEventListener("pointerup", end);
+        top.addEventListener("pointercancel", end);
+      }
+
+      // Délégué : le deck est reconstruit à chaque carte, les cartes non.
+      cdeck.addEventListener("click", (e) => {
+        if (Date.now() < ignoreClickUntil) return;
+        const btn = e.target.closest?.("[data-coach]");
+        const c = btn && coach[Number(btn.getAttribute("data-coach"))];
         if (!c) return;
         haptic("select");
         openCoachSheet({
@@ -1515,8 +1647,22 @@ export async function mount(root, param) {
           rtl,
           icon: c.ic,
         });
-      }),
-    );
+      });
+      cdeck.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowLeft") advanceCoach(-1);
+        else if (e.key === "ArrowRight") advanceCoach(1);
+        else return;
+        e.preventDefault();
+      });
+      root
+        .querySelectorAll("[data-cd]")
+        .forEach((b) =>
+          b.addEventListener("click", () =>
+            advanceCoach(b.getAttribute("data-cd") === "next" ? 1 : -1),
+          ),
+        );
+      buildCoachDeck();
+    }
     // La fiche mène désormais DIRECTEMENT à la certification (décision Rayan,
     // 31/07/2026) : « Teste-toi » ouvrait un quiz de révision, qui proposait
     // ensuite un second quiz pour certifier — deux quiz d'affilée pour un
