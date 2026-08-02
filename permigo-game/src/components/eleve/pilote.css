@@ -995,6 +995,140 @@ body.mp-open #header-bar {
   stroke-width: 7;
 }
 
+/* ── La commande à doser ──────────────────────────────────────────────────
+   Une course verticale, trois crans, une jauge qui suit le doigt. Le zéro est
+   EN BAS : pousser une pédale c'est descendre le pied, et la jauge monte dans
+   le même sens que l'effort.
+
+   `--dose` porte la position courante, en pourcentage de la course. */
+.mp-reglage {
+  --dose: 0%;
+  display: flex;
+  justify-content: center;
+  padding: 18px 0 6px;
+}
+
+.mp-reglage-piste {
+  position: relative;
+  width: 74px;
+  /* Les libellés des crans sont posés À DROITE de la piste, en absolu. Sans
+     cette marge ils sortaient de l'écran sur un téléphone de 390 px. Elle
+     entre dans le calcul du centrage et décale l'ensemble vers la gauche,
+     juste ce qu'il faut pour que le plus long tienne. */
+  margin-right: 138px;
+  height: 168px;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 37px;
+  background: linear-gradient(180deg, rgb(10 5 25 / 62%), rgb(22 15 44 / 62%));
+  box-shadow: inset 0 2px 0 rgb(255 255 255 / 7%);
+}
+
+.mp-reglage-jauge {
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  left: 5px;
+  height: calc(var(--dose) * 0.94);
+  min-height: 6px;
+  border-radius: 32px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--world) 72%, white 8%),
+    color-mix(in srgb, var(--world-dark) 88%, black 4%)
+  );
+  opacity: 0.55;
+  transition: height 90ms var(--ease-out);
+}
+
+/* Les crans restent NEUTRES tant que rien n'est lâché : aucun ne doit se
+   distinguer avant que l'élève ait choisi. */
+.mp-reglage-cran {
+  position: absolute;
+  left: calc(100% + 12px);
+  bottom: calc(var(--cran) * 0.94 + 5px);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  /* ⚠️ Une LARGEUR, pas un `max-width`. Le libellé est posé en absolu hors de
+     sa piste, qui ne fait que 74 px : en largeur automatique il se calait sur
+     ce qui restait de la piste, c'est-à-dire rien, et « Tout d'un coup »
+     tombait sur trois lignes. */
+  width: 130px;
+  transform: translateY(50%);
+}
+
+.mp-reglage-cran i {
+  width: 13px;
+  height: 2px;
+  border-radius: 2px;
+  background: rgb(255 255 255 / 32%);
+}
+
+.mp-reglage-cran small {
+  color: #b6a8d4;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.mp-reglage-cran.is-over i,
+.mp-reglage-cran.is-chosen i {
+  width: 19px;
+  background: var(--world);
+}
+
+.mp-reglage-cran.is-over small,
+.mp-reglage-cran.is-chosen small {
+  color: #f3edff;
+}
+
+.mp-reglage-bouton {
+  position: absolute;
+  right: 4px;
+  bottom: calc(var(--dose) * 0.94 + 4px);
+  left: 4px;
+  height: 40px;
+  border-radius: 24px;
+  background: linear-gradient(180deg, #efe9ff, #b6a6ec);
+  box-shadow:
+    0 6px 12px rgb(0 0 0 / 38%),
+    inset 0 2px 0 rgb(255 255 255 / 72%);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  transform: translateY(50%);
+  transition: bottom 90ms var(--ease-out);
+}
+
+.mp-reglage-bouton::after {
+  position: absolute;
+  top: 50%;
+  right: 20px;
+  left: 20px;
+  height: 2px;
+  border-radius: 2px;
+  background: rgb(43 30 78 / 42%);
+  box-shadow: 0 5px 0 rgb(43 30 78 / 26%), 0 -5px 0 rgb(43 30 78 / 26%);
+  content: "";
+}
+
+.mp-reglage-bouton.is-pushing {
+  cursor: grabbing;
+  transition: none;
+}
+
+.mp-reglage-bouton.is-locked {
+  cursor: default;
+  opacity: 0.86;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mp-reglage-jauge,
+  .mp-reglage-bouton {
+    transition: none;
+  }
+}
+
 /* La voiture vue de dessus, l'autre pièce déplaçable. Elle reprend le violet
    du joueur des décors en vue de dessus, pour qu'on la reconnaisse tout de
    suite comme « ma voiture » et pas comme un véhicule du décor. */
