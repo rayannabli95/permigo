@@ -44,7 +44,7 @@ const FTW_I18N = {
     perk1_d: "Skills · chests · steering wheels · ranking",
     perk2_t: "Mock exam and certification",
     perk2_d: "Everything you need to be ready on test day",
-    unlock: "Open my course",
+    unlock: "Unlock everything · €4.99/month",
     explore: "Keep exploring",
     banner_free: "Free account",
     banner_lessons: (n) => `First ${n} lessons`,
@@ -68,7 +68,7 @@ const FTW_I18N = {
     perk1_d: "المهارات · الصناديق · المقاود · الترتيب",
     perk2_t: "امتحان تجريبي وشهادة",
     perk2_d: "كل ما تحتاجه لتكون جاهزاً يوم الامتحان",
-    unlock: "افتح مساري",
+    unlock: "افتح كل شيء · €4.99/شهر",
     explore: "متابعة الاستكشاف",
     banner_free: "حساب مجاني",
     banner_lessons: (n) => `أول ${n} دروس`,
@@ -232,7 +232,7 @@ export async function mountFreeTierWall(
           </div>`,
         ).join("")}
       </div>
-      <button class="ftw-unlock" id="ftw-unlock" type="button">${wt("unlock", "Débloquer mon parcours")}</button>
+      <button class="ftw-unlock" id="ftw-unlock" type="button">${wt("unlock", "Tout débloquer · 4,99 €/mois")}</button>
       <button class="ftw-explore" id="ftw-explore" type="button">${wt("explore", "Continuer à explorer")}</button>
       ${counter}
     </div>

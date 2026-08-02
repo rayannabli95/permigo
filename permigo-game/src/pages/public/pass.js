@@ -2,10 +2,16 @@
 // Page publique — Pré-vente « Pass Permis » (payeur = ÉLÈVE)
 // URL : #/pass  (partageable en DM : www.permigo.fr/#/pass?lang=en)
 //
-// DA « Ticket d'Or » — v3 (retours Rayan après SON vrai paiement, 15/07 soir) :
+// PRIX — v4 (décision Rayan, 02/08/2026) : UN SEUL prix, 4,99 €/mois.
+// Le billet Or à 24,99 € les 3 mois est retiré. Raisons, dans ses mots :
+// « on est gourmand à 24,99 alors que c'est le début », « personne ne va payer
+// 24,99 en trois mois », « les gens comparent au fond d'écran d'Ornikar », et
+// « 4,99 ça parle à tout le monde ». Conséquence : plus de prix barré, plus de
+// chips d'économie, plus de grille à arbitrer. Le gratuit passe devant, le
+// payant se propose au moment où l'élève est frustré (mur des 3 questions).
+//
+// DA « Ticket d'Or » (retours Rayan après SON vrai paiement, 15/07 soir) :
 //  - logo = le badge de marque (/p-badge.png), plus de wordmark illisible
-//  - « Offre de lancement* », tarif exceptionnel, prix barré partout,
-//    chips d'économie jaunes façon Ornikar (−17 % / −33 %)
 //  - PLUS de compteur de places ni de billet numéroté (retiré à sa demande)
 //  - garantie repensée : « satisfait ou remboursé — 3 jours d'essai »,
 //    puis annulation à tout moment (fini le « remboursé sans question »
@@ -57,14 +63,14 @@ const STR = {
     tSub: "Conduite · mini-jeux · simulations d'examen",
     tBoardLbl: "Départ",
     tDureeLbl: "Accès",
-    tDuree: "3 MOIS",
-    tOffre: "Tarif exceptionnel",
-    tStrike: "29,97 €",
-    tPrice: "24,99 €",
+    tDuree: "SANS LIMITE",
+    tOffre: "Prix de lancement",
+    tPer: "par mois",
+    tPrice: "4,99 €",
     freeCta: "Commencer gratuitement",
     freeNote: "3 leçons offertes · sans carte bancaire",
-    cta: `Ouvrir tout mon parcours · <s>29,97 €</s> 24,99 €`,
-    ctaNote: `Paiement sécurisé Stripe · <b>Satisfait ou remboursé sous 3 jours</b><br><small>Moins qu'une demi-heure de conduite.</small>`,
+    cta: `Tout débloquer · 4,99 €/mois`,
+    ctaNote: `Paiement sécurisé Stripe · <b>Satisfait ou remboursé sous 3 jours</b><br><small>Moins de 6 minutes de conduite.</small>`,
     bulle: "3 compétences validées !",
     bulleSub: "cette semaine",
     secCode: `Préparer le permis, c'est <em>bien plus</em> que conduire.`,
@@ -99,37 +105,20 @@ const STR = {
     mathsRows: [
       ["1 heure de conduite", "55 €"],
       ["Budget permis moyen", "1 800 €"],
-      ["PermiGo, par mois", "9,99 €"],
+      ["PermiGo, par mois", "4,99 €"],
     ],
     mathsNote: "Une leçon mal préparée = 55 € de perdus.",
     mathsSrc: "Sources : UFC-Que Choisir (budget permis) · Sécurité routière",
-    secPass: "Deux façons. Un objectif.",
+    secPass: "Un seul prix. Tout PermiGo.",
     secPassSub:
-      "Le même contenu dans les deux. Trois mois au mensuel coûtent 29,97 €. Le billet Or les met à 24,99 €.",
+      "Pas de formule à choisir, pas d'engagement. Tu commences gratuitement, et le jour où tu veux la suite, c'est 4,99 € par mois.",
     passes: {
       mensuel: {
-        name: "Billet Mensuel",
-        desc: "Ton exam est le mois prochain ? Parfait. Annulable en un clic.",
-        price: "9,99 €",
+        name: "Pass PermiGo",
+        desc: "Tout le parcours, l'examen blanc, ta progression et tes récompenses. Annulable en un clic.",
+        price: "4,99 €",
         per: "/mois",
         btn: "Commencer",
-      },
-      pass3: {
-        tag: "Le plus choisi",
-        name: "Billet Or · 3 mois",
-        desc: "2 à 4 mois : le vrai temps de préparation d'un permis. Payé une fois, prix bloqué.",
-        strike: "29,97 €",
-        price: "24,99 €",
-        eco: "−17 %",
-        btn: "Réserver",
-      },
-      pass6: {
-        name: "Billet Platine · 6 mois",
-        desc: "Conduite accompagnée ou longue prépa. Zéro pression.",
-        strike: "59,94 €",
-        price: "39,99 €",
-        eco: "−33 %",
-        btn: "Réserver",
       },
     },
     err: "Le paiement n'a pas pu démarrer. Réessaie.",
@@ -171,16 +160,16 @@ const STR = {
       ],
       [
         "Je peux annuler ou être remboursé ?",
-        `Pendant les 3 premiers jours : <strong>satisfait ou remboursé</strong>. Ensuite, le mensuel s'annule à tout moment en un clic (le billet Or est un paiement unique). Tu pars ? <a href="#/avis-depart">Dis-nous pourquoi ici</a>. Ça nous aide à améliorer l'app.`,
+        `Pendant les 3 premiers jours : <strong>satisfait ou remboursé</strong>. Ensuite, l'abonnement s'annule à tout moment en un clic. Tu pars ? <a href="#/avis-depart">Dis-nous pourquoi ici</a>. Ça nous aide à améliorer l'app.`,
       ],
     ],
     foot: `Paiement sécurisé par Stripe · Satisfait ou remboursé sous 3 jours<br><a href="#/legal">Mentions légales</a> · <a href="#/rejoindre?solo=1">Créer un compte gratuit</a>`,
     pros: `Moniteur indépendant ? <a href="#/creer-compte">Crée ton espace</a> · Auto-école ? <a href="#/pro">Demander un devis</a>`,
-    // Barre collante : la porte gratuite à gauche, l'achat à droite. Avant, elle
-    // ne proposait QUE de payer — et le compte gratuit n'avait aucune porte.
-    stickyName: "Ou commencer",
-    stickyPrice: "gratuitement",
-    stickyBtn: "Ouvrir tout · 24,99 €",
+    // Barre collante : le gratuit est LE bouton, l'achat passe en second rang.
+    // Avant, « Ou commencer gratuitement » était un texte à gauche du bouton
+    // doré : personne ne voyait qu'on pouvait cliquer dessus.
+    stickyFree: "Commencer gratuitement",
+    stickyPaid: "Tout débloquer · 4,99 €/mois",
     cancelNote:
       "Paiement annulé. Rien n'a été débité. Ton billet t'attend juste en dessous. 👇",
     successT: "Bienvenue dans l'aventure ! 🚀",
@@ -206,14 +195,14 @@ const STR = {
     tSub: "Driving · mini-games · exam simulations",
     tBoardLbl: "Start",
     tDureeLbl: "Access",
-    tDuree: "3 MONTHS",
-    tOffre: "Special price",
-    tStrike: "€29.97",
-    tPrice: "€24.99",
+    tDuree: "NO LIMIT",
+    tOffre: "Launch price",
+    tPer: "per month",
+    tPrice: "€4.99",
     freeCta: "Start for free",
     freeNote: "3 lessons included · no card needed",
-    cta: `Open my full course · <s>€29.97</s> €24.99`,
-    ctaNote: `Secure Stripe checkout · <b>3-day money-back guarantee</b><br><small>Less than half an hour of driving lessons.</small>`,
+    cta: `Unlock everything · €4.99/month`,
+    ctaNote: `Secure Stripe checkout · <b>3-day money-back guarantee</b><br><small>Less than 6 minutes of driving lessons.</small>`,
     bulle: "3 skills validated!",
     bulleSub: "this week",
     secCode: `Getting your licence takes <em>more</em> than driving.`,
@@ -250,37 +239,20 @@ const STR = {
     mathsRows: [
       ["1 hour of driving lessons", "€55"],
       ["Average licence budget (France)", "€1,800"],
-      ["PermiGo, per month", "€9.99"],
+      ["PermiGo, per month", "€4.99"],
     ],
     mathsNote: "One unprepared lesson = €55 wasted.",
     mathsSrc: "Sources: UFC-Que Choisir (licence budget) · Sécurité routière",
-    secPass: "Two ways. One goal.",
+    secPass: "One price. All of PermiGo.",
     secPassSub:
-      "Same content in both. Three months on the monthly plan cost €29.97. The Gold ticket makes it €24.99.",
+      "No plan to pick, no commitment. You start for free, and the day you want the rest, it is €4.99 a month.",
     passes: {
       mensuel: {
-        name: "Monthly Ticket",
-        desc: "Exam next month? Perfect. Cancel in one click.",
-        price: "€9.99",
+        name: "PermiGo Pass",
+        desc: "The full course, the mock exam, your progress and your rewards. Cancel in one click.",
+        price: "€4.99",
         per: "/mo",
         btn: "Start",
-      },
-      pass3: {
-        tag: "Most popular",
-        name: "Gold Ticket · 3 months",
-        desc: "2 to 4 months is what a licence really takes. Paid once and price locked.",
-        strike: "€29.97",
-        price: "€24.99",
-        eco: "−17%",
-        btn: "Book",
-      },
-      pass6: {
-        name: "Platinum · 6 months",
-        desc: "Accompanied driving or a longer prep. Zero pressure.",
-        strike: "€59.94",
-        price: "€39.99",
-        eco: "−33%",
-        btn: "Book",
       },
     },
     err: "Payment couldn't start. Please try again.",
@@ -321,14 +293,13 @@ const STR = {
       ],
       [
         "Can I cancel or get a refund?",
-        `First 3 days: <strong>money-back guarantee</strong>. After that, the monthly plan cancels anytime in one click (the Gold ticket is a one-time payment). Leaving? <a href="#/avis-depart">Tell us why here</a>. It helps us improve.`,
+        `First 3 days: <strong>money-back guarantee</strong>. After that, the subscription cancels anytime in one click. Leaving? <a href="#/avis-depart">Tell us why here</a>. It helps us improve.`,
       ],
     ],
     foot: `Secure payment by Stripe · 3-day money-back guarantee<br><a href="#/legal">Legal notice</a> · <a href="#/rejoindre?solo=1">Create a free account</a>`,
     pros: `Driving instructor? <a href="#/creer-compte">Create your space</a> · Driving school? <a href="#/pro">Ask for a quote</a>`,
-    stickyName: "Or start",
-    stickyPrice: "for free",
-    stickyBtn: "Open all · €24.99",
+    stickyFree: "Start for free",
+    stickyPaid: "Unlock everything · €4.99/month",
     cancelNote:
       "Payment cancelled. Nothing was charged. Your ticket is waiting below. 👇",
     successT: "Welcome aboard! 🚀",
@@ -354,14 +325,14 @@ const STR = {
     tSub: "قيادة · ألعاب مصغّرة · محاكاة الامتحان",
     tBoardLbl: "الانطلاق",
     tDureeLbl: "المدة",
-    tDuree: "3 أشهر",
-    tOffre: "سعر استثنائي",
-    tStrike: "€29.97",
-    tPrice: "€24.99",
+    tDuree: "بلا حدود",
+    tOffre: "سعر الإطلاق",
+    tPer: "شهرياً",
+    tPrice: "€4.99",
     freeCta: "ابدأ مجاناً",
     freeNote: "3 دروس هدية · بدون بطاقة بنكية",
-    cta: `افتح مساري كاملاً · <s>€29.97</s> €24.99`,
-    ctaNote: `دفع آمن عبر Stripe · <b>مضمون أو استرداد أموالك خلال 3 أيام</b><br><small>أقل من نصف ساعة قيادة.</small>`,
+    cta: `افتح كل شيء · €4.99/شهر`,
+    ctaNote: `دفع آمن عبر Stripe · <b>مضمون أو استرداد أموالك خلال 3 أيام</b><br><small>أقل من 6 دقائق قيادة.</small>`,
     bulle: "تم التحقق من 3 مهارات!",
     bulleSub: "هذا الأسبوع",
     secCode: `الحصول على الرخصة يتطلّب <em>أكثر</em> من مجرّد القيادة.`,
@@ -398,37 +369,20 @@ const STR = {
     mathsRows: [
       ["ساعة قيادة واحدة", "€55"],
       ["متوسط ميزانية الرخصة (فرنسا)", "€1,800"],
-      ["PermiGo، شهرياً", "€9.99"],
+      ["PermiGo، شهرياً", "€4.99"],
     ],
     mathsNote: "درس غير مُحضَّر = €55 ضائعة.",
     mathsSrc: "المصادر: UFC-Que Choisir (ميزانية الرخصة) · Sécurité routière",
-    secPass: "طريقتان. هدف واحد.",
+    secPass: "سعر واحد. PermiGo كاملاً.",
     secPassSub:
-      "المحتوى نفسه في الاثنتين. ثلاثة أشهر بالاشتراك الشهري تكلّف €29.97. التذكرة الذهبية تجعلها €24.99.",
+      "لا صيغ تختار بينها ولا التزام. تبدأ مجاناً، وفي اليوم الذي تريد فيه البقية، السعر €4.99 شهرياً.",
     passes: {
       mensuel: {
-        name: "التذكرة الشهرية",
-        desc: "امتحانك الشهر المقبل؟ ممتاز. ألغِ بنقرة واحدة.",
-        price: "€9.99",
+        name: "باقة PermiGo",
+        desc: "المسار كاملاً، والامتحان التجريبي، وتقدّمك ومكافآتك. ألغِ بنقرة واحدة.",
+        price: "€4.99",
         per: "/شهر",
         btn: "ابدأ",
-      },
-      pass3: {
-        tag: "الأكثر اختياراً",
-        name: "التذكرة الذهبية · 3 أشهر",
-        desc: "من 2 إلى 4 أشهر هي المدة الحقيقية للتحضير للرخصة. دفعة واحدة، والسعر ثابت.",
-        strike: "€29.97",
-        price: "€24.99",
-        eco: "−17%",
-        btn: "احجز",
-      },
-      pass6: {
-        name: "البلاتينية · 6 أشهر",
-        desc: "القيادة المرافَقة أو تحضير أطول. دون أي ضغط.",
-        strike: "€59.94",
-        price: "€39.99",
-        eco: "−33%",
-        btn: "احجز",
       },
     },
     err: "تعذّر بدء الدفع. يُرجى المحاولة مرة أخرى.",
@@ -469,14 +423,13 @@ const STR = {
       ],
       [
         "هل يمكنني الإلغاء أو استرداد أموالي؟",
-        `أول 3 أيام: <strong>مضمون أو استرداد أموالك</strong>. بعد ذلك، يُلغى الاشتراك الشهري في أي وقت بنقرة واحدة (التذكرة الذهبية دفعة واحدة فقط). هل ستغادر؟ <a href="#/avis-depart">أخبرنا بالسبب هنا</a>. هذا يساعدنا على التحسّن.`,
+        `أول 3 أيام: <strong>مضمون أو استرداد أموالك</strong>. بعد ذلك، يُلغى الاشتراك في أي وقت بنقرة واحدة. هل ستغادر؟ <a href="#/avis-depart">أخبرنا بالسبب هنا</a>. هذا يساعدنا على التحسّن.`,
       ],
     ],
     foot: `دفع آمن عبر Stripe · مضمون أو استرداد أموالك خلال 3 أيام<br><a href="#/legal">الإشعارات القانونية</a> · <a href="#/rejoindre?solo=1">أنشئ حساباً مجانياً</a>`,
     pros: `مدرّب قيادة مستقل؟ <a href="#/creer-compte">أنشئ مساحتك</a> · مدرسة قيادة؟ <a href="#/pro">اطلب عرض سعر</a>`,
-    stickyName: "أو ابدأ",
-    stickyPrice: "مجاناً",
-    stickyBtn: "افتح الكل · €24.99",
+    stickyFree: "ابدأ مجاناً",
+    stickyPaid: "افتح كل شيء · €4.99/شهر",
     cancelNote:
       "تمّ إلغاء الدفع. لم يُخصم أي مبلغ. تذكرتك في انتظارك أدناه. 👇",
     successT: "مرحباً بك على متن الرحلة! 🚀",
@@ -617,21 +570,24 @@ function renderAvis(lang, L, from, to) {
 // Montants en euros, pour la mesure publicitaire uniquement (Meta apprend « qui
 // achète combien »). ⚠️ Ce n'est PAS ce qui est facturé : le vrai prix vit dans
 // l'edge function pass-checkout, côté serveur.
-const PLAN_VALUE = { mensuel: 9.99, pass3: 24.99, pass6: 39.99 };
+// ⚠️ pass3 / pass6 ne sont PLUS vendus (décision Rayan, 02/08/2026 : un seul
+// prix à 4,99 €/mois, fini le billet Or). Leurs valeurs restent ici pour les
+// anciens acheteurs qui reviennent sur #/pass?checkout=success&plan=pass3.
+const PLAN_VALUE = { mensuel: 4.99, pass3: 24.99, pass6: 39.99 };
 
 const PLAN_LABELS = {
   fr: {
-    mensuel: "Billet Mensuel",
+    mensuel: "Pass PermiGo",
     pass3: "Billet Or · 3 mois",
     pass6: "Billet Platine · 6 mois",
   },
   en: {
-    mensuel: "Monthly Ticket",
+    mensuel: "PermiGo Pass",
     pass3: "Gold Ticket · 3 months",
     pass6: "Platinum Ticket · 6 months",
   },
   ar: {
-    mensuel: "التذكرة الشهرية",
+    mensuel: "باقة PermiGo",
     pass3: "التذكرة الذهبية · 3 أشهر",
     pass6: "التذكرة البلاتينية · 6 أشهر",
   },
@@ -648,7 +604,7 @@ const STYLE = `<style>
     font-family: 'Archivo', var(--fb), sans-serif;
     -webkit-font-smoothing: antialiased;
     --in:#6c63ff;--in-lt:#8e87ff;--in-dp:#4a3fc9;--in-dk:#372fa3;
-    --gold:#ffce4d;--gold-dp:#e8a317;--go:#58cc02;--eco:#ffe94d;
+    --gold:#ffce4d;--gold-dp:#e8a317;--go:#58cc02;
     --pv-ink:#f4f1ff;--ink-soft:#cdc8ec;--ink-mu:#aaa2d8;--ink-dim:#8b7fc4;
     --tik-ink:#3a2a05;--tik-mu:#6b520f;--tik-lbl:#8a6a17;
     color: var(--pv-ink);
@@ -656,7 +612,7 @@ const STYLE = `<style>
       radial-gradient(100% 46% at 50% -4%, rgba(255,206,77,.16), transparent 58%),
       linear-gradient(180deg, #1b1240 0%, #241a4d 50%, #170f38 100%);
     background-color:#1b1240;
-    padding-bottom: calc(88px + env(safe-area-inset-bottom));
+    padding-bottom: calc(104px + env(safe-area-inset-bottom));
     overflow-x: clip;
   }
   .pv * { box-sizing: border-box; }
@@ -782,7 +738,9 @@ const STYLE = `<style>
      (« أ غسطس »). On repasse sur la police de marque pour le billet en arabe. */
   .pv[dir="rtl"] .pv-t-meta div span { font-family: 'Archivo', sans-serif; }
   .pv-t-stub .n { font: 700 9.5px/1.25 'Archivo', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--tik-lbl); }
-  .pv-t-strike { font: 700 13px/1 'Archivo', sans-serif; color: var(--tik-lbl); text-decoration: line-through; }
+  /* Plus de prix barré sur le talon : à 4,99 € il n'y a plus de remise à
+     montrer, et un faux « avant » sur un si petit prix ne trompe personne. */
+  .pv-t-per { font: 700 10.5px/1 'Archivo', sans-serif; color: var(--tik-lbl); }
   .pv-t-price { font: 800 22px/1 'Archivo', sans-serif; text-shadow: 0 1px 0 rgba(255,255,255,.45); }
   .pv-t-check { font: 800 30px/1 'Archivo', sans-serif; text-shadow: 0 1px 0 rgba(255,255,255,.45); }
   .pv-t-barcode {
@@ -800,20 +758,24 @@ const STYLE = `<style>
     box-shadow: inset 0 3px 0 rgba(255,255,255,.55), 0 6px 0 #a86e00, 0 12px 26px rgba(0,0,0,.4);
     transition: transform .1s ease, box-shadow .1s ease;
   }
-  .pv-cta-hero s { opacity: .55; font-weight: 700; font-size: 14px; margin-right: 2px; }
   .pv-cta-hero:active { transform: translateY(4px); box-shadow: inset 0 3px 0 rgba(255,255,255,.55), 0 2px 0 #a86e00, 0 4px 8px rgba(0,0,0,.3); }
   .pv-cta-hero[disabled] { opacity: .65; cursor: wait; }
-  /* Porte gratuite : violet plein (celui de l'app), posée AU-DESSUS du bouton
-     doré. L'or reste la couleur de l'achat, le violet celle de l'entrée. */
+  /* Porte gratuite : VERT, la même couleur que dans la barre collante. Elle
+     était violette, comme les boutons d'achat des cartes : deux actions
+     opposées se ressemblaient. Une seule couleur pour « gratuit » sur toute la
+     page, l'or reste celle de l'achat. */
   .pv-cta-free {
     display: block; width: 100%; max-width: 340px; margin: 26px auto 0;
     border: 0; cursor: pointer; border-radius: 18px; padding: 17px;
-    font: 800 17px/1 'Archivo', sans-serif; color: #fff; text-shadow: 0 1.5px 0 rgba(0,0,0,.28);
-    background: linear-gradient(180deg, var(--in) 0%, var(--in-dp) 70%, var(--in-dk));
-    box-shadow: inset 0 3px 0 rgba(255,255,255,.28), 0 6px 0 var(--in-dk), 0 12px 26px rgba(0,0,0,.4);
+    /* Encre vert-nuit, PAS du blanc : blanc sur ce vert ne monte qu'a 2,1 de
+       contraste (le vert est trop lumineux). En fonce, on est a 4,7 minimum sur
+       tout le degrade, et le bouton garde son punch. Meme logique que l'or. */
+    font: 800 17px/1 'Archivo', sans-serif; color: #123a00; text-shadow: 0 1px 0 rgba(255,255,255,.28);
+    background: linear-gradient(180deg, #6bdd11 0%, var(--go) 55%, #46a800);
+    box-shadow: inset 0 3px 0 rgba(255,255,255,.4), 0 6px 0 #2f7300, 0 12px 26px rgba(0,0,0,.4);
     transition: transform .1s ease, box-shadow .1s ease;
   }
-  .pv-cta-free:active { transform: translateY(4px); box-shadow: inset 0 3px 0 rgba(255,255,255,.35), 0 2px 0 var(--in-dk), 0 4px 8px rgba(0,0,0,.3); }
+  .pv-cta-free:active { transform: translateY(4px); box-shadow: inset 0 3px 0 rgba(255,255,255,.35), 0 2px 0 #2f7300, 0 4px 8px rgba(0,0,0,.3); }
   .pv-free-note { text-align: center; font: 600 12.5px/1.6 'Archivo', sans-serif; color: var(--ink-mu); margin: 10px 0 18px; }
   .pv-cta-note { text-align: center; font: 600 12.5px/1.6 'Archivo', sans-serif; color: var(--ink-dim); margin: 12px 0 0; }
   .pv-cta-note b { color: var(--ink-soft); }
@@ -905,26 +867,19 @@ const STYLE = `<style>
   .pv-maths-note { text-align: center; font: 600 12.5px/1.6 'Archivo', sans-serif; color: var(--ink-dim); margin: 12px 0 0; }
   .pv-maths-src { text-align: center; font: 500 10.5px/1.5 'Archivo', sans-serif; color: #655a97; margin: 6px 0 0; }
 
-  /* ── Les 3 billets ── */
+  /* ── Le billet (il n'y en a plus qu'un) ── */
   .pv-pass { position: relative; display: flex; border-radius: 18px; margin-bottom: 14px; box-shadow: 0 14px 28px rgba(0,0,0,.4); }
   .pv-pass-main { flex: 1; padding: 16px 14px 15px 18px; border-radius: 18px 0 0 18px; }
   .pv-pass-cut {
     width: 118px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px;
     padding: 12px 8px; border-left: 2px dashed rgba(255,255,255,.25); border-radius: 0 18px 18px 0;
   }
-  .pv-pass-std { background: linear-gradient(180deg, #352a6e, #2b2160); box-shadow: inset 0 2px 0 rgba(255,255,255,.12), 0 14px 28px rgba(0,0,0,.4); }
-  .pv-pass-std .pv-pass-cut { border-left-color: rgba(255,255,255,.18); background: rgba(0,0,0,.18); }
   .pv-pass-name { font: 800 17px/1.2 'Archivo', sans-serif; }
   .pv-pass-desc { font: 600 12.5px/1.45 'Archivo', sans-serif; color: var(--ink-mu); margin-top: 3px; }
-  .pv-pass-price { font: 800 24px/1 'Archivo', sans-serif; }
+  /* nowrap obligatoire : l'espace de « 4,99 € » est un point de coupure, et le
+     talon ne fait que 118 px — sans ça le « € » tombait sur la ligne du dessous. */
+  .pv-pass-price { font: 800 23px/1.15 'Archivo', sans-serif; white-space: nowrap; }
   .pv-pass-price small { font-size: 12px; color: var(--ink-mu); }
-  .pv-pass-strike { font: 600 12px 'Archivo', sans-serif; color: var(--ink-dim); text-decoration: line-through; }
-  /* Chip d'économie jaune fluo (façon Ornikar) */
-  .pv-eco {
-    font: 800 11.5px/1 'Archivo', sans-serif; color: #231603; background: var(--eco);
-    padding: 4px 8px; border-radius: 6px; letter-spacing: .02em;
-    box-shadow: 0 2px 6px rgba(0,0,0,.3);
-  }
   .pv-pass-btn {
     border: 0; cursor: pointer; border-radius: 12px; padding: 11px 14px; width: 100%;
     font: 800 13.5px 'Archivo', sans-serif; color: #fff; text-shadow: 0 1px 0 rgba(0,0,0,.25);
@@ -936,7 +891,7 @@ const STYLE = `<style>
   .pv-pass-btn[disabled] { opacity: .65; cursor: wait; }
 
   .pv-pass-gold {
-    transform: scale(1.04); margin: 24px 0;
+    transform: scale(1.04); margin: 24px 0 40px;
     background:
       radial-gradient(120% 90% at 15% 0%, rgba(255,255,255,.45), transparent 40%),
       linear-gradient(115deg, #f6d267 0%, #ffe9a8 25%, #eab63a 55%, #d99c1e 100%);
@@ -946,18 +901,10 @@ const STYLE = `<style>
   .pv-pass-gold .pv-pass-name { text-shadow: 0 1px 0 rgba(255,255,255,.4); }
   .pv-pass-gold .pv-pass-desc { color: var(--tik-mu); }
   .pv-pass-gold .pv-pass-cut { border-left-color: rgba(58,42,5,.4); background: rgba(255,255,255,.14); }
-  .pv-pass-gold .pv-pass-strike { color: var(--tik-lbl); }
+  .pv-pass-gold .pv-pass-price small { color: var(--tik-mu); }
   .pv-pass-gold .pv-pass-btn {
     background: linear-gradient(180deg, var(--in-dp), var(--in-dk));
     box-shadow: inset 0 2px 0 rgba(255,255,255,.3), 0 4px 0 #241c6e;
-  }
-  .pv-pass-tag {
-    position: absolute; top: -11px; left: 16px; z-index: 1;
-    font: 800 10.5px/1 'Archivo', sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #fff;
-    /* Le rouge d'origine (#e2513f) ne portait le blanc qu'à 3,83 de contraste,
-       et cette pastille est écrite en 10,5 px espacé — la taille où ça se paie
-       le plus cher. Rouge plus profond, même chaleur : 5,03. */
-    background: #c73f2c; padding: 7px 12px; border-radius: 99px; box-shadow: 0 4px 10px rgba(0,0,0,.35);
   }
   .pv-err { font: 700 13px/1.4 'Archivo', sans-serif; color: #ffb4a8; text-align: center; margin: 4px 0 0; display: none; }
   .pv-err.on { display: block; }
@@ -1046,24 +993,33 @@ const STYLE = `<style>
     bottom: calc(var(--ck-h, 96px) + 20px + env(safe-area-inset-bottom, 0px));
   }
   @media (prefers-reduced-motion: reduce) { .pv-sticky { transition: none; } }
-  .pv-sticky-inner { display: flex; align-items: center; gap: 12px; width: 100%; max-width: 480px; margin: 0 auto; }
-  /* Moitié gauche de la barre collante : elle affichait un prix, elle ouvre
-     maintenant le compte gratuit. C'est l'élément le plus vu de la page. */
+  /* La barre collante se lit de haut en bas, plus de gauche à droite : le
+     gratuit est LE bouton, l'achat est la ligne d'en dessous. Avant, « Ou
+     commencer gratuitement » était un simple texte collé à gauche d'un gros
+     bouton doré — rien ne disait qu'on pouvait cliquer dessus, et le visiteur
+     lisait un prix avant d'avoir essayé quoi que ce soit. */
+  .pv-sticky-inner {
+    display: flex; flex-direction: column; align-items: stretch; gap: 7px;
+    width: 100%; max-width: 400px; margin: 0 auto;
+  }
   .pv-sticky-free {
-    flex: none; min-height: 46px; padding: 6px 10px; border: 0; cursor: pointer;
-    background: none; border-radius: 12px; text-align: start;
-    font: 700 12.5px/1.25 'Archivo', sans-serif; color: var(--ink-soft); white-space: nowrap;
+    border: 0; cursor: pointer; border-radius: 14px; padding: 14px;
+    font: 800 16px/1 'Archivo', sans-serif; color: #123a00; text-shadow: 0 1px 0 rgba(255,255,255,.28);
+    background: linear-gradient(180deg, #6bdd11 0%, var(--go) 55%, #46a800);
+    box-shadow: inset 0 2px 0 rgba(255,255,255,.4), 0 4px 0 #2f7300;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform .1s ease, box-shadow .1s ease;
+  }
+  .pv-sticky-free:active { transform: translateY(3px); box-shadow: inset 0 2px 0 rgba(255,255,255,.32), 0 1px 0 #2f7300; }
+  /* L'achat reste accessible en permanence, mais discret : le visiteur qui a
+     déjà décidé le trouve du premier coup d'œil, les autres ne le subissent pas. */
+  .pv-sticky-paid {
+    border: 0; background: none; cursor: pointer; padding: 2px 6px 1px;
+    font: 800 13px/1.3 'Archivo', sans-serif; color: var(--gold);
+    text-decoration: underline; text-underline-offset: 3px;
     -webkit-tap-highlight-color: transparent;
   }
-  .pv-sticky-free b { display: block; color: var(--go); font-size: 14.5px; }
-  .pv-sticky-free:active { background: rgba(255,255,255,.08); }
-  .pv-sticky-btn {
-    flex: 1; border: 0; cursor: pointer; border-radius: 14px; padding: 13px 14px;
-    font: 800 15px/1 'Archivo', sans-serif; color: #4a3300; text-shadow: 0 1px 0 rgba(255,255,255,.35);
-    background: linear-gradient(180deg, #ffe08a, var(--gold) 55%, var(--gold-dp));
-    box-shadow: inset 0 2px 0 rgba(255,255,255,.55), 0 4px 0 #a86e00;
-  }
-  .pv-sticky-btn[disabled] { opacity: .65; cursor: wait; }
+  .pv-sticky-paid[disabled] { opacity: .6; cursor: wait; }
 
   /* ── Retour checkout ── */
   .pv-result { max-width: 400px; margin: 26px auto 0; filter: drop-shadow(0 30px 40px rgba(0,0,0,.55)); }
@@ -1191,7 +1147,7 @@ function renderTicket(L, { stamped = false, lang = "fr" } = {}) {
           </div>
           <div class="pv-t-stub">
             <span class="n">${L.tOffre}</span>
-            ${stamped ? `<span class="pv-t-check">✔</span>` : `<span class="pv-t-strike">${L.tStrike}</span><span class="pv-t-price">${L.tPrice}</span>`}
+            ${stamped ? `<span class="pv-t-check">✔</span>` : `<span class="pv-t-price">${L.tPrice}</span><span class="pv-t-per">${L.tPer}</span>`}
             <div class="pv-t-barcode"></div>
           </div>
         </div>
@@ -1299,7 +1255,7 @@ export async function mount(root) {
       <button class="pv-cta-free" id="pv-free" type="button">${L.freeCta}</button>
       <p class="pv-free-note">${L.freeNote}</p>
 
-      <button class="pv-cta-hero" data-plan="pass3" type="button">${L.cta}</button>
+      <button class="pv-cta-hero" data-plan="mensuel" type="button">${L.cta}</button>
       <p class="pv-cta-note">${L.ctaNote}</p>
 
       <div class="pv-stage pv-rev" aria-hidden="true">
@@ -1365,7 +1321,11 @@ export async function mount(root) {
       <h2 class="pv-sec-title pv-rev" id="pv-pricing"><span>${L.secPass}</span></h2>
       <p class="pv-sec-sub">${L.secPassSub}</p>
 
-      <article class="pv-pass pv-pass-std pv-rev">
+      <!-- UNE seule offre (décision Rayan 02/08/2026). Trois cartes, puis deux,
+           puis une : à 4,99 €/mois il n'y a plus rien à arbitrer, donc plus rien
+           à faire hésiter. Les plans pass3 / pass6 restent côté serveur pour les
+           anciens acheteurs, ils ne sont simplement plus proposés nulle part. -->
+      <article class="pv-pass pv-pass-gold pv-rev">
         <div class="pv-pass-main">
           <div class="pv-pass-name">${P.mensuel.name}</div>
           <div class="pv-pass-desc">${P.mensuel.desc}</div>
@@ -1375,25 +1335,6 @@ export async function mount(root) {
           <button class="pv-pass-btn" data-plan="mensuel" type="button">${P.mensuel.btn}</button>
         </div>
       </article>
-
-      <article class="pv-pass pv-pass-gold pv-rev">
-        <span class="pv-pass-tag">${P.pass3.tag}</span>
-        <div class="pv-pass-main">
-          <div class="pv-pass-name">${P.pass3.name}</div>
-          <div class="pv-pass-desc">${P.pass3.desc}</div>
-        </div>
-        <div class="pv-pass-cut">
-          <span class="pv-eco">${P.pass3.eco}</span>
-          <div class="pv-pass-strike">${P.pass3.strike}</div>
-          <div class="pv-pass-price">${P.pass3.price}</div>
-          <button class="pv-pass-btn" data-plan="pass3" type="button">${P.pass3.btn}</button>
-        </div>
-      </article>
-
-      <!-- ⚠️ Plus de billet Platine ici : le mur interne (pass-requis.js) n'affiche
-           que DEUX offres depuis la décision du 31/07. Un élève qui voyait Platine
-           sur la page publique et ne le retrouvait plus dans l'app se demandait ce
-           qu'on lui cachait. Les constantes pass6 restent (anciens liens, webhook). -->
 
       <p class="pv-err" id="pv-err">${L.err}</p>
 
@@ -1436,8 +1377,8 @@ export async function mount(root) {
 
     <div class="pv-sticky">
       <div class="pv-sticky-inner">
-        <button class="pv-sticky-free" id="pv-sticky-free" type="button">${L.stickyName}<b>${L.stickyPrice}</b></button>
-        <button class="pv-sticky-btn" data-plan="pass3" type="button">${L.stickyBtn}</button>
+        <button class="pv-sticky-free" id="pv-sticky-free" type="button">${L.stickyFree}</button>
+        <button class="pv-sticky-paid" data-plan="mensuel" type="button">${L.stickyPaid}</button>
       </div>
     </div>
 
