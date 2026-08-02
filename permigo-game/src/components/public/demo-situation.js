@@ -42,7 +42,8 @@ const STR = {
   fr: {
     kick: "Essaie maintenant",
     alt: "Croisement sans panneau ni feu. Un camion arrive par ta droite.",
-    q: "Un camion arrive par ta droite. Qui passe en premier ?",
+    q: "Un camion arrive par ta droite.",
+    qAsk: "Qui passe en premier ?",
     r: { v1: "Le camion", moi: "Toi" },
     // Une ligne, pas trois, et sans point final. Personne ne lit un
     // paragraphe pour une réponse qu'il vient de donner, et la scène qui se
@@ -52,31 +53,30 @@ const STR = {
     ko: "Presque",
     koSub: "Il vient de ta droite donc il passe avant toi",
     retry: "Réessayer",
-    cta: "Continuer gratuitement",
   },
   en: {
     kick: "Try it now",
     alt: "Crossroads with no sign and no lights. A truck is coming from your right.",
-    q: "A truck is coming from your right. Who goes first?",
+    q: "A truck is coming from your right.",
+    qAsk: "Who goes first?",
     r: { v1: "The truck", moi: "You" },
     ok: "Well spotted",
     okSub: "It comes from your right so it goes first",
     ko: "Almost",
     koSub: "It comes from your right so it goes before you",
     retry: "Try again",
-    cta: "Continue for free",
   },
   ar: {
     kick: "جرّب الآن",
     alt: "تقاطع بلا لافتة ولا إشارة. شاحنة قادمة من يمينك.",
-    q: "شاحنة قادمة من يمينك. من يمرّ أولًا؟",
+    q: "شاحنة قادمة من يمينك.",
+    qAsk: "من يمرّ أولًا؟",
     r: { v1: "الشاحنة", moi: "أنت" },
     ok: "أحسنت",
     okSub: "هي قادمة من يمينك فتمرّ أولًا",
     ko: "تقريبًا",
     koSub: "هي قادمة من يمينك فتمرّ قبلك",
     retry: "أعد المحاولة",
-    cta: "تابع مجاناً",
   },
 };
 
@@ -138,10 +138,19 @@ const STYLE = `<style>
   @keyframes dmoHalo { 0%, 100% { opacity: .95; } 50% { opacity: .4; } }
   @keyframes dmoChev { 0%, 70%, 100% { opacity: 0; } 25%, 45% { opacity: 1; } }
   @keyframes dmoTagIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+  /* Deux lignes, deux roles. En haut la scene, en gras et en grand : c'est ce
+     qui se passe. En dessous la question, plus petite et en couleur douce :
+     c'est ce qu'on te demande. Les deux sur une seule ligne se melangeaient,
+     on ne savait plus ou finissait le decor et ou commencait la question. */
   .dmo-q {
     font: 800 18px/1.3 'Archivo', sans-serif; color: #fff;
-    margin: 16px 4px 13px; text-align: center; text-wrap: balance;
+    margin: 16px 4px 12px; text-align: center; text-wrap: balance;
     text-shadow: 0 2px 4px rgba(0,0,0,.35);
+  }
+  .dmo-q span {
+    display: block; margin-top: 5px;
+    font: 700 14px/1.35 'Archivo', sans-serif; color: var(--gold);
+    text-shadow: none;
   }
   .dmo-answers { display: flex; gap: 9px; }
   /* Boutons « plastique » : la tranche dure (0 7px 0) est ce qui donne le
@@ -186,29 +195,13 @@ const STYLE = `<style>
   .dmo-fb.ko { border-inline-start-color: var(--gold); }
   .dmo-fb b { display: block; font: 800 16px/1.3 'Archivo', sans-serif; color: #fff; margin-bottom: 3px; }
   .dmo-fb span { font: 600 13.5px/1.5 'Archivo', sans-serif; color: var(--ink-soft); }
-  /* Le bouton qui compte passe en or : c'est le seul élément doré plein de la
-     carte, rien d'autre ne lui dispute le regard. */
-  .dmo-cta {
-    display: block; width: 100%; margin: 14px 0 0; border: 0; cursor: pointer;
-    border-radius: 18px; padding: 17px;
-    font: 800 16.5px/1 'Archivo', sans-serif; color: #4a2500;
-    text-shadow: 0 1px 0 rgba(255,255,255,.4);
-    background: linear-gradient(180deg, #ffe27a 0%, #ffcb3d 48%, #ff9b1e 100%);
-    box-shadow: 0 7px 0 #b85e00, 0 14px 26px -10px rgba(255,155,30,.55),
-                inset 0 2px 0 rgba(255,255,255,.5);
-    transition: transform .09s ease, box-shadow .09s ease;
-  }
-  .dmo-cta:active {
-    transform: translateY(5px);
-    box-shadow: 0 2px 0 #b85e00, inset 0 2px 0 rgba(255,255,255,.5);
-  }
   .dmo-retry {
     display: block; margin: 10px auto 0; background: none; border: 0; cursor: pointer;
     font: 700 13.5px/1 'Archivo', sans-serif; color: var(--ink-soft);
     text-decoration: underline; text-underline-offset: 3px; min-height: 44px;
   }
   @media (prefers-reduced-motion: reduce) {
-    .dmo-ans, .dmo-cta { transition: none; }
+    .dmo-ans { transition: none; }
     /* Mouvement coupé : le décor ne respire plus et les acteurs se posent
        d'un coup à l'arrivée. La scène se joue quand même, elle ne glisse pas. */
     .dmo-scene svg, .dmo-scene .sit-veh, .dmo-scene .sit-halo,
@@ -221,9 +214,8 @@ const STYLE = `<style>
  * Monte la démonstration dans `host`.
  * @param {HTMLElement} host
  * @param {'fr'|'en'|'ar'} lang
- * @param {() => void} onContinue  clic sur « Continuer gratuitement »
  */
-export function mountDemoSituation(host, lang, onContinue) {
+export function mountDemoSituation(host, lang) {
   const L = STR[lang] || STR.fr;
 
   host.innerHTML = `${STYLE}
@@ -232,7 +224,7 @@ export function mountDemoSituation(host, lang, onContinue) {
       <div class="dmo-scene">
         ${renderSituationScene(SCENE, { alt: L.alt })}
       </div>
-      <p class="dmo-q">${L.q}</p>
+      <p class="dmo-q">${L.q}<span>${L.qAsk}</span></p>
       <div class="dmo-answers" id="dmo-answers">
         <button class="dmo-ans" type="button" data-ans="v1">${L.r.v1}</button>
         <button class="dmo-ans" type="button" data-ans="moi">${L.r.moi}</button>
@@ -297,12 +289,7 @@ export function mountDemoSituation(host, lang, onContinue) {
           <b>${juste ? L.ok : L.ko}</b>
           <span>${juste ? L.okSub : L.koSub}</span>
         </div>
-        <button class="dmo-cta" id="dmo-cta" type="button">${L.cta}</button>
         ${juste ? "" : `<button class="dmo-retry" id="dmo-retry" type="button">${L.retry}</button>`}`;
-      after.querySelector("#dmo-cta")?.addEventListener("click", () => {
-        track("pass.demo_cta", { lang, ok: juste });
-        onContinue();
-      });
       after.querySelector("#dmo-retry")?.addEventListener("click", reset);
     });
   });
