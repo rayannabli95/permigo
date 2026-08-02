@@ -123,7 +123,7 @@ export const MISSIONS = [
       "Un témoin rouge reste visible après le contrôle du tableau de bord.",
     choices: [
       { id: "wait", label: "Partir doucement et surveiller plus tard" },
-      { id: "signal", label: "Ne pas partir et le signaler" },
+      { id: "signal", label: "Ne pas partir du tout et le signaler tout de suite" },
       { id: "wipe", label: "Actionner les essuie-glaces" },
     ],
     solution: "signal",
@@ -182,12 +182,12 @@ export const MISSIONS = [
     prompt: "Ta sortie approche. Quelle action vient en premier ?",
     visual: "roundabout",
     choices: [
-      { id: "accelerate", label: "Accélérer immédiatement vers la sortie" },
+      { id: "accelerate", label: "Accélérer tout de suite pour prendre la sortie" },
       {
         id: "check-signal",
-        label: "Contrôler, puis mettre le clignotant droit",
+        label: "Contrôler puis mettre le clignotant",
       },
-      { id: "stop", label: "S’arrêter sur l’anneau" },
+      { id: "stop", label: "S’arrêter sur l’anneau pour laisser passer" },
     ],
     solution: "check-signal",
     hint: "Avant de déplacer la voiture, tu prends l’information et tu annonces ton intention.",
@@ -371,8 +371,8 @@ export const MISSIONS = [
     symptom:
       "Le GPS annonce « Tournez maintenant », mais la bretelle est déjà derrière toi.",
     choices: [
-      { id: "reverse", label: "Reculer prudemment vers la sortie" },
-      { id: "stop", label: "M’arrêter pour recalculer" },
+      { id: "reverse", label: "Reculer prudemment jusqu'à la sortie ratée" },
+      { id: "stop", label: "M’arrêter sur le bas-côté pour recalculer" },
       { id: "continue", label: "Continuer et laisser le GPS recalculer" },
     ],
     solution: "continue",
@@ -398,7 +398,7 @@ export const MISSIONS = [
     choices: [
       { id: "accelerate", label: "Accélérer pour arriver avant les autres" },
       { id: "brake-hard", label: "Freiner fort immédiatement" },
-      { id: "lift", label: "Lever le pied et laisser ralentir" },
+      { id: "lift", label: "Lever le pied et laisser la voiture ralentir toute seule" },
     ],
     solution: "lift",
     hint: "Tu as de la distance : utilise-la avant de solliciter fortement le frein.",
@@ -527,8 +527,8 @@ export const MISSIONS = [
     visual: "cockpit",
     choices: [
       { id: "epaule", label: "Au milieu de l'épaule" },
-      { id: "cou", label: "Contre le cou" },
-      { id: "bras", label: "Sous le bras" },
+      { id: "cou", label: "Contre le cou et le menton" },
+      { id: "bras", label: "Sous le bras et le coude" },
     ],
     solution: "epaule",
     hint: "Cherche l'os le plus solide entre ton cou et ton bras.",
@@ -601,9 +601,9 @@ export const MISSIONS = [
     prompt: "Tu roules en ligne droite. Tes mains sont où sur le volant ?",
     visual: "cockpit",
     choices: [
-      { id: "haut", label: "En haut, une de chaque côté" },
-      { id: "bas", label: "En bas, réunies" },
-      { id: "une", label: "Une seule main tout en haut" },
+      { id: "haut", label: "En haut une de chaque côté" },
+      { id: "bas", label: "En bas et réunies au milieu" },
+      { id: "une", label: "Une seule main posée tout en haut" },
     ],
     solution: "haut",
     hint: "Imagine qu'un obstacle surgit maintenant. D'où peux-tu tourner le plus vite ?",
@@ -629,9 +629,9 @@ export const MISSIONS = [
     symptom:
       "Dans chaque virage à droite, tu te retrouves collé au bord et tu dois corriger.",
     choices: [
-      { id: "regard", label: "Tu regardes le bord au lieu de la sortie" },
-      { id: "volant", label: "Ton volant est trop dur" },
-      { id: "vitesse", label: "Tu roules trop lentement" },
+      { id: "regard", label: "Tu regardes le bord de la route au lieu de la sortie" },
+      { id: "volant", label: "Ton volant est trop dur à tourner" },
+      { id: "vitesse", label: "Tu roules beaucoup trop lentement pour ça" },
     ],
     solution: "regard",
     hint: "Ta voiture va là où tes yeux vont. Où sont-ils en ce moment ?",
@@ -657,9 +657,9 @@ export const MISSIONS = [
     symptom:
       "La voiture s'arrête net sur les derniers centimètres, et tout le monde part en avant.",
     choices: [
-      { id: "relacher", label: "Tu gardes la même pression jusqu'à l'arrêt" },
-      { id: "tot", label: "Tu freines trop tôt" },
-      { id: "freins", label: "Tes freins sont trop puissants" },
+      { id: "relacher", label: "Tu gardes la même pression jusqu'au bout" },
+      { id: "tot", label: "Tu freines beaucoup trop tôt au départ" },
+      { id: "freins", label: "Tes freins sont bien trop puissants pour ça" },
     ],
     solution: "relacher",
     hint: "Ce qui secoue, ce n'est pas le freinage. C'est la seconde où il s'arrête.",
@@ -683,9 +683,9 @@ export const MISSIONS = [
     prompt: "Le feu passe à l'orange et tu es encore loin. Tu fais quoi ?",
     visual: "city-light",
     choices: [
-      { id: "arret", label: "Tu ralentis et tu t'arrêtes avant la ligne" },
-      { id: "passe", label: "Tu accélères pour passer" },
-      { id: "pile", label: "Tu pile sur place" },
+      { id: "arret", label: "Tu ralentis et tu t'arrêtes à la ligne" },
+      { id: "passe", label: "Tu accélères pour passer avant le rouge" },
+      { id: "pile", label: "Tu piles net sur place au dernier moment" },
     ],
     solution: "arret",
     hint: "L'orange n'est pas une fin de vert. C'est un début de rouge.",
@@ -775,10 +775,10 @@ export const MISSIONS = [
     choices: [
       {
         id: "descendre",
-        label: "Le rapport est trop grand, il faut descendre",
+        label: "Le rapport est trop grand pour l'allure",
       },
-      { id: "monter", label: "Le rapport est trop petit, il faut monter" },
-      { id: "panne", label: "Le moteur est en panne" },
+      { id: "monter", label: "Le rapport est trop petit pour l'allure" },
+      { id: "panne", label: "Le moteur est en panne et il faut s'arrêter" },
     ],
     solution: "descendre",
     hint: "Trente à l'heure en quatrième, c'est comme monter un escalier avec des skis.",
@@ -803,9 +803,9 @@ export const MISSIONS = [
       "Tu attends au feu rouge, en D, le pied sur le frein. Tu fais quoi ?",
     visual: "selecteur",
     choices: [
-      { id: "reste", label: "Tu restes en D, le pied sur le frein" },
-      { id: "park", label: "Tu passes en P" },
-      { id: "neutre", label: "Tu passes en N à chaque arrêt" },
+      { id: "reste", label: "Tu restes en D avec le pied posé sur le frein" },
+      { id: "park", label: "Tu passes en P le temps de l'arrêt" },
+      { id: "neutre", label: "Tu passes en N puis tu reprends en D" },
     ],
     solution: "reste",
     hint: "Le feu va repasser au vert dans quelques secondes.",
@@ -829,9 +829,9 @@ export const MISSIONS = [
     prompt: "Tu dois reprendre franchement pour t'insérer. Ton geste ?",
     visual: "pedales-auto",
     choices: [
-      { id: "fond", label: "Tu enfonces l'accélérateur jusqu'au bout" },
-      { id: "leger", label: "Tu appuies doucement et tu attends" },
-      { id: "manuel", label: "Tu passes le sélecteur sur N" },
+      { id: "fond", label: "Tu enfonces l'accélérateur jusqu'en bas" },
+      { id: "leger", label: "Tu appuies doucement et tu patientes" },
+      { id: "manuel", label: "Tu passes le sélecteur sur N pour relancer" },
     ],
     solution: "fond",
     hint: "La boîte t'écoute par la pédale. Il faut lui parler fort.",
@@ -841,33 +841,6 @@ export const MISSIONS = [
     why: "C'est le kick-down. En allant jusqu'au bout de la course, tu demandes à la boîte de rétrograder et la reprise arrive.",
     transfer:
       "Sur une route dégagée avec ton enseignant, essaie une fois d'aller au bout de la pédale pour sentir la boîte descendre.",
-  },
-  {
-    ...commun,
-    id: "c1g-pneu",
-    competence: "C1g",
-    order: 1,
-    boites: ["manuelle", "auto"],
-    mode: "diagnostic",
-    modeLabel: "Diagnostiquer",
-    title: "Avant même de monter",
-    objective: "Repérer un défaut au tour de la voiture.",
-    prompt: "Tu fais le tour de la voiture. Qu'est-ce qui cloche ?",
-    visual: "exterior",
-    symptom: "La voiture est garée devant toi, côté conducteur.",
-    choices: [
-      { id: "pneu", label: "Un pneu est affaissé" },
-      { id: "vitre", label: "Une vitre est ouverte" },
-      { id: "rien", label: "Rien, tout est normal" },
-    ],
-    solution: "pneu",
-    hint: "Regarde la forme des roues, pas la carrosserie.",
-    retry:
-      "Regarde plus bas. Ce qui touche la route mérite le premier coup d'œil.",
-    success: "Pneu affaissé repéré avant le départ.",
-    why: "Un pneu sous-gonflé allonge le freinage et peut éclater. C'est le genre de chose qui se voit en trois secondes et qui ne se rattrape plus à cinquante à l'heure.",
-    transfer:
-      "Avant ta prochaine leçon, fais le tour de la voiture et regarde les quatre pneus un par un.",
   },
   {
     ...commun,
@@ -1045,9 +1018,9 @@ export const MISSIONS = [
     prompt: "Ton créneau part de travers et tu ne rentres pas. Tu fais quoi ?",
     visual: "parking",
     choices: [
-      { id: "reprendre", label: "Tu ressors et tu repars du début" },
+      { id: "reprendre", label: "Tu ressors complètement et tu repars depuis le début" },
       { id: "forcer", label: "Tu forces au volant en reculant" },
-      { id: "abandonner", label: "Tu laisses la voiture en travers" },
+      { id: "abandonner", label: "Tu laisses la voiture en travers et tu sors" },
     ],
     solution: "reprendre",
     hint: "Une manœuvre ratée ne se rattrape pas en insistant. Elle se recommence.",
@@ -1072,7 +1045,7 @@ export const MISSIONS = [
       "Ton enseignant se tait et attend. La place est libre. Tu fais quoi ?",
     visual: "parking",
     choices: [
-      { id: "lance", label: "Tu regardes autour et tu te lances" },
+      { id: "lance", label: "Tu regardes tout autour de toi et tu te lances" },
       { id: "attend", label: "Tu attends qu'il te dise quoi faire" },
       { id: "passe", label: "Tu passes ton chemin" },
     ],
@@ -1153,8 +1126,8 @@ export const MISSIONS = [
     visual: "city-light",
     choices: [
       { id: "bumper", label: "Sur le pare-chocs de la voiture devant toi" },
-      { id: "far", label: "Loin devant, par-dessus la file" },
-      { id: "speedo", label: "Sur le compteur, pour tenir la limite" },
+      { id: "far", label: "Loin devant par-dessus toute la file" },
+      { id: "speedo", label: "Sur le compteur pour tenir la limite" },
     ],
     solution: "far",
     hint: "Ce que tu vois au dernier moment, tu le subis. Ce que tu vois tôt, tu le prépares.",
@@ -1206,12 +1179,12 @@ export const MISSIONS = [
       "Rue étroite limitée à 30. Une école sort et des enfants longent le trottoir. Tu roules à combien ?",
     visual: "city-light",
     choices: [
-      { id: "thirty", label: "À 30 puisque c'est autorisé" },
+      { id: "thirty", label: "À 30 puisque le panneau te l'autorise" },
       {
         id: "under",
-        label: "Bien en dessous de 30 tant que la rue est pleine",
+        label: "En dessous de 30 tant qu'il y a du monde",
       },
-      { id: "keep", label: "À 50 jusqu'au prochain panneau" },
+      { id: "keep", label: "À 50 jusqu'à voir le prochain panneau de ville" },
     ],
     solution: "under",
     hint: "Un panneau donne un maximum. Il ne promet jamais que cette vitesse est sûre.",
@@ -1381,9 +1354,9 @@ export const MISSIONS = [
       "Giratoire à deux voies. Tu sors à la première sortie. Tu entres par quelle file ?",
     visual: "roundabout",
     choices: [
-      { id: "right", label: "La file de droite" },
-      { id: "left", label: "La file de gauche, elle tourne mieux" },
-      { id: "late", label: "N'importe laquelle, tu choisiras sur l'anneau" },
+      { id: "right", label: "Celle de droite dès l'entrée du giratoire" },
+      { id: "left", label: "La file de gauche qui tourne mieux" },
+      { id: "late", label: "N'importe laquelle puis tu choisis sur l'anneau" },
     ],
     solution: "right",
     hint: "Tu ressors presque tout de suite. Inutile d'aller chercher l'intérieur de l'anneau.",
@@ -1509,10 +1482,10 @@ export const MISSIONS = [
       "Tu allais dépasser le cycliste. Une voiture arrive en face. Tu fais quoi ?",
     visual: "overtake-oncoming",
     choices: [
-      { id: "rush", label: "Tu dépasses vite avant qu'elle arrive" },
+      { id: "rush", label: "Tu dépasses vite avant qu'elle arrive sur toi" },
       {
         id: "squeeze",
-        label: "Tu passes en restant dans ta voie sans t'écarter",
+        label: "Tu passes sans t'écarter de ta voie",
       },
       {
         id: "wait",
@@ -1620,10 +1593,10 @@ export const MISSIONS = [
     visual: "city-light",
     choices: [
       { id: "horn", label: "Un coup de klaxon pour l'inviter à traverser" },
-      { id: "flash", label: "Un appel de phares pour lui dire d'y aller" },
+      { id: "flash", label: "Un appel de phares pour l'inviter" },
       {
         id: "eyes",
-        label: "Tu ralentis, tu t'arrêtes et tu croises son regard",
+        label: "Tu t'arrêtes vraiment et tu croises son regard",
       },
     ],
     solution: "eyes",
@@ -1652,7 +1625,7 @@ export const MISSIONS = [
       { id: "cross", label: "Tu traverses les voies tout de suite" },
       {
         id: "continue",
-        label: "Tu continues et tu reprends la route plus loin",
+        label: "Tu continues et tu prends la sortie suivante",
       },
       { id: "stop", label: "Tu ralentis fort pour te donner le temps" },
     ],
@@ -1683,7 +1656,7 @@ export const MISSIONS = [
       { id: "pass", label: "Tu passes puisque rien ne t'oblige à t'arrêter" },
       {
         id: "right",
-        label: "Tu ralentis et tu cèdes à celui qui vient de ta droite",
+        label: "Tu cèdes à celui qui vient de ta droite",
       },
       { id: "speed", label: "Tu accélères pour passer avant les autres" },
     ],
@@ -1717,9 +1690,9 @@ export const MISSIONS = [
     choices: [
       {
         id: "switch",
-        label: "Tu repasses en feux de croisement dès que tu la vois",
+        label: "Tu repasses en feux de croisement tout de suite",
       },
-      { id: "keep", label: "Tu gardes les pleins phares jusqu'au croisement" },
+      { id: "keep", label: "Tu gardes tes pleins phares jusqu'à ce qu'elle passe" },
       { id: "flash", label: "Tu fais un appel de phares pour la prévenir" },
     ],
     solution: "switch",
@@ -1744,12 +1717,12 @@ export const MISSIONS = [
     prompt: "Tu ne vois plus à cinquante mètres. Tu allumes quoi ?",
     visual: "rain",
     choices: [
-      { id: "high", label: "Les pleins phares, pour voir plus loin" },
+      { id: "high", label: "Tes pleins phares pour voir bien plus loin" },
       {
         id: "fog",
-        label: "Les feux de croisement, plus les feux de brouillard",
+        label: "Tes feux de croisement et de brouillard",
       },
-      { id: "day", label: "Rien, tes feux de jour suffisent" },
+      { id: "day", label: "Tes feux de jour suffisent bien assez" },
     ],
     solution: "fog",
     hint: "Dans le brouillard, une lumière trop haute te revient dans les yeux.",
@@ -1813,9 +1786,9 @@ export const MISSIONS = [
       { id: "brake", label: "Tu freines fort pour ralentir tout de suite" },
       {
         id: "lift",
-        label: "Tu lèves le pied doucement et tu tiens le volant droit",
+        label: "Tu lèves le pied et tu tiens le volant",
       },
-      { id: "steer", label: "Tu braques pour sortir de la flaque" },
+      { id: "steer", label: "Tu braques pour sortir de la flaque au plus vite" },
     ],
     solution: "lift",
     hint: "Tes pneus ne touchent plus la route. Un geste fort ne sera transmis à rien.",
@@ -1841,13 +1814,13 @@ export const MISSIONS = [
     symptom:
       "Le thermomètre affiche 1 °C, la chaussée brille par plaques, et le bruit des pneus s'est adouci.",
     choices: [
-      { id: "wet", label: "C'est de la pluie, tu continues normalement" },
+      { id: "wet", label: "C'est de la pluie et tu continues normalement" },
       {
         id: "ice",
         label:
-          "C'est peut-être du verglas, tu ralentis bien avant et sans à-coup",
+          "Sans doute du verglas et tu ralentis bien avant",
       },
-      { id: "test", label: "Tu freines un coup pour tester l'adhérence" },
+      { id: "test", label: "Tu freines un coup pour tester l'adhérence au sol" },
     ],
     solution: "ice",
     hint: "Trois indices qui vont ensemble valent une certitude. Tu n'as pas besoin d'attendre le quatrième.",
@@ -2046,10 +2019,10 @@ export const MISSIONS = [
       "Le trafic s'arrête dans le tunnel et ne repart pas. Tu fais quoi ?",
     visual: "tunnel",
     choices: [
-      { id: "uturn", label: "Tu fais demi-tour vers l'entrée" },
+      { id: "uturn", label: "Tu fais demi-tour pour revenir vers l'entrée" },
       {
         id: "hazard",
-        label: "Feux de détresse, moteur coupé, et tu écoutes la radio",
+        label: "Feux de détresse puis moteur coupé et radio",
       },
       { id: "idle", label: "Tu attends moteur tournant sans rien changer" },
     ],
@@ -2111,10 +2084,10 @@ export const MISSIONS = [
       "Ton feu passe au vert, mais la file d'en face n'avance pas. Tu t'engages ?",
     visual: "city-light",
     choices: [
-      { id: "go", label: "Oui, ton feu est vert" },
+      { id: "go", label: "Oui puisque ton feu est passé au vert" },
       {
         id: "wait",
-        label: "Non, tu attends d'avoir la place de ressortir",
+        label: "Non tu attends d'avoir la place de ressortir derrière",
       },
       { id: "half", label: "Tu avances au milieu pour prendre ta place" },
     ],

@@ -42,10 +42,6 @@ const PHOTOS = {
     src: "/pilote/capot-ouvert-2026-08-02.webp",
     alt: "Le compartiment moteur d'une voiture, capot ouvert",
   },
-  "photo-voiture": {
-    src: "/pilote/voiture-profil-2026-08-02.webp",
-    alt: "Une voiture vue de profil, garée",
-  },
 };
 
 /**

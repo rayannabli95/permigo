@@ -71,7 +71,12 @@ export const playNotify = () => play("notify");
 export const playHorn = () => play("horn");
 
 // ─── Musiques de fin (vraies pistes dédiées) ───
-export const playVictory = () => play("victory", 0.5); // quiz recap réussi / exam blanc admis / compétence débloquée
+// quiz recap réussi / exam blanc admis / compétence débloquée.
+// ⚠️ 2,2 s, pas 16. L'ancienne fanfare tenait seize secondes et pesait 526 Ko :
+// elle jouait encore quand l'élève lisait déjà l'écran suivant. Un bon jeu
+// mobile récompense en deux secondes puis rend la main. Le nom porte sa DATE,
+// sinon le cache de l'app garde l'ancien fichier à vie chez les installés.
+export const playVictory = () => play("victoire-courte-2026-08-03", 0.55);
 export const playDefeat = () => play("defeat", 0.5); // quiz recap échoué / exam blanc recalé
 
 // ─── Alias sémantiques quiz/examen (remappés sur .mp3 existants en attendant vrais sons) ───
