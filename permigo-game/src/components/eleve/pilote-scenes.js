@@ -9,17 +9,57 @@
 // `.mp-art-{nom}` porte la mise en scène, les `<span>` portent les pièces.
 //
 // À côté de ces scènes vivent les PIÈCES dessinées en SVG (`pilote-pieces.js`) :
-// le pneu et son usure, le capot et ses quatre niveaux, le bloc compteurs, les
-// pédales, le levier. Une scène plante un lieu, une pièce montre un objet. Le
-// même champ `visual` désigne les deux, et les pièces passent en premier.
+// le bloc compteurs, les pédales, le levier. Une scène plante un lieu, une
+// pièce montre un objet. Le même champ `visual` désigne les deux.
+//
+// Et il y a les PHOTOS. Règle posée par Rayan le 30/07/2026 devant les
+// voitures dessinées de Codex (« ça fait tellement cheap ») :
+//
+//   on DESSINE ce qui change d'état, on PHOTOGRAPHIE ce qu'on regarde.
+//
+// Le tableau de bord, les voyants, les pédales changent d'état à l'infini :
+// le dessin s'y décline sans une image par variante. Un pneu, un compartiment
+// moteur, une carrosserie ne changent pas d'état : dessinés au trait ils font
+// toujours cheap, quel que soit l'agent qui les dessine.
+//
+// Ordre de priorité : photo, puis pièce dessinée, puis décor CSS.
 // ═══════════════════════════════════════════════════════════════
 import { estUnePiece, renderPiece } from "@/components/eleve/pilote-pieces.js";
 
 /**
- * @param {string} visual nom du décor ou de la pièce, cf. `visual` des missions
+ * Les photos du Mode Pilote, pour ce qu'on regarde sans le transformer.
+ *
+ * ⚠️ Le nom du fichier porte sa DATE. Le cache de l'app garde une image à vie
+ * sous le même nom : remplacer une photo sans changer son nom laisse l'ancienne
+ * chez tous ceux qui ont déjà installé.
+ */
+const PHOTOS = {
+  "photo-pneu": {
+    src: "/pilote/pneu-use-2026-08-02.webp",
+    alt: "Le pneu avant d'une voiture, vu de près",
+  },
+  "photo-capot": {
+    src: "/pilote/capot-ouvert-2026-08-02.webp",
+    alt: "Le compartiment moteur d'une voiture, capot ouvert",
+  },
+  "photo-voiture": {
+    src: "/pilote/voiture-profil-2026-08-02.webp",
+    alt: "Une voiture vue de profil, garée",
+  },
+};
+
+/**
+ * @param {string} visual nom du décor, de la pièce ou de la photo
  * @param {object} [options] réglages passés à la pièce (usure, rapport, niveau)
  */
 export function renderArt(visual, options = {}) {
+  const photo = PHOTOS[visual];
+  if (photo) {
+    // `loading="eager"` : la scène est le premier écran de la mission, une
+    // image qui arrive après coup ferait sauter la mise en page.
+    return `<img class="mp-photo" src="${photo.src}" alt="" loading="eager"
+      decoding="async" width="1100" height="825" aria-hidden="true">`;
+  }
   if (estUnePiece(visual)) return renderPiece(visual, options);
   if (visual === "cockpit") return artCockpit();
   if (visual === "seat-profile") return artSeatProfile();
