@@ -11,10 +11,17 @@
 // 87 Ko et 63 Ko, soit tout le catalogue, pour UNE scène sur la page la plus
 // coûteuse du site. Si tu modifies la scène là-bas, reporte-la ici.
 //
-// Le moteur de rendu, lui, est bien le vrai (situation-scene.js) et il est
-// chargé À LA DEMANDE : la première vue de la page ne paie rien.
+// Le moteur de rendu, lui, est bien le vrai (situation-scene.js). Il était
+// chargé à la demande pour alléger la première vue ; il ne l'est plus. Un
+// chargement séparé peut échouer (déploiement pendant qu'un onglet reste
+// ouvert, réseau qui saute) et la scène disparaissait alors en silence. Sur la
+// page qui vend, la démonstration ne peut pas être optionnelle.
 // ═══════════════════════════════════════════════════════════════
 import { track } from "@/services/analytics.js";
+import {
+  renderSituationScene,
+  buildFocusFX,
+} from "@/components/eleve/situation-scene.js";
 
 // ── La scène (copie conforme de « camion-prio-droite ») ─────────
 const SCENE = {
@@ -142,19 +149,8 @@ const STYLE = `<style>
  * @param {'fr'|'en'|'ar'} lang
  * @param {() => void} onContinue  clic sur « Continuer gratuitement »
  */
-export async function mountDemoSituation(host, lang, onContinue) {
+export function mountDemoSituation(host, lang, onContinue) {
   const L = STR[lang] || STR.fr;
-  // Le moteur de scène (20 Ko) n'est chargé qu'ici : la première vue de la page
-  // de vente ne le paie pas. Si l'import échoue (réseau coupé au mauvais
-  // moment), la page reste vendable : on ne monte simplement rien.
-  let renderSituationScene, buildFocusFX;
-  try {
-    ({ renderSituationScene, buildFocusFX } =
-      await import("@/components/eleve/situation-scene.js"));
-  } catch {
-    host.remove();
-    return;
-  }
 
   host.innerHTML = `${STYLE}
     <div class="dmo">
