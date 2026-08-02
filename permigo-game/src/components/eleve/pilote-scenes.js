@@ -1,22 +1,28 @@
 // ═══════════════════════════════════════════════════════════════
 // Les décors du Mode Pilote.
 //
-// Douze scènes dessinées en CSS pur : l'habitacle, le pédalier, le carrefour,
-// le giratoire, la nuit, la pluie… Repris tels quels du prototype
-// `mockups/moteur-pilote`, ils ne coûtent aucune image à charger.
+// Des scènes dessinées en CSS pur : l'habitacle, le carrefour, le giratoire,
+// la nuit, la pluie… Reprises telles quelles du prototype
+// `mockups/moteur-pilote`, elles ne coûtent aucune image à charger.
 //
 // Le style qui les dessine vit dans `pilote.css`, à côté. Une classe
 // `.mp-art-{nom}` porte la mise en scène, les `<span>` portent les pièces.
+//
+// À côté de ces scènes vivent les PIÈCES dessinées en SVG (`pilote-pieces.js`) :
+// le pneu et son usure, le capot et ses quatre niveaux, le bloc compteurs, les
+// pédales, le levier. Une scène plante un lieu, une pièce montre un objet. Le
+// même champ `visual` désigne les deux, et les pièces passent en premier.
 // ═══════════════════════════════════════════════════════════════
+import { estUnePiece, renderPiece } from "@/components/eleve/pilote-pieces.js";
 
-/** @param {string} visual nom du décor, cf. `visual` dans les missions */
-export function renderArt(visual) {
+/**
+ * @param {string} visual nom du décor ou de la pièce, cf. `visual` des missions
+ * @param {object} [options] réglages passés à la pièce (usure, rapport, niveau)
+ */
+export function renderArt(visual, options = {}) {
+  if (estUnePiece(visual)) return renderPiece(visual, options);
   if (visual === "cockpit") return artCockpit();
   if (visual === "seat-profile") return artSeatProfile();
-  if (visual === "start-manual" || visual === "start-automatic") {
-    return artStart(visual === "start-automatic");
-  }
-  if (visual === "warning") return artWarning();
   if (visual === "intersection") return artIntersection();
   if (visual === "roundabout") return artRoundabout();
   if (visual === "bend") return artBend();
@@ -62,33 +68,6 @@ function artCockpit() {
     <span class="art-stalk art-stalk-right"></span>
     <div class="art-wheel"><span>PG</span></div>
     <div class="art-pedals"><i></i><i></i><i></i></div>`;
-}
-
-function artStart(automatic) {
-  return `
-    <div class="art-start-grid"></div>
-    <div class="art-footwell">
-      <span class="art-foot"></span>
-      <span class="art-pedal-large"></span>
-      ${automatic ? `<span class="art-pedal-small"></span>` : `<span class="art-pedal-small"></span><span class="art-pedal-clutch"></span>`}
-    </div>
-    <div class="art-selector">
-      <span class="${automatic ? "" : "is-active"}">${automatic ? "P" : "1"}</span>
-      <span class="${automatic ? "is-active" : ""}">${automatic ? "D" : "2"}</span>
-      <span>${automatic ? "R" : "3"}</span>
-      <i></i>
-    </div>`;
-}
-
-function artWarning() {
-  return `
-    <div class="art-warning-dash">
-      <span class="art-warning-dial"><i></i></span>
-      <span class="art-warning-screen">CONTACT</span>
-      <span class="art-warning-dial"><i></i></span>
-      <b class="art-warning-light">!</b>
-      <small>ALERTE ACTIVE</small>
-    </div>`;
 }
 
 function artIntersection() {

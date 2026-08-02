@@ -62,7 +62,7 @@ export const MISSIONS = [
     title: "Le départ parfait",
     objective: "Construire la chaîne d’un démarrage en boîte manuelle.",
     prompt: "Remets les gestes dans l’ordre. Touche le premier, puis continue.",
-    visual: "start-manual",
+    visual: "pedales-manuelle",
     steps: [
       { id: "clutch", label: "Embrayage à fond", symbol: "↓" },
       { id: "gear", label: "Passer la 1re", symbol: "H" },
@@ -90,7 +90,7 @@ export const MISSIONS = [
     title: "Le départ parfait",
     objective: "Construire la chaîne d’un démarrage en boîte automatique.",
     prompt: "Remets les gestes dans l’ordre. Touche le premier, puis continue.",
-    visual: "start-automatic",
+    visual: "pedales-auto",
     steps: [
       { id: "brake", label: "Pied droit sur le frein", symbol: "●" },
       { id: "drive", label: "Sélecteur sur D", symbol: "D" },
@@ -118,7 +118,7 @@ export const MISSIONS = [
     title: "Alerte au tableau",
     objective: "Interpréter un témoin rouge qui reste allumé après le contact.",
     prompt: "Le témoin reste allumé. Quelle décision répare la situation ?",
-    visual: "warning",
+    visual: "voyant-moteur",
     symptom:
       "Un témoin rouge reste visible après le contrôle du tableau de bord.",
     choices: [
@@ -543,8 +543,7 @@ export const MISSIONS = [
       },
     ],
     solution: "juste",
-    hint:
-      "Quand tu enfonces une pédale ton genou reste légèrement fléchi.",
+    hint: "Quand tu enfonces une pédale ton genou reste légèrement fléchi.",
     retry:
       "Cette distance oblige à tendre la jambe ou bloque le genou contre les commandes.",
     success: "Le siège est à bonne distance.",
@@ -672,7 +671,7 @@ export const MISSIONS = [
     objective: "Enchaîner un changement de rapport sans à-coup.",
     prompt:
       "Tu passes de la seconde à la troisième. Remets les gestes dans l'ordre.",
-    visual: "start-manual",
+    visual: "levier",
     steps: [
       { id: "lever", label: "Lever le pied du gaz", symbol: "↑" },
       { id: "debrayer", label: "Débrayer à fond", symbol: "↓" },
@@ -700,7 +699,7 @@ export const MISSIONS = [
     title: "Le moteur qui tousse",
     objective: "Reconnaître un sous-régime et en sortir.",
     prompt: "La voiture broute et n'avance plus. Qu'est-ce qui se passe ?",
-    visual: "warning",
+    visual: "compte-tours-bas",
     symptom:
       "Tu es en quatrième à trente à l'heure. Le moteur vibre et tu n'as plus de reprise.",
     choices: [
@@ -732,7 +731,7 @@ export const MISSIONS = [
     objective: "Savoir quoi faire du sélecteur à l'arrêt.",
     prompt:
       "Tu attends au feu rouge, en D, le pied sur le frein. Tu fais quoi ?",
-    visual: "start-automatic",
+    visual: "selecteur",
     choices: [
       { id: "reste", label: "Tu restes en D, le pied sur le frein" },
       { id: "park", label: "Tu passes en P" },
@@ -758,7 +757,7 @@ export const MISSIONS = [
     title: "La reprise qui manque",
     objective: "Obtenir de la reprise en boîte automatique.",
     prompt: "Tu dois reprendre franchement pour t'insérer. Ton geste ?",
-    visual: "start-automatic",
+    visual: "pedales-auto",
     choices: [
       { id: "fond", label: "Tu enfonces l'accélérateur jusqu'au bout" },
       { id: "leger", label: "Tu appuies doucement et tu attends" },
@@ -826,6 +825,75 @@ export const MISSIONS = [
     why: "Un tour qui suit toujours le même chemin ne laisse rien de côté. C'est aussi ce que l'examinateur observe le jour J.",
     transfer:
       "Avant ta prochaine leçon, fais ce tour en nommant chaque contrôle à voix haute.",
+  },
+  {
+    ...commun,
+    id: "c1g-usure",
+    competence: "C1g",
+    order: 3,
+    boites: ["manuelle", "auto"],
+    // ⚠️ Le dessin ILLUSTRE, il ne porte pas la réponse. Un pneu seul ne dit
+    // pas à un débutant combien de gomme il lui reste : sans un deuxième pneu
+    // pour comparer, « lis l'usure » serait une devinette. La question porte
+    // donc sur ce que ce pneu change sur la route, ce que l'élève peut
+    // raisonner. La lecture de l'usure viendra quand une mécanique saura
+    // montrer deux pneus côte à côte.
+    mode: "decision",
+    modeLabel: "Décider",
+    title: "Le pneu lisse",
+    objective: "Relier l'état des pneus à ce qui se passe sous la pluie.",
+    prompt:
+      "Les sillons de ce pneu ont presque disparu. Il pleut. Que risques-tu ?",
+    visual: "pneu-use",
+    choices: [
+      { id: "eau", label: "La voiture flotte au lieu d'accrocher" },
+      { id: "bruit", label: "Le pneu fait surtout beaucoup plus de bruit" },
+      {
+        id: "rien",
+        label: "Rien de grave tant qu'on roule doucement en ville",
+      },
+    ],
+    solution: "eau",
+    hint: "Demande-toi où part l'eau quand les sillons ne peuvent plus l'avaler.",
+    retry:
+      "Le bruit n'est pas le problème. Pense à ce que les sillons font de l'eau.",
+    success: "Sans sillons, l'eau reste sous le pneu et la voiture flotte.",
+    why: "Les sillons servent à évacuer l'eau. Quand ils sont usés, un film d'eau s'installe entre la gomme et la route : le volant devient léger, le freinage ne répond plus, et rien ne prévient avant. Le minimum légal est de 1,6 mm et la tenue se dégrade bien avant.",
+    transfer:
+      "Avant ta prochaine leçon, accroupis-toi devant une roue et regarde la profondeur des sillons du bout du doigt.",
+  },
+  {
+    ...commun,
+    id: "c1g-niveaux",
+    competence: "C1g",
+    order: 4,
+    boites: ["manuelle", "auto"],
+    mode: "diagnostic",
+    modeLabel: "Diagnostiquer",
+    title: "Sous le capot",
+    objective: "Repérer le niveau qui manque parmi les quatre.",
+    prompt: "Tu ouvres le capot. Un bocal ne va pas. Lequel ?",
+    visual: "capot-bas",
+    symptom: "Le compartiment moteur, capot levé.",
+    choices: [
+      { id: "refroid", label: "Le refroidissement est presque à sec" },
+      {
+        id: "laveglace",
+        label: "Le lave-glace réclame un plein avant de partir",
+      },
+      {
+        id: "aucun",
+        label: "Les quatre niveaux sont bons, la voiture peut rouler",
+      },
+    ],
+    solution: "refroid",
+    hint: "Compare la hauteur des liquides. L'un des quatre n'a presque plus rien.",
+    retry:
+      "Le lave-glace se refait n'importe quand. Cherche celui qui empêche de rouler.",
+    success: "Refroidissement presque vide. Repéré avant de partir.",
+    why: "Sans liquide de refroidissement, le moteur monte en température et peut se détruire en quelques kilomètres. Le voyant de température prévient souvent trop tard pour éviter la casse.",
+    transfer:
+      "Demande à ton enseignant de te montrer les repères mini et maxi sur le bocal de refroidissement.",
   },
   {
     ...commun,
@@ -1039,7 +1107,7 @@ export const MISSIONS = [
       "Construire un ralentissement qui reste doux pour tout le monde.",
     prompt:
       "Un rétrécissement approche. Remets les gestes dans l'ordre, du premier au dernier.",
-    visual: "start-manual",
+    visual: "pedales-manuelle",
     steps: [
       { id: "mirror", label: "Contrôler le rétroviseur", symbol: "◉" },
       { id: "lift", label: "Lever le pied de l'accélérateur", symbol: "↑" },
@@ -1069,7 +1137,7 @@ export const MISSIONS = [
       "Construire un ralentissement qui reste doux pour tout le monde.",
     prompt:
       "Un rétrécissement approche. Remets les gestes dans l'ordre, du premier au dernier.",
-    visual: "start-automatic",
+    visual: "pedales-auto",
     steps: [
       { id: "mirror", label: "Contrôler le rétroviseur", symbol: "◉" },
       { id: "lift", label: "Lever le pied de l'accélérateur", symbol: "↑" },
