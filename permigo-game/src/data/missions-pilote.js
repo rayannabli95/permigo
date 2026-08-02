@@ -504,6 +504,56 @@ export const MISSIONS = [
   },
   {
     ...commun,
+    id: "c1c-siege",
+    competence: "C1c",
+    order: 1,
+    boites: ["manuelle", "auto"],
+    mode: "placement",
+    modeLabel: "Placer",
+    title: "À bonne distance",
+    objective:
+      "Placer le siège assez près des commandes sans bloquer les mouvements.",
+    prompt: "Fais glisser le siège jusqu’à la bonne distance des pédales.",
+    visual: "seat-profile",
+    piece: { label: "Siège avec conducteur" },
+    spots: [
+      {
+        id: "trop-loin",
+        label: "Position gauche",
+        x: 18,
+        y: 43,
+        w: 20,
+        h: 40,
+      },
+      {
+        id: "juste",
+        label: "Position centrale",
+        x: 44,
+        y: 43,
+        w: 20,
+        h: 40,
+      },
+      {
+        id: "trop-pres",
+        label: "Position droite",
+        x: 70,
+        y: 43,
+        w: 20,
+        h: 40,
+      },
+    ],
+    solution: "juste",
+    hint:
+      "Quand tu enfonces une pédale ton genou reste légèrement fléchi.",
+    retry:
+      "Cette distance oblige à tendre la jambe ou bloque le genou contre les commandes.",
+    success: "Le siège est à bonne distance.",
+    why: "Une jambe légèrement fléchie permet d’appuyer à fond sans se tendre ni se coller aux commandes.",
+    transfer:
+      "À ta prochaine leçon, enfonce chaque pédale et vérifie que ton genou reste légèrement fléchi.",
+  },
+  {
+    ...commun,
     id: "c1c-mains",
     competence: "C1c",
     order: 1,
@@ -1649,6 +1699,11 @@ export const MODE_INFO = {
     label: "Diagnostiquer",
     description: "Symptôme, cause et réparation",
     symbol: "△",
+  },
+  placement: {
+    label: "Placer",
+    description: "Position spatiale par glissement",
+    symbol: "✥",
   },
 };
 

@@ -28,6 +28,26 @@ const LIMITE_ERREURS = 4;
 /** Nomme les trajectoires à l'écran, dans l'ordre où la mission les donne. */
 const LETTRES = ["a", "b", "c", "d"];
 
+/**
+ * Géométrie commune des pièces de placement, en pourcentage de la scène.
+ *
+ * ⚠️ `departX` ne doit JAMAIS tomber dans la zone qui porte la bonne réponse.
+ * La pièce démarrait au centre, donc pile sur « juste » : un simple appui suivi
+ * d'un relâché, sans bouger d'un pixel, validait la mission. La scène donnait
+ * la réponse avant que l'élève ait rien décidé.
+ *
+ * Elle démarre maintenant à la butée gauche, ce qui raconte aussi la bonne
+ * histoire : le siège est trop reculé, à toi de l'amener à la bonne distance.
+ * Lâcher sans bouger désigne donc une position fausse et coûte un essai, ce qui
+ * est juste puisque relâcher EST une réponse.
+ */
+const PIECE_PLACEMENT = Object.freeze({
+  largeur: 50,
+  hauteur: 38,
+  departX: 25,
+  departY: 79,
+});
+
 /** Les couleurs de chaque famille de compétence, pour la teinte de la scène. */
 const TEINTES = {
   C1: ["#8b6dff", "#4e2cc7"],
@@ -165,14 +185,62 @@ export function monterMissions(
         </svg>`
         : "";
 
+    const placement =
+      interactif &&
+      m.mode === "placement" &&
+      Array.isArray(m.spots) &&
+      m.spots.length
+        ? placementDansScene(m)
+        : "";
+
     // L'étiquette porte la MÉCANIQUE, jamais le code REMC.
     return `
       <div class="mp-scene mp-scene-${esc(m.visual)}">
         <div class="mp-scene-scan" aria-hidden="true"></div>
         <div class="mp-scene-art mp-art-${esc(m.visual)}" aria-hidden="true">${renderArt(m.visual)}</div>
-        ${zones}${trajets}
+        ${zones}${trajets}${placement}
         <span class="mp-scene-tag">${esc(m.modeLabel)}</span>
       </div>`;
+  }
+
+  function placementDansScene(m) {
+    const spots = m.spots.map(normaliserSpot).filter(Boolean);
+    const spotActuel = spots.find((spot) => spot.id === etat.dernier);
+    const pieceX = spotActuel
+      ? spotActuel.x + spotActuel.w / 2
+      : PIECE_PLACEMENT.departX;
+    const pieceY = spotActuel
+      ? spotActuel.y + spotActuel.h / 2
+      : PIECE_PLACEMENT.departY;
+
+    return `<div class="mp-placement-layer">
+      ${spots
+        .map(
+          (
+            spot,
+          ) => `<span class="mp-placement-spot" data-placement-spot="${escAttr(spot.id)}"
+            data-x="${spot.x}" data-y="${spot.y}" data-w="${spot.w}" data-h="${spot.h}"
+            style="--spot-x:${spot.x}%;--spot-y:${spot.y}%;--spot-w:${spot.w}%;--spot-h:${spot.h}%"
+            aria-hidden="true"><i></i></span>`,
+        )
+        .join("")}
+      <div class="mp-placement-piece ${spotActuel ? "is-placed" : ""} ${etat.resolu ? "is-locked" : ""}"
+        role="button" tabindex="${etat.resolu ? "-1" : "0"}" data-placement-piece
+        aria-label="${escAttr(`${m.piece?.label || "Objet"}. Fais glisser puis lâche dans une position.`)}"
+        aria-disabled="${etat.resolu ? "true" : "false"}"
+        style="--piece-x:${pieceX}%;--piece-y:${pieceY}%">
+        <svg class="mp-placement-driver" viewBox="0 0 140 100" aria-hidden="true">
+          <path class="mp-driver-seat-back" d="M27 25 Q23 26 24 35 L28 71 Q29 78 36 78 L43 76 L40 30 Q39 24 33 24Z"/>
+          <path class="mp-driver-seat-base" d="M31 69 Q33 64 41 64 H70 Q76 65 75 72 Q74 78 67 79 H37 Q31 78 31 69Z"/>
+          <path class="mp-driver-seat-rail" d="M34 83 H76"/>
+          <circle class="mp-driver-head" cx="57" cy="19" r="10"/>
+          <path class="mp-driver-body" d="M48 31 Q55 27 63 31 Q68 42 65 62 L52 67 Q44 54 46 39Z"/>
+          <path class="mp-driver-arm" d="M59 38 L84 48 L108 43"/>
+          <path class="mp-driver-leg" d="M56 63 L89 68 L119 83"/>
+          <path class="mp-driver-foot" d="M116 83 H133"/>
+        </svg>
+      </div>
+    </div>`;
   }
 
   function interaction(m) {
@@ -193,6 +261,12 @@ export function monterMissions(
             )
             .join("")}
         </div>
+      </section>`;
+    }
+    if (m.mode === "placement") {
+      return `<section class="mp-interaction mp-placement-interaction">
+        ${scene(m, true)}
+        <p class="mp-scene-instruction">Fais glisser le siège vers une position puis lâche.</p>
       </section>`;
     }
     if (m.mode === "sequence") return sequence(m);
@@ -376,6 +450,177 @@ export function monterMissions(
         repondre(el.dataset.reponse);
       });
     });
+    brancherPlacement();
+  }
+
+  function brancherPlacement() {
+    const m = mission();
+    if (m?.mode !== "placement" || etat.resolu) return;
+
+    const sceneEl = hote.querySelector(".mp-placement-interaction .mp-scene");
+    const piece = hote.querySelector("[data-placement-piece]");
+    const spots = [...hote.querySelectorAll("[data-placement-spot]")]
+      .map((el) => ({
+        el,
+        id: el.dataset.placementSpot,
+        x: Number(el.dataset.x),
+        y: Number(el.dataset.y),
+        w: Number(el.dataset.w),
+        h: Number(el.dataset.h),
+      }))
+      .filter(
+        (spot) =>
+          spot.id && [spot.x, spot.y, spot.w, spot.h].every(Number.isFinite),
+      );
+    if (!sceneEl || !piece || !spots.length) return;
+
+    let pointeurActif = null;
+    let decalageX = 0;
+    let decalageY = 0;
+    let spotSurvole = null;
+    let indexClavier = -1;
+    let verrouille = false;
+
+    const borner = (valeur, min, max) => Math.min(max, Math.max(min, valeur));
+    const lirePosition = () => ({
+      x:
+        Number.parseFloat(piece.style.getPropertyValue("--piece-x")) ||
+        PIECE_PLACEMENT.departX,
+      y:
+        Number.parseFloat(piece.style.getPropertyValue("--piece-y")) ||
+        PIECE_PLACEMENT.departY,
+    });
+    const positionDuPointeur = (e) => {
+      const rect = sceneEl.getBoundingClientRect();
+      return {
+        x: ((e.clientX - rect.left) / rect.width) * 100,
+        y: ((e.clientY - rect.top) / rect.height) * 100,
+      };
+    };
+    const placerPiece = ({ x, y }) => {
+      const demiLargeur = PIECE_PLACEMENT.largeur / 2;
+      const demiHauteur = PIECE_PLACEMENT.hauteur / 2;
+      const position = {
+        x: borner(x, demiLargeur, 100 - demiLargeur),
+        y: borner(y, demiHauteur, 100 - demiHauteur),
+      };
+      piece.style.setProperty("--piece-x", `${position.x}%`);
+      piece.style.setProperty("--piece-y", `${position.y}%`);
+      return position;
+    };
+    const spotSous = ({ x, y }) =>
+      spots.find(
+        (spot) =>
+          x >= spot.x &&
+          x <= spot.x + spot.w &&
+          y >= spot.y &&
+          y <= spot.y + spot.h,
+      ) || null;
+    const spotLePlusProche = ({ x, y }) =>
+      spots.reduce((proche, spot) => {
+        const dx = spot.x + spot.w / 2 - x;
+        const dy = spot.y + spot.h / 2 - y;
+        const distance = dx * dx + dy * dy;
+        return !proche || distance < proche.distance
+          ? { ...spot, distance }
+          : proche;
+      }, null);
+    const marquerSurvol = (spot) => {
+      const prochain = spot?.id || null;
+      if (prochain === spotSurvole) return;
+      spots.forEach(({ el }) => el.classList.remove("is-over"));
+      if (spot) {
+        spot.el.classList.add("is-over");
+        haptic("impact");
+      }
+      spotSurvole = prochain;
+    };
+    const deplacer = (e) => {
+      const pointeur = positionDuPointeur(e);
+      const position = placerPiece({
+        x: pointeur.x - decalageX,
+        y: pointeur.y - decalageY,
+      });
+      marquerSurvol(spotSous(position));
+      return position;
+    };
+    const relacherCapture = () => {
+      if (pointeurActif !== null && piece.hasPointerCapture?.(pointeurActif)) {
+        piece.releasePointerCapture(pointeurActif);
+      }
+      pointeurActif = null;
+    };
+    const deposer = (spot) => {
+      verrouille = true;
+      marquerSurvol(null);
+      piece.classList.remove("is-dragging");
+      piece.classList.add("is-settling");
+      placerPiece({
+        x: spot.x + spot.w / 2,
+        y: spot.y + spot.h / 2,
+      });
+      relacherCapture();
+      setTimeout(() => {
+        if (hote.contains(piece)) repondre(spot.id);
+      }, 140);
+    };
+
+    piece.addEventListener("pointerdown", (e) => {
+      if (verrouille || (e.button !== undefined && e.button !== 0)) return;
+      e.preventDefault();
+      pointeurActif = e.pointerId;
+      const pointeur = positionDuPointeur(e);
+      const position = lirePosition();
+      decalageX = pointeur.x - position.x;
+      decalageY = pointeur.y - position.y;
+      spotSurvole = spotSous(position)?.id || null;
+      piece.classList.add("is-dragging");
+      haptic("impact");
+      try {
+        piece.setPointerCapture(e.pointerId);
+      } catch {
+        // Un PointerEvent synthétique de test ne crée pas toujours de capture.
+      }
+    });
+    piece.addEventListener("pointermove", (e) => {
+      if (verrouille || e.pointerId !== pointeurActif) return;
+      e.preventDefault();
+      deplacer(e);
+    });
+    piece.addEventListener("pointerup", (e) => {
+      if (verrouille || e.pointerId !== pointeurActif) return;
+      e.preventDefault();
+      const position = deplacer(e);
+      const spot = spotSous(position) || spotLePlusProche(position);
+      if (spot) deposer(spot);
+    });
+    piece.addEventListener("pointercancel", () => {
+      if (verrouille) return;
+      piece.classList.remove("is-dragging");
+      marquerSurvol(null);
+      relacherCapture();
+    });
+
+    // Le geste reste jouable au clavier sans ajouter de boutons dans la scène.
+    piece.addEventListener("keydown", (e) => {
+      if (verrouille) return;
+      if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+        e.preventDefault();
+        const pas = e.key === "ArrowLeft" ? -1 : 1;
+        indexClavier = borner(indexClavier + pas, 0, spots.length - 1);
+        const spot = spots[indexClavier];
+        placerPiece({
+          x: spot.x + spot.w / 2,
+          y: spot.y + spot.h / 2,
+        });
+        marquerSurvol(spot);
+        return;
+      }
+      if ((e.key === "Enter" || e.key === " ") && indexClavier >= 0) {
+        e.preventDefault();
+        deposer(spots[indexClavier]);
+      }
+    });
   }
 
   etat = nouvelEtat();
@@ -387,6 +632,21 @@ export function monterMissions(
   });
   dessiner();
   return true;
+}
+
+function normaliserSpot(spot) {
+  if (!spot?.id) return null;
+  const nombres = [spot.x, spot.y, spot.w, spot.h].map(Number);
+  if (!nombres.every(Number.isFinite)) return null;
+  const [x, y, w, h] = nombres;
+  return {
+    id: String(spot.id),
+    label: String(spot.label || spot.id),
+    x: Math.min(100, Math.max(0, x)),
+    y: Math.min(100, Math.max(0, y)),
+    w: Math.min(100, Math.max(1, w)),
+    h: Math.min(100, Math.max(1, h)),
+  };
 }
 
 export { missionsPour };

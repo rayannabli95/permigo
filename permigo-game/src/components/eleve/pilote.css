@@ -852,7 +852,285 @@ body.mp-open #header-bar {
   background: #5ab9ff;
 }
 
+/* Placement */
+
+.mp-placement-layer {
+  position: absolute;
+  z-index: 8;
+  inset: 0;
+}
+
+.mp-placement-spot {
+  position: absolute;
+  left: var(--spot-x);
+  top: var(--spot-y);
+  width: var(--spot-w);
+  height: var(--spot-h);
+  border: 1px dashed rgb(218 208 240 / 30%);
+  border-radius: 18%;
+  background: rgb(255 255 255 / 2%);
+  pointer-events: none;
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.mp-placement-spot i {
+  position: absolute;
+  left: 24%;
+  right: 24%;
+  bottom: 8%;
+  height: 3%;
+  border-radius: 99%;
+  background: rgb(255 255 255 / 24%);
+}
+
+/* Le survol confirme uniquement la position actuellement visée. Les trois
+   zones gardent exactement la même couleur et aucune ne révèle la solution. */
+.mp-placement-spot.is-over {
+  border-color: rgb(239 234 255 / 66%);
+  background: rgb(255 255 255 / 7%);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 8%);
+}
+
+.mp-placement-piece {
+  position: absolute;
+  z-index: 2;
+  left: var(--piece-x);
+  top: var(--piece-y);
+  width: 50%;
+  height: 38%;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 9px 8px rgb(0 0 0 / 38%));
+  transition:
+    left 140ms var(--ease-out),
+    top 140ms var(--ease-out),
+    filter 120ms ease,
+    transform 120ms var(--ease-out);
+}
+
+.mp-placement-piece.is-dragging {
+  cursor: grabbing;
+  filter: drop-shadow(0 13px 12px rgb(0 0 0 / 48%));
+  transform: translate(-50%, -50%) scale(1.05);
+  transition: none;
+}
+
+.mp-placement-piece.is-settling,
+.mp-placement-piece.is-locked {
+  cursor: default;
+  pointer-events: none;
+}
+
+.mp-placement-piece:focus-visible {
+  border-radius: 18%;
+  box-shadow: 0 0 0 3px var(--gold);
+}
+
+.mp-placement-driver {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.mp-driver-seat-back,
+.mp-driver-seat-base {
+  fill: #5d4698;
+  stroke: rgb(255 255 255 / 18%);
+  stroke-width: 1.4;
+}
+
+.mp-driver-seat-base {
+  fill: #433267;
+}
+
+.mp-driver-seat-rail {
+  fill: none;
+  stroke: #aaa0ba;
+  stroke-linecap: round;
+  stroke-width: 3;
+}
+
+.mp-driver-head {
+  fill: #d88c70;
+}
+
+.mp-driver-body {
+  fill: #684bd0;
+}
+
+.mp-driver-arm,
+.mp-driver-leg,
+.mp-driver-foot {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.mp-driver-arm {
+  stroke: #7255d8;
+  stroke-width: 9;
+}
+
+.mp-driver-leg {
+  stroke: #2b243d;
+  stroke-width: 13;
+}
+
+.mp-driver-foot {
+  stroke: #211b30;
+  stroke-width: 7;
+}
+
 /* Scene art */
+
+/* Profil du poste de conduite. Les proportions restent relatives à la scène
+   pour que le siège, les trois ancrages et les commandes restent alignés. */
+.mp-art-seat-profile {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #544977 0 49%, #241a3b 50% 100%);
+}
+
+.art-seat-window {
+  position: absolute;
+  left: 4%;
+  top: 5%;
+  width: 91%;
+  height: 43%;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 35% 10% 8% 7%;
+  background: linear-gradient(155deg, #8d86bd, #c6c2da 64%, #55576a 65%);
+}
+
+.art-seat-window::after {
+  position: absolute;
+  content: "";
+  left: 0;
+  right: 0;
+  bottom: 14%;
+  height: 4%;
+  background: rgb(255 255 255 / 43%);
+  transform: rotate(-3deg);
+}
+
+.art-seat-roof {
+  position: absolute;
+  left: 1%;
+  top: 0;
+  width: 98%;
+  height: 8%;
+  border-radius: 0 0 50% 18%;
+  background: #160f29;
+}
+
+.art-seat-dashboard {
+  position: absolute;
+  right: 0;
+  top: 36%;
+  width: 31%;
+  height: 25%;
+  border-radius: 38% 0 0 24%;
+  background: linear-gradient(180deg, #332945, #110c1d);
+  box-shadow: inset 0 7px 0 rgb(255 255 255 / 4%);
+}
+
+.art-seat-wheel {
+  position: absolute;
+  z-index: 2;
+  right: 19%;
+  top: 31%;
+  width: 17%;
+  aspect-ratio: 1;
+  border: 6px solid #100b18;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 2px #4b405b;
+}
+
+.art-seat-wheel::after {
+  position: absolute;
+  content: "";
+  left: 46%;
+  top: 48%;
+  width: 53%;
+  height: 9%;
+  border-radius: 99%;
+  background: #100b18;
+  transform: rotate(16deg);
+  transform-origin: left center;
+}
+
+.art-seat-pedals {
+  position: absolute;
+  right: 5%;
+  bottom: 14%;
+  width: 14%;
+  height: 25%;
+}
+
+.art-seat-pedals i {
+  position: absolute;
+  bottom: 0;
+  width: 25%;
+  height: 66%;
+  border: 1px solid #82778d;
+  border-radius: 16%;
+  background: repeating-linear-gradient(
+    90deg,
+    #30293a 0 18%,
+    #50475b 18% 32%
+  );
+  transform: rotate(9deg);
+}
+
+.art-seat-pedals i:first-child {
+  left: 8%;
+}
+
+.art-seat-pedals i:nth-child(2) {
+  left: 42%;
+  height: 81%;
+}
+
+.art-seat-pedals i:last-child {
+  right: 0;
+  height: 73%;
+}
+
+.art-seat-floor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 27%;
+  background: linear-gradient(180deg, #1c142d, #0c0815);
+  clip-path: polygon(0 37%, 100% 0, 100% 100%, 0 100%);
+}
+
+.art-seat-rail {
+  position: absolute;
+  left: 4%;
+  bottom: 10%;
+  width: 77%;
+  height: 2%;
+  border-radius: 99%;
+  background: #756c83;
+  box-shadow:
+    0 4px 0 #0b0712,
+    inset 0 1px 0 rgb(255 255 255 / 34%);
+}
 
 .art-sky {
   position: absolute;
