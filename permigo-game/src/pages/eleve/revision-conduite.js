@@ -545,6 +545,23 @@ ${chromeNight("#5a4fc0", "#423a96")}
 /* auto-fit : 2 cartes par ligne sur mobile, 3 dès qu'il y a la place. Avant,
    une grille à N colonnes écrasait les cartes au-delà de trois (une fiche
    ICRI complète en compte jusqu'à six). */
+/* Le crochet qui donne envie d'ouvrir une carte : la mascotte pointe la
+   promesse. Choix Rayan 02/08 : ce qui fait cliquer, ce n'est pas le résumé du
+   contenu, c'est ce que l'élève y gagne. */
+.fd-coach-hook{ display:flex; align-items:center; gap:12px; margin:0 18px 12px; padding:9px 15px 9px 9px; border-radius:20px;
+  background:linear-gradient(180deg, rgba(255,228,166,.14), rgba(255,228,166,.05));
+  border:1px solid rgba(255,228,166,.26); }
+/* La mascotte est violet foncé : posée telle quelle sur le bandeau sombre elle
+   disparaît. Elle a donc son médaillon clair, comme les icônes des cartes.
+   Et son PNG est en paysage : sans boîte plus large que haute, object-fit la
+   réduisait à un tiers de la hauteur disponible. */
+.fd-hook-av{ width:58px; height:58px; flex:none; border-radius:18px; display:grid; place-items:center; overflow:hidden;
+  background:linear-gradient(180deg,#fff6e2,#ffdfa8); border:1px solid rgba(255,228,166,.55);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.85), 0 4px 10px rgba(0,0,0,.3); }
+.fd-hook-av img{ width:68px; height:54px; object-fit:contain; margin-bottom:-3px;
+  animation:fdHookNod 3.4s ease-in-out 1.2s infinite; }
+@keyframes fdHookNod{ 0%,72%,100%{ transform:rotate(0) translateY(0); } 80%{ transform:rotate(-5deg) translateY(-3px); } 88%{ transform:rotate(4deg) translateY(-1px); } }
+.fd-coach-hook p{ margin:0; font:800 13.5px/1.35 'Archivo',sans-serif; color:#ffe4a6; }
 .fd-coach{ display:grid; grid-template-columns:repeat(auto-fit,minmax(148px,1fr)); gap:9px; padding:0 18px; align-items:stretch; }
 /* Carte coach = bouton (demande Rayan 22/07 : tap → lecture en grand). */
 .fd-cc{ position:relative; border-radius:14px; padding:11px 10px 12px; background:#f6f4ff; border:1px solid #e6e2fb; border-top-color:#fff;
@@ -553,22 +570,26 @@ ${chromeNight("#5a4fc0", "#423a96")}
   -webkit-tap-highlight-color:transparent; transition:transform .1s ease; }
 .fd-cc:active{ transform:scale(.97); }
 /* Reflet qui balaie la carte, le même que les cartes de collection quand une
-   compétence se débloque (collection.js, .col-card-gloss). Différence : là-bas
-   la carte est sombre, une bande blanche suffit. Ici le fond est clair (#f6f4ff),
-   donc la bande est bordée d'un violet très doux de chaque côté, sinon le reflet
-   ne se voit pas. Bande à 55 % : elle passe sur le texte sans l'effacer.
-   Chaque carte part un peu plus tard que la précédente : la vague traverse la
-   grille au lieu que les six cartes clignotent ensemble. */
-.fd-cc::after{ content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; z-index:1;
-  background:linear-gradient(115deg, transparent 46.5%, rgba(110,84,214,.09) 49%, rgba(255,255,255,.82) 50.5%, rgba(255,255,255,.82) 51.5%, rgba(110,84,214,.09) 53%, transparent 55.5%);
-  background-size:250% 250%; background-position:130% 0;
-  animation:fdGloss 5.5s ease-in-out 1s infinite; }
-@keyframes fdGloss{ 0%,100%{ background-position:130% 0; } 50%{ background-position:-30% 0; } }
-.fd-cc:nth-child(2)::after{ animation-delay:1.18s; }
-.fd-cc:nth-child(3)::after{ animation-delay:1.36s; }
-.fd-cc:nth-child(4)::after{ animation-delay:1.54s; }
-.fd-cc:nth-child(5)::after{ animation-delay:1.72s; }
-.fd-cc:nth-child(6)::after{ animation-delay:1.9s; }
+   compétence se débloque (collection.js, .col-card-gloss). Deux différences.
+   Là-bas la carte est sombre et une bande blanche suffit ; ici le fond est clair
+   (#f6f4ff) donc la bande est bordée d'un violet très doux, sinon on ne la voit
+   pas. Et là-bas la lumière fait l'aller-retour ; ici elle part toujours de la
+   gauche puis se repose hors champ, sinon ça ne se lit pas comme un swipe.
+   Chaque carte démarre 0,42 s après la précédente : la lumière traverse la
+   grille de carte en carte au lieu que les six clignotent ensemble. */
+.fd-cc::after{ content:""; position:absolute; top:-55%; bottom:-55%; left:0; width:34%; pointer-events:none; z-index:1;
+  background:linear-gradient(90deg, transparent 0%, rgba(110,84,214,.10) 24%, rgba(255,255,255,.95) 47%, rgba(255,255,255,.95) 53%, rgba(110,84,214,.10) 76%, transparent 100%);
+  transform:rotate(18deg) translateX(-170%);
+  animation:fdGloss 4s cubic-bezier(.4,0,.5,1) 1s infinite; }
+/* La course s'arrête à 32 % : la lumière traverse en une seconde puis se repose
+   hors champ le reste du cycle. Une course plus longue passerait l'essentiel du
+   temps hors de la carte et on ne verrait qu'un éclair. */
+@keyframes fdGloss{ 0%{ transform:rotate(18deg) translateX(-170%); } 32%,100%{ transform:rotate(18deg) translateX(330%); } }
+.fd-cc:nth-child(2)::after{ animation-delay:1.42s; }
+.fd-cc:nth-child(3)::after{ animation-delay:1.84s; }
+.fd-cc:nth-child(4)::after{ animation-delay:2.26s; }
+.fd-cc:nth-child(5)::after{ animation-delay:2.68s; }
+.fd-cc:nth-child(6)::after{ animation-delay:3.1s; }
 .fd-cc-zoom{ position:absolute; top:8px; right:8px; width:22px; height:22px; border-radius:7px;
   display:flex; align-items:center; justify-content:center;
   background:rgba(90,79,192,.08); border:1px solid rgba(90,79,192,.16); }
@@ -1323,6 +1344,10 @@ export async function mount(root, param) {
     const coachHtml = coach.length
       ? `<div class="fd-coach-wrap">
           ${seclab("Cartes coach", lang !== "fr" ? ui("coach", "Cartes coach") : null)}
+          <div class="fd-coach-hook">
+            <span class="fd-hook-av" aria-hidden="true"><img src="/skins/mascot-point.png" alt="" /></span>
+            <p>${esc(ui("coach_hook", "Deux minutes ici t'évitent une leçon de plus"))}</p>
+          </div>
           <div class="fd-coach">
             ${coach
               .map(
