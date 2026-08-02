@@ -58,7 +58,7 @@ const STR = {
     h1: `Prépare ta leçon <br><em>avant de monter en voiture.</em>`,
     // ⚠️ Pas de « la seule app » : allégation de supériorité invérifiable
     // (pratiques commerciales trompeuses). On dit ce qu'on fait, pas qu'on est seul.
-    lead: `L'app qui travaille ta <strong>conduite</strong> entre les leçons. Pas une énième app de code.`,
+    lead: `L'app qui travaille ta <strong>conduite</strong> entre les leçons.`,
     tTitle: `OBJECTIF PERMIS<br>EN 90 JOURS`,
     tSub: "Conduite · mini-jeux · simulations d'examen",
     tBoardLbl: "Départ",
@@ -69,8 +69,6 @@ const STR = {
     tPrice: "4,99 €",
     freeCta: "Commencer gratuitement",
     freeNote: "3 leçons offertes · sans carte bancaire",
-    cta: `Tout débloquer · 4,99 €/mois`,
-    ctaNote: `Paiement sécurisé Stripe · <b>Satisfait ou remboursé sous 3 jours</b><br><small>Moins de 6 minutes de conduite.</small>`,
     bulle: "3 compétences validées !",
     bulleSub: "cette semaine",
     secCode: `Préparer le permis, c'est <em>bien plus</em> que conduire.`,
@@ -82,9 +80,7 @@ const STR = {
       "Mini-jeu En situation : un croisement, à toi de décider qui passe",
     centreTitle: "Ton centre d'examen décortiqué",
     centreTxt:
-      "Difficulté, accès, réputation des examinateurs et pièges du parcours. Centre par centre (Cergy, Argenteuil, Bobigny…).",
-    centreAlt:
-      "Fiche du centre d'examen de Cergy : difficulté 3/5, accès, pièges du parcours",
+      "On a passé les centres au crible : la difficulté réelle, l'accès, les pièges du parcours et ce que les examinateurs regardent. Le jour J tu arrives sur un terrain que tu connais déjà.",
     feats: [
       {
         mask: "cahier",
@@ -109,9 +105,9 @@ const STR = {
     ],
     mathsNote: "Une leçon mal préparée = 55 € de perdus.",
     mathsSrc: "Sources : UFC-Que Choisir (budget permis) · Sécurité routière",
-    secPass: "Un seul prix. Tout PermiGo.",
+    secPass: "Un seul prix. Tout est dedans.",
     secPassSub:
-      "Pas de formule à choisir, pas d'engagement. Tu commences gratuitement, et le jour où tu veux la suite, c'est 4,99 € par mois.",
+      "Pas de formule à choisir, pas d'engagement. Tu commences gratuitement, et le jour où tu veux la suite, c'est 4,99 € par mois. Moins de 6 minutes de conduite.",
     passes: {
       mensuel: {
         name: "Pass PermiGo",
@@ -190,7 +186,7 @@ const STR = {
     kicker: "Driving school or self-taught",
     docTitle: "PermiGo. Prepare every driving lesson before you get in the car",
     h1: `Prepare every lesson <br><em>before you get in the car.</em>`,
-    lead: `The app that trains your <strong>driving</strong> between lessons. Not just another code-test app.`,
+    lead: `The app that trains your <strong>driving</strong> between lessons.`,
     tTitle: `LICENCE GOAL:<br>90 DAYS`,
     tSub: "Driving · mini-games · exam simulations",
     tBoardLbl: "Start",
@@ -201,8 +197,6 @@ const STR = {
     tPrice: "€4.99",
     freeCta: "Start for free",
     freeNote: "3 lessons included · no card needed",
-    cta: `Unlock everything · €4.99/month`,
-    ctaNote: `Secure Stripe checkout · <b>3-day money-back guarantee</b><br><small>Less than 6 minutes of driving lessons.</small>`,
     bulle: "3 skills validated!",
     bulleSub: "this week",
     secCode: `Getting your licence takes <em>more</em> than driving.`,
@@ -213,8 +207,7 @@ const STR = {
     situAlt: "On-the-road mini-game: a crossroads, you decide who goes first",
     centreTitle: "Your test centre decoded",
     centreTxt:
-      "Difficulty, access, examiner reputation and the known traps of the route. Centre by centre.",
-    centreAlt: "Cergy test-centre sheet: difficulty 3/5, access, route traps",
+      "We went through the test centres one by one: the real difficulty, getting there, the traps on the route and what examiners watch for. On test day you arrive somewhere you already know.",
     feats: [
       {
         mask: "cahier",
@@ -243,9 +236,9 @@ const STR = {
     ],
     mathsNote: "One unprepared lesson = €55 wasted.",
     mathsSrc: "Sources: UFC-Que Choisir (licence budget) · Sécurité routière",
-    secPass: "One price. All of PermiGo.",
+    secPass: "One price. Everything is in it.",
     secPassSub:
-      "No plan to pick, no commitment. You start for free, and the day you want the rest, it is €4.99 a month.",
+      "No plan to pick, no commitment. You start for free, and the day you want the rest, it is €4.99 a month. Less than 6 minutes of driving lessons.",
     passes: {
       mensuel: {
         name: "PermiGo Pass",
@@ -320,7 +313,7 @@ const STR = {
     kicker: "مدرسة قيادة أو مترشّح حر",
     docTitle: "PermiGo. حضّر كل درس قيادة قبل أن تركب السيارة",
     h1: `حضِّر كل درس <br><em>قبل أن تركب السيارة.</em>`,
-    lead: `التطبيق الذي يدرّبك على <strong>القيادة</strong> بين الدروس. وليس مجرّد تطبيق آخر لاختبار الكود.`,
+    lead: `التطبيق الذي يدرّبك على <strong>القيادة</strong> بين الدروس.`,
     tTitle: `الهدف: رخصة القيادة<br>في 90 يوماً`,
     tSub: "قيادة · ألعاب مصغّرة · محاكاة الامتحان",
     tBoardLbl: "الانطلاق",
@@ -331,8 +324,6 @@ const STR = {
     tPrice: "€4.99",
     freeCta: "ابدأ مجاناً",
     freeNote: "3 دروس هدية · بدون بطاقة بنكية",
-    cta: `افتح كل شيء · €4.99/شهر`,
-    ctaNote: `دفع آمن عبر Stripe · <b>مضمون أو استرداد أموالك خلال 3 أيام</b><br><small>أقل من 6 دقائق قيادة.</small>`,
     bulle: "تم التحقق من 3 مهارات!",
     bulleSub: "هذا الأسبوع",
     secCode: `الحصول على الرخصة يتطلّب <em>أكثر</em> من مجرّد القيادة.`,
@@ -343,8 +334,7 @@ const STR = {
     situAlt: "لعبة مصغّرة على الطريق: مفترق طرق، أنت تقرّر من يمرّ أولاً",
     centreTitle: "مركز امتحانك مفصّلاً",
     centreTxt:
-      "الصعوبة، الوصول، سمعة الممتحنين والفخاخ المعروفة في المسار. مركزاً تلو الآخر.",
-    centreAlt: "بطاقة مركز امتحان Cergy: الصعوبة 3/5، الوصول، فخاخ المسار",
+      "درسنا مراكز الامتحان واحداً واحداً: الصعوبة الحقيقية، والوصول، وفخاخ المسار، وما ينتبه إليه الممتحنون. يوم الامتحان تصل إلى أرض تعرفها مسبقاً.",
     feats: [
       {
         mask: "cahier",
@@ -373,9 +363,9 @@ const STR = {
     ],
     mathsNote: "درس غير مُحضَّر = €55 ضائعة.",
     mathsSrc: "المصادر: UFC-Que Choisir (ميزانية الرخصة) · Sécurité routière",
-    secPass: "سعر واحد. PermiGo كاملاً.",
+    secPass: "سعر واحد. كل شيء بداخله.",
     secPassSub:
-      "لا صيغ تختار بينها ولا التزام. تبدأ مجاناً، وفي اليوم الذي تريد فيه البقية، السعر €4.99 شهرياً.",
+      "لا صيغ تختار بينها ولا التزام. تبدأ مجاناً، وفي اليوم الذي تريد فيه البقية، السعر €4.99 شهرياً. أقل من 6 دقائق قيادة.",
     passes: {
       mensuel: {
         name: "باقة PermiGo",
@@ -749,8 +739,12 @@ const STYLE = `<style>
     box-shadow: 0 1px 0 rgba(255,255,255,.35);
   }
 
-  /* CTA principal */
-  .pv-cta-hero {
+  /* LA porte de la page, et la seule sous le billet : elle prend l'or, la
+     couleur la plus forte de la page. Elle etait verte, a cote d'un bouton
+     d'achat dore qui gagnait le regard a tous les coups. Le bouton d'achat est
+     parti, l'or revient a ce qu'on veut vraiment faire cliquer.
+     Encre brune et pas du blanc : sur cet or, blanc tombe a 1,6 de contraste. */
+  .pv-cta-free {
     display: block; width: 100%; max-width: 340px; margin: 26px auto 0;
     border: 0; cursor: pointer; border-radius: 18px; padding: 17px;
     font: 800 17px/1 'Archivo', sans-serif; color: #4a3300; text-shadow: 0 1px 0 rgba(255,255,255,.35);
@@ -758,28 +752,8 @@ const STYLE = `<style>
     box-shadow: inset 0 3px 0 rgba(255,255,255,.55), 0 6px 0 #a86e00, 0 12px 26px rgba(0,0,0,.4);
     transition: transform .1s ease, box-shadow .1s ease;
   }
-  .pv-cta-hero:active { transform: translateY(4px); box-shadow: inset 0 3px 0 rgba(255,255,255,.55), 0 2px 0 #a86e00, 0 4px 8px rgba(0,0,0,.3); }
-  .pv-cta-hero[disabled] { opacity: .65; cursor: wait; }
-  /* Porte gratuite : VERT, la même couleur que dans la barre collante. Elle
-     était violette, comme les boutons d'achat des cartes : deux actions
-     opposées se ressemblaient. Une seule couleur pour « gratuit » sur toute la
-     page, l'or reste celle de l'achat. */
-  .pv-cta-free {
-    display: block; width: 100%; max-width: 340px; margin: 26px auto 0;
-    border: 0; cursor: pointer; border-radius: 18px; padding: 17px;
-    /* Encre vert-nuit, PAS du blanc : blanc sur ce vert ne monte qu'a 2,1 de
-       contraste (le vert est trop lumineux). En fonce, on est a 4,7 minimum sur
-       tout le degrade, et le bouton garde son punch. Meme logique que l'or. */
-    font: 800 17px/1 'Archivo', sans-serif; color: #123a00; text-shadow: 0 1px 0 rgba(255,255,255,.28);
-    background: linear-gradient(180deg, #6bdd11 0%, var(--go) 55%, #46a800);
-    box-shadow: inset 0 3px 0 rgba(255,255,255,.4), 0 6px 0 #2f7300, 0 12px 26px rgba(0,0,0,.4);
-    transition: transform .1s ease, box-shadow .1s ease;
-  }
-  .pv-cta-free:active { transform: translateY(4px); box-shadow: inset 0 3px 0 rgba(255,255,255,.35), 0 2px 0 #2f7300, 0 4px 8px rgba(0,0,0,.3); }
+  .pv-cta-free:active { transform: translateY(4px); box-shadow: inset 0 3px 0 rgba(255,255,255,.55), 0 2px 0 #a86e00, 0 4px 8px rgba(0,0,0,.3); }
   .pv-free-note { text-align: center; font: 600 12.5px/1.6 'Archivo', sans-serif; color: var(--ink-mu); margin: 10px 0 18px; }
-  .pv-cta-note { text-align: center; font: 600 12.5px/1.6 'Archivo', sans-serif; color: var(--ink-dim); margin: 12px 0 0; }
-  .pv-cta-note b { color: var(--ink-soft); }
-  .pv-cta-note small { font-size: 11px; color: #655a97; }
 
   /* ── Scène téléphone + mascotte ── */
   /* MOMENT SIGNATURE 1 — le téléphone se redresse.
@@ -834,6 +808,7 @@ const STYLE = `<style>
   }
   .pv-situ-shot::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(155deg, rgba(255,255,255,.16), transparent 30%); }
   .pv-situ-shot img { display: block; width: 100%; height: auto; }
+  .pv-situ-solo { display: block; }
   .pv-situ-txt b { display: block; font: 800 16px/1.25 'Archivo', sans-serif; margin-bottom: 5px; }
   .pv-situ-txt span { font: 600 12.5px/1.5 'Archivo', sans-serif; color: var(--ink-mu); }
   .pv-feat {
@@ -1002,20 +977,23 @@ const STYLE = `<style>
     display: flex; flex-direction: column; align-items: stretch; gap: 7px;
     width: 100%; max-width: 400px; margin: 0 auto;
   }
+  /* Meme or que la porte gratuite du corps de page : une seule couleur pour
+     « commencer », partout, du haut en bas. */
   .pv-sticky-free {
     border: 0; cursor: pointer; border-radius: 14px; padding: 14px;
-    font: 800 16px/1 'Archivo', sans-serif; color: #123a00; text-shadow: 0 1px 0 rgba(255,255,255,.28);
-    background: linear-gradient(180deg, #6bdd11 0%, var(--go) 55%, #46a800);
-    box-shadow: inset 0 2px 0 rgba(255,255,255,.4), 0 4px 0 #2f7300;
+    font: 800 16px/1 'Archivo', sans-serif; color: #4a3300; text-shadow: 0 1px 0 rgba(255,255,255,.35);
+    background: linear-gradient(180deg, #ffe08a, var(--gold) 55%, var(--gold-dp));
+    box-shadow: inset 0 2px 0 rgba(255,255,255,.5), 0 4px 0 #a86e00;
     -webkit-tap-highlight-color: transparent;
     transition: transform .1s ease, box-shadow .1s ease;
   }
-  .pv-sticky-free:active { transform: translateY(3px); box-shadow: inset 0 2px 0 rgba(255,255,255,.32), 0 1px 0 #2f7300; }
-  /* L'achat reste accessible en permanence, mais discret : le visiteur qui a
-     déjà décidé le trouve du premier coup d'œil, les autres ne le subissent pas. */
+  .pv-sticky-free:active { transform: translateY(3px); box-shadow: inset 0 2px 0 rgba(255,255,255,.5), 0 1px 0 #a86e00; }
+  /* L'achat reste accessible en permanence, mais discret. En encre douce et
+     plus en or : l'or appartient maintenant au bouton juste au-dessus, et deux
+     ors cote a cote, c'est deux appels au meme moment. */
   .pv-sticky-paid {
     border: 0; background: none; cursor: pointer; padding: 2px 6px 1px;
-    font: 800 13px/1.3 'Archivo', sans-serif; color: var(--gold);
+    font: 800 13px/1.3 'Archivo', sans-serif; color: var(--ink-soft);
     text-decoration: underline; text-underline-offset: 3px;
     -webkit-tap-highlight-color: transparent;
   }
@@ -1252,11 +1230,13 @@ export async function mount(root) {
       <!-- La porte gratuite passe DEVANT l'achat : le compte gratuit existe
            depuis le 30/07 et n'avait aucun lien depuis le site (un visiteur sans
            code moniteur ne pouvait tout simplement pas entrer). -->
+      <!-- UNE seule porte sous le billet : la gratuite. Le bouton d'achat qui
+           la suivait est retiré (decision Rayan 03/08/2026, « le but c'est
+           d'epurer »). Le prix a sa propre section plus bas, et la barre
+           collante le garde a portee de pouce en permanence. Demander de payer
+           a quelqu'un qui vient de lire le titre, c'est demander trop tot. -->
       <button class="pv-cta-free" id="pv-free" type="button">${L.freeCta}</button>
       <p class="pv-free-note">${L.freeNote}</p>
-
-      <button class="pv-cta-hero" data-plan="mensuel" type="button">${L.cta}</button>
-      <p class="pv-cta-note">${L.ctaNote}</p>
 
       <div class="pv-stage pv-rev" aria-hidden="true">
         <div class="pv-phone"><img src="/showcase/eleve-parcours.webp" alt="" width="390" height="844" loading="lazy" decoding="async"></div>
@@ -1276,12 +1256,14 @@ export async function mount(root) {
             <span>${L.situTxt}</span>
           </div>
         </div>
-        <div class="pv-situ">
+        <!-- Sans capture : a 138 px de large on ne lisait NI le nom du centre,
+             NI la difficulte, NI le texte. Une vignette illisible ne prouve
+             rien, elle occupe de la place. Deux phrases disent la meme chose. -->
+        <div class="pv-situ pv-situ-solo">
           <div class="pv-situ-txt">
             <b>${L.centreTitle}</b>
             <span>${L.centreTxt}</span>
           </div>
-          <div class="pv-situ-shot"><img src="/showcase/eleve-centre-examen.webp" alt="${L.centreAlt}" width="780" height="990" loading="lazy" decoding="async"></div>
         </div>
         ${L.feats
           .map(
@@ -1490,7 +1472,7 @@ function wire(root, me, lang, L) {
   // Démonstration jouable. Montée avec le reste de la page : elle est là ou la
   // page ne s'affiche pas du tout, plus de disparition silencieuse.
   const demoHost = root.querySelector("#pv-demo");
-  if (demoHost) mountDemoSituation(demoHost, lang, () => goFree("demo"));
+  if (demoHost) mountDemoSituation(demoHost, lang);
 
   // Porte gratuite (hero, démonstration, barre collante) → inscription élève
   // sans code moniteur. Évènement SÉPARÉ de l'achat : on veut voir laquelle des
