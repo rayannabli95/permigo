@@ -44,12 +44,12 @@ const STR = {
     alt: "Croisement sans panneau ni feu. Un camion arrive par ta droite.",
     q: "Un camion arrive par ta droite. Qui passe en premier ?",
     r: { v1: "Le camion", moi: "Toi" },
+    // Une ligne, pas trois. Personne ne lit un paragraphe pour une réponse
+    // qu'il vient de donner, et la scène qui se joue dit déjà l'essentiel.
     ok: "Bien vu.",
-    okSub:
-      "Il vient de ta droite : il passe. Avec un camion, garde encore plus de marge. Il démarre lentement.",
+    okSub: "Il vient de ta droite. Il passe.",
     ko: "Presque.",
-    koSub:
-      "Regarde à droite. Gros ou petit, la règle ne change pas : le camion vient de ta droite, il passe en premier.",
+    koSub: "Il vient de ta droite. Il passe avant toi.",
     retry: "Réessayer",
     cta: "Continuer gratuitement",
     more: "Il y a 59 scènes comme celle-ci dans l'app.",
@@ -60,11 +60,9 @@ const STR = {
     q: "A truck is coming from your right. Who goes first?",
     r: { v1: "The truck", moi: "You" },
     ok: "Well spotted.",
-    okSub:
-      "It comes from your right, so it goes first. With a truck, keep even more margin. It pulls away slowly.",
+    okSub: "It comes from your right. It goes first.",
     ko: "Almost.",
-    koSub:
-      "Look right. Big or small, the rule doesn't change: the truck comes from your right, it goes first.",
+    koSub: "It comes from your right. It goes before you.",
     retry: "Try again",
     cta: "Continue for free",
     more: "There are 59 scenes like this one in the app.",
@@ -75,33 +73,53 @@ const STR = {
     q: "شاحنة قادمة من يمينك. من يمرّ أولًا؟",
     r: { v1: "الشاحنة", moi: "أنت" },
     ok: "أحسنت.",
-    okSub:
-      "هي قادمة من يمينك، فتمرّ أولًا. ومع الشاحنة، اترك هامشًا أكبر. فهي تنطلق ببطء.",
+    okSub: "هي قادمة من يمينك. تمرّ أولًا.",
     ko: "تقريبًا.",
-    koSub:
-      "انظر إلى اليمين. كبيرة كانت المركبة أم صغيرة، القاعدة لا تتغيّر: الشاحنة قادمة من يمينك، فتمرّ أولًا.",
+    koSub: "هي قادمة من يمينك. تمرّ قبلك.",
     retry: "أعد المحاولة",
     cta: "تابع مجاناً",
     more: "في التطبيق 59 سيناريو مثل هذا.",
   },
 };
 
+// DA « Arène 3D » (mockups/DA-ARENE-3D-SPEC.md, choix Rayan du 02/08/2026) :
+// nuit violet, or chaud, boutons plastique qui s'enfoncent. La page qui vend
+// parle enfin la même langue que le produit qu'elle vend. Une seule police,
+// Archivo, comme partout ailleurs.
 const STYLE = `<style>
   .dmo {
-    position: relative; margin: 16px auto 0; max-width: 400px;
-    border-radius: 24px; padding: 14px 14px 16px;
-    background: rgba(255,255,255,.05); border: 1.5px solid rgba(142,135,255,.34);
-    box-shadow: 0 18px 40px -18px rgba(0,0,0,.75);
+    position: relative; margin: 20px auto 0; max-width: 400px;
+    border-radius: 26px; padding: 18px 16px;
+    background: linear-gradient(180deg, #262059 0%, #191344 55%, #140f38 100%);
+    border: 1.5px solid rgba(255,203,61,.30);
+    box-shadow:
+      0 30px 60px -24px rgba(0,0,0,.9),
+      0 0 0 1px rgba(0,0,0,.4),
+      inset 0 1.5px 0 rgba(255,255,255,.16),
+      inset 0 -22px 40px -24px rgba(255,155,30,.35);
   }
   .dmo-kick {
     display: inline-flex; align-items: center; gap: 6px;
-    font: 800 10.5px/1 'Archivo', sans-serif; letter-spacing: .14em; text-transform: uppercase;
-    color: #1a1030; background: var(--gold); padding: 6px 10px; border-radius: 999px;
-    position: absolute; top: -11px; inset-inline-start: 16px;
+    font: 800 11px/1 'Archivo', sans-serif; letter-spacing: .14em; text-transform: uppercase;
+    color: #4a2500; padding: 7px 13px; border-radius: 999px;
+    background: linear-gradient(180deg, #ffe27a 0%, #ffcb3d 45%, #ff9b1e 100%);
+    box-shadow: 0 3px 0 #b85e00, 0 6px 14px rgba(255,155,30,.35);
+    position: absolute; top: -13px; inset-inline-start: 16px;
   }
+  /* Le cadre doré tient la scène comme un écran de jeu : liseré or, tranche
+     sombre, puis l'ombre portée. Trois couches d'un seul box-shadow. */
   .dmo-scene {
-    border-radius: 16px; overflow: hidden; position: relative;
-    border: 3px solid #160f38; box-shadow: 0 10px 24px rgba(0,0,0,.45);
+    border-radius: 18px; overflow: hidden; position: relative; border: 0;
+    box-shadow:
+      0 0 0 1.5px rgba(255,203,61,.34),
+      0 0 0 5px #120d33,
+      0 14px 30px -8px rgba(0,0,0,.75),
+      inset 0 0 60px 12px rgba(4,2,20,.55);
+  }
+  /* Reflet de vitre en haut de la scène. */
+  .dmo-scene::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+    background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,0) 42%);
   }
   /* La scène est carrée : on la recadre en hauteur pour que la question ET les
      deux réponses tiennent dans le premier écran d'un iPhone 13. */
@@ -123,44 +141,77 @@ const STYLE = `<style>
   @keyframes dmoChev { 0%, 70%, 100% { opacity: 0; } 25%, 45% { opacity: 1; } }
   @keyframes dmoTagIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
   .dmo-q {
-    font: 800 16.5px/1.3 'Archivo', sans-serif; color: var(--pv-ink);
-    margin: 10px 2px 10px; text-align: center; text-wrap: balance;
+    font: 800 18px/1.3 'Archivo', sans-serif; color: #fff;
+    margin: 16px 4px 13px; text-align: center; text-wrap: balance;
+    text-shadow: 0 2px 4px rgba(0,0,0,.35);
   }
   .dmo-answers { display: flex; gap: 9px; }
+  /* Boutons « plastique » : la tranche dure (0 7px 0) est ce qui donne le
+     relief, et elle se réduit à 2px quand le doigt appuie. Le bouton
+     s'enfonce vraiment, il ne fait pas semblant. */
   .dmo-ans {
-    flex: 1; min-height: 54px; padding: 13px 10px; cursor: pointer;
-    border-radius: 15px; border: 1.5px solid rgba(255,255,255,.18);
-    background: linear-gradient(180deg, rgba(255,255,255,.13), rgba(255,255,255,.05));
-    color: #fff; font: 800 14.5px/1.2 'Archivo', sans-serif;
-    transition: transform .1s ease, border-color .15s ease, background .15s ease;
+    flex: 1; min-height: 60px; padding: 13px 10px; cursor: pointer;
+    border: 0; border-radius: 18px;
+    background: linear-gradient(180deg, #443c80 0%, #2c2560 55%, #241e52 100%);
+    box-shadow: 0 7px 0 #15113a, 0 12px 20px -8px rgba(0,0,0,.7),
+                inset 0 2px 0 rgba(255,255,255,.26), inset 0 -8px 14px -8px rgba(0,0,0,.5);
+    color: #fff; font: 800 15.5px/1.2 'Archivo', sans-serif;
+    transition: transform .09s ease, box-shadow .09s ease;
     -webkit-tap-highlight-color: transparent;
   }
-  .dmo-ans:active { transform: scale(.97); }
-  .dmo-ans.ok { border-color: var(--go); background: linear-gradient(180deg, rgba(88,204,2,.32), rgba(88,204,2,.14)); }
-  .dmo-ans.ko { border-color: #e2513f; background: linear-gradient(180deg, rgba(226,81,63,.28), rgba(226,81,63,.12)); }
-  .dmo-ans[disabled] { cursor: default; opacity: .55; }
-  .dmo-ans.ok[disabled], .dmo-ans.ko[disabled] { opacity: 1; }
-  .dmo-fb { margin-top: 12px; border-radius: 15px; padding: 12px 14px; text-align: start; }
-  .dmo-fb.ok { background: rgba(88,204,2,.13); border: 1px solid rgba(88,204,2,.4); }
-  .dmo-fb.ko { background: rgba(255,206,77,.12); border: 1px solid rgba(255,206,77,.4); }
-  .dmo-fb b { display: block; font: 800 15px/1.3 'Archivo', sans-serif; color: #fff; margin-bottom: 3px; }
-  .dmo-fb span { font: 600 13px/1.5 'Archivo', sans-serif; color: var(--ink-soft); }
-  .dmo-more { display: block; text-align: center; font: 600 12px/1.5 'Archivo', sans-serif; color: var(--ink-dim); margin: 10px 0 0; }
-  .dmo-cta {
-    display: block; width: 100%; margin: 12px 0 0; border: 0; cursor: pointer;
-    border-radius: 15px; padding: 15px;
-    font: 800 16px/1 'Archivo', sans-serif; color: #fff; text-shadow: 0 1.5px 0 rgba(0,0,0,.28);
-    background: linear-gradient(180deg, var(--in) 0%, var(--in-dp) 70%, var(--in-dk));
-    box-shadow: inset 0 2.5px 0 rgba(255,255,255,.28), 0 5px 0 var(--in-dk);
+  .dmo-ans:active {
+    transform: translateY(5px);
+    box-shadow: 0 2px 0 #15113a, inset 0 2px 0 rgba(255,255,255,.26);
   }
-  .dmo-cta:active { transform: translateY(3px); box-shadow: inset 0 2.5px 0 rgba(255,255,255,.28), 0 2px 0 var(--in-dk); }
+  .dmo-ans.ok {
+    background: linear-gradient(180deg, #b6f05a 0%, #78d128 55%, #58a416 100%);
+    color: #1c3300;
+    box-shadow: 0 7px 0 #3d7a06, 0 12px 22px -8px rgba(88,204,2,.5),
+                inset 0 2px 0 rgba(255,255,255,.5);
+  }
+  .dmo-ans.ko {
+    background: linear-gradient(180deg, #ff8b7a 0%, #e2513f 55%, #b93526 100%);
+    color: #3d0b04;
+    box-shadow: 0 7px 0 #8a2418, 0 12px 22px -8px rgba(226,81,63,.45),
+                inset 0 2px 0 rgba(255,255,255,.45);
+  }
+  .dmo-ans[disabled] { cursor: default; opacity: .5; }
+  .dmo-ans.ok[disabled], .dmo-ans.ko[disabled] { opacity: 1; }
+  .dmo-fb {
+    margin-top: 15px; border-radius: 18px; padding: 14px 15px 14px 17px; text-align: start;
+    background: linear-gradient(180deg, rgba(12,8,36,.85), rgba(12,8,36,.6));
+    border: 1px solid rgba(255,255,255,.10);
+    border-inline-start: 4px solid var(--gold);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.10);
+  }
+  .dmo-fb.ok { border-inline-start-color: #78d128; }
+  .dmo-fb.ko { border-inline-start-color: var(--gold); }
+  .dmo-fb b { display: block; font: 800 16px/1.3 'Archivo', sans-serif; color: #fff; margin-bottom: 3px; }
+  .dmo-fb span { font: 600 13.5px/1.5 'Archivo', sans-serif; color: var(--ink-soft); }
+  .dmo-more { display: block; text-align: center; font: 600 12px/1.5 'Archivo', sans-serif; color: #b9b2e8; margin: 10px 0 0; }
+  /* Le bouton qui compte passe en or : c'est le seul élément doré plein de la
+     carte, rien d'autre ne lui dispute le regard. */
+  .dmo-cta {
+    display: block; width: 100%; margin: 14px 0 0; border: 0; cursor: pointer;
+    border-radius: 18px; padding: 17px;
+    font: 800 16.5px/1 'Archivo', sans-serif; color: #4a2500;
+    text-shadow: 0 1px 0 rgba(255,255,255,.4);
+    background: linear-gradient(180deg, #ffe27a 0%, #ffcb3d 48%, #ff9b1e 100%);
+    box-shadow: 0 7px 0 #b85e00, 0 14px 26px -10px rgba(255,155,30,.55),
+                inset 0 2px 0 rgba(255,255,255,.5);
+    transition: transform .09s ease, box-shadow .09s ease;
+  }
+  .dmo-cta:active {
+    transform: translateY(5px);
+    box-shadow: 0 2px 0 #b85e00, inset 0 2px 0 rgba(255,255,255,.5);
+  }
   .dmo-retry {
     display: block; margin: 10px auto 0; background: none; border: 0; cursor: pointer;
     font: 700 13.5px/1 'Archivo', sans-serif; color: var(--ink-soft);
     text-decoration: underline; text-underline-offset: 3px; min-height: 44px;
   }
   @media (prefers-reduced-motion: reduce) {
-    .dmo-ans { transition: none; }
+    .dmo-ans, .dmo-cta { transition: none; }
     /* Mouvement coupé : le décor ne respire plus et les acteurs se posent
        d'un coup à l'arrivée. La scène se joue quand même, elle ne glisse pas. */
     .dmo-scene svg, .dmo-scene .sit-veh, .dmo-scene .sit-halo,
