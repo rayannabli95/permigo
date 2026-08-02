@@ -21,7 +21,14 @@
   <meta property="og:site_name" content="PermiGo" />
   <meta property="og:locale" content="fr_FR" />
   <meta property="og:title" content="PermiGo. Le compagnon qui te prépare avant chaque heure de conduite" />
-  <meta property="og:description" content="Prépare chaque leçon avant de monter en voiture, débriefe après, progresse entre deux. Mode découverte gratuit, Pass Permis dès 9,99 €/mois." />
+  <!-- ⚠️ PRIX ÉLÈVE : 4,99 €/mois (décision Rayan, 02/08/2026, PR #688). Il est
+       écrit à la main à QUATRE endroits de ce fichier et de la landing :
+       og:description, twitter:description, le JSON-LD `Offer` plus bas, et
+       `src/pages/public/pass.js`. Ces deux meta sont restées à 9,99 € pendant
+       que la landing affichait 4,99 € : un lien partagé sur WhatsApp annonçait
+       un autre prix que la page. Changer le prix = changer les quatre.
+       ⚠️ 9,99 €/mois reste le prix MONITEUR, il ne se touche pas ici. -->
+  <meta property="og:description" content="Prépare chaque leçon avant de monter en voiture, débriefe après, progresse entre deux. Mode découverte gratuit. Tout PermiGo · 4,99 €/mois." />
   <meta property="og:url" content="https://www.permigo.fr/" />
   <!-- Nom de fichier daté À CHANGER à chaque nouveau visuel : les réseaux
        (WhatsApp, Messenger, LinkedIn, iMessage) gardent l'aperçu en cache
@@ -35,7 +42,8 @@
   <!-- ╔══ Twitter Card ══╗ -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="PermiGo. Le compagnon qui te prépare avant chaque heure de conduite" />
-  <meta name="twitter:description" content="Prépare chaque leçon avant de monter en voiture, débriefe après, progresse entre deux. Mode découverte gratuit, Pass Permis dès 9,99 €/mois." />
+  <!-- Même prix que og:description ci-dessus. 4,99 €, pas 9,99 €. -->
+  <meta name="twitter:description" content="Prépare chaque leçon avant de monter en voiture, débriefe après, progresse entre deux. Mode découverte gratuit. Tout PermiGo · 4,99 €/mois." />
   <meta name="twitter:image" content="https://www.permigo.fr/og-image-2026.jpg" />
   <meta name="twitter:image:alt" content="PermiGo. Prépare ta prochaine heure de conduite" />
 
