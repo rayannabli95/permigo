@@ -672,6 +672,13 @@ const STYLE = `<style>
   .pv-stag > * { opacity: 0; transform: translateY(20px); transition: opacity .5s ease, transform .5s var(--pv-ease); }
   .pv-stag.in > * { opacity: 1; transform: none; }
 
+  /* Le PREMIER écran. Il n'avait aucune entrée : les 14 apparitions vivaient
+     toutes sous la ligne de flottaison, donc l'écran de chargement laissait
+     place à une page déjà posée, d'un bloc. Il se lève maintenant pendant que
+     le splash s'efface (signal permigo:splash-out, voir wireReveal). */
+  #pv-demo.pv-rev { transition-delay: .14s; }
+  .pv-avis-haut.pv-rev { transition-delay: .26s; }
+
   /* Titres de section : le texte se découvre par le bas, comme tiré
      de dessous une ligne. Plus net qu'un simple fondu. */
   .pv-sec-title.pv-rev { transform: none; transition: opacity .4s ease; overflow: hidden; }
@@ -1260,7 +1267,7 @@ export async function mount(root) {
 
     <div class="pv-wrap">
 
-      <section class="pv-hero">
+      <section class="pv-hero pv-rev pv-stag">
         <div class="pv-kicker">${L.kicker}</div>
         <h1 class="pv-h1">${L.h1}</h1>
         <p class="pv-lead">${L.lead}</p>
@@ -1269,13 +1276,13 @@ export async function mount(root) {
       <!-- La démonstration passe AVANT le billet et avant le prix : on montre,
            puis on demande. Montée à la demande (le moteur de scène n'est pas
            dans le premier chargement) et sans compte ni appel réseau. -->
-      <div id="pv-demo"></div>
+      <div id="pv-demo" class="pv-rev"></div>
 
       <!-- Trois avis AVANT le billet : la scène montre ce que c'est, les avis
            disent que ça marche, et seulement après on parle d'argent. Les deux
            premiers ont 56 et 43 ans — la première objection d'un visiteur de
            40 ans est « c'est pour les jeunes ». -->
-      <div class="pv-avis-lot pv-avis-haut">${renderAvis(lang, L, 0, 3)}</div>
+      <div class="pv-avis-lot pv-avis-haut pv-rev">${renderAvis(lang, L, 0, 3)}</div>
 
       ${renderTicket(L, { lang })}
 
@@ -1468,7 +1475,21 @@ function wireReveal(root) {
     },
     { rootMargin: "0px 0px -60px 0px", threshold: 0.08 },
   );
-  els.forEach((el) => io.observe(el));
+  const start = () => els.forEach((el) => io.observe(el));
+
+  // L'écran de chargement couvre encore la page : si on observait maintenant,
+  // toute la mise en scène du premier écran se jouerait DERRIÈRE lui et le
+  // visiteur verrait le noir laisser place à une page déjà posée. On attend le
+  // signal envoyé par index.html au début du fondu de sortie : le premier écran
+  // se lève pendant que le splash s'efface.
+  const sp = document.getElementById("splash");
+  if (!sp || sp.classList.contains("is-out")) return start();
+  document.addEventListener("permigo:splash-out", start, { once: true });
+  // Filet : le splash ne dépasse jamais 3,4 s. S'il a disparu autrement (erreur,
+  // onglet en arrière-plan), la page ne doit pas rester invisible.
+  setTimeout(() => {
+    if (!document.getElementById("splash")) start();
+  }, 3800);
 }
 
 /** Fait défiler un montant de 0 jusqu'à sa valeur, en gardant EXACTEMENT
