@@ -95,6 +95,15 @@ async function boot() {
         const { mount } = await import("@/pages/public/rejoindre.js");
         return mount(app);
       }
+      // « Défie tes amis » : l'ami arrive d'une boucle WhatsApp, donc TOUJOURS
+      // par un premier chargement, jamais par une navigation interne. Sans
+      // cette branche il tombait sur la page de vente : la route existait
+      // dans router.js (hashchange) mais pas ici, et c'est ici que ça compte.
+      if (location.hash.startsWith("#/duel")) {
+        const code = location.hash.replace(/^#\/duel\/?/, "").split("?")[0];
+        const { mount } = await import("@/pages/common/duel.js");
+        return mount(app, code);
+      }
       if (location.hash.startsWith("#/ecole/")) {
         const slug = location.hash.replace("#/ecole/", "").split("?")[0];
         const { mount } = await import("@/pages/public/ecole.js");
@@ -208,9 +217,7 @@ async function boot() {
         () => import("@/pages/eleve/quiz.js"),
         () => import("@/pages/eleve/classement.js"),
       ],
-      enseignant: [
-        () => import("@/pages/enseignant/mes-eleves.js"),
-      ],
+      enseignant: [() => import("@/pages/enseignant/mes-eleves.js")],
       gerant: [() => import("@/pages/gerant/pulse.js")],
       owner: [() => import("@/pages/gerant/owner.js")],
     };
@@ -218,13 +225,9 @@ async function boot() {
       navigator.connection ||
       navigator.mozConnection ||
       navigator.webkitConnection;
-    const slowNetwork = ["slow-2g", "2g"].includes(
-      connection?.effectiveType,
-    );
+    const slowNetwork = ["slow-2g", "2g"].includes(connection?.effectiveType);
     const canPrefetch =
-      navigator.onLine !== false &&
-      !connection?.saveData &&
-      !slowNetwork;
+      navigator.onLine !== false && !connection?.saveData && !slowNetwork;
     if (canPrefetch) {
       const prefetch = () => {
         // L'onglet a pu passer en arrière-plan entre le boot et l'idle.
