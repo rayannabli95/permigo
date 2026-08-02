@@ -21,6 +21,7 @@ import { track } from "@/services/analytics.js";
 import {
   renderSituationScene,
   buildFocusFX,
+  actorScreenDelta,
 } from "@/components/eleve/situation-scene.js";
 
 // ── La scène (copie conforme de « camion-prio-droite ») ─────────
@@ -33,6 +34,9 @@ const SCENE = {
 };
 const FOCUS = { veh: "v1" };
 const BONNE = "v1";
+// La scène SE JOUE quand la réponse est bonne : le camion s'engage, ta voiture
+// le suit une seconde après. Recopié de « camion-prio-droite » (okAnim).
+const OK_ANIM = [{ veh: "v1" }, { veh: "moi", delai: 1100 }];
 
 const STR = {
   fr: {
@@ -102,7 +106,22 @@ const STYLE = `<style>
   /* La scène est carrée : on la recadre en hauteur pour que la question ET les
      deux réponses tiennent dans le premier écran d'un iPhone 13. */
   .dmo-scene svg { display: block; width: 100%; height: auto; max-height: 34vh; margin: -6% 0; }
-  .dmo-fx { position: absolute; inset: 0; pointer-events: none; }
+  /* Le décor respire, puis la scène SE JOUE : les acteurs avancent pour de
+     vrai. Mêmes classes et mêmes durées que le mini-jeu de l'app, sinon la
+     démonstration promet un mouvement que le produit ne tient pas. */
+  .dmo-scene svg { animation: dmoFloat 7s ease-in-out infinite alternate; }
+  .dmo-scene .sit-veh { transition: transform 1.6s cubic-bezier(.45,.05,.3,1), opacity .55s ease .95s; will-change: transform; }
+  .dmo-scene .sit-clign { opacity: 0; }
+  .dmo-scene .sit-veh.clign-droit .sit-clign-droit,
+  .dmo-scene .sit-veh.clign-gauche .sit-clign-gauche { opacity: 1; animation: dmoBlink .72s steps(2, jump-none) infinite; }
+  .dmo-scene .sit-halo { animation: dmoHalo 1.15s ease-in-out infinite; }
+  .dmo-scene .sit-chev { opacity: 0; animation: dmoChev 1.4s ease-in-out infinite; }
+  .dmo-scene .sit-tag { animation: dmoTagIn .5s cubic-bezier(.34,1.56,.64,1) both; }
+  @keyframes dmoFloat { from { transform: translateY(0); } to { transform: translateY(-5px); } }
+  @keyframes dmoBlink { 0%, 100% { opacity: 1; } 50% { opacity: .12; } }
+  @keyframes dmoHalo { 0%, 100% { opacity: .95; } 50% { opacity: .4; } }
+  @keyframes dmoChev { 0%, 70%, 100% { opacity: 0; } 25%, 45% { opacity: 1; } }
+  @keyframes dmoTagIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
   .dmo-q {
     font: 800 16.5px/1.3 'Archivo', sans-serif; color: var(--pv-ink);
     margin: 10px 2px 10px; text-align: center; text-wrap: balance;
@@ -140,7 +159,14 @@ const STYLE = `<style>
     font: 700 13.5px/1 'Archivo', sans-serif; color: var(--ink-soft);
     text-decoration: underline; text-underline-offset: 3px; min-height: 44px;
   }
-  @media (prefers-reduced-motion: reduce) { .dmo-ans { transition: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .dmo-ans { transition: none; }
+    /* Mouvement coupé : le décor ne respire plus et les acteurs se posent
+       d'un coup à l'arrivée. La scène se joue quand même, elle ne glisse pas. */
+    .dmo-scene svg, .dmo-scene .sit-veh, .dmo-scene .sit-halo,
+    .dmo-scene .sit-chev, .dmo-scene .sit-tag { animation: none; transition: none; }
+    .dmo-scene .sit-chev { opacity: 1; }
+  }
 </style>`;
 
 /**
@@ -157,7 +183,6 @@ export function mountDemoSituation(host, lang, onContinue) {
       <span class="dmo-kick">${L.kick}</span>
       <div class="dmo-scene">
         ${renderSituationScene(SCENE, { alt: L.alt })}
-        <div class="dmo-fx" id="dmo-fx" aria-hidden="true"></div>
       </div>
       <p class="dmo-q">${L.q}</p>
       <div class="dmo-answers" id="dmo-answers">
@@ -171,15 +196,27 @@ export function mountDemoSituation(host, lang, onContinue) {
 
   const answers = [...host.querySelectorAll(".dmo-ans")];
   const after = host.querySelector("#dmo-after");
-  const fx = host.querySelector("#dmo-fx");
+  // Le calque d'effets vit DANS le SVG, pas à côté. Il était posé dans un
+  // <div> par-dessus la scène : les ellipses et les chevrons rendus par
+  // buildFocusFX sont du SVG, un navigateur ne les dessine pas dans du HTML.
+  // Le halo qui désigne le prioritaire n'est donc jamais apparu.
+  const fx = host.querySelector(".sit-fx");
+  const veh = (id) => host.querySelector(`[data-veh="${id}"]`);
+  const timers = [];
 
   const reset = () => {
+    timers.splice(0).forEach(clearTimeout);
     answers.forEach((b) => {
       b.disabled = false;
       b.classList.remove("ok", "ko");
     });
     after.innerHTML = "";
-    fx.innerHTML = "";
+    if (fx) fx.innerHTML = "";
+    // Les acteurs reviennent à leur place de départ pour un second essai.
+    for (const { veh: id } of OK_ANIM) {
+      const el = veh(id);
+      if (el) el.style.transform = "";
+    }
   };
 
   answers.forEach((btn) => {
@@ -188,10 +225,24 @@ export function mountDemoSituation(host, lang, onContinue) {
       track("pass.demo_answer", { lang, ok: juste });
       answers.forEach((b) => (b.disabled = true));
       btn.classList.add(juste ? "ok" : "ko");
-      if (!juste) {
+      if (juste) {
+        // La scène se joue : le camion s'engage, ta voiture le suit. C'est la
+        // récompense de la bonne réponse, et c'est ce que promet le titre
+        // « Une scène. Une décision. ».
+        for (const st of OK_ANIM) {
+          timers.push(
+            setTimeout(() => {
+              const el = veh(st.veh);
+              if (!el) return;
+              const { dx, dy } = actorScreenDelta(SCENE, st.veh, 3.6);
+              el.style.transform = `translate(${dx}px, ${dy}px)`;
+            }, st.delai || 60),
+          );
+        }
+      } else {
         // On montre QUI avait la priorité plutôt que d'écrire « faux ».
         answers.find((b) => b.dataset.ans === BONNE)?.classList.add("ok");
-        fx.innerHTML = buildFocusFX(SCENE, FOCUS);
+        if (fx) fx.innerHTML = buildFocusFX(SCENE, FOCUS);
       }
       after.innerHTML = `
         <div class="dmo-fb ${juste ? "ok" : "ko"}">
