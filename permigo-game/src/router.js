@@ -131,16 +131,17 @@ const ROUTES = {
     classement: () => import("@/pages/eleve/classement.js"),
     galerie: () => import("@/pages/eleve/galerie.js"),
     recompenses: () => import("@/pages/eleve/recompenses.js"),
-    // ⛔ Le hub condensé « mon-permis » est SUPPRIMÉ (décision Rayan,
-    // 02/08/2026). Il redisait ce que le parcours montre déjà (les compétences
-    // acquises) et il ne servait plus que de vitrine à l'examen. Les deux
-    // vivent maintenant chez eux : `parcours` pour les compétences, `examen`
-    // ci-dessous pour le jour J. Ne pas le recréer.
+    // ⛔ Deux pages supprimées le 02/08/2026 (décision Rayan) : le hub
+    // condensé « mon-permis » (il redisait les compétences que `parcours`
+    // dessine déjà) et « examen » (date, compte à rebours, checklist et
+    // conseils « dors 8 h la veille » — ça ne préparait aucune leçon).
+    // Ne pas les recréer. Le « centre-examen » ci-dessous reste : il parle
+    // du VRAI centre de l'élève (difficulté, pièges du parcours) et il
+    // alimente les pages SEO.
     // Certification d'une compétence par l'élève (TOUS les élèves depuis
     // le pivot 17/07) : CTA depuis la fiche compétence de `parcours.js`
     // (openFiche), route #/valider-seul/{compId}.
     "valider-seul": () => import("@/pages/eleve/valider-seul.js"),
-    examen: () => import("@/pages/eleve/examen.js"),
     "centre-examen": () => import("@/pages/eleve/centre-examen.js"),
     boutique: () => import("@/pages/eleve/boutique.js"),
     "exam-blanc": () => import("@/pages/eleve/exam-blanc.js"),
@@ -251,8 +252,13 @@ const ROUTES = {
 // « introuvable ». Vaut pour tous les rôles.
 const ROUTES_RETIREES = {
   // Hub condensé « Mon permis » retiré le 02/08/2026 : le parcours montre
-  // déjà les compétences, l'examen a sa page (#/examen).
+  // déjà les compétences.
   "mon-permis": "#/parcours",
+  // Page « examen » retirée le 02/08/2026 : compte à rebours, checklist de
+  // préparation et conseils de la veille. Rien là-dedans n'aidait à monter
+  // dans la voiture le lendemain, et le score quiz parlait du code alors
+  // qu'on prépare la conduite.
+  examen: "#/parcours",
 };
 
 // Libellés de titre de page (a11y lecteur d'écran, onglet, historique, SEO).
@@ -279,7 +285,6 @@ const ROUTE_TITLES = {
   recompenses: "Récompenses",
   roue: "La Roue",
   "valider-seul": "Certifier une compétence",
-  examen: "Examen",
   "exam-blanc": "Examen blanc du code",
   "revision-conduite": "Révision conduite",
   "exam-conduite": "Examen blanc de conduite",
