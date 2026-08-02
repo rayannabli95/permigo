@@ -12,6 +12,7 @@
 /** @param {string} visual nom du décor, cf. `visual` dans les missions */
 export function renderArt(visual) {
   if (visual === "cockpit") return artCockpit();
+  if (visual === "seat-profile") return artSeatProfile();
   if (visual === "start-manual" || visual === "start-automatic") {
     return artStart(visual === "start-automatic");
   }
@@ -36,6 +37,17 @@ export function renderArt(visual) {
   if (visual === "motorway-shoulder") return artMotorway(true);
   if (visual === "tunnel") return artTunnel();
   return artCockpit();
+}
+
+function artSeatProfile() {
+  return `
+    <div class="art-seat-window"></div>
+    <div class="art-seat-roof"></div>
+    <div class="art-seat-dashboard"></div>
+    <span class="art-seat-wheel"></span>
+    <div class="art-seat-pedals"><i></i><i></i><i></i></div>
+    <div class="art-seat-floor"></div>
+    <span class="art-seat-rail"></span>`;
 }
 
 function artCockpit() {
