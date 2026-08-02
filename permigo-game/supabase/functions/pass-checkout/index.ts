@@ -1,9 +1,10 @@
 // ═══════════════════════════════════════════════════════════════
 // Edge Function : pass-checkout
-// Crée une session Stripe Checkout pour le Pass Permis ÉLÈVE (pré-vente) :
-//   - mensuel : abonnement 9,99 €/mois (mode subscription)
-//   - pass3   : Pass Permis 3 mois, 24,99 € one-shot (mode payment)
-//   - pass6   : Pass Permis 6 mois + bonus, 39,99 € one-shot (mode payment)
+// Crée une session Stripe Checkout pour le Pass Permis ÉLÈVE :
+//   - mensuel : abonnement 4,99 €/mois (mode subscription) — LE SEUL VENDU
+//   - pass3 / pass6 : anciens paliers one-shot, PLUS PROPOSÉS nulle part depuis
+//     le 02/08/2026 (décision Rayan : un seul prix à 4,99 €). Ils restent ici
+//     pour ne pas casser un paiement déjà ouvert dans un onglet.
 //
 // Les prix sont INLINE (price_data) : rien à créer dans le dashboard Stripe.
 // Marche CONNECTÉ (JWT user → user_id rattaché) ou INVITÉ (anon key → Stripe
@@ -35,8 +36,8 @@ function json(body: unknown, status = 200) {
   });
 }
 
-// Paliers de la pré-vente (montants en centimes). Source : brief prix du
-// 15/07/2026 — mensuel = faible barrière, pass3 = cible, pass6 = ancre haute.
+// Paliers (montants en centimes). Depuis le 02/08/2026, seul `mensuel` est
+// proposé : 4,99 €/mois, le même prix pour tout le monde.
 const PLANS: Record<
   string,
   {
@@ -48,11 +49,12 @@ const PLANS: Record<
 > = {
   mensuel: {
     mode: "subscription",
-    amount: 999,
+    amount: 499,
     name: "PermiGo — Abonnement mensuel",
     description:
       "Accès complet à PermiGo. Sans engagement, résiliable en un clic.",
   },
+  // ── Ci-dessous : plus vendus (aucun bouton ne les appelle). ──
   pass3: {
     mode: "payment",
     amount: 2499,

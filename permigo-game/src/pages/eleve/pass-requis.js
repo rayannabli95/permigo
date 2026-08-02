@@ -32,20 +32,13 @@ const PRQ_I18N = {
     code_checking: "Checking…",
     code_ok: "All set! Signing you in…",
     code_invalid: "Invalid code. Check with your instructor.",
-    launch_price: "launch price",
     checkout_err: "Payment unavailable right now. Try again in a moment.",
     logout: "Log out",
     back: "Back",
     keep_free: "Keep going with my free account",
-    tier_pass3_nom: "3-month Pass",
-    tier_pass3_sous: "€8.33 a month",
-    tier_pass3_note: "most popular",
-    tier_mensuel_nom: "Monthly Pass",
-    tier_mensuel_sous: "cancel anytime",
+    tier_mensuel_nom: "PermiGo Pass",
+    tier_mensuel_sous: "everything unlocked · cancel in one click",
     tier_mensuel_note: "/ month",
-    tier_pass6_nom: "Platinum Pass",
-    tier_pass6_sous: "6 months",
-    tier_pass6_note: "cheapest per month",
   },
   ar: {
     bulle: "دروسك الثلاثة الأولى لك. بقي 28 درساً.",
@@ -62,20 +55,13 @@ const PRQ_I18N = {
     code_checking: "جارٍ التحقّق…",
     code_ok: "تمّ! جارٍ تسجيل دخولك…",
     code_invalid: "رمز غير صالح. تحقّق مع مدرّبك.",
-    launch_price: "سعر الإطلاق",
     checkout_err: "الدفع غير متاح حالياً. أعد المحاولة بعد لحظات.",
     logout: "تسجيل الخروج",
     back: "رجوع",
     keep_free: "المتابعة بحسابي المجاني",
-    tier_pass3_nom: "باقة 3 أشهر",
-    tier_pass3_sous: "8.33 € شهرياً",
-    tier_pass3_note: "الأكثر اختياراً",
-    tier_mensuel_nom: "الباقة الشهرية",
-    tier_mensuel_sous: "دون التزام",
+    tier_mensuel_nom: "باقة PermiGo",
+    tier_mensuel_sous: "كل شيء مفتوح · ألغِ بنقرة واحدة",
     tier_mensuel_note: "/ شهر",
-    tier_pass6_nom: "الباقة البلاتينية",
-    tier_pass6_sous: "6 أشهر",
-    tier_pass6_note: "الأرخص شهرياً",
   },
 };
 function pt(key, fr) {
@@ -87,25 +73,18 @@ function ptR(key, fr) {
   return (l !== "fr" && PRQ_I18N[l]?.[key]) || fr;
 }
 
-// DEUX offres, pas trois (décision Rayan 31/07/2026) : « 9,99 € ou bien 24,99 €
-// les trois mois ». Trois cartes faisaient hésiter ; deux font choisir. Le Pass
-// 6 mois reste vendable ailleurs (page publique #/pass), pas sur cet écran-ci.
+// UNE seule offre (décision Rayan 02/08/2026) : 4,99 €/mois, point. Trois
+// cartes faisaient hésiter, deux faisaient encore calculer ; une seule fait
+// décider. C'est ici que l'élève arrive quand ses 3 questions du jour sont
+// épuisées : le moment où il a envie de continuer, pas de comparer une grille.
 const TIERS = [
   {
-    plan: "pass3",
-    nom: "Pass 3 mois",
-    sous: "8,33 € par mois",
-    price: "24,99 €",
-    note: "le + choisi",
-    best: true,
-  },
-  {
     plan: "mensuel",
-    nom: "Pass mensuel",
-    sous: "sans engagement",
-    price: "9,99 €",
+    nom: "Pass PermiGo",
+    sous: "tout est ouvert · résiliable en un clic",
+    price: "4,99 €",
     note: "/ mois",
-    best: false,
+    best: true,
   },
 ];
 
@@ -153,8 +132,6 @@ const STYLE = `<style>
 .prq-tprice{ flex:0 0 auto; text-align:right; }
 .prq-tprice b{ font-family:'Archivo', system-ui, sans-serif; font-weight:800; font-size:22px; color:#ffe4a6; }
 .prq-tprice span{ display:block; font-size:10px; font-weight:700; color:#b8aef0; }
-.prq-badge{ position:absolute; top:-9px; right:14px; font-weight:800; font-size:9px; letter-spacing:.08em; text-transform:uppercase;
-  color:#1a1240; background:linear-gradient(180deg,#ffe9b0,#f4b24a); padding:3px 9px; border-radius:999px; box-shadow:0 2px 5px rgba(20,12,60,.35); }
 .prq-guar{ display:flex; align-items:center; justify-content:center; gap:8px; text-align:center; font-size:12.5px; font-weight:700; color:#d9f2e0;
   padding:10px 12px; border-radius:13px; background:rgba(52,199,120,.12); border:1px solid rgba(52,199,120,.3); margin-bottom:18px; }
 .prq-or{ text-align:center; font-size:11px; font-weight:700; color:#9a8fd0; letter-spacing:.1em; text-transform:uppercase; margin:4px 0 12px; }
@@ -187,8 +164,7 @@ const STYLE = `<style>
    moniteur sont en lettres latines (PERMIS75). */
 .prq[dir="rtl"] .prq-tier{ text-align:right; }
 .prq[dir="rtl"] .prq-tprice{ text-align:left; }
-.prq[dir="rtl"] .prq-badge{ right:auto; left:14px; }
-.prq[dir="rtl"] .prq-back{ left:auto; right:14px; }
+.prq[dir="rtl"] .prq[dir="rtl"] .prq-back{ left:auto; right:14px; }
 .prq[dir="rtl"] .prq-back svg{ transform:scaleX(-1); }
 .prq[dir="rtl"] .prq-bulle{ border-radius:16px 16px 4px 16px; }
 @media (prefers-reduced-motion: reduce){ .prq *{ transition:none!important; } }
@@ -223,9 +199,8 @@ export async function mount(root, me) {
     (
       t,
     ) => `<button class="prq-tier${t.best ? " best" : ""}" data-plan="${escAttr(t.plan)}">
-      ${t.best ? `<span class="prq-badge">${pt(`tier_${t.plan}_note`, t.note)}</span>` : ""}
       <span class="prq-tinfo"><span class="prq-tnom">${pt(`tier_${t.plan}_nom`, t.nom)}</span><span class="prq-tsous">${pt(`tier_${t.plan}_sous`, t.sous)}</span></span>
-      <span class="prq-tprice"><b>${esc(t.price)}</b><span>${t.best ? pt("launch_price", "prix de lancement") : pt(`tier_${t.plan}_note`, t.note)}</span></span>
+      <span class="prq-tprice"><b>${esc(t.price)}</b><span>${pt(`tier_${t.plan}_note`, t.note)}</span></span>
     </button>`,
   ).join("");
 
