@@ -25,7 +25,7 @@ import { track } from "@/services/analytics.js";
 import { startPassCheckout } from "@/services/billing.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { illMask } from "@/utils/illustrations.js";
-import { esc } from "@/utils/escape.js";
+import { esc, escAttr } from "@/utils/escape.js";
 import { fbTrack } from "@/services/meta-pixel.js";
 import { applyLang, browserLang, explicitLang } from "@/utils/lang.js";
 
@@ -655,9 +655,37 @@ const STYLE = `<style>
   .pv * { box-sizing: border-box; }
   .pv-wrap { max-width: 480px; margin: 0 auto; padding: 0 18px; }
 
-  .pv-rev { opacity: 0; transform: translateY(24px); transition: opacity .55s ease, transform .55s cubic-bezier(.22,1,.36,1); }
+  /* ══════════ La mise en scène au défilement ══════════
+     Avant : les 14 blocs montaient tous de 24 px de la même façon. Un seul
+     geste répété 14 fois ne se remarque pas, la page semblait figée.
+     Maintenant chaque famille a son entrée, et ce qui est GROUPÉ arrive
+     en cascade au lieu d'apparaître d'un bloc.
+     Règle tenue partout : on n'anime que transform et opacity. */
+  .pv { --pv-ease: cubic-bezier(.23,1,.32,1); --pv-in: .62s; }
+
+  .pv-rev { opacity: 0; transform: translateY(26px) scale(.988); transition: opacity var(--pv-in) ease, transform var(--pv-in) var(--pv-ease); }
   .pv-rev.in { opacity: 1; transform: none; }
-  @media (prefers-reduced-motion: reduce) { .pv-rev { opacity: 1; transform: none; transition: none; } }
+
+  /* Conteneur en cascade : le parent ne bouge pas, ses enfants entrent un
+     par un (délai posé en JS, plafonné pour que la fin reste vive). */
+  .pv-rev.pv-stag { opacity: 1; transform: none; transition: none; }
+  .pv-stag > * { opacity: 0; transform: translateY(20px); transition: opacity .5s ease, transform .5s var(--pv-ease); }
+  .pv-stag.in > * { opacity: 1; transform: none; }
+
+  /* Titres de section : le texte se découvre par le bas, comme tiré
+     de dessous une ligne. Plus net qu'un simple fondu. */
+  .pv-sec-title.pv-rev { transform: none; transition: opacity .4s ease; overflow: hidden; }
+  .pv-sec-title.pv-rev > span { display: inline-block; transform: translateY(105%); transition: transform .72s var(--pv-ease); }
+  .pv-sec-title.pv-rev.in > span { transform: none; }
+
+  /* Les captures d'app se posent : elles arrivent légèrement en retrait
+     puis reviennent à leur taille. */
+  .pv-situ-shot img, .pv-feat-img { transition: transform .7s var(--pv-ease); }
+  .pv-stag > *:not(.in) .pv-situ-shot img { transform: scale(.94); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pv-rev, .pv-stag > *, .pv-sec-title.pv-rev, .pv-sec-title.pv-rev > span { opacity: 1; transform: none; transition: none; }
+  }
 
   /* ── Barre haute : le P vert gloss, seul ── */
   .pv-nav {
@@ -778,7 +806,19 @@ const STYLE = `<style>
   .pv-cta-note small { font-size: 11px; color: #655a97; }
 
   /* ── Scène téléphone + mascotte ── */
-  .pv-stage { position: relative; height: 470px; max-width: 400px; margin: 44px auto 0; }
+  /* MOMENT SIGNATURE 1 — le téléphone se redresse.
+     Il entre couché en arrière puis se relève jusqu'à la verticale. C'est
+     le seul endroit de la page qui utilise la 3D : ça doit rester un
+     événement, pas un tic. La perspective vit sur le parent pour que la
+     mascotte et le volant tournent AVEC l'écran, pas chacun de leur côté. */
+  .pv-stage { position: relative; height: 470px; max-width: 400px; margin: 44px auto 0; perspective: 1200px; }
+  .pv-stage.pv-rev { transform: translateY(46px) scale(.93); transition: opacity .5s ease, transform .9s var(--pv-ease); }
+  .pv-stage.pv-rev > * { transform-origin: 50% 100%; transition: transform .95s var(--pv-ease); }
+  .pv-stage.pv-rev:not(.in) > * { transform: rotateX(16deg); }
+  .pv-stage.pv-rev.in { transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .pv-stage.pv-rev, .pv-stage.pv-rev > * { transform: none; transition: none; }
+  }
   .pv-phone {
     position: absolute; left: 50%; transform: translateX(-26%) rotate(4deg); top: 0; width: 196px;
     border-radius: 30px; overflow: hidden; border: 6px solid #160f38;
@@ -842,7 +882,10 @@ const STYLE = `<style>
   .pv-maths { margin-top: 22px; border-radius: 20px; padding: 8px 18px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.09); }
   .pv-maths-row { display: flex; justify-content: space-between; align-items: baseline; padding: 13px 0; font: 500 14px 'Archivo', sans-serif; color: var(--ink-soft); }
   .pv-maths-row + .pv-maths-row { border-top: 1px dashed rgba(255,255,255,.1); }
-  .pv-maths-row b { font: 700 16px 'Archivo', sans-serif; color: #fff; }
+  /* MOMENT SIGNATURE 2 — les trois prix défilent jusqu'à leur valeur.
+     La police à chasse fixe fige la largeur des chiffres, sinon la ligne tremble
+     pendant le comptage. */
+  .pv-maths-row b { font: 700 16px 'Archivo', sans-serif; color: #fff; font-variant-numeric: tabular-nums; }
   .pv-maths-row.hot { color: var(--gold); }
   .pv-maths-row.hot b { color: var(--gold); font-size: 18px; }
   .pv-maths-note { text-align: center; font: 600 12.5px/1.6 'Archivo', sans-serif; color: var(--ink-dim); margin: 12px 0 0; }
@@ -1252,10 +1295,10 @@ export async function mount(root) {
         <div class="pv-bulle">${L.bulle}<small>${L.bulleSub}</small></div>
       </div>
 
-      <h2 class="pv-sec-title pv-rev">${L.secCode}</h2>
+      <h2 class="pv-sec-title pv-rev"><span>${L.secCode}</span></h2>
       <p class="pv-sec-sub">${L.secCodeSub}</p>
 
-      <div class="pv-conduite pv-rev">
+      <div class="pv-conduite pv-rev pv-stag">
         <div class="pv-situ">
           <div class="pv-situ-shot"><img src="/showcase/eleve-en-situation.webp" alt="${L.situAlt}" width="780" height="980" loading="lazy" decoding="async"></div>
           <div class="pv-situ-txt">
@@ -1294,18 +1337,18 @@ export async function mount(root) {
         }
       </div>
 
-      <div class="pv-maths pv-rev">
+      <div class="pv-maths pv-rev pv-stag">
         ${L.mathsRows
           .map(
             ([lbl, val], i) =>
-              `<div class="pv-maths-row${i === 2 ? " hot" : ""}"><span>${lbl}</span><b>${val}</b></div>`,
+              `<div class="pv-maths-row${i === 2 ? " hot" : ""}"><span>${lbl}</span><b data-count="${escAttr(val)}">${val}</b></div>`,
           )
           .join("")}
       </div>
       <p class="pv-maths-note">${L.mathsNote}</p>
       <p class="pv-maths-src">${L.mathsSrc}</p>
 
-      <h2 class="pv-sec-title pv-rev" id="pv-pricing">${L.secPass}</h2>
+      <h2 class="pv-sec-title pv-rev" id="pv-pricing"><span>${L.secPass}</span></h2>
       <p class="pv-sec-sub">${L.secPassSub}</p>
 
       <article class="pv-pass pv-pass-std pv-rev">
@@ -1346,12 +1389,12 @@ export async function mount(root) {
         <span>${L.stampD}</span>
       </div>
 
-      <h2 class="pv-sec-title pv-rev">${L.secAvis}</h2>
+      <h2 class="pv-sec-title pv-rev"><span>${L.secAvis}</span></h2>
       <p class="pv-sec-sub">${L.secAvisSub}</p>
-      <div class="pv-avis-lot pv-rev">${renderAvis(lang, L, 3, AVIS.length)}</div>
+      <div class="pv-avis-lot pv-rev pv-stag">${renderAvis(lang, L, 3, AVIS.length)}</div>
 
-      <h2 class="pv-sec-title pv-rev">${L.secProof}</h2>
-      <div class="pv-proof pv-rev">
+      <h2 class="pv-sec-title pv-rev"><span>${L.secProof}</span></h2>
+      <div class="pv-proof pv-rev pv-stag">
         <div class="pv-bar-lbl"><span>${L.proofA}</span><span>${L.proofAVal}</span></div>
         <div class="pv-bar pv-bar-go"><span style="width:${L.proofAW}%"></span></div>
         <div class="pv-bar-lbl"><span>${L.proofB}</span><span>${L.proofBVal}</span></div>
@@ -1359,7 +1402,7 @@ export async function mount(root) {
         <p class="pv-src">${L.proofSrc}</p>
       </div>
 
-      <section class="pv-faq pv-rev">
+      <section class="pv-faq pv-rev pv-stag">
         <h2 class="pv-sec-title">${L.secFaq}</h2>
         <div style="margin-top:16px">
           ${L.faq
@@ -1390,7 +1433,9 @@ export async function mount(root) {
   wireReveal(root);
 }
 
-/** Révélation au scroll : .pv-rev → .in à l'entrée dans le viewport. */
+/** Révélation au scroll : .pv-rev → .in à l'entrée dans le viewport.
+ *  Un conteneur .pv-stag fait entrer ses enfants en cascade, et un bloc
+ *  qui porte des [data-count] fait défiler ses chiffres. */
 function wireReveal(root) {
   const els = [...root.querySelectorAll(".pv-rev")];
   const reduced = window.matchMedia?.(
@@ -1398,20 +1443,72 @@ function wireReveal(root) {
   )?.matches;
   if (reduced || !("IntersectionObserver" in window)) {
     els.forEach((el) => el.classList.add("in"));
+    // Mouvement coupé : on pose directement la valeur finale.
+    root
+      .querySelectorAll("[data-count]")
+      .forEach((n) => (n.textContent = n.dataset.count));
     return;
   }
   const io = new IntersectionObserver(
     (entries) => {
       for (const e of entries) {
-        if (e.isIntersecting) {
-          e.target.classList.add("in");
-          io.unobserve(e.target);
+        if (!e.isIntersecting) continue;
+        const el = e.target;
+        // Cascade : 70 ms entre chaque enfant, plafonné à 6 crans pour
+        // qu'une longue liste ne finisse pas une seconde après le reste.
+        if (el.classList.contains("pv-stag")) {
+          [...el.children].forEach((c, i) => {
+            c.style.transitionDelay = `${Math.min(i, 6) * 70}ms`;
+          });
         }
+        el.classList.add("in");
+        el.querySelectorAll("[data-count]").forEach(countUp);
+        io.unobserve(el);
       }
     },
     { rootMargin: "0px 0px -60px 0px", threshold: 0.08 },
   );
   els.forEach((el) => io.observe(el));
+}
+
+/** Fait défiler un montant de 0 jusqu'à sa valeur, en gardant EXACTEMENT
+ *  l'écriture d'origine : « 1 800 € », « €1,800 », « 9,99 € », « €9.99 ».
+ *  On isole le nombre, on l'anime, on le remet dans la phrase. */
+function countUp(node) {
+  const final = node.dataset.count || "";
+  const token = (final.match(/\d[\d\s  .,]*\d|\d/) || [])[0];
+  if (!token) return;
+  const bare = token.replace(/[\s  ]/g, "");
+  const dm = bare.match(/([.,])(\d{1,2})$/);
+  const decimals = dm ? dm[2].length : 0;
+  const decSep = dm ? dm[1] : "";
+  const thouSep = (token.match(/\d([\s  ,.])\d{3}/) || [])[1] || "";
+  const target = parseFloat(
+    (dm ? bare.slice(0, dm.index) : bare).replace(/[.,]/g, "") +
+      (dm ? `.${dm[2]}` : ""),
+  );
+  if (!isFinite(target)) return;
+
+  const write = (v) => {
+    let [ent, dec] = v.toFixed(decimals).split(".");
+    if (thouSep) ent = ent.replace(/\B(?=(\d{3})+(?!\d))/g, thouSep);
+    node.textContent = final.replace(token, dec ? ent + decSep + dec : ent);
+  };
+
+  // La page sert déjà le vrai prix : sans JS, ou si l'observateur ne se
+  // déclenche jamais, le visiteur lit « 1 800 € », pas « 0 ».
+  const DUREE = 900;
+  write(0);
+  let start = null;
+  const step = (t) => {
+    if (start === null) start = t;
+    const p = Math.min(1, (t - start) / DUREE);
+    // Même courbe que les entrées : ça part vite et ça se pose.
+    write(target * (1 - Math.pow(1 - p, 3)));
+    if (p < 1) requestAnimationFrame(step);
+    else node.textContent = final;
+  };
+  requestAnimationFrame(step);
 }
 
 function wire(root, me, lang, L) {
