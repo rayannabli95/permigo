@@ -269,6 +269,7 @@ export function monterMissions(
         <p class="mp-scene-instruction">Fais glisser le siège vers une position puis lâche.</p>
       </section>`;
     }
+    if (m.mode === "reglage") return reglage(m);
     if (m.mode === "sequence") return sequence(m);
 
     return `<section class="mp-interaction mp-choice-interaction">
@@ -288,6 +289,55 @@ export function monterMissions(
           })
           .join("")}
       </div>
+    </section>`;
+  }
+
+  /**
+   * Le doseur : une commande qu'on pousse au doigt et qu'on lâche sur un cran.
+   *
+   * C'est la réponse à ce que Codex a pointé dans sa cartographie : « une seule
+   * extension est nécessaire pour ne pas transformer le maniement en QCM ».
+   * Freiner, accélérer, corriger une glissade sont des QUANTITÉS. Trois phrases
+   * à cocher ne les font pas sentir ; une commande qu'on pousse, oui.
+   *
+   * La course est verticale et la jauge se remplit sous le doigt, pour que
+   * l'intensité se voie pendant le geste et pas seulement à l'arrivée.
+   */
+  function reglage(m) {
+    const crans = m.crans || [];
+    const positions = crans.map((_, i) =>
+      crans.length > 1 ? (i / (crans.length - 1)) * 100 : 50,
+    );
+    const depart = Number.isFinite(Number(m.commande?.depart))
+      ? Number(m.commande.depart)
+      : 0;
+    const choisi = crans.findIndex((c) => c.id === etat.dernier);
+    const valeur = choisi >= 0 ? positions[choisi] : depart;
+
+    return `<section class="mp-interaction mp-reglage-interaction">
+      ${scene(m, false)}
+      <div class="mp-reglage" style="--dose:${valeur}%">
+        <div class="mp-reglage-piste" data-reglage-piste>
+          <span class="mp-reglage-jauge" aria-hidden="true"></span>
+          ${crans
+            .map(
+              (
+                c,
+                i,
+              ) => `<span class="mp-reglage-cran ${etat.dernier === c.id ? "is-chosen" : ""}"
+                data-reglage-cran="${escAttr(c.id)}" data-valeur="${positions[i]}"
+                style="--cran:${positions[i]}%"><i></i><small>${esc(c.label)}</small></span>`,
+            )
+            .join("")}
+          <span class="mp-reglage-bouton ${etat.resolu ? "is-locked" : ""}"
+            role="slider" tabindex="${etat.resolu ? "-1" : "0"}" data-reglage-bouton
+            aria-label="${escAttr(m.commande?.label || "Commande")}"
+            aria-valuemin="0" aria-valuemax="${Math.max(0, crans.length - 1)}"
+            aria-valuenow="${choisi >= 0 ? choisi : 0}"
+            aria-valuetext="${escAttr(crans[choisi >= 0 ? choisi : 0]?.label || "")}"></span>
+        </div>
+      </div>
+      <p class="mp-scene-instruction">${esc(`Pousse ${m.commande?.article || "la commande"} puis lâche sur un cran.`)}</p>
     </section>`;
   }
 
@@ -451,6 +501,126 @@ export function monterMissions(
       });
     });
     brancherPlacement();
+    brancherReglage();
+  }
+
+  /**
+   * Le geste du doseur : pousser, sentir, lâcher sur un cran.
+   *
+   * ⚠️ Comme pour le placement, on retombe sur le cran le plus proche quand on
+   * lâche entre deux. Le départ de la commande ne doit donc JAMAIS être le plus
+   * proche du bon cran, sinon un appui suivi d'un relâché, sans bouger, valide
+   * la mission. Trois des quatre missions démarrent au repos, tout en bas :
+   * une pédale non touchée c'est zéro, et zéro y est une réponse fausse.
+   * La quatrième démarre à fond, parce que sa bonne réponse est justement de
+   * lever le pied (cf. `depart` dans `commande`).
+   */
+  function brancherReglage() {
+    const m = mission();
+    if (m?.mode !== "reglage" || etat.resolu) return;
+
+    const piste = hote.querySelector("[data-reglage-piste]");
+    const bouton = hote.querySelector("[data-reglage-bouton]");
+    const conteneur = hote.querySelector(".mp-reglage");
+    const crans = [...hote.querySelectorAll("[data-reglage-cran]")]
+      .map((el) => ({
+        el,
+        id: el.dataset.reglageCran,
+        v: Number(el.dataset.valeur),
+      }))
+      .filter((c) => c.id && Number.isFinite(c.v));
+    if (!piste || !bouton || !conteneur || !crans.length) return;
+
+    let pointeurActif = null;
+    let verrouille = false;
+    let indexClavier = -1;
+
+    const borner = (v) => Math.min(100, Math.max(0, v));
+    // La piste est verticale et le zéro est EN BAS : pousser une pédale, c'est
+    // descendre le pied, et la jauge doit monter dans le même sens.
+    const valeurDuPointeur = (e) => {
+      const rect = piste.getBoundingClientRect();
+      return borner(((rect.bottom - e.clientY) / rect.height) * 100);
+    };
+    const poser = (valeur) => {
+      conteneur.style.setProperty("--dose", `${valeur}%`);
+      return valeur;
+    };
+    const cranLePlusProche = (valeur) =>
+      crans.reduce(
+        (proche, c) =>
+          !proche || Math.abs(c.v - valeur) < Math.abs(proche.v - valeur)
+            ? c
+            : proche,
+        null,
+      );
+    const marquer = (cran) => {
+      crans.forEach(({ el }) => el.classList.remove("is-over"));
+      if (cran) cran.el.classList.add("is-over");
+    };
+    const deposer = (cran) => {
+      verrouille = true;
+      marquer(null);
+      bouton.classList.remove("is-pushing");
+      poser(cran.v);
+      setTimeout(() => {
+        if (hote.contains(bouton)) repondre(cran.id);
+      }, 140);
+    };
+
+    bouton.addEventListener("pointerdown", (e) => {
+      if (verrouille || (e.button !== undefined && e.button !== 0)) return;
+      e.preventDefault();
+      pointeurActif = e.pointerId;
+      bouton.classList.add("is-pushing");
+      haptic("impact");
+      try {
+        bouton.setPointerCapture(e.pointerId);
+      } catch {
+        // Un PointerEvent synthétique de test ne crée pas toujours de capture.
+      }
+    });
+    bouton.addEventListener("pointermove", (e) => {
+      if (verrouille || e.pointerId !== pointeurActif) return;
+      e.preventDefault();
+      marquer(cranLePlusProche(poser(valeurDuPointeur(e))));
+    });
+    bouton.addEventListener("pointerup", (e) => {
+      if (verrouille || e.pointerId !== pointeurActif) return;
+      e.preventDefault();
+      const cran = cranLePlusProche(poser(valeurDuPointeur(e)));
+      pointeurActif = null;
+      if (cran) deposer(cran);
+    });
+    bouton.addEventListener("pointercancel", () => {
+      if (verrouille) return;
+      bouton.classList.remove("is-pushing");
+      marquer(null);
+      pointeurActif = null;
+    });
+
+    // Le geste reste jouable au clavier, sans ajouter de bouton dans la scène.
+    bouton.addEventListener("keydown", (e) => {
+      if (verrouille) return;
+      if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+        e.preventDefault();
+        const pas = e.key === "ArrowUp" ? 1 : -1;
+        indexClavier = Math.min(
+          crans.length - 1,
+          Math.max(0, (indexClavier < 0 ? 0 : indexClavier) + pas),
+        );
+        const cran = crans[indexClavier];
+        poser(cran.v);
+        marquer(cran);
+        haptic("tap");
+        return;
+      }
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        const cran = crans[indexClavier < 0 ? 0 : indexClavier];
+        if (cran) deposer(cran);
+      }
+    });
   }
 
   function brancherPlacement() {

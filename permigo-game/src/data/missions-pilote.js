@@ -410,6 +410,43 @@ export const MISSIONS = [
   },
   {
     ...commun,
+    id: "c4c-dose-elan",
+    competence: "C4c",
+    order: 3,
+    boites: ["manuelle", "auto"],
+    mode: "reglage",
+    modeLabel: "Doser",
+    title: "Le feu rouge qu'on voit de loin",
+    objective: "Utiliser son élan au lieu de le jeter dans les freins.",
+    prompt:
+      "Le feu est rouge à deux cents mètres. Pousse la pédale d'accélérateur comme tu la tiendrais.",
+    visual: "city-light",
+    commande: {
+      label: "Pédale d'accélérateur",
+      article: "l’accélérateur",
+      // ⚠️ Départ à FOND, pas au repos. Les autres doseurs partent de zéro
+      // parce que zéro y est une réponse fausse. Ici la bonne réponse EST de
+      // lever le pied : partir au repos aurait validé la mission d’un simple
+      // appui sans bouger. Et c’est l’histoire vraie : tu roules, ton pied est
+      // sur l’accélérateur, tu vois le feu rouge, tu lèves.
+      depart: 100,
+    },
+    crans: [
+      { id: "lever", label: "Lever le pied maintenant" },
+      { id: "tenir", label: "Tenir l'allure" },
+      { id: "relancer", label: "Relancer un peu" },
+    ],
+    solution: "lever",
+    hint: "L'énergie que tu mets maintenant, tu la donneras aux freins dans dix secondes.",
+    retry:
+      "Tu arrives au feu encore vite, et tout part en chaleur dans les plaquettes.",
+    success: "Pied levé tôt. La voiture roule sur son élan jusqu'au feu.",
+    why: "Chaque goutte de carburant brûlée avant un arrêt est perdue deux fois : à la pompe, puis dans les freins. Lever le pied tôt fait rouler la voiture sur son élan, et souvent le feu repasse au vert avant l'arrêt. C'est le seul geste d'éco-conduite qui se voit aussi sur les plaquettes.",
+    transfer:
+      "Au prochain feu rouge repéré de loin, lève le pied dès que tu le vois et regarde jusqu'où tu roules sans freiner.",
+  },
+  {
+    ...commun,
     id: "c4f-verification",
     competence: "C4f",
     order: 3,
@@ -658,6 +695,34 @@ export const MISSIONS = [
     why: "L'orange impose l'arrêt sauf si s'arrêter est dangereux, par exemple quand tu es déjà engagé. De loin, tu n'es pas dans ce cas.",
     transfer:
       "À ta prochaine leçon, annonce à voix haute « je m'arrête » dès que tu vois un feu passer à l'orange.",
+  },
+  {
+    ...commun,
+    id: "c1e-dose-frein",
+    competence: "C1e",
+    order: 3,
+    boites: ["manuelle", "auto"],
+    mode: "reglage",
+    modeLabel: "Doser",
+    title: "Le freinage qui ne secoue personne",
+    objective: "Sentir la différence entre freiner fort et freiner brutalement.",
+    prompt:
+      "Un feu passe au rouge à cinquante mètres. Pousse la pédale comme tu le ferais.",
+    visual: "pedales-manuelle",
+    commande: { label: "Pédale de frein", article: "la pédale de frein", depart: 0 },
+    crans: [
+      { id: "effleure", label: "À peine" },
+      { id: "franc", label: "Franc puis relâché" },
+      { id: "ecrase", label: "Tout d'un coup" },
+    ],
+    solution: "franc",
+    hint: "Le bon freinage commence tôt et finit doucement, jamais l'inverse.",
+    retry:
+      "Là tu arrives trop vite ou tu jettes tes passagers en avant. Cherche entre les deux.",
+    success: "Franc au début, relâché à la fin. Personne n'a bougé.",
+    why: "Un freinage se dose à l'envers de ce qu'on croit : on appuie fort au début, quand il reste de la distance, et on relâche en approchant. C'est le relâché final qui évite le coup de tête des passagers, et c'est lui que l'examinateur sent.",
+    transfer:
+      "À ta prochaine leçon, essaie de relâcher la pédale juste avant l'arrêt et regarde si la voiture se pose au lieu de piquer.",
   },
   {
     ...commun,
@@ -1156,6 +1221,34 @@ export const MISSIONS = [
   },
   {
     ...commun,
+    id: "c2b-dose-allure",
+    competence: "C2b",
+    order: 3,
+    boites: ["manuelle", "auto"],
+    mode: "reglage",
+    modeLabel: "Doser",
+    title: "L'allure que la rue autorise",
+    objective: "Régler son allure sur ce qu'on voit, pas sur le panneau.",
+    prompt:
+      "Rue étroite, voitures garées des deux côtés, école à cent mètres. Pousse l'allure que tu tiendrais.",
+    visual: "compte-tours-bas",
+    commande: { label: "Allure", article: "l'allure", depart: 0 },
+    crans: [
+      { id: "pas", label: "Au pas" },
+      { id: "posee", label: "Allure posée" },
+      { id: "limite", label: "La limite affichée" },
+    ],
+    solution: "posee",
+    hint: "Le panneau donne un maximum. Ce que tu vois donne le reste.",
+    retry:
+      "Trop lent tu bloques la rue, trop vite tu n'as plus de marge si quelqu'un sort. Cherche entre les deux.",
+    success: "Assez lent pour t'arrêter, assez fluide pour ne gêner personne.",
+    why: "Une limite de vitesse est un plafond, jamais une consigne. Entre des voitures garées et une école, ce qui fixe l'allure c'est la distance où tu peux t'arrêter si un enfant sort. Rouler à la limite affichée là où on ne voit rien est une faute même sans excès.",
+    transfer:
+      "Dans la prochaine rue étroite, dis à voix haute à quelle allure tu roules et pourquoi.",
+  },
+  {
+    ...commun,
     id: "c2c-place-dans-voie",
     competence: "C2c",
     order: 1,
@@ -1559,6 +1652,33 @@ export const MISSIONS = [
     why: "Une plaque de verglas ne se voit pas toujours. Le froid, les reflets et le silence des pneus arrivent ensemble, et un ralentissement anticipé est la seule marge qui reste.",
     transfer:
       "Cet hiver, prends l'habitude de regarder la température extérieure avant de partir.",
+  },
+  {
+    ...commun,
+    id: "c3c-dose-correction",
+    competence: "C3c",
+    order: 3,
+    boites: ["manuelle", "auto"],
+    mode: "reglage",
+    modeLabel: "Doser",
+    title: "L'arrière qui part",
+    objective: "Corriger une glissade sans en provoquer une deuxième.",
+    prompt: "Sur le mouillé, l'arrière commence à partir. Pousse ta correction.",
+    visual: "rain",
+    commande: { label: "Correction au volant", article: "la correction", depart: 0 },
+    crans: [
+      { id: "rien", label: "Ne rien faire" },
+      { id: "douce", label: "Corriger doucement" },
+      { id: "brusque", label: "Contre-braquer à fond" },
+    ],
+    solution: "douce",
+    hint: "Tu regardes où tu veux aller, et tes mains suivent sans à-coup.",
+    retry:
+      "Sans rien faire tu pars. En corrigeant trop fort tu repars de l'autre côté, plus vite encore.",
+    success: "Une correction douce et la voiture se remet dans l'axe.",
+    why: "Une glissade se rattrape avec des gestes progressifs et un regard porté loin. Un coup de volant trop fort provoque le contre-effet : la voiture repasse de l'autre côté avec plus d'élan qu'avant, et là c'est fini. La règle est la même pour le frein et l'accélérateur sur le verglas.",
+    transfer:
+      "Demande à ton enseignant de te faire sentir sur une aire mouillée ce que fait une correction trop forte.",
   },
   {
     ...commun,
