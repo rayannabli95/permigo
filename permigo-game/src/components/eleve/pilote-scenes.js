@@ -39,6 +39,10 @@ export function renderArt(visual, options = {}) {
     return artOvertake({ cyclist: true, oncoming: true });
   if (visual === "overtake-empty") return artOvertake({});
   if (visual === "overtake-top") return artOvertakeTop();
+  if (visual === "overtake-top-libre") return artOvertakeTop({ joueur: false });
+  if (visual === "voie-garee") return artVoieGaree();
+  if (visual === "brouillard-file") return artBrouillardFile();
+  if (visual === "insertion") return artInsertion();
   if (visual === "motorway") return artMotorway(false);
   if (visual === "motorway-shoulder") return artMotorway(true);
   if (visual === "tunnel") return artTunnel();
@@ -214,12 +218,54 @@ function artOvertake({ cyclist, oncoming }) {
 // Le même dépassement, mais vu de dessus. En vue subjective les trois
 // trajectoires se superposent et ne veulent plus rien dire : l'écart latéral
 // y vaut quelques pixels. De dessus, un mètre se voit.
-function artOvertakeTop() {
+//
+// `joueur: false` retire la voiture du joueur du décor. C'est la variante des
+// missions de placement : là, la voiture du joueur EST la pièce qu'on déplace,
+// et la laisser dans le décor en afficherait deux.
+function artOvertakeTop({ joueur = true } = {}) {
   return `
     <div class="art-ot-verge"></div>
     <div class="art-ot-road"><span class="art-ot-center"></span></div>
     <span class="art-ot-cyclist"><i></i></span>
-    <span class="art-ot-player"><i></i></span>`;
+    ${joueur ? `<span class="art-ot-player"><i></i></span>` : ""}`;
+}
+
+// Une voie urbaine vue de dessus, avec une file de voitures garées le long du
+// trottoir de droite. L'une d'elles a sa portière entrouverte : c'est le
+// danger que la place dans la voie doit anticiper.
+//
+// Vue de dessus, encore une fois parce qu'une marge latérale ne se juge pas en
+// vue subjective : à hauteur d'œil, un mètre à droite et trois mètres à droite
+// se ressemblent.
+function artVoieGaree() {
+  return `
+    <div class="art-vg-trottoir art-vg-trottoir-gauche"></div>
+    <div class="art-vg-trottoir art-vg-trottoir-droit"></div>
+    <div class="art-vg-route"><span class="art-vg-axe"></span></div>
+    <span class="art-vg-garee art-vg-garee-a"></span>
+    <span class="art-vg-garee art-vg-garee-b"><i></i></span>`;
+}
+
+// Une file dans le brouillard, vue de dessus. Le voile s'épaissit vers le
+// haut : au-delà, on ne voit plus rien. La voiture de devant est encore
+// visible, ce qui donne l'échelle de la distance à garder.
+function artBrouillardFile() {
+  return `
+    <div class="art-bf-route"><span class="art-bf-bord-gauche"></span><span class="art-bf-bord-droit"></span></div>
+    <span class="art-bf-devant"><i></i></span>
+    <div class="art-bf-voile"></div>`;
+}
+
+// L'insertion sur une voie rapide, vue de dessus, la circulation de gauche à
+// droite. Trois voitures sur la voie de droite laissent trois espaces de
+// tailles différentes, et la bretelle se pince vers son point de raccordement.
+function artInsertion() {
+  return `
+    <div class="art-in-route"><span class="art-in-ligne"></span></div>
+    <div class="art-in-bretelle"></div>
+    <span class="art-in-voiture art-in-voiture-a"></span>
+    <span class="art-in-voiture art-in-voiture-b"></span>
+    <span class="art-in-voiture art-in-voiture-c"></span>`;
 }
 
 // Voie rapide vue de dessus, la circulation va de gauche à droite. Vue de
