@@ -29,17 +29,22 @@ const LIMITE_ERREURS = 4;
 const LETTRES = ["a", "b", "c", "d"];
 
 /**
- * Géométrie commune des pièces de placement, en pourcentage de la scène.
+ * Géométrie de la pièce qu'on déplace, en pourcentage de la scène.
  *
- * ⚠️ `departX` ne doit JAMAIS tomber dans la zone qui porte la bonne réponse.
- * La pièce démarrait au centre, donc pile sur « juste » : un simple appui suivi
- * d'un relâché, sans bouger d'un pixel, validait la mission. La scène donnait
- * la réponse avant que l'élève ait rien décidé.
+ * Ce sont les valeurs par défaut, celles du siège vu de profil. Une mission
+ * peut les remplacer dans son champ `piece` : une voiture vue de dessus est
+ * quatre fois plus petite qu'un conducteur dans son siège, et elle ne part pas
+ * du même bord.
  *
- * Elle démarre maintenant à la butée gauche, ce qui raconte aussi la bonne
- * histoire : le siège est trop reculé, à toi de l'amener à la bonne distance.
- * Lâcher sans bouger désigne donc une position fausse et coûte un essai, ce qui
- * est juste puisque relâcher EST une réponse.
+ * ⚠️ `departX` et `departY` ne doivent JAMAIS tomber dans la zone qui porte la
+ * bonne réponse. La pièce démarrait au centre, donc pile sur « juste » : un
+ * simple appui suivi d'un relâché, sans bouger d'un pixel, validait la mission.
+ * La scène donnait la réponse avant que l'élève ait rien décidé.
+ *
+ * Le siège démarre donc à la butée gauche, ce qui raconte aussi la bonne
+ * histoire : il est trop reculé, à toi de l'amener à la bonne distance. Lâcher
+ * sans bouger désigne une position fausse et coûte un essai, ce qui est juste
+ * puisque relâcher EST une réponse.
  */
 const PIECE_PLACEMENT = Object.freeze({
   largeur: 50,
@@ -47,6 +52,35 @@ const PIECE_PLACEMENT = Object.freeze({
   departX: 25,
   departY: 79,
 });
+
+/**
+ * Les dessins disponibles pour la pièce, choisis par `piece.forme`.
+ *
+ * `conducteur` : un conducteur dans son siège, vu de profil (réglage du poste).
+ * `voiture` : une voiture vue de dessus, pour tout ce qui se joue en plan
+ * (la place dans la voie, l'espace pour doubler, la distance à garder).
+ */
+const FORMES_PIECE = {
+  conducteur: `
+    <svg class="mp-placement-driver" viewBox="0 0 140 100" aria-hidden="true">
+      <path class="mp-driver-seat-back" d="M27 25 Q23 26 24 35 L28 71 Q29 78 36 78 L43 76 L40 30 Q39 24 33 24Z"/>
+      <path class="mp-driver-seat-base" d="M31 69 Q33 64 41 64 H70 Q76 65 75 72 Q74 78 67 79 H37 Q31 78 31 69Z"/>
+      <path class="mp-driver-seat-rail" d="M34 83 H76"/>
+      <circle class="mp-driver-head" cx="57" cy="19" r="10"/>
+      <path class="mp-driver-body" d="M48 31 Q55 27 63 31 Q68 42 65 62 L52 67 Q44 54 46 39Z"/>
+      <path class="mp-driver-arm" d="M59 38 L84 48 L108 43"/>
+      <path class="mp-driver-leg" d="M56 63 L89 68 L119 83"/>
+      <path class="mp-driver-foot" d="M116 83 H133"/>
+    </svg>`,
+  voiture: `
+    <svg class="mp-placement-car" viewBox="0 0 60 100" aria-hidden="true">
+      <rect class="mp-car-body" x="6" y="4" width="48" height="92" rx="11"/>
+      <path class="mp-car-glass" d="M14 22H46V38H14Z"/>
+      <path class="mp-car-glass" d="M14 62H46V78H14Z"/>
+      <path class="mp-car-roof" d="M13 40H47V60H13Z"/>
+      <path class="mp-car-mirror" d="M4 40H10M50 40H56"/>
+    </svg>`,
+};
 
 /** Les couleurs de chaque famille de compétence, pour la teinte de la scène. */
 const TEINTES = {
@@ -205,13 +239,11 @@ export function monterMissions(
 
   function placementDansScene(m) {
     const spots = m.spots.map(normaliserSpot).filter(Boolean);
+    const geo = geometriePiece(m);
     const spotActuel = spots.find((spot) => spot.id === etat.dernier);
-    const pieceX = spotActuel
-      ? spotActuel.x + spotActuel.w / 2
-      : PIECE_PLACEMENT.departX;
-    const pieceY = spotActuel
-      ? spotActuel.y + spotActuel.h / 2
-      : PIECE_PLACEMENT.departY;
+    const pieceX = spotActuel ? spotActuel.x + spotActuel.w / 2 : geo.departX;
+    const pieceY = spotActuel ? spotActuel.y + spotActuel.h / 2 : geo.departY;
+    const dessin = FORMES_PIECE[m.piece?.forme] || FORMES_PIECE.conducteur;
 
     return `<div class="mp-placement-layer">
       ${spots
@@ -228,17 +260,8 @@ export function monterMissions(
         role="button" tabindex="${etat.resolu ? "-1" : "0"}" data-placement-piece
         aria-label="${escAttr(`${m.piece?.label || "Objet"}. Fais glisser puis lâche dans une position.`)}"
         aria-disabled="${etat.resolu ? "true" : "false"}"
-        style="--piece-x:${pieceX}%;--piece-y:${pieceY}%">
-        <svg class="mp-placement-driver" viewBox="0 0 140 100" aria-hidden="true">
-          <path class="mp-driver-seat-back" d="M27 25 Q23 26 24 35 L28 71 Q29 78 36 78 L43 76 L40 30 Q39 24 33 24Z"/>
-          <path class="mp-driver-seat-base" d="M31 69 Q33 64 41 64 H70 Q76 65 75 72 Q74 78 67 79 H37 Q31 78 31 69Z"/>
-          <path class="mp-driver-seat-rail" d="M34 83 H76"/>
-          <circle class="mp-driver-head" cx="57" cy="19" r="10"/>
-          <path class="mp-driver-body" d="M48 31 Q55 27 63 31 Q68 42 65 62 L52 67 Q44 54 46 39Z"/>
-          <path class="mp-driver-arm" d="M59 38 L84 48 L108 43"/>
-          <path class="mp-driver-leg" d="M56 63 L89 68 L119 83"/>
-          <path class="mp-driver-foot" d="M116 83 H133"/>
-        </svg>
+        style="--piece-x:${pieceX}%;--piece-y:${pieceY}%;--piece-w:${geo.largeur}%;--piece-h:${geo.hauteur}%">
+        ${dessin}
       </div>
     </div>`;
   }
@@ -266,7 +289,7 @@ export function monterMissions(
     if (m.mode === "placement") {
       return `<section class="mp-interaction mp-placement-interaction">
         ${scene(m, true)}
-        <p class="mp-scene-instruction">Fais glisser le siège vers une position puis lâche.</p>
+        <p class="mp-scene-instruction">${esc(`Fais glisser ${m.piece?.article || "le siège"} vers une position puis lâche.`)}</p>
       </section>`;
     }
     if (m.mode === "sequence") return sequence(m);
@@ -481,14 +504,15 @@ export function monterMissions(
     let indexClavier = -1;
     let verrouille = false;
 
+    const geo = geometriePiece(m);
     const borner = (valeur, min, max) => Math.min(max, Math.max(min, valeur));
     const lirePosition = () => ({
       x:
         Number.parseFloat(piece.style.getPropertyValue("--piece-x")) ||
-        PIECE_PLACEMENT.departX,
+        geo.departX,
       y:
         Number.parseFloat(piece.style.getPropertyValue("--piece-y")) ||
-        PIECE_PLACEMENT.departY,
+        geo.departY,
     });
     const positionDuPointeur = (e) => {
       const rect = sceneEl.getBoundingClientRect();
@@ -498,8 +522,8 @@ export function monterMissions(
       };
     };
     const placerPiece = ({ x, y }) => {
-      const demiLargeur = PIECE_PLACEMENT.largeur / 2;
-      const demiHauteur = PIECE_PLACEMENT.hauteur / 2;
+      const demiLargeur = geo.largeur / 2;
+      const demiHauteur = geo.hauteur / 2;
       const position = {
         x: borner(x, demiLargeur, 100 - demiLargeur),
         y: borner(y, demiHauteur, 100 - demiHauteur),
@@ -646,6 +670,24 @@ function normaliserSpot(spot) {
     y: Math.min(100, Math.max(0, y)),
     w: Math.min(100, Math.max(1, w)),
     h: Math.min(100, Math.max(1, h)),
+  };
+}
+
+/**
+ * La géométrie de la pièce d'une mission, complétée par les valeurs du siège.
+ *
+ * Chaque nombre est un pourcentage de la scène. Une valeur absente ou farfelue
+ * retombe sur la valeur par défaut plutôt que de casser le glisser.
+ */
+function geometriePiece(m) {
+  const demande = m?.piece || {};
+  const nombre = (valeur, defaut) =>
+    Number.isFinite(Number(valeur)) ? Number(valeur) : defaut;
+  return {
+    largeur: nombre(demande.largeur, PIECE_PLACEMENT.largeur),
+    hauteur: nombre(demande.hauteur, PIECE_PLACEMENT.hauteur),
+    departX: nombre(demande.departX, PIECE_PLACEMENT.departX),
+    departY: nombre(demande.departY, PIECE_PLACEMENT.departY),
   };
 }
 
