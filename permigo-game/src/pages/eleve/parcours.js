@@ -47,8 +47,6 @@ const PRC_I18N = {
     retry: "Try again",
     fresh_unlock: "Just unlocked: {name}",
     chip_chap: "Chapter {n} of {t}",
-    examen_cta: "The exam",
-    examen_aria: "The exam. Your date, your countdown, where you stand",
     prog_chap: "Chapter progress",
     aria_jalons: "{d} out of {t} done in this chapter",
     gate_one: "Validate 1 more skill from the previous chapter",
@@ -108,8 +106,6 @@ const PRC_I18N = {
     retry: "أعد المحاولة",
     fresh_unlock: "فتحت للتو: {name}",
     chip_chap: "الفصل {n} من {t}",
-    examen_cta: "الامتحان",
-    examen_aria: "الامتحان. موعدك، العدّ التنازلي، وأين وصلت",
     prog_chap: "تقدّم الفصل",
     aria_jalons: "{d} من {t} مكتملة في هذا الفصل",
     gate_one: "صادق على مهارة إضافية واحدة من الفصل السابق",
@@ -923,11 +919,6 @@ const STYLE = `<style>
   color: #5a2fa0;
 }
 .prc-cv.is-light .prc-cv-chip .dot { background: linear-gradient(#a870ff, #7c4dff); }
-.prc-cv.is-light .prc-cv-suivi {
-  background: rgba(124,77,255,.1);
-  border-color: rgba(124,77,255,.3);
-  color: #5a2fa0;
-}
 .prc-cv.is-light .prc-cv-world-card {
   background:
     radial-gradient(300px 160px at 88% -10%, rgba(180,130,255,.22), transparent 60%),
@@ -1154,23 +1145,6 @@ const STYLE = `<style>
   box-shadow: 0 2px 10px -4px rgba(255,156,28,.5);
 }
 .prc-cv-chip .dot { width: 7px; height: 7px; border-radius: 50%; background: linear-gradient(#ffd24a, #ff9c1c); box-shadow: 0 0 8px #ffb840; }
-/* ── Bouton discret du hero → la page de l'examen ── */
-.prc-cv-meta-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.prc-cv-suivi {
-  position: relative;
-  display: inline-flex; align-items: center; gap: 6px; flex: none;
-  padding: 7px 12px; border-radius: 20px;
-  background: rgba(42,27,82,.6);
-  border: 1.5px solid rgba(168,85,247,.35);
-  font: 800 12px/1 'Archivo', sans-serif;
-  color: #cdbff5; text-decoration: none;
-  -webkit-tap-highlight-color: transparent;
-  transition: transform .12s, background .15s;
-}
-.prc-cv-suivi::after { content: ""; position: absolute; inset: -8px; } /* zone tactile ≥44px */
-.prc-cv-suivi svg { width: 14px; height: 14px; }
-.prc-cv-suivi:active { transform: scale(.95); }
-.prc-cv-suivi:focus-visible { outline: 2px solid var(--cv-gold); outline-offset: 2px; }
 .prc-cv-world-title {
   font-family: 'Archivo', sans-serif;
   font-weight: 800; font-size: 27px; line-height: 1.02; letter-spacing: -.6px;
@@ -2333,18 +2307,7 @@ function renderChapterView(
                 stroke="rgba(255,210,74,.5)" stroke-width="2.5" stroke-dasharray="9 12" stroke-linecap="round"/>
         </svg>
         <div class="prc-cv-world-meta">
-          <div class="prc-cv-meta-top">
-            <span class="prc-cv-chip"><span class="dot" aria-hidden="true"></span>${prcD("chip_chap", `Chapitre ${currentIdx + 1} sur ${worldStates.length}`, { n: currentIdx + 1, t: worldStates.length })}</span>
-            <!-- Ce bouton menait au hub condensé « mon permis », qui
-                 redisait les compétences que cette page dessine déjà
-                 (supprimé le 02/08/2026). Il mène maintenant à l'examen :
-                 c'était la SEULE chose que le hub apportait, et la page
-                 #/examen n'avait plus aucune porte dans toute l'app. -->
-            <a class="prc-cv-suivi" href="#/examen" aria-label="${prcT("examen_aria", "L'examen. Ta date, ton compte à rebours, où tu en es")}">
-              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.6" stroke="currentColor" stroke-width="2.2"/><path d="M3.5 9.6h17M8.2 3v4M15.8 3v4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
-              <span>${prcD("examen_cta", "L'examen")}</span>
-            </a>
-          </div>
+          <span class="prc-cv-chip"><span class="dot" aria-hidden="true"></span>${prcD("chip_chap", `Chapitre ${currentIdx + 1} sur ${worldStates.length}`, { n: currentIdx + 1, t: worldStates.length })}</span>
           <h1 class="prc-cv-world-title">${nameBi(chapTitle, chapTr(world))}</h1>
           <p class="prc-cv-world-sub">${nameBi(world.description ?? "", chapDescTr(world))}</p>
         </div>
