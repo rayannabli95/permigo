@@ -43,6 +43,10 @@ function json(body: unknown, status = 200) {
 
 const NB_QUESTIONS = 10;
 const MAX_JOUEURS = 8;
+// Points de vitesse : une bonne réponse vaut de 500 (au buzzer) à 1000
+// (instantanée). Le plafond sert uniquement à borner ce qu'un client peut
+// envoyer, la règle de calcul vit dans la page.
+const PTS_MAX = 1000;
 
 // Alphabet sans caractère ambigu : pas de 0/O, 1/I/L, 2/Z, 5/S, 8/B. Le code
 // se lit à voix haute dans une soirée sans que personne ne se trompe.
@@ -223,6 +227,7 @@ Deno.serve(async (req) => {
     if (action === "finish") {
       const playerId = String(body.playerId ?? "");
       const score = Number(body.score);
+      const correct = Number(body.correct);
       if (!playerId || !Number.isInteger(score) || score < 0) {
         return json({ error: "score" }, 400);
       }
@@ -233,7 +238,12 @@ Deno.serve(async (req) => {
       const { data, error } = await admin
         .from("duel_players")
         .update({
-          score: Math.min(score, NB_QUESTIONS),
+          // Points de VITESSE, plus un nombre de bonnes réponses : le plafond
+          // est celui d'une partie parfaite, pas celui du nombre de questions.
+          score: Math.min(score, NB_QUESTIONS * PTS_MAX),
+          correct_count: Number.isInteger(correct)
+            ? Math.min(Math.max(correct, 0), NB_QUESTIONS)
+            : null,
           missed_ids: missed,
           finished_at: new Date().toISOString(),
         })
@@ -254,8 +264,11 @@ Deno.serve(async (req) => {
 
       const { data: joueurs, error } = await admin
         .from("duel_players")
-        .select("id, name, score, missed_ids, finished_at")
-        .eq("duel_id", duel.id);
+        .select(
+          "id, name, score, correct_count, missed_ids, finished_at, is_host",
+        )
+        .eq("duel_id", duel.id)
+        .order("created_at", { ascending: true });
       if (error) throw error;
 
       const classement = (joueurs ?? [])
@@ -263,6 +276,7 @@ Deno.serve(async (req) => {
           id: p.id,
           name: p.name,
           score: p.score,
+          correct: p.correct_count,
           fini: !!p.finished_at,
         }))
         .sort((a, b) => (b.score ?? -1) - (a.score ?? -1));
@@ -290,7 +304,12 @@ Deno.serve(async (req) => {
         if (q) ratee = { ...q, rates: pire.rates };
       }
 
-      return json({ classement, ratee, total: NB_QUESTIONS });
+      // Le nom de l'hôte est renvoyé À PART : le classement est trié par
+      // score, donc dès que quelqu'un finit, l'hôte n'est plus en première
+      // ligne. C'est lui qui donne le « Machin te défie » de l'écran d'accueil.
+      const hote = (joueurs ?? []).find((p) => p.is_host)?.name ?? null;
+
+      return json({ classement, ratee, hote, total: NB_QUESTIONS });
     }
 
     return json({ error: "action" }, 400);
