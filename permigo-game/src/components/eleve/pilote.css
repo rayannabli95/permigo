@@ -899,8 +899,10 @@ body.mp-open #header-bar {
   z-index: 2;
   left: var(--piece-x);
   top: var(--piece-y);
-  width: 50%;
-  height: 38%;
+  /* La taille vient de la mission : un conducteur dans son siège occupe la
+     moitié de la scène, une voiture vue de dessus le huitième. */
+  width: var(--piece-w, 50%);
+  height: var(--piece-h, 38%);
   padding: 0;
   border: 0;
   outline: none;
@@ -991,6 +993,39 @@ body.mp-open #header-bar {
 .mp-driver-foot {
   stroke: #211b30;
   stroke-width: 7;
+}
+
+/* La voiture vue de dessus, l'autre pièce déplaçable. Elle reprend le violet
+   du joueur des décors en vue de dessus, pour qu'on la reconnaisse tout de
+   suite comme « ma voiture » et pas comme un véhicule du décor. */
+.mp-placement-car {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.mp-car-body {
+  fill: #9b86e0;
+  stroke: rgb(255 255 255 / 26%);
+  stroke-width: 2;
+}
+
+.mp-car-glass,
+.mp-car-roof {
+  fill: rgb(20 12 40 / 42%);
+}
+
+.mp-car-roof {
+  fill: rgb(20 12 40 / 20%);
+}
+
+.mp-car-mirror {
+  fill: none;
+  stroke: #9b86e0;
+  stroke-linecap: round;
+  stroke-width: 5;
 }
 
 /* Scene art */
@@ -2617,6 +2652,227 @@ body.mp-open #header-bar {
   width: 26%;
   border-radius: 3px;
   background: rgb(20 12 40 / 45%);
+}
+
+/* ── Décor « voie avec voitures garées », vue de dessus ───────────────────
+   Pour la place à tenir dans sa voie. Tout est en POURCENTAGE : les zones de
+   dépose d'une mission de placement le sont aussi, et un décor calé en pixels
+   les décalerait dès que la largeur change.
+
+   La route occupe 14 % → 86 %. Le trottoir de droite porte trois voitures
+   garées, celle du milieu a sa portière entrouverte. */
+.mp-art-voie-garee {
+  position: absolute;
+  inset: 0;
+  background: #2a2740;
+}
+
+.art-vg-trottoir {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 14%;
+  background: linear-gradient(180deg, #514c6e, #3f3b5c);
+}
+
+.art-vg-trottoir-gauche {
+  left: 0;
+}
+
+.art-vg-trottoir-droit {
+  right: 0;
+}
+
+.art-vg-route {
+  position: absolute;
+  inset: 0 14%;
+  background: linear-gradient(90deg, #423e55, #34314c);
+}
+
+.art-vg-axe {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: repeating-linear-gradient(
+    180deg,
+    rgb(247 233 161 / 85%) 0 20px,
+    transparent 20px 40px
+  );
+  transform: translateX(-50%);
+}
+
+.art-vg-garee {
+  position: absolute;
+  right: 15%;
+  width: 12%;
+  height: 21%;
+  border-radius: 5px;
+  background: linear-gradient(180deg, #6f6894, #4a4470);
+  box-shadow: inset 0 2px 0 rgb(255 255 255 / 14%);
+}
+
+.art-vg-garee-a {
+  top: 4%;
+}
+
+.art-vg-garee-b {
+  top: 32%;
+}
+
+/* ⚠️ Le bas de la file reste VIDE volontairement. La voiture du joueur y
+   démarre : une troisième voiture garée là, et la pièce se posait dessus. */
+
+/* La portière entrouverte de la voiture du milieu : elle mord sur la voie.
+   C'est le seul élément de la scène qui justifie de ne pas serrer à droite. */
+.art-vg-garee-b i {
+  position: absolute;
+  left: -52%;
+  top: 26%;
+  width: 52%;
+  height: 26%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #ffd88a, #e0a133);
+  transform-origin: right center;
+  transform: rotate(-14deg);
+}
+
+/* ── Décor « file dans le brouillard », vue de dessus ─────────────────────
+   Pour la distance à garder quand on ne voit plus loin. Le voile s'épaissit
+   vers le haut de la scène : ce qui est au-delà n'existe pas encore pour le
+   conducteur, et c'est exactement ce qui fixe la distance utile. */
+.mp-art-brouillard-file {
+  position: absolute;
+  inset: 0;
+  background: #4b5062;
+}
+
+.art-bf-route {
+  position: absolute;
+  inset: 0 18%;
+  background: linear-gradient(180deg, #3f3c52, #4a4760);
+}
+
+.art-bf-bord-gauche,
+.art-bf-bord-droit {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: rgb(247 243 255 / 52%);
+}
+
+.art-bf-bord-gauche {
+  left: 3%;
+}
+
+.art-bf-bord-droit {
+  right: 3%;
+}
+
+.art-bf-devant {
+  position: absolute;
+  left: 44%;
+  top: 9%;
+  width: 13%;
+  height: 17%;
+  border-radius: 5px;
+  background: linear-gradient(180deg, #6f6894, #4a4470);
+}
+
+/* Les feux arrière, le seul repère qui perce encore le voile. */
+.art-bf-devant i {
+  position: absolute;
+  right: 12%;
+  bottom: 8%;
+  left: 12%;
+  height: 20%;
+  border-radius: 3px;
+  background: #ff6a5e;
+  box-shadow: 0 0 10px rgb(255 106 94 / 70%);
+}
+
+.art-bf-voile {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* ⚠️ Le voile s'arrête à 78 % d'opacité en haut, pas 92 %. Plus dense, il
+     avalait complètement la voiture de devant : la mission demande de garder
+     ses feux en vue, il faut donc qu'on les voie. */
+  background: linear-gradient(
+    180deg,
+    rgb(214 218 228 / 78%) 0%,
+    rgb(214 218 228 / 52%) 24%,
+    rgb(214 218 228 / 20%) 54%,
+    transparent 80%
+  );
+}
+
+/* ── Décor « insertion sur voie rapide », vue de dessus ───────────────────
+   La circulation va de gauche à droite. Trois voitures laissent trois espaces
+   de tailles différentes ; la bretelle se pince vers son raccordement, ce qui
+   dit sans un mot que le temps pour choisir est compté. */
+.mp-art-insertion {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #2f5240, #1e3b2d);
+}
+
+.art-in-route {
+  position: absolute;
+  inset: 6% 0 auto 0;
+  height: 46%;
+  background: linear-gradient(180deg, #423e55, #34314c);
+  box-shadow:
+    inset 0 2px 0 rgb(247 243 255 / 45%),
+    inset 0 -2px 0 rgb(247 243 255 / 45%);
+}
+
+.art-in-ligne {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    rgb(247 243 255 / 65%) 0 22px,
+    transparent 22px 44px
+  );
+}
+
+.art-in-bretelle {
+  position: absolute;
+  left: 0;
+  top: 52%;
+  width: 86%;
+  height: 36%;
+  background: linear-gradient(180deg, #3d3950, #302d47);
+  clip-path: polygon(0% 0%, 100% 0%, 0% 100%);
+}
+
+.art-in-voiture {
+  position: absolute;
+  top: 30%;
+  width: 14%;
+  height: 15%;
+  border-radius: 5px;
+  background: linear-gradient(180deg, #7b6ba8, #4a3f74);
+}
+
+/* Les trois espaces que ces voitures laissent derrière elles : serré entre A
+   et B, large entre B et C, et la queue derrière C. */
+.art-in-voiture-a {
+  left: 2%;
+}
+
+.art-in-voiture-b {
+  left: 26%;
+}
+
+.art-in-voiture-c {
+  left: 72%;
 }
 
 /* ── Décor « entrée de tunnel » ───────────────────────────────────────────
