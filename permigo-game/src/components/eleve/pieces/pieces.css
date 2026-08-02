@@ -1,0 +1,910 @@
+/* ═══════════════════════════════════════════════════════════════
+   LES PIÈCES DE VOITURE DESSINÉES.
+
+   Le corps de cette feuille vient du labo `mockups/moteur-pilote/art-library`,
+   dont on n'a gardé que les règles `.pg-` : la feuille du labo habillait aussi
+   sa page de démonstration (`.al-`, `html`, `body`, `*`) et cette partie-là,
+   importée dans l'app, aurait écrasé la mise en page du jeu.
+
+   Les couleurs du labo vivaient dans `:root`. Ici elles sont posées sur le
+   conteneur `.mp-piece` : une pièce reste dessinée pareil, mais elle ne
+   redéfinit rien pour le reste de l'écran.
+   ═══════════════════════════════════════════════════════════════ */
+
+.mp-piece {
+  --al-night: #100922;
+  --al-n2: #1a1038;
+  --al-n3: #281957;
+  --al-accent: #8b6dff;
+  --al-gold: #f4c75e;
+  --al-green: #38d994;
+  --al-red: #ff766e;
+  --al-ease: cubic-bezier(0.23, 1, 0.32, 1);
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  /* Les pièces posent leurs libellés dans les coins. En haut, la scène a déjà
+     son étiquette de mécanique : sans cette marge, « Lave-glace » passait sous
+     « Diagnostiquer ». */
+  padding: 27px 10px 12px;
+}
+
+/* Le cadre du labo servait à poser chaque pièce sur sa fiche de catalogue.
+   Dans une mission, la scène EST déjà le cadre : un deuxième bord dessinerait
+   une carte dans une carte. */
+.mp-piece .pg-element {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.mp-piece .pg-drawing {
+  width: 100%;
+  height: 100%;
+}
+
+/* Le marqueur d'état du labo (la pastille de coin) annonçait « trouvé » ou
+   « raté » dans le catalogue. La mission a déjà son propre retour à l'écran. */
+.mp-piece .pg-state-marker {
+  display: none;
+}
+
+/* ⚠️ Le labo faisait GLOWER le bocal choisi : sa page de catalogue avait un
+   bouton par fluide et il fallait voir lequel était sélectionné. Dans une
+   mission qui demande « quel niveau ne va pas ? », ce halo désigne la réponse
+   avant que l'élève ait regardé. Le seul signal qui reste est le bon : un
+   niveau trop bas se dessine en rouge. */
+.mp-piece .pg-fluid-container.is-selected {
+  filter: none;
+}
+
+.mp-piece .pg-fluid-label.is-selected {
+  color: inherit;
+  background: none;
+  box-shadow: none;
+}
+
+/* Le pneu du labo affichait son usure en chiffres (« 92 % ») à côté d'une
+   jauge. Les deux restent dehors dans l'app.
+   · le pourcentage est banni du Mode Pilote, et il donnerait la réponse ;
+   · la jauge n'existe pas sur une vraie roue, et sa barre rouge dépasse le
+     repère à TOUTES les usures : elle raconte donc n'importe quoi. Ce qui
+     reste est ce qu'on voit vraiment, la hauteur de gomme. */
+.mp-piece .pg-wear-label,
+.mp-piece .pg-wear-gauge {
+  display: none;
+}
+
+@keyframes pg-glass-sweep {
+  0%,
+  68%,
+  100% {
+    opacity: 0;
+    transform: translate(-18%, -8%);
+  }
+
+  76% {
+    opacity: 0.24;
+  }
+
+  88% {
+    opacity: 0;
+    transform: translate(22%, 12%);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   ÉLÉMENT RÉUTILISABLE
+   Une lumière clé violette, un complément chaud, une ombre contact.
+   ───────────────────────────────────────────────────────────── */
+
+.pg-element {
+  --pg-state: var(--al-accent);
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: 0.08rem solid rgb(139 109 255 / 24%);
+  border-radius: 0.78rem;
+  background:
+    radial-gradient(
+      circle at 50% -8%,
+      rgb(139 109 255 / 22%),
+      transparent 58%
+    ),
+    linear-gradient(180deg, var(--al-n2), var(--al-night));
+  box-shadow:
+    inset 0 0.08rem 0 rgb(139 109 255 / 26%),
+    inset 0 -0.8rem 1.4rem rgb(16 9 34 / 36%);
+  isolation: isolate;
+  transition:
+    border-color 180ms var(--al-ease),
+    box-shadow 180ms var(--al-ease);
+}
+
+.pg-element.is-active {
+  --pg-state: var(--al-gold);
+}
+
+.pg-element.is-found {
+  --pg-state: var(--al-green);
+}
+
+.pg-element.is-error {
+  --pg-state: var(--al-red);
+}
+
+.pg-element:not(.is-idle) {
+  border-color: var(--pg-state);
+  box-shadow:
+    inset 0 0.08rem 0 rgb(139 109 255 / 26%),
+    inset 0 0 0 0.11rem var(--pg-state),
+    0 0 1rem rgb(139 109 255 / 18%);
+}
+
+.pg-light {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.pg-light-key {
+  top: -24%;
+  left: 50%;
+  width: 82%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: rgb(139 109 255 / 20%);
+  filter: blur(1.6rem);
+  transform: translateX(-50%);
+}
+
+.pg-light-warm {
+  top: 18%;
+  right: 1%;
+  width: 28%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: rgb(244 199 94 / 8%);
+  filter: blur(1.4rem);
+}
+
+.pg-drawing {
+  position: absolute;
+  z-index: 1;
+  inset: 4%;
+  width: 92%;
+  height: 92%;
+  overflow: hidden;
+}
+
+.pg-glass-sweep {
+  opacity: 0;
+  pointer-events: none;
+  animation: pg-glass-sweep 7s ease-in-out infinite;
+}
+
+.pg-element-selector .pg-glass-sweep,
+.pg-element-automatic-selector .pg-glass-sweep,
+.pg-element-manual-shifter .pg-glass-sweep {
+  opacity: 0.22;
+}
+
+.pg-pedal-arm,
+.pg-pedal-pad,
+.pg-pedal-grip,
+.pg-foot,
+.pg-shoe,
+.pg-foot-highlight,
+.pg-footrest,
+.pg-footrest-ribs,
+.pg-selector-stem,
+.pg-selector-handle,
+.pg-selector-handle-light,
+.pg-shifter-stem,
+.pg-shifter-knob,
+.pg-shifter-knob-light {
+  transition:
+    transform 210ms var(--al-ease),
+    fill 180ms ease,
+    stroke 180ms ease,
+    opacity 180ms ease;
+}
+
+.pg-element:not(.is-idle) .pg-key-edge,
+.pg-element:not(.is-idle) .pg-pedal-grip,
+.pg-element:not(.is-idle) .pg-foot-highlight {
+  stroke: var(--pg-state);
+  stroke-opacity: 0.92;
+}
+
+.pg-element.is-active .pg-selector-handle,
+.pg-element.is-active .pg-shifter-knob {
+  filter: drop-shadow(0 0 0.35rem rgb(244 199 94 / 36%));
+}
+
+.pg-element.is-found .pg-selector-handle,
+.pg-element.is-found .pg-shifter-knob,
+.pg-element.is-found .pg-pedal-pad {
+  filter: drop-shadow(0 0 0.32rem rgb(56 217 148 / 30%));
+}
+
+.pg-element.is-error .pg-selector-handle,
+.pg-element.is-error .pg-shifter-knob,
+.pg-element.is-error .pg-pedal-pad {
+  filter: drop-shadow(0 0 0.32rem rgb(255 118 110 / 30%));
+}
+
+.pg-element.is-active .pg-shoe {
+  fill: var(--al-gold);
+}
+
+.pg-element.is-found .pg-shoe {
+  fill: var(--al-green);
+}
+
+.pg-element.is-error .pg-shoe {
+  fill: var(--al-red);
+}
+
+.pg-element-dashboard .pg-glass-sweep {
+  opacity: 0.18;
+}
+
+.pg-drawing-cluster {
+  inset: 5% 3%;
+  width: 94%;
+  height: 90%;
+}
+
+.pg-drawing-tachometer {
+  inset: 3%;
+  width: 94%;
+  height: 94%;
+}
+
+.pg-dial-ticks {
+  fill: none;
+  stroke: var(--al-accent);
+  stroke-linecap: round;
+  stroke-width: 1.5;
+  opacity: 0.68;
+}
+
+.pg-element-dashboard:not(.is-idle) .pg-dial-ticks {
+  stroke: var(--pg-state);
+  opacity: 0.84;
+}
+
+.pg-dial-face,
+.pg-cluster-screen,
+.pg-tacho-face {
+  filter: drop-shadow(0 0.35rem 0.55rem rgb(16 9 34 / 48%));
+}
+
+.pg-red-zone {
+  filter: drop-shadow(0 0 0.22rem rgb(255 118 110 / 44%));
+}
+
+.pg-cluster-needle,
+.pg-tacho-needle {
+  filter: drop-shadow(0 0 0.2rem rgb(244 199 94 / 38%));
+  transition: transform 220ms var(--al-ease);
+}
+
+.pg-needle-hub {
+  filter: drop-shadow(0 0.25rem 0.3rem rgb(16 9 34 / 58%));
+}
+
+.pg-warning-glyph,
+.pg-cluster-warning {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 6.5;
+}
+
+.pg-warning-solid,
+.pg-cluster-warning .pg-warning-solid {
+  fill: currentColor;
+  stroke: none;
+}
+
+.pg-cluster-warning {
+  color: var(--al-accent);
+  opacity: 0.16;
+}
+
+.pg-cluster-warning.is-lit {
+  color: var(--warning-tone);
+  opacity: 1;
+  filter: drop-shadow(0 0 0.28rem var(--warning-tone));
+}
+
+.pg-cluster-speed {
+  color: var(--al-gold);
+  font-size: clamp(0.7rem, 4vw, 1.15rem);
+  text-shadow: 0 0 0.55rem rgb(244 199 94 / 34%);
+}
+
+.pg-cluster-unit,
+.pg-cluster-rpm {
+  color: var(--al-accent);
+  font-size: clamp(0.36rem, 1.65vw, 0.52rem);
+}
+
+.pg-cluster-warning-name {
+  width: 38%;
+  min-height: 10%;
+  padding: 0 2%;
+  border-radius: 99rem;
+  color: var(--al-accent);
+  background: var(--al-night);
+  font-size: clamp(0.34rem, 1.6vw, 0.52rem);
+  white-space: nowrap;
+}
+
+.pg-cluster-warning-name.is-lit {
+  color: var(--al-gold);
+  box-shadow: inset 0 0 0 0.05rem rgb(244 199 94 / 36%);
+}
+
+.pg-warning-board {
+  position: absolute;
+  z-index: 2;
+  inset: 7% 5% 8%;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 3%;
+}
+
+.pg-warning-cell {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  justify-items: center;
+  align-items: center;
+  gap: 3%;
+  padding: 6%;
+  border: 0.07rem solid rgb(139 109 255 / 18%);
+  border-radius: 15%;
+  background:
+    linear-gradient(
+      155deg,
+      rgb(139 109 255 / 8%),
+      transparent 48%
+    ),
+    var(--al-n2);
+  box-shadow:
+    inset 0 0.08rem 0 rgb(139 109 255 / 17%),
+    0 0.35rem 0.65rem rgb(16 9 34 / 42%);
+}
+
+.pg-warning-cell.is-lit {
+  border-color: var(--warning-tone);
+  box-shadow:
+    inset 0 0 0 0.08rem var(--warning-tone),
+    0 0 0.7rem rgb(244 199 94 / 16%);
+}
+
+.pg-warning-asset {
+  --warning-tone: var(--al-gold);
+  width: min(72%, 3.2rem);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  color: var(--al-accent);
+  opacity: 0.24;
+}
+
+.pg-warning-asset.is-lit {
+  color: var(--warning-tone);
+  opacity: 1;
+  filter: drop-shadow(0 0 0.3rem var(--warning-tone));
+}
+
+.pg-warning-icon {
+  width: 100%;
+  height: 100%;
+}
+
+.pg-warning-label {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--al-accent);
+  font-size: clamp(0.34rem, 1.7vw, 0.5rem);
+  font-weight: 900;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pg-warning-cell.is-lit .pg-warning-label {
+  color: var(--warning-tone);
+}
+
+.pg-tacho-number {
+  color: var(--al-accent);
+  font-size: clamp(0.48rem, 2.2vw, 0.68rem);
+}
+
+.pg-tacho-readout {
+  color: var(--al-gold);
+  font-size: clamp(0.72rem, 4.6vw, 1.25rem);
+  text-shadow: 0 0 0.6rem rgb(244 199 94 / 34%);
+}
+
+.pg-tacho-unit {
+  color: var(--al-accent);
+  font-size: clamp(0.35rem, 1.8vw, 0.52rem);
+}
+
+.pg-element-vehicle .pg-glass-sweep {
+  opacity: 0.16;
+}
+
+.pg-drawing-vehicle {
+  inset: 4% 2%;
+  width: 96%;
+  height: 92%;
+}
+
+.pg-drawing-light {
+  inset: 3%;
+  width: 94%;
+  height: 94%;
+}
+
+.pg-drawing-hood {
+  inset: auto;
+  top: 12%;
+  left: 2%;
+  width: 96%;
+  height: 76%;
+}
+
+.pg-car-body,
+.pg-car-side,
+.pg-car-hood,
+.pg-car-trunk,
+.pg-car-wheel,
+.pg-light-housing,
+.pg-light-glass,
+.pg-tail-glass,
+.pg-fluid-container {
+  transition:
+    fill 180ms ease,
+    stroke 180ms ease,
+    opacity 180ms ease,
+    filter 180ms ease;
+}
+
+.pg-car-body,
+.pg-light-housing,
+.pg-tyre-shell,
+.pg-hood-lid,
+.pg-engine-bay {
+  filter: drop-shadow(0 0.35rem 0.45rem rgb(16 9 34 / 48%));
+}
+
+.pg-car-lamp,
+.pg-light-unit,
+.pg-tail-core,
+.pg-light-beam {
+  transition:
+    fill 180ms ease,
+    opacity 180ms ease,
+    filter 180ms ease;
+}
+
+.pg-car-lamp.is-off,
+.pg-light-unit.is-off,
+.pg-tail-core.is-off {
+  opacity: 0.28;
+}
+
+.pg-car-lamp.is-lit,
+.pg-light-unit.is-lit,
+.pg-tail-core.is-lit {
+  opacity: 1;
+  filter: drop-shadow(0 0 0.34rem currentColor);
+}
+
+.pg-car-lamp-front.is-lit,
+.pg-light-bulb.is-lit {
+  color: var(--al-gold);
+}
+
+.pg-car-lamp-rear.is-lit,
+.pg-tail-glass.is-lit,
+.pg-tail-core.is-lit {
+  color: var(--al-red);
+  filter: drop-shadow(0 0 0.42rem var(--al-red));
+}
+
+.pg-light-beam.is-lit {
+  filter: drop-shadow(0 0 0.36rem var(--al-gold));
+}
+
+.pg-element-vehicle:not(.is-idle) .pg-focus-edge {
+  stroke: var(--pg-state);
+  stroke-opacity: 0.96;
+}
+
+.pg-element-vehicle.is-active .pg-car-body,
+.pg-element-vehicle.is-active .pg-tyre-shell,
+.pg-element-vehicle.is-active .pg-light-housing,
+.pg-element-vehicle.is-active .pg-hood-lid {
+  filter:
+    drop-shadow(0 0.35rem 0.45rem rgb(16 9 34 / 48%))
+    drop-shadow(0 0 0.3rem rgb(244 199 94 / 28%));
+}
+
+.pg-element-vehicle.is-found .pg-car-body,
+.pg-element-vehicle.is-found .pg-tyre-shell,
+.pg-element-vehicle.is-found .pg-light-housing,
+.pg-element-vehicle.is-found .pg-hood-lid {
+  filter:
+    drop-shadow(0 0.35rem 0.45rem rgb(16 9 34 / 48%))
+    drop-shadow(0 0 0.3rem rgb(56 217 148 / 28%));
+}
+
+.pg-element-vehicle.is-error .pg-car-body,
+.pg-element-vehicle.is-error .pg-tyre-shell,
+.pg-element-vehicle.is-error .pg-light-housing,
+.pg-element-vehicle.is-error .pg-hood-lid {
+  filter:
+    drop-shadow(0 0.35rem 0.45rem rgb(16 9 34 / 48%))
+    drop-shadow(0 0 0.3rem rgb(255 118 110 / 28%));
+}
+
+.pg-tyre-tread {
+  transition: opacity 180ms ease;
+}
+
+.pg-wear-gauge {
+  filter: drop-shadow(0 0.2rem 0.3rem rgb(16 9 34 / 56%));
+}
+
+.pg-wear-label {
+  min-width: 22%;
+  padding: 2% 3%;
+  border-radius: 99rem;
+  color: var(--al-gold);
+  background: var(--al-night);
+  box-shadow: inset 0 0 0 0.05rem rgb(244 199 94 / 34%);
+}
+
+.pg-fluid-container {
+  opacity: 0.52;
+}
+
+.pg-fluid-container.is-selected {
+  opacity: 1;
+  filter: drop-shadow(0 0 0.34rem var(--fluid-tone));
+}
+
+.pg-fluid-container.is-selected .pg-fluid-mark {
+  stroke: var(--fluid-tone);
+  stroke-width: 2;
+}
+
+.pg-fluid-label {
+  max-width: 29%;
+  overflow: hidden;
+  padding: 1.8% 2.4%;
+  border-radius: 99rem;
+  color: var(--al-accent);
+  background: var(--al-night);
+  font-size: clamp(0.3rem, 1.45vw, 0.46rem);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pg-fluid-label.is-selected {
+  color: var(--al-night);
+  background: var(--fluid-tone);
+  box-shadow: 0 0 0.45rem var(--fluid-tone);
+}
+
+.pg-silhouette-only {
+  display: none;
+}
+
+.pg-element-vehicle.is-silhouette .pg-car-grille-detail,
+.pg-element-vehicle.is-silhouette .pg-car-door,
+.pg-element-vehicle.is-silhouette .pg-tyre-spokes,
+.pg-element-vehicle.is-silhouette .pg-tyre-tread,
+.pg-element-vehicle.is-silhouette .pg-wear-gauge,
+.pg-element-vehicle.is-silhouette .pg-tail-segment,
+.pg-element-vehicle.is-silhouette .pg-hood-brace,
+.pg-element-vehicle.is-silhouette .pg-engine-detail,
+.pg-element-vehicle.is-silhouette .pg-fluid-container,
+.pg-element-vehicle.is-silhouette .pg-focus-edge {
+  display: none;
+}
+
+.pg-element-headlight-front.is-silhouette .pg-light-housing,
+.pg-element-headlight-front.is-silhouette .pg-light-glass,
+.pg-element-headlight-front.is-silhouette .pg-light-reflector,
+.pg-element-headlight-front.is-silhouette .pg-light-bulb,
+.pg-element-headlight-front.is-silhouette .pg-light-beam,
+.pg-element-taillight-rear.is-silhouette .pg-light-housing,
+.pg-element-taillight-rear.is-silhouette .pg-tail-glass,
+.pg-element-taillight-rear.is-silhouette .pg-tail-segment,
+.pg-element-taillight-rear.is-silhouette .pg-tail-core,
+.pg-element-hood-levels.is-silhouette .pg-hood-lid,
+.pg-element-hood-levels.is-silhouette .pg-hood-inner,
+.pg-element-hood-levels.is-silhouette .pg-hood-brace,
+.pg-element-hood-levels.is-silhouette .pg-engine-bay,
+.pg-element-hood-levels.is-silhouette .pg-engine-cover,
+.pg-element-hood-levels.is-silhouette .pg-engine-detail {
+  display: none;
+}
+
+.pg-element-vehicle.is-silhouette .pg-silhouette-only {
+  display: block;
+}
+
+.pg-element-car-front.is-silhouette .pg-drawing > :not(defs):not(.pg-silhouette-only),
+.pg-element-car-rear.is-silhouette .pg-drawing > :not(defs):not(.pg-silhouette-only) {
+  display: none;
+}
+
+.pg-warning-asset.is-silhouette {
+  width: 100%;
+  height: 100%;
+  color-scheme: light;
+  color: CanvasText;
+  background: Canvas;
+  filter: none;
+  opacity: 1;
+}
+
+.pg-warning-asset.is-silhouette .pg-warning-icon {
+  filter: brightness(0);
+}
+
+.pg-element-dashboard.is-silhouette .pg-contact-shadow,
+.pg-element-dashboard.is-silhouette .pg-cluster-shell,
+.pg-element-dashboard.is-silhouette .pg-dial-face,
+.pg-element-dashboard.is-silhouette .pg-cluster-screen,
+.pg-element-dashboard.is-silhouette .pg-tacho-shell,
+.pg-element-dashboard.is-silhouette .pg-tacho-face,
+.pg-element-dashboard.is-silhouette .pg-red-zone,
+.pg-element-dashboard.is-silhouette .pg-key-edge,
+.pg-element-dashboard.is-silhouette .pg-cluster-warning {
+  display: none;
+}
+
+.pg-element-warning-lights.is-silhouette .pg-warning-board {
+  inset: 7%;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 5%;
+  filter: brightness(0);
+}
+
+.pg-element-warning-lights.is-silhouette .pg-warning-cell {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.pg-element-warning-lights.is-silhouette .pg-warning-asset {
+  width: 100%;
+  opacity: 1;
+}
+
+.pg-element-warning-lights.is-silhouette .pg-warning-label {
+  display: none;
+}
+
+.pg-label-layer {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  pointer-events: none;
+}
+
+.pg-object-label {
+  position: absolute;
+  left: var(--label-x);
+  top: var(--label-y);
+  display: grid;
+  place-items: center;
+  color: var(--al-accent);
+  font-size: clamp(0.34rem, 1.65vw, 0.52rem);
+  font-weight: 950;
+  line-height: 1;
+  text-align: center;
+  text-shadow: 0 0.12rem 0.3rem var(--al-night);
+  transform: translate(-50%, -50%);
+}
+
+.pg-object-label-clutch,
+.pg-object-label-brake,
+.pg-object-label-accelerator,
+.pg-object-label-footrest {
+  width: 30%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pg-selector-label,
+.pg-gear-label {
+  width: 11%;
+  aspect-ratio: 1;
+  border-radius: 34%;
+  color: var(--al-accent);
+  background: var(--al-night);
+  box-shadow: inset 0 0 0 0.05rem rgb(139 109 255 / 26%);
+  transition:
+    color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms var(--al-ease);
+}
+
+.pg-selector-label.is-lit,
+.pg-gear-label.is-lit {
+  color: var(--al-night);
+  background: var(--al-gold);
+  box-shadow:
+    0 0 0.55rem rgb(244 199 94 / 48%),
+    inset 0 0.05rem 0 rgb(244 199 94 / 65%);
+}
+
+.pg-selector-label.is-lit {
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.pg-gear-label {
+  width: 9%;
+}
+
+.pg-gear-label[data-gear-label="N"] {
+  opacity: 0.75;
+}
+
+.pg-state-marker {
+  position: absolute;
+  z-index: 5;
+  top: 6%;
+  right: 5%;
+  width: 14%;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border: 0.08rem solid var(--pg-state);
+  border-radius: 32%;
+  background: var(--al-night);
+  box-shadow: 0 0 0.65rem rgb(16 9 34 / 52%);
+  opacity: 1;
+  pointer-events: none;
+}
+
+.pg-element.is-idle .pg-state-marker {
+  opacity: 0;
+}
+
+.pg-state-marker i,
+.pg-state-marker i::before,
+.pg-state-marker i::after {
+  position: absolute;
+  display: block;
+  content: "";
+}
+
+.pg-state-marker i {
+  width: 42%;
+  height: 42%;
+}
+
+.pg-element.is-active .pg-state-marker i {
+  inset: 29%;
+  border: 0.12rem solid var(--al-gold);
+  border-radius: 50%;
+}
+
+.pg-element.is-found .pg-state-marker i {
+  left: 31%;
+  top: 21%;
+  width: 27%;
+  height: 48%;
+  border-right: 0.13rem solid var(--al-green);
+  border-bottom: 0.13rem solid var(--al-green);
+  transform: rotate(42deg);
+}
+
+.pg-element.is-error .pg-state-marker i::before,
+.pg-element.is-error .pg-state-marker i::after {
+  top: 45%;
+  left: 0;
+  width: 100%;
+  height: 0.13rem;
+  border-radius: 99rem;
+  background: var(--al-red);
+}
+
+.pg-element.is-error .pg-state-marker i::before {
+  transform: rotate(45deg);
+}
+
+.pg-element.is-error .pg-state-marker i::after {
+  transform: rotate(-45deg);
+}
+
+/* Test diagnostic : rendu noir sur fond blanc système, à 40 CSS pixels. */
+.pg-element.is-silhouette {
+  color-scheme: light;
+  border: 0;
+  border-radius: 0;
+  background: Canvas;
+  box-shadow: none;
+}
+
+.pg-element.is-silhouette .pg-light,
+.pg-element.is-silhouette .pg-label-layer,
+.pg-element.is-silhouette .pg-state-marker,
+.pg-element.is-silhouette .pg-glass-sweep {
+  display: none;
+}
+
+.pg-element.is-silhouette .pg-drawing {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  filter: brightness(0);
+}
+
+.pg-element.is-silhouette .pg-footwell-floor,
+.pg-element.is-silhouette .pg-key-edge,
+.pg-element.is-silhouette .pg-contact-shadow,
+.pg-element.is-silhouette .pg-pedal-grip,
+.pg-element.is-silhouette .pg-foot-highlight,
+.pg-element.is-silhouette .pg-footrest-ribs,
+.pg-element.is-silhouette .pg-selector-console,
+.pg-element.is-silhouette .pg-selector-glass,
+.pg-element.is-silhouette .pg-shifter-console,
+.pg-element.is-silhouette .pg-shifter-boot {
+  display: none;
+}
+
+@media (max-width: 22rem) {
+  .al-shell {
+    padding-inline: 0.55rem;
+  }
+
+  .al-card {
+    padding: 0.32rem;
+  }
+
+  .al-card-header {
+    grid-template-columns: 1.4rem 1fr;
+    gap: 0.3rem;
+  }
+
+  .al-card-header > span {
+    width: 1.4rem;
+  }
+
+  .al-card-header h2 {
+    font-size: 0.64rem;
+  }
+
+  .pg-object-label {
+    font-size: 0.32rem;
+  }
+
+  .al-silhouette-row-lot3 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    row-gap: 0.55rem;
+  }
+}

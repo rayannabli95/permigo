@@ -197,7 +197,7 @@ export function monterMissions(
     return `
       <div class="mp-scene mp-scene-${esc(m.visual)}">
         <div class="mp-scene-scan" aria-hidden="true"></div>
-        <div class="mp-scene-art mp-art-${esc(m.visual)}" aria-hidden="true">${renderArt(m.visual)}</div>
+        <div class="mp-scene-art mp-art-${esc(m.visual)}" aria-hidden="true">${renderArt(m.visual, m.reglages)}</div>
         ${zones}${trajets}${placement}
         <span class="mp-scene-tag">${esc(m.modeLabel)}</span>
       </div>`;
