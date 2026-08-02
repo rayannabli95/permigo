@@ -54,6 +54,11 @@ const RV_I18N = {
     centre_t: "Exam centre",
     centre_m: "Exam day",
     centre_v: "View",
+    neuf: "New",
+    duel_t: "Challenge your friends",
+    duel_s: "They do not need an account",
+    duel_m: "Players",
+    duel_v: "2 to 4",
   },
   ar: {
     title: "المراجعة",
@@ -76,6 +81,11 @@ const RV_I18N = {
     centre_t: "مركز الامتحان",
     centre_m: "يوم الامتحان",
     centre_v: "عرض",
+    neuf: "جديد",
+    duel_t: "تحدَّ أصدقاءك",
+    duel_s: "لا يحتاجون إلى حساب",
+    duel_m: "لاعبون",
+    duel_v: "من 2 إلى 4",
   },
 };
 function rv(key, fr) {
@@ -94,6 +104,7 @@ const HERO_IMG = "/showcase/eleve-en-situation.webp"; // vraie capture du jeu (c
 const BADGE = {
   exam: "/art/reviser/cible.webp",
   fiche: "/art/reviser/livre.webp",
+  duel: "/art/reviser/epees.png", // pas de .webp dans la bibliothèque
   centre: "/art/reviser/panneau.webp",
 };
 
@@ -177,6 +188,15 @@ ${chromeNight("#241a52", "#1a1340")}
 .rv4-badge img { width:64px; height:64px; object-fit:contain; display:block; filter:drop-shadow(0 5px 8px rgba(0,0,0,.5)); }
 .rv4-itx { flex:1; min-width:0; }
 .rv4-itx h3 { font:800 19.5px/1.15 'Archivo',sans-serif; letter-spacing:-.025em; color:#fff; margin:0; }
+.rv4-itx p { margin:4px 0 0; font:600 12.5px/1.3 'Archivo',sans-serif; color:#9089c7; }
+/* La carte « Défie tes amis » : c'est la seule qui fait entrer des gens de
+   l'extérieur, elle a droit au liseré or tant qu'elle est neuve. */
+.rv4-item.neuf { border-color:rgba(245,196,81,.55);
+  background:linear-gradient(180deg,#3b2f74,#2c2263);
+  box-shadow:0 10px 26px -14px rgba(245,196,81,.4), inset 0 1px 0 rgba(255,255,255,.06); }
+.rv4-tag { display:inline-block; margin-bottom:5px; padding:4px 9px; border-radius:999px;
+  background:linear-gradient(180deg,#f7cf68,#f0aa2c); color:#2a1e05;
+  font:800 9.5px/1 'Archivo',sans-serif; letter-spacing:.1em; text-transform:uppercase; }
 .rv4-meta { flex:none; text-align:right; font:800 14px/1.1 'Archivo',sans-serif; letter-spacing:-.01em; color:#f5c451; }
 .rv4-meta small { display:block; font:700 10px/1 'Archivo',sans-serif; letter-spacing:.08em; text-transform:uppercase; color:#9089c7; margin-bottom:3px; }
 
@@ -221,10 +241,14 @@ function render({
       ? `<small${R}>${rv("best", "Record")}</small>${examBest} %`
       : `<small${R}>${rv("goal", "Objectif")}</small>/31`;
 
-  const item = (id, badge, title, meta) => `
-    <button class="rv4-item" data-go="${id}">
+  const item = (id, badge, title, meta, opts = {}) => `
+    <button class="rv4-item${opts.neuf ? " neuf" : ""}" data-go="${id}">
       <span class="rv4-badge"><img src="${badge}" alt="" width="512" height="512" loading="lazy" decoding="async"></span>
-      <span class="rv4-itx"><h3${R}>${title}</h3></span>
+      <span class="rv4-itx">
+        ${opts.neuf ? `<span class="rv4-tag"${R}>${rv("neuf", "Nouveau")}</span>` : ""}
+        <h3${R}>${title}</h3>
+        ${opts.sub ? `<p${R}>${opts.sub}</p>` : ""}
+      </span>
       <span class="rv4-meta">${meta}</span>
     </button>`;
 
@@ -254,6 +278,13 @@ function render({
       <div class="rv4-railhead"><span${R}>${rv("rail", "Aussi pour s'entraîner")}</span><div class="rule"></div></div>
       ${item("exam-conduite", BADGE.exam, rv("exam_t", "Examen blanc"), examMeta)}
       ${item("revision-conduite", BADGE.fiche, rv("fiches_t", "Fiches de révision"), `<small${R}>${rv("fiches_m", "Fiches")}</small>${fichesLues} / ${fichesTotal}`)}
+      ${item(
+        "duel",
+        BADGE.duel,
+        rv("duel_t", "Défie tes amis"),
+        `<small${R}>${rv("duel_m", "Joueurs")}</small>${rv("duel_v", "2 à 4")}`,
+        { neuf: true, sub: rv("duel_s", "Ils n'ont pas besoin de compte") },
+      )}
       ${item("centre-examen", BADGE.centre, rv("centre_t", "Centre d'examen"), `<small${R}>${rv("centre_m", "Le jour J")}</small>${rv("centre_v", "Voir")}`)}
     </div>
 
