@@ -108,6 +108,11 @@ const SIGNUP_ROUTES = {
   // Lien d'invitation par email (#/signup?token=…) : même piège — un élève
   // dont le téléphone a déjà une session ne doit pas atterrir sur l'accueil.
   signup: () => import("@/pages/public/signup.js"),
+  // « Défie tes amis » : le lien d'une partie (#/duel/K7X2) circule dans une
+  // boucle WhatsApp. Il tombe autant sur un visiteur que sur un moniteur
+  // déjà connecté, donc la route vit dans TOUS les rôles et dans la branche
+  // publique (routePublic). #/duel sans code = l'écran de création.
+  duel: () => import("@/pages/common/duel.js"),
 };
 
 const ROUTES = {
@@ -440,6 +445,11 @@ async function routePublic(app) {
     m = await import("@/pages/public/signup.js");
   } else if (hash.startsWith("#/rejoindre")) {
     m = await import("@/pages/public/rejoindre.js");
+  } else if (hash.startsWith("#/duel")) {
+    // Un ami arrive de WhatsApp : il n'a pas de compte et n'en aura pas
+    // besoin. Sans cette branche il retombait sur la page de vente.
+    arg = hash.replace(/^#\/duel\/?/, "").split("?")[0];
+    m = await import("@/pages/common/duel.js");
   } else if (hash.startsWith("#/ecole/")) {
     arg = hash.replace("#/ecole/", "").split("?")[0];
     m = await import("@/pages/public/ecole.js");

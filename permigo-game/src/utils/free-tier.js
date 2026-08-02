@@ -67,6 +67,10 @@ const DISCOVERY_ROUTES = new Set([
   "creer-compte",
   "signup",
   "nouveau-mdp",
+  // « Défie tes amis » : un lien de partie tombe dans une boucle WhatsApp et
+  // peut atterrir sur un compte gratuit. Le murer viderait la feature de son
+  // intérêt — c'est justement ce qui fait venir des gens de l'extérieur.
+  "duel",
 ]);
 
 /**
