@@ -160,12 +160,19 @@
     /* z-index au niveau --z-splash : le splash est un FRÈRE de #app (et non un
        enfant), sinon le premier `app.innerHTML = …` d'une page l'efface avant
        que la vidéo ait eu le temps de jouer. */
-    #splash{position:fixed;inset:0;z-index:10100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;background:#010208;padding:calc(env(safe-area-inset-top,0px) + 24px) 24px calc(env(safe-area-inset-bottom,0px) + 24px);animation:spFade .25s ease;overflow:hidden;transition:opacity .26s ease}
-    #splash.is-out{opacity:0;pointer-events:none}
-    #splash::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 70% at 50% 45%,rgba(108,99,255,.16),transparent 62%);pointer-events:none}
+    /* La sortie n'est pas un simple fondu : le logo grandit un peu pendant qu'il
+       s'efface, comme un objectif qui s'ouvre sur la page. Un fondu plat donnait
+       une coupure sèche entre le noir et l'app. */
+    #splash{position:fixed;inset:0;z-index:10100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;background:#010208;padding:calc(env(safe-area-inset-top,0px) + 24px) 24px calc(env(safe-area-inset-bottom,0px) + 24px);animation:spFade .25s ease;overflow:hidden;transition:opacity .4s ease,transform .4s cubic-bezier(.32,0,.24,1);will-change:opacity,transform}
+    #splash.is-out{opacity:0;transform:scale(1.09);pointer-events:none}
+    /* La halo remplit le vide autour du logo. À .16 sur 62 % il ne se voyait
+       pas : l'écran était un rectangle noir mort avec une bille au milieu. */
+    #splash::before{content:"";position:absolute;inset:0;background:radial-gradient(88% 52% at 50% 43%,rgba(124,110,255,.30),rgba(70,52,160,.13) 46%,transparent 72%);pointer-events:none}
     /* `screen` rend le noir de la vidéo transparent : plus aucun carré visible
        autour du logo, même si l'encodage n'a pas un noir parfait. */
-    #splash .sp-logo{position:relative;width:min(58vw,240px);aspect-ratio:1;display:block;mix-blend-mode:screen}
+    /* 58vw laissait 290 px de noir vide au-dessus ET en dessous sur un iPhone :
+       une bille perdue au centre. Le logo occupe maintenant l'écran. */
+    #splash .sp-logo{position:relative;width:min(78vw,320px);aspect-ratio:1;display:block;mix-blend-mode:screen}
     #splash .sp-logo video,#splash .sp-logo img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block}
     #splash .sp-logo video{z-index:1}
     /* Le poster est la dernière image (logo COMPLET) : l'afficher d'entrée
@@ -180,7 +187,7 @@
        de marque ne couvrent pas. Le fondu était sur 1,6 s démarré à 0,5 s —
        le texte n'atteignait sa pleine opacité qu'une fois le splash parti :
        ramené à 0,3 s démarré à 0,15 s, pour que les mots soient LISIBLES. */
-    #splash .sp-go{font:800 16px/1.35 'Archivo',system-ui,sans-serif;color:#a99cff;letter-spacing:.01em;text-align:center;min-height:1.35em;opacity:0;animation:spGo .3s ease .15s forwards}
+    #splash .sp-go{font:800 19px/1.35 'Archivo',system-ui,sans-serif;color:#b7abff;letter-spacing:.01em;text-align:center;min-height:1.35em;opacity:0;animation:spGo .3s ease .15s forwards}
     @keyframes spFade{from{opacity:0}to{opacity:1}}
     @keyframes spGo{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
     /* Mouvement réduit : pas de vidéo, le logo fixe suffit. */
@@ -197,7 +204,9 @@
   <a href="#app" class="skip-link">Aller au contenu principal</a>
 
   <!-- Écran de chargement. FRÈRE de #app (voir le CSS plus haut) -->
-  <div id="splash" aria-busy="true" aria-label="Chargement de PermiGo">
+  <!-- role="status" : un div nu n'a pas le droit de porter aria-label (axe le
+       refuse, RGAA 7.1.1). C'est aussi le bon rôle pour un écran d'attente. -->
+  <div id="splash" role="status" aria-busy="true" aria-label="Chargement de PermiGo">
     <div class="sp-logo" aria-hidden="true">
       <img src="%BASE_URL%splash-permigo-poster.jpg" alt="" width="240" height="240" />
       <video src="%BASE_URL%splash-permigo.mp4"
@@ -292,9 +301,15 @@
         closed = true;
         land();                         // le dernier mot lu est le sien
         sp.classList.add('is-out');
+        /* La page dessous a monté pendant que le splash couvrait l'écran : sa
+           mise en scène s'est donc jouée sans témoin, et l'élève découvrait une
+           page déjà posée qui apparaissait d'un bloc. On prévient ici, PENDANT
+           le fondu, pour que le premier écran se lève au moment où le noir s'en
+           va. Consommé par `wireReveal()` dans src/pages/public/pass.js. */
+        document.dispatchEvent(new Event('permigo:splash-out'));
         var drop = function () { sp.remove(); };
         sp.addEventListener('transitionend', drop, { once: true });
-        setTimeout(drop, 450); // filet si transitionend ne partait pas
+        setTimeout(drop, 620); // filet si transitionend ne partait pas (sortie : 440 ms)
       }
       function fallback() {
         if (sp.classList.contains('is-fallback')) return;
