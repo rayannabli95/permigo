@@ -29,6 +29,15 @@ const LIMITE_ERREURS = 4;
 const LETTRES = ["a", "b", "c", "d"];
 
 /**
+ * Le découpage du voile de balayage.
+ *
+ * Quatre colonnes sur trois lignes : assez fin pour qu'un balayage négligent
+ * laisse des angles morts, assez gros pour qu'un tour complet tienne en deux
+ * gestes du doigt.
+ */
+const BALAYAGE = Object.freeze({ colonnes: 4, lignes: 3 });
+
+/**
  * Géométrie de la pièce qu'on déplace, en pourcentage de la scène.
  *
  * Ce sont les valeurs par défaut, celles du siège vu de profil. Une mission
@@ -125,6 +134,10 @@ export function monterMissions(
     retour: null,
     choisis: [],
     dernier: null,
+    // Les cases de voile déjà balayées. Elles vivent dans l'état et pas dans le
+    // DOM : une mauvaise réponse redessine l'écran, et sans ça l'élève devrait
+    // refaire tout son balayage à chaque essai.
+    balaye: [],
   });
 
   const mission = () => missions[index];
@@ -293,6 +306,7 @@ export function monterMissions(
       </section>`;
     }
     if (m.mode === "reglage") return reglage(m);
+    if (m.mode === "balayage") return balayage(m);
     if (m.mode === "sequence") return sequence(m);
 
     return `<section class="mp-interaction mp-choice-interaction">
@@ -313,6 +327,75 @@ export function monterMissions(
           .join("")}
       </div>
     </section>`;
+  }
+
+  /**
+   * Le balayage : explorer la scène avant de désigner ce qu'on a vu.
+   *
+   * Les autres mécaniques jugent la RÉPONSE. Celle-ci juge d'abord la
+   * RECHERCHE : un voile couvre la scène, il se lève sous le doigt case par
+   * case, et un indice ne devient désignable que si on est allé le regarder.
+   * C'est ce que Codex décrit pour le tour de voiture, la prise d'information
+   * et la ville dense : « balaye puis touche l'indice retenu ».
+   *
+   * Le voile ne cache pas une image cachée à deviner. Il oblige juste à faire
+   * le tour complet, comme on balaie la route du regard au lieu de fixer le
+   * capot de la voiture de devant.
+   */
+  function balayage(m) {
+    const indices = m.indices || [];
+    const cases = Array.from({ length: BALAYAGE.colonnes * BALAYAGE.lignes });
+
+    return `<section class="mp-interaction mp-balayage-interaction">
+      <div class="mp-scene mp-scene-${esc(m.visual)}">
+        <div class="mp-scene-scan" aria-hidden="true"></div>
+        <div class="mp-scene-art mp-art-${esc(m.visual)}" aria-hidden="true">${renderArt(m.visual, m.reglages)}</div>
+        ${indices
+          .map((ind) => {
+            const vu = etat.balaye.includes(caseDeLIndice(ind));
+            const rate =
+              etat.dernier === ind.id && etat.retour?.ton === "retry";
+            const bon = etat.resolu && ind.id === m.solution;
+            return `<button class="mp-balayage-indice ${vu ? "is-vu" : ""} ${rate ? "is-wrong" : ""} ${bon ? "is-correct" : ""}"
+              type="button" data-indice="${escAttr(ind.id)}"
+              ${vu && !etat.resolu ? `data-reponse="${escAttr(ind.id)}"` : "disabled"}
+              aria-hidden="${vu ? "false" : "true"}" tabindex="${vu && !etat.resolu ? "0" : "-1"}"
+              style="--ind-x:${ind.x}%;--ind-y:${ind.y}%"><i></i><small>${esc(ind.label)}</small></button>`;
+          })
+          .join("")}
+        ${
+          etat.resolu
+            ? ""
+            : `<div class="mp-balayage-voile" data-balayage-voile>
+          ${cases
+            .map(
+              (_, i) =>
+                `<span class="${etat.balaye.includes(i) ? "is-leve" : ""}" data-case="${i}"></span>`,
+            )
+            .join("")}
+        </div>`
+        }
+        <span class="mp-scene-tag">${esc(m.modeLabel)}</span>
+      </div>
+      <p class="mp-scene-instruction">${esc(
+        etat.balaye.length >= cases.length
+          ? "Touche maintenant ce qui peut changer ta conduite."
+          : "Passe le doigt sur la scène pour la balayer, puis touche ce que tu retiens.",
+      )}</p>
+    </section>`;
+  }
+
+  /** La case du voile qui couvre un indice, selon sa position en pourcentage. */
+  function caseDeLIndice(ind) {
+    const col = Math.min(
+      BALAYAGE.colonnes - 1,
+      Math.floor((Number(ind.x) / 100) * BALAYAGE.colonnes),
+    );
+    const ligne = Math.min(
+      BALAYAGE.lignes - 1,
+      Math.floor((Number(ind.y) / 100) * BALAYAGE.lignes),
+    );
+    return ligne * BALAYAGE.colonnes + col;
   }
 
   /**
@@ -525,6 +608,82 @@ export function monterMissions(
     });
     brancherPlacement();
     brancherReglage();
+    brancherBalayage();
+  }
+
+  /**
+   * Le geste du balayage : le voile se lève case par case sous le doigt.
+   *
+   * ⚠️ On ne redessine PAS tout l'écran à chaque case levée. Redessiner tuerait
+   * le pointeur en cours de glissement, et le balayage s'arrêterait au premier
+   * carreau. On touche donc directement la classe de la case, et l'état ne sert
+   * qu'à survivre au prochain rendu.
+   */
+  function brancherBalayage() {
+    const m = mission();
+    if (m?.mode !== "balayage" || etat.resolu) return;
+
+    const voile = hote.querySelector("[data-balayage-voile]");
+    if (!voile) return;
+    const indices = [...hote.querySelectorAll(".mp-balayage-indice")];
+
+    const lever = (el) => {
+      const n = Number(el?.dataset?.case);
+      if (!Number.isFinite(n) || etat.balaye.includes(n)) return;
+      etat.balaye.push(n);
+      el.classList.add("is-leve");
+      haptic("tap");
+      // Un indice devient désignable dès que SA case est levée. On le branche
+      // ici plutôt que de tout redessiner.
+      indices.forEach((btn) => {
+        const ind = (m.indices || []).find((i) => i.id === btn.dataset.indice);
+        if (!ind || caseDeLIndice(ind) !== n) return;
+        btn.classList.add("is-vu");
+        btn.removeAttribute("disabled");
+        btn.setAttribute("aria-hidden", "false");
+        btn.tabIndex = 0;
+        btn.dataset.reponse = ind.id;
+        btn.addEventListener("click", () => repondre(ind.id), { once: true });
+      });
+    };
+
+    const caseSous = (e) => {
+      const el = document.elementFromPoint(e.clientX, e.clientY);
+      return el?.dataset?.case !== undefined ? el : null;
+    };
+
+    let actif = null;
+    voile.addEventListener("pointerdown", (e) => {
+      actif = e.pointerId;
+      lever(caseSous(e));
+      try {
+        voile.setPointerCapture(e.pointerId);
+      } catch {
+        // Un PointerEvent synthétique de test ne crée pas toujours de capture.
+      }
+    });
+    voile.addEventListener("pointermove", (e) => {
+      if (e.pointerId !== actif) return;
+      e.preventDefault();
+      lever(caseSous(e));
+    });
+    const finir = () => {
+      actif = null;
+    };
+    voile.addEventListener("pointerup", finir);
+    voile.addEventListener("pointercancel", finir);
+
+    // Au clavier le glissement n'existe pas. La touche Entrée lève tout le
+    // voile d'un coup : la mission reste jouable, et désigner le bon indice
+    // reste le vrai travail.
+    voile.tabIndex = 0;
+    voile.setAttribute("role", "button");
+    voile.setAttribute("aria-label", "Balayer toute la scène");
+    voile.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      e.preventDefault();
+      voile.querySelectorAll("[data-case]").forEach(lever);
+    });
   }
 
   /**

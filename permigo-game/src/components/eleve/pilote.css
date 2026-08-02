@@ -995,6 +995,108 @@ body.mp-open #header-bar {
   stroke-width: 7;
 }
 
+/* ── Le voile de balayage ─────────────────────────────────────────────────
+   Une grille de cases opaques posée sur la scène. Chacune se lève sous le
+   doigt et ne se repose jamais. Ce n'est pas une image cachée à deviner :
+   c'est ce qui oblige à faire le tour complet au lieu de fixer un seul point.
+
+   ⚠️ `touch-action: none` sur le voile. Sans ça, le glissement du doigt fait
+   défiler la page et le balayage s'arrête au premier carreau. */
+.mp-balayage-voile {
+  position: absolute;
+  z-index: 7;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  touch-action: none;
+}
+
+.mp-balayage-voile > span {
+  background: linear-gradient(
+    150deg,
+    rgb(14 8 32 / 94%),
+    rgb(26 17 56 / 92%)
+  );
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 5%);
+  transition:
+    opacity 220ms var(--ease-out),
+    transform 220ms var(--ease-out);
+}
+
+.mp-balayage-voile > span.is-leve {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(1.06);
+}
+
+.mp-balayage-voile:focus-visible {
+  outline: 2px solid var(--world);
+  outline-offset: -4px;
+}
+
+/* Un indice n'existe à l'écran que si on est allé le regarder. */
+.mp-balayage-indice {
+  position: absolute;
+  z-index: 8;
+  left: var(--ind-x);
+  top: var(--ind-y);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 9px 5px 6px;
+  border: 1px solid rgb(255 255 255 / 16%);
+  border-radius: 999px;
+  color: #f1ecff;
+  background: rgb(14 8 32 / 78%);
+  font-size: 11px;
+  font-weight: 700;
+  opacity: 0;
+  cursor: pointer;
+  transform: translate(-50%, -50%) scale(0.9);
+  transition:
+    opacity 240ms var(--ease-out),
+    transform 240ms var(--ease-out);
+}
+
+.mp-balayage-indice.is-vu {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.mp-balayage-indice i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--world);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--world) 30%, transparent);
+}
+
+.mp-balayage-indice.is-wrong {
+  border-color: rgb(255 118 110 / 62%);
+}
+
+.mp-balayage-indice.is-wrong i {
+  background: #ff766e;
+  box-shadow: 0 0 0 3px rgb(255 118 110 / 26%);
+}
+
+.mp-balayage-indice.is-correct {
+  border-color: rgb(56 217 148 / 66%);
+}
+
+.mp-balayage-indice.is-correct i {
+  background: #38d994;
+  box-shadow: 0 0 0 3px rgb(56 217 148 / 26%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mp-balayage-voile > span,
+  .mp-balayage-indice {
+    transition: none;
+  }
+}
+
 /* ── La commande à doser ──────────────────────────────────────────────────
    Une course verticale, trois crans, une jauge qui suit le doigt. Le zéro est
    EN BAS : pousser une pédale c'est descendre le pied, et la jauge monte dans
