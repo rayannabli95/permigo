@@ -14,9 +14,7 @@ import { getLang } from "@/utils/lang.js";
 
 // ── i18n de la COQUE (élève non-francophone) — page ENTIÈRE (hero, compte à
 // rebours, prédiction, checklist, conseils, centre d'examen, état d'erreur).
-// Dict local (règle coque), repli FR si clé absente. buildCriteria/buildVerdict
-// sont EXPORTÉS et réutilisés tels quels par mon-permis.js : les traduire ici
-// traduit aussi, sans duplication, le bloc « prêt pour l'examen » de ce hub.
+// Dict local (règle coque), repli FR si clé absente.
 const EX_I18N = {
   en: {
     title: "Your exam",
@@ -435,10 +433,11 @@ const STYLE = `<style>
 </style>`;
 
 // ─── Constants ───────────────────────────────────────────────────
-// ⚠️ LS_KEY_DATE/LS_KEY_REVISED, les seuils et la readiness sont réutilisés
-// tels quels par le hub « Mon permis » (mon-permis.js, chantier nav
-// simplifiée) via les exports ci-dessous — AUCUNE re-déclaration de seuil,
-// la readiness reste gelée (même règle moniteur, même vérité) dans les 2 écrans.
+// ⚠️ La readiness est GELÉE : un seul calcul de « prêt pour l'examen » dans
+// toute l'app, jamais un pourcentage réinventé ailleurs. Ces seuils et ces
+// clés localStorage ne se redéclarent nulle part.
+// Ces helpers étaient exportés pour le hub « mon-permis », supprimé le
+// 02/08/2026 ; ils sont redevenus internes à cette page.
 const LS_KEY_DATE = "permigo:exam_date";
 const LS_KEY_REVISED = "permigo:has_revised";
 const COMPS_TARGET = 16; // > 50% of 31
@@ -467,9 +466,9 @@ const TIPS = [
   },
 ];
 
-// ─── Helpers (exportés : réutilisés tels quels par mon-permis.js — même
-// mécanisme localStorage, ne PAS dupliquer la lecture/écriture de la date) ──
-export function parseSavedDate() {
+// ─── Helpers : la lecture/écriture de la date d'examen. Un seul endroit,
+// on ne duplique pas l'accès au localStorage ailleurs. ──────────────────
+function parseSavedDate() {
   try {
     const v = localStorage.getItem(LS_KEY_DATE);
     if (!v) return null;
@@ -480,13 +479,13 @@ export function parseSavedDate() {
   }
 }
 
-export function saveExamDate(iso) {
+function saveExamDate(iso) {
   try {
     localStorage.setItem(LS_KEY_DATE, iso);
   } catch {}
 }
 
-export function countdown(examDate) {
+function countdown(examDate) {
   const now = Date.now();
   const diff = examDate.getTime() - now;
   if (diff < 0) return { days: 0, hours: 0, minutes: 0, passed: true };
@@ -497,7 +496,7 @@ export function countdown(examDate) {
   return { days, hours, minutes, passed: false };
 }
 
-export function fmtDate(d) {
+function fmtDate(d) {
   return d.toLocaleDateString("fr-FR", {
     weekday: "long",
     day: "numeric",
@@ -514,9 +513,8 @@ function isRevised() {
   }
 }
 
-// ─── Data (exportée : mon-permis.js appelle CETTE MÊME fonction pour son
-// étape ③ « L'examen » — un seul calcul de readiness dans toute l'app) ────
-export async function loadData(meId) {
+// ─── Data : un seul calcul de readiness dans toute l'app ─────────────────
+async function loadData(meId) {
   const [validRes, streakRes, quizRes, predictRes, selfValRes] =
     await Promise.allSettled([
       sb
@@ -541,7 +539,7 @@ export async function loadData(meId) {
 
       // Validation autonome (élève solo, valider-seul.js) : fusionnée pour
       // que la readiness ne reste pas bloquée à 0/31 pour un compte sans
-      // moniteur. Même pattern que mon-permis.js / accueil.js.
+      // moniteur. Même pattern que accueil.js.
       sb.from("self_validations").select("competence_id").eq("eleve_id", meId),
     ]);
 
@@ -571,11 +569,11 @@ export async function loadData(meId) {
   // Compétences acquises (distinctes). On dérive les BASES C1-C3 (24)
   // pour aligner la readiness élève sur la règle moniteur (« prêt » =
   // 100% des bases validées par le moniteur).
-  const validRows = validError ? [] : validRes.value?.data ?? [];
+  const validRows = validError ? [] : (validRes.value?.data ?? []);
   const acquisSet = new Set(
     validRows.map((v) => v.competence_id).filter(Boolean),
   );
-  for (const s of selfValError ? [] : selfValRes.value?.data ?? [])
+  for (const s of selfValError ? [] : (selfValRes.value?.data ?? []))
     if (s.competence_id) acquisSet.add(s.competence_id);
   const compsCount = acquisSet.size;
   const baseAcquis = [...acquisSet].filter((c) => /^C[123]/.test(c)).length;
@@ -592,7 +590,7 @@ export async function loadData(meId) {
     _streakRow && _streakRow.last_activity_date >= _yesterdayStr
       ? (_streakRow.current_streak ?? 0)
       : 0;
-  const scores = quizError ? [] : quizRes.value?.data ?? [];
+  const scores = quizError ? [] : (quizRes.value?.data ?? []);
   const avgScore = scores.length
     ? Math.round(scores.reduce((s, r) => s + (r.score ?? 0), 0) / scores.length)
     : null;
@@ -602,12 +600,7 @@ export async function loadData(meId) {
 
   // Fetch critique : si les validations n'ont pas pu être lues, on ne doit
   // pas afficher « 0 compétence » ni une readiness fausse (dégradation silencieuse)
-  const loadFailed = !!(
-    validError ||
-    streakError ||
-    quizError ||
-    selfValError
-  );
+  const loadFailed = !!(validError || streakError || quizError || selfValError);
 
   return { compsCount, baseAcquis, streak, avgScore, predict, loadFailed };
 }
@@ -744,18 +737,15 @@ function renderPredict(data) {
 </div>`;
 }
 
-// Exportée : mon-permis.js en a besoin pour situer son hero « X/31 » sur les
-// mêmes bases que la readiness (aucune re-déclaration).
-export const BASE_TOTAL = 24; // C1+C2+C3 (mêmes bases que la readiness moniteur)
+const BASE_TOTAL = 24; // C1+C2+C3 (mêmes bases que la readiness moniteur)
 
 // Verdict 3 niveaux — EXTRAIT de renderChecklist (même calcul, zéro
 // changement de comportement) pour être réutilisable sans dupliquer les
-// seuils. mon-permis.js appelle cette fonction telle quelle pour son
-// étape ③ : la readiness reste gelée, jamais recalculée « à la main ».
+// seuils : la readiness reste gelée, jamais recalculée « à la main ».
 // Depuis le pivot 17/07, rattaché ou solo : c'est l'élève qui certifie son
 // parcours. Le paramètre `solo` reste accepté (appelants inchangés) mais ne
 // change plus le texte — « Ton moniteur a validé » était devenu faux.
-export function buildVerdict({ baseAcquis = 0, solo = false } = {}) {
+function buildVerdict({ baseAcquis = 0, solo = false } = {}) {
   void solo;
   const baseRestantes = Math.max(0, BASE_TOTAL - baseAcquis);
   if (baseAcquis >= BASE_TOTAL) {
@@ -785,7 +775,7 @@ export function buildVerdict({ baseAcquis = 0, solo = false } = {}) {
   };
 }
 
-export function buildCriteria({ compsCount, streak, avgScore }) {
+function buildCriteria({ compsCount, streak, avgScore }) {
   const revised = isRevised();
   return [
     {

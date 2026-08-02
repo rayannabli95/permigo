@@ -196,7 +196,7 @@ export async function pickRevisionQuiz(userId) {
   // Compétences acquises de l'élève (moniteur ou auto-validées). Fusion avec
   // `self_validations` (élève solo, valider-seul.js) pour que le pool de
   // consolidation ne reste pas vide pour un compte sans moniteur. Même
-  // pattern que accueil.js / mon-permis.js.
+  // pattern que accueil.js.
   let acquired = [];
   try {
     const { data, error } = await sb

@@ -131,12 +131,11 @@ const ROUTES = {
     classement: () => import("@/pages/eleve/classement.js"),
     galerie: () => import("@/pages/eleve/galerie.js"),
     recompenses: () => import("@/pages/eleve/recompenses.js"),
-    // Chantier nav simplifiée : « Mon permis » est le hub crédible (compétences
-    // acquises + examen) — le jeu (mondes/boss/coffres) RESTE à `parcours`
-    // ci-dessus, séparé volontairement. Depuis le retrait du moniteur (lot 4 du
-    // pivot, 30/07/2026) le hub n'a plus d'étape « Mes leçons » : elle n'était
-    // alimentée que par les comptes-rendus du moniteur, qui n'émet plus rien.
-    "mon-permis": () => import("@/pages/eleve/mon-permis.js"),
+    // ⛔ Le hub condensé « mon-permis » est SUPPRIMÉ (décision Rayan,
+    // 02/08/2026). Il redisait ce que le parcours montre déjà (les compétences
+    // acquises) et il ne servait plus que de vitrine à l'examen. Les deux
+    // vivent maintenant chez eux : `parcours` pour les compétences, `examen`
+    // ci-dessous pour le jour J. Ne pas le recréer.
     // Certification d'une compétence par l'élève (TOUS les élèves depuis
     // le pivot 17/07) : CTA depuis la fiche compétence de `parcours.js`
     // (openFiche), route #/valider-seul/{compId}.
@@ -246,6 +245,16 @@ const ROUTES = {
   },
 };
 
+// Routes SUPPRIMÉES et leur remplaçante. Une page qui disparaît laisse des
+// URL derrière elle (raccourci sur l'écran d'accueil, historique de la PWA,
+// lien dans une vieille notification) : on redirige au lieu d'afficher
+// « introuvable ». Vaut pour tous les rôles.
+const ROUTES_RETIREES = {
+  // Hub condensé « Mon permis » retiré le 02/08/2026 : le parcours montre
+  // déjà les compétences, l'examen a sa page (#/examen).
+  "mon-permis": "#/parcours",
+};
+
 // Libellés de titre de page (a11y lecteur d'écran, onglet, historique, SEO).
 // On préfère le <h1> réel rendu par la page ; ce map sert de repli.
 const ROUTE_TITLES = {
@@ -269,7 +278,6 @@ const ROUTE_TITLES = {
   galerie: "Ma collection",
   recompenses: "Récompenses",
   roue: "La Roue",
-  "mon-permis": "Mon permis",
   "valider-seul": "Certifier une compétence",
   examen: "Examen",
   "exam-blanc": "Examen blanc du code",
@@ -347,6 +355,16 @@ export async function route(root, me) {
   const segments = rawPath.split("/");
   const routeName = segments[0] || "default";
   const param = segments[1] || null; // ex: eleveId pour #/livret/{id}
+
+  // Une route SUPPRIMÉE n'est pas une route inconnue : quelqu'un a pu poser un
+  // raccourci sur son écran d'accueil, ou l'avoir dans l'historique de la PWA.
+  // On l'emmène chez la remplaçante au lieu de lui servir « introuvable ».
+  // `replace` : le retour arrière ne doit pas reboucler sur l'ancienne URL.
+  const remplacante = ROUTES_RETIREES[routeName];
+  if (remplacante) {
+    location.replace(`${location.pathname}${location.search}${remplacante}`);
+    return;
+  }
 
   // Mode découverte (élève solo non payé) : les surfaces premium (récompenses,
   // parcours-jeu, examen blanc, certification, classement…) sont murées vers le

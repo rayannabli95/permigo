@@ -77,14 +77,14 @@ const TABS = {
     },
     {
       // Décision Rayan (2026-07-16) : l'onglet « Mon permis » ouvre
-      // DIRECTEMENT le parcours immersif (#/parcours) — le hub condensé
-      // « mon-permis » (compétences/leçons/examen en 3 étapes) reste
-      // accessible en option depuis le parcours (bouton « Suivi ») et
-      // continue d'allumer cet onglet via `match`.
+      // DIRECTEMENT le parcours immersif (#/parcours). Le hub condensé
+      // « mon-permis », qui redisait la même chose en plus terne, est
+      // supprimé (02/08/2026) ; l'examen garde sa page et continue
+      // d'allumer cet onglet.
       id: "parcours",
       label: "Mon permis",
       ico: "map",
-      match: ["mon-permis", "examen", "centre-examen"],
+      match: ["examen", "centre-examen"],
     },
     {
       id: "recompenses",

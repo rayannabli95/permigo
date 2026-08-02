@@ -629,7 +629,7 @@ async function handleComplete(
             .eq("statut", "acquis"),
           // Validation autonome (élève solo, valider-seul.js) : table séparée
           // de `validations`, fusionnée pour ne pas laisser le compteur
-          // bloqué. Même pattern que accueil.js / mon-permis.js.
+          // bloqué. Même pattern que accueil.js.
           sb
             .from("self_validations")
             .select("competence_id")
