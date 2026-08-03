@@ -25,6 +25,7 @@ import { navigate } from "@/router.js";
 import { haptic } from "@/utils/haptic.js";
 import { toast } from "@/components/common/toast.js";
 import { chromeNight } from "@/utils/chrome-night.js";
+import { prochainMessage } from "@/pages/common/duel-intermission.js";
 
 const LS = (code) => `duel_${code}`;
 const LS_LANG = "duel_lang";
@@ -94,13 +95,8 @@ const I18N = {
     full: "The game is full",
     cant_join: "Could not join",
     copied: "Link copied",
-    halftime: "Half time",
-    halftime_sub: "5 questions played. 5 to go.",
-    not_yet: "not yet",
     ad: "Advertisement",
-    continue: "Keep going",
-    ad_house_s: "Ready before every driving hour.",
-    ad_house_c: "Try it · €4.99/month",
+    next_round: "Next round",
   },
   ar: {
     host_title: "تحدَّ أصدقاءك",
@@ -150,13 +146,8 @@ const I18N = {
     full: "اللعبة مكتملة",
     cant_join: "تعذّر الانضمام",
     copied: "تم نسخ الرابط",
-    halftime: "استراحة",
-    halftime_sub: "5 أسئلة انتهت. 5 قادمة.",
-    not_yet: "ليس بعد",
     ad: "إعلان",
-    continue: "نواصل",
-    ad_house_s: "جاهز قبل كل ساعة قيادة.",
-    ad_house_c: "جرّب · 4,99 €/شهر",
+    next_round: "الجولة التالية",
   },
 };
 
@@ -203,14 +194,16 @@ const DUREE = 20000;
 const PTS_BASE = 500;
 const PTS_VITESSE = 500;
 
-// ── La mi-temps ──────────────────────────────────────────────────────────
+// ── L'entracte ───────────────────────────────────────────────────────────
 // Les 10 questions se jouent en DEUX manches de 5 (décision Rayan 03/08).
-// Entre les deux : le classement en direct, et l'emplacement publicitaire.
+// Entre les deux : un écran de cinq secondes, en pleine page, qui s'ouvre et
+// se ferme tout seul. Aucun bouton, aucun geste : la manche 2 repart au
+// buzzer.
 //
 // Le placement n'est pas neutre. Avant la première question, ce serait le
-// tout premier contact d'un inconnu avec PermiGo, et une pub y ferait fuir.
-// À la mi-temps, les joueurs s'attendent les uns les autres : c'est le seul
-// moment où une coupure ne casse rien.
+// tout premier contact d'un inconnu avec PermiGo, et une coupure y ferait
+// fuir. Entre deux manches, les joueurs s'attendent les uns les autres :
+// c'est le seul moment où une pause ne casse rien.
 const MI_TEMPS = 5;
 
 // L'emplacement publicitaire.
@@ -229,7 +222,7 @@ const MI_TEMPS = 5;
 //      devient fausse le jour du branchement ;
 //   3. ne charger le script de la régie QU'APRÈS acceptation du bandeau.
 const PUB = {
-  attenteSecondes: 3, // 0 pour retirer toute attente
+  duree: 5000, // cinq secondes pile, puis la manche suivante démarre seule
   externe: null,
 };
 
@@ -487,48 +480,85 @@ ${chromeNight("#241a52", "#1a1340")}
   text-transform:uppercase; color:#f5c451; margin-bottom:9px; }
 .du-bonne { color:#f5c451; margin:0 0 10px; font:700 14.5px/1.4 'Archivo',sans-serif; }
 
-/* ===== Mi-temps ===== */
-.du-half { text-align:center; font:800 30px/1.1 'Archivo',sans-serif; letter-spacing:-.035em;
-  margin:6px 0 2px; color:#fff; }
-.du-live { margin-top:20px; }
-.du-live .du-row { margin-top:8px; }
-.du-live .du-row.moi { border-color:rgba(245,196,81,.5); background:rgba(245,196,81,.09); }
-.du-live .du-row .sc { color:#ffd06a; }
-.du-live .du-row .att { font:700 12px/1 'Archivo',sans-serif; color:#6b63a8; }
+/* ── L'entracte ─────────────────────────────────────────────────────────
+   Cinq secondes plein écran. Tout ce qui bouge ici ne bouge QUE par
+   transform ou opacity : ce sont les deux seules propriétés que le
+   navigateur anime sans repasser par la mise en page, donc les seules qui
+   tiennent 60 images par seconde sur un téléphone d'entrée de gamme. */
+/* La colonne est bornée à zéro en minimum, pas laissée en 1fr : le mot ne se
+   coupe jamais, et une colonne de grille refuse par défaut de descendre sous
+   la largeur de son contenu. Sans ce garde-fou, c'est le MOT qui décide de
+   la largeur de l'écran. */
+.dui { position:relative; min-height:100dvh; display:grid;
+  grid-template-columns:minmax(0,1fr); grid-template-rows:1fr auto;
+  overflow:hidden; background:#181046; }
 
-/* L'emplacement publicitaire. Encadré et annoncé : un bloc commercial qui se
-   déguise en contenu, c'est ce qui fait désinstaller une app. */
-.du-pub { margin-top:22px; border-radius:20px; overflow:hidden;
-  border:1px solid #3a3178; background:rgba(0,0,0,.22); }
-.du-pub-lab { display:block; padding:8px 14px; font:800 10px/1 'Archivo',sans-serif;
-  letter-spacing:.16em; text-transform:uppercase; color:#6b63a8;
-  border-bottom:1px solid #3a3178; text-align:left; }
-.du-pub-slot { min-height:180px; display:grid; place-items:center; padding:20px 18px; }
-.du-pub-maison { text-align:center; }
-.du-pub-maison span { display:block; font:600 13.5px/1.45 'Archivo',sans-serif; color:#b3aede;
-  margin-bottom:14px; }
-/* La marque, avec un reflet doré qui la balaie en boucle. Le dégradé est
-   deux fois plus large que le mot : on le fait glisser, la bande claire
-   passe dessus. */
-.du-pub-maison .marque { font:900 42px/1.05 'Archivo',sans-serif; letter-spacing:-.035em;
-  margin-bottom:6px;
-  background:linear-gradient(100deg,#ffb43a 0%,#ffd76b 34%,#fffaf0 46%,#ffd76b 58%,#ffb43a 100%);
-  background-size:260% 100%; background-position:180% 0;
-  -webkit-background-clip:text; background-clip:text; color:transparent;
-  -webkit-text-fill-color:transparent;
-  filter:drop-shadow(0 3px 14px rgba(255,180,58,.35));
-  animation:duBrille 3.2s linear infinite; }
-@keyframes duBrille { to { background-position:-60% 0; } }
-.du-pub-maison .prix { display:inline-block; padding:10px 18px; border-radius:999px;
-  background:linear-gradient(180deg,#ffd24a,#ff9c1c); color:#3a1d00;
-  font:800 14px/1 'Archivo',sans-serif; cursor:pointer; }
+.dui-bg { position:absolute; inset:-25%; z-index:0; will-change:transform;
+  animation:duiCam 20s ease-in-out infinite alternate; }
+.dui-bg i { position:absolute; display:block; border-radius:50%; filter:blur(52px);
+  will-change:transform; }
+.dui-bg .b1 { width:78%; aspect-ratio:1; left:-8%; top:2%;
+  background:radial-gradient(circle,rgba(124,92,255,.85),transparent 68%);
+  animation:duiD1 17s ease-in-out infinite alternate; }
+.dui-bg .b2 { width:62%; aspect-ratio:1; right:-6%; top:26%;
+  background:radial-gradient(circle,rgba(255,180,58,.45),transparent 68%);
+  animation:duiD2 21s ease-in-out infinite alternate; }
+.dui-bg .b3 { width:70%; aspect-ratio:1; left:6%; bottom:-4%;
+  background:radial-gradient(circle,rgba(196,82,255,.6),transparent 70%);
+  animation:duiD3 25s ease-in-out infinite alternate; }
+.dui-ray { position:absolute; top:-40%; left:0; width:38%; height:180%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.10),transparent);
+  will-change:transform; animation:duiRay 7s linear infinite; }
+@keyframes duiCam { from{transform:scale(1)} to{transform:scale(1.12)} }
+@keyframes duiD1 { from{transform:translate3d(0,0,0)} to{transform:translate3d(7%,5%,0)} }
+@keyframes duiD2 { from{transform:translate3d(0,0,0)} to{transform:translate3d(-6%,8%,0)} }
+@keyframes duiD3 { from{transform:translate3d(0,0,0)} to{transform:translate3d(5%,-6%,0)} }
+@keyframes duiRay { from{transform:rotate(14deg) translate3d(-90%,0,0)} to{transform:rotate(14deg) translate3d(360%,0,0)} }
+
+.dui-centre { position:relative; z-index:1; display:grid; align-content:center;
+  justify-items:center; grid-template-columns:minmax(0,1fr);
+  min-width:0; padding:0 16px; text-align:center; }
+.dui-lab { display:block; margin-bottom:16px; padding:5px 12px; border-radius:999px;
+  background:rgba(255,255,255,.10); color:#cfc9f5;
+  font:800 10px/1 'Archivo',sans-serif; letter-spacing:.14em; text-transform:uppercase; }
+.dui-slot { display:grid; justify-items:center; width:100%; }
+.dui-mot { margin:0; font:900 80px/0.94 'Archivo',sans-serif; letter-spacing:-.045em;
+  text-transform:uppercase; white-space:nowrap; color:#fff;
+  text-shadow:0 8px 44px rgba(124,92,255,.6);
+  opacity:0; transform:scale(.86);
+  animation:duiEntre .78s cubic-bezier(.16,1,.3,1) .06s forwards; }
+.dui-ligne { margin:18px 0 0; max-width:15em;
+  font:600 16px/1.45 'Archivo',sans-serif; color:#d0c9f4;
+  opacity:0; transform:translate3d(0,12px,0);
+  animation:duiMonte .7s cubic-bezier(.16,1,.3,1) .3s forwards; }
+@keyframes duiEntre { to { opacity:1; transform:scale(1); } }
+@keyframes duiMonte { to { opacity:1; transform:none; } }
+
+.dui-bas { position:relative; z-index:1;
+  padding:0 22px calc(104px + env(safe-area-inset-bottom));
+  opacity:0; animation:duiMonte .6s ease .5s forwards; }
+.dui-meta { display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:10px; }
+.dui-tag { font:800 12px/1 'Archivo',sans-serif; color:#a79ede;
+  letter-spacing:.12em; text-transform:uppercase; }
+.dui-sec { font:900 20px/1 'Archivo',sans-serif; color:#ffd24a; }
+.dui-piste { height:6px; border-radius:999px; background:rgba(255,255,255,.12);
+  overflow:hidden; }
+.dui-jauge { display:block; height:100%; border-radius:999px;
+  background:linear-gradient(90deg,#ffd24a,#ff9c1c);
+  transform-origin:left center; transform:scaleX(1); will-change:transform; }
 
 .du-skel { border-radius:18px; background:rgba(255,255,255,.05); animation:duPulse 1.2s ease-in-out infinite; }
 .du-skel.big { height:220px; }
 .du-skel.row { height:66px; margin-top:12px; }
 @keyframes duPulse { 0%,100%{opacity:.5} 50%{opacity:.9} }
+/* Sur un téléphone réglé sur « moins d'animations », le décor se fige et le
+   mot arrive sans grandir. La jauge, elle, continue de se vider : c'est une
+   information, pas une décoration. */
 @media (prefers-reduced-motion: reduce){ .du-skel{animation:none} .du-cta,.du-opt{transition:none} .du-gain{animation:none}
-  .du-pub-maison .marque{ animation:none; background-position:50% 0; } }
+  .dui-bg,.dui-bg i,.dui-ray{ animation:none; }
+  .dui-ray{ display:none; }
+  .dui-mot,.dui-ligne,.dui-bas{ animation-duration:.01ms; animation-delay:0s; } }
 </style>`;
 
 function coque(inner) {
@@ -721,76 +751,72 @@ function vueQuestion(etat) {
   `);
 }
 
-// ───────────────────────────── La mi-temps ───────────────────────────────
-function vueMiTemps(etat) {
-  const c = etat.classementLive || [];
-  return coque(`
-    <h1 class="du-half"${R()}>${t("halftime", "Mi-temps")}</h1>
-    <p class="du-sub" style="margin:8px 0 0"${R()}>${t("halftime_sub", "5 questions jouées. 5 à venir.")}</p>
+// ───────────────────────────── L'entracte ────────────────────────────────
+// Un écran plein, cinq secondes, sans un seul bouton : un décor qui respire,
+// un mot énorme, une phrase, et une barre qui se vide.
+function vueEntracte(msg) {
+  const sec = Math.round(PUB.duree / 1000);
+  // Pas de `coque()` ici : cet écran est plein bord à bord, il ne veut ni la
+  // gouttière ni le rembourrage bas des autres vues du duel.
+  return `${STYLE}<div class="du">
+    <div class="dui">
+      <div class="dui-bg" aria-hidden="true">
+        <i class="b1"></i><i class="b2"></i><i class="b3"></i>
+        <span class="dui-ray"></span>
+      </div>
 
-    <div class="du-live">
-      ${c
-        .map(
-          (p, i) =>
-            `<div class="du-row${p.id === etat.playerId ? " moi" : ""}">
-               <span class="rk">${i + 1}</span>
-               <span class="nm">${esc(p.name)}</span>
-               ${
-                 p.score == null
-                   ? `<span class="att"${R()}>${t("not_yet", "pas encore")}</span>`
-                   : `<span class="sc">${chiffres(p.score)}</span>`
-               }
-             </div>`,
-        )
-        .join("")}
+      <div class="dui-centre">
+        ${
+          PUB.externe
+            ? `<span class="dui-lab"${R()}>${t("ad", "Publicité")}</span>`
+            : ""
+        }
+        <div class="dui-slot" id="du-pub-slot">
+          <p class="dui-mot" id="dui-mot"${R()}>${esc(msg.mot)}</p>
+          <p class="dui-ligne"${R()}>${esc(msg.ligne)}</p>
+        </div>
+      </div>
+
+      <div class="dui-bas">
+        <div class="dui-meta">
+          <span class="dui-tag"${R()}>${t("next_round", "Manche suivante")}</span>
+          <span class="dui-sec" id="dui-sec">${chiffres(sec)}</span>
+        </div>
+        <div class="dui-piste"><span class="dui-jauge" id="dui-jauge"></span></div>
+      </div>
     </div>
-
-    <div class="du-pub">
-      <!-- L'étiquette « Publicité » n'apparaît QUE si une régie tierce
-           remplit l'emplacement. Tant que c'est l'offre PermiGo, l'étiqueter
-           ainsi contredirait le bandeau de consentement, qui promet « aucune
-           publicité » sur le même écran. -->
-      ${PUB.externe ? `<span class="du-pub-lab"${R()}>${t("ad", "Publicité")}</span>` : ""}
-      <div class="du-pub-slot" id="du-pub-slot"></div>
-    </div>
-
-    <button class="du-cta gold" data-continuer style="margin-top:18px" ${
-      PUB.attenteSecondes > 0 ? "disabled" : ""
-    }>
-      <span id="du-cont-txt">${
-        PUB.attenteSecondes > 0
-          ? `${t("continue", "On continue")} · ${PUB.attenteSecondes}`
-          : t("continue", "On continue")
-      }</span>
-    </button>
-  `);
+  </div>`;
 }
 
-// Le contenu de l'emplacement. Tant qu'aucune régie n'est branchée, c'est
-// l'offre PermiGo qui l'occupe : elle rapporte plus qu'une bannière.
-function remplitPub(root) {
-  const slot = root.querySelector("#du-pub-slot");
-  if (!slot) return;
-  if (typeof PUB.externe === "function") {
-    try {
-      PUB.externe(slot);
-      return;
-    } catch (e) {
-      console.error("[duel:pub]", e);
-      /* la régie tombe : on remet l'offre maison plutôt qu'un trou */
-    }
-  }
-  // La marque n'est pas traduite : c'est un nom propre. Le reflet doré la
-  // balaie en boucle, c'est le seul mouvement de l'écran de mi-temps.
-  slot.innerHTML = `<div class="du-pub-maison"${R()}>
-    <span class="marque">PermiGo</span>
-    <span>${t("ad_house_s", "Prêt avant chaque heure de conduite.")}</span>
-    <span class="prix">${t("ad_house_c", "Essayer · 4,99 €/mois")}</span>
-  </div>`;
-  slot.querySelector(".prix")?.addEventListener("click", () => {
-    track("duel.pub_clic", { code: root.__code || null });
-    navigate("/pass");
-  });
+// L'écran commence SOUS le bandeau du haut, pas en haut de la fenêtre. Une
+// hauteur de 100dvh le fait donc dépasser par le bas d'exactement la hauteur
+// du bandeau, et la barre du compte à rebours finit cachée derrière le menu.
+// On retire la marge du haut, mesurée plutôt que devinée : elle change avec
+// l'encoche du téléphone.
+function caleEcran(root) {
+  const el = root.querySelector(".dui");
+  if (!el) return;
+  const haut = Math.max(0, Math.round(el.getBoundingClientRect().top));
+  el.style.minHeight = `calc(100dvh - ${haut}px)`;
+}
+
+// Le mot doit remplir la largeur, qu'il fasse quatre lettres ou douze. On le
+// pose à une taille de référence, on mesure, et on applique le rapport. Sans
+// ça « Calme » flotte au milieu de l'écran et « Rétroviseurs » déborde.
+function ajusteMot(root) {
+  const el = root.querySelector("#dui-mot");
+  if (!el) return;
+  // ⚠️ On mesure sur la COLONNE, jamais sur le parent direct du mot : le mot
+  // est en `nowrap`, donc son conteneur se dimensionne SUR LUI. Mesurer là
+  // revient à comparer le mot à lui-même, et il ressort toujours « à la
+  // bonne taille » en débordant de l'écran.
+  const ecran = el.closest(".dui");
+  const dispo = Math.max(200, (ecran?.clientWidth || 360) - 34);
+  el.style.fontSize = "80px";
+  const large = el.scrollWidth;
+  if (!large) return;
+  const taille = Math.max(30, Math.min(92, (80 * dispo) / large));
+  el.style.fontSize = `${Math.round(taille)}px`;
 }
 
 // ───────────────────────────── Le classement ─────────────────────────────
@@ -1230,59 +1256,75 @@ function dessineQuestion(root, etat) {
   });
 }
 
-// La mi-temps : on pousse son score en cours, on montre qui mène, et
-// l'emplacement publicitaire occupe l'attente.
+// L'entracte : cinq secondes exactement, puis la manche 2 démarre seule.
+//
+// Le score en cours part au serveur pendant que l'écran s'affiche, pas avant :
+// l'entracte ne doit JAMAIS attendre le réseau. Si l'appel traîne ou tombe, la
+// partie continue et le classement final reste juste, parce qu'il est
+// recalculé à la fin.
 async function afficheMiTemps(root, etat) {
   stopChrono();
-  root.innerHTML = squelette();
-  try {
-    await appel("progress", {
-      playerId: etat.playerId,
-      score: etat.points,
-      correct: etat.bonnes,
-    });
-  } catch (e) {
-    // Le score en cours n'est qu'un confort d'affichage : s'il ne part pas,
-    // la partie continue quand même.
-    console.error("[duel:progress]", e);
-  }
-  try {
-    const r = await appel("results", { code: etat.code });
-    etat.classementLive = r.classement || [];
-  } catch (e) {
-    console.error("[duel:mi-temps]", e);
-    etat.classementLive = [];
-  }
 
-  root.innerHTML = vueMiTemps(etat);
+  const msg = prochainMessage(_lang);
+  root.innerHTML = vueEntracte(msg);
   root.__code = etat.code;
-  remplitPub(root);
-  track("duel.mi_temps", { code: etat.code, score: etat.points });
+  // L'écran de question qu'on quitte est plus haut que la fenêtre. Sans ce
+  // rappel en haut, l'entracte s'ouvre à la position de défilement héritée et
+  // le mot se retrouve sous le bord haut : le rendu paraît décentré alors que
+  // la mise en page est juste.
+  window.scrollTo(0, 0);
+  caleEcran(root);
+  ajusteMot(root);
+  // Si Archivo n'est pas encore posée, la première mesure porte sur la police
+  // de secours et tombe à côté. On remesure dès que la vraie arrive.
+  document.fonts?.ready.then(() => ajusteMot(root)).catch(() => {});
+  track("duel.entracte", {
+    code: etat.code,
+    score: etat.points,
+    message: msg.index,
+  });
 
-  const btn = root.querySelector("[data-continuer]");
-  const txt = root.querySelector("#du-cont-txt");
-  const reprends = () => {
+  appel("progress", {
+    playerId: etat.playerId,
+    score: etat.points,
+    correct: etat.bonnes,
+  }).catch((e) => console.error("[duel:progress]", e));
+
+  // Une régie tierce, le jour où il y en a une, remplace le message maison.
+  if (typeof PUB.externe === "function") {
+    const slot = root.querySelector("#du-pub-slot");
+    try {
+      if (slot) PUB.externe(slot);
+    } catch (e) {
+      console.error("[duel:pub]", e);
+      /* la régie tombe : le message maison reste, plutôt qu'un trou */
+    }
+  }
+
+  const jauge = root.querySelector("#dui-jauge");
+  const sec = root.querySelector("#dui-sec");
+  const fin = Date.now() + PUB.duree;
+
+  // La jauge se vide par une seule transition : le navigateur la joue sur son
+  // fil de composition, donc elle reste lisse même si le reste rame.
+  if (jauge) {
+    requestAnimationFrame(() => {
+      jauge.style.transition = `transform ${PUB.duree}ms linear`;
+      jauge.style.transform = "scaleX(0)";
+    });
+  }
+
+  // On réutilise `_tick` : aucune question ne tourne pendant l'entracte, et ça
+  // garantit que le compte à rebours meurt si on quitte la page en plein
+  // milieu. Un intervalle court sert seulement à rafraîchir le chiffre.
+  _tick = setInterval(() => {
+    const reste = fin - Date.now();
+    if (sec) sec.textContent = chiffres(Math.max(0, Math.ceil(reste / 1000)));
+    if (reste > 0) return;
     stopChrono();
     haptic("tap");
     dessineQuestion(root, etat);
-  };
-
-  if (PUB.attenteSecondes > 0) {
-    let reste = PUB.attenteSecondes;
-    // On réutilise _tick : aucune question ne tourne pendant la mi-temps, et
-    // ça garantit que le compte à rebours meurt si on quitte la page.
-    _tick = setInterval(() => {
-      reste--;
-      if (reste > 0) {
-        if (txt) txt.textContent = `${t("continue", "On continue")} · ${reste}`;
-        return;
-      }
-      stopChrono();
-      if (txt) txt.textContent = t("continue", "On continue");
-      if (btn) btn.disabled = false;
-    }, 1000);
-  }
-  btn?.addEventListener("click", reprends);
+  }, 120);
 }
 
 async function afficheClassement(root, etat) {
