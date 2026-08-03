@@ -18,6 +18,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
+import { getLang } from "@/utils/lang.js";
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
@@ -26,7 +27,160 @@ import { toast } from "@/components/common/toast.js";
 import { chromeNight } from "@/utils/chrome-night.js";
 
 const LS = (code) => `duel_${code}`;
+const LS_LANG = "duel_lang";
 const LETTRES = ["A", "B", "C", "D", "E", "F"];
+
+// ── Langue ───────────────────────────────────────────────────────────────
+// Trois langues, choisies AVANT de jouer (demande Rayan 03/08). Elles
+// changent la coque ET les questions : les 415 questions de la banque
+// existent en anglais et en arabe (table question_translations).
+//
+// ⚠️ Écart ASSUMÉ avec lang.js : l'app garde d'habitude le français sous la
+// traduction, parce que l'examen du code se passe en français. Ici c'est un
+// jeu de soirée, pas de la préparation d'examen, et une question doublée
+// serait illisible en 20 secondes. Une seule langue à l'écran.
+const LANGUES = [
+  ["fr", "Français"],
+  ["en", "English"],
+  ["ar", "العربية"],
+];
+
+const I18N = {
+  en: {
+    host_title: "Challenge your friends",
+    who: "Who knows the road best?",
+    rules: "10 questions. 20 seconds each.<br>Fastest wins.",
+    create: "Create the game",
+    qr_hint: "Point your camera at this",
+    or_link: "Or send the link",
+    send: "Send the link",
+    copy: "Copy",
+    no_account: "No account. No email.",
+    in_party: "In the game",
+    free_slot: "Free",
+    you: "You",
+    start: "Start",
+    defies: "{n} challenges you",
+    defies_any: "You have been challenged",
+    f_questions: "10 questions",
+    f_chrono: "20 s clock",
+    f_winner: "1 winner",
+    lang: "Language",
+    your_name: "Your first name",
+    name_ph: "Sarah",
+    go: "Let's go",
+    already: "Already here",
+    of: "{i} of {n}",
+    streak: "{n} in a row",
+    timeout: "Time up",
+    missed: "Wrong",
+    next: "Next",
+    see_rank: "See the ranking",
+    takes_title: "{n} takes the crown",
+    running: "Game running",
+    points: "{p} points",
+    correct_of: "{c} of {t}",
+    nobody_done: "Nobody has finished yet",
+    waiting: "Waiting for {n}.",
+    nobody_had: "Nobody got this one",
+    replay: "Play again",
+    refresh: "Refresh",
+    create_free: "Create my free account",
+    keeps: "Your score lasts 7 days.",
+    over: "This game is over",
+    over_sub: "A link lasts 7 days.<br>Ask your friend for a new one.",
+    discover: "Discover PermiGo",
+    need_name: "I just need your first name",
+    full: "The game is full",
+    cant_join: "Could not join",
+    copied: "Link copied",
+  },
+  ar: {
+    host_title: "تحدَّ أصدقاءك",
+    who: "من يعرف الطريق أكثر؟",
+    rules: "10 أسئلة. 20 ثانية لكل سؤال.<br>الأسرع يفوز.",
+    create: "أنشئ اللعبة",
+    qr_hint: "وجّه الكاميرا نحو هذا المربع",
+    or_link: "أو أرسل الرابط",
+    send: "أرسل الرابط",
+    copy: "نسخ",
+    no_account: "بدون حساب. بدون بريد.",
+    in_party: "في اللعبة",
+    free_slot: "شاغر",
+    you: "أنت",
+    start: "لنبدأ",
+    defies: "{n} يتحداك",
+    defies_any: "لقد تم تحديك",
+    f_questions: "10 أسئلة",
+    f_chrono: "20 ثانية",
+    f_winner: "فائز واحد",
+    lang: "اللغة",
+    your_name: "اسمك",
+    name_ph: "سارة",
+    go: "هيا بنا",
+    already: "موجودون بالفعل",
+    of: "{i} من {n}",
+    streak: "{n} على التوالي",
+    timeout: "انتهى الوقت",
+    missed: "خطأ",
+    next: "التالي",
+    see_rank: "شاهد الترتيب",
+    takes_title: "{n} يفوز باللقب",
+    running: "اللعبة جارية",
+    points: "{p} نقطة",
+    correct_of: "{c} من {t}",
+    nobody_done: "لم ينهِ أحد بعد",
+    waiting: "في انتظار {n}.",
+    nobody_had: "لم يعرفها أحد",
+    replay: "العب مرة أخرى",
+    refresh: "تحديث",
+    create_free: "أنشئ حسابي المجاني",
+    keeps: "نتيجتك تبقى 7 أيام.",
+    over: "انتهت هذه اللعبة",
+    over_sub: "الرابط يبقى 7 أيام.<br>اطلب من صديقك رابطًا جديدًا.",
+    discover: "اكتشف PermiGo",
+    need_name: "أحتاج فقط إلى اسمك",
+    full: "اللعبة مكتملة",
+    cant_join: "تعذّر الانضمام",
+    copied: "تم نسخ الرابط",
+  },
+};
+
+// La langue choisie pour CETTE partie. Un invité n'a pas de session, donc on
+// ne touche jamais user_preferences : le choix vit dans localStorage.
+let _lang = "fr";
+function chargeLangue() {
+  try {
+    const v = localStorage.getItem(LS_LANG);
+    if (v && LANGUES.some(([c]) => c === v)) return v;
+  } catch {
+    /* navigation privée */
+  }
+  try {
+    return getLang();
+  } catch {
+    return "fr";
+  }
+}
+function poseLangue(v) {
+  _lang = v;
+  try {
+    localStorage.setItem(LS_LANG, v);
+  } catch {
+    /* navigation privée : la partie se joue quand même */
+  }
+}
+function t(cle, fr, vars = {}) {
+  let s = (_lang !== "fr" && I18N[_lang]?.[cle]) || fr;
+  for (const [k, v] of Object.entries(vars)) s = s.replaceAll(`{${k}}`, v);
+  return s;
+}
+// L'app reste en LTR (règle de lang.js) : seul le TEXTE arabe passe en RTL,
+// jamais la mise en page. Les écrans du duel sont centrés ou en colonne, donc
+// l'attribut sur les blocs de texte suffit.
+function R() {
+  return _lang === "ar" ? ' dir="rtl" lang="ar"' : "";
+}
 
 // Chrono : 20 secondes par question (décision Rayan 03/08). Une bonne réponse
 // vaut 500 points au buzzer et 1000 instantanément. C'est la VITESSE qui
@@ -181,6 +335,17 @@ ${chromeNight("#241a52", "#1a1340")}
 .du-input::placeholder { color:#6b63a8; }
 .du-input:focus { outline:none; border-color:#f5c451; }
 
+/* Le choix de langue : trois pastilles, avant de jouer. Assez grandes pour
+   le pouce (44px de haut minimum, règle mobile). */
+.du-langs { display:flex; justify-content:center; gap:8px; margin:0 0 22px; }
+.du-langs button { flex:1; max-width:130px; min-height:46px; padding:12px 10px; cursor:pointer;
+  border-radius:14px; border:1px solid #3a3178; background:rgba(255,255,255,.05); color:#b3aede;
+  font:800 14px/1 'Archivo',sans-serif; -webkit-tap-highlight-color:transparent;
+  transition:transform .1s ease; }
+.du-langs button:active { transform:scale(.97); }
+.du-langs button[aria-pressed="true"] { background:linear-gradient(180deg,#ffd24a,#ff9c1c);
+  color:#3a1d00; border-color:#ffe08a; box-shadow:0 3px 0 #b85e00; }
+
 .du-facts { display:flex; justify-content:center; gap:8px; margin:18px 0 26px; flex-wrap:wrap; }
 .du-fact { padding:9px 14px; border-radius:999px; background:rgba(255,255,255,.06);
   border:1px solid #3a3178; font:800 12.5px/1 'Archivo',sans-serif; color:#cfc7ff; }
@@ -312,16 +477,29 @@ function slotsHTML(joueurs, neufs = []) {
       (n, i) =>
         `<div class="du-slot${neufs.includes(n) ? " neuf" : ""}">
            <div class="du-pl" style="background:${COULEURS[i % COULEURS.length]}">${esc(initiale(n))}</div>
-           <span class="nm${i === 0 ? " moi" : ""}">${esc(i === 0 ? "Toi" : n)}</span>
+           <span class="nm${i === 0 ? " moi" : ""}">${esc(i === 0 ? t("you", "Toi") : n)}</span>
          </div>`,
     )
     .join("");
   const libres = Array.from(
     { length: Math.max(0, 4 - joueurs.length) },
     () =>
-      `<div class="du-slot"><div class="du-empty"></div><span class="nm">Libre</span></div>`,
+      `<div class="du-slot"><div class="du-empty"></div><span class="nm">${t("free_slot", "Libre")}</span></div>`,
   ).join("");
   return pris + libres;
+}
+
+// Les trois pastilles de langue. Rendues partout où on peut encore choisir,
+// c'est à dire AVANT que la première question ne s'affiche.
+function langsHTML() {
+  return `<div class="du-langs" role="group" aria-label="${t("lang", "Langue")}">
+    ${LANGUES.map(
+      ([code, nom]) =>
+        `<button type="button" data-lang="${code}" aria-pressed="${code === _lang}"${
+          code === "ar" ? ' lang="ar"' : ""
+        }>${nom}</button>`,
+    ).join("")}
+  </div>`;
 }
 
 // ───────────────────────────── L'hôte crée la partie ─────────────────────
@@ -330,31 +508,35 @@ function vueCreation(etat) {
   return coque(`
     <div class="du-top">
       <button class="du-back" data-retour aria-label="Retour">←</button>
-      <h1>Défie tes amis</h1>
+      <h1${R()}>${t("host_title", "Défie tes amis")}</h1>
       <span class="du-spacer"></span>
     </div>
     ${
       etat.code
         ? `<div class="du-qr">
              <div class="du-qrbox" id="du-qrbox"><span class="du-qrfail">…</span></div>
-             <p class="du-qrhint">Vise avec ton appareil photo</p>
+             <p class="du-qrhint"${R()}>${t("qr_hint", "Vise avec ton appareil photo")}</p>
            </div>
            <div class="du-block">
-             <span class="du-lab">Ou envoie le lien</span>
+             <span class="du-lab"${R()}>${t("or_link", "Ou envoie le lien")}</span>
              <div class="du-link">${esc(lien)}</div>
-             <button class="du-cta" data-partager style="margin-top:12px">Envoyer le lien</button>
-             <button class="du-ghost" data-copier>Copier</button>
-             <p class="du-note">Pas de compte. Pas d'email.</p>
+             <button class="du-cta" data-partager style="margin-top:12px">${t("send", "Envoyer le lien")}</button>
+             <button class="du-ghost" data-copier>${t("copy", "Copier")}</button>
+             <p class="du-note"${R()}>${t("no_account", "Pas de compte. Pas d'email.")}</p>
            </div>
            <div class="du-block">
-             <span class="du-lab" id="du-lab-salon">Dans la partie</span>
+             <span class="du-lab" id="du-lab-salon"${R()}>${t("in_party", "Dans la partie")}</span>
              <div class="du-slots" id="du-slots">${slotsHTML(etat.joueurs || [])}</div>
            </div>
-           <button class="du-cta gold" data-jouer style="margin-top:26px">Je commence</button>`
+           <div class="du-block">
+             <span class="du-lab"${R()}>${t("lang", "Langue")}</span>
+             ${langsHTML()}
+           </div>
+           <button class="du-cta gold" data-jouer>${t("start", "Je commence")}</button>`
         : `<img class="du-mascot" src="/skins/mascot-hello-remastered.png" alt="">
-           <h2 class="du-title">Qui est le plus permifié ?</h2>
-           <p class="du-sub">10 questions. 20 secondes chacune.<br>Le plus rapide gagne.</p>
-           <button class="du-cta gold" data-creer>Créer la partie</button>`
+           <h2 class="du-title"${R()}>${t("who", "Qui est le plus permifié ?")}</h2>
+           <p class="du-sub"${R()}>${t("rules", "10 questions. 20 secondes chacune.<br>Le plus rapide gagne.")}</p>
+           <button class="du-cta gold" data-creer>${t("create", "Créer la partie")}</button>`
     }
   `);
 }
@@ -364,23 +546,30 @@ function vueArrivee(etat) {
   return coque(`
     <div class="du-wordmark">PermiGo</div>
     <img class="du-mascot" src="/skins/mascot-hello-remastered.png" alt="">
-    <h1 class="du-title">${
-      etat.hote ? `<em>${esc(etat.hote)}</em> te défie` : "On te défie"
+    <h1 class="du-title"${R()}>${
+      etat.hote
+        ? t("defies", "<em>{n}</em> te défie", {
+            n: `<em>${esc(etat.hote)}</em>`,
+          })
+        : t("defies_any", "On te défie")
     }</h1>
     <div class="du-facts">
-      <span class="du-fact">10 questions</span>
-      <span class="du-fact">20 s chrono</span>
-      <span class="du-fact">1 gagnant</span>
+      <span class="du-fact"${R()}>${t("f_questions", "10 questions")}</span>
+      <span class="du-fact"${R()}>${t("f_chrono", "20 s chrono")}</span>
+      <span class="du-fact"${R()}>${t("f_winner", "1 gagnant")}</span>
     </div>
-    <span class="du-lab">Ton prénom</span>
+    ${langsHTML()}
+    <span class="du-lab"${R()}>${t("your_name", "Ton prénom")}</span>
     <input class="du-input" id="du-nom" type="text" maxlength="24" autocomplete="given-name"
-           placeholder="Sarah" aria-label="Ton prénom">
-    <button class="du-cta gold" data-entrer style="margin-top:14px">J'y vais</button>
-    <p class="du-note">Pas de compte. Pas d'email.</p>
+           placeholder="${t("name_ph", "Sarah")}" aria-label="${t("your_name", "Ton prénom")}"${
+             _lang === "ar" ? ' dir="rtl"' : ""
+           }>
+    <button class="du-cta gold" data-entrer style="margin-top:14px">${t("go", "J'y vais")}</button>
+    <p class="du-note"${R()}>${t("no_account", "Pas de compte. Pas d'email.")}</p>
     ${
       (etat.joueurs || []).length
         ? `<div class="du-card" style="margin-top:26px">
-             <span class="du-eyebrow">Déjà là</span>
+             <span class="du-eyebrow"${R()}>${t("already", "Déjà là")}</span>
              <div class="du-players">${pastilles(etat.joueurs)}</div>
            </div>`
         : ""
@@ -415,7 +604,7 @@ function vueQuestion(etat) {
       <div class="du-players">${pastilles(etat.joueurs || [])}</div>
       <span>
         <span class="du-score">${chiffres(etat.points)}</span>
-        ${etat.serie >= 2 ? `<span class="du-combo">${etat.serie} d'affilée</span>` : ""}
+        ${etat.serie >= 2 ? `<span class="du-combo"${R()}>${t("streak", "{n} d'affilée", { n: etat.serie })}</span>` : ""}
       </span>
     </div>
 
@@ -428,7 +617,7 @@ function vueQuestion(etat) {
            </div>`
     }
 
-    <h2 class="du-q">${esc(q.question)}</h2>
+    <h2 class="du-q"${R()}>${esc(q.question)}</h2>
     <div class="du-opts">${options}</div>
 
     ${
@@ -437,14 +626,16 @@ function vueQuestion(etat) {
             bon
               ? `+${chiffres(etat.dernierGain)}`
               : rep === -1
-                ? "Temps écoulé"
-                : "Raté"
+                ? t("timeout", "Temps écoulé")
+                : t("missed", "Raté")
           }</p>
-           ${q.explanation ? `<p class="du-expl">${esc(q.explanation)}</p>` : ""}
+           ${q.explanation ? `<p class="du-expl"${R()}>${esc(q.explanation)}</p>` : ""}
            <button class="du-cta" data-suite style="margin-top:14px">${
-             dernier ? "Voir le classement" : "Suivante"
+             dernier
+               ? t("see_rank", "Voir le classement")
+               : t("next", "Suivante")
            }</button>`
-        : `<p class="du-note">${etat.i + 1} sur ${etat.questions.length}</p>`
+        : `<p class="du-note"${R()}>${t("of", "{i} sur {n}", { i: etat.i + 1, n: etat.questions.length })}</p>`
     }
   `);
 }
@@ -482,15 +673,19 @@ function vueClassement(etat) {
 
   return coque(`
     <img class="du-mascot" src="/skins/mascot-celebrate.webp" alt="" style="width:92px;height:92px">
-    <h1 class="du-win">${gagnant ? `${esc(gagnant.name)} prend le titre` : "Partie en cours"}</h1>
+    <h1 class="du-win"${R()}>${
+      gagnant
+        ? t("takes_title", "{n} prend le titre", { n: esc(gagnant.name) })
+        : t("running", "Partie en cours")
+    }</h1>
     ${
       gagnant
-        ? `<p class="du-sub" style="margin:6px 0 0">${chiffres(gagnant.score)} points${
+        ? `<p class="du-sub" style="margin:6px 0 0"${R()}>${t("points", "{p} points", { p: chiffres(gagnant.score) })}${
             gagnant.correct != null
-              ? ` · ${gagnant.correct} sur ${etat.total}`
+              ? ` · ${t("correct_of", "{c} sur {t}", { c: gagnant.correct, t: etat.total })}`
               : ""
           }</p>`
-        : `<p class="du-sub" style="margin:6px 0 0">Personne n'a encore fini</p>`
+        : `<p class="du-sub" style="margin:6px 0 0"${R()}>${t("nobody_done", "Personne n'a encore fini")}</p>`
     }
     ${c.length ? `<div class="du-podium">${podium}${marches}</div>` : ""}
     ${reste
@@ -499,24 +694,28 @@ function vueClassement(etat) {
           `<div class="du-row"><span class="rk">${i + 4}</span><span class="nm">${esc(p.name)}</span><span class="sc">${chiffres(p.score)}</span></div>`,
       )
       .join("")}
-    ${attente.length ? `<p class="du-note">On attend ${esc(attente.map((p) => p.name).join(" · "))}.</p>` : ""}
+    ${
+      attente.length
+        ? `<p class="du-note"${R()}>${t("waiting", "On attend {n}.", { n: esc(attente.map((p) => p.name).join(" · ")) })}</p>`
+        : ""
+    }
     ${
       etat.ratee
         ? `<div class="du-card">
-             <span class="du-eyebrow">Personne ne l'a eue</span>
-             <h3>${esc(etat.ratee.question)}</h3>
-             <p class="du-bonne">${esc(etat.ratee.options?.[etat.ratee.correct_index] || "")}</p>
-             ${etat.ratee.explanation ? `<p>${esc(etat.ratee.explanation)}</p>` : ""}
+             <span class="du-eyebrow"${R()}>${t("nobody_had", "Personne ne l'a eue")}</span>
+             <h3${R()}>${esc(etat.ratee.question)}</h3>
+             <p class="du-bonne"${R()}>${esc(etat.ratee.options?.[etat.ratee.correct_index] || "")}</p>
+             ${etat.ratee.explanation ? `<p${R()}>${esc(etat.ratee.explanation)}</p>` : ""}
            </div>`
         : ""
     }
     ${
       connecte
-        ? `<button class="du-cta gold" data-relancer style="margin-top:22px">Rejouer</button>
-           <button class="du-ghost" data-rafraichir>Rafraîchir</button>`
-        : `<button class="du-cta gold" data-compte style="margin-top:22px">Créer mon compte gratuit</button>
-           <button class="du-ghost" data-rafraichir>Rafraîchir</button>
-           <p class="du-note">Ton score tient 7 jours.</p>`
+        ? `<button class="du-cta gold" data-relancer style="margin-top:22px">${t("replay", "Rejouer")}</button>
+           <button class="du-ghost" data-rafraichir>${t("refresh", "Rafraîchir")}</button>`
+        : `<button class="du-cta gold" data-compte style="margin-top:22px">${t("create_free", "Créer mon compte gratuit")}</button>
+           <button class="du-ghost" data-rafraichir>${t("refresh", "Rafraîchir")}</button>
+           <p class="du-note"${R()}>${t("keeps", "Ton score tient 7 jours.")}</p>`
     }
   `);
 }
@@ -524,6 +723,7 @@ function vueClassement(etat) {
 // ───────────────────────────── Montage ───────────────────────────────────
 export async function mount(root, param) {
   unmount(); // une navigation en plein chrono ne laisse rien tourner derrière
+  _lang = chargeLangue(); // langue de la partie précédente, ou celle de l'app
   const code = String(param || "")
     .toUpperCase()
     .trim();
@@ -570,9 +770,9 @@ export async function mount(root, param) {
     if (String(e.message) === "introuvable") {
       root.innerHTML = coque(`
         <div class="du-wordmark">PermiGo</div>
-        <h1 class="du-title" style="margin-top:40px">Cette partie est finie</h1>
-        <p class="du-sub">Un lien tient 7 jours.<br>Demande à ton ami d'en relancer une.</p>
-        <button class="du-cta gold" data-accueil>Découvrir PermiGo</button>
+        <h1 class="du-title" style="margin-top:40px"${R()}>${t("over", "Cette partie est finie")}</h1>
+        <p class="du-sub"${R()}>${t("over_sub", "Un lien tient 7 jours.<br>Demande à ton ami d'en relancer une.")}</p>
+        <button class="du-cta gold" data-accueil>${t("discover", "Découvrir PermiGo")}</button>
       `);
       root
         .querySelector("[data-accueil]")
@@ -632,7 +832,28 @@ function suitLeSalon(root, etat) {
   }, 3000);
 }
 
+// Les pastilles de langue. Changer de langue redessine l'écran courant : la
+// coque ET les questions suivront, puisque `questions` est rappelé au départ
+// du jeu avec la langue retenue.
+function cableLangs(root, redessine) {
+  root.querySelectorAll("[data-lang]").forEach((b) => {
+    b.addEventListener("click", () => {
+      const code = b.getAttribute("data-lang");
+      if (code === _lang) return;
+      haptic("tap");
+      poseLangue(code);
+      track("duel.langue", { lang: code });
+      redessine();
+    });
+  });
+}
+
 function cableCreation(root, me, etat) {
+  cableLangs(root, () => {
+    root.innerHTML = vueCreation(etat);
+    cableCreation(root, me, etat);
+  });
+
   root
     .querySelector("[data-retour]")
     ?.addEventListener("click", () => navigate("/reviser"));
@@ -693,17 +914,21 @@ function cableCreation(root, me, etat) {
 function copie(lien) {
   navigator.clipboard
     ?.writeText(lien)
-    .then(() => toast("Lien copié", "success"))
+    .then(() => toast(t("copied", "Lien copié"), "success"))
     .catch(() => toast("Copie impossible sur ce navigateur", "error"));
 }
 
 function cableArrivee(root, etat) {
+  cableLangs(root, () => {
+    root.innerHTML = vueArrivee(etat);
+    cableArrivee(root, etat);
+  });
   const input = root.querySelector("#du-nom");
   const go = async () => {
     const nom = (input?.value || "").trim();
     if (!nom) {
       input?.focus();
-      toast("Il me faut juste ton prénom", "info");
+      toast(t("need_name", "Il me faut juste ton prénom"), "info");
       return;
     }
     const btn = root.querySelector("[data-entrer]");
@@ -722,8 +947,8 @@ function cableArrivee(root, etat) {
       if (btn) btn.disabled = false;
       toast(
         String(e.message) === "complet"
-          ? "La partie est complète"
-          : "Impossible de rejoindre",
+          ? t("full", "La partie est complète")
+          : t("cant_join", "Impossible de rejoindre"),
         "error",
       );
     }
@@ -739,7 +964,10 @@ async function lanceJeu(root, etat) {
   stopSalon();
   root.innerHTML = squelette();
   try {
-    const r = await appel("questions", { code: etat.code });
+    // La langue voyage avec la demande : les 415 questions existent en
+    // anglais et en arabe (table question_translations). Une traduction
+    // absente se replie sur le français, question par question.
+    const r = await appel("questions", { code: etat.code, lang: _lang });
     etat.questions = r.questions || [];
   } catch (e) {
     console.error("[duel:questions]", e);
