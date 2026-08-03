@@ -144,7 +144,11 @@ Deno.serve(async (req) => {
       ],
       metadata,
       allow_promotion_codes: true,
-      success_url: `${origin}/#/pass?checkout=success&plan=${plan}`,
+      // {CHECKOUT_SESSION_ID} est un placeholder Stripe : substitué au
+      // vrai id à la redirection. Sert UNIQUEMENT à pré-remplir l'email
+      // d'inscription d'un invité (cf. pass-session-email) — un compte déjà
+      // connecté a déjà son accès via client_reference_id, il l'ignore.
+      success_url: `${origin}/#/pass?checkout=success&plan=${plan}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/#/pass?checkout=cancel`,
       ...(userId ? { client_reference_id: userId } : {}),
       ...(userEmail ? { customer_email: userEmail } : {}),

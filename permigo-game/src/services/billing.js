@@ -41,6 +41,28 @@ export async function startPassCheckout(plan) {
 }
 
 /**
+ * Retrouve l'email d'une session Stripe Checkout Pass Permis (audit landing
+ * 03/08/2026) : un invité qui vient de payer doit retaper exactement le même
+ * email pour débloquer son accès (eleve_access_status matche par email). Cet
+ * appel permet de le pré-remplir sur #/rejoindre au lieu de le lui demander
+ * de mémoire. Best-effort : au pire l'élève retape son email lui-même.
+ * @param {string} sessionId depuis l'URL de retour (`?session_id=...`)
+ * @returns {Promise<string|null>}
+ */
+export async function getPassSessionEmail(sessionId) {
+  if (!sessionId) return null;
+  try {
+    const { data, error } = await sb.functions.invoke("pass-session-email", {
+      body: { session_id: sessionId },
+    });
+    if (error) return null;
+    return data?.email || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Ouvre le portail de facturation Stripe (edge function billing-portal) pour
  * gérer / RÉSILIER l'abonnement en ligne, puis redirige vers ce portail.
  * supabase-js attache automatiquement le JWT user à l'invocation.
