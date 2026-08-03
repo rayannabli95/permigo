@@ -254,6 +254,31 @@ Deno.serve(async (req) => {
       return json({ questions, lang });
     }
 
+    // ── progress : le score EN COURS, à la mi-temps ──────────────────────
+    // Écrit le score sans marquer la partie finie, pour que le classement de
+    // la mi-temps montre qui mène. Sans ça les scores n'existent qu'à la fin
+    // et l'écran de mi-temps n'afficherait que des zéros.
+    if (action === "progress") {
+      const playerId = String(body.playerId ?? "");
+      const score = Number(body.score);
+      const correct = Number(body.correct);
+      if (!playerId || !Number.isInteger(score) || score < 0) {
+        return json({ error: "score" }, 400);
+      }
+      const { error } = await admin
+        .from("duel_players")
+        .update({
+          score: Math.min(score, NB_QUESTIONS * PTS_MAX),
+          correct_count: Number.isInteger(correct)
+            ? Math.min(Math.max(correct, 0), NB_QUESTIONS)
+            : null,
+        })
+        .eq("id", playerId)
+        .is("finished_at", null); // une partie finie ne se réécrit jamais
+      if (error) throw error;
+      return json({ ok: true });
+    }
+
     // ── finish : le jeton du joueur autorise l'écriture de SON score ─────
     if (action === "finish") {
       const playerId = String(body.playerId ?? "");
