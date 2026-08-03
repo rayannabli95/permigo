@@ -634,6 +634,28 @@ const STYLE = `<style>
   }
   .pv * { box-sizing: border-box; }
   .pv-wrap { max-width: 480px; margin: 0 auto; padding: 0 18px; }
+  .pv-hero-wrap { display: contents; }
+
+  /* ══════════ Desktop : la colonne s'élargit, le hero passe à côté de la
+     démo. En dessous de 860px rien ne change, c'est encore le même mobile. ══════════ */
+  @media (min-width: 860px) {
+    .pv-nav, .pv-wrap { max-width: 640px; }
+    .pv-hero-wrap {
+      display: flex; align-items: center; gap: 40px;
+      text-align: start; padding-top: 18px;
+    }
+    .pv-hero-wrap .pv-hero { flex: 0 0 42%; text-align: start; padding-top: 0; }
+    .pv-hero-wrap .pv-lead { margin: 0; }
+    .pv-hero-wrap #pv-demo { flex: 1 1 0; min-width: 0; }
+    .pv-avis-lot {
+      flex-wrap: wrap; overflow: visible; scroll-snap-type: none;
+      margin-inline: 0; padding: 2px 0 6px;
+    }
+    .pv-avis-lot .pv-avis { flex: 0 0 calc(33.33% - 8px); max-width: none; }
+  }
+  @media (min-width: 1240px) {
+    .pv-nav, .pv-wrap { max-width: 720px; }
+  }
 
   /* ══════════ La mise en scène au défilement ══════════
      Avant : les 14 blocs montaient tous de 24 px de la même façon. Un seul
@@ -1274,16 +1296,22 @@ export async function mount(root) {
 
     <div class="pv-wrap">
 
-      <section class="pv-hero pv-rev pv-stag">
-        <div class="pv-kicker">${L.kicker}</div>
-        <h1 class="pv-h1">${L.h1}</h1>
-        <p class="pv-lead">${L.lead}</p>
-      </section>
+      <!-- À partir de 860px, le texte et la démo passent côte à côte : sous
+           ce seuil, une seule colonne mobile inchangée entourée de vide sur
+           un écran d'ordinateur (chantier resté ouvert depuis l'audit du
+           03/08/2026, mis de côté le temps que #701 refasse la même page). -->
+      <div class="pv-hero-wrap">
+        <section class="pv-hero pv-rev pv-stag">
+          <div class="pv-kicker">${L.kicker}</div>
+          <h1 class="pv-h1">${L.h1}</h1>
+          <p class="pv-lead">${L.lead}</p>
+        </section>
 
-      <!-- La démonstration passe AVANT le billet et avant le prix : on montre,
-           puis on demande. Montée à la demande (le moteur de scène n'est pas
-           dans le premier chargement) et sans compte ni appel réseau. -->
-      <div id="pv-demo" class="pv-rev"></div>
+        <!-- La démonstration passe AVANT le billet et avant le prix : on montre,
+             puis on demande. Montée à la demande (le moteur de scène n'est pas
+             dans le premier chargement) et sans compte ni appel réseau. -->
+        <div id="pv-demo" class="pv-rev"></div>
+      </div>
 
       <!-- Trois avis AVANT le billet : la scène montre ce que c'est, les avis
            disent que ça marche, et seulement après on parle d'argent. Le
