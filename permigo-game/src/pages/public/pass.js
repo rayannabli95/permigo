@@ -1012,6 +1012,18 @@ const STYLE = `<style>
     transition: transform .1s ease, box-shadow .1s ease;
   }
   .pv-sticky-free:active { transform: translateY(3px); box-shadow: inset 0 2px 0 rgba(255,255,255,.5), 0 1px 0 #a86e00; }
+  /* Se déclenche à la bonne réponse de la démo (cf. onCorrect, plus bas dans
+     ce fichier) : la porte gratuite existe déjà, en permanence, sous le
+     pouce. Au lieu d'en fabriquer une seconde à cet instant précis, celle-ci
+     réagit. Classe retirée puis reposée en JS pour rejouer l'anim si l'élève
+     relance la démo une seconde fois. */
+  .pv-sticky-free.pv-pulse { animation: pvStickyPulse 1.7s ease-out; }
+  @keyframes pvStickyPulse {
+    0%, 100% { box-shadow: inset 0 2px 0 rgba(255,255,255,.5), 0 4px 0 #a86e00; }
+    20% { box-shadow: inset 0 2px 0 rgba(255,255,255,.7), 0 4px 0 #a86e00, 0 0 0 8px rgba(255,206,77,.3); }
+    45% { box-shadow: inset 0 2px 0 rgba(255,255,255,.5), 0 4px 0 #a86e00, 0 0 0 0 rgba(255,206,77,0); }
+  }
+  @media (prefers-reduced-motion: reduce) { .pv-sticky-free.pv-pulse { animation: none; } }
   /* L'achat reste accessible en permanence, mais discret. En encre douce et
      plus en or : l'or appartient maintenant au bouton juste au-dessus, et deux
      ors cote a cote, c'est deux appels au meme moment. */
@@ -1492,25 +1504,42 @@ function wire(root, me, lang, L) {
     location.hash = "#/login";
   });
 
-  // Démonstration jouable. Montée avec le reste de la page : elle est là ou la
-  // page ne s'affiche pas du tout, plus de disparition silencieuse.
-  const demoHost = root.querySelector("#pv-demo");
-  if (demoHost) mountDemoSituation(demoHost, lang);
-
   // Porte gratuite (hero, démonstration, barre collante) → inscription élève
   // sans code moniteur. Évènement SÉPARÉ de l'achat : on veut voir laquelle des
-  // portes travaille.
+  // portes travaille. Déclarée avant mountDemoSituation (function hissée) car
+  // la démo a besoin de la fermer sur ce même geste.
   function goFree(from) {
     track("pass.free_click", { from, lang, logged: !!me });
     fbTrack("Lead", { content_name: "compte_gratuit" });
     location.hash = "#/rejoindre?solo=1";
   }
+
+  // Démonstration jouable. Montée avec le reste de la page : elle est là ou la
+  // page ne s'affiche pas du tout, plus de disparition silencieuse.
+  // ⭐⭐ onCorrect (audit landing 03/08/2026) : juste après la bonne réponse, la
+  // motivation est à son maximum. Avant, rien ne la recueillait : le visiteur
+  // retombait sur trois avis puis un billet doré. PR #690 avait déjà tranché
+  // « une seule porte par écran » : pas de deuxième bouton ici, on met en
+  // valeur celle qui existe déjà (la barre collante, à portée de pouce en
+  // permanence) au moment précis où l'élève a envie de la prendre.
+  const demoHost = root.querySelector("#pv-demo");
+  const stickyFreeBtn = root.querySelector("#pv-sticky-free");
+  if (demoHost)
+    mountDemoSituation(demoHost, lang, {
+      onCorrect: () => {
+        track("pass.demo_success", { lang });
+        if (!stickyFreeBtn) return;
+        stickyFreeBtn.classList.remove("pv-pulse");
+        // Force le replay si l'élève relance la démo une seconde fois.
+        void stickyFreeBtn.offsetWidth;
+        stickyFreeBtn.classList.add("pv-pulse");
+      },
+    });
+
   root
     .querySelector("#pv-free")
     ?.addEventListener("click", () => goFree("hero"));
-  root
-    .querySelector("#pv-sticky-free")
-    ?.addEventListener("click", () => goFree("sticky"));
+  stickyFreeBtn?.addEventListener("click", () => goFree("sticky"));
 
   // Bascule FR/EN : on clique la langue VOULUE (FR ou EN), pas une bascule
   // aveugle. On mémorise puis on re-rend la page entière.
