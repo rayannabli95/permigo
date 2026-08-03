@@ -147,13 +147,6 @@ const STR = {
     },
     err: "Le paiement n'a pas pu démarrer. Réessaie.",
     btnWait: "Ouverture du paiement…",
-    stampTag: "Garanti",
-    stampT: "Satisfait ou remboursé sous 3 jours",
-    // « Teste tout pendant 3 jours » se lit « essai gratuit de 3 jours ».
-    // C'est un remboursement, donc un paiement d'abord. On le dit avant qu'il
-    // le découvre sur son relevé.
-    stampD:
-      "Ce n'est pas un essai gratuit : tu paies, puis tu testes tout. Pas convaincu dans les 3 jours ? On te rembourse. Ensuite le mensuel s'annule à tout moment, en un clic.",
     secAvis: "Ce qu'en disent nos élèves",
     secAvisSub:
       "Dix élèves de l'auto-école. Ils ont relu et validé leur phrase.",
@@ -281,10 +274,6 @@ const STR = {
     },
     err: "Payment couldn't start. Please try again.",
     btnWait: "Opening checkout…",
-    stampTag: "Guaranteed",
-    stampT: "3-day money-back guarantee",
-    stampD:
-      "This is not a free trial: you pay, then you try everything. Not convinced within 3 days? We refund you. After that, the monthly plan cancels anytime, in one click.",
     secAvis: "What our students say",
     secAvisSub:
       "Ten students from the driving school. Each one read and approved their own line.",
@@ -403,10 +392,6 @@ const STR = {
     },
     err: "تعذّر بدء الدفع. يُرجى المحاولة مرة أخرى.",
     btnWait: "جارٍ فتح صفحة الدفع…",
-    stampTag: "مضمون",
-    stampT: "مضمون أو استرداد أموالك خلال 3 أيام",
-    stampD:
-      "هذه ليست تجربة مجانية: تدفع أولاً، ثم تجرّب كل شيء. غير مقتنع خلال 3 أيام؟ نعيد لك أموالك. بعد ذلك، يُلغى الاشتراك الشهري في أي وقت، بنقرة واحدة.",
     secAvis: "ماذا يقول طلابنا",
     secAvisSub:
       "عشرة طلاب من مدرسة تعليم القيادة. كلّ واحد قرأ جملته ووافق على نشرها.",
@@ -911,17 +896,6 @@ const STYLE = `<style>
   .pv-err { font: 700 13px/1.4 'Archivo', sans-serif; color: #ffb4a8; text-align: center; margin: 4px 0 0; display: none; }
   .pv-err.on { display: block; }
 
-  /* ── Garantie ── */
-  .pv-stamp-zone { position: relative; margin-top: 26px; padding: 20px 18px; border-radius: 20px; border: 2px dashed rgba(88,204,2,.5); text-align: center; }
-  .pv-stamp-zone b { display: block; font: 800 16.5px/1.3 'Archivo', sans-serif; margin-bottom: 4px; }
-  .pv-stamp-zone span { font: 600 13px/1.55 'Archivo', sans-serif; color: var(--ink-soft); }
-  .pv-stamp {
-    position: absolute; top: -16px; right: 10px; transform: rotate(9deg);
-    font: 800 11px/1 'Archivo', sans-serif; letter-spacing: .1em; text-transform: uppercase;
-    color: #7ee838; border: 2.5px solid var(--go); border-radius: 8px; padding: 7px 10px;
-    background: rgba(20,40,4,.6);
-  }
-
   /* ── Avis d'élèves (validés par eux, cf. docs/PREUVES-A-COLLECTER) ──
      Carrousel horizontal, pas un mur vertical : 10 cartes empilées faisaient
      défiler l'écran sur près de 3000 px pour cette seule section. Le
@@ -1371,12 +1345,6 @@ export async function mount(root) {
       </article>
 
       <p class="pv-err" id="pv-err">${L.err}</p>
-
-      <div class="pv-stamp-zone pv-rev">
-        <span class="pv-stamp">${L.stampTag}</span>
-        <b>${L.stampT}</b>
-        <span>${L.stampD}</span>
-      </div>
 
       <h2 class="pv-sec-title pv-rev"><span>${L.secAvis}</span></h2>
       <p class="pv-sec-sub">${L.secAvisSub}</p>
