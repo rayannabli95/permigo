@@ -820,8 +820,20 @@ body.mp-open #header-bar {
 }
 
 .mp-sequence-card:disabled {
-  opacity: 0.28;
+  opacity: 0.42;
   cursor: default;
+}
+
+/* Posée : la pastille s'allume avec le rang, la carte reste lisible. */
+.mp-sequence-card.is-placed {
+  opacity: 0.72;
+  border-color: color-mix(in srgb, var(--world) 44%, transparent);
+}
+
+.mp-sequence-card.is-placed > span {
+  color: #100a24;
+  background: var(--world);
+  font-size: 15px;
 }
 
 .mp-sequence-card > span {
