@@ -47,6 +47,9 @@ const MAX_JOUEURS = 8;
 // (instantanée). Le plafond sert uniquement à borner ce qu'un client peut
 // envoyer, la règle de calcul vit dans la page.
 const PTS_MAX = 1000;
+// Langues servies pour les questions. Une valeur inconnue retombe en français
+// plutôt que de renvoyer une partie vide.
+const LANGUES = new Set(["en", "ar"]);
 
 // Alphabet sans caractère ambigu : pas de 0/O, 1/I/L, 2/Z, 5/S, 8/B. Le code
 // se lit à voix haute dans une soirée sans que personne ne se trompe.
@@ -216,11 +219,64 @@ Deno.serve(async (req) => {
       // `.in()` ne garantit pas l'ordre : on remet la suite tirée à la
       // création, sinon deux joueurs ne verraient pas la même question 4.
       const parId = new Map((data ?? []).map((q) => [q.id, q]));
-      const questions = duel.question_ids
+      let questions = duel.question_ids
         .map((id: string) => parId.get(id))
         .filter(Boolean);
 
-      return json({ questions });
+      // Langue demandée par le joueur. Les 415 questions de la banque
+      // existent en anglais et en arabe. `correct_index` NE BOUGE PAS : les
+      // options traduites gardent l'ordre de la source (cf. le commentaire
+      // de la table question_translations). Une traduction manquante se
+      // replie sur le français, question par question.
+      const lang = LANGUES.has(String(body.lang ?? ""))
+        ? String(body.lang)
+        : "fr";
+      if (lang !== "fr") {
+        const { data: tr } = await admin
+          .from("question_translations")
+          .select("question_id, question, options, explanation")
+          .eq("lang", lang)
+          .in("question_id", duel.question_ids);
+        const parTr = new Map((tr ?? []).map((x) => [x.question_id, x]));
+        questions = questions.map((q) => {
+          const x = parTr.get(q.id);
+          return x
+            ? {
+                ...q,
+                question: x.question,
+                options: x.options,
+                explanation: x.explanation,
+              }
+            : q;
+        });
+      }
+
+      return json({ questions, lang });
+    }
+
+    // ── progress : le score EN COURS, à la mi-temps ──────────────────────
+    // Écrit le score sans marquer la partie finie, pour que le classement de
+    // la mi-temps montre qui mène. Sans ça les scores n'existent qu'à la fin
+    // et l'écran de mi-temps n'afficherait que des zéros.
+    if (action === "progress") {
+      const playerId = String(body.playerId ?? "");
+      const score = Number(body.score);
+      const correct = Number(body.correct);
+      if (!playerId || !Number.isInteger(score) || score < 0) {
+        return json({ error: "score" }, 400);
+      }
+      const { error } = await admin
+        .from("duel_players")
+        .update({
+          score: Math.min(score, NB_QUESTIONS * PTS_MAX),
+          correct_count: Number.isInteger(correct)
+            ? Math.min(Math.max(correct, 0), NB_QUESTIONS)
+            : null,
+        })
+        .eq("id", playerId)
+        .is("finished_at", null); // une partie finie ne se réécrit jamais
+      if (error) throw error;
+      return json({ ok: true });
     }
 
     // ── finish : le jeton du joueur autorise l'écriture de SON score ─────

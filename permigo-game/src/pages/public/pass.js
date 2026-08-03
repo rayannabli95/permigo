@@ -18,7 +18,6 @@
 //    exploitable) ; questionnaire de départ → #/avis-depart
 //  - titre section : « Préparer le permis, c'est bien plus que conduire. »
 //  - centres d'examen montrés avec une vraie capture (fiche Cergy)
-//  - chiffres sourcés : 74,7 % vs 56,8 % (bilan examens 2022, Sécurité routière)
 //  - succès post-paiement : « Bienvenue dans l'aventure », installation de
 //    l'app expliquée (rappels/notifs), aide pas à pas, retour à l'accueil
 //  - bloc non-francophones VISIBLE UNIQUEMENT en anglais (l'app est en
@@ -28,7 +27,7 @@
 // Retour Checkout : #/pass?checkout=success&plan=xxx | #/pass?checkout=cancel
 // ═══════════════════════════════════════════════════════════════
 import { track } from "@/services/analytics.js";
-import { startPassCheckout } from "@/services/billing.js";
+import { startPassCheckout, getPassSessionEmail } from "@/services/billing.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { icon } from "@/utils/icons.js";
 import { esc, escAttr } from "@/utils/escape.js";
@@ -59,16 +58,26 @@ const STR = {
     // ⚠️ Pas de « la seule app » : allégation de supériorité invérifiable
     // (pratiques commerciales trompeuses). On dit ce qu'on fait, pas qu'on est seul.
     lead: `L'app qui travaille ta <strong>conduite</strong> entre les leçons.`,
-    tTitle: `OBJECTIF PERMIS<br>EN 90 JOURS`,
+    // Le billet annonçait « OBJECTIF PERMIS EN 90 JOURS ». Personne ne peut
+    // tenir un délai qui dépend des places d'examen, du rythme de l'élève et
+    // de son auto-école. Une promesse qu'on ne maîtrise pas se retourne : le
+    // premier qui dépasse 90 jours se sent floué. Le billet promet maintenant
+    // la seule chose que l'app fait vraiment, et qu'elle fait tous les jours.
+    tTitle: `PRÊT AVANT<br>CHAQUE LEÇON`,
     tSub: "Conduite · mini-jeux · simulations d'examen",
     tBoardLbl: "Départ",
     tDureeLbl: "Accès",
-    tDuree: "SANS LIMITE",
+    // « SANS LIMITE » à côté d'un abonnement mensuel : limite de contenu ou
+    // limite de durée ? On répond au lieu de laisser la question ouverte.
+    tDuree: "TOUT PERMIGO",
     tOffre: "Prix de lancement",
     tPer: "par mois",
     tPrice: "4,99 €",
     freeCta: "Commencer gratuitement",
-    freeNote: "3 leçons offertes · sans carte bancaire",
+    // « 3 leçons offertes » se lit « 3 heures de conduite offertes ». On dit
+    // ce que le gratuit donne VRAIMENT (cf. utils/free-tier.js) : les trois
+    // premières leçons de l'app en entier, et un examen blanc complet.
+    freeNote: "3 leçons + 1 examen blanc offerts · sans carte bancaire",
     bulle: "3 compétences validées !",
     bulleSub: "cette semaine",
     // Un seul prix, une seule offre (v4) : ce titre disait aussi « c'est bien
@@ -103,7 +112,11 @@ const STR = {
       {
         icon: "target",
         t: "Simulation d'examen",
-        d: "Notée comme l'inspecteur. Zéro surprise.",
+        // « Zéro surprise » promettait ce qu'aucune app ne peut tenir : un
+        // examinateur pressé ou un giratoire inconnu suffit à le rendre faux
+        // (audit confiance du 03/08/2026). On garde ce qui est vérifiable :
+        // la grille de l'examen est publique, et on note dessus.
+        d: "Notée sur la grille officielle de l'examen.",
       },
     ],
     mathsRows: [
@@ -111,7 +124,11 @@ const STR = {
       ["Budget permis moyen", "1 800 €"],
       ["PermiGo, par mois", "4,99 €"],
     ],
-    mathsNote: "Une leçon mal préparée = 55 € de perdus.",
+    // « Une leçon mal préparée = 55 € de perdus » se conteste en une seconde
+    // (une leçon mal préparée n'est pas une leçon perdue) et accuse l'élève
+    // de gâcher son argent. La ligne dit maintenant un fait que le tableau
+    // juste au-dessus démontre tout seul.
+    mathsNote: "PermiGo coûte moins qu'un dixième d'heure de conduite.",
     mathsSrc: "Sources : UFC-Que Choisir (budget permis) · Sécurité routière",
     secPass: "Un seul prix. Tout est dedans.",
     secPassSub:
@@ -122,28 +139,36 @@ const STR = {
         desc: "Tout le parcours, l'examen blanc, ta progression et tes récompenses. Annulable en un clic.",
         price: "4,99 €",
         per: "/mois",
-        btn: "Commencer",
+        // « Commencer » était le mot du bouton gratuit ET du bouton payant.
+        // Deux actions différentes, le même verbe : l'élève ne sait pas
+        // laquelle des deux il déclenche.
+        btn: "Tout débloquer",
       },
     },
     err: "Le paiement n'a pas pu démarrer. Réessaie.",
     btnWait: "Ouverture du paiement…",
     stampTag: "Garanti",
     stampT: "Satisfait ou remboursé sous 3 jours",
+    // « Teste tout pendant 3 jours » se lit « essai gratuit de 3 jours ».
+    // C'est un remboursement, donc un paiement d'abord. On le dit avant qu'il
+    // le découvre sur son relevé.
     stampD:
-      "Teste tout pendant 3 jours. Pas convaincu ? Remboursé. Ensuite, le mensuel s'annule à tout moment, en un clic.",
+      "Ce n'est pas un essai gratuit : tu paies, puis tu testes tout. Pas convaincu dans les 3 jours ? On te rembourse. Ensuite le mensuel s'annule à tout moment, en un clic.",
     secAvis: "Ce qu'en disent nos élèves",
     secAvisSub:
       "Dix élèves de l'auto-école. Ils ont relu et validé leur phrase.",
     avisAge: "ans",
-    secProof: "S'entraîner régulièrement paie",
-    proofA: "Conduite accompagnée (entraînement régulier)",
-    proofAVal: "74,7 %",
-    proofAW: 74.7,
-    proofB: "Filière classique",
-    proofBVal: "56,8 %",
-    proofBW: 56.8,
-    proofSrc:
-      "Bilan des examens du permis de conduire 2022 · Sécurité routière",
+    // ⛔ RETIRÉ (03/08/2026) — le graphique « 74,7 % conduite accompagnée
+    // contre 56,8 % filière classique, Sécurité routière 2022 ».
+    // Les chiffres étaient vrais et sourcés. Le problème est ce qu'ils
+    // faisaient là : ils comparent DEUX FILIÈRES DE CONDUITE entre elles,
+    // pas les élèves PermiGo aux autres. Placés sous le titre « S'entraîner
+    // régulièrement paie », juste après le prix, ils se lisaient comme la
+    // preuve que l'app fait gagner 18 points de réussite. On ne l'a jamais
+    // écrit, et c'est justement le problème : le lecteur le conclut seul,
+    // et celui qui repère le glissement doute de tout le reste de la page.
+    // On y remettra un chiffre le jour où ce sera un chiffre à NOUS
+    // (échantillon, période, méthode).
     secFaq: "Questions fréquentes",
     faq: [
       [
@@ -195,16 +220,16 @@ const STR = {
     docTitle: "PermiGo. Prepare every driving lesson before you get in the car",
     h1: `Prepare every lesson <br><em>before you get in the car.</em>`,
     lead: `The app that trains your <strong>driving</strong> between lessons.`,
-    tTitle: `LICENCE GOAL:<br>90 DAYS`,
+    tTitle: `READY BEFORE<br>EVERY LESSON`,
     tSub: "Driving · mini-games · exam simulations",
     tBoardLbl: "Start",
     tDureeLbl: "Access",
-    tDuree: "NO LIMIT",
+    tDuree: "ALL OF PERMIGO",
     tOffre: "Launch price",
     tPer: "per month",
     tPrice: "€4.99",
     freeCta: "Start for free",
-    freeNote: "3 lessons included · no card needed",
+    freeNote: "3 lessons + 1 mock test free · no card needed",
     bulle: "3 skills validated!",
     bulleSub: "this week",
     secCode: `Getting your licence takes <em>more</em> than driving.`,
@@ -228,7 +253,7 @@ const STR = {
       {
         icon: "target",
         t: "Exam simulation",
-        d: "Scored like the examiner. No surprises.",
+        d: "Scored on the official exam grid.",
       },
     ],
     nonFranco: {
@@ -240,7 +265,7 @@ const STR = {
       ["Average licence budget (France)", "€1,800"],
       ["PermiGo, per month", "€4.99"],
     ],
-    mathsNote: "One unprepared lesson = €55 wasted.",
+    mathsNote: "PermiGo costs less than a tenth of one driving hour.",
     mathsSrc: "Sources: UFC-Que Choisir (licence budget) · Sécurité routière",
     secPass: "One price. Everything is in it.",
     secPassSub:
@@ -251,7 +276,7 @@ const STR = {
         desc: "The full course, the mock exam, your progress and your rewards. Cancel in one click.",
         price: "€4.99",
         per: "/mo",
-        btn: "Start",
+        btn: "Unlock everything",
       },
     },
     err: "Payment couldn't start. Please try again.",
@@ -259,19 +284,14 @@ const STR = {
     stampTag: "Guaranteed",
     stampT: "3-day money-back guarantee",
     stampD:
-      "Try everything for 3 days. Not convinced? Refunded. After that, the monthly plan cancels anytime, in one click.",
+      "This is not a free trial: you pay, then you try everything. Not convinced within 3 days? We refund you. After that, the monthly plan cancels anytime, in one click.",
     secAvis: "What our students say",
     secAvisSub:
       "Ten students from the driving school. Each one read and approved their own line.",
     avisAge: "years old",
-    secProof: "Regular practice pays off",
-    proofA: "Accompanied driving (regular practice)",
-    proofAVal: "74.7%",
-    proofAW: 74.7,
-    proofB: "Standard route",
-    proofBVal: "56.8%",
-    proofBW: 56.8,
-    proofSrc: "French driving-test results 2022 · Sécurité routière",
+    // ⛔ Section « Regular practice pays off » retirée. Cf. le commentaire de
+    // la version française : le graphique comparait deux filières de conduite
+    // françaises entre elles, jamais les élèves PermiGo aux autres.
     secFaq: "Frequently asked",
     faq: [
       [
@@ -320,16 +340,18 @@ const STR = {
     docTitle: "PermiGo. حضّر كل درس قيادة قبل أن تركب السيارة",
     h1: `حضِّر كل درس <br><em>قبل أن تركب السيارة.</em>`,
     lead: `التطبيق الذي يدرّبك على <strong>القيادة</strong> بين الدروس.`,
-    tTitle: `الهدف: رخصة القيادة<br>في 90 يوماً`,
+    tTitle: `جاهز قبل<br>كل حصة`,
     tSub: "قيادة · ألعاب مصغّرة · محاكاة الامتحان",
     tBoardLbl: "الانطلاق",
-    tDureeLbl: "المدة",
-    tDuree: "بلا حدود",
+    // « المدة » (la durée) devient « الوصول » (l'accès) : l'ambiguïté
+    // durée/contenu de « بلا حدود » se levait mal en arabe aussi.
+    tDureeLbl: "الوصول",
+    tDuree: "كل PermiGo",
     tOffre: "سعر الإطلاق",
     tPer: "شهرياً",
     tPrice: "€4.99",
     freeCta: "ابدأ مجاناً",
-    freeNote: "3 دروس هدية · بدون بطاقة بنكية",
+    freeNote: "3 دروس + امتحان تجريبي هدية · بدون بطاقة بنكية",
     bulle: "تم التحقق من 3 مهارات!",
     bulleSub: "هذا الأسبوع",
     secCode: `الحصول على الرخصة يتطلّب <em>أكثر</em> من مجرّد القيادة.`,
@@ -353,7 +375,7 @@ const STR = {
       {
         icon: "target",
         t: "محاكاة الامتحان",
-        d: "تُقيَّم كالممتحن. بلا مفاجآت.",
+        d: "تُقيَّم وفق شبكة الامتحان الرسمية.",
       },
     ],
     nonFranco: {
@@ -365,7 +387,7 @@ const STR = {
       ["متوسط ميزانية الرخصة (فرنسا)", "€1,800"],
       ["PermiGo، شهرياً", "€4.99"],
     ],
-    mathsNote: "درس غير مُحضَّر = €55 ضائعة.",
+    mathsNote: "يكلّف PermiGo أقلّ من عُشر ساعة قيادة واحدة.",
     mathsSrc: "المصادر: UFC-Que Choisir (ميزانية الرخصة) · Sécurité routière",
     secPass: "سعر واحد. كل شيء بداخله.",
     secPassSub:
@@ -376,7 +398,7 @@ const STR = {
         desc: "المسار كاملاً، والامتحان التجريبي، وتقدّمك ومكافآتك. ألغِ بنقرة واحدة.",
         price: "€4.99",
         per: "/شهر",
-        btn: "ابدأ",
+        btn: "افتح كل شيء",
       },
     },
     err: "تعذّر بدء الدفع. يُرجى المحاولة مرة أخرى.",
@@ -384,19 +406,13 @@ const STR = {
     stampTag: "مضمون",
     stampT: "مضمون أو استرداد أموالك خلال 3 أيام",
     stampD:
-      "جرّب كل شيء لمدة 3 أيام. غير مقتنع؟ تُستردّ أموالك. بعد ذلك، يُلغى الاشتراك الشهري في أي وقت، بنقرة واحدة.",
+      "هذه ليست تجربة مجانية: تدفع أولاً، ثم تجرّب كل شيء. غير مقتنع خلال 3 أيام؟ نعيد لك أموالك. بعد ذلك، يُلغى الاشتراك الشهري في أي وقت، بنقرة واحدة.",
     secAvis: "ماذا يقول طلابنا",
     secAvisSub:
       "عشرة طلاب من مدرسة تعليم القيادة. كلّ واحد قرأ جملته ووافق على نشرها.",
     avisAge: "سنة",
-    secProof: "التدرّب المنتظم يؤتي ثماره",
-    proofA: "القيادة المرافَقة (تدرّب منتظم)",
-    proofAVal: "74.7%",
-    proofAW: 74.7,
-    proofB: "المسار التقليدي",
-    proofBVal: "56.8%",
-    proofBW: 56.8,
-    proofSrc: "حصيلة امتحانات رخصة القيادة الفرنسية 2022 · Sécurité routière",
+    // ⛔ Section « التدرّب المنتظم يؤتي ثماره » retirée. Cf. le commentaire de
+    // la version française.
     secFaq: "الأسئلة الشائعة",
     faq: [
       [
@@ -451,9 +467,23 @@ const STR = {
 // sont propres — on ne fabrique pas les fautes de quelqu'un dans une langue
 // qu'il n'a pas écrite.
 //
-// Les deux avis de 43 et 56 ans passent en tête : ils cassent l'idée d'une
-// app pour ados, qui est la première objection d'un visiteur de 40 ans.
+// ORDRE DES TROIS PREMIERS (ce sont eux qui s'affichent sous la démo) :
+//  1. Leo raconte EXACTEMENT la promesse de la page (arriver à sa leçon en
+//     sachant quoi faire, stresser moins). Il était troisième, donc le seul
+//     avis qui prouve le titre passait après deux avis qui parlent d'autre
+//     chose. Il passe premier.
+//  2. et 3. Salah (56 ans) et Lassaad (43 ans) suivent immédiatement : ils
+//     cassent l'idée d'une app pour ados, première objection d'un visiteur de
+//     40 ans. Ils restent tous les deux au-dessus du pli, l'objection tombe
+//     aussi vite qu'avant.
 const AVIS = [
+  {
+    n: "Leo C.",
+    age: 32,
+    fr: "Avant j'arrivais à ma leçon sans savoir ce qu'on allait faire. Maintenant je sais et je stresse beaucoup moins.",
+    en: "I used to turn up to my lesson with no idea what we'd be doing. Now I know, and I stress far less.",
+    ar: "كنتُ أصل إلى الحصة دون أن أعرف ماذا سنفعل. الآن أعرف، وتوتّري أقلّ بكثير.",
+  },
   {
     n: "Salah S.",
     age: 56,
@@ -467,13 +497,6 @@ const AVIS = [
     fr: "Je révise en arabe et le mot francais est juste en dessous. c'est sa qui m'a débloqué",
     en: "I revise in Arabic and the French word sits right underneath. that's what unlocked it for me",
     ar: "أراجع بالعربية والكلمة الفرنسية تحتها مباشرة. هذا ما فكّ عقدتي",
-  },
-  {
-    n: "Leo C.",
-    age: 32,
-    fr: "Avant j'arrivais à ma leçon sans savoir ce qu'on allait faire. Maintenant je sais et je stresse beaucoup moins.",
-    en: "I used to turn up to my lesson with no idea what we'd be doing. Now I know, and I stress far less.",
-    ar: "كنتُ أصل إلى الحصة دون أن أعرف ماذا سنفعل. الآن أعرف، وتوتّري أقلّ بكثير.",
   },
   {
     n: "Regis T.",
@@ -838,8 +861,13 @@ const STYLE = `<style>
   .pv-maths-row b { font: 700 16px 'Archivo', sans-serif; color: #fff; font-variant-numeric: tabular-nums; }
   .pv-maths-row.hot { color: var(--gold); }
   .pv-maths-row.hot b { color: var(--gold); font-size: 18px; }
-  .pv-maths-note { text-align: center; font: 600 12.5px/1.6 'Archivo', sans-serif; color: var(--ink-dim); margin: 12px 0 0; }
-  .pv-maths-src { text-align: center; font: 500 10.5px/1.5 'Archivo', sans-serif; color: #655a97; margin: 6px 0 0; }
+  /* La source était en 10,5px sur #655a97, soit 2,6:1 de contraste sur le
+     fond violet quand l'AA en demande 4,5. Citer ses sources et les rendre
+     illisibles, c'est se donner l'air de citer ses sources. 12,5px sur
+     --ink-mu : 6,7:1. Et la note passe de --ink-dim (4,46:1, juste sous la
+     barre) à --ink-soft. */
+  .pv-maths-note { text-align: center; font: 600 13.5px/1.6 'Archivo', sans-serif; color: var(--ink-soft); margin: 12px 0 0; }
+  .pv-maths-src { text-align: center; font: 500 12.5px/1.5 'Archivo', sans-serif; color: var(--ink-mu); margin: 8px 0 0; }
 
   /* ── Le billet (il n'y en a plus qu'un) ── */
   .pv-pass { position: relative; display: flex; border-radius: 18px; margin-bottom: 14px; box-shadow: 0 14px 28px rgba(0,0,0,.4); }
@@ -932,14 +960,8 @@ const STYLE = `<style>
      carte de date de naissance le 01/08. */
   .pv-avis-qui span { font: 600 11.5px/1.2 'Archivo', sans-serif; color: var(--ink-mu); }
 
-  /* ── Preuve ── */
-  .pv-proof { margin-top: 20px; }
-  .pv-bar-lbl { display: flex; justify-content: space-between; gap: 12px; font: 600 13px 'Archivo', sans-serif; margin-bottom: 6px; color: var(--ink-soft); }
-  .pv-bar { height: 12px; border-radius: 99px; background: rgba(255,255,255,.08); overflow: hidden; margin-bottom: 14px; }
-  .pv-bar span { display: block; height: 100%; border-radius: 99px; }
-  .pv-bar-go span { background: linear-gradient(90deg, var(--go), #8aec3c); }
-  .pv-bar-mu span { background: #5c519f; }
-  .pv-src { text-align: center; font: 500 11px 'Archivo', sans-serif; color: #655a97; margin: 0; }
+  /* Le bloc « Preuve » (.pv-proof, .pv-bar*, .pv-src) est retiré avec son
+     graphique le 03/08/2026. Rien d'autre ne l'utilisait. */
 
   /* ── FAQ ── */
   .pv-faq details { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 0 15px; margin-bottom: 9px; }
@@ -1008,6 +1030,18 @@ const STYLE = `<style>
     transition: transform .1s ease, box-shadow .1s ease;
   }
   .pv-sticky-free:active { transform: translateY(3px); box-shadow: inset 0 2px 0 rgba(255,255,255,.5), 0 1px 0 #a86e00; }
+  /* Se déclenche à la bonne réponse de la démo (cf. onCorrect, plus bas dans
+     ce fichier) : la porte gratuite existe déjà, en permanence, sous le
+     pouce. Au lieu d'en fabriquer une seconde à cet instant précis, celle-ci
+     réagit. Classe retirée puis reposée en JS pour rejouer l'anim si l'élève
+     relance la démo une seconde fois. */
+  .pv-sticky-free.pv-pulse { animation: pvStickyPulse 1.7s ease-out; }
+  @keyframes pvStickyPulse {
+    0%, 100% { box-shadow: inset 0 2px 0 rgba(255,255,255,.5), 0 4px 0 #a86e00; }
+    20% { box-shadow: inset 0 2px 0 rgba(255,255,255,.7), 0 4px 0 #a86e00, 0 0 0 8px rgba(255,206,77,.3); }
+    45% { box-shadow: inset 0 2px 0 rgba(255,255,255,.5), 0 4px 0 #a86e00, 0 0 0 0 rgba(255,206,77,0); }
+  }
+  @media (prefers-reduced-motion: reduce) { .pv-sticky-free.pv-pulse { animation: none; } }
   /* L'achat reste accessible en permanence, mais discret. En encre douce et
      plus en or : l'or appartient maintenant au bouton juste au-dessus, et deux
      ors cote a cote, c'est deux appels au meme moment. */
@@ -1182,6 +1216,18 @@ export async function mount(root) {
       currency: "EUR",
       value: PLAN_VALUE[planParam] ?? 0,
     });
+    // Invité (pas de compte) : va chercher l'email qui vient de payer pour
+    // pré-remplir #/rejoindre juste en dessous. eleve_access_status() matche
+    // pass_purchases par email confirmé : une lettre de travers au moment de
+    // recréer le compte, et l'élève a payé pour rien. Best-effort, en fond,
+    // ne bloque jamais l'affichage de l'écran de succès.
+    const sessionId = q.get("session_id");
+    if (!me && sessionId) {
+      getPassSessionEmail(sessionId).then((email) => {
+        if (email) sessionStorage.setItem("pg_pass_email", email);
+      });
+    }
+
     const label = PLAN_LABELS[lang][planParam] || "Pass Permis";
     root.innerHTML = `${STYLE}
       <div class="pv" dir="${lang === "ar" ? "rtl" : "ltr"}">
@@ -1240,9 +1286,10 @@ export async function mount(root) {
       <div id="pv-demo" class="pv-rev"></div>
 
       <!-- Trois avis AVANT le billet : la scène montre ce que c'est, les avis
-           disent que ça marche, et seulement après on parle d'argent. Les deux
-           premiers ont 56 et 43 ans — la première objection d'un visiteur de
-           40 ans est « c'est pour les jeunes ». -->
+           disent que ça marche, et seulement après on parle d'argent. Le
+           premier raconte le titre de la page (arriver à sa leçon en sachant
+           quoi faire), les deux suivants ont 56 et 43 ans (la première
+           objection d'un visiteur de 40 ans est « c'est pour les jeunes »). -->
       <div class="pv-avis-lot pv-avis-haut pv-rev">${renderAvis(lang, L, 0, 3)}</div>
 
       ${renderTicket(L, { lang })}
@@ -1335,14 +1382,12 @@ export async function mount(root) {
       <p class="pv-sec-sub">${L.secAvisSub}</p>
       <div class="pv-avis-lot pv-rev pv-stag">${renderAvis(lang, L, 3, AVIS.length)}</div>
 
-      <h2 class="pv-sec-title pv-rev"><span>${L.secProof}</span></h2>
-      <div class="pv-proof pv-rev pv-stag">
-        <div class="pv-bar-lbl"><span>${L.proofA}</span><span>${L.proofAVal}</span></div>
-        <div class="pv-bar pv-bar-go"><span style="width:${L.proofAW}%"></span></div>
-        <div class="pv-bar-lbl"><span>${L.proofB}</span><span>${L.proofBVal}</span></div>
-        <div class="pv-bar pv-bar-mu"><span style="width:${L.proofBW}%"></span></div>
-        <p class="pv-src">${L.proofSrc}</p>
-      </div>
+      <!-- Le graphique « 74,7 % contre 56,8 % » vivait ici. Retiré le
+           03/08/2026 : il comparait la conduite accompagnée à la filière
+           classique, donc deux façons d'apprendre à conduire, pas les élèves
+           PermiGo aux autres. Posé juste après le prix sous le titre
+           « S'entraîner régulièrement paie », il se lisait comme notre taux
+           de réussite. La FAQ enchaîne maintenant directement. -->
 
       <section class="pv-faq pv-rev pv-stag">
         <h2 class="pv-sec-title">${L.secFaq}</h2>
@@ -1492,25 +1537,42 @@ function wire(root, me, lang, L) {
     location.hash = "#/login";
   });
 
-  // Démonstration jouable. Montée avec le reste de la page : elle est là ou la
-  // page ne s'affiche pas du tout, plus de disparition silencieuse.
-  const demoHost = root.querySelector("#pv-demo");
-  if (demoHost) mountDemoSituation(demoHost, lang);
-
   // Porte gratuite (hero, démonstration, barre collante) → inscription élève
   // sans code moniteur. Évènement SÉPARÉ de l'achat : on veut voir laquelle des
-  // portes travaille.
+  // portes travaille. Déclarée avant mountDemoSituation (function hissée) car
+  // la démo a besoin de la fermer sur ce même geste.
   function goFree(from) {
     track("pass.free_click", { from, lang, logged: !!me });
     fbTrack("Lead", { content_name: "compte_gratuit" });
     location.hash = "#/rejoindre?solo=1";
   }
+
+  // Démonstration jouable. Montée avec le reste de la page : elle est là ou la
+  // page ne s'affiche pas du tout, plus de disparition silencieuse.
+  // ⭐⭐ onCorrect (audit landing 03/08/2026) : juste après la bonne réponse, la
+  // motivation est à son maximum. Avant, rien ne la recueillait : le visiteur
+  // retombait sur trois avis puis un billet doré. PR #690 avait déjà tranché
+  // « une seule porte par écran » : pas de deuxième bouton ici, on met en
+  // valeur celle qui existe déjà (la barre collante, à portée de pouce en
+  // permanence) au moment précis où l'élève a envie de la prendre.
+  const demoHost = root.querySelector("#pv-demo");
+  const stickyFreeBtn = root.querySelector("#pv-sticky-free");
+  if (demoHost)
+    mountDemoSituation(demoHost, lang, {
+      onCorrect: () => {
+        track("pass.demo_success", { lang });
+        if (!stickyFreeBtn) return;
+        stickyFreeBtn.classList.remove("pv-pulse");
+        // Force le replay si l'élève relance la démo une seconde fois.
+        void stickyFreeBtn.offsetWidth;
+        stickyFreeBtn.classList.add("pv-pulse");
+      },
+    });
+
   root
     .querySelector("#pv-free")
     ?.addEventListener("click", () => goFree("hero"));
-  root
-    .querySelector("#pv-sticky-free")
-    ?.addEventListener("click", () => goFree("sticky"));
+  stickyFreeBtn?.addEventListener("click", () => goFree("sticky"));
 
   // Bascule FR/EN : on clique la langue VOULUE (FR ou EN), pas une bascule
   // aveugle. On mémorise puis on re-rend la page entière.

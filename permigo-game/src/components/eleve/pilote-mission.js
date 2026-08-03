@@ -475,14 +475,22 @@ export function monterMissions(
       </div>
       <div class="mp-sequence-bank">
         ${banque
-          .map(
-            (
-              s,
-            ) => `<button class="mp-sequence-card" type="button" data-reponse="${escAttr(s.id)}"
-              ${etat.choisis.includes(s.id) || etat.resolu ? "disabled" : ""}>
-              <span>${esc(s.symbol)}</span><strong>${esc(s.label)}</strong>
-            </button>`,
-          )
+          .map((s) => {
+            // La pastille portait un SIGNE typographique choisi à la main :
+            // 33 signes pour 64 gestes, et le même petit carré servait à
+            // « Avancer le siège », « Vitres et rétroviseurs » et « Se replacer
+            // le long du trottoir ». Ça ne renseignait rien, ça décorait.
+            // Elle porte maintenant le RANG où le geste a été posé : la seule
+            // information que l'élève cherche vraiment sur cette carte.
+            const rang = etat.choisis.indexOf(s.id);
+            const pris = rang >= 0;
+            return `<button class="mp-sequence-card ${pris ? "is-placed" : ""}"
+              type="button" data-reponse="${escAttr(s.id)}"
+              ${pris || etat.resolu ? "disabled" : ""}>
+              <span aria-hidden="${pris ? "false" : "true"}">${pris ? rang + 1 : ""}</span>
+              <strong>${esc(s.label)}</strong>
+            </button>`;
+          })
           .join("")}
       </div>
     </section>`;

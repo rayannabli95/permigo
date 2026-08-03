@@ -50,6 +50,7 @@ const FTW_I18N = {
     banner_lessons: (n) => `First ${n} lessons`,
     banner_quiz: (u, m) => `${u}/${m} questions`,
     banner_scene: (u, m) => `${u}/${m} scenario`,
+    banner_duel: "Unlimited friend duels",
   },
   ar: {
     quota_kick: "وضع الاكتشاف",
@@ -74,6 +75,7 @@ const FTW_I18N = {
     banner_lessons: (n) => `أول ${n} دروس`,
     banner_quiz: (u, m) => `${u}/${m} أسئلة`,
     banner_scene: (u, m) => `${u}/${m} سيناريو`,
+    banner_duel: "تحدي الأصدقاء بلا حدود",
   },
 };
 
@@ -286,6 +288,10 @@ export function discoveryBannerHTML() {
       <span>${wt("banner_lessons", `${FREE_SUBS.length} premières leçons`, FREE_SUBS.length)}</span>
       <span>${wt("banner_quiz", `${q.used}/${q.max} questions`, q.used, q.max)}</span>
       <span>${wt("banner_scene", `${s.used}/${s.max} scène`, s.used, s.max)}</span>
+      <!-- « Défie tes amis » est OUVERT au compte gratuit et ne consomme aucun
+           quota. Sans cette ligne, le gratuit ne voit que ses limites et ne
+           découvre jamais la seule chose illimitée qu'il possède. -->
+      <span>${wt("banner_duel", "Duel entre amis sans limite")}</span>
     </span>
   </div>`;
 }
