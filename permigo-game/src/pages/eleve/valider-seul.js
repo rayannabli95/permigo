@@ -42,6 +42,22 @@ import {
   missionsPour,
 } from "@/components/eleve/pilote-mission.js";
 
+// ⚠️ Le routeur RÉUTILISE le même nœud `root` d'une page à l'autre (il fait
+// `root.innerHTML = ...`, jamais un nouveau conteneur). Toute écriture posée
+// APRÈS un `await` (une requête réseau, une RPC) doit donc vérifier qu'aucune
+// navigation n'a eu lieu entre-temps, sinon un résultat qui arrive en retard
+// écrase la page suivante avec l'écran d'une AUTRE compétence — repéré en
+// testant la boucle des 3 compétences gratuites (02/08) : quitter l'écran de
+// résultat de C1a juste après avoir répondu au quiz laissait le score de C1a
+// s'afficher par-dessus la fiche de C1b, quelques centaines de ms plus tard.
+// `mount()` incrémente `_gen` à chaque montage ; toute fonction qui écrit
+// dans `root` après un `await` capture `_gen` avant d'attendre et vérifie
+// qu'il n'a pas changé avant d'écrire.
+let _gen = 0;
+export function unmount() {
+  _gen++;
+}
+
 const NB_QUESTIONS = 5; // plus que le quiz-récap (3) : la barre doit avoir du sens
 const SEUIL = 80; // barre INTERNE, jamais affichée : on ne parle pas en pourcentage
 // Ce que l'élève lit : un nombre de bonnes réponses, pas une note sur cent
@@ -183,8 +199,7 @@ const VS_I18N = {
     ok_title: "تمت المصادقة على المهارة!",
     ok_p: "«{n}» أصبحت الآن مكتملة في مسارك.",
     ok_volants: "+{n} مقود (volants)",
-    ok_vaut:
-      "تصبح مكتسبة في «رخصتي». وهي لا تعوّض الدرس ولا الامتحان.",
+    ok_vaut: "تصبح مكتسبة في «رخصتي». وهي لا تعوّض الدرس ولا الامتحان.",
     ok_cta: "اعثر على هذه المهارة في رخصتي",
     fail_kick: "ليس بعد",
     fail_title: "اقتربت!",
@@ -611,6 +626,12 @@ export async function mount(root, param) {
   const me = getCurUser();
   if (!me) return;
 
+  // Nouveau montage = nouvelle génération : toute écriture encore en vol
+  // depuis la page précédente (ou une frappe rapide sur cette même page,
+  // ex. clic sur « réessayer » pendant que le premier chargement tourne
+  // encore) doit se reconnaître périmée et ne rien écrire.
+  const gen = ++_gen;
+
   const compId = param || null;
   const sub = compId ? findSubComp(compId) : null;
   const cat = compId ? findCategory(compId) : null;
@@ -647,6 +668,7 @@ export async function mount(root, param) {
       .eq("competence_id", compId)
       .maybeSingle(),
   ]);
+  if (gen !== _gen) return; // l'élève a déjà quitté cette compétence
 
   const valError =
     valRes.status === "rejected"
@@ -672,12 +694,14 @@ export async function mount(root, param) {
   const acquisMoniteur = valRes.value.data?.statut === "acquis";
   const already = selfRes.value.data || null;
   const fiche = await fichePromise;
+  if (gen !== _gen) return;
 
   // La boîte est peut-être inconnue à ce stade : on demande alors les missions
   // sans filtre. Le libellé peut donc annoncer une mise en situation qui sera
   // filtrée juste après, jamais l'inverse (aucune compétence n'a de mission
   // pour une seule boîte sans en avoir pour l'autre).
   const avecMission = missionsPour(compId, await chargerBoite()).length > 0;
+  if (gen !== _gen) return;
 
   // Acquise ne veut pas dire fermée. Un geste, ça s'entretient : la mission et
   // le quiz restent rejouables pour s'entraîner, ils ne certifient simplement
@@ -753,7 +777,9 @@ function wireBoite(root, me, compId, sub, cat) {
  * Les compétences sans mission gardent le chemin d'avant : questions seules.
  */
 async function lancerLaCertification(root, me, compId, sub, cat, btn) {
+  const gen = _gen;
   const boite = await chargerBoite();
+  if (gen !== _gen) return; // parti pendant la lecture de la boîte
   if (!missionsPour(compId, boite).length) {
     await lancerLeQuiz(root, me, compId, sub, cat, btn);
     return;
@@ -818,10 +844,12 @@ function ouvrirLaScene() {
  * ne pouvait plus jamais toucher une scène.
  */
 async function rejouerLaMission(root, me, compId, sub, cat) {
+  const gen = _gen;
   // On relit la boîte : sans elle, un élève en automatique se voyait servir
   // la mission d'embrayage. Un entraînement doit parler la voiture qu'il
   // conduit, comme la certification.
   const boite = await chargerBoite();
+  if (gen !== _gen) return; // parti pendant la lecture de la boîte
   const { hote, fermer } = ouvrirLaScene();
   track("valider_seul.mission_rejouee", { competence_id: compId });
 
@@ -905,6 +933,10 @@ async function handleComplete(
   total,
   answers,
 ) {
+  // Capturé AVANT le `await` réseau qui suit : si l'élève a déjà quitté cette
+  // compétence quand la RPC répond, `_gen` a changé et on n'écrit plus rien
+  // dans `root` — sinon le score d'ici s'affichait par-dessus la page suivante.
+  const gen = _gen;
   const scorePct = Math.round((score / total) * 100);
   track("valider_seul.quiz_done", {
     competence_id: compId,
@@ -926,6 +958,7 @@ async function handleComplete(
   } catch (e) {
     console.warn("[valider-seul] submit_competence_quiz", e);
   }
+  if (gen !== _gen) return;
 
   if (scorePct < SEUIL) {
     haptic("warning");
@@ -967,6 +1000,7 @@ function confirmScreen(sub, scorePct) {
 }
 
 async function certify(root, me, compId, sub, cat, scorePct, answers) {
+  const gen = _gen;
   try {
     // Le SERVEUR corrige : on envoie les réponses, pas un score déclaratif
     // (migration solo_hardening — l'ancienne signature p_score est supprimée).
@@ -974,6 +1008,7 @@ async function certify(root, me, compId, sub, cat, scorePct, answers) {
       p_competence_id: compId,
       p_answers: answers || [],
     });
+    if (gen !== _gen) return; // parti avant la réponse serveur
     if (error || data?.error) {
       console.warn(
         "[valider-seul] self_validate_competence",
@@ -1024,6 +1059,9 @@ async function certify(root, me, compId, sub, cat, scorePct, answers) {
       console.warn("[valider-seul] claim_competence_reward", e);
     }
 
+    // La récompense doit être créditée même si l'élève est parti entre-temps
+    // (RPC idempotente ci-dessus, jamais sautée) : seul l'AFFICHAGE se tait.
+    if (gen !== _gen) return;
     root.innerHTML = successScreen(sub, scorePct, volants);
     wireResult(root, me, compId, sub, cat);
   } catch (e) {

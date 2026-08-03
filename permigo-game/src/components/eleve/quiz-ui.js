@@ -116,7 +116,7 @@ const RESULT_MSGS_I18N = {
   en: {
     perfect: [
       "Flawless. Seriously?!",
-      "100%. Hats off.",
+      "No mistakes. Hats off.",
       "Zero mistakes. Clean.",
     ],
     passed: [
@@ -131,7 +131,11 @@ const RESULT_MSGS_I18N = {
     ],
   },
   ar: {
-    perfect: ["بلا أخطاء. حقًا؟!", "100٪. أحسنت.", "صفر أخطاء. عمل نظيف."],
+    perfect: [
+      "بلا أخطاء. حقًا؟!",
+      "بلا أي خطأ. أحسنت.",
+      "صفر أخطاء. عمل نظيف.",
+    ],
     passed: [
       "أحسنت، أنت تتقدّم!",
       "قويّ. واصل هكذا.",
@@ -191,10 +195,13 @@ function pickCoachHead(lang = getLang()) {
 }
 
 // Messages de fin — varient selon le palier
+// ⚠️ Jamais de pourcentage ici (décision Rayan, 31/07/2026, cf. CLAUDE.md) :
+// l'élève lit un nombre de bonnes réponses, pas une note sur cent. « 100 %.
+// Chapeau. » s'était glissé dans le tirage du score parfait.
 const RESULT_MSGS = {
   perfect: [
     "Sans-faute. Sérieux ?!",
-    "100 %. Chapeau.",
+    "Aucune erreur. Chapeau.",
     "Zéro erreur. Propre.",
   ],
   passed: [
