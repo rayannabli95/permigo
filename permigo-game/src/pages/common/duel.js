@@ -99,8 +99,7 @@ const I18N = {
     not_yet: "not yet",
     ad: "Advertisement",
     continue: "Keep going",
-    ad_house_t: "Do you really want that licence?",
-    ad_house_s: "PermiGo gets you ready before every driving hour.",
+    ad_house_s: "Ready before every driving hour.",
     ad_house_c: "Try it · €4.99/month",
   },
   ar: {
@@ -156,8 +155,7 @@ const I18N = {
     not_yet: "ليس بعد",
     ad: "إعلان",
     continue: "نواصل",
-    ad_house_t: "هل تريد رخصتك فعلاً؟",
-    ad_house_s: "PermiGo يجهّزك قبل كل ساعة قيادة.",
+    ad_house_s: "جاهز قبل كل ساعة قيادة.",
     ad_house_c: "جرّب · 4,99 €/شهر",
   },
 };
@@ -507,19 +505,30 @@ ${chromeNight("#241a52", "#1a1340")}
   border-bottom:1px solid #3a3178; text-align:left; }
 .du-pub-slot { min-height:180px; display:grid; place-items:center; padding:20px 18px; }
 .du-pub-maison { text-align:center; }
-.du-pub-maison strong { display:block; font:800 21px/1.2 'Archivo',sans-serif; color:#fff;
-  letter-spacing:-.02em; margin-bottom:8px; }
 .du-pub-maison span { display:block; font:600 13.5px/1.45 'Archivo',sans-serif; color:#b3aede;
   margin-bottom:14px; }
+/* La marque, avec un reflet doré qui la balaie en boucle. Le dégradé est
+   deux fois plus large que le mot : on le fait glisser, la bande claire
+   passe dessus. */
+.du-pub-maison .marque { font:900 42px/1.05 'Archivo',sans-serif; letter-spacing:-.035em;
+  margin-bottom:6px;
+  background:linear-gradient(100deg,#ffb43a 0%,#ffd76b 34%,#fffaf0 46%,#ffd76b 58%,#ffb43a 100%);
+  background-size:260% 100%; background-position:180% 0;
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  -webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 3px 14px rgba(255,180,58,.35));
+  animation:duBrille 3.2s linear infinite; }
+@keyframes duBrille { to { background-position:-60% 0; } }
 .du-pub-maison .prix { display:inline-block; padding:10px 18px; border-radius:999px;
   background:linear-gradient(180deg,#ffd24a,#ff9c1c); color:#3a1d00;
-  font:800 14px/1 'Archivo',sans-serif; }
+  font:800 14px/1 'Archivo',sans-serif; cursor:pointer; }
 
 .du-skel { border-radius:18px; background:rgba(255,255,255,.05); animation:duPulse 1.2s ease-in-out infinite; }
 .du-skel.big { height:220px; }
 .du-skel.row { height:66px; margin-top:12px; }
 @keyframes duPulse { 0%,100%{opacity:.5} 50%{opacity:.9} }
-@media (prefers-reduced-motion: reduce){ .du-skel{animation:none} .du-cta,.du-opt{transition:none} .du-gain{animation:none} }
+@media (prefers-reduced-motion: reduce){ .du-skel{animation:none} .du-cta,.du-opt{transition:none} .du-gain{animation:none}
+  .du-pub-maison .marque{ animation:none; background-position:50% 0; } }
 </style>`;
 
 function coque(inner) {
@@ -771,9 +780,11 @@ function remplitPub(root) {
       /* la régie tombe : on remet l'offre maison plutôt qu'un trou */
     }
   }
+  // La marque n'est pas traduite : c'est un nom propre. Le reflet doré la
+  // balaie en boucle, c'est le seul mouvement de l'écran de mi-temps.
   slot.innerHTML = `<div class="du-pub-maison"${R()}>
-    <strong>${t("ad_house_t", "Tu veux vraiment ton permis ?")}</strong>
-    <span>${t("ad_house_s", "PermiGo te prépare avant chaque heure de conduite.")}</span>
+    <span class="marque">PermiGo</span>
+    <span>${t("ad_house_s", "Prêt avant chaque heure de conduite.")}</span>
     <span class="prix">${t("ad_house_c", "Essayer · 4,99 €/mois")}</span>
   </div>`;
   slot.querySelector(".prix")?.addEventListener("click", () => {
