@@ -30,7 +30,7 @@
 import { track } from "@/services/analytics.js";
 import { startPassCheckout } from "@/services/billing.js";
 import { getCurUser } from "@/auth/cur-user.js";
-import { illMask } from "@/utils/illustrations.js";
+import { icon } from "@/utils/icons.js";
 import { esc, escAttr } from "@/utils/escape.js";
 import { fbTrack } from "@/services/meta-pixel.js";
 import { applyLang, browserLang, explicitLang } from "@/utils/lang.js";
@@ -71,31 +71,39 @@ const STR = {
     freeNote: "3 leçons offertes · sans carte bancaire",
     bulle: "3 compétences validées !",
     bulleSub: "cette semaine",
-    secCode: `Préparer le permis, c'est <em>bien plus</em> que conduire.`,
-    secCodeSub: "PermiGo t'entraîne sur tout ce qui compte le jour J :",
-    situTitle: "Mini-jeux « En situation »",
-    situTxt:
-      "Une scène. Une décision : qui passe en premier ? Priorités, distances, insertions. Comme au volant.",
-    situAlt:
-      "Mini-jeu En situation : un croisement, à toi de décider qui passe",
-    centreTitle: "Ton centre d'examen décortiqué",
-    centreTxt:
-      "On a passé les centres au crible : la difficulté réelle, l'accès, les pièges du parcours et ce que les examinateurs regardent. Le jour J tu arrives sur un terrain que tu connais déjà.",
+    // Un seul prix, une seule offre (v4) : ce titre disait aussi « c'est bien
+    // plus que conduire, » — une virgule dans un titre affiché, contraire à la
+    // regle maison. Reformule pour rester sans ponctuation.
+    secCode: `Le permis exige <em>plus</em> que conduire.`,
+    secCodeSub: "Tout ce qui compte le jour J.",
+    // v5 (03/08/2026, refonte demandee par Rayan) : les DEUX cartes texte
+    // (mini-jeu + centre d'examen) et les 3 cartes « feat » melangeaient deux
+    // langages d'icone (trait fin pour le cahier, medaille en 3D pour les deux
+    // autres) et redisaient en photo une scene qu'on venait de faire JOUER en
+    // haut de la page. Un seul type de carte, une seule famille d'icone
+    // (icon(), meme trace que partout ailleurs dans l'app), une ligne par
+    // carte. « Ca donne envie de revenir » est retire : le mur des 3 questions
+    // et la carte Pass PermiGo le disent deja (« tes recompenses »).
     feats: [
       {
-        mask: "cahier",
+        icon: "zap",
+        t: "Mini-jeux en situation",
+        d: "Une scène. Une décision. Comme au volant.",
+      },
+      {
+        icon: "map",
+        t: "Ton centre d'examen",
+        d: "Décortiqué · centre par centre.",
+      },
+      {
+        icon: "book",
         t: "Chaque leçon préparée",
-        d: "Créneau, autoroute, giratoire : une fiche claire avant de monter en voiture.",
+        d: "Une fiche claire avant de monter en voiture.",
       },
       {
-        img: "/skins/badge-medaille.webp",
-        t: "Simulation d'examen de conduite",
-        d: "Notée sur les mêmes critères que l'inspecteur. Le jour J, zéro surprise.",
-      },
-      {
-        img: "/skins/volant-coin.webp",
-        t: "Et ça donne envie de revenir",
-        d: "Série · ligue · récompenses. Le code est inclus aussi.",
+        icon: "target",
+        t: "Simulation d'examen",
+        d: "Notée comme l'inspecteur. Zéro surprise.",
       },
     ],
     mathsRows: [
@@ -200,29 +208,27 @@ const STR = {
     bulle: "3 skills validated!",
     bulleSub: "this week",
     secCode: `Getting your licence takes <em>more</em> than driving.`,
-    secCodeSub: "PermiGo trains you on everything that counts on test day:",
-    situTitle: "“On the road” mini-games",
-    situTxt:
-      "One scene. One decision: who goes first? Right of way, distances, merging. Like behind the wheel.",
-    situAlt: "On-the-road mini-game: a crossroads, you decide who goes first",
-    centreTitle: "Your test centre decoded",
-    centreTxt:
-      "We went through the test centres one by one: the real difficulty, getting there, the traps on the route and what examiners watch for. On test day you arrive somewhere you already know.",
+    secCodeSub: "Everything that counts on test day.",
     feats: [
       {
-        mask: "cahier",
+        icon: "zap",
+        t: "On-the-road mini-games",
+        d: "One scene. One decision. Like behind the wheel.",
+      },
+      {
+        icon: "map",
+        t: "Your test centre",
+        d: "Decoded · centre by centre.",
+      },
+      {
+        icon: "book",
         t: "Every lesson prepped",
-        d: "Parking, motorway, roundabouts: a clear sheet before you get in the car.",
+        d: "A clear sheet before you get in the car.",
       },
       {
-        img: "/skins/badge-medaille.webp",
-        t: "Driving exam simulation",
-        d: "Scored on the examiner's own criteria. No surprises on test day.",
-      },
-      {
-        img: "/skins/volant-coin.webp",
-        t: "And you'll want to come back",
-        d: "Streaks · leagues · rewards. The code test is included too.",
+        icon: "target",
+        t: "Exam simulation",
+        d: "Scored like the examiner. No surprises.",
       },
     ],
     nonFranco: {
@@ -327,29 +333,27 @@ const STR = {
     bulle: "تم التحقق من 3 مهارات!",
     bulleSub: "هذا الأسبوع",
     secCode: `الحصول على الرخصة يتطلّب <em>أكثر</em> من مجرّد القيادة.`,
-    secCodeSub: "يدرّبك PermiGo على كل ما يهمّ يوم الامتحان:",
-    situTitle: "ألعاب «على الطريق» المصغّرة",
-    situTxt:
-      "مشهد واحد. قرار واحد: من يمرّ أولاً؟ أولوية المرور، المسافات، الاندماج. كما خلف المقود.",
-    situAlt: "لعبة مصغّرة على الطريق: مفترق طرق، أنت تقرّر من يمرّ أولاً",
-    centreTitle: "مركز امتحانك مفصّلاً",
-    centreTxt:
-      "درسنا مراكز الامتحان واحداً واحداً: الصعوبة الحقيقية، والوصول، وفخاخ المسار، وما ينتبه إليه الممتحنون. يوم الامتحان تصل إلى أرض تعرفها مسبقاً.",
+    secCodeSub: "كل ما يهمّ يوم الامتحان.",
     feats: [
       {
-        mask: "cahier",
-        t: "كل درس مُحضَّر مسبقاً",
-        d: "الركن، الطريق السريع، الدوّارات: بطاقة واضحة قبل أن تركب السيارة.",
+        icon: "zap",
+        t: "ألعاب على الطريق",
+        d: "مشهد واحد. قرار واحد. كما خلف المقود.",
       },
       {
-        img: "/skins/badge-medaille.webp",
-        t: "محاكاة امتحان القيادة",
-        d: "تُقيَّم بنفس معايير الممتحن. يوم الامتحان، لا مفاجآت.",
+        icon: "map",
+        t: "مركز امتحانك",
+        d: "مفصّل · مركزاً بمركز.",
       },
       {
-        img: "/skins/volant-coin.webp",
-        t: "وستشعر برغبة في العودة",
-        d: "سلاسل أيام · دوريات · مكافآت. واختبار الكود مُضمَّن أيضاً.",
+        icon: "book",
+        t: "كل درس محضّر",
+        d: "بطاقة واضحة قبل أن تركب السيارة.",
+      },
+      {
+        icon: "target",
+        t: "محاكاة الامتحان",
+        d: "تُقيَّم كالممتحن. بلا مفاجآت.",
       },
     ],
     nonFranco: {
@@ -638,10 +642,6 @@ const STYLE = `<style>
   .pv-sec-title.pv-rev > span { display: inline-block; transform: translateY(105%); transition: transform .72s var(--pv-ease); }
   .pv-sec-title.pv-rev.in > span { transform: none; }
 
-  /* Les captures d'app se posent : elles arrivent légèrement en retrait
-     puis reviennent à leur taille. */
-  .pv-situ-shot img, .pv-feat-img { transition: transform .7s var(--pv-ease); }
-  .pv-stag > *:not(.in) .pv-situ-shot img { transform: scale(.94); }
 
   @media (prefers-reduced-motion: reduce) {
     .pv-rev, .pv-stag > *, .pv-sec-title.pv-rev, .pv-sec-title.pv-rev > span { opacity: 1; transform: none; transition: none; }
@@ -790,34 +790,33 @@ const STYLE = `<style>
   /* ── Sections ── */
   .pv-sec-title {
     text-align: center; font: 800 clamp(24px, 7vw, 28px)/1.15 'Archivo', sans-serif;
-    color: var(--pv-ink); margin: 52px 0 0; text-shadow: 0 3px 0 rgba(12,7,32,.8);
+    color: var(--pv-ink); margin: 64px 0 0; text-shadow: 0 3px 0 rgba(12,7,32,.8);
   }
   .pv-sec-title em { font-style: normal; color: var(--gold); }
-  .pv-sec-sub { text-align: center; font: 600 13.5px/1.55 'Archivo', sans-serif; color: var(--ink-mu); margin: 8px auto 22px; max-width: 340px; }
+  .pv-sec-sub { text-align: center; font: 600 13.5px/1.55 'Archivo', sans-serif; color: var(--ink-mu); margin: 10px auto 26px; max-width: 340px; }
 
-  /* ── Cartes atouts ── */
-  .pv-conduite { display: flex; flex-direction: column; gap: 12px; }
-  .pv-situ {
-    display: flex; gap: 14px; align-items: center;
-    background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.09);
-    border-radius: 20px; padding: 14px;
-  }
-  .pv-situ-shot {
-    position: relative; flex: none; width: 138px; border-radius: 16px; overflow: hidden;
-    border: 4px solid #160f38; box-shadow: 0 10px 24px rgba(0,0,0,.45), 0 0 0 1.5px rgba(142,135,255,.45);
-  }
-  .pv-situ-shot::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(155deg, rgba(255,255,255,.16), transparent 30%); }
-  .pv-situ-shot img { display: block; width: 100%; height: auto; }
-  .pv-situ-solo { display: block; }
-  .pv-situ-txt b { display: block; font: 800 16px/1.25 'Archivo', sans-serif; margin-bottom: 5px; }
-  .pv-situ-txt span { font: 600 12.5px/1.5 'Archivo', sans-serif; color: var(--ink-mu); }
+  /* ── Cartes atouts : une seule famille de carte, une seule famille d'icône
+     (icon(), le même trait que perk0/1/2 du mur découverte). Avant : une
+     capture d'écran qui rejouait en photo la scène qu'on venait de faire
+     JOUER plus haut, et deux médailles 3D en photo à côté d'un trait fin —
+     deux langages d'icône sur la même page. */
+  .pv-feats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .pv-feat {
-    display: flex; gap: 13px; align-items: center;
-    background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.09); border-radius: 16px; padding: 13px 14px;
+    background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.09);
+    border-radius: 18px; padding: 16px 14px;
   }
-  .pv-feat-img { flex: none; width: 46px; height: 46px; object-fit: contain; filter: drop-shadow(0 5px 8px rgba(0,0,0,.45)); }
-  .pv-feat b { display: block; font: 700 15px/1.3 'Archivo', sans-serif; }
-  .pv-feat span { font: 600 13px/1.45 'Archivo', sans-serif; color: var(--ink-mu); }
+  /* .pv-feat .pv-feat-ico et pas .pv-feat-ico seul : l'icône ET le sous-texte
+     sont tous deux des <span> enfants directs de .pv-feat. La règle générique
+     .pv-feat span ci-dessous a la même spécificité qu'un simple .pv-feat-ico
+     et gagnait au dernier défini — l'icône se peignait en gris terne au lieu
+     du doré (constaté à l'écran, couleur réelle vérifiée : rgb(170,162,216),
+     celle du texte, pas var(--gold)). */
+  .pv-feat .pv-feat-ico {
+    display: grid; place-items: center; width: 40px; height: 40px; margin-bottom: 12px;
+    border-radius: 12px; background: rgba(255,206,77,.14); color: var(--gold);
+  }
+  .pv-feat b { display: block; font: 800 14.5px/1.25 'Archivo', sans-serif; margin-bottom: 4px; }
+  .pv-feat span { display: block; font: 600 12px/1.45 'Archivo', sans-serif; color: var(--ink-mu); }
 
   /* Bloc non-francophones (version EN uniquement) */
   .pv-franco {
@@ -895,9 +894,19 @@ const STYLE = `<style>
     background: rgba(20,40,4,.6);
   }
 
-  /* ── Avis d'élèves (validés par eux, cf. docs/PREUVES-A-COLLECTER) ── */
-  .pv-avis-lot { display: grid; gap: 12px; margin-top: 18px; }
+  /* ── Avis d'élèves (validés par eux, cf. docs/PREUVES-A-COLLECTER) ──
+     Carrousel horizontal, pas un mur vertical : 10 cartes empilées faisaient
+     défiler l'écran sur près de 3000 px pour cette seule section. Le
+     « peek » de la carte suivante (78 % de largeur) dit « il y en a
+     d'autres » sans un mot ni un point de pagination. */
+  .pv-avis-lot {
+    display: flex; gap: 12px; margin-top: 20px;
+    overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+    margin-inline: -18px; padding: 2px 18px 6px; scrollbar-width: none;
+  }
+  .pv-avis-lot::-webkit-scrollbar { display: none; }
   .pv-avis {
+    flex: 0 0 78%; max-width: 320px; scroll-snap-align: start;
     margin: 0; padding: 15px 16px; border-radius: 18px;
     background: rgba(255,255,255,.055); border: 1px solid rgba(255,255,255,.1);
   }
@@ -922,7 +931,6 @@ const STYLE = `<style>
      autour de 3,6 de contraste quand l'AA en demande 4,5. Même leçon que la
      carte de date de naissance le 01/08. */
   .pv-avis-qui span { font: 600 11.5px/1.2 'Archivo', sans-serif; color: var(--ink-mu); }
-  @media (min-width: 620px) { .pv-avis-lot { grid-template-columns: 1fr 1fr; } }
 
   /* ── Preuve ── */
   .pv-proof { margin-top: 20px; }
@@ -934,7 +942,7 @@ const STYLE = `<style>
   .pv-src { text-align: center; font: 500 11px 'Archivo', sans-serif; color: #655a97; margin: 0; }
 
   /* ── FAQ ── */
-  .pv-faq details { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); border-radius: 15px; padding: 0 15px; margin-bottom: 9px; }
+  .pv-faq details { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 0 15px; margin-bottom: 9px; }
   .pv-faq summary {
     font: 700 14.5px/1.4 'Archivo', sans-serif; padding: 14px 0; cursor: pointer; list-style: none;
     display: flex; justify-content: space-between; align-items: center; gap: 10px;
@@ -954,11 +962,23 @@ const STYLE = `<style>
   /* ── Barre CTA collante ── */
   .pv-sticky {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
-    transition: bottom .42s cubic-bezier(.22,1,.32,1);
+    transition: bottom .42s cubic-bezier(.22,1,.32,1), transform .34s cubic-bezier(.22,1,.32,1);
     padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
     background: rgba(18,11,44,.94); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
     border-top: 1.5px solid rgba(255,206,77,.25);
   }
+  /* Elle s'efface UNIQUEMENT pendant que le bouton « Commencer gratuitement »
+     du corps de page est à l'écran : les deux disaient EXACTEMENT la même
+     chose l'un sous l'autre (mesuré à l'écran le 03/08/2026 — la barre est
+     fixed, donc toujours montée, et venait se coller pile sous ce bouton).
+     wireStickyReveal() bascule la classe via IntersectionObserver. */
+  /* Pas juste 120% : quand le bandeau cookies est ouvert, la propriété bottom
+     relève déjà la barre de ~150 px (règle body.ck-open juste en dessous).
+     120% de sa propre hauteur ne suffit plus à la faire sortir de l'écran
+     dans ce cas précis (mesuré en test : elle restait visible, translatée
+     mais toujours dans le cadre). +180px de marge fixe couvre ce cas en plus
+     de sa hauteur. */
+  .pv-sticky.pv-sticky-hide { transform: translateY(calc(100% + 180px)); }
   /* Le bandeau cookies est en z-index 9000 et se pose en bas : il RECOUVRAIT
      cette barre, donc le bouton du compte gratuit et le bouton d'achat, tant
      que le visiteur n'avait pas répondu (mesuré en prod le 01/08/2026). La
@@ -967,7 +987,7 @@ const STYLE = `<style>
   body.ck-open .pv-sticky {
     bottom: calc(var(--ck-h, 96px) + 20px + env(safe-area-inset-bottom, 0px));
   }
-  @media (prefers-reduced-motion: reduce) { .pv-sticky { transition: none; } }
+  @media (prefers-reduced-motion: reduce) { .pv-sticky, .pv-sticky.pv-sticky-hide { transition: none; transform: none; } }
   /* La barre collante se lit de haut en bas, plus de gauche à droite : le
      gratuit est LE bouton, l'achat est la ligne d'en dessous. Avant, « Ou
      commencer gratuitement » était un simple texte collé à gauche d'un gros
@@ -1248,46 +1268,31 @@ export async function mount(root) {
       <h2 class="pv-sec-title pv-rev"><span>${L.secCode}</span></h2>
       <p class="pv-sec-sub">${L.secCodeSub}</p>
 
-      <div class="pv-conduite pv-rev pv-stag">
-        <div class="pv-situ">
-          <div class="pv-situ-shot"><img src="/showcase/eleve-en-situation.webp" alt="${L.situAlt}" width="780" height="980" loading="lazy" decoding="async"></div>
-          <div class="pv-situ-txt">
-            <b>${L.situTitle}</b>
-            <span>${L.situTxt}</span>
-          </div>
-        </div>
-        <!-- Sans capture : a 138 px de large on ne lisait NI le nom du centre,
-             NI la difficulte, NI le texte. Une vignette illisible ne prouve
-             rien, elle occupe de la place. Deux phrases disent la meme chose. -->
-        <div class="pv-situ pv-situ-solo">
-          <div class="pv-situ-txt">
-            <b>${L.centreTitle}</b>
-            <span>${L.centreTxt}</span>
-          </div>
-        </div>
+      <!-- v5 (03/08/2026) : UNE seule famille de carte, UNE seule famille
+           d'icône (icon(), même trait que le reste de l'app). Avant : une
+           capture qui rejouait en photo la démo qu'on venait de faire jouer
+           plus haut, et deux médailles 3D à côté d'un trait fin. -->
+      <div class="pv-feats pv-rev pv-stag">
         ${L.feats
           .map(
             (f) => `
         <div class="pv-feat">
-          ${
-            f.mask
-              ? `<span class="pv-feat-img" style="display:grid;place-items:center">${illMask(f.mask, { size: 40, color: "var(--gold)" })}</span>`
-              : `<img class="pv-feat-img" src="${f.img}" alt="" loading="lazy" decoding="async">`
-          }
-          <div><b>${f.t}</b><span>${f.d}</span></div>
+          <span class="pv-feat-ico" aria-hidden="true">${icon(f.icon, { size: 22, strokeWidth: 2.3 })}</span>
+          <b>${f.t}</b>
+          <span>${f.d}</span>
         </div>`,
           )
           .join("")}
-        ${
-          L.nonFranco
-            ? `
-        <div class="pv-franco">
-          <span class="pv-franco-flag" aria-hidden="true">🇫🇷</span>
-          <div><b>${L.nonFranco.title}</b><span>${L.nonFranco.txt}</span></div>
-        </div>`
-            : ""
-        }
       </div>
+      ${
+        L.nonFranco
+          ? `
+      <div class="pv-franco pv-rev">
+        <span class="pv-franco-flag" aria-hidden="true">🇫🇷</span>
+        <div><b>${L.nonFranco.title}</b><span>${L.nonFranco.txt}</span></div>
+      </div>`
+          : ""
+      }
 
       <div class="pv-maths pv-rev pv-stag">
         ${L.mathsRows
@@ -1368,6 +1373,24 @@ export async function mount(root) {
 
   wire(root, me, lang, L);
   wireReveal(root);
+  wireStickyReveal(root);
+}
+
+/** La barre collante s'efface tant que le bouton « Commencer gratuitement »
+ *  du corps de page est à l'écran (les deux disent la même chose), et
+ *  reprend sa place dès qu'il sort du cadre, dans un sens comme dans l'autre.
+ *  Sans IntersectionObserver : elle reste montrée, c'est le filet le plus sûr. */
+function wireStickyReveal(root) {
+  if (!("IntersectionObserver" in window)) return;
+  const cta = root.querySelector("#pv-free");
+  const sticky = root.querySelector(".pv-sticky");
+  if (!cta || !sticky) return;
+  const io = new IntersectionObserver(
+    ([entry]) =>
+      sticky.classList.toggle("pv-sticky-hide", entry.isIntersecting),
+    { rootMargin: "0px 0px -10% 0px" },
+  );
+  io.observe(cta);
 }
 
 /** Révélation au scroll : .pv-rev → .in à l'entrée dans le viewport.

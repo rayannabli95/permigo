@@ -163,7 +163,7 @@ const STYLE = `<style>
     box-shadow: 0 7px 0 #15113a, 0 12px 20px -8px rgba(0,0,0,.7),
                 inset 0 2px 0 rgba(255,255,255,.26), inset 0 -8px 14px -8px rgba(0,0,0,.5);
     color: #fff; font: 800 15.5px/1.2 'Archivo', sans-serif;
-    transition: transform .09s ease, box-shadow .09s ease;
+    transition: transform .1s ease, box-shadow .1s ease;
     -webkit-tap-highlight-color: transparent;
   }
   .dmo-ans:active {
