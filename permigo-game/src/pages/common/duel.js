@@ -94,6 +94,14 @@ const I18N = {
     full: "The game is full",
     cant_join: "Could not join",
     copied: "Link copied",
+    halftime: "Half time",
+    halftime_sub: "5 questions played. 5 to go.",
+    not_yet: "not yet",
+    ad: "Advertisement",
+    continue: "Keep going",
+    ad_house_t: "Do you really want that licence?",
+    ad_house_s: "PermiGo gets you ready before every driving hour.",
+    ad_house_c: "Try it · €4.99/month",
   },
   ar: {
     host_title: "تحدَّ أصدقاءك",
@@ -143,6 +151,14 @@ const I18N = {
     full: "اللعبة مكتملة",
     cant_join: "تعذّر الانضمام",
     copied: "تم نسخ الرابط",
+    halftime: "استراحة",
+    halftime_sub: "5 أسئلة انتهت. 5 قادمة.",
+    not_yet: "ليس بعد",
+    ad: "إعلان",
+    continue: "نواصل",
+    ad_house_t: "هل تريد رخصتك فعلاً؟",
+    ad_house_s: "PermiGo يجهّزك قبل كل ساعة قيادة.",
+    ad_house_c: "جرّب · 4,99 €/شهر",
   },
 };
 
@@ -188,6 +204,36 @@ function R() {
 const DUREE = 20000;
 const PTS_BASE = 500;
 const PTS_VITESSE = 500;
+
+// ── La mi-temps ──────────────────────────────────────────────────────────
+// Les 10 questions se jouent en DEUX manches de 5 (décision Rayan 03/08).
+// Entre les deux : le classement en direct, et l'emplacement publicitaire.
+//
+// Le placement n'est pas neutre. Avant la première question, ce serait le
+// tout premier contact d'un inconnu avec PermiGo, et une pub y ferait fuir.
+// À la mi-temps, les joueurs s'attendent les uns les autres : c'est le seul
+// moment où une coupure ne casse rien.
+const MI_TEMPS = 5;
+
+// L'emplacement publicitaire.
+//
+// `externe` reste NULL tant qu'aucune régie n'est ouverte : l'emplacement
+// affiche alors l'offre PermiGo, qui rapporte plus qu'une bannière (un
+// abonné vaut des milliers d'impressions). Le jour où une régie existe,
+// c'est la SEULE chose à changer ici : une fonction qui reçoit l'élément et
+// y pose son bloc. ⚠️ Un script de régie est un tiers : il ne se charge
+// qu'après acceptation du bandeau de consentement.
+// ⚠️ LE JOUR OÙ TU BRANCHES UNE RÉGIE, trois choses à faire ENSEMBLE :
+//   1. renseigner `externe` ci-dessous ;
+//   2. corriger DEUX textes qui promettent aujourd'hui qu'il n'y a aucune
+//      publicité : `txt_short` dans src/components/common/cookie-banner.js
+//      et la section cookies de src/pages/common/legal.js. Sinon la promesse
+//      devient fausse le jour du branchement ;
+//   3. ne charger le script de la régie QU'APRÈS acceptation du bandeau.
+const PUB = {
+  attenteSecondes: 3, // 0 pour retirer toute attente
+  externe: null,
+};
 
 const COULEURS = [
   "linear-gradient(180deg,#8e87ff,#6058d8)",
@@ -443,6 +489,32 @@ ${chromeNight("#241a52", "#1a1340")}
   text-transform:uppercase; color:#f5c451; margin-bottom:9px; }
 .du-bonne { color:#f5c451; margin:0 0 10px; font:700 14.5px/1.4 'Archivo',sans-serif; }
 
+/* ===== Mi-temps ===== */
+.du-half { text-align:center; font:800 30px/1.1 'Archivo',sans-serif; letter-spacing:-.035em;
+  margin:6px 0 2px; color:#fff; }
+.du-live { margin-top:20px; }
+.du-live .du-row { margin-top:8px; }
+.du-live .du-row.moi { border-color:rgba(245,196,81,.5); background:rgba(245,196,81,.09); }
+.du-live .du-row .sc { color:#ffd06a; }
+.du-live .du-row .att { font:700 12px/1 'Archivo',sans-serif; color:#6b63a8; }
+
+/* L'emplacement publicitaire. Encadré et annoncé : un bloc commercial qui se
+   déguise en contenu, c'est ce qui fait désinstaller une app. */
+.du-pub { margin-top:22px; border-radius:20px; overflow:hidden;
+  border:1px solid #3a3178; background:rgba(0,0,0,.22); }
+.du-pub-lab { display:block; padding:8px 14px; font:800 10px/1 'Archivo',sans-serif;
+  letter-spacing:.16em; text-transform:uppercase; color:#6b63a8;
+  border-bottom:1px solid #3a3178; text-align:left; }
+.du-pub-slot { min-height:180px; display:grid; place-items:center; padding:20px 18px; }
+.du-pub-maison { text-align:center; }
+.du-pub-maison strong { display:block; font:800 21px/1.2 'Archivo',sans-serif; color:#fff;
+  letter-spacing:-.02em; margin-bottom:8px; }
+.du-pub-maison span { display:block; font:600 13.5px/1.45 'Archivo',sans-serif; color:#b3aede;
+  margin-bottom:14px; }
+.du-pub-maison .prix { display:inline-block; padding:10px 18px; border-radius:999px;
+  background:linear-gradient(180deg,#ffd24a,#ff9c1c); color:#3a1d00;
+  font:800 14px/1 'Archivo',sans-serif; }
+
 .du-skel { border-radius:18px; background:rgba(255,255,255,.05); animation:duPulse 1.2s ease-in-out infinite; }
 .du-skel.big { height:220px; }
 .du-skel.row { height:66px; margin-top:12px; }
@@ -638,6 +710,76 @@ function vueQuestion(etat) {
         : `<p class="du-note"${R()}>${t("of", "{i} sur {n}", { i: etat.i + 1, n: etat.questions.length })}</p>`
     }
   `);
+}
+
+// ───────────────────────────── La mi-temps ───────────────────────────────
+function vueMiTemps(etat) {
+  const c = etat.classementLive || [];
+  return coque(`
+    <h1 class="du-half"${R()}>${t("halftime", "Mi-temps")}</h1>
+    <p class="du-sub" style="margin:8px 0 0"${R()}>${t("halftime_sub", "5 questions jouées. 5 à venir.")}</p>
+
+    <div class="du-live">
+      ${c
+        .map(
+          (p, i) =>
+            `<div class="du-row${p.id === etat.playerId ? " moi" : ""}">
+               <span class="rk">${i + 1}</span>
+               <span class="nm">${esc(p.name)}</span>
+               ${
+                 p.score == null
+                   ? `<span class="att"${R()}>${t("not_yet", "pas encore")}</span>`
+                   : `<span class="sc">${chiffres(p.score)}</span>`
+               }
+             </div>`,
+        )
+        .join("")}
+    </div>
+
+    <div class="du-pub">
+      <!-- L'étiquette « Publicité » n'apparaît QUE si une régie tierce
+           remplit l'emplacement. Tant que c'est l'offre PermiGo, l'étiqueter
+           ainsi contredirait le bandeau de consentement, qui promet « aucune
+           publicité » sur le même écran. -->
+      ${PUB.externe ? `<span class="du-pub-lab"${R()}>${t("ad", "Publicité")}</span>` : ""}
+      <div class="du-pub-slot" id="du-pub-slot"></div>
+    </div>
+
+    <button class="du-cta gold" data-continuer style="margin-top:18px" ${
+      PUB.attenteSecondes > 0 ? "disabled" : ""
+    }>
+      <span id="du-cont-txt">${
+        PUB.attenteSecondes > 0
+          ? `${t("continue", "On continue")} · ${PUB.attenteSecondes}`
+          : t("continue", "On continue")
+      }</span>
+    </button>
+  `);
+}
+
+// Le contenu de l'emplacement. Tant qu'aucune régie n'est branchée, c'est
+// l'offre PermiGo qui l'occupe : elle rapporte plus qu'une bannière.
+function remplitPub(root) {
+  const slot = root.querySelector("#du-pub-slot");
+  if (!slot) return;
+  if (typeof PUB.externe === "function") {
+    try {
+      PUB.externe(slot);
+      return;
+    } catch (e) {
+      console.error("[duel:pub]", e);
+      /* la régie tombe : on remet l'offre maison plutôt qu'un trou */
+    }
+  }
+  slot.innerHTML = `<div class="du-pub-maison"${R()}>
+    <strong>${t("ad_house_t", "Tu veux vraiment ton permis ?")}</strong>
+    <span>${t("ad_house_s", "PermiGo te prépare avant chaque heure de conduite.")}</span>
+    <span class="prix">${t("ad_house_c", "Essayer · 4,99 €/mois")}</span>
+  </div>`;
+  slot.querySelector(".prix")?.addEventListener("click", () => {
+    track("duel.pub_clic", { code: root.__code || null });
+    navigate("/pass");
+  });
 }
 
 // ───────────────────────────── Le classement ─────────────────────────────
@@ -984,6 +1126,7 @@ async function lanceJeu(root, etat) {
   etat.bonnes = 0;
   etat.serie = 0;
   etat.ratees = [];
+  etat.miTempsVue = false; // une reprise de partie ne rejoue pas la mi-temps
   dessineQuestion(root, etat);
 }
 
@@ -1043,6 +1186,11 @@ function dessineQuestion(root, etat) {
     if (etat.i < etat.questions.length - 1) {
       etat.i++;
       etat.reponse = null;
+      // Fin de la première manche : mi-temps avant de repartir.
+      if (etat.i === MI_TEMPS && !etat.miTempsVue) {
+        etat.miTempsVue = true;
+        return afficheMiTemps(root, etat);
+      }
       dessineQuestion(root, etat);
       return;
     }
@@ -1069,6 +1217,61 @@ function dessineQuestion(root, etat) {
     etat.fini = true;
     afficheClassement(root, etat);
   });
+}
+
+// La mi-temps : on pousse son score en cours, on montre qui mène, et
+// l'emplacement publicitaire occupe l'attente.
+async function afficheMiTemps(root, etat) {
+  stopChrono();
+  root.innerHTML = squelette();
+  try {
+    await appel("progress", {
+      playerId: etat.playerId,
+      score: etat.points,
+      correct: etat.bonnes,
+    });
+  } catch (e) {
+    // Le score en cours n'est qu'un confort d'affichage : s'il ne part pas,
+    // la partie continue quand même.
+    console.error("[duel:progress]", e);
+  }
+  try {
+    const r = await appel("results", { code: etat.code });
+    etat.classementLive = r.classement || [];
+  } catch (e) {
+    console.error("[duel:mi-temps]", e);
+    etat.classementLive = [];
+  }
+
+  root.innerHTML = vueMiTemps(etat);
+  root.__code = etat.code;
+  remplitPub(root);
+  track("duel.mi_temps", { code: etat.code, score: etat.points });
+
+  const btn = root.querySelector("[data-continuer]");
+  const txt = root.querySelector("#du-cont-txt");
+  const reprends = () => {
+    stopChrono();
+    haptic("tap");
+    dessineQuestion(root, etat);
+  };
+
+  if (PUB.attenteSecondes > 0) {
+    let reste = PUB.attenteSecondes;
+    // On réutilise _tick : aucune question ne tourne pendant la mi-temps, et
+    // ça garantit que le compte à rebours meurt si on quitte la page.
+    _tick = setInterval(() => {
+      reste--;
+      if (reste > 0) {
+        if (txt) txt.textContent = `${t("continue", "On continue")} · ${reste}`;
+        return;
+      }
+      stopChrono();
+      if (txt) txt.textContent = t("continue", "On continue");
+      if (btn) btn.disabled = false;
+    }, 1000);
+  }
+  btn?.addEventListener("click", reprends);
 }
 
 async function afficheClassement(root, etat) {
