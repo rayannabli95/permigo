@@ -28,7 +28,7 @@
 // Retour Checkout : #/pass?checkout=success&plan=xxx | #/pass?checkout=cancel
 // ═══════════════════════════════════════════════════════════════
 import { track } from "@/services/analytics.js";
-import { startPassCheckout } from "@/services/billing.js";
+import { startPassCheckout, getPassSessionEmail } from "@/services/billing.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { illMask } from "@/utils/illustrations.js";
 import { esc, escAttr } from "@/utils/escape.js";
@@ -1162,6 +1162,18 @@ export async function mount(root) {
       currency: "EUR",
       value: PLAN_VALUE[planParam] ?? 0,
     });
+    // Invité (pas de compte) : va chercher l'email qui vient de payer pour
+    // pré-remplir #/rejoindre juste en dessous. eleve_access_status() matche
+    // pass_purchases par email confirmé : une lettre de travers au moment de
+    // recréer le compte, et l'élève a payé pour rien. Best-effort, en fond,
+    // ne bloque jamais l'affichage de l'écran de succès.
+    const sessionId = q.get("session_id");
+    if (!me && sessionId) {
+      getPassSessionEmail(sessionId).then((email) => {
+        if (email) sessionStorage.setItem("pg_pass_email", email);
+      });
+    }
+
     const label = PLAN_LABELS[lang][planParam] || "Pass Permis";
     root.innerHTML = `${STYLE}
       <div class="pv" dir="${lang === "ar" ? "rtl" : "ltr"}">
