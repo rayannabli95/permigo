@@ -25,6 +25,7 @@ const LS_CHESTS_DB_CACHE = "pg-chests-db-v1";
 const LS_GEMMES = "pg-gemmes";
 const LS_OWNED = "pg-owned"; // array d'item IDs achetés
 const LS_EQUIPPED = "pg-equipped"; // { permit, avatarFrame, theme }
+const LS_LAST_USER = "pg-last-user"; // id du dernier compte connecté sur cet appareil
 
 // ─── Ligues : seuils en XP ───
 const LEAGUES = [
@@ -153,6 +154,22 @@ function _scheduleSave() {
 export async function initGameState(userId) {
   _userId = userId;
   try {
+    // Un autre compte s'est connecté sur cet appareil depuis la dernière fois :
+    // la mémoire locale (skins équipés, gemmes, série) lui appartient, pas au
+    // compte courant. On la vide pour ne rien lui faire hériter par erreur
+    // (ex : un skin premium jamais acheté qui semblait "déjà débloqué").
+    const lastUser = localStorage.getItem(LS_LAST_USER);
+    if (lastUser && lastUser !== userId) {
+      localStorage.removeItem(LS_STREAK_DATE);
+      localStorage.removeItem(LS_STREAK_COUNT);
+      localStorage.removeItem(LS_CHESTS_OPENED);
+      localStorage.removeItem(LS_CHESTS_DB_CACHE);
+      localStorage.removeItem(LS_GEMMES);
+      localStorage.removeItem(LS_OWNED);
+      localStorage.removeItem(LS_EQUIPPED);
+      localStorage.removeItem(LS_EQUIPPED_ASSETS);
+    }
+    localStorage.setItem(LS_LAST_USER, userId);
     // Pull en parallèle : user_preferences (custom) + streaks (table dédiée) + profiles.gemmes
     const [prefsRes, streakRes, profileRes] = await Promise.allSettled([
       sb
