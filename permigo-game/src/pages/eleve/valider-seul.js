@@ -41,6 +41,7 @@ import {
   monterMissions,
   missionsPour,
 } from "@/components/eleve/pilote-mission.js";
+import { vocabulairePour } from "@/data/vocabulaire-conduite.js";
 
 // ⚠️ Le routeur RÉUTILISE le même nœud `root` d'une page à l'autre (il fait
 // `root.innerHTML = ...`, jamais un nouveau conteneur). Toute écriture posée
@@ -148,6 +149,10 @@ const VS_I18N = {
     boite_auto: "Automatic gearbox",
     boite_auto_s: "Two pedals and a P R N D selector",
     boite_hint: "You can change this in your settings.",
+    vocab_kick: "Words to know",
+    vocab_sub:
+      "Your instructor will say these in French. Listen and learn them.",
+    vocab_play: "Listen",
   },
   ar: {
     back: "رجوع",
@@ -223,6 +228,9 @@ const VS_I18N = {
     boite_auto: "علبة سرعة أوتوماتيكية",
     boite_auto_s: "دواستان ومُحدِّد P R N D",
     boite_hint: "يمكنك تغيير ذلك في الإعدادات.",
+    vocab_kick: "كلمات تتعلمها",
+    vocab_sub: "سيقولها مدرّبك بالفرنسية. استمع إليها وتعلّمها.",
+    vocab_play: "استماع",
   },
 };
 function vsTR(key, fr, vars) {
@@ -555,6 +563,34 @@ function successScreen(sub, scorePct, volants = 0) {
         <div class="vsr-carte-shine"></div>
       </div>`
     : "";
+  // Le lexique français (décision Rayan 05/08) : un élève qui joue en anglais
+  // ou en arabe traduit toute l'app, mais son moniteur lui parle en français
+  // DANS la voiture. On lui donne donc 1 à 4 mots réels de cette
+  // compétence, leur sens dans sa langue en petite trad (façon astérisque)
+  // et un bouton pour les ENTENDRE. Masqué en français : un francophone les
+  // connaît déjà. Pilote sur C1a-C1c (rollout progressif ensuite).
+  const lang = getLang();
+  const vocab = lang !== "fr" ? vocabulairePour(sub.c) : [];
+  const vocabBlock = vocab.length
+    ? `<div class="vsr-vocab">
+        <p class="vsr-vocab-kick">${vsD("vocab_kick", "Mots à connaître")}</p>
+        <p class="vsr-vocab-sub">${vsD("vocab_sub", "Ton moniteur les dira en français. Écoute-les et retiens-les.")}</p>
+        <div class="vsr-vocab-list">
+          ${vocab
+            .map(
+              (v) => `
+            <button type="button" class="vsr-vocab-item" data-vocab-audio="${escAttr(v.audio)}">
+              <span class="vsr-vocab-play">${icon("volume", { size: 15 })}</span>
+              <span class="vsr-vocab-txt">
+                <span class="vsr-vocab-fr">${esc(v.mot)}<sup>*</sup></span>
+                <span class="vsr-vocab-tr">* ${esc(lang === "ar" ? v.ar : v.en)}</span>
+              </span>
+            </button>`,
+            )
+            .join("")}
+        </div>
+      </div>`
+    : "";
   return `${STYLE}
     <style>
     .vsr-carte { position:relative; width:172px; aspect-ratio:5/7; margin:4px auto 6px; border-radius:18px; overflow:hidden;
@@ -577,6 +613,23 @@ function successScreen(sub, scorePct, volants = 0) {
       background:linear-gradient(180deg,#ffd76e,#f0a93f); box-shadow:0 6px 0 #b46a10, 0 12px 22px rgba(0,0,0,.4); }
     .vsr-cta-carte:active { transform:translateY(3px); box-shadow:0 3px 0 #b46a10, 0 7px 14px rgba(0,0,0,.4); }
     @media (prefers-reduced-motion: reduce) { .vsr-carte, .vsr-carte-shine, .vsr-carte-gloss { animation:none; } .vsr-carte-shine { display:none; } }
+    .vsr-vocab { width:100%; max-width:340px; margin:18px auto 0; padding:14px 16px; border-radius:16px;
+      background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); text-align:left; }
+    .vsr-vocab-kick { font:800 11px/1 'Archivo',sans-serif; letter-spacing:.08em; text-transform:uppercase;
+      color:rgba(255,215,110,.9); margin:0 0 4px; }
+    .vsr-vocab-sub { font:500 11.5px/1.4 'Archivo',sans-serif; color:rgba(255,255,255,.6); margin:0 0 10px; }
+    .vsr-vocab-list { display:flex; flex-direction:column; gap:8px; }
+    .vsr-vocab-item { display:flex; align-items:center; gap:10px; width:100%; padding:9px 10px; border:0; border-radius:11px;
+      cursor:pointer; background:rgba(255,255,255,.05); text-align:left; }
+    .vsr-vocab-item:active { background:rgba(255,255,255,.11); }
+    .vsr-vocab-play { flex-shrink:0; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+      background:rgba(255,215,110,.16); color:#ffd76e; }
+    .vsr-vocab-play.is-playing { background:rgba(255,215,110,.32); }
+    .vsr-vocab-txt { display:flex; flex-direction:column; gap:1px; min-width:0; }
+    .vsr-vocab-fr { font:800 14px/1.25 'Archivo',sans-serif; color:#fff; }
+    .vsr-vocab-fr sup { color:rgba(255,215,110,.9); }
+    .vsr-vocab-tr { font:600 11.5px/1.3 'Archivo',sans-serif; color:rgba(255,255,255,.58); }
+    [dir="rtl"] .vsr-vocab, [dir="rtl"] .vsr-vocab-item { text-align:right; }
     </style>
     <div class="vsr anim-slide-up">
     ${carteBlock || `<div class="vsr-med">${medallion("check", "violet", { size: 96 })}</div>`}
@@ -587,6 +640,7 @@ function successScreen(sub, scorePct, volants = 0) {
          certifiée », une carte à collectionner et des volants, un élève ne
          sait plus s'il est dans un jeu ou dans un suivi sérieux. -->
     <p class="vsr-vaut">${vsD("ok_vaut", "Elle passe en acquise dans Mon permis. Ça ne remplace ni la leçon ni l'examen.")}</p>
+    ${vocabBlock}
     ${volants > 0 ? `<span class="vsr-volants"><img src="/skins/volant-coin.webp" alt="volant"> +${volants}</span>` : ""}
     ${carte ? `<button class="vsr-cta-carte" id="vs-cta-carte" type="button">${vsD("ok_cta_carte", "Voir ma carte")}</button>` : ""}
     <button class="vsr-ghost" id="vs-cta-parcours" type="button" data-comp="${escAttr(sub.c)}">${vsD("ok_cta", "Retrouve cette compétence dans Mon permis")}</button>
@@ -1087,5 +1141,32 @@ function wireResult(root, me, compId, sub, cat) {
     const fiche = await loadFiche(compId).catch(() => null);
     root.innerHTML = introScreen(sub, cat, null, fiche);
     wireIntro(root, me, compId, sub, cat);
+  });
+  wireVocabAudio(root);
+}
+
+/**
+ * Un seul mot joue à la fois (un player réutilisé, pas un <audio> par
+ * bouton) : si l'élève enchaîne les clics, le précédent s'arrête net au
+ * lieu de superposer deux voix.
+ */
+let _vocabPlayer = null;
+function wireVocabAudio(root) {
+  root.querySelectorAll("[data-vocab-audio]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const src = btn.getAttribute("data-vocab-audio");
+      if (!src) return;
+      root
+        .querySelectorAll(".vsr-vocab-play.is-playing")
+        .forEach((el) => el.classList.remove("is-playing"));
+      if (_vocabPlayer) _vocabPlayer.pause();
+      _vocabPlayer = new Audio(src);
+      const ic = btn.querySelector(".vsr-vocab-play");
+      ic?.classList.add("is-playing");
+      _vocabPlayer.addEventListener("ended", () =>
+        ic?.classList.remove("is-playing"),
+      );
+      _vocabPlayer.play().catch(() => ic?.classList.remove("is-playing"));
+    });
   });
 }
