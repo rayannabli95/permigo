@@ -41,18 +41,17 @@ export const ASSETS = {
     permisVirtuel: "/skins/trophy-permis-virtuel.webp",
   },
 
-  // ── Avatars par défaut (9 choix au signup) ─────────────────────
-  // Skins fournis par Rayan (skin1–6 + dame-noir / alien-cool / pilote-f1)
+  // ── Avatars par défaut (8 choix au signup) ─────────────────────
+  // Série "photo de profil" fournie par Rayan (même DA, diversité de profils)
   avatar: [
-    "/skins/avatars/skin1.webp",
-    "/skins/avatars/skin2.webp",
-    "/skins/avatars/skin3.webp",
-    "/skins/avatars/skin4.webp",
-    "/skins/avatars/skin5.webp",
-    "/skins/avatars/skin6.webp",
-    "/skins/avatars/dame-noir.webp",
-    "/skins/avatars/alien-cool.webp",
-    "/skins/avatars/pilote-f1.webp",
+    "/skins/avatars/garcon-hoodie-violet.webp",
+    "/skins/avatars/fille-chignon-boucles.webp",
+    "/skins/avatars/homme-barbe.webp",
+    "/skins/avatars/fille-cheveux-longs.webp",
+    "/skins/avatars/fille-hijab.webp",
+    "/skins/avatars/garcon-hoodie-bleu.webp",
+    "/skins/avatars/fille-chignon-rose.webp",
+    "/skins/avatars/garcon-hoodie-gris.webp",
   ],
 
   // ── Illustrations UI (PNG transparents premium — fournis par Rayan) ──
