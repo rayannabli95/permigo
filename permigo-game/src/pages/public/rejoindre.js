@@ -299,6 +299,13 @@ export async function mount(root) {
   const params = new URLSearchParams(qIdx >= 0 ? hash.slice(qIdx + 1) : "");
   const prefillCode = (params.get("code") || "").trim();
   const solo = params.get("solo") === "1";
+  // Posé par #/pass juste avant la redirection vers ici (audit landing
+  // 03/08/2026) : un invité qui vient de payer le Pass devait retaper de
+  // mémoire l'email exact de son paiement pour débloquer son accès. Lu UNE
+  // fois puis retiré : une session Stripe ne doit pas se ré-appliquer à une
+  // inscription qui n'a rien à voir (nouvel onglet, nouveau visiteur…).
+  const prefillEmail = sessionStorage.getItem("pg_pass_email") || "";
+  if (prefillEmail) sessionStorage.removeItem("pg_pass_email");
 
   track("signup.viewed", { from: solo ? "pass_solo" : "join_code" });
 
@@ -398,10 +405,14 @@ export async function mount(root) {
     const submitBtn = root.querySelector("#sg-submit");
 
     // Restaure la saisie déjà tapée après un re-rendu (changement de langue).
+    // Sans `preserve` (tout premier rendu), l'email du paiement Stripe
+    // (prefillEmail) prend sa place s'il y en a un.
     if (preserve) {
       if (codeEl && preserve.code) codeEl.value = preserve.code;
       emailEl.value = preserve.email || "";
       pwdEl.value = preserve.pwd || "";
+    } else if (prefillEmail) {
+      emailEl.value = prefillEmail;
     }
     const collectValues = () => ({
       code: codeEl?.value || "",
@@ -728,8 +739,15 @@ export async function mount(root) {
     });
 
     // Focus initial seulement au 1er rendu (pas à chaque changement de langue).
-    if (!preserve)
-      setTimeout(() => (solo || prefillCode ? emailEl : codeEl).focus(), 100);
+    // Email déjà rempli (paiement Stripe) → directement le mot de passe.
+    if (!preserve) {
+      const first = prefillEmail
+        ? pwdEl
+        : solo || prefillCode
+          ? emailEl
+          : codeEl;
+      setTimeout(() => first.focus(), 100);
+    }
   }
 
   renderForm();

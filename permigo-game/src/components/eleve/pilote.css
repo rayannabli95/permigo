@@ -157,6 +157,10 @@
     linear-gradient(180deg, #1b103c, #100922 58%);
 }
 
+.mp-brief-visual {
+  --art-mode-k: 0.837; /* 226 / 270 */
+}
+
 .mp-brief-visual .mp-scene {
   width: 326px;
   height: 226px;
@@ -234,7 +238,7 @@ body.mp-open #header-bar {
   display: block;
   margin-bottom: 5px;
   color: #a99bc5;
-  font-size: 7px;
+  font-size: 11px;
   font-weight: 950;
   letter-spacing: 0.1em;
   text-align: center;
@@ -265,7 +269,7 @@ body.mp-open #header-bar {
 .mp-play-title p {
   margin: 0 0 7px;
   color: color-mix(in srgb, var(--world) 74%, #fff);
-  font-size: 8px;
+  font-size: 12px;
   font-weight: 950;
   letter-spacing: 0.12em;
 }
@@ -310,10 +314,37 @@ body.mp-open #header-bar {
   mix-blend-mode: screen;
 }
 
+/* ⚠️ TOUS les décors sont dessinés en pixels pour une scène de 270 px de haut :
+   un volant à `top: 119px`, des pédales à `bottom: 13px`, une voiture posée sur
+   un sol calé au pixel. Deux modes raccourcissent pourtant la scène (145 px
+   pour « Ordonner », 184 px pour les questions à choix) et le décor y était
+   simplement ROGNÉ : le volant coupé en deux, les pédales qui flottaient dans
+   le ciel, la voiture sans ses roues. C'est ça qui faisait « assemblage HTML ».
+
+   On ne rogne plus, on RÉDUIT. La couche d'art garde ses 270 px de haut et
+   déborde en largeur du même facteur, puis l'ensemble est mis à l'échelle : la
+   composition reste entière, elle est juste plus petite. `--art-k` vaut 1 par
+   défaut, chaque mode court pose le sien. */
 .mp-scene-art {
+  /* posé par le mode sur son conteneur, cf. `--art-mode-k` plus bas */
+  --art-k: var(--art-mode-k, 1);
   position: absolute;
   inset: 0;
+  height: 270px; /* la taille de DESSIN, avant mise à l'échelle */
+  width: calc(100% / var(--art-k));
   overflow: hidden;
+  transform: scale(var(--art-k));
+  transform-origin: top left;
+}
+
+/* Une image de fond remplit déjà la boîte en `cover` : la mettre à l'échelle
+   la recadrerait pour rien. */
+.mp-scene-art:has(.mp-photo),
+.mp-scene-art:has(.mp-illu) {
+  --art-k: 1;
+  height: auto;
+  width: auto;
+  inset: 0;
 }
 
 /* Une photo dans une scène de nuit.
@@ -375,22 +406,6 @@ body.mp-open #header-bar {
 .mp-balayage-interaction .mp-scene:has(.mp-illu) {
   height: auto;
   aspect-ratio: 4 / 3;
-}
-
-.mp-scene-tag {
-  position: absolute;
-  z-index: 9;
-  top: 11px;
-  left: 11px;
-  padding: 5px 7px;
-  border: 1px solid rgb(255 255 255 / 11%);
-  border-radius: 8px;
-  color: #cbbfe4;
-  background: rgb(10 5 25 / 58%);
-  font-size: 6px;
-  font-weight: 950;
-  letter-spacing: 0.1em;
-  backdrop-filter: blur(5px);
 }
 
 .mp-hotspot {
@@ -455,13 +470,17 @@ body.mp-open #header-bar {
 .mp-scene-instruction {
   margin: 10px 0 0;
   color: #8f82a8;
-  font-size: 8px;
+  font-size: 13px;
   font-weight: 800;
   text-align: center;
 }
 
 .mp-choice-interaction .mp-scene {
   height: 184px;
+}
+
+.mp-choice-interaction {
+  --art-mode-k: 0.681; /* 184 / 270 */
 }
 
 .mp-symptom {
@@ -479,13 +498,13 @@ body.mp-open #header-bar {
 
 .mp-symptom small {
   color: #ff9892;
-  font-size: 7px;
+  font-size: 11px;
   font-weight: 950;
   letter-spacing: 0.1em;
 }
 
 .mp-symptom strong {
-  font-size: 10px;
+  font-size: 15px;
   line-height: 1.35;
 }
 
@@ -546,12 +565,12 @@ body.mp-open #header-bar {
   border-radius: 11px;
   color: color-mix(in srgb, var(--world) 72%, #fff);
   background: color-mix(in srgb, var(--world) 9%, transparent);
-  font-size: 10px;
+  font-size: 14px;
   font-weight: 950;
 }
 
 .mp-answer-card > span:nth-child(2) {
-  font-size: 10px;
+  font-size: 15px;
   font-weight: 850;
   line-height: 1.35;
 }
@@ -613,12 +632,12 @@ body.mp-open #header-bar {
 }
 
 .mp-feedback strong {
-  font-size: 10px;
+  font-size: 15px;
 }
 
 .mp-feedback small {
   color: #9d90b7;
-  font-size: 8px;
+  font-size: 13px;
   line-height: 1.4;
 }
 
@@ -692,13 +711,13 @@ body.mp-open #header-bar {
 
 .mp-hint small {
   color: #d1aa54;
-  font-size: 7px;
+  font-size: 12px;
   font-weight: 950;
   letter-spacing: 0.1em;
 }
 
 .mp-hint strong {
-  font-size: 9px;
+  font-size: 14px;
   line-height: 1.4;
 }
 
@@ -710,6 +729,10 @@ body.mp-open #header-bar {
 
 .mp-sequence-interaction .mp-scene {
   height: 145px;
+}
+
+.mp-sequence-interaction {
+  --art-mode-k: 0.537; /* 145 / 270 */
 }
 
 .mp-sequence-lane {
@@ -736,7 +759,7 @@ body.mp-open #header-bar {
 }
 
 .mp-sequence-slot small {
-  font-size: 7px;
+  font-size: 13px;
   font-weight: 950;
 }
 
@@ -763,10 +786,13 @@ body.mp-open #header-bar {
   color: #66dca2;
 }
 
+/* Une colonne, pas deux. À deux colonnes, « Régler les rétroviseurs » et
+   « Monter l'appui-tête » cassaient sur deux lignes et les cartes d'une même
+   rangée n'avaient plus la même hauteur. Les réponses des autres modes sont
+   déjà en pleine largeur : la banque leur ressemble maintenant. */
 .mp-sequence-bank {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 7px;
+  gap: 8px;
   margin-top: 10px;
 }
 
@@ -794,8 +820,20 @@ body.mp-open #header-bar {
 }
 
 .mp-sequence-card:disabled {
-  opacity: 0.28;
+  opacity: 0.42;
   cursor: default;
+}
+
+/* Posée : la pastille s'allume avec le rang, la carte reste lisible. */
+.mp-sequence-card.is-placed {
+  opacity: 0.72;
+  border-color: color-mix(in srgb, var(--world) 44%, transparent);
+}
+
+.mp-sequence-card.is-placed > span {
+  color: #100a24;
+  background: var(--world);
+  font-size: 15px;
 }
 
 .mp-sequence-card > span {
@@ -812,11 +850,15 @@ body.mp-open #header-bar {
 }
 
 .mp-sequence-card strong {
-  font-size: 8px;
+  font-size: 13px;
   line-height: 1.3;
 }
 
 /* Trajectory */
+
+.mp-trajectory-interaction {
+  --art-mode-k: 1.019; /* 275 / 270 */
+}
 
 .mp-trajectory-interaction .mp-scene {
   height: 275px;
@@ -887,7 +929,7 @@ body.mp-open #header-bar {
   border-radius: 10px;
   color: #cbbfe4;
   background: rgb(255 255 255 / 3%);
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 800;
   line-height: 1.2;
 }
@@ -1110,7 +1152,7 @@ body.mp-open #header-bar {
   border-radius: 999px;
   color: #f1ecff;
   background: rgb(14 8 32 / 78%);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
   opacity: 0;
@@ -1122,6 +1164,12 @@ body.mp-open #header-bar {
   transition:
     opacity 240ms var(--ease-out),
     transform 240ms var(--ease-out);
+}
+
+/* `<small>` sans taille explicite retombe à 0,83 em, soit 10 px : sous le
+   plancher lisible. */
+.mp-balayage-indice small {
+  font-size: 11px;
 }
 
 .mp-balayage-indice.is-vu {
@@ -1245,7 +1293,7 @@ body.mp-open #header-bar {
 
 .mp-reglage-cran small {
   color: #b6a8d4;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
 }
 

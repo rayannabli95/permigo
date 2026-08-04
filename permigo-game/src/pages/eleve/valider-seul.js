@@ -42,6 +42,22 @@ import {
   missionsPour,
 } from "@/components/eleve/pilote-mission.js";
 
+// ⚠️ Le routeur RÉUTILISE le même nœud `root` d'une page à l'autre (il fait
+// `root.innerHTML = ...`, jamais un nouveau conteneur). Toute écriture posée
+// APRÈS un `await` (une requête réseau, une RPC) doit donc vérifier qu'aucune
+// navigation n'a eu lieu entre-temps, sinon un résultat qui arrive en retard
+// écrase la page suivante avec l'écran d'une AUTRE compétence — repéré en
+// testant la boucle des 3 compétences gratuites (02/08) : quitter l'écran de
+// résultat de C1a juste après avoir répondu au quiz laissait le score de C1a
+// s'afficher par-dessus la fiche de C1b, quelques centaines de ms plus tard.
+// `mount()` incrémente `_gen` à chaque montage ; toute fonction qui écrit
+// dans `root` après un `await` capture `_gen` avant d'attendre et vérifie
+// qu'il n'a pas changé avant d'écrire.
+let _gen = 0;
+export function unmount() {
+  _gen++;
+}
+
 const NB_QUESTIONS = 5; // plus que le quiz-récap (3) : la barre doit avoir du sens
 const SEUIL = 80; // barre INTERNE, jamais affichée : on ne parle pas en pourcentage
 // Ce que l'élève lit : un nombre de bonnes réponses, pas une note sur cent
@@ -65,9 +81,9 @@ const VS_I18N = {
     retry: "Try again",
     comp_fallback: "Skill",
     blocked_q:
-      "Your instructor already validated this skill. You can still retake the quiz to keep the move sharp.",
+      "This skill is already done. The quiz stays open to keep the move sharp.",
     blocked_m:
-      "Your instructor already validated this skill. You can still replay the driving scene to keep the move sharp.",
+      "This skill is already done. The driving scene stays open to keep the move sharp.",
     self: "You already certified this skill. The quiz stays open for as much practice as you want.",
     self_m:
       "You already certified this skill. The driving scene stays open for as much practice as you want.",
@@ -80,7 +96,7 @@ const VS_I18N = {
     ent_p: "“{n}” stays done in your journey. This practice changes nothing.",
     ent_cta: "Back to the journey",
     hero_p:
-      "Have you worked on this move in a lesson with your instructor? Certify it in 2 steps.",
+      "Have you already worked on this move in a real lesson? Certify it in 2 steps.",
     step1_t: "Re-read the method",
     step1_s: "A quick reminder of what you need to know.",
     fiche_link: "See the full sheet (fiche)",
@@ -108,7 +124,7 @@ const VS_I18N = {
     ok_p: "“{n}” is now done in your journey.",
     ok_volants: "+{n} Steering wheels (volants)",
     ok_vaut:
-      "It becomes done in My licence, and your instructor can see it. It replaces neither the lesson nor the test.",
+      "It becomes done in My licence. It replaces neither the lesson nor the test.",
     ok_cta: "Find this skill in My licence",
     fail_kick: "Not yet",
     fail_title: "Almost!",
@@ -120,7 +136,7 @@ const VS_I18N = {
     fail_back: "Back to the journey",
     cf_kick: "Quiz passed",
     cf_title: "Do you feel ready to move on?",
-    cf_p: "By certifying “{n}”, you confirm this move is done in a real lesson. Your instructor can see your certifications.",
+    cf_p: "By certifying “{n}”, you confirm this move is done in a real lesson.",
     cf_yes: "Yes I certify",
     cf_no: "Not yet",
     boite_kick: "One question first",
@@ -144,9 +160,9 @@ const VS_I18N = {
     retry: "أعد المحاولة",
     comp_fallback: "مهارة",
     blocked_q:
-      "سبق أن صادق مدرّبك على هذه المهارة. ويمكنك مع ذلك إعادة الاختبار للحفاظ على الحركة.",
+      "هذه المهارة مكتسبة سلفًا. ويبقى الاختبار مفتوحًا للحفاظ على الحركة.",
     blocked_m:
-      "سبق أن صادق مدرّبك على هذه المهارة. ويمكنك مع ذلك إعادة المشهد العملي للحفاظ على الحركة.",
+      "هذه المهارة مكتسبة سلفًا. ويبقى المشهد العملي مفتوحًا للحفاظ على الحركة.",
     self: "لقد صادقت سلفًا على هذه المهارة. ويبقى الاختبار مفتوحًا للتدرّب كما تشاء.",
     self_m:
       "لقد صادقت سلفًا على هذه المهارة. ويبقى المشهد العملي مفتوحًا للتدرّب كما تشاء.",
@@ -157,7 +173,7 @@ const VS_I18N = {
     ent_title: "الحركة ما زالت حاضرة",
     ent_p: "«{n}» تبقى مكتسبة في مسارك. وهذا التمرين لا يغيّر شيئًا.",
     ent_cta: "العودة إلى المسار",
-    hero_p: "هل تدرّبت على هذه الحركة في درس مع مدرّبك؟ صادق عليها في خطوتين.",
+    hero_p: "هل تدرّبت على هذه الحركة في درس حقيقي؟ صادق عليها في خطوتين.",
     step1_t: "أعد قراءة الطريقة",
     step1_s: "تذكير سريع بما يجب أن تتقنه.",
     fiche_link: "اعرض البطاقة الكاملة (fiche)",
@@ -183,8 +199,7 @@ const VS_I18N = {
     ok_title: "تمت المصادقة على المهارة!",
     ok_p: "«{n}» أصبحت الآن مكتملة في مسارك.",
     ok_volants: "+{n} مقود (volants)",
-    ok_vaut:
-      "تصبح مكتسبة في «رخصتي»، ويراها مدرّبك. وهي لا تعوّض الدرس ولا الامتحان.",
+    ok_vaut: "تصبح مكتسبة في «رخصتي». وهي لا تعوّض الدرس ولا الامتحان.",
     ok_cta: "اعثر على هذه المهارة في رخصتي",
     fail_kick: "ليس بعد",
     fail_title: "اقتربت!",
@@ -196,7 +211,7 @@ const VS_I18N = {
     fail_back: "العودة إلى المسار",
     cf_kick: "نجحت في الاختبار",
     cf_title: "هل تشعر أنك جاهز للانتقال إلى ما بعدها؟",
-    cf_p: "بمصادقتك على «{n}» تؤكد أن هذه الحركة أُنجزت في درس حقيقي. يمكن لمدرّبك رؤية مصادقاتك.",
+    cf_p: "بمصادقتك على «{n}» تؤكد أن هذه الحركة أُنجزت في درس حقيقي.",
     cf_yes: "نعم أصادق",
     cf_no: "ليس بعد",
     boite_kick: "سؤال واحد أولًا",
@@ -382,13 +397,17 @@ function blockedScreen(sub, avecMission, parMoi = false) {
           "Tu as déjà certifié cette compétence. Le quiz reste ouvert pour t'entraîner autant que tu veux.",
         )
     : avecMission
-      ? vsD(
+      ? // ⚠️ Ne JAMAIS nommer l'enseignant sur l'écran de certification. On y
+        // entre pour relever un défi, et s'entendre dire « quelqu'un d'autre a
+        // déjà validé pour toi » vide le geste de son sens à la seconde où on
+        // arrive. Le résultat affiché est le même, la phrase parle de l'élève.
+        vsD(
           "blocked_m",
-          "Ton enseignant a déjà validé cette compétence. Tu peux quand même refaire la mise en situation pour entretenir le geste.",
+          "Cette compétence est déjà acquise. La mise en situation reste ouverte pour entretenir le geste.",
         )
       : vsD(
           "blocked_q",
-          "Ton enseignant a déjà validé cette compétence. Tu peux quand même refaire le quiz pour entretenir le geste.",
+          "Cette compétence est déjà acquise. Le quiz reste ouvert pour entretenir le geste.",
         );
 
   return `${STYLE}<div class="vs">
@@ -481,7 +500,7 @@ function introScreen(sub, cat, fiche, avecMission) {
       <div class="vs-hero-med">${catMedallion(cat?.ico, 56)}</div>
       <p class="vs-hero-cat">${esc(cat?.name || "")}</p>
       <h2 class="vs-hero-ttl">${esc(sub.n)}</h2>
-      <p class="vs-hero-p">${vsD("hero_p", "Tu as travaillé ce geste en leçon avec ton enseignant ? Certifie-le en 2 étapes.")}</p>
+      <p class="vs-hero-p">${vsD("hero_p", "Tu as déjà travaillé ce geste en vraie leçon ? Certifie-le en 2 étapes.")}</p>
     </div>
 
     <div class="vs-steps">
@@ -567,7 +586,7 @@ function successScreen(sub, scorePct, volants = 0) {
          Aucun écran ne le disait (audit 01/08) : entre « compétence
          certifiée », une carte à collectionner et des volants, un élève ne
          sait plus s'il est dans un jeu ou dans un suivi sérieux. -->
-    <p class="vsr-vaut">${vsD("ok_vaut", "Elle passe en acquise dans Mon permis, et ton enseignant la voit. Ça ne remplace ni la leçon ni l'examen.")}</p>
+    <p class="vsr-vaut">${vsD("ok_vaut", "Elle passe en acquise dans Mon permis. Ça ne remplace ni la leçon ni l'examen.")}</p>
     ${volants > 0 ? `<span class="vsr-volants"><img src="/skins/volant-coin.webp" alt="volant"> +${volants}</span>` : ""}
     ${carte ? `<button class="vsr-cta-carte" id="vs-cta-carte" type="button">${vsD("ok_cta_carte", "Voir ma carte")}</button>` : ""}
     <button class="vsr-ghost" id="vs-cta-parcours" type="button" data-comp="${escAttr(sub.c)}">${vsD("ok_cta", "Retrouve cette compétence dans Mon permis")}</button>
@@ -607,6 +626,12 @@ export async function mount(root, param) {
   const me = getCurUser();
   if (!me) return;
 
+  // Nouveau montage = nouvelle génération : toute écriture encore en vol
+  // depuis la page précédente (ou une frappe rapide sur cette même page,
+  // ex. clic sur « réessayer » pendant que le premier chargement tourne
+  // encore) doit se reconnaître périmée et ne rien écrire.
+  const gen = ++_gen;
+
   const compId = param || null;
   const sub = compId ? findSubComp(compId) : null;
   const cat = compId ? findCategory(compId) : null;
@@ -643,6 +668,7 @@ export async function mount(root, param) {
       .eq("competence_id", compId)
       .maybeSingle(),
   ]);
+  if (gen !== _gen) return; // l'élève a déjà quitté cette compétence
 
   const valError =
     valRes.status === "rejected"
@@ -668,12 +694,14 @@ export async function mount(root, param) {
   const acquisMoniteur = valRes.value.data?.statut === "acquis";
   const already = selfRes.value.data || null;
   const fiche = await fichePromise;
+  if (gen !== _gen) return;
 
   // La boîte est peut-être inconnue à ce stade : on demande alors les missions
   // sans filtre. Le libellé peut donc annoncer une mise en situation qui sera
   // filtrée juste après, jamais l'inverse (aucune compétence n'a de mission
   // pour une seule boîte sans en avoir pour l'autre).
   const avecMission = missionsPour(compId, await chargerBoite()).length > 0;
+  if (gen !== _gen) return;
 
   // Acquise ne veut pas dire fermée. Un geste, ça s'entretient : la mission et
   // le quiz restent rejouables pour s'entraîner, ils ne certifient simplement
@@ -749,7 +777,9 @@ function wireBoite(root, me, compId, sub, cat) {
  * Les compétences sans mission gardent le chemin d'avant : questions seules.
  */
 async function lancerLaCertification(root, me, compId, sub, cat, btn) {
+  const gen = _gen;
   const boite = await chargerBoite();
+  if (gen !== _gen) return; // parti pendant la lecture de la boîte
   if (!missionsPour(compId, boite).length) {
     await lancerLeQuiz(root, me, compId, sub, cat, btn);
     return;
@@ -814,10 +844,12 @@ function ouvrirLaScene() {
  * ne pouvait plus jamais toucher une scène.
  */
 async function rejouerLaMission(root, me, compId, sub, cat) {
+  const gen = _gen;
   // On relit la boîte : sans elle, un élève en automatique se voyait servir
   // la mission d'embrayage. Un entraînement doit parler la voiture qu'il
   // conduit, comme la certification.
   const boite = await chargerBoite();
+  if (gen !== _gen) return; // parti pendant la lecture de la boîte
   const { hote, fermer } = ouvrirLaScene();
   track("valider_seul.mission_rejouee", { competence_id: compId });
 
@@ -901,6 +933,10 @@ async function handleComplete(
   total,
   answers,
 ) {
+  // Capturé AVANT le `await` réseau qui suit : si l'élève a déjà quitté cette
+  // compétence quand la RPC répond, `_gen` a changé et on n'écrit plus rien
+  // dans `root` — sinon le score d'ici s'affichait par-dessus la page suivante.
+  const gen = _gen;
   const scorePct = Math.round((score / total) * 100);
   track("valider_seul.quiz_done", {
     competence_id: compId,
@@ -922,6 +958,7 @@ async function handleComplete(
   } catch (e) {
     console.warn("[valider-seul] submit_competence_quiz", e);
   }
+  if (gen !== _gen) return;
 
   if (scorePct < SEUIL) {
     haptic("warning");
@@ -956,13 +993,14 @@ function confirmScreen(sub, scorePct) {
     <div class="vsr-med">${medallion("check", "violet", { size: 96 })}</div>
     <span class="vsr-kick">${icon("check", { size: 13 })} ${vsD("cf_kick", "Quiz réussi")}</span>
     <h1 class="vsr-ttl">${vsD("cf_title", "Tu te sens prêt à passer à la suite ?")}</h1>
-    <p class="vsr-p">${vsD("cf_p", `En certifiant « ${sub.n} », tu confirmes que ce geste est acquis en vraie leçon. Ton enseignant peut voir tes certifications.`, { n: sub.n })}</p>
+    <p class="vsr-p">${vsD("cf_p", `En certifiant « ${sub.n} », tu confirmes que ce geste est acquis en vraie leçon.`, { n: sub.n })}</p>
     <button class="vsr-cta" id="vs-certify" type="button">${vsD("cf_yes", "Oui je certifie")} ${icon("shield", { size: 16 })}</button>
     <button class="vsr-ghost" id="vs-not-yet" type="button">${vsD("cf_no", "Pas encore")}</button>
   </div>`;
 }
 
 async function certify(root, me, compId, sub, cat, scorePct, answers) {
+  const gen = _gen;
   try {
     // Le SERVEUR corrige : on envoie les réponses, pas un score déclaratif
     // (migration solo_hardening — l'ancienne signature p_score est supprimée).
@@ -970,6 +1008,7 @@ async function certify(root, me, compId, sub, cat, scorePct, answers) {
       p_competence_id: compId,
       p_answers: answers || [],
     });
+    if (gen !== _gen) return; // parti avant la réponse serveur
     if (error || data?.error) {
       console.warn(
         "[valider-seul] self_validate_competence",
@@ -1020,6 +1059,9 @@ async function certify(root, me, compId, sub, cat, scorePct, answers) {
       console.warn("[valider-seul] claim_competence_reward", e);
     }
 
+    // La récompense doit être créditée même si l'élève est parti entre-temps
+    // (RPC idempotente ci-dessus, jamais sautée) : seul l'AFFICHAGE se tait.
+    if (gen !== _gen) return;
     root.innerHTML = successScreen(sub, scorePct, volants);
     wireResult(root, me, compId, sub, cat);
   } catch (e) {

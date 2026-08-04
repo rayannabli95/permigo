@@ -53,6 +53,12 @@ const STR = {
     ko: "Presque",
     koSub: "Il vient de ta droite donc il passe avant toi",
     retry: "Réessayer",
+    // La motivation est à son maximum juste après la bonne réponse (audit
+    // landing du 03/08/2026) : avant, rien ne la recueillait, le visiteur
+    // retombait sur trois avis puis un billet doré. Cette ligne referme la
+    // boucle (la démo → PermiGo en vrai) sans ajouter de deuxième bouton.
+    demoCtaLine:
+      "C'est exactement comme ça que PermiGo te prépare avant de conduire.",
   },
   en: {
     kick: "Try it now",
@@ -65,6 +71,7 @@ const STR = {
     ko: "Almost",
     koSub: "It comes from your right so it goes before you",
     retry: "Try again",
+    demoCtaLine: "That's exactly how PermiGo gets you ready before you drive.",
   },
   ar: {
     kick: "جرّب الآن",
@@ -77,6 +84,7 @@ const STR = {
     ko: "تقريبًا",
     koSub: "هي قادمة من يمينك فتمرّ قبلك",
     retry: "أعد المحاولة",
+    demoCtaLine: "هكذا بالضبط يُحضّرك PermiGo قبل أن تقود.",
   },
 };
 
@@ -163,7 +171,7 @@ const STYLE = `<style>
     box-shadow: 0 7px 0 #15113a, 0 12px 20px -8px rgba(0,0,0,.7),
                 inset 0 2px 0 rgba(255,255,255,.26), inset 0 -8px 14px -8px rgba(0,0,0,.5);
     color: #fff; font: 800 15.5px/1.2 'Archivo', sans-serif;
-    transition: transform .09s ease, box-shadow .09s ease;
+    transition: transform .1s ease, box-shadow .1s ease;
     -webkit-tap-highlight-color: transparent;
   }
   .dmo-ans:active {
@@ -200,6 +208,16 @@ const STYLE = `<style>
     font: 700 13.5px/1 'Archivo', sans-serif; color: var(--ink-soft);
     text-decoration: underline; text-underline-offset: 3px; min-height: 44px;
   }
+  /* La ligne de renfort après la bonne réponse. PAS de bouton ici : PR #690
+     (« il ne reste qu'une porte par écran ») a délibérément retiré tout ce qui
+     ferait deux portes sur un même écran. La barre collante (.pv-sticky-free
+     dans pass.js) est déjà à portée de pouce en permanence ; cette ligne
+     referme la boucle vers elle au lieu de lui fabriquer une doublure juste
+     au-dessus. Cf. onCorrect plus bas : c'est lui qui la met en valeur. */
+  .dmo-cta-line {
+    margin: 14px 4px 0; text-align: center; text-wrap: balance;
+    font: 700 14.5px/1.4 'Archivo', sans-serif; color: var(--ink-soft);
+  }
   @media (prefers-reduced-motion: reduce) {
     .dmo-ans { transition: none; }
     /* Mouvement coupé : le décor ne respire plus et les acteurs se posent
@@ -214,8 +232,13 @@ const STYLE = `<style>
  * Monte la démonstration dans `host`.
  * @param {HTMLElement} host
  * @param {'fr'|'en'|'ar'} lang
+ * @param {{ onCorrect?: () => void }} [opts] onCorrect : appelé une fois,
+ *   dès la bonne réponse (avant même que l'élève ait lu la ligne de renfort).
+ *   Laisse la page hôte réagir au moment où la motivation est la plus haute,
+ *   par exemple en mettant en valeur SA porte gratuite déjà à l'écran, plutôt
+ *   que d'en fabriquer une seconde ici (cf. commentaire .dmo-cta-line).
  */
-export function mountDemoSituation(host, lang) {
+export function mountDemoSituation(host, lang, opts = {}) {
   const L = STR[lang] || STR.fr;
 
   host.innerHTML = `${STYLE}
@@ -279,6 +302,10 @@ export function mountDemoSituation(host, lang) {
             }, st.delai || 60),
           );
         }
+        // La motivation est à son maximum ici. On le signale à la page hôte
+        // (elle décide quoi en faire, cf. commentaire d'opts.onCorrect) plutôt
+        // que d'ajouter un deuxième bouton à côté du sien.
+        opts.onCorrect?.();
       } else {
         // On montre QUI avait la priorité plutôt que d'écrire « faux ».
         answers.find((b) => b.dataset.ans === BONNE)?.classList.add("ok");
@@ -289,7 +316,11 @@ export function mountDemoSituation(host, lang) {
           <b>${juste ? L.ok : L.ko}</b>
           <span>${juste ? L.okSub : L.koSub}</span>
         </div>
-        ${juste ? "" : `<button class="dmo-retry" id="dmo-retry" type="button">${L.retry}</button>`}`;
+        ${
+          juste
+            ? `<p class="dmo-cta-line">${L.demoCtaLine}</p>`
+            : `<button class="dmo-retry" id="dmo-retry" type="button">${L.retry}</button>`
+        }`;
       after.querySelector("#dmo-retry")?.addEventListener("click", reset);
     });
   });

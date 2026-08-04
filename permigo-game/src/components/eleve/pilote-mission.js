@@ -148,7 +148,10 @@ export function monterMissions(
       <div class="mp-game mp-play" style="--world:${clair};--world-dark:${sombre}">
         ${enTete(m)}
         <section class="mp-play-title">
-          <p>${esc(`Étape ${index + 1} sur ${missions.length}`)} · ${esc(m.title)}</p>
+          <!-- Le rang de l'étape est DÉJÀ dans le bandeau du haut, en chiffres
+               et en barre. L'écrire une troisième fois poussait le titre de la
+               mission sur deux lignes pour ne rien apprendre. -->
+          <p>${esc(m.title)}</p>
           <h1>${esc(m.prompt)}</h1>
         </section>
         ${interaction(m)}
@@ -178,12 +181,16 @@ export function monterMissions(
   }
 
   function enTete(m) {
-    const avance =
-      m.mode === "sequence"
-        ? Math.round((etat.choisis.length / m.sequence.length) * 100)
-        : etat.resolu
-          ? 100
-          : 14;
+    // La barre suit la MÊME chose que le compteur « 2/3 » posé à sa droite :
+    // l'avancée dans la série. Elle montrait la progression DANS l'étape en
+    // cours, donc à « 1 sur 2 » elle affichait un moignon de 14 % et à la
+    // dernière question elle était pleine avant la réponse. Deux mesures
+    // différentes côte à côte : l'élève ne pouvait que se fier au compteur.
+    //
+    // Une étape en cours compte pour une demie : la barre bouge quand on
+    // répond ET quand on passe à la suivante, jamais par à-coups.
+    const fait = index + (etat.resolu ? 1 : 0.5);
+    const avance = Math.round((fait / missions.length) * 100);
     return `
       <header class="mp-play-hud">
         <button class="mp-icon-button mp-dark-button" type="button" data-quitter
@@ -246,7 +253,6 @@ export function monterMissions(
         <div class="mp-scene-scan" aria-hidden="true"></div>
         <div class="mp-scene-art mp-art-${esc(m.visual)}" aria-hidden="true">${renderArt(m.visual, m.reglages)}</div>
         ${zones}${trajets}${placement}
-        <span class="mp-scene-tag">${esc(m.modeLabel)}</span>
       </div>`;
   }
 
@@ -376,7 +382,6 @@ export function monterMissions(
             .join("")}
         </div>`
         }
-        <span class="mp-scene-tag">${esc(m.modeLabel)}</span>
       </div>
       <p class="mp-scene-instruction">${esc(consigneBalayage())}</p>
     </section>`;
@@ -470,26 +475,33 @@ export function monterMissions(
       </div>
       <div class="mp-sequence-bank">
         ${banque
-          .map(
-            (
-              s,
-            ) => `<button class="mp-sequence-card" type="button" data-reponse="${escAttr(s.id)}"
-              ${etat.choisis.includes(s.id) || etat.resolu ? "disabled" : ""}>
-              <span>${esc(s.symbol)}</span><strong>${esc(s.label)}</strong>
-            </button>`,
-          )
+          .map((s) => {
+            // La pastille portait un SIGNE typographique choisi à la main :
+            // 33 signes pour 64 gestes, et le même petit carré servait à
+            // « Avancer le siège », « Vitres et rétroviseurs » et « Se replacer
+            // le long du trottoir ». Ça ne renseignait rien, ça décorait.
+            // Elle porte maintenant le RANG où le geste a été posé : la seule
+            // information que l'élève cherche vraiment sur cette carte.
+            const rang = etat.choisis.indexOf(s.id);
+            const pris = rang >= 0;
+            return `<button class="mp-sequence-card ${pris ? "is-placed" : ""}"
+              type="button" data-reponse="${escAttr(s.id)}"
+              ${pris || etat.resolu ? "disabled" : ""}>
+              <span aria-hidden="${pris ? "false" : "true"}">${pris ? rang + 1 : ""}</span>
+              <strong>${esc(s.label)}</strong>
+            </button>`;
+          })
           .join("")}
       </div>
     </section>`;
   }
 
   function retour(m) {
-    if (!etat.retour) {
-      return `<div class="mp-feedback mp-feedback-neutral">
-        <span>?</span>
-        <p><strong>Prends le temps d'observer.</strong><small>Tu peux te reprendre.</small></p>
-      </div>`;
-    }
+    // Tant que l'élève n'a rien répondu, PAS de carte. Elle disait « prends le
+    // temps d'observer, tu peux te reprendre » sur tous les écrans du jeu :
+    // une carte pleine largeur, sous les réponses, qui n'apprend rien et
+    // n'attend rien. La place appartient à la scène et aux réponses.
+    if (!etat.retour) return "";
     const signe =
       etat.retour.ton === "success"
         ? icon("check", { size: 16 })

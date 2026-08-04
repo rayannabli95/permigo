@@ -134,6 +134,21 @@ export async function lancerQuiz({
   const overlay = renderOverlay();
   document.body.appendChild(overlay);
 
+  // Le quiz vit sur <body>, donc le routeur ne le balaie pas quand la page
+  // change (même piège que la scène du Mode Pilote, cf. ouvrirLaScene() dans
+  // valider-seul.js). Sans ça, un retour arrière du navigateur PENDANT une
+  // question laissait le quiz collé par-dessus l'app, plein écran, sans
+  // aucun bouton pour en sortir — vu en testant la boucle des 3 compétences
+  // gratuites (02/08).
+  const fermerSiPartiAilleurs = () => {
+    stopMusic();
+    stopSpeaking();
+    overlay.remove();
+  };
+  window.addEventListener("hashchange", fermerSiPartiAilleurs, {
+    once: true,
+  });
+
   // Mélodie de fond pendant le quiz (coupée à la fin / fermeture)
   const stopMusic = playQuizMusic();
 
@@ -252,6 +267,9 @@ export async function lancerQuiz({
       total,
     });
     overlay.querySelector(".qz-cta").addEventListener("click", () => {
+      // Fin normale : le garde-fou plus haut ne sert plus, sinon il se
+      // déclenche sur la PROCHAINE navigation, ailleurs dans l'app.
+      window.removeEventListener("hashchange", fermerSiPartiAilleurs);
       overlay.remove();
       onComplete?.(score, total, answers);
     });

@@ -18,7 +18,6 @@
 //    exploitable) ; questionnaire de départ → #/avis-depart
 //  - titre section : « Préparer le permis, c'est bien plus que conduire. »
 //  - centres d'examen montrés avec une vraie capture (fiche Cergy)
-//  - chiffres sourcés : 74,7 % vs 56,8 % (bilan examens 2022, Sécurité routière)
 //  - succès post-paiement : « Bienvenue dans l'aventure », installation de
 //    l'app expliquée (rappels/notifs), aide pas à pas, retour à l'accueil
 //  - bloc non-francophones VISIBLE UNIQUEMENT en anglais (l'app est en
@@ -28,9 +27,9 @@
 // Retour Checkout : #/pass?checkout=success&plan=xxx | #/pass?checkout=cancel
 // ═══════════════════════════════════════════════════════════════
 import { track } from "@/services/analytics.js";
-import { startPassCheckout } from "@/services/billing.js";
+import { startPassCheckout, getPassSessionEmail } from "@/services/billing.js";
 import { getCurUser } from "@/auth/cur-user.js";
-import { illMask } from "@/utils/illustrations.js";
+import { icon } from "@/utils/icons.js";
 import { esc, escAttr } from "@/utils/escape.js";
 import { fbTrack } from "@/services/meta-pixel.js";
 import { applyLang, browserLang, explicitLang } from "@/utils/lang.js";
@@ -59,43 +58,65 @@ const STR = {
     // ⚠️ Pas de « la seule app » : allégation de supériorité invérifiable
     // (pratiques commerciales trompeuses). On dit ce qu'on fait, pas qu'on est seul.
     lead: `L'app qui travaille ta <strong>conduite</strong> entre les leçons.`,
-    tTitle: `OBJECTIF PERMIS<br>EN 90 JOURS`,
+    // Le billet annonçait « OBJECTIF PERMIS EN 90 JOURS ». Personne ne peut
+    // tenir un délai qui dépend des places d'examen, du rythme de l'élève et
+    // de son auto-école. Une promesse qu'on ne maîtrise pas se retourne : le
+    // premier qui dépasse 90 jours se sent floué. Le billet promet maintenant
+    // la seule chose que l'app fait vraiment, et qu'elle fait tous les jours.
+    tTitle: `PRÊT AVANT<br>CHAQUE LEÇON`,
     tSub: "Conduite · mini-jeux · simulations d'examen",
     tBoardLbl: "Départ",
     tDureeLbl: "Accès",
-    tDuree: "SANS LIMITE",
+    // « SANS LIMITE » à côté d'un abonnement mensuel : limite de contenu ou
+    // limite de durée ? On répond au lieu de laisser la question ouverte.
+    tDuree: "TOUT PERMIGO",
     tOffre: "Prix de lancement",
     tPer: "par mois",
     tPrice: "4,99 €",
     freeCta: "Commencer gratuitement",
-    freeNote: "3 leçons offertes · sans carte bancaire",
+    // « 3 leçons offertes » se lit « 3 heures de conduite offertes ». On dit
+    // ce que le gratuit donne VRAIMENT (cf. utils/free-tier.js) : les trois
+    // premières leçons de l'app en entier, et un examen blanc complet.
+    freeNote: "3 leçons + 1 examen blanc offerts · sans carte bancaire",
     bulle: "3 compétences validées !",
     bulleSub: "cette semaine",
-    secCode: `Préparer le permis, c'est <em>bien plus</em> que conduire.`,
-    secCodeSub: "PermiGo t'entraîne sur tout ce qui compte le jour J :",
-    situTitle: "Mini-jeux « En situation »",
-    situTxt:
-      "Une scène. Une décision : qui passe en premier ? Priorités, distances, insertions. Comme au volant.",
-    situAlt:
-      "Mini-jeu En situation : un croisement, à toi de décider qui passe",
-    centreTitle: "Ton centre d'examen décortiqué",
-    centreTxt:
-      "On a passé les centres au crible : la difficulté réelle, l'accès, les pièges du parcours et ce que les examinateurs regardent. Le jour J tu arrives sur un terrain que tu connais déjà.",
+    // Un seul prix, une seule offre (v4) : ce titre disait aussi « c'est bien
+    // plus que conduire, » — une virgule dans un titre affiché, contraire à la
+    // regle maison. Reformule pour rester sans ponctuation.
+    secCode: `Le permis exige <em>plus</em> que conduire.`,
+    secCodeSub: "Tout ce qui compte le jour J.",
+    // v5 (03/08/2026, refonte demandee par Rayan) : les DEUX cartes texte
+    // (mini-jeu + centre d'examen) et les 3 cartes « feat » melangeaient deux
+    // langages d'icone (trait fin pour le cahier, medaille en 3D pour les deux
+    // autres) et redisaient en photo une scene qu'on venait de faire JOUER en
+    // haut de la page. Un seul type de carte, une seule famille d'icone
+    // (icon(), meme trace que partout ailleurs dans l'app), une ligne par
+    // carte. « Ca donne envie de revenir » est retire : le mur des 3 questions
+    // et la carte Pass PermiGo le disent deja (« tes recompenses »).
     feats: [
       {
-        mask: "cahier",
+        icon: "zap",
+        t: "Mini-jeux en situation",
+        d: "Une scène. Une décision. Comme au volant.",
+      },
+      {
+        icon: "map",
+        t: "Ton centre d'examen",
+        d: "Décortiqué · centre par centre.",
+      },
+      {
+        icon: "book",
         t: "Chaque leçon préparée",
-        d: "Créneau, autoroute, giratoire : une fiche claire avant de monter en voiture.",
+        d: "Une fiche claire avant de monter en voiture.",
       },
       {
-        img: "/skins/badge-medaille.webp",
-        t: "Simulation d'examen de conduite",
-        d: "Notée sur les mêmes critères que l'inspecteur. Le jour J, zéro surprise.",
-      },
-      {
-        img: "/skins/volant-coin.webp",
-        t: "Et ça donne envie de revenir",
-        d: "Série · ligue · récompenses. Le code est inclus aussi.",
+        icon: "target",
+        t: "Simulation d'examen",
+        // « Zéro surprise » promettait ce qu'aucune app ne peut tenir : un
+        // examinateur pressé ou un giratoire inconnu suffit à le rendre faux
+        // (audit confiance du 03/08/2026). On garde ce qui est vérifiable :
+        // la grille de l'examen est publique, et on note dessus.
+        d: "Notée sur la grille officielle de l'examen.",
       },
     ],
     mathsRows: [
@@ -103,7 +124,11 @@ const STR = {
       ["Budget permis moyen", "1 800 €"],
       ["PermiGo, par mois", "4,99 €"],
     ],
-    mathsNote: "Une leçon mal préparée = 55 € de perdus.",
+    // « Une leçon mal préparée = 55 € de perdus » se conteste en une seconde
+    // (une leçon mal préparée n'est pas une leçon perdue) et accuse l'élève
+    // de gâcher son argent. La ligne dit maintenant un fait que le tableau
+    // juste au-dessus démontre tout seul.
+    mathsNote: "PermiGo coûte moins qu'un dixième d'heure de conduite.",
     mathsSrc: "Sources : UFC-Que Choisir (budget permis) · Sécurité routière",
     secPass: "Un seul prix. Tout est dedans.",
     secPassSub:
@@ -114,28 +139,29 @@ const STR = {
         desc: "Tout le parcours, l'examen blanc, ta progression et tes récompenses. Annulable en un clic.",
         price: "4,99 €",
         per: "/mois",
-        btn: "Commencer",
+        // « Commencer » était le mot du bouton gratuit ET du bouton payant.
+        // Deux actions différentes, le même verbe : l'élève ne sait pas
+        // laquelle des deux il déclenche.
+        btn: "Tout débloquer",
       },
     },
     err: "Le paiement n'a pas pu démarrer. Réessaie.",
     btnWait: "Ouverture du paiement…",
-    stampTag: "Garanti",
-    stampT: "Satisfait ou remboursé sous 3 jours",
-    stampD:
-      "Teste tout pendant 3 jours. Pas convaincu ? Remboursé. Ensuite, le mensuel s'annule à tout moment, en un clic.",
     secAvis: "Ce qu'en disent nos élèves",
     secAvisSub:
       "Dix élèves de l'auto-école. Ils ont relu et validé leur phrase.",
     avisAge: "ans",
-    secProof: "S'entraîner régulièrement paie",
-    proofA: "Conduite accompagnée (entraînement régulier)",
-    proofAVal: "74,7 %",
-    proofAW: 74.7,
-    proofB: "Filière classique",
-    proofBVal: "56,8 %",
-    proofBW: 56.8,
-    proofSrc:
-      "Bilan des examens du permis de conduire 2022 · Sécurité routière",
+    // ⛔ RETIRÉ (03/08/2026) — le graphique « 74,7 % conduite accompagnée
+    // contre 56,8 % filière classique, Sécurité routière 2022 ».
+    // Les chiffres étaient vrais et sourcés. Le problème est ce qu'ils
+    // faisaient là : ils comparent DEUX FILIÈRES DE CONDUITE entre elles,
+    // pas les élèves PermiGo aux autres. Placés sous le titre « S'entraîner
+    // régulièrement paie », juste après le prix, ils se lisaient comme la
+    // preuve que l'app fait gagner 18 points de réussite. On ne l'a jamais
+    // écrit, et c'est justement le problème : le lecteur le conclut seul,
+    // et celui qui repère le glissement doute de tout le reste de la page.
+    // On y remettra un chiffre le jour où ce sera un chiffre à NOUS
+    // (échantillon, période, méthode).
     secFaq: "Questions fréquentes",
     faq: [
       [
@@ -187,42 +213,40 @@ const STR = {
     docTitle: "PermiGo. Prepare every driving lesson before you get in the car",
     h1: `Prepare every lesson <br><em>before you get in the car.</em>`,
     lead: `The app that trains your <strong>driving</strong> between lessons.`,
-    tTitle: `LICENCE GOAL:<br>90 DAYS`,
+    tTitle: `READY BEFORE<br>EVERY LESSON`,
     tSub: "Driving · mini-games · exam simulations",
     tBoardLbl: "Start",
     tDureeLbl: "Access",
-    tDuree: "NO LIMIT",
+    tDuree: "ALL OF PERMIGO",
     tOffre: "Launch price",
     tPer: "per month",
     tPrice: "€4.99",
     freeCta: "Start for free",
-    freeNote: "3 lessons included · no card needed",
+    freeNote: "3 lessons + 1 mock test free · no card needed",
     bulle: "3 skills validated!",
     bulleSub: "this week",
     secCode: `Getting your licence takes <em>more</em> than driving.`,
-    secCodeSub: "PermiGo trains you on everything that counts on test day:",
-    situTitle: "“On the road” mini-games",
-    situTxt:
-      "One scene. One decision: who goes first? Right of way, distances, merging. Like behind the wheel.",
-    situAlt: "On-the-road mini-game: a crossroads, you decide who goes first",
-    centreTitle: "Your test centre decoded",
-    centreTxt:
-      "We went through the test centres one by one: the real difficulty, getting there, the traps on the route and what examiners watch for. On test day you arrive somewhere you already know.",
+    secCodeSub: "Everything that counts on test day.",
     feats: [
       {
-        mask: "cahier",
+        icon: "zap",
+        t: "On-the-road mini-games",
+        d: "One scene. One decision. Like behind the wheel.",
+      },
+      {
+        icon: "map",
+        t: "Your test centre",
+        d: "Decoded · centre by centre.",
+      },
+      {
+        icon: "book",
         t: "Every lesson prepped",
-        d: "Parking, motorway, roundabouts: a clear sheet before you get in the car.",
+        d: "A clear sheet before you get in the car.",
       },
       {
-        img: "/skins/badge-medaille.webp",
-        t: "Driving exam simulation",
-        d: "Scored on the examiner's own criteria. No surprises on test day.",
-      },
-      {
-        img: "/skins/volant-coin.webp",
-        t: "And you'll want to come back",
-        d: "Streaks · leagues · rewards. The code test is included too.",
+        icon: "target",
+        t: "Exam simulation",
+        d: "Scored on the official exam grid.",
       },
     ],
     nonFranco: {
@@ -234,7 +258,7 @@ const STR = {
       ["Average licence budget (France)", "€1,800"],
       ["PermiGo, per month", "€4.99"],
     ],
-    mathsNote: "One unprepared lesson = €55 wasted.",
+    mathsNote: "PermiGo costs less than a tenth of one driving hour.",
     mathsSrc: "Sources: UFC-Que Choisir (licence budget) · Sécurité routière",
     secPass: "One price. Everything is in it.",
     secPassSub:
@@ -245,27 +269,18 @@ const STR = {
         desc: "The full course, the mock exam, your progress and your rewards. Cancel in one click.",
         price: "€4.99",
         per: "/mo",
-        btn: "Start",
+        btn: "Unlock everything",
       },
     },
     err: "Payment couldn't start. Please try again.",
     btnWait: "Opening checkout…",
-    stampTag: "Guaranteed",
-    stampT: "3-day money-back guarantee",
-    stampD:
-      "Try everything for 3 days. Not convinced? Refunded. After that, the monthly plan cancels anytime, in one click.",
     secAvis: "What our students say",
     secAvisSub:
       "Ten students from the driving school. Each one read and approved their own line.",
     avisAge: "years old",
-    secProof: "Regular practice pays off",
-    proofA: "Accompanied driving (regular practice)",
-    proofAVal: "74.7%",
-    proofAW: 74.7,
-    proofB: "Standard route",
-    proofBVal: "56.8%",
-    proofBW: 56.8,
-    proofSrc: "French driving-test results 2022 · Sécurité routière",
+    // ⛔ Section « Regular practice pays off » retirée. Cf. le commentaire de
+    // la version française : le graphique comparait deux filières de conduite
+    // françaises entre elles, jamais les élèves PermiGo aux autres.
     secFaq: "Frequently asked",
     faq: [
       [
@@ -314,42 +329,42 @@ const STR = {
     docTitle: "PermiGo. حضّر كل درس قيادة قبل أن تركب السيارة",
     h1: `حضِّر كل درس <br><em>قبل أن تركب السيارة.</em>`,
     lead: `التطبيق الذي يدرّبك على <strong>القيادة</strong> بين الدروس.`,
-    tTitle: `الهدف: رخصة القيادة<br>في 90 يوماً`,
+    tTitle: `جاهز قبل<br>كل حصة`,
     tSub: "قيادة · ألعاب مصغّرة · محاكاة الامتحان",
     tBoardLbl: "الانطلاق",
-    tDureeLbl: "المدة",
-    tDuree: "بلا حدود",
+    // « المدة » (la durée) devient « الوصول » (l'accès) : l'ambiguïté
+    // durée/contenu de « بلا حدود » se levait mal en arabe aussi.
+    tDureeLbl: "الوصول",
+    tDuree: "كل PermiGo",
     tOffre: "سعر الإطلاق",
     tPer: "شهرياً",
     tPrice: "€4.99",
     freeCta: "ابدأ مجاناً",
-    freeNote: "3 دروس هدية · بدون بطاقة بنكية",
+    freeNote: "3 دروس + امتحان تجريبي هدية · بدون بطاقة بنكية",
     bulle: "تم التحقق من 3 مهارات!",
     bulleSub: "هذا الأسبوع",
     secCode: `الحصول على الرخصة يتطلّب <em>أكثر</em> من مجرّد القيادة.`,
-    secCodeSub: "يدرّبك PermiGo على كل ما يهمّ يوم الامتحان:",
-    situTitle: "ألعاب «على الطريق» المصغّرة",
-    situTxt:
-      "مشهد واحد. قرار واحد: من يمرّ أولاً؟ أولوية المرور، المسافات، الاندماج. كما خلف المقود.",
-    situAlt: "لعبة مصغّرة على الطريق: مفترق طرق، أنت تقرّر من يمرّ أولاً",
-    centreTitle: "مركز امتحانك مفصّلاً",
-    centreTxt:
-      "درسنا مراكز الامتحان واحداً واحداً: الصعوبة الحقيقية، والوصول، وفخاخ المسار، وما ينتبه إليه الممتحنون. يوم الامتحان تصل إلى أرض تعرفها مسبقاً.",
+    secCodeSub: "كل ما يهمّ يوم الامتحان.",
     feats: [
       {
-        mask: "cahier",
-        t: "كل درس مُحضَّر مسبقاً",
-        d: "الركن، الطريق السريع، الدوّارات: بطاقة واضحة قبل أن تركب السيارة.",
+        icon: "zap",
+        t: "ألعاب على الطريق",
+        d: "مشهد واحد. قرار واحد. كما خلف المقود.",
       },
       {
-        img: "/skins/badge-medaille.webp",
-        t: "محاكاة امتحان القيادة",
-        d: "تُقيَّم بنفس معايير الممتحن. يوم الامتحان، لا مفاجآت.",
+        icon: "map",
+        t: "مركز امتحانك",
+        d: "مفصّل · مركزاً بمركز.",
       },
       {
-        img: "/skins/volant-coin.webp",
-        t: "وستشعر برغبة في العودة",
-        d: "سلاسل أيام · دوريات · مكافآت. واختبار الكود مُضمَّن أيضاً.",
+        icon: "book",
+        t: "كل درس محضّر",
+        d: "بطاقة واضحة قبل أن تركب السيارة.",
+      },
+      {
+        icon: "target",
+        t: "محاكاة الامتحان",
+        d: "تُقيَّم وفق شبكة الامتحان الرسمية.",
       },
     ],
     nonFranco: {
@@ -361,7 +376,7 @@ const STR = {
       ["متوسط ميزانية الرخصة (فرنسا)", "€1,800"],
       ["PermiGo، شهرياً", "€4.99"],
     ],
-    mathsNote: "درس غير مُحضَّر = €55 ضائعة.",
+    mathsNote: "يكلّف PermiGo أقلّ من عُشر ساعة قيادة واحدة.",
     mathsSrc: "المصادر: UFC-Que Choisir (ميزانية الرخصة) · Sécurité routière",
     secPass: "سعر واحد. كل شيء بداخله.",
     secPassSub:
@@ -372,27 +387,17 @@ const STR = {
         desc: "المسار كاملاً، والامتحان التجريبي، وتقدّمك ومكافآتك. ألغِ بنقرة واحدة.",
         price: "€4.99",
         per: "/شهر",
-        btn: "ابدأ",
+        btn: "افتح كل شيء",
       },
     },
     err: "تعذّر بدء الدفع. يُرجى المحاولة مرة أخرى.",
     btnWait: "جارٍ فتح صفحة الدفع…",
-    stampTag: "مضمون",
-    stampT: "مضمون أو استرداد أموالك خلال 3 أيام",
-    stampD:
-      "جرّب كل شيء لمدة 3 أيام. غير مقتنع؟ تُستردّ أموالك. بعد ذلك، يُلغى الاشتراك الشهري في أي وقت، بنقرة واحدة.",
     secAvis: "ماذا يقول طلابنا",
     secAvisSub:
       "عشرة طلاب من مدرسة تعليم القيادة. كلّ واحد قرأ جملته ووافق على نشرها.",
     avisAge: "سنة",
-    secProof: "التدرّب المنتظم يؤتي ثماره",
-    proofA: "القيادة المرافَقة (تدرّب منتظم)",
-    proofAVal: "74.7%",
-    proofAW: 74.7,
-    proofB: "المسار التقليدي",
-    proofBVal: "56.8%",
-    proofBW: 56.8,
-    proofSrc: "حصيلة امتحانات رخصة القيادة الفرنسية 2022 · Sécurité routière",
+    // ⛔ Section « التدرّب المنتظم يؤتي ثماره » retirée. Cf. le commentaire de
+    // la version française.
     secFaq: "الأسئلة الشائعة",
     faq: [
       [
@@ -447,9 +452,23 @@ const STR = {
 // sont propres — on ne fabrique pas les fautes de quelqu'un dans une langue
 // qu'il n'a pas écrite.
 //
-// Les deux avis de 43 et 56 ans passent en tête : ils cassent l'idée d'une
-// app pour ados, qui est la première objection d'un visiteur de 40 ans.
+// ORDRE DES TROIS PREMIERS (ce sont eux qui s'affichent sous la démo) :
+//  1. Leo raconte EXACTEMENT la promesse de la page (arriver à sa leçon en
+//     sachant quoi faire, stresser moins). Il était troisième, donc le seul
+//     avis qui prouve le titre passait après deux avis qui parlent d'autre
+//     chose. Il passe premier.
+//  2. et 3. Salah (56 ans) et Lassaad (43 ans) suivent immédiatement : ils
+//     cassent l'idée d'une app pour ados, première objection d'un visiteur de
+//     40 ans. Ils restent tous les deux au-dessus du pli, l'objection tombe
+//     aussi vite qu'avant.
 const AVIS = [
+  {
+    n: "Leo C.",
+    age: 32,
+    fr: "Avant j'arrivais à ma leçon sans savoir ce qu'on allait faire. Maintenant je sais et je stresse beaucoup moins.",
+    en: "I used to turn up to my lesson with no idea what we'd be doing. Now I know, and I stress far less.",
+    ar: "كنتُ أصل إلى الحصة دون أن أعرف ماذا سنفعل. الآن أعرف، وتوتّري أقلّ بكثير.",
+  },
   {
     n: "Salah S.",
     age: 56,
@@ -463,13 +482,6 @@ const AVIS = [
     fr: "Je révise en arabe et le mot francais est juste en dessous. c'est sa qui m'a débloqué",
     en: "I revise in Arabic and the French word sits right underneath. that's what unlocked it for me",
     ar: "أراجع بالعربية والكلمة الفرنسية تحتها مباشرة. هذا ما فكّ عقدتي",
-  },
-  {
-    n: "Leo C.",
-    age: 32,
-    fr: "Avant j'arrivais à ma leçon sans savoir ce qu'on allait faire. Maintenant je sais et je stresse beaucoup moins.",
-    en: "I used to turn up to my lesson with no idea what we'd be doing. Now I know, and I stress far less.",
-    ar: "كنتُ أصل إلى الحصة دون أن أعرف ماذا سنفعل. الآن أعرف، وتوتّري أقلّ بكثير.",
   },
   {
     n: "Regis T.",
@@ -607,6 +619,28 @@ const STYLE = `<style>
   }
   .pv * { box-sizing: border-box; }
   .pv-wrap { max-width: 480px; margin: 0 auto; padding: 0 18px; }
+  .pv-hero-wrap { display: contents; }
+
+  /* ══════════ Desktop : la colonne s'élargit, le hero passe à côté de la
+     démo. En dessous de 860px rien ne change, c'est encore le même mobile. ══════════ */
+  @media (min-width: 860px) {
+    .pv-nav, .pv-wrap { max-width: 640px; }
+    .pv-hero-wrap {
+      display: flex; align-items: center; gap: 40px;
+      text-align: start; padding-top: 18px;
+    }
+    .pv-hero-wrap .pv-hero { flex: 0 0 42%; text-align: start; padding-top: 0; }
+    .pv-hero-wrap .pv-lead { margin: 0; }
+    .pv-hero-wrap #pv-demo { flex: 1 1 0; min-width: 0; }
+    .pv-avis-lot {
+      flex-wrap: wrap; overflow: visible; scroll-snap-type: none;
+      margin-inline: 0; padding: 2px 0 6px;
+    }
+    .pv-avis-lot .pv-avis { flex: 0 0 calc(33.33% - 8px); max-width: none; }
+  }
+  @media (min-width: 1240px) {
+    .pv-nav, .pv-wrap { max-width: 720px; }
+  }
 
   /* ══════════ La mise en scène au défilement ══════════
      Avant : les 14 blocs montaient tous de 24 px de la même façon. Un seul
@@ -638,10 +672,6 @@ const STYLE = `<style>
   .pv-sec-title.pv-rev > span { display: inline-block; transform: translateY(105%); transition: transform .72s var(--pv-ease); }
   .pv-sec-title.pv-rev.in > span { transform: none; }
 
-  /* Les captures d'app se posent : elles arrivent légèrement en retrait
-     puis reviennent à leur taille. */
-  .pv-situ-shot img, .pv-feat-img { transition: transform .7s var(--pv-ease); }
-  .pv-stag > *:not(.in) .pv-situ-shot img { transform: scale(.94); }
 
   @media (prefers-reduced-motion: reduce) {
     .pv-rev, .pv-stag > *, .pv-sec-title.pv-rev, .pv-sec-title.pv-rev > span { opacity: 1; transform: none; transition: none; }
@@ -790,34 +820,33 @@ const STYLE = `<style>
   /* ── Sections ── */
   .pv-sec-title {
     text-align: center; font: 800 clamp(24px, 7vw, 28px)/1.15 'Archivo', sans-serif;
-    color: var(--pv-ink); margin: 52px 0 0; text-shadow: 0 3px 0 rgba(12,7,32,.8);
+    color: var(--pv-ink); margin: 64px 0 0; text-shadow: 0 3px 0 rgba(12,7,32,.8);
   }
   .pv-sec-title em { font-style: normal; color: var(--gold); }
-  .pv-sec-sub { text-align: center; font: 600 13.5px/1.55 'Archivo', sans-serif; color: var(--ink-mu); margin: 8px auto 22px; max-width: 340px; }
+  .pv-sec-sub { text-align: center; font: 600 13.5px/1.55 'Archivo', sans-serif; color: var(--ink-mu); margin: 10px auto 26px; max-width: 340px; }
 
-  /* ── Cartes atouts ── */
-  .pv-conduite { display: flex; flex-direction: column; gap: 12px; }
-  .pv-situ {
-    display: flex; gap: 14px; align-items: center;
-    background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.09);
-    border-radius: 20px; padding: 14px;
-  }
-  .pv-situ-shot {
-    position: relative; flex: none; width: 138px; border-radius: 16px; overflow: hidden;
-    border: 4px solid #160f38; box-shadow: 0 10px 24px rgba(0,0,0,.45), 0 0 0 1.5px rgba(142,135,255,.45);
-  }
-  .pv-situ-shot::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(155deg, rgba(255,255,255,.16), transparent 30%); }
-  .pv-situ-shot img { display: block; width: 100%; height: auto; }
-  .pv-situ-solo { display: block; }
-  .pv-situ-txt b { display: block; font: 800 16px/1.25 'Archivo', sans-serif; margin-bottom: 5px; }
-  .pv-situ-txt span { font: 600 12.5px/1.5 'Archivo', sans-serif; color: var(--ink-mu); }
+  /* ── Cartes atouts : une seule famille de carte, une seule famille d'icône
+     (icon(), le même trait que perk0/1/2 du mur découverte). Avant : une
+     capture d'écran qui rejouait en photo la scène qu'on venait de faire
+     JOUER plus haut, et deux médailles 3D en photo à côté d'un trait fin —
+     deux langages d'icône sur la même page. */
+  .pv-feats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .pv-feat {
-    display: flex; gap: 13px; align-items: center;
-    background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.09); border-radius: 16px; padding: 13px 14px;
+    background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.09);
+    border-radius: 18px; padding: 16px 14px;
   }
-  .pv-feat-img { flex: none; width: 46px; height: 46px; object-fit: contain; filter: drop-shadow(0 5px 8px rgba(0,0,0,.45)); }
-  .pv-feat b { display: block; font: 700 15px/1.3 'Archivo', sans-serif; }
-  .pv-feat span { font: 600 13px/1.45 'Archivo', sans-serif; color: var(--ink-mu); }
+  /* .pv-feat .pv-feat-ico et pas .pv-feat-ico seul : l'icône ET le sous-texte
+     sont tous deux des <span> enfants directs de .pv-feat. La règle générique
+     .pv-feat span ci-dessous a la même spécificité qu'un simple .pv-feat-ico
+     et gagnait au dernier défini — l'icône se peignait en gris terne au lieu
+     du doré (constaté à l'écran, couleur réelle vérifiée : rgb(170,162,216),
+     celle du texte, pas var(--gold)). */
+  .pv-feat .pv-feat-ico {
+    display: grid; place-items: center; width: 40px; height: 40px; margin-bottom: 12px;
+    border-radius: 12px; background: rgba(255,206,77,.14); color: var(--gold);
+  }
+  .pv-feat b { display: block; font: 800 14.5px/1.25 'Archivo', sans-serif; margin-bottom: 4px; }
+  .pv-feat span { display: block; font: 600 12px/1.45 'Archivo', sans-serif; color: var(--ink-mu); }
 
   /* Bloc non-francophones (version EN uniquement) */
   .pv-franco {
@@ -839,8 +868,13 @@ const STYLE = `<style>
   .pv-maths-row b { font: 700 16px 'Archivo', sans-serif; color: #fff; font-variant-numeric: tabular-nums; }
   .pv-maths-row.hot { color: var(--gold); }
   .pv-maths-row.hot b { color: var(--gold); font-size: 18px; }
-  .pv-maths-note { text-align: center; font: 600 12.5px/1.6 'Archivo', sans-serif; color: var(--ink-dim); margin: 12px 0 0; }
-  .pv-maths-src { text-align: center; font: 500 10.5px/1.5 'Archivo', sans-serif; color: #655a97; margin: 6px 0 0; }
+  /* La source était en 10,5px sur #655a97, soit 2,6:1 de contraste sur le
+     fond violet quand l'AA en demande 4,5. Citer ses sources et les rendre
+     illisibles, c'est se donner l'air de citer ses sources. 12,5px sur
+     --ink-mu : 6,7:1. Et la note passe de --ink-dim (4,46:1, juste sous la
+     barre) à --ink-soft. */
+  .pv-maths-note { text-align: center; font: 600 13.5px/1.6 'Archivo', sans-serif; color: var(--ink-soft); margin: 12px 0 0; }
+  .pv-maths-src { text-align: center; font: 500 12.5px/1.5 'Archivo', sans-serif; color: var(--ink-mu); margin: 8px 0 0; }
 
   /* ── Le billet (il n'y en a plus qu'un) ── */
   .pv-pass { position: relative; display: flex; border-radius: 18px; margin-bottom: 14px; box-shadow: 0 14px 28px rgba(0,0,0,.4); }
@@ -884,20 +918,19 @@ const STYLE = `<style>
   .pv-err { font: 700 13px/1.4 'Archivo', sans-serif; color: #ffb4a8; text-align: center; margin: 4px 0 0; display: none; }
   .pv-err.on { display: block; }
 
-  /* ── Garantie ── */
-  .pv-stamp-zone { position: relative; margin-top: 26px; padding: 20px 18px; border-radius: 20px; border: 2px dashed rgba(88,204,2,.5); text-align: center; }
-  .pv-stamp-zone b { display: block; font: 800 16.5px/1.3 'Archivo', sans-serif; margin-bottom: 4px; }
-  .pv-stamp-zone span { font: 600 13px/1.55 'Archivo', sans-serif; color: var(--ink-soft); }
-  .pv-stamp {
-    position: absolute; top: -16px; right: 10px; transform: rotate(9deg);
-    font: 800 11px/1 'Archivo', sans-serif; letter-spacing: .1em; text-transform: uppercase;
-    color: #7ee838; border: 2.5px solid var(--go); border-radius: 8px; padding: 7px 10px;
-    background: rgba(20,40,4,.6);
+  /* ── Avis d'élèves (validés par eux, cf. docs/PREUVES-A-COLLECTER) ──
+     Carrousel horizontal, pas un mur vertical : 10 cartes empilées faisaient
+     défiler l'écran sur près de 3000 px pour cette seule section. Le
+     « peek » de la carte suivante (78 % de largeur) dit « il y en a
+     d'autres » sans un mot ni un point de pagination. */
+  .pv-avis-lot {
+    display: flex; gap: 12px; margin-top: 20px;
+    overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+    margin-inline: -18px; padding: 2px 18px 6px; scrollbar-width: none;
   }
-
-  /* ── Avis d'élèves (validés par eux, cf. docs/PREUVES-A-COLLECTER) ── */
-  .pv-avis-lot { display: grid; gap: 12px; margin-top: 18px; }
+  .pv-avis-lot::-webkit-scrollbar { display: none; }
   .pv-avis {
+    flex: 0 0 78%; max-width: 320px; scroll-snap-align: start;
     margin: 0; padding: 15px 16px; border-radius: 18px;
     background: rgba(255,255,255,.055); border: 1px solid rgba(255,255,255,.1);
   }
@@ -922,19 +955,12 @@ const STYLE = `<style>
      autour de 3,6 de contraste quand l'AA en demande 4,5. Même leçon que la
      carte de date de naissance le 01/08. */
   .pv-avis-qui span { font: 600 11.5px/1.2 'Archivo', sans-serif; color: var(--ink-mu); }
-  @media (min-width: 620px) { .pv-avis-lot { grid-template-columns: 1fr 1fr; } }
 
-  /* ── Preuve ── */
-  .pv-proof { margin-top: 20px; }
-  .pv-bar-lbl { display: flex; justify-content: space-between; gap: 12px; font: 600 13px 'Archivo', sans-serif; margin-bottom: 6px; color: var(--ink-soft); }
-  .pv-bar { height: 12px; border-radius: 99px; background: rgba(255,255,255,.08); overflow: hidden; margin-bottom: 14px; }
-  .pv-bar span { display: block; height: 100%; border-radius: 99px; }
-  .pv-bar-go span { background: linear-gradient(90deg, var(--go), #8aec3c); }
-  .pv-bar-mu span { background: #5c519f; }
-  .pv-src { text-align: center; font: 500 11px 'Archivo', sans-serif; color: #655a97; margin: 0; }
+  /* Le bloc « Preuve » (.pv-proof, .pv-bar*, .pv-src) est retiré avec son
+     graphique le 03/08/2026. Rien d'autre ne l'utilisait. */
 
   /* ── FAQ ── */
-  .pv-faq details { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); border-radius: 15px; padding: 0 15px; margin-bottom: 9px; }
+  .pv-faq details { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 0 15px; margin-bottom: 9px; }
   .pv-faq summary {
     font: 700 14.5px/1.4 'Archivo', sans-serif; padding: 14px 0; cursor: pointer; list-style: none;
     display: flex; justify-content: space-between; align-items: center; gap: 10px;
@@ -954,11 +980,23 @@ const STYLE = `<style>
   /* ── Barre CTA collante ── */
   .pv-sticky {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
-    transition: bottom .42s cubic-bezier(.22,1,.32,1);
+    transition: bottom .42s cubic-bezier(.22,1,.32,1), transform .34s cubic-bezier(.22,1,.32,1);
     padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
     background: rgba(18,11,44,.94); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
     border-top: 1.5px solid rgba(255,206,77,.25);
   }
+  /* Elle s'efface UNIQUEMENT pendant que le bouton « Commencer gratuitement »
+     du corps de page est à l'écran : les deux disaient EXACTEMENT la même
+     chose l'un sous l'autre (mesuré à l'écran le 03/08/2026 — la barre est
+     fixed, donc toujours montée, et venait se coller pile sous ce bouton).
+     wireStickyReveal() bascule la classe via IntersectionObserver. */
+  /* Pas juste 120% : quand le bandeau cookies est ouvert, la propriété bottom
+     relève déjà la barre de ~150 px (règle body.ck-open juste en dessous).
+     120% de sa propre hauteur ne suffit plus à la faire sortir de l'écran
+     dans ce cas précis (mesuré en test : elle restait visible, translatée
+     mais toujours dans le cadre). +180px de marge fixe couvre ce cas en plus
+     de sa hauteur. */
+  .pv-sticky.pv-sticky-hide { transform: translateY(calc(100% + 180px)); }
   /* Le bandeau cookies est en z-index 9000 et se pose en bas : il RECOUVRAIT
      cette barre, donc le bouton du compte gratuit et le bouton d'achat, tant
      que le visiteur n'avait pas répondu (mesuré en prod le 01/08/2026). La
@@ -967,7 +1005,7 @@ const STYLE = `<style>
   body.ck-open .pv-sticky {
     bottom: calc(var(--ck-h, 96px) + 20px + env(safe-area-inset-bottom, 0px));
   }
-  @media (prefers-reduced-motion: reduce) { .pv-sticky { transition: none; } }
+  @media (prefers-reduced-motion: reduce) { .pv-sticky, .pv-sticky.pv-sticky-hide { transition: none; transform: none; } }
   /* La barre collante se lit de haut en bas, plus de gauche à droite : le
      gratuit est LE bouton, l'achat est la ligne d'en dessous. Avant, « Ou
      commencer gratuitement » était un simple texte collé à gauche d'un gros
@@ -988,6 +1026,18 @@ const STYLE = `<style>
     transition: transform .1s ease, box-shadow .1s ease;
   }
   .pv-sticky-free:active { transform: translateY(3px); box-shadow: inset 0 2px 0 rgba(255,255,255,.5), 0 1px 0 #a86e00; }
+  /* Se déclenche à la bonne réponse de la démo (cf. onCorrect, plus bas dans
+     ce fichier) : la porte gratuite existe déjà, en permanence, sous le
+     pouce. Au lieu d'en fabriquer une seconde à cet instant précis, celle-ci
+     réagit. Classe retirée puis reposée en JS pour rejouer l'anim si l'élève
+     relance la démo une seconde fois. */
+  .pv-sticky-free.pv-pulse { animation: pvStickyPulse 1.7s ease-out; }
+  @keyframes pvStickyPulse {
+    0%, 100% { box-shadow: inset 0 2px 0 rgba(255,255,255,.5), 0 4px 0 #a86e00; }
+    20% { box-shadow: inset 0 2px 0 rgba(255,255,255,.7), 0 4px 0 #a86e00, 0 0 0 8px rgba(255,206,77,.3); }
+    45% { box-shadow: inset 0 2px 0 rgba(255,255,255,.5), 0 4px 0 #a86e00, 0 0 0 0 rgba(255,206,77,0); }
+  }
+  @media (prefers-reduced-motion: reduce) { .pv-sticky-free.pv-pulse { animation: none; } }
   /* L'achat reste accessible en permanence, mais discret. En encre douce et
      plus en or : l'or appartient maintenant au bouton juste au-dessus, et deux
      ors cote a cote, c'est deux appels au meme moment. */
@@ -1162,6 +1212,18 @@ export async function mount(root) {
       currency: "EUR",
       value: PLAN_VALUE[planParam] ?? 0,
     });
+    // Invité (pas de compte) : va chercher l'email qui vient de payer pour
+    // pré-remplir #/rejoindre juste en dessous. eleve_access_status() matche
+    // pass_purchases par email confirmé : une lettre de travers au moment de
+    // recréer le compte, et l'élève a payé pour rien. Best-effort, en fond,
+    // ne bloque jamais l'affichage de l'écran de succès.
+    const sessionId = q.get("session_id");
+    if (!me && sessionId) {
+      getPassSessionEmail(sessionId).then((email) => {
+        if (email) sessionStorage.setItem("pg_pass_email", email);
+      });
+    }
+
     const label = PLAN_LABELS[lang][planParam] || "Pass Permis";
     root.innerHTML = `${STYLE}
       <div class="pv" dir="${lang === "ar" ? "rtl" : "ltr"}">
@@ -1208,21 +1270,28 @@ export async function mount(root) {
 
     <div class="pv-wrap">
 
-      <section class="pv-hero pv-rev pv-stag">
-        <div class="pv-kicker">${L.kicker}</div>
-        <h1 class="pv-h1">${L.h1}</h1>
-        <p class="pv-lead">${L.lead}</p>
-      </section>
+      <!-- À partir de 860px, le texte et la démo passent côte à côte : sous
+           ce seuil, une seule colonne mobile inchangée entourée de vide sur
+           un écran d'ordinateur (chantier resté ouvert depuis l'audit du
+           03/08/2026, mis de côté le temps que #701 refasse la même page). -->
+      <div class="pv-hero-wrap">
+        <section class="pv-hero pv-rev pv-stag">
+          <div class="pv-kicker">${L.kicker}</div>
+          <h1 class="pv-h1">${L.h1}</h1>
+          <p class="pv-lead">${L.lead}</p>
+        </section>
 
-      <!-- La démonstration passe AVANT le billet et avant le prix : on montre,
-           puis on demande. Montée à la demande (le moteur de scène n'est pas
-           dans le premier chargement) et sans compte ni appel réseau. -->
-      <div id="pv-demo" class="pv-rev"></div>
+        <!-- La démonstration passe AVANT le billet et avant le prix : on montre,
+             puis on demande. Montée à la demande (le moteur de scène n'est pas
+             dans le premier chargement) et sans compte ni appel réseau. -->
+        <div id="pv-demo" class="pv-rev"></div>
+      </div>
 
       <!-- Trois avis AVANT le billet : la scène montre ce que c'est, les avis
-           disent que ça marche, et seulement après on parle d'argent. Les deux
-           premiers ont 56 et 43 ans — la première objection d'un visiteur de
-           40 ans est « c'est pour les jeunes ». -->
+           disent que ça marche, et seulement après on parle d'argent. Le
+           premier raconte le titre de la page (arriver à sa leçon en sachant
+           quoi faire), les deux suivants ont 56 et 43 ans (la première
+           objection d'un visiteur de 40 ans est « c'est pour les jeunes »). -->
       <div class="pv-avis-lot pv-avis-haut pv-rev">${renderAvis(lang, L, 0, 3)}</div>
 
       ${renderTicket(L, { lang })}
@@ -1248,46 +1317,31 @@ export async function mount(root) {
       <h2 class="pv-sec-title pv-rev"><span>${L.secCode}</span></h2>
       <p class="pv-sec-sub">${L.secCodeSub}</p>
 
-      <div class="pv-conduite pv-rev pv-stag">
-        <div class="pv-situ">
-          <div class="pv-situ-shot"><img src="/showcase/eleve-en-situation.webp" alt="${L.situAlt}" width="780" height="980" loading="lazy" decoding="async"></div>
-          <div class="pv-situ-txt">
-            <b>${L.situTitle}</b>
-            <span>${L.situTxt}</span>
-          </div>
-        </div>
-        <!-- Sans capture : a 138 px de large on ne lisait NI le nom du centre,
-             NI la difficulte, NI le texte. Une vignette illisible ne prouve
-             rien, elle occupe de la place. Deux phrases disent la meme chose. -->
-        <div class="pv-situ pv-situ-solo">
-          <div class="pv-situ-txt">
-            <b>${L.centreTitle}</b>
-            <span>${L.centreTxt}</span>
-          </div>
-        </div>
+      <!-- v5 (03/08/2026) : UNE seule famille de carte, UNE seule famille
+           d'icône (icon(), même trait que le reste de l'app). Avant : une
+           capture qui rejouait en photo la démo qu'on venait de faire jouer
+           plus haut, et deux médailles 3D à côté d'un trait fin. -->
+      <div class="pv-feats pv-rev pv-stag">
         ${L.feats
           .map(
             (f) => `
         <div class="pv-feat">
-          ${
-            f.mask
-              ? `<span class="pv-feat-img" style="display:grid;place-items:center">${illMask(f.mask, { size: 40, color: "var(--gold)" })}</span>`
-              : `<img class="pv-feat-img" src="${f.img}" alt="" loading="lazy" decoding="async">`
-          }
-          <div><b>${f.t}</b><span>${f.d}</span></div>
+          <span class="pv-feat-ico" aria-hidden="true">${icon(f.icon, { size: 22, strokeWidth: 2.3 })}</span>
+          <b>${f.t}</b>
+          <span>${f.d}</span>
         </div>`,
           )
           .join("")}
-        ${
-          L.nonFranco
-            ? `
-        <div class="pv-franco">
-          <span class="pv-franco-flag" aria-hidden="true">🇫🇷</span>
-          <div><b>${L.nonFranco.title}</b><span>${L.nonFranco.txt}</span></div>
-        </div>`
-            : ""
-        }
       </div>
+      ${
+        L.nonFranco
+          ? `
+      <div class="pv-franco pv-rev">
+        <span class="pv-franco-flag" aria-hidden="true">🇫🇷</span>
+        <div><b>${L.nonFranco.title}</b><span>${L.nonFranco.txt}</span></div>
+      </div>`
+          : ""
+      }
 
       <div class="pv-maths pv-rev pv-stag">
         ${L.mathsRows
@@ -1320,24 +1374,16 @@ export async function mount(root) {
 
       <p class="pv-err" id="pv-err">${L.err}</p>
 
-      <div class="pv-stamp-zone pv-rev">
-        <span class="pv-stamp">${L.stampTag}</span>
-        <b>${L.stampT}</b>
-        <span>${L.stampD}</span>
-      </div>
-
       <h2 class="pv-sec-title pv-rev"><span>${L.secAvis}</span></h2>
       <p class="pv-sec-sub">${L.secAvisSub}</p>
       <div class="pv-avis-lot pv-rev pv-stag">${renderAvis(lang, L, 3, AVIS.length)}</div>
 
-      <h2 class="pv-sec-title pv-rev"><span>${L.secProof}</span></h2>
-      <div class="pv-proof pv-rev pv-stag">
-        <div class="pv-bar-lbl"><span>${L.proofA}</span><span>${L.proofAVal}</span></div>
-        <div class="pv-bar pv-bar-go"><span style="width:${L.proofAW}%"></span></div>
-        <div class="pv-bar-lbl"><span>${L.proofB}</span><span>${L.proofBVal}</span></div>
-        <div class="pv-bar pv-bar-mu"><span style="width:${L.proofBW}%"></span></div>
-        <p class="pv-src">${L.proofSrc}</p>
-      </div>
+      <!-- Le graphique « 74,7 % contre 56,8 % » vivait ici. Retiré le
+           03/08/2026 : il comparait la conduite accompagnée à la filière
+           classique, donc deux façons d'apprendre à conduire, pas les élèves
+           PermiGo aux autres. Posé juste après le prix sous le titre
+           « S'entraîner régulièrement paie », il se lisait comme notre taux
+           de réussite. La FAQ enchaîne maintenant directement. -->
 
       <section class="pv-faq pv-rev pv-stag">
         <h2 class="pv-sec-title">${L.secFaq}</h2>
@@ -1368,6 +1414,24 @@ export async function mount(root) {
 
   wire(root, me, lang, L);
   wireReveal(root);
+  wireStickyReveal(root);
+}
+
+/** La barre collante s'efface tant que le bouton « Commencer gratuitement »
+ *  du corps de page est à l'écran (les deux disent la même chose), et
+ *  reprend sa place dès qu'il sort du cadre, dans un sens comme dans l'autre.
+ *  Sans IntersectionObserver : elle reste montrée, c'est le filet le plus sûr. */
+function wireStickyReveal(root) {
+  if (!("IntersectionObserver" in window)) return;
+  const cta = root.querySelector("#pv-free");
+  const sticky = root.querySelector(".pv-sticky");
+  if (!cta || !sticky) return;
+  const io = new IntersectionObserver(
+    ([entry]) =>
+      sticky.classList.toggle("pv-sticky-hide", entry.isIntersecting),
+    { rootMargin: "0px 0px -10% 0px" },
+  );
+  io.observe(cta);
 }
 
 /** Révélation au scroll : .pv-rev → .in à l'entrée dans le viewport.
@@ -1469,25 +1533,42 @@ function wire(root, me, lang, L) {
     location.hash = "#/login";
   });
 
-  // Démonstration jouable. Montée avec le reste de la page : elle est là ou la
-  // page ne s'affiche pas du tout, plus de disparition silencieuse.
-  const demoHost = root.querySelector("#pv-demo");
-  if (demoHost) mountDemoSituation(demoHost, lang);
-
   // Porte gratuite (hero, démonstration, barre collante) → inscription élève
   // sans code moniteur. Évènement SÉPARÉ de l'achat : on veut voir laquelle des
-  // portes travaille.
+  // portes travaille. Déclarée avant mountDemoSituation (function hissée) car
+  // la démo a besoin de la fermer sur ce même geste.
   function goFree(from) {
     track("pass.free_click", { from, lang, logged: !!me });
     fbTrack("Lead", { content_name: "compte_gratuit" });
     location.hash = "#/rejoindre?solo=1";
   }
+
+  // Démonstration jouable. Montée avec le reste de la page : elle est là ou la
+  // page ne s'affiche pas du tout, plus de disparition silencieuse.
+  // ⭐⭐ onCorrect (audit landing 03/08/2026) : juste après la bonne réponse, la
+  // motivation est à son maximum. Avant, rien ne la recueillait : le visiteur
+  // retombait sur trois avis puis un billet doré. PR #690 avait déjà tranché
+  // « une seule porte par écran » : pas de deuxième bouton ici, on met en
+  // valeur celle qui existe déjà (la barre collante, à portée de pouce en
+  // permanence) au moment précis où l'élève a envie de la prendre.
+  const demoHost = root.querySelector("#pv-demo");
+  const stickyFreeBtn = root.querySelector("#pv-sticky-free");
+  if (demoHost)
+    mountDemoSituation(demoHost, lang, {
+      onCorrect: () => {
+        track("pass.demo_success", { lang });
+        if (!stickyFreeBtn) return;
+        stickyFreeBtn.classList.remove("pv-pulse");
+        // Force le replay si l'élève relance la démo une seconde fois.
+        void stickyFreeBtn.offsetWidth;
+        stickyFreeBtn.classList.add("pv-pulse");
+      },
+    });
+
   root
     .querySelector("#pv-free")
     ?.addEventListener("click", () => goFree("hero"));
-  root
-    .querySelector("#pv-sticky-free")
-    ?.addEventListener("click", () => goFree("sticky"));
+  stickyFreeBtn?.addEventListener("click", () => goFree("sticky"));
 
   // Bascule FR/EN : on clique la langue VOULUE (FR ou EN), pas une bascule
   // aveugle. On mémorise puis on re-rend la page entière.
