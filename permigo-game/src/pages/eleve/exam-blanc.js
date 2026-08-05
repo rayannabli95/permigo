@@ -26,6 +26,7 @@ import {
 } from "@/components/eleve/quiz-visuals.js";
 import { swapVisualToReveal } from "@/components/eleve/quiz-ui.js";
 import { hideBottomNav } from "@/utils/nav.js";
+import { chromeNight } from "@/utils/chrome-night.js";
 import {
   muteButtonHTML,
   wireQuestionSpeech,
@@ -37,7 +38,6 @@ import {
   playWrong,
   playVictory,
   playDefeat,
-  playQuizMusic,
   playWhoosh,
 } from "@/utils/sound.js";
 
@@ -815,8 +815,14 @@ function runExbQuiz(
   const answers = new Array(questions.length).fill(null); // null = non répondu
   let idx = 0;
 
+  // ⛔ Plus de musique de fond en boucle (retour Rayan, 05/08/2026 : « une
+  // musique relou »). Elle démarrait toute seule sur les 3 modes, sans que
+  // personne l'ait demandée, et sans bouton pour la couper — la seule sortie
+  // était de quitter le quiz. Les sons de RÉPONSE (juste, faux, victoire) sont
+  // gardés : eux répondent à un geste de l'élève.
+  // `stopExamMusic()` reste appelé ici et à la sortie : un onglet ouvert avant
+  // ce changement peut encore avoir une boucle en cours.
   stopExamMusic();
-  _examStopMusic = playQuizMusic();
 
   function renderQ() {
     clearExamTimer(); // sans effet si pas de chrono
@@ -1513,15 +1519,45 @@ function showRevisionResults(
 // ─── Styles ──────────────────────────────────────────────────
 const EXB_STYLE_ID = "exb-styles";
 const EXB_CSS = `
-/* === Parcours quiz — exb-* === */
+/* === Parcours quiz — exb-* ===
+
+   DA Arène (nuit-violet + or), alignée sur reviser.js. Retour Rayan
+   05/08/2026 : « ça met l'ancienne mise en forme des questions » — on arrivait
+   ici depuis la fiche centre qui venait d'être repeinte, et on retombait sur un
+   quiz tout blanc. Deux DA à un clic d'écart.
+
+   ⚠️⚠️ ZÉRO BACKTICK ici : ce commentaire vit DANS un template littéral, un
+   seul backtick le referme et la page ne se charge plus.
+
+   Même geste que centre-examen.js : on redéfinit les TOKENS sur .exb et
+   toutes les règles plus bas atterrissent dans la nuit sans être touchées.
+   Ne PAS remplacer ces var() par des couleurs en dur, sinon la prochaine
+   couleur ajoutée repartira en blanc sans que rien ne le signale.
+*/
 .exb {
   min-height: 100svh;
-  background: var(--bg);
   display: flex;
   flex-direction: column;
   font-family: 'Archivo', sans-serif;
-  color: var(--ink);
   overflow-x: hidden;
+
+  --bg:   #1a1340;
+  --bg3:  linear-gradient(180deg,#2c2264 0%,#241a56 100%);
+  --su:   linear-gradient(180deg,#2c2264 0%,#241a56 100%);
+  --bo:   #3a3178;
+  --bo2:  #3a3178;
+  --ink:  #f4f2ff;
+  --mu:   rgba(244,242,255,.72);
+  --mu2:  rgba(244,242,255,.58);
+  --mu3:  rgba(244,242,255,.42);
+  --a:    #6c63ff;
+  --a-ink:#fff;
+  --a-txt:#b3adff;
+
+  color: var(--ink);
+  background:
+    radial-gradient(120% 40% at 50% 0%, rgba(142,135,255,.16) 0%, transparent 60%),
+    linear-gradient(180deg,#241a52 0%,#1e1648 46%,#1a1340 100%);
 }
 .anim-slide-up {
   animation: exbSlideUp .3s cubic-bezier(.34,1.56,.64,1);
@@ -2200,5 +2236,11 @@ function renderStyles() {
     el.textContent = EXB_CSS + QUIZ_VISUAL_CSS;
     document.head.appendChild(el);
   }
-  return "";
+  // ⚠️ chromeNight() teinte `body` : il ne peut PAS aller dans la feuille
+  // ci-dessus, qui reste dans <head> pour toujours (elle n'est jamais retirée,
+  // par choix — 9 sites d'appel). Il partirait teinter le bandeau et la barre
+  // du bas de toutes les pages CLAIRES visitées ensuite. Ici il est rendu DANS
+  // #app : le router remplace #app à chaque navigation, donc la teinte meurt
+  // avec la page, sans nettoyage.
+  return `<style>${chromeNight("#241a52", "#1a1340")}</style>`;
 }

@@ -20,6 +20,7 @@ import { setupReveals } from "@/utils/reveal-on-scroll.js";
 import { navigate } from "@/router.js";
 import { getFicheMeta } from "@/data/conduite-meta.js";
 import { getLang } from "@/utils/lang.js";
+import { chromeNight } from "@/utils/chrome-night.js";
 import {
   isFreeTierUser,
   isFreeCentre,
@@ -165,17 +166,59 @@ function diffColor(n) {
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
 /* ─────────────────────────────────────────────────
-   CEA — Centre Examen Variant A
+   CEA — Centre d'examen, DA Arène (nuit-violet + or)
    Tout préfixé .cea- pour zéro collision.
+
+   ⚠️ Cette page vivait en BLANC avec un gros aplat moutarde en hero, au milieu
+   d'un produit qui est en Arène 3D (cf. reviser.js). Retour Rayan 05/08/2026 :
+   « les centres d'exam sont pas sur la même DA que PermiGo ».
+
+   ⚠️⚠️ ZÉRO BACKTICK dans ce commentaire : il vit DANS un template littéral,
+   un seul backtick le referme et le build casse (« is not a function »).
+
+   Le geste : on garde TOUTE la structure et on repeint, en redéfinissant les
+   tokens de thème SUR .cea (bloc ci-dessous). Chaque règle plus bas continue
+   d'écrire var(--bg3) / var(--bo) / var(--ink) et atterrit dans la nuit. C'est
+   pour ça qu'il ne faut PAS remplacer ces var() par des couleurs en dur : la
+   page se re-peindrait à la main, règle par règle, et le prochain qui touche
+   une couleur en oublierait la moitié.
+
+   Palette : la même que l'Arène de Réviser, au pixel près.
 ───────────────────────────────────────────────── */
+${chromeNight("#241a52", "#1a1340")}
+
 .cea {
   max-width: 480px;
   margin: 0 auto;
   padding: 0 0 calc(110px + env(safe-area-inset-bottom));
-  background: var(--bg);
-  color: var(--ink);
   font-family: 'Archivo', sans-serif;
   position: relative;
+
+  /* ── Les tokens de la page, repeints en nuit ── */
+  --bg:   #1a1340;                    /* fond de page */
+  --bg3:  linear-gradient(180deg,#2c2264 0%,#241a56 100%);  /* carte */
+  --su:   linear-gradient(180deg,#2c2264 0%,#241a56 100%);  /* idem (rangées) */
+  --bo:   #3a3178;                    /* bord de carte / séparateur */
+  --bo2:  #3a3178;
+  --ink:  #f4f2ff;                    /* titres */
+  --mu:   rgba(244,242,255,.72);      /* corps de texte */
+  --mu2:  rgba(244,242,255,.58);      /* secondaire */
+  --mu3:  rgba(244,242,255,.42);      /* icônes discrètes */
+  --a:    #6c63ff;                    /* accent plein (boutons, chip active) */
+  --a-ink:#fff;
+  --a-txt:#b3adff;                    /* accent LISIBLE sur fond nuit */
+  --am:   #f0aa2c;                    /* ambre des pièges */
+  --amp:  rgba(245,196,81,.14);
+  --amk:  #f7cf68;
+  --gr:   #4ade80;                    /* vert des conseils */
+
+  color: var(--ink);
+  /* Le fond couvre toute la hauteur même quand la fiche est courte : sans ça
+     on voyait le blanc de l'app réapparaître sous le dernier bloc. */
+  min-height: 100%;
+  background:
+    radial-gradient(120% 45% at 50% 0%, rgba(142,135,255,.16) 0%, transparent 60%),
+    linear-gradient(180deg,#241a52 0%,#1e1648 46%,#1a1340 100%);
 }
 
 /* ── Reveal au scroll ── */
@@ -304,9 +347,10 @@ const STYLE = `<style>
   position: relative;
   overflow: hidden;
   padding: 22px 20px 20px;
-  /* La couleur vient d'une variable CSS injectée inline */
-  background: var(--cea-hero-bg, linear-gradient(140deg, #0a1a10 0%, #132d1c 100%));
-  box-shadow: 0 8px 32px -8px var(--cea-hero-glow, rgba(16,185,129,.35));
+  /* La teinte de difficulté vient d'une variable injectée inline (heroBg) */
+  background: var(--cea-hero-bg, linear-gradient(180deg,#2c2264 0%,#241a56 100%));
+  border: 1px solid var(--bo);
+  box-shadow: 0 18px 38px -20px rgba(6,2,22,.9);
 }
 /* Shimmer / sheen premium — bande lumineuse qui défile */
 .cea-hero::after {
@@ -830,10 +874,17 @@ function diffCss(c, alpha = 1) {
   return `hsl(${c.h} ${c.s} ${c.l} / ${alpha})`;
 }
 
+// Le hero est une CARTE DE L'ARÈNE, pas un aplat de couleur.
+//
+// Avant : la difficulté peignait tout le bloc, du sol au plafond. À 3/5 ça
+// donnait une dalle moutarde de 400 px au milieu d'une app nuit-violet, et le
+// résumé se lisait en doré sur doré. La difficulté reste lisible — c'est la
+// JAUGE qui la porte, plus une teinte de 8 % en haut de la carte. Un seul objet
+// coloré au lieu d'un mur.
 function heroBg(c) {
-  const base = diffCss(c, 1);
-  const dark = `hsl(${c.h} ${c.s} ${parseFloat(c.l) - 18}%)`;
-  return `linear-gradient(145deg, ${dark} 0%, ${base} 100%)`;
+  const teinte = diffCss(c, 0.16);
+  return `radial-gradient(120% 70% at 50% 0%, ${teinte} 0%, transparent 62%),
+          linear-gradient(180deg, #2c2264 0%, #241a56 100%)`;
 }
 
 // ─── Jauge de difficulté (HTML) ──────────────────────────────
@@ -885,12 +936,8 @@ function renderChips(activeSlug) {
 function renderFiche(c) {
   const col = diffColor(c.difficulte);
   const colCss = diffCss(col);
-  const glow = diffCss(col, 0.38);
 
-  const heroCss = `
-    --cea-hero-bg: ${heroBg(col)};
-    --cea-hero-glow: ${glow};
-  `.trim();
+  const heroCss = `--cea-hero-bg: ${heroBg(col)};`;
 
   return `
   <!-- HERO -->
