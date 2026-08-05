@@ -180,7 +180,13 @@
        une bille perdue au centre. Le logo occupe maintenant l'écran. */
     #splash .sp-logo{position:relative;width:min(78vw,320px);aspect-ratio:1;display:block;mix-blend-mode:screen}
     #splash .sp-logo video,#splash .sp-logo img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block}
-    #splash .sp-logo video{z-index:1}
+    /* Avant que la 1re frame soit décodée, certains navigateurs (iOS Safari,
+       quelques WebView Android) peignent la vidéo en BLANC par défaut au lieu
+       de transparent. Le parent est en mix-blend-mode:screen : screen(blanc,x)
+       = blanc plein écran → c'est la zone blanche qui apparaît au lancement,
+       le temps que la vidéo ait une image à montrer. On force son fond à la
+       couleur du splash pour neutraliser ce blanc. */
+    #splash .sp-logo video{z-index:1;background:#010208}
     /* Le poster est la dernière image (logo COMPLET) : l'afficher d'entrée
        spoilerait l'animation. Il ne sert donc que de repli — vidéo en erreur,
        autoplay refusé ou mouvement réduit. */
