@@ -1,10 +1,20 @@
 // ═══════════════════════════════════════════════════════════════
 // Edge Function : pass-checkout
-// Crée une session Stripe Checkout pour le Pass Permis ÉLÈVE :
-//   - mensuel : abonnement 4,99 €/mois (mode subscription) — LE SEUL VENDU
-//   - pass3 / pass6 : anciens paliers one-shot, PLUS PROPOSÉS nulle part depuis
-//     le 02/08/2026 (décision Rayan : un seul prix à 4,99 €). Ils restent ici
-//     pour ne pas casser un paiement déjà ouvert dans un onglet.
+// Crée une session Stripe Checkout pour le Pass Permis ÉLÈVE.
+//
+// UN SEUL palier : `mensuel`, abonnement 4,99 €/mois (mode subscription).
+//
+// ⛔ Les anciens paliers one-shot `pass3` (24,99 €) et `pass6` (39,99 €) ont
+// été RETIRÉS d'ici le 05/08/2026. Ils n'étaient plus proposés par aucun bouton
+// depuis le 02/08 (décision Rayan : un seul prix), mais la fonction les
+// acceptait encore : n'importe qui pouvait faire partir un paiement à 24,99 €
+// sur une offre qu'on ne vend plus, en appelant la fonction à la main. Ils
+// renvoient maintenant `unknown_plan` (400).
+//
+// ⚠️ Ne PAS les retirer de `stripe-webhook` ni de `pass_purchases` : des gens
+// ont réellement acheté ces paliers, leur accès doit continuer de vivre.
+// Idem pour PLAN_VALUE / PLAN_LABEL dans `src/pages/public/pass.js` : ils
+// servent à l'écran de succès d'un ancien acheteur qui revient sur son lien.
 //
 // Les prix sont INLINE (price_data) : rien à créer dans le dashboard Stripe.
 // Marche CONNECTÉ (JWT user → user_id rattaché) ou INVITÉ (anon key → Stripe
@@ -36,8 +46,8 @@ function json(body: unknown, status = 200) {
   });
 }
 
-// Paliers (montants en centimes). Depuis le 02/08/2026, seul `mensuel` est
-// proposé : 4,99 €/mois, le même prix pour tout le monde.
+// Paliers (montants en centimes). UN SEUL : 4,99 €/mois, le même prix pour
+// tout le monde. Tout ce qui n'est pas dans cette table est refusé en 400.
 const PLANS: Record<
   string,
   {
@@ -53,21 +63,6 @@ const PLANS: Record<
     name: "PermiGo — Abonnement mensuel",
     description:
       "Accès complet à PermiGo. Sans engagement, résiliable en un clic.",
-  },
-  // ── Ci-dessous : plus vendus (aucun bouton ne les appelle). ──
-  pass3: {
-    mode: "payment",
-    amount: 2499,
-    name: "Pass Permis 3 mois — Objectif Permis en 90 jours",
-    description:
-      "Accès complet à PermiGo pendant 3 mois. Pré-vente : remboursable sur simple demande.",
-  },
-  pass6: {
-    mode: "payment",
-    amount: 3999,
-    name: "Pass Permis 6 mois + bonus fondateur",
-    description:
-      "Accès complet à PermiGo pendant 6 mois + bonus fondateur. Pré-vente : remboursable sur simple demande.",
   },
 };
 

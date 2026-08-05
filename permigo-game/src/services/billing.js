@@ -27,7 +27,9 @@ export async function startCheckout() {
  * Pré-vente Pass Permis ÉLÈVE : lance le Checkout du palier choisi.
  * Marche connecté (JWT user → achat rattaché au compte) comme invité
  * (supabase-js envoie l'anon key → Stripe collecte l'email).
- * @param {'mensuel'|'pass3'|'pass6'} plan
+ * Un seul palier depuis le 05/08/2026 : tout le reste est refusé par le
+ * serveur (`unknown_plan`, 400).
+ * @param {'mensuel'} plan
  * @returns {Promise<void>} redirige la page si succès ; throw sinon.
  */
 export async function startPassCheckout(plan) {
