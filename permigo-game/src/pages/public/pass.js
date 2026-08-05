@@ -571,9 +571,11 @@ function renderAvis(lang, L, from, to) {
 // Montants en euros, pour la mesure publicitaire uniquement (Meta apprend « qui
 // achète combien »). ⚠️ Ce n'est PAS ce qui est facturé : le vrai prix vit dans
 // l'edge function pass-checkout, côté serveur.
-// ⚠️ pass3 / pass6 ne sont PLUS vendus (décision Rayan, 02/08/2026 : un seul
-// prix à 4,99 €/mois, fini le billet Or). Leurs valeurs restent ici pour les
-// anciens acheteurs qui reviennent sur #/pass?checkout=success&plan=pass3.
+// ⚠️ pass3 / pass6 ne sont plus vendus (02/08/2026) et le SERVEUR les refuse
+// depuis le 05/08/2026 (`unknown_plan` dans pass-checkout). Leurs valeurs
+// restent ici uniquement pour l'écran de succès d'un ancien acheteur qui
+// rouvre son lien #/pass?checkout=success&plan=pass3. Ne pas les retirer en
+// croyant nettoyer : ça casserait cet écran-là, pas une offre.
 const PLAN_VALUE = { mensuel: 4.99, pass3: 24.99, pass6: 39.99 };
 
 const PLAN_LABELS = {
@@ -1356,8 +1358,8 @@ export async function mount(root) {
 
       <!-- UNE seule offre (décision Rayan 02/08/2026). Trois cartes, puis deux,
            puis une : à 4,99 €/mois il n'y a plus rien à arbitrer, donc plus rien
-           à faire hésiter. Les plans pass3 / pass6 restent côté serveur pour les
-           anciens acheteurs, ils ne sont simplement plus proposés nulle part. -->
+           à faire hésiter. Les plans pass3 / pass6 sont retirés du serveur
+           depuis le 05/08/2026 : plus proposés, et plus achetables. -->
       <article class="pv-pass pv-pass-gold pv-rev">
         <div class="pv-pass-main">
           <div class="pv-pass-name">${P.mensuel.name}</div>
