@@ -20,8 +20,20 @@ import { setupReveals } from "@/utils/reveal-on-scroll.js";
 import { navigate } from "@/router.js";
 import { getFicheMeta } from "@/data/conduite-meta.js";
 import { getLang } from "@/utils/lang.js";
+import {
+  isFreeTierUser,
+  isFreeCentre,
+  FREE_CENTRE,
+} from "@/utils/free-tier.js";
 
 const CENTRES_PREMIUM_LOCKED = false;
+
+// L'élève en mode découverte lit UN centre en entier, les autres chips sont
+// cadenassées. ⚠️ Le routeur mure déjà `#/centre-examen/{autre-slug}`, mais le
+// sélecteur de centre ne passe PAS par le routeur : il fait un replaceState et
+// re-rend la page sur place. Sans ce garde-fou, deux clics dans les chips
+// ouvraient les 30 fiches payantes.
+let _gated = false;
 
 // ── i18n de la COQUE (les données propres à chaque centre restent dans
 // data/centres-examen.js). Dict local, repli FR systématique.
@@ -271,6 +283,13 @@ const STYLE = `<style>
 /* sur la puce active, le n° de département (span opacity:.65) doit rester lisible
    sur fond accent → opacité pleine, sinon le blend tombe sous 4.5:1 (a11y) */
 .cea-chip.active span { opacity: 1 !important; }
+/* Découverte : chip d'un centre payant. Assez visible pour donner envie, assez
+   discrète pour qu'on voie tout de suite laquelle est ouverte. Pas d'opacité
+   sous .7 : le nom du centre est justement l'argument. */
+.cea-chip.locked {
+  opacity: .78;
+  border-style: dashed;
+}
 .cea-chip.soon {
   opacity: .5;
   cursor: default;
@@ -842,12 +861,21 @@ function mapsUrl(c) {
 // ─── Chips sélecteur ─────────────────────────────────────────
 function renderChips(activeSlug) {
   const chips = listCentres()
-    .map(
-      (c) =>
-        `<button class="cea-chip${c.slug === activeSlug ? " active" : ""}" data-slug="${escAttr(c.slug)}" type="button">
-           ${esc(c.nom)} <span style="opacity:.65;font-weight:600">${esc(c.deptNum)}</span>
-         </button>`,
-    )
+    .map((c) => {
+      // Découverte : le centre offert reste cliquable, les autres deviennent
+      // une invitation à débloquer. On garde le NOM lisible plutôt qu'un chip
+      // grisé anonyme : l'élève doit voir ce qu'il y a derrière le cadenas.
+      const locked = _gated && !isFreeCentre(c.slug);
+      const attr = locked
+        ? `data-lock="${escAttr(c.slug)}"`
+        : `data-slug="${escAttr(c.slug)}"`;
+      const mark = locked
+        ? `<span style="opacity:.8">${icon("lock", { size: 12 })}</span> `
+        : "";
+      return `<button class="cea-chip${c.slug === activeSlug ? " active" : ""}${locked ? " locked" : ""}" ${attr} type="button">
+           ${mark}${esc(c.nom)} <span style="opacity:.65;font-weight:600">${esc(c.deptNum)}</span>
+         </button>`;
+    })
     .join("");
   const soon = `<span class="cea-chip soon">${icon("plus", { size: 13 })} ${txt("other_centres", "Autres centres bientôt")}</span>`;
   return `<div class="cea-chips-wrap"><div class="cea-chips">${chips}${soon}</div></div>`;
@@ -1109,12 +1137,18 @@ export async function mount(root, param) {
 
   root.innerHTML = skeleton();
 
-  const active = getCentre(param) ? param : CENTRES_EXAMEN[0].slug;
+  _gated = isFreeTierUser(me);
+
+  let active = getCentre(param) ? param : CENTRES_EXAMEN[0].slug;
+  // Filet : le routeur ne laisse déjà passer que le centre offert en découverte,
+  // mais mount() est aussi appelé par le sélecteur et par un retour arrière.
+  if (_gated && !isFreeCentre(active)) active = FREE_CENTRE;
 
   track("page_view", {
     page: "centre-examen",
     centre: active,
     user_role: me.role,
+    gated: _gated,
   });
 
   root.innerHTML = template(active);
@@ -1140,6 +1174,18 @@ function wire(root, active) {
       animateHero(root);
       setupReveals(root);
       wire(root, active);
+    });
+  });
+
+  // Découverte : chip d'un centre payant → le mur, avec le nom du centre dans
+  // l'événement. C'est le meilleur signal d'intention d'achat de la page : il a
+  // lu une fiche en entier et il en veut une autre.
+  root.querySelectorAll(".cea-chip[data-lock]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      haptic("select");
+      track("centre_examen_locked_click", { centre: btn.dataset.lock });
+      const { mount: mountWall } = await import("@/pages/eleve/pass-requis.js");
+      await mountWall(root, getCurUser());
     });
   });
 

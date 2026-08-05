@@ -13,9 +13,11 @@
 // DA « Ticket d'Or » (retours Rayan après SON vrai paiement, 15/07 soir) :
 //  - logo = le badge de marque (/p-badge.png), plus de wordmark illisible
 //  - PLUS de compteur de places ni de billet numéroté (retiré à sa demande)
-//  - garantie repensée : « satisfait ou remboursé — 3 jours d'essai »,
-//    puis annulation à tout moment (fini le « remboursé sans question »
-//    exploitable) ; questionnaire de départ → #/avis-depart
+//  - la garantie « satisfait ou remboursé » ne sert PLUS d'argument de vente
+//    (carte retirée par #704, puis les 3 derniers restes le 05/08/2026 : pied
+//    de page, réponse FAQ, écran de succès). Elle reste vraie et vit dans les
+//    mentions légales, seul endroit qui l'engage. Ici on vend l'annulation en
+//    un clic ; questionnaire de départ → #/avis-depart
 //  - titre section : « Préparer le permis, c'est bien plus que conduire. »
 //  - centres d'examen montrés avec une vraie capture (fiche Cergy)
 //  - succès post-paiement : « Bienvenue dans l'aventure », installation de
@@ -181,11 +183,11 @@ const STR = {
         "Oui. Phrases courtes, mots simples, mini-jeux visuels. Et cette page existe en anglais et en arabe (boutons EN et AR en haut). Par message, on t'aide pas à pas.",
       ],
       [
-        "Je peux annuler ou être remboursé ?",
-        `Pendant les 3 premiers jours : <strong>satisfait ou remboursé</strong>. Ensuite, l'abonnement s'annule à tout moment en un clic. Tu pars ? <a href="#/avis-depart">Dis-nous pourquoi ici</a>. Ça nous aide à améliorer l'app.`,
+        "Je peux annuler quand je veux ?",
+        `Oui. L'abonnement s'annule <strong>à tout moment en un clic</strong>, depuis Réglages. Tu pars ? <a href="#/avis-depart">Dis-nous pourquoi ici</a>. Ça nous aide à améliorer l'app.`,
       ],
     ],
-    foot: `Paiement sécurisé par Stripe · Satisfait ou remboursé sous 3 jours<br><a href="#/legal">Mentions légales</a> · <a href="#/rejoindre?solo=1">Créer un compte gratuit</a>`,
+    foot: `Paiement sécurisé par Stripe<br><a href="#/legal">Mentions légales</a> · <a href="#/rejoindre?solo=1">Créer un compte gratuit</a>`,
     pros: `Moniteur indépendant ? <a href="#/creer-compte">Crée ton espace</a> · Auto-école ? <a href="#/pro">Demander un devis</a>`,
     // Barre collante : le gratuit est LE bouton, l'achat passe en second rang.
     // Avant, « Ou commencer gratuitement » était un texte à gauche du bouton
@@ -202,7 +204,6 @@ const STR = {
       "<b>Installe l'app sur ton téléphone</b> pour recevoir les rappels de révision : iPhone → Safari → Partager → « Sur l'écran d'accueil ». Android → Chrome → menu ⋮ → « Installer l'application ».",
       "<b>Besoin d'aide ?</b> Écris-nous : on t'aide pas à pas.",
     ],
-    successGuarantee: "Et bien sûr : satisfait ou remboursé pendant 3 jours.",
     successCta: "Ouvrir PermiGo",
     successCtaSolo: "Créer mon compte · accès immédiat",
   },
@@ -300,11 +301,11 @@ const STR = {
         "Yes. Keep your lessons. PermiGo works in between. If your instructor uses PermiGo, your progress syncs with them.",
       ],
       [
-        "Can I cancel or get a refund?",
-        `First 3 days: <strong>money-back guarantee</strong>. After that, the subscription cancels anytime in one click. Leaving? <a href="#/avis-depart">Tell us why here</a>. It helps us improve.`,
+        "Can I cancel whenever I want?",
+        `Yes. The subscription cancels <strong>anytime in one click</strong>, from Settings. Leaving? <a href="#/avis-depart">Tell us why here</a>. It helps us improve.`,
       ],
     ],
-    foot: `Secure payment by Stripe · 3-day money-back guarantee<br><a href="#/legal">Legal notice</a> · <a href="#/rejoindre?solo=1">Create a free account</a>`,
+    foot: `Secure payment by Stripe<br><a href="#/legal">Legal notice</a> · <a href="#/rejoindre?solo=1">Create a free account</a>`,
     pros: `Driving instructor? <a href="#/creer-compte">Create your space</a> · Driving school? <a href="#/pro">Ask for a quote</a>`,
     stickyFree: "Start for free",
     stickyPaid: "Unlock everything · €4.99/month",
@@ -318,7 +319,6 @@ const STR = {
       "<b>Install the app on your phone</b> to get revision reminders: iPhone → Safari → Share → “Add to Home Screen”. Android → Chrome → ⋮ menu → “Install app”.",
       "<b>Need help?</b> Message us. We'll walk you through it, step by step.",
     ],
-    successGuarantee: "And of course: 3-day money-back guarantee.",
     successCta: "Open PermiGo",
     successCtaSolo: "Create my account · instant access",
   },
@@ -417,11 +417,11 @@ const STR = {
         "نعم. احتفظ بدروسك. يعمل PermiGo في ما بينها. وإذا كان مدرّبك يستخدم PermiGo، يتزامن تقدّمك معه.",
       ],
       [
-        "هل يمكنني الإلغاء أو استرداد أموالي؟",
-        `أول 3 أيام: <strong>مضمون أو استرداد أموالك</strong>. بعد ذلك، يُلغى الاشتراك في أي وقت بنقرة واحدة. هل ستغادر؟ <a href="#/avis-depart">أخبرنا بالسبب هنا</a>. هذا يساعدنا على التحسّن.`,
+        "هل يمكنني الإلغاء متى شئت؟",
+        `نعم. يُلغى الاشتراك <strong>في أي وقت بنقرة واحدة</strong> من الإعدادات. هل ستغادر؟ <a href="#/avis-depart">أخبرنا بالسبب هنا</a>. هذا يساعدنا على التحسّن.`,
       ],
     ],
-    foot: `دفع آمن عبر Stripe · مضمون أو استرداد أموالك خلال 3 أيام<br><a href="#/legal">الإشعارات القانونية</a> · <a href="#/rejoindre?solo=1">أنشئ حساباً مجانياً</a>`,
+    foot: `دفع آمن عبر Stripe<br><a href="#/legal">الإشعارات القانونية</a> · <a href="#/rejoindre?solo=1">أنشئ حساباً مجانياً</a>`,
     pros: `مدرّب قيادة مستقل؟ <a href="#/creer-compte">أنشئ مساحتك</a> · مدرسة قيادة؟ <a href="#/pro">اطلب عرض سعر</a>`,
     stickyFree: "ابدأ مجاناً",
     stickyPaid: "افتح كل شيء · €4.99/شهر",
@@ -435,7 +435,6 @@ const STR = {
       "<b>ثبّت التطبيق على هاتفك</b> لتصلك تذكيرات المراجعة: آيفون ← Safari ← مشاركة ← «إضافة إلى الشاشة الرئيسية». أندرويد ← Chrome ← قائمة ⋮ ← «تثبيت التطبيق».",
       "<b>تحتاج مساعدة؟</b> راسلنا. سنرافقك خطوة بخطوة.",
     ],
-    successGuarantee: "وبالطبع: مضمون أو استرداد أموالك خلال 3 أيام.",
     successCta: "افتح PermiGo",
     successCtaSolo: "أنشئ حسابي · وصول فوري",
   },
@@ -1067,7 +1066,6 @@ const STYLE = `<style>
     background: linear-gradient(180deg, #ffe08a, var(--gold) 60%, var(--gold-dp));
     border-radius: 50%; box-shadow: inset 0 1.5px 0 rgba(255,255,255,.55), 0 2.5px 0 #a86e00;
   }
-  .pv-result-guarantee { text-align: center; font: 600 12.5px/1.5 'Archivo', sans-serif; color: var(--ink-dim); margin: 16px 0 0; }
   .pv-result-cta {
     display: block; width: 100%; max-width: 320px; margin: 20px auto 0;
     border: 0; cursor: pointer; border-radius: 16px; padding: 15px;
@@ -1237,7 +1235,6 @@ export async function mount(root) {
           <div class="pv-steps">
             ${L.successSteps.map((s) => `<div class="pv-step"><div>${s}</div></div>`).join("")}
           </div>
-          <p class="pv-result-guarantee">${L.successGuarantee}</p>
           <button class="pv-result-cta" id="pv-home" type="button">${me ? L.successCta : L.successCtaSolo}</button>
         </div>
         <footer class="pv-foot">${L.foot}<br><span class="pv-foot-pros">${L.pros}</span></footer>
