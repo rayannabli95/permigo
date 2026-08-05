@@ -86,14 +86,29 @@ const ILLUSTRATIONS = {
  * fait glisser), mais ses zones ont été recalées en même temps que le décor
  * (voir `missions-pilote.js`, mission `c1c-siege`), donc les deux avancent
  * ensemble plutôt que l'un sans l'autre.
+ *
+ * Deuxième exception (05/08, plus tard) : `cockpit` et `intersection` ont
+ * des missions `spot` (zones de « Trouver »), mais dans l'autre sens que le
+ * siège : au lieu de recaler les zones sur un nouveau décor, le décor a été
+ * COMPOSÉ pour tomber sur les zones qui existaient déjà (commodo gauche visible
+ * là où `c1a-commodos` pose sa zone, voiture garée + ouverture entre les
+ * bâtiments là où `c2f-indices`/`c3g-masque` posent les leurs). Possible ici
+ * parce que les zones restent des cadres en pointillés (jamais un repère
+ * précis à quelques pixels près) : `missions-pilote.js` n'a pas bougé.
  */
 const DECORS = {
   "city-light": { alt: "Un feu tricolore isolé, la nuit, en ville" },
+  cockpit: {
+    alt: "Le poste de conduite, volant et commodos de part et d'autre",
+  },
   emergency: {
     alt: "Un piéton qui surgit soudainement devant la voiture",
     src: "emergency-2026-08-05b",
   },
   gps: { alt: "Une sortie d'autoroute déjà passée, vue dans le rétroviseur" },
+  intersection: {
+    alt: "Un carrefour au crépuscule, une voiture garée et une rue qui débouche",
+  },
   motorway: { alt: "Une insertion sur autoroute avec la circulation qui file" },
   "motorway-shoulder": {
     alt: "La voiture arrêtée en sécurité sur la bande d'arrêt d'urgence",
@@ -148,8 +163,6 @@ export function renderArt(visual, options = {}) {
       width="${decor.width || 1600}" height="${decor.height || 1067}" aria-hidden="true">`;
   }
   if (estUnePiece(visual)) return renderPiece(visual, options);
-  if (visual === "cockpit") return artCockpit();
-  if (visual === "intersection") return artIntersection();
   if (visual === "roundabout") return artRoundabout();
   if (visual === "bend") return artBend();
   if (visual === "night") return artNight();

@@ -133,10 +133,10 @@ Avant de générer quoi que ce soit en prod, voilà où on en est réellement.
 
 Priorité fixée sur la fréquence réelle d'usage dans les 65 missions (comptée dans `missions-pilote.js`).
 
-- [x] **`intersection`** (3 usages) ✅ carrefour parisien crépuscule, feu et panneaux corrects.
+- [x] **`intersection`** (3 usages) ✅ carrefour au crépuscule. Généré une première fois dans la session initiale mais jamais branché ; **rebranché le 05/08 en fin de session** avec les zones tactiles de `c2f-indices` et `c3g-masque` (mode `spot`) inchangées, en composant le décor pour tomber dessus (voiture garée à gauche, ouverture entre les bâtiments à droite). Vérifié en jouant les deux missions en vrai.
 - [x] **`night`** (2 usages) ✅ route de campagne étoilée, badge P correct.
 - [x] **`city-light`** (8 usages, LE plus fréquent) ✅ VERROUILLÉ après correction : le premier essai montrait le feu rouge ET vert allumés en même temps (incohérence détectée et corrigée immédiatement, cf. règle §5).
-- [ ] **`cockpit`** (5 usages, décor par défaut) 🔴 **problème non résolu** : dès que le décor de jour est un peu détaillé (ici un lotissement pavillonnaire), le rendu extérieur redevient quasi photoréaliste malgré un habitacle bien figé sur la référence. Le style « glossy jouet » ne tient que sur des scènes stylisées simples ou nocturnes ; les scènes de JOUR avec beaucoup de détails architecturaux semblent pousser le modèle vers le réalisme. À creuser : insister encore plus fort sur le rendu stylisé dans le prompt, ou accepter un léger réalisme le jour tant que ça reste cohérent avec la charte.
+- [x] **`cockpit`** (5 usages, décor par défaut) ✅ **résolu autrement, le 05/08 en fin de session.** Le problème n'était pas de rendre la rue en jouet, c'était de la montrer du tout : recadré en gros plan sur l'habitacle (volant, deux commodos, compteurs), sans aucune fenêtre sur l'extérieur, donc plus aucune dérive photoréaliste possible. Branché avec les zones tactiles de `c1a-commodos` (mode `spot`) inchangées. Un premier essai a doublé le volant en fantôme et recopié par erreur le fond du giratoire de référence ; corrigé en insistant sur « UN SEUL volant » et « pas de vue extérieure ».
 - [x] **`rain`** (5 usages) ✅ pluie battante, essuie-glaces en mouvement, ville mouillée.
 - [x] **`tunnel`** (2 usages) ✅ aucune voiture dans le champ, aucun risque.
 - [x] **`parking`** (3 usages) ✅ VERROUILLÉ après correction : le premier essai montrait une Ferrari 458 rouge ET une berline façon Audi jaune garées, deux vraies voitures de marque reconnaissables. Corrigé en imposant des voitures génériques ternes (gris, bleu marine) sans silhouette de marque.
@@ -192,6 +192,20 @@ Les trois décors repérés ci-dessus ont été régénérés en repartant du **
 **`emergency` a eu besoin d'un second passage** : le piéton toy avait une tête bien ronde mais **totalement vide, sans le moindre trait de visage**, un rendu plus dérangeant que la version photo qu'il remplaçait. Corrigé en imposant explicitement « deux points pour les yeux et un sourire, comme la mascotte, PAS une tête sans visage ».
 
 ⚠️ **Ces trois fichiers étaient déjà en prod sous ce nom exact** (mergés dans #708 le jour même). Écraser le même nom aurait laissé l'ancienne version à vie chez qui avait déjà installé l'app (piège du cache déjà documenté, cf. la règle sur les noms de fichiers datés). Renommés en `-2026-08-05b` et le code de `pilote-scenes.js` a été adapté pour lire un nom de fichier différent du nom du décor quand `src` est précisé dans `DECORS`.
+
+### Les 12 décors qui restaient en CSS : aucun n'est un remplacement simple (05/08, fin de session)
+
+Rayan a demandé de continuer sur les décors encore dessinés en CSS (`cockpit`, `intersection`, `bend`, `night`, `mirror`, `exterior`, `insertion`, `brouillard-file`, `voie-garee`, `overtake-empty`, `overtake-top`, `overtake-top-libre`). Vérification faite mission par mission dans `missions-pilote.js` : **contrairement aux 10 décors à 1 usage faits plus tôt dans la journée, ces 12-là portent TOUS au moins une mission `spot`, `trajectory` ou `placement`** posant des coordonnées précises dessus. Aucun n'est donc un simple remplacement d'image : chacun demande soit de recaler les coordonnées de la mission sur le nouveau décor (méthode du siège, §7ter), soit de composer le nouveau décor pour qu'il tombe sur des coordonnées existantes (méthode utilisée ici pour `cockpit` et `intersection`, plus bas).
+
+**Deux traités ce soir en pilote : `cockpit` (5 usages, le plus fréquent) et `intersection` (3 usages).** Les deux étaient déjà générés depuis la session initiale mais jamais branchés dans `DECORS` : `cockpit` avait la même dérive photoréaliste que les autres ce jour-là (une rue de lotissement détaillée derrière l'habitacle), `intersection` était correct mais restait un fichier mort sur le disque, jamais chargé par aucun client (donc sans risque de cache à écraser).
+
+**Le vrai déblocage sur `cockpit` : ne pas essayer de rendre la rue en jouet, l'enlever du cadre.** Un simple recadrage en gros plan sur l'habitacle (volant + deux commodos + compteurs, aucune fenêtre visible) supprime le problème à la racine : sans rue à dessiner, plus de dérive possible vers le photoréalisme. Les zones tactiles de `c1a-commodos` n'ont pas bougé, le nouveau décor a été composé pour tomber dessus.
+
+**`intersection` sert DEUX missions avec des zones différentes** (`c2f-indices` : voiture garée à gauche + ouverture à droite ; `c3g-masque` : devant du véhicule + toit de bâtiment). Une image ne peut pas bouger sans casser l'une des deux : le nouveau décor a donc été composé pour satisfaire les deux jeux de coordonnées à la fois (voiture à gauche, ouverture à droite, ciel en haut, toit visible en haut à droite), sans toucher `missions-pilote.js`.
+
+⚠️ Repéré au passage sans le corriger (hors sujet du jour) : le texte de `c3g-masque` dit « un véhicule est arrêté à droite » mais sa zone `front` est positionnée à GAUCHE (x=6). Le déplacer casserait `c2f-indices`, qui a besoin de sa voiture garée exactement là. À trancher séparément : soit le texte se trompe de côté, soit il faudrait deux décors distincts au lieu d'un partagé.
+
+**Reste à faire, même méthode à appliquer un par un** : `bend`, `night`, `mirror`, `exterior`, `insertion`, `brouillard-file`, `voie-garee`, `overtake-empty`, `overtake-top`, `overtake-top-libre`.
 
 ## 8. Ce qui reste ouvert (prochaine session)
 
