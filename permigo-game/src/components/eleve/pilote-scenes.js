@@ -72,6 +72,34 @@ const ILLUSTRATIONS = {
 };
 
 /**
+ * Les décors de rue générés (Art Bible 2.0, 05/08/2026) : un monde glossy
+ * plastique façon jouet premium, calé sur la voiture et l'habitacle
+ * PermiGo verrouillés. Détail complet : `docs/ART_BIBLE_CERTIF_2026.md`.
+ *
+ * ⚠️ Seuls les décors dont AUCUNE mission ne pose de zone tactile ou de
+ * tracé en pourcentage dessus sont ici. Un décor où l'élève doit taper une
+ * zone précise (mode `spot`), tracer un chemin (`trajectory`) ou faire
+ * glisser une pièce (`placement`) reste en CSS : ses coordonnées sont
+ * calées sur l'ancien schéma, un nouveau décor les décalerait toutes.
+ */
+const DECORS = {
+  "city-light": { alt: "Un feu tricolore isolé, la nuit, en ville" },
+  emergency: { alt: "Un piéton qui surgit soudainement devant la voiture" },
+  gps: { alt: "Une sortie d'autoroute déjà passée, vue dans le rétroviseur" },
+  motorway: { alt: "Une insertion sur autoroute avec la circulation qui file" },
+  "motorway-shoulder": {
+    alt: "La voiture arrêtée en sécurité sur la bande d'arrêt d'urgence",
+  },
+  rain: { alt: "Une route sous la pluie, essuie-glaces en mouvement" },
+  roundabout: { alt: "Un giratoire avec un panneau cédez le passage" },
+  parking: { alt: "Un parking avec des places libres et occupées" },
+  tunnel: { alt: "L'entrée d'un tunnel, la sortie visible au loin" },
+  "overtake-oncoming": {
+    alt: "Un cycliste devant et une voiture qui arrive en face",
+  },
+};
+
+/**
  * @param {string} visual nom du décor, de la pièce ou de la photo
  * @param {object} [options] réglages passés à la pièce (usure, rapport, niveau)
  */
@@ -87,6 +115,12 @@ export function renderArt(visual, options = {}) {
     // image qui arrive après coup ferait sauter la mise en page.
     return `<img class="mp-photo" src="${photo.src}" alt="" loading="eager"
       decoding="async" width="1100" height="825" aria-hidden="true">`;
+  }
+  const decor = DECORS[visual];
+  if (decor) {
+    return `<img class="mp-decor" src="/pilote/decors/${visual}-2026-08-05.webp"
+      alt="${decor.alt}" loading="eager" decoding="async"
+      width="1600" height="1067" aria-hidden="true">`;
   }
   if (estUnePiece(visual)) return renderPiece(visual, options);
   if (visual === "cockpit") return artCockpit();
