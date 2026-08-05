@@ -171,6 +171,20 @@ Concrètement : un décor `seat-profile-2026-08-05.webp` (habitacle en coupe, vi
 
 **Cette méthode (décor vide + pièce détourée) est probablement transposable aux 10 autres décors `placement`/`spot`/`trajectory` encore en CSS**, à condition que la zone à toucher ne soit pas un détail fixe DANS le décor (un panneau précis, un angle mort précis) mais un espace continu où la position compte plus que le contenu exact dessous.
 
+### 🔴🔴 Le décor était bon, c'est le cadre qui le mangeait (05/08, après test sur téléphone)
+
+Première partie de missions jouée en vrai sur un téléphone (390 × 844, compte élève, missions enchaînées comme un élève la veille de sa leçon). Trois décors sur quatre m'ont paru « trop photoréalistes, pas assez jouet », et j'allais en relancer quatre en génération. **C'était faux, et ça aurait coûté quatre images pour rien.**
+
+Le vrai coupable : la scène a une hauteur figée en pixels (270 px), héritée des décors DESSINÉS calés au pixel, et deux modes la raccourcissent encore (184 px pour « Décider », 145 px pour « Ordonner »). Une image y était donc rognée en hauteur : **mesuré 24 % de perte en mode « Décider » et 40 % en mode « Ordonner »**. Sur le parking, la scène montrait deux voitures jouet, des places marquées, des arbres, un levier de vitesse : on n'en voyait qu'un bandeau, le reste étant du tableau de bord. Le décor n'avait jamais été photoréaliste, il était **décapité**.
+
+**Règle : avant de juger une image, la regarder dans le CADRE où elle vivra, pas dans l'outil qui l'a produite.** Une image jugée bonne à la génération peut être mauvaise à l'écran, et l'inverse est vrai aussi. La bonne façon de juger un décor est une capture de l'écran réel sur un vrai gabarit de téléphone, pas la vignette du générateur.
+
+Corrigé côté code : une image reprend sa hauteur naturelle et va de bord à bord de la colonne, donc plus aucun rognage, et la scène gagne entre 43 % et 82 % de surface. Le seul décor qui reste vraiment trop photo après correction est **`rain`** (rue grise photographique derrière un tableau de bord jouet). `emergency` et `tunnel` sont à revoir de près.
+
+Autre mesure du même test : il restait **158 à 380 px de noir vide** sous la dernière réponse, jusqu'à 45 % de l'écran sur la mission du siège. La page avait l'air coupée. Corrigé aussi (colonne en flex, la place va aux cartes de réponse qui deviennent plus faciles à viser au pouce).
+
+⚠️ **Reste ouvert** : les missions sans liste de réponses (« Placer », « Trouver ») gardent du vide, parce que l'image est panoramique et l'écran est haut. Pour celles-là il faudra un décor **cadré plus haut** (4/3 plutôt que 3/2), pas une correction de code.
+
 ## 8. Ce qui reste ouvert (prochaine session)
 
 - [ ] Construire le kit France (§5) élément par élément, avec validation visuelle de chaque pièce

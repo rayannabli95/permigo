@@ -201,12 +201,18 @@ body.mp-open #header-bar {
   display: none;
 }
 
+/* Colonne en flex pour que le bas de la mission se pose SUR le bas de
+   l'écran. Avant, tout était empilé en haut et il restait 260 à 380 px de
+   noir vide sous la dernière réponse (mesuré le 05/08 sur un vrai téléphone,
+   45 % de l'écran sur la mission du siège). La page avait l'air coupée. */
 .mp-play {
   min-height: 100%;
   max-width: 480px;
   margin: 0 auto;
   padding: calc(env(safe-area-inset-top, 0px) + 8px) 16px
     calc(26px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
 }
 
 /* Les couleurs du prototype étaient portées par son <body> nuit. Dans l'app,
@@ -281,8 +287,18 @@ body.mp-open #header-bar {
   letter-spacing: -0.035em;
 }
 
+/* `flex: 1` : le bloc de la mission prend la hauteur qui reste dans la
+   colonne, au lieu de s'empiler en haut et de laisser un trou noir en bas.
+   Ce qu'il fait de cette hauteur dépend du mode (cf. `.mp-choice-list`). */
 .mp-interaction {
   margin-top: 15px;
+  flex: 1;
+}
+
+/* Colonne, pour que la liste des réponses puisse prendre la place restante. */
+.mp-choice-interaction {
+  display: flex;
+  flex-direction: column;
 }
 
 .mp-scene {
@@ -356,6 +372,41 @@ body.mp-open #header-bar {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+/* ── Un décor image reprend la main sur la hauteur ────────────────────────
+   Les hauteurs en pixels plus bas (270, 184, 145) existent pour les décors
+   DESSINÉS, calés au pixel. Une image n'a pas cette contrainte, et ces
+   hauteurs la rognaient : mesuré le 05/08 sur un vrai téléphone, 24 % de
+   l'image perdue en mode « Décider » et 40 % en mode « Ordonner ». Sur le
+   parking on ne voyait plus le parking, juste le tableau de bord.
+
+   L'image reprend donc sa hauteur naturelle et va de bord à bord de la
+   colonne. Plus aucun rognage, et la scène gagne environ la moitié de sa
+   surface. C'est `height: auto` sur l'image qui fixe la hauteur de la boîte,
+   donc chaque décor garde SES proportions sans qu'on les écrive nulle part. */
+.mp-choice-interaction .mp-scene:has(.mp-decor),
+.mp-sequence-interaction .mp-scene:has(.mp-decor),
+.mp-placement-interaction .mp-scene:has(.mp-decor),
+.mp-spot-interaction .mp-scene:has(.mp-decor),
+.mp-scene:has(.mp-decor) {
+  width: calc(100% + 32px);
+  height: auto;
+  margin-inline: -16px;
+  border-inline: 0;
+  border-radius: 0;
+}
+
+/* La couche d'art n'est plus posée en absolu : c'est elle qui porte la
+   hauteur de la scène. Les couches par-dessus (voile, zones, pièce) restent
+   en absolu sur `.mp-scene` et se calent donc dessus toutes seules. */
+.mp-scene-art:has(.mp-decor) {
+  position: relative;
+}
+
+.mp-scene:has(.mp-decor) .mp-decor {
+  height: auto;
+  display: block;
 }
 
 .mp-scene-art:has(.mp-decor)::after {
@@ -531,10 +582,21 @@ body.mp-open #header-bar {
   line-height: 1.35;
 }
 
+/* La liste prend la place qui reste sous la scène. Sur un écran de 844 px il
+   restait 250 px de noir vide sous la dernière réponse, alors même que les
+   cartes étaient serrées à 8 px les unes des autres. L'espace va donc aux
+   réponses : elles respirent et surtout elles deviennent plus faciles à viser
+   au pouce. Quand la page est pleine (5 réponses), rien ne change, la grille
+   reprend simplement ses 8 px. */
 .mp-choice-list {
   display: grid;
   gap: 8px;
   margin-top: 13px;
+  flex: 1;
+  /* La place va dans les CARTES, pas dans les écarts entre elles : une carte
+     plus haute se vise mieux au pouce qu'un grand trou entre deux cartes.
+     Le `minmax` garde les 60 px de hauteur minimale quand la page est pleine. */
+  grid-auto-rows: minmax(60px, 1fr);
 }
 
 .mp-answer-card {
@@ -611,8 +673,14 @@ body.mp-open #header-bar {
   stroke-width: 2.7;
 }
 
+/* `auto` et pas 13 px : le retour et le coup de pouce se posent SUR le bas de
+   l'écran, et l'espace qui reste passe au-dessus d'eux plutôt que de pendre
+   sous la page (cf. la colonne en flex, `.mp-play`). Les réponses descendent
+   vers le pouce au passage. Le 13 px reste le minimum quand la page est
+   pleine et que rien ne dépasse. */
 .mp-play-bottom {
-  margin-top: 13px;
+  margin-top: auto;
+  padding-top: 13px;
 }
 
 .mp-feedback {
