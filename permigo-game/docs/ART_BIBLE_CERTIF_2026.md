@@ -163,6 +163,14 @@ Priorité fixée sur la fréquence réelle d'usage dans les 65 missions (compté
 
 **🔴 Règle ajoutée (05/08) : jamais de voiture tierce à silhouette reconnaissable dans le décor.** Deux essais sur deux ont fait apparaître spontanément une vraie marque (Ferrari 458, un coupé sport, une berline type Audi) dès qu'une scène demandait « une autre voiture » sans préciser son style. **Toujours préciser explicitement** : voiture générique, ton terne (gris/bleu marine), proportions rondes façon jouet, jamais une silhouette de marque précise. Vérifier ce point sur CHAQUE scène qui inclut un véhicule tiers.
 
+### `seat-profile` : le 11e décor débloqué (05/08, en fin de session)
+
+Ce décor faisait partie des 11 mis de côté avec la mission `placement` (le siège qu'on fait glisser vers la bonne distance des pédales) : recalibrer ses zones tactiles semblait risqué. Idée de Rayan pour le débloquer sans y toucher à l'aveugle : **séparer le décor (fixe, généré une fois) de la pièce qu'on déplace (elle aussi une image, générée à part, fond retiré).** Comme le décor ne porte alors AUCUNE zone dessinée dessus (juste un habitacle vide avec un rail), on peut redéfinir les coordonnées des 3 zones et du départ en même temps que le décor, sans essayer de faire correspondre une nouvelle image à d'anciennes coordonnées CSS.
+
+Concrètement : un décor `seat-profile-2026-08-05.webp` (habitacle en coupe, vide, rail au sol, tableau de bord et pédales à droite) + une pièce `siege-conducteur-2026-08-05.webp` (siège avec conducteur, vu de profil, fond retiré via `remove_background`) qui glisse dessus. Les 3 zones (`trop-loin`, `juste`, `trop-pres`) et le point de départ ont été repositionnés à la main pour coller au nouveau rail, vérifiés par une capture d'écran hors-app (le login du serveur de preview local échouait, contournement : une page HTML statique qui rejoue exactement le balisage de la scène). Résultat correct aux deux extrêmes testées (position de départ et position centrale).
+
+**Cette méthode (décor vide + pièce détourée) est probablement transposable aux 10 autres décors `placement`/`spot`/`trajectory` encore en CSS**, à condition que la zone à toucher ne soit pas un détail fixe DANS le décor (un panneau précis, un angle mort précis) mais un espace continu où la position compte plus que le contenu exact dessous.
+
 ## 8. Ce qui reste ouvert (prochaine session)
 
 - [ ] Construire le kit France (§5) élément par élément, avec validation visuelle de chaque pièce

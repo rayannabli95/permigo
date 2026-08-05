@@ -66,21 +66,16 @@ const PIECE_PLACEMENT = Object.freeze({
  * Les dessins disponibles pour la pièce, choisis par `piece.forme`.
  *
  * `conducteur` : un conducteur dans son siège, vu de profil (réglage du poste).
+ * Une image plutôt qu'un dessin : Art Bible 2.0 du 05/08/2026, même technique
+ * que le décor `seat-profile` qu'elle glisse par-dessus. `remove_background`
+ * lui a retiré son fond, ne reste que la silhouette du siège et du conducteur.
  * `voiture` : une voiture vue de dessus, pour tout ce qui se joue en plan
  * (la place dans la voie, l'espace pour doubler, la distance à garder).
  */
 const FORMES_PIECE = {
   conducteur: `
-    <svg class="mp-placement-driver" viewBox="0 0 140 100" aria-hidden="true">
-      <path class="mp-driver-seat-back" d="M27 25 Q23 26 24 35 L28 71 Q29 78 36 78 L43 76 L40 30 Q39 24 33 24Z"/>
-      <path class="mp-driver-seat-base" d="M31 69 Q33 64 41 64 H70 Q76 65 75 72 Q74 78 67 79 H37 Q31 78 31 69Z"/>
-      <path class="mp-driver-seat-rail" d="M34 83 H76"/>
-      <circle class="mp-driver-head" cx="57" cy="19" r="10"/>
-      <path class="mp-driver-body" d="M48 31 Q55 27 63 31 Q68 42 65 62 L52 67 Q44 54 46 39Z"/>
-      <path class="mp-driver-arm" d="M59 38 L84 48 L108 43"/>
-      <path class="mp-driver-leg" d="M56 63 L89 68 L119 83"/>
-      <path class="mp-driver-foot" d="M116 83 H133"/>
-    </svg>`,
+    <img class="mp-placement-photo" src="/pilote/pieces/siege-conducteur-2026-08-05.webp"
+      alt="" loading="eager" decoding="async" width="700" height="700">`,
   voiture: `
     <svg class="mp-placement-car" viewBox="0 0 60 100" aria-hidden="true">
       <rect class="mp-car-body" x="6" y="4" width="48" height="92" rx="11"/>

@@ -81,6 +81,11 @@ const ILLUSTRATIONS = {
  * zone précise (mode `spot`), tracer un chemin (`trajectory`) ou faire
  * glisser une pièce (`placement`) reste en CSS : ses coordonnées sont
  * calées sur l'ancien schéma, un nouveau décor les décalerait toutes.
+ *
+ * Exception : `seat-profile` EST une mission `placement` (le siège qu'on
+ * fait glisser), mais ses zones ont été recalées en même temps que le décor
+ * (voir `missions-pilote.js`, mission `c1c-siege`), donc les deux avancent
+ * ensemble plutôt que l'un sans l'autre.
  */
 const DECORS = {
   "city-light": { alt: "Un feu tricolore isolé, la nuit, en ville" },
@@ -96,6 +101,11 @@ const DECORS = {
   tunnel: { alt: "L'entrée d'un tunnel, la sortie visible au loin" },
   "overtake-oncoming": {
     alt: "Un cycliste devant et une voiture qui arrive en face",
+  },
+  "seat-profile": {
+    alt: "Un habitacle vu de profil, le siège sur son rail, prêt à glisser",
+    width: 1600,
+    height: 894,
   },
 };
 
@@ -120,11 +130,10 @@ export function renderArt(visual, options = {}) {
   if (decor) {
     return `<img class="mp-decor" src="/pilote/decors/${visual}-2026-08-05.webp"
       alt="${decor.alt}" loading="eager" decoding="async"
-      width="1600" height="1067" aria-hidden="true">`;
+      width="${decor.width || 1600}" height="${decor.height || 1067}" aria-hidden="true">`;
   }
   if (estUnePiece(visual)) return renderPiece(visual, options);
   if (visual === "cockpit") return artCockpit();
-  if (visual === "seat-profile") return artSeatProfile();
   if (visual === "intersection") return artIntersection();
   if (visual === "roundabout") return artRoundabout();
   if (visual === "bend") return artBend();
@@ -149,17 +158,6 @@ export function renderArt(visual, options = {}) {
   if (visual === "motorway-shoulder") return artMotorway(true);
   if (visual === "tunnel") return artTunnel();
   return artCockpit();
-}
-
-function artSeatProfile() {
-  return `
-    <div class="art-seat-window"></div>
-    <div class="art-seat-roof"></div>
-    <div class="art-seat-dashboard"></div>
-    <span class="art-seat-wheel"></span>
-    <div class="art-seat-pedals"><i></i><i></i><i></i></div>
-    <div class="art-seat-floor"></div>
-    <span class="art-seat-rail"></span>`;
 }
 
 function artCockpit() {
