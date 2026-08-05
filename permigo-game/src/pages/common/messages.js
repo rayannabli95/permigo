@@ -458,6 +458,11 @@ function renderStyles() {
   font: 700 22px/1 'Archivo', sans-serif;
   margin: 0;
   flex: 1;
+  /* La règle globale h1,h2,h3,h4{color:var(--ink)} de base.css cible l'élément
+     directement et gagne sur l'héritage de .msg{color:#fff} (un h1 non stylé
+     n'hérite pas s'il matche une autre règle, même moins spécifique) : le titre
+     devenait #0b0d1a sur fond #0b0d1a, donc invisible. On fixe la couleur ici. */
+  color: #fff;
 }
 .msg-count {
   background: color-mix(in srgb, var(--a) 20%, transparent);
