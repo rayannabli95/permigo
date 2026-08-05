@@ -340,11 +340,34 @@ body.mp-open #header-bar {
 /* Une image de fond remplit déjà la boîte en `cover` : la mettre à l'échelle
    la recadrerait pour rien. */
 .mp-scene-art:has(.mp-photo),
-.mp-scene-art:has(.mp-illu) {
+.mp-scene-art:has(.mp-illu),
+.mp-scene-art:has(.mp-decor) {
   --art-k: 1;
   height: auto;
   width: auto;
   inset: 0;
+}
+
+/* Les décors générés de l'Art Bible 2.0 (05/08/2026) : à la différence des
+   photos, leur ambiance (nuit, jour, pluie…) est déjà dans l'image. Pas de
+   filtre de nuit à ajouter par-dessus, ça délaverait le violet. Juste un
+   voile bas pour la lisibilité d'un texte éventuel. */
+.mp-decor {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mp-scene-art:has(.mp-decor)::after {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    130% 80% at 50% 116%,
+    rgb(12 7 26 / 45%),
+    transparent 55%
+  );
+  content: "";
 }
 
 /* Une photo dans une scène de nuit.
