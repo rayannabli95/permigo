@@ -70,7 +70,7 @@ export const CENTRES_EXAMEN = [
       },
       {
         ico: "alert-triangle",
-        titre: "Voies larges, vitesse traître",
+        titre: "La vitesse monte sans prévenir",
         texte:
           "L'infrastructure est moderne et roulante. Le piège est sournois : sur ces grands axes " +
           "fluides, on dépasse la limite sans s'en rendre compte. Garde un œil régulier sur les " +
@@ -153,7 +153,7 @@ export const CENTRES_EXAMEN = [
       },
       {
         ico: "users",
-        titre: "Usagers de tous types, partout",
+        titre: "Tous les usagers en même temps",
         texte:
           "Cyclistes, livreurs à vélo-cargo, piétons qui traversent hors passage clouté, camions sur les grands boulevards : la diversité des usagers est maximale sur ce parcours. Tu dois scanner ton environnement en continu et ne jamais supposer que la route devant toi est libre.",
       },
@@ -823,7 +823,7 @@ export const CENTRES_EXAMEN = [
     pieges: [
       {
         ico: "refresh-cw",
-        titre: "Les giratoires à deux voies, test signature",
+        titre: "Les giratoires à deux voies",
         texte:
           "C'est LE morceau attendu du secteur : des ronds-points à deux voies avec du flux en continu. " +
           "Choisis ta voie avant d'entrer selon ta sortie, tiens ta trajectoire sans mordre sur l'autre couloir, " +
@@ -831,7 +831,7 @@ export const CENTRES_EXAMEN = [
       },
       {
         ico: "eye",
-        titre: "Un départ dans le vif, montée comprise",
+        titre: "Un départ dans le vif avec une montée",
         texte:
           "Zéro mise en jambes ici : tu démarres directement dans un environnement dense. Commerces, piétons, " +
           "arrêts de bus. Les candidats parlent aussi d'une belle montée dès le départ, avec un passage piéton très " +
@@ -840,7 +840,7 @@ export const CENTRES_EXAMEN = [
       },
       {
         ico: "alert-triangle",
-        titre: "Les grands boulevards, faux amis",
+        titre: "Les grands boulevards sont des faux amis",
         texte:
           "Les axes larges à plusieurs voies donnent une impression de confort. Et c'est exactement là que " +
           "beaucoup d'élèves ratent. On relâche l'attention, on laisse filer la vitesse, on oublie un contrôle au " +
@@ -1036,7 +1036,7 @@ export const CENTRES_EXAMEN = [
       },
       {
         ico: "eye",
-        titre: "L'avenue des États-Unis, grand axe piégeux",
+        titre: "Le piège de l'avenue des États-Unis",
         texte:
           "Cette ancienne nationale traverse tout le quartier : commerces, concessions autos, entrées et sorties " +
           "de parkings en continu, bus et piétons. Le trafic y est dense et les limitations alternent entre " +
@@ -1430,7 +1430,7 @@ export const CENTRES_EXAMEN = [
       },
       {
         ico: "refresh-cw",
-        titre: "Trafic dense, vitesses en yo-yo",
+        titre: "Un trafic dense et des vitesses en yo-yo",
         texte:
           "L'A35 et le tunnel de l'Étoile sont réputés souvent saturés aux heures de pointe, " +
           "et le centre-ville multiplie zones 30 et secteurs apaisés. Le piège : rester calé " +
@@ -1510,7 +1510,7 @@ export const CENTRES_EXAMEN = [
     pieges: [
       {
         ico: "eye",
-        titre: "Le tram, roi de la ville",
+        titre: "Le tram est roi en ville",
         texte:
           "À Montpellier, le tram est partout et il est prioritaire. Feu rouge clignotant = " +
           "arrêt absolu, jamais d'arrêt sur les voies, et avant de franchir une plateforme tu " +
@@ -1716,7 +1716,7 @@ export const CENTRES_EXAMEN = [
       },
       {
         ico: "refresh-cw",
-        titre: "La rocade, l'axe le plus chargé de Bretagne",
+        titre: "La rocade la plus chargée de Bretagne",
         texte:
           "Le centre de Villejean est posé au bord de la rocade : insertion à 90 km/h dans un flux " +
           "qui dépasse les 100 000 véhicules par jour sur la section ouest. Accélération franche " +
