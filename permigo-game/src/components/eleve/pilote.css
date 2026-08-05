@@ -955,6 +955,19 @@ body.mp-open #header-bar {
   height: 275px;
 }
 
+/* Même chose que la règle générale plus haut (§ 05/08), mais il faut la
+   répéter ICI avec un cran de spécificité en plus : sans ça, la règle juste
+   au-dessus (`.mp-trajectory-interaction .mp-scene { height: 275px }`, deux
+   classes) l'emporte sur la règle générale (une classe + un `:has`, même
+   poids) simplement parce qu'elle vient après dans le fichier. Repéré en
+   branchant `bend` et `overtake-top`, les deux seuls décors image en mode
+   « tracer » : sans cette règle, le tracé SVG (`viewBox` fixe) se serait
+   étiré sur une boîte forcée à 275 px au lieu de la hauteur naturelle de
+   l'image. */
+.mp-trajectory-interaction .mp-scene:has(.mp-decor) {
+  height: auto;
+}
+
 .mp-trajectory-svg {
   position: absolute;
   z-index: 8;

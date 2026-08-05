@@ -95,8 +95,25 @@ const ILLUSTRATIONS = {
  * bâtiments là où `c2f-indices`/`c3g-masque` posent les leurs). Possible ici
  * parce que les zones restent des cadres en pointillés (jamais un repère
  * précis à quelques pixels près) : `missions-pilote.js` n'a pas bougé.
+ *
+ * Troisième vague (05/08, fin de session) : `bend`, `brouillard-file`,
+ * `exterior`, `insertion`, `mirror`, `night`, `overtake-empty`,
+ * `overtake-top`, `overtake-top-libre`, `voie-garee`. Même méthode que
+ * `cockpit`/`intersection` (décor composé pour tomber sur des zones
+ * inchangées), sauf que ces dix-là avaient déjà été générés lors de la
+ * session initiale mais jamais branchés : `night`, `brouillard-file`,
+ * `exterior`, `overtake-empty`, `voie-garee` étaient bons tels quels.
+ * `mirror`, `insertion` et `overtake-top` ont eu besoin d'une deuxième passe
+ * (voir l'historique de la bible : miroir qui montrait l'extérieur de la
+ * voiture au lieu du poste de conduite, panneau « SORTIE » sur une mission
+ * qui fait ENTRER sur l'autoroute, mesure « 1 MÈTRE D'ÉCART » incrustée qui
+ * donnait la réponse d'une mission de tracé).
  */
 const DECORS = {
+  bend: { alt: "Une route qui amorce un virage, vue à travers le pare-brise" },
+  "brouillard-file": {
+    alt: "Une route dans le brouillard, les feux d'une voiture visibles devant",
+  },
   "city-light": { alt: "Un feu tricolore isolé, la nuit, en ville" },
   cockpit: {
     alt: "Le poste de conduite, volant et commodos de part et d'autre",
@@ -105,13 +122,32 @@ const DECORS = {
     alt: "Un piéton qui surgit soudainement devant la voiture",
     src: "emergency-2026-08-05b",
   },
+  exterior: {
+    alt: "La voiture vue de trois quarts avant, un pneu affaissé",
+  },
   gps: { alt: "Une sortie d'autoroute déjà passée, vue dans le rétroviseur" },
+  insertion: {
+    alt: "Une bretelle d'autoroute avec des espaces de tailles différentes entre les voitures",
+  },
   intersection: {
     alt: "Un carrefour au crépuscule, une voiture garée et une rue qui débouche",
+  },
+  mirror: {
+    alt: "Le poste de conduite, un motard visible dans l'angle mort à gauche",
   },
   motorway: { alt: "Une insertion sur autoroute avec la circulation qui file" },
   "motorway-shoulder": {
     alt: "La voiture arrêtée en sécurité sur la bande d'arrêt d'urgence",
+  },
+  night: { alt: "Une route de campagne la nuit, une voiture arrive en face" },
+  "overtake-empty": {
+    alt: "Une route vide, vue à travers le pare-brise",
+  },
+  "overtake-top": {
+    alt: "Vue de dessus, un cycliste devant la voiture sur une route à deux voies",
+  },
+  "overtake-top-libre": {
+    alt: "Vue de dessus, un cycliste et la voiture qui s'apprête à le dépasser",
   },
   // Le premier jet du 05/08 avait un DEHORS photoréaliste (rue photo, piéton
   // photo, brume de tunnel) derrière un habitacle jouet : repéré en jouant
@@ -135,6 +171,9 @@ const DECORS = {
     alt: "Un habitacle vu de profil, le siège sur son rail, prêt à glisser",
     width: 1600,
     height: 894,
+  },
+  "voie-garee": {
+    alt: "Une rue avec des voitures garées sur la droite",
   },
 };
 

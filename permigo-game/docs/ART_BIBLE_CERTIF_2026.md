@@ -205,7 +205,15 @@ Rayan a demandé de continuer sur les décors encore dessinés en CSS (`cockpit`
 
 ⚠️ Repéré au passage sans le corriger (hors sujet du jour) : le texte de `c3g-masque` dit « un véhicule est arrêté à droite » mais sa zone `front` est positionnée à GAUCHE (x=6). Le déplacer casserait `c2f-indices`, qui a besoin de sa voiture garée exactement là. À trancher séparément : soit le texte se trompe de côté, soit il faudrait deux décors distincts au lieu d'un partagé.
 
-**Reste à faire, même méthode à appliquer un par un** : `bend`, `night`, `mirror`, `exterior`, `insertion`, `brouillard-file`, `voie-garee`, `overtake-empty`, `overtake-top`, `overtake-top-libre`.
+**Les 10 restants faits dans la foulée (même soir, 05/08).** Bonne surprise : les 10 étaient déjà générés depuis la session initiale, jamais branchés. Trois étaient bons tels quels après vérification (`night`, `brouillard-file`, `exterior` avaient déjà eu leur passe de correction dans la session initiale, cf. §7ter), quatre de plus se sont révélés corrects à l'inspection (`bend`, `overtake-empty`, `voie-garee`, `overtake-top-libre`). Trois ont eu besoin d'une deuxième génération :
+
+- **`mirror`** montrait l'EXTÉRIEUR de la voiture (une vue 3/4 avec un cercle zoomé sur le rétroviseur) alors que la mission demande de regarder depuis l'intérieur (rétroviseur, lunette arrière, angle mort par la vitre, tableau de bord). Refait en vue conducteur, avec un motard visible dans la vitre latérale gauche, là où tombe la zone « angle mort » (la seule bonne réponse).
+- **`insertion`** portait un panneau « SORTIE » sur une mission où l'élève ENTRE sur l'autoroute par la bretelle. Un panneau qui contredit le sens de la manœuvre. Corrigé en « ENTREE ».
+- **`overtake-top`** avait un texte « 1 MÈTRE D'ÉCART » et une flèche incrustés dans l'image, qui DONNAIENT LA RÉPONSE à une mission de tracé où l'élève doit justement choisir l'écart. Refait en vue de dessus pure, sans aucun texte, sans aucune mesure : juste la route, la voiture et le cycliste.
+
+⚠️ **Piège de spécificité CSS découvert au passage** : `.mp-trajectory-interaction .mp-scene { height: 275px }` (deux classes) l'emportait sur la règle générale qui redonne sa hauteur naturelle à un décor image (une classe + un `:has`, même poids), simplement parce qu'elle vient plus tard dans le fichier. Sans le correctif, `bend` et `overtake-top` (les deux seuls décors image en mode « tracer ») auraient été rognés dans une boîte à 275 px comme avant la correction du 05/08 après-midi. Repéré avant la mise en prod, pas en audit après coup.
+
+**Les 22 décors du Mode Pilote sont maintenant tous en Art Bible 2.0, tous branchés.** Reste ouvert (hors sujet du jour, cf. plus haut) : la contradiction de côté sur `c3g-masque` (texte « à droite », zone à gauche), et l'absence de coordonnées vérifiées en conditions réelles pour les 4 décors `placement` de cette vague (`brouillard-file`, `insertion`, `voie-garee`, `overtake-top-libre`) : vérifiés sur une page statique hors-app plutôt qu'en jouant la vraie mission, faute de connaître la bonne réponse des missions précédentes pour y arriver en cliquant.
 
 ## 8. Ce qui reste ouvert (prochaine session)
 
