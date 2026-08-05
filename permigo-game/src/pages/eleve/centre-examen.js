@@ -42,6 +42,8 @@ const I18N = {
   en: {
     difficulty: "Difficulty",
     other_centres: "More centres coming soon",
+    read_more: "Details",
+    read_less: "Collapse",
     access_title: "Access and address",
     open_map: "Open in Maps",
     traps_title: "Pitfalls at {name}",
@@ -70,6 +72,8 @@ const I18N = {
   ar: {
     difficulty: "الصعوبة",
     other_centres: "مراكز أخرى قريبًا",
+    read_more: "التفاصيل",
+    read_less: "طيّ",
     access_title: "الوصول والعنوان",
     open_map: "فتح في الخرائط",
     traps_title: "مطبّات مركز {name}",
@@ -867,11 +871,138 @@ ${chromeNight("#241a52", "#1a1340")}
   text-align: center;
   margin: 6px 0 0;
 }
+
+/* ── Lire l'essentiel, déplier le reste ──
+   Le bouton est volontairement discret : c'est une sortie de secours pour qui
+   veut tout lire, pas un appel à l'action. La porte de la page reste
+   « Révise les pièges de X ». */
+.cea-plus {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 9px;
+  padding: 7px 12px 7px 13px;
+  min-height: 34px;
+  border-radius: 999px;
+  border: 1px solid var(--bo);
+  background: rgba(255,255,255,.04);
+  color: var(--a-txt);
+  font: 800 11.5px/1 'Archivo', sans-serif;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .14s cubic-bezier(.23,1,.32,1), background .16s;
+}
+.cea-plus:active { transform: scale(.95); }
+.cea-plus svg { transition: transform .28s cubic-bezier(.23,1,.32,1); }
+.cea-plus[aria-expanded="true"] { background: rgba(255,255,255,.09); }
+/* 90deg et pas 180 : l'icône « chevron » pointe à DROITE au repos, la tourner
+   d'un demi-tour la ferait pointer à gauche (= retour en arrière). */
+.cea-plus[aria-expanded="true"] svg { transform: rotate(90deg); }
+.cea-hero-resume-rest .cea-hero-resume,
+.cea-piege-rest { margin-top: 9px; }
+.cea-piege-rest {
+  font: 500 13px/1.55 'Archivo', sans-serif;
+  color: var(--mu);
+}
+
+/* ── Accès en chips ──
+   Avant : trois lignes de 90 caractères empilées, dont l'élève ne lit que le
+   premier mot (« RER A », « Métro 5 »). C'est donc ce premier mot qui devient
+   la chip, et la ligne complète s'ouvre dessous quand il la touche. */
+.cea-acces-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+.cea-acces-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--bo);
+  background: rgba(255,255,255,.05);
+  color: var(--ink);
+  font: 700 13px/1 'Archivo', sans-serif;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .14s cubic-bezier(.23,1,.32,1), background .16s, border-color .16s;
+}
+.cea-acces-chip svg { color: var(--a-txt); }
+.cea-acces-chip:active { transform: scale(.94); }
+.cea-acces-chip[aria-expanded="true"] {
+  background: var(--a);
+  border-color: var(--a);
+  color: var(--a-ink);
+}
+.cea-acces-chip[aria-expanded="true"] svg { color: var(--a-ink); }
+.cea-acces-detail {
+  font: 500 13.5px/1.55 'Archivo', sans-serif;
+  color: var(--mu);
+  margin: 10px 0 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cea-plus, .cea-plus svg, .cea-acces-chip { transition: none; }
+}
 </style>`;
 
 // ─── Helpers couleur difficulté ──────────────────────────────
 function diffCss(c, alpha = 1) {
   return `hsl(${c.h} ${c.s} ${c.l} / ${alpha})`;
+}
+
+// ─── Couper un texte éditorial en « ce qu'on lit » / « le reste » ───
+//
+// La fiche empilait des pavés : 5 lignes de résumé, puis 3 pièges de 4 lignes
+// chacun, puis 4 conseils, puis 5 questions. Personne ne lit ça sur un
+// téléphone. Retour Rayan 05/08/2026 : « réduit le texte à l'essentiel, fais
+// une belle mise en forme qu'on veut lire ».
+//
+// ⚠️ On ne SUPPRIME rien : les 21 fiches sont du contenu éditorial original,
+// écrit à la main, et il porte le SEO. On le HIÉRARCHISE. La première phrase
+// se lit tout de suite, le reste se déplie d'un geste. « L'essentiel » c'est
+// ce qu'on VOIT, pas ce qui reste dans le fichier.
+//
+// Découpe sur le premier point suivi d'une majuscule (ou fin de chaîne). Pas
+// sur n'importe quel point : « 6 à 8 ronds-points. » et « A15 / N184 » en
+// contiennent, et « M. Dupont » aussi.
+function splitLead(texte) {
+  const t = String(texte || "").trim();
+  const m = t.match(/^(.{20,190}?[.!?])\s+(?=[A-ZÀÂÉÈÊÎÔÙÜÇ«])/);
+  if (!m) return { lead: t, rest: "" };
+  return { lead: m[1], rest: t.slice(m[0].length).trim() };
+}
+
+// Un pavé éditorial rendu en « première phrase + Le détail ».
+function renderPlie(texte, cls) {
+  const { lead, rest } = splitLead(texte);
+  if (!rest) return `<p class="cea-${cls}">${esc(lead)}</p>`;
+  return `<p class="cea-${cls}">${esc(lead)}</p>
+    <div class="cea-${cls}-rest" hidden><p class="cea-${cls}">${esc(rest)}</p></div>
+    <button class="cea-plus" type="button" data-plus aria-expanded="false">
+      <span>${txt("read_more", "Le détail")}</span>${icon("chevron", { size: 14 })}
+    </button>`;
+}
+
+// Étiquette courte d'un moyen d'accès, pour la chip.
+//
+// Les 21 fiches suivent toutes la même écriture : « RER A. Arrêt … »,
+// « Métro ligne 5. Stations … », « En voiture : axes A15 / N184, … ». On prend
+// donc ce qui précède le premier point ou deux-points. Si ça ne matche pas (une
+// fiche écrite autrement plus tard), on se replie sur les premiers mots plutôt
+// que de rendre une chip vide.
+function accesChip(texte) {
+  const t = String(texte || "").trim();
+  const m = t.match(/^([^.:]{2,26})\s*[.:]/);
+  const brut = m ? m[1] : t.split(/\s+/).slice(0, 3).join(" ");
+  // « En voiture : … » → « Voiture ». La majuscule est remise à la main : sans
+  // elle la chip affichait « voiture » en minuscule à côté de « RER A ».
+  const court = brut.replace(/^En\s+/i, "").trim();
+  return court.charAt(0).toUpperCase() + court.slice(1);
 }
 
 // Le hero est une CARTE DE L'ARÈNE, pas un aplat de couleur.
@@ -948,18 +1079,28 @@ function renderFiche(c) {
       </div>
       <h1 class="cea-hero-nom">${esc(c.nom)}</h1>
       ${diffGauge(c.difficulte, c.difficulteLabel, colCss)}
-      <p class="cea-hero-resume">${esc(c.resume)}</p>
+      ${renderPlie(c.resume, "hero-resume")}
     </div>
   </div>
 
-  <!-- ACCÈS -->
+  <!-- ACCÈS — chips : le moyen de transport d'abord, le détail au clic -->
   <div class="cea-section reveal">
     <h2 class="cea-section-tit">${icon("map-pin", { size: 17 })} ${txt("access_title", "Accès et adresse")}</h2>
     <div class="cea-addr-row">${icon("map-pin", { size: 17 })} ${esc(c.adresse)}</div>
+    <div class="cea-acces-chips">
+      ${c.acces
+        .map(
+          (a, i) =>
+            `<button class="cea-acces-chip" type="button" data-acces="${i}" aria-expanded="false">
+               ${icon(a.ico, { size: 14 })} ${esc(accesChip(a.texte))}
+             </button>`,
+        )
+        .join("")}
+    </div>
     ${c.acces
       .map(
-        (a) =>
-          `<div class="cea-acces-item">${icon(a.ico, { size: 16 })} <span>${esc(a.texte)}</span></div>`,
+        (a, i) =>
+          `<p class="cea-acces-detail" data-acces-detail="${i}" hidden>${esc(a.texte)}</p>`,
       )
       .join("")}
     <a class="cea-maps-btn" href="${escAttr(mapsUrl(c))}" target="_blank" rel="noopener" data-act="maps">
@@ -967,21 +1108,30 @@ function renderFiche(c) {
     </a>
   </div>
 
-  <!-- PIÈGES -->
+  <!-- PIÈGES — le titre et la phrase qui pique, le reste au clic -->
   <div class="cea-section reveal">
     <h2 class="cea-section-tit">${icon("alert-triangle", { size: 17 })} ${rtl(esc(format("traps_title", "Les pièges à {name}", { name: c.nom })))}</h2>
     <div class="cea-pieges-list">
       ${c.pieges
-        .map(
-          (p) => `
+        .map((p) => {
+          const { lead, rest } = splitLead(p.texte);
+          return `
         <div class="cea-piege">
           <div class="cea-piege-ico">${icon(p.ico, { size: 20 })}</div>
           <div class="cea-piege-body">
             <div class="cea-piege-tit">${esc(p.titre)}</div>
-            <div class="cea-piege-txt">${esc(p.texte)}</div>
+            <div class="cea-piege-txt">${esc(lead)}</div>
+            ${
+              rest
+                ? `<div class="cea-piege-rest" hidden>${esc(rest)}</div>
+                   <button class="cea-plus" type="button" data-plus aria-expanded="false">
+                     <span>${txt("read_more", "Le détail")}</span>${icon("chevron", { size: 14 })}
+                   </button>`
+                : ""
+            }
           </div>
-        </div>`,
-        )
+        </div>`;
+        })
         .join("")}
     </div>
   </div>
@@ -1244,6 +1394,46 @@ function wire(root, active) {
 
   // Accordéon FAQ
   wireAccordion(root, active);
+
+  // « Le détail » — déplie le pavé qu'on avait replié (résumé, piège).
+  // Le bloc caché est le frère JUSTE AVANT le bouton : c'est ce que renderPlie
+  // et le rendu des pièges produisent tous les deux, donc une seule règle suffit
+  // pour les deux endroits.
+  root.querySelectorAll("[data-plus]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const bloc = btn.previousElementSibling;
+      if (!bloc) return;
+      const ouvert = btn.getAttribute("aria-expanded") === "true";
+      bloc.hidden = ouvert;
+      btn.setAttribute("aria-expanded", ouvert ? "false" : "true");
+      btn.querySelector("span").textContent = ouvert
+        ? txt("read_more", "Le détail")
+        : txt("read_less", "Replier");
+      haptic("tap");
+      if (!ouvert) track("centre_examen_detail_open", { centre: active });
+    });
+  });
+
+  // Chips d'accès — une seule ouverte à la fois : deux détails côte à côte
+  // reformaient le pavé qu'on vient de défaire.
+  root.querySelectorAll("[data-acces]").forEach((chip) => {
+    chip.addEventListener("click", () => {
+      const i = chip.dataset.acces;
+      const deja = chip.getAttribute("aria-expanded") === "true";
+      root.querySelectorAll("[data-acces]").forEach((c2) => {
+        c2.setAttribute("aria-expanded", "false");
+      });
+      root.querySelectorAll("[data-acces-detail]").forEach((d) => {
+        d.hidden = true;
+      });
+      if (!deja) {
+        chip.setAttribute("aria-expanded", "true");
+        const d = root.querySelector(`[data-acces-detail="${i}"]`);
+        if (d) d.hidden = false;
+      }
+      haptic("select");
+    });
+  });
 
   // Bouton « Révise les pièges de <centre> »
   root.querySelector("#cea-revise")?.addEventListener("click", () => {
