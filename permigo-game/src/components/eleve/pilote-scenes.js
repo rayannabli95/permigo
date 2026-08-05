@@ -89,16 +89,30 @@ const ILLUSTRATIONS = {
  */
 const DECORS = {
   "city-light": { alt: "Un feu tricolore isolé, la nuit, en ville" },
-  emergency: { alt: "Un piéton qui surgit soudainement devant la voiture" },
+  emergency: {
+    alt: "Un piéton qui surgit soudainement devant la voiture",
+    src: "emergency-2026-08-05b",
+  },
   gps: { alt: "Une sortie d'autoroute déjà passée, vue dans le rétroviseur" },
   motorway: { alt: "Une insertion sur autoroute avec la circulation qui file" },
   "motorway-shoulder": {
     alt: "La voiture arrêtée en sécurité sur la bande d'arrêt d'urgence",
   },
-  rain: { alt: "Une route sous la pluie, essuie-glaces en mouvement" },
+  // Le premier jet du 05/08 avait un DEHORS photoréaliste (rue photo, piéton
+  // photo, brume de tunnel) derrière un habitacle jouet : repéré en jouant
+  // les missions en vrai sur téléphone, refait entièrement stylisé le même
+  // jour. Suffixe `b` : ce nom de fichier était déjà en prod (#708), le
+  // réutiliser aurait laissé l'ancienne image à vie chez qui a déjà installé.
+  rain: {
+    alt: "Une route sous la pluie, essuie-glaces en mouvement",
+    src: "rain-2026-08-05b",
+  },
   roundabout: { alt: "Un giratoire avec un panneau cédez le passage" },
   parking: { alt: "Un parking avec des places libres et occupées" },
-  tunnel: { alt: "L'entrée d'un tunnel, la sortie visible au loin" },
+  tunnel: {
+    alt: "L'entrée d'un tunnel, la sortie visible au loin",
+    src: "tunnel-2026-08-05b",
+  },
   "overtake-oncoming": {
     alt: "Un cycliste devant et une voiture qui arrive en face",
   },
@@ -128,7 +142,8 @@ export function renderArt(visual, options = {}) {
   }
   const decor = DECORS[visual];
   if (decor) {
-    return `<img class="mp-decor" src="/pilote/decors/${visual}-2026-08-05.webp"
+    const fichier = decor.src || `${visual}-2026-08-05`;
+    return `<img class="mp-decor" src="/pilote/decors/${fichier}.webp"
       alt="${decor.alt}" loading="eager" decoding="async"
       width="${decor.width || 1600}" height="${decor.height || 1067}" aria-hidden="true">`;
   }
