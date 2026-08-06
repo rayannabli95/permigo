@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapitre C · Dalle claire</title>
+<style>
+@font-face { font-family:'Archivo'; font-style:normal; font-weight:400 900; font-display:block; src:url(archivo.woff2) format('woff2'); }
+*{ box-sizing:border-box; }
+html,body{ margin:0; padding:0; }
+body{ font-family:'Archivo', system-ui, sans-serif; background:#0b0719; }
+.page{ max-width:480px; margin:0 auto; min-height:100dvh; overflow-x:hidden; color:#fff;
+  background:linear-gradient(#120a24 0%, #1a1030 46%, #0b0719 100%); padding-bottom:40px; }
+.flag{ margin:0; padding:9px 18px; background:#2a1b52; color:#ffd24a; font:800 11px/1 'Archivo',sans-serif; letter-spacing:.16em; text-transform:uppercase; }
+
+/* ── Le parcours en 4 arrêts : on voit le voyage entier ───── */
+.stops{ position:relative; margin:20px 20px 0; padding:0 4px; }
+.stops .rail{ position:absolute; left:14px; right:14px; top:13px; height:4px; border-radius:2px; background:rgba(255,255,255,.12); }
+.stops .rail i{ position:absolute; left:0; top:0; bottom:0; width:30%; border-radius:2px;
+  background:linear-gradient(90deg,#6ef0a4,#ffd24a); box-shadow:0 0 10px rgba(255,170,40,.5); }
+.stops ol{ position:relative; margin:0; padding:0; list-style:none; display:flex; justify-content:space-between; }
+.stops li{ width:23%; text-align:center; }
+.stops .pin{ width:28px; height:28px; margin:0 auto; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font:800 12px/1 'Archivo',sans-serif; color:#cdbff5; background:#231648; border:2px solid rgba(168,85,247,.35); }
+.stops li.done .pin{ background:#1c6b3f; border-color:#4fe08f; color:#c9ffe0; }
+.stops li.cur .pin{ background:linear-gradient(160deg,#ffe08a,#ffb33f); border-color:#ffd24a; color:#3a1c00; transform:scale(1.2);
+  box-shadow:0 0 0 5px rgba(255,180,64,.18); }
+.stops .nm{ display:block; margin-top:11px; font:700 10.5px/1.25 'Archivo',sans-serif; color:#9d8ecf; }
+.stops li.cur .nm{ color:#ffe1a0; font-weight:800; }
+.stops li.next .pin{ border-color:rgba(168,85,247,.7); background:#3b2378; color:#e6ddff; }
+.stops li.next .nm{ color:#c8bbf2; }
+
+/* ── La dalle claire : rupture totale avec le fond nuit ───── */
+.slab{ position:relative; margin:24px 16px 0; padding:24px 22px 22px; border-radius:28px; overflow:hidden;
+  background:linear-gradient(178deg,#fffdf7 0%, #f4efff 100%);
+  border:1px solid #fff;
+  box-shadow:0 14px 0 -3px rgba(255,196,80,.28), 0 30px 60px -20px rgba(0,0,0,.75); }
+.slab .deco{ position:absolute; right:-40px; top:-30px; width:200px; height:210px; opacity:.13; pointer-events:none; }
+.slab-top{ position:relative; display:flex; align-items:center; gap:13px; }
+.tile{ flex:0 0 62px; width:62px; height:62px; border-radius:20px; display:flex; align-items:center; justify-content:center;
+  font:900 30px/1 'Archivo',sans-serif; color:#5a2c00;
+  background:linear-gradient(160deg,#ffe08a,#ffb33f); border:1px solid #ffd24a;
+  box-shadow:0 5px 0 #d98a1f, inset 0 1px 0 rgba(255,255,255,.7); }
+.slab-top .k{ margin:0; font:800 11px/1 'Archivo',sans-serif; letter-spacing:.18em; text-transform:uppercase; color:#8a6a12; }
+.slab-top .st{ margin:8px 0 0; font:800 12.5px/1 'Archivo',sans-serif; color:#7a6ca8; }
+.slab h1{ position:relative; margin:20px 0 0; font-weight:900; font-size:33px; line-height:.98; letter-spacing:-.045em; color:#160f34; }
+.slab .sub{ position:relative; margin:11px 0 0; max-width:27ch; font:600 14.5px/1.45 'Archivo',sans-serif; color:#5b5089; }
+
+/* Progression : un anneau + le compte. Lisible d'un coup d'œil. */
+.prog{ position:relative; margin:22px 0 0; display:flex; align-items:center; gap:15px;
+  padding:14px 16px; border-radius:20px; background:#fff; border:1px solid #ece7fb;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9); }
+.ring{ position:relative; flex:0 0 58px; width:58px; height:58px; }
+.ring svg{ display:block; transform:rotate(-90deg); }
+.ring .val{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font:900 15px/1 'Archivo',sans-serif; color:#160f34; }
+.prog .lab{ flex:1; }
+.prog .lab p{ margin:0; font:800 16px/1.2 'Archivo',sans-serif; color:#160f34; }
+.prog .lab span{ display:block; margin-top:5px; font:600 13px/1.35 'Archivo',sans-serif; color:#6b5fa0; }
+
+.go{ position:relative; margin:16px 0 0; width:100%; padding:16px; border-radius:16px; border:0;
+  font:900 16px/1 'Archivo',sans-serif; color:#3a1c00;
+  background:linear-gradient(180deg,#ffe08a,#ffb33f 60%,#ff9c1c);
+  box-shadow:0 5px 0 #b85e00, inset 0 1px 0 rgba(255,255,255,.65);
+  display:flex; align-items:center; justify-content:center; gap:9px; }
+
+/* ── Suite : l'itinéraire, volontairement plus calme ──────── */
+.route-head{ display:flex; align-items:baseline; justify-content:space-between; padding:28px 22px 0; }
+.route-head h2{ margin:0; font-weight:800; font-size:17px; color:#e6ddff; }
+.route-head .cnt{ font:700 12px/1 'Archivo',sans-serif; color:#9d8ecf; }
+.route{ position:relative; height:200px; margin:14px 22px 0; }
+.node{ position:absolute; width:56px; height:56px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(180deg,#2f2159,#221546); border:2px solid rgba(168,85,247,.35); color:#cdbff5; font:800 14px/1 'Archivo',sans-serif; }
+.node.done{ background:linear-gradient(180deg,#1f6b3f,#14512d); border-color:rgba(46,200,110,.5); color:#8ff5bb; }
+.node.cur{ background:linear-gradient(160deg,#ffe08a,#ffb33f); border-color:#ffd24a; color:#3a1c00; }
+</style>
+</head>
+<body>
+<div class="page">
+  <p class="flag">Variante C · dalle claire sur nuit</p>
+
+  <div class="stops">
+    <div class="rail"><i></i></div>
+    <ol>
+      <li class="cur"><span class="pin"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4 10-11" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="nm">Maîtriser le véhicule</span></li>
+      <li class="next"><span class="pin">2</span><span class="nm">Circuler en ville</span></li>
+      <li><span class="pin">3</span><span class="nm">Conditions difficiles</span></li>
+      <li><span class="pin">4</span><span class="nm">Conduite autonome</span></li>
+    </ol>
+  </div>
+
+  <div class="slab">
+    <svg class="deco" viewBox="0 0 200 210" fill="none" aria-hidden="true">
+      <path d="M150 -10 C 80 40, 170 90, 100 130 S 50 190, 140 230" stroke="#5a4fc0" stroke-width="30" stroke-linecap="round"/>
+      <path d="M150 -10 C 80 40, 170 90, 100 130 S 50 190, 140 230" stroke="#f0a93f" stroke-width="3" stroke-dasharray="9 13" stroke-linecap="round"/>
+    </svg>
+
+    <div class="slab-top">
+      <span class="tile">1</span>
+      <div>
+        <p class="k">Chapitre 1 sur 4</p>
+        <p class="st">Tu es ici</p>
+      </div>
+    </div>
+
+    <h1>Maîtriser le véhicule</h1>
+    <p class="sub">Les bases. Démarrer. Freiner. Diriger.</p>
+
+    <div class="prog">
+      <div class="ring">
+        <svg width="58" height="58" viewBox="0 0 58 58">
+          <circle cx="29" cy="29" r="24" fill="none" stroke="#ece7fb" stroke-width="8"/>
+          <circle cx="29" cy="29" r="24" fill="none" stroke="#f0a93f" stroke-width="8" stroke-linecap="round"
+                  stroke-dasharray="150.8" stroke-dashoffset="0"/>
+        </svg>
+        <span class="val">9/9</span>
+      </div>
+      <div class="lab">
+        <p>Chapitre terminé</p>
+        <span>Les 9 étapes sont validées. Ta récompense t'attend.</span>
+      </div>
+    </div>
+
+    <button class="go" type="button">
+      Ouvrir ta récompense
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12h13M13 6l6 6-6 6" stroke="#3a1c00" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+
+  <div class="route-head"><h2>Ton itinéraire</h2><span class="cnt">9 étapes</span></div>
+  <div class="route">
+    <span class="node done" style="left:14px; top:6px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4 10-11" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    <span class="node done" style="right:20px; top:72px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4 10-11" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    <span class="node cur" style="left:30px; top:138px;">★</span>
+  </div>
+</div>
+</body>
+</html>

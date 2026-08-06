@@ -8,7 +8,10 @@
 //   2. Examen blanc de conduite  3. Fiches de révision  4. Centre d'examen
 //
 // Données 100 % réelles (repli gracieux, jamais inventées) :
-//   - Série            : utils/game-state.js getStreak() (local)
+//   - Série            : services/streak.js getStreak() (source unique élève,
+//                        même valeur qu'accueil.js et profil.js depuis le
+//                        06/08/2026 — l'ancien utils/game-state.js#getStreak()
+//                        lisait un cache localStorage figé au boot de l'app)
 //   - Scènes           : data/situations-conduite.js (SITUATIONS.length)
 //   - Examen blanc      : quiz_attempts (type=exam_blanc, ref_id="exam-conduite")
 //   - Fiches lues       : localStorage rvc_read_v1 + data/fiches-conduite.js
@@ -18,7 +21,7 @@ import { getCurUser } from "@/auth/cur-user.js";
 import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { haptic } from "@/utils/haptic.js";
-import { getStreak } from "@/utils/game-state.js";
+import { getStreak } from "@/services/streak.js";
 import { getLang } from "@/utils/lang.js";
 import {
   FICHE_CODES,
@@ -318,26 +321,28 @@ export async function mount(root) {
   }
   const fichesLues = FICHE_CODES.filter((code) => read[code]).length;
 
-  // Meilleur score de l'examen blanc de CONDUITE (repli gracieux si indispo).
+  // Meilleur score de l'examen blanc de CONDUITE + série (repli gracieux si
+  // indispo pour l'un ou l'autre).
   let examBest = null;
-  try {
-    const { data, error } = await sb
+  const [examRes, streakData] = await Promise.allSettled([
+    sb
       .from("quiz_attempts")
       .select("score, ref_id")
       .eq("user_id", me.id)
-      .eq("type", "exam_blanc");
-    if (!error) {
-      const attempts = (data || []).filter(
-        (a) => a.ref_id === "exam-conduite" && typeof a.score === "number",
-      );
-      if (attempts.length) examBest = Math.max(...attempts.map((a) => a.score));
-    }
-  } catch {
-    /* réseau indispo → méta « Objectif » */
+      .eq("type", "exam_blanc"),
+    getStreak(),
+  ]);
+  if (examRes.status === "fulfilled" && !examRes.value.error) {
+    const attempts = (examRes.value.data || []).filter(
+      (a) => a.ref_id === "exam-conduite" && typeof a.score === "number",
+    );
+    if (attempts.length) examBest = Math.max(...attempts.map((a) => a.score));
   }
+  const streakCount =
+    streakData.status === "fulfilled" ? streakData.value.current : 0;
 
   root.innerHTML = render({
-    streak: getStreak(),
+    streak: { count: streakCount },
     sceneCount: SITUATION_TOTAL,
     examBest,
     fichesLues,

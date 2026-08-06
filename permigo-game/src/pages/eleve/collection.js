@@ -27,7 +27,9 @@ import { chromeNight } from "@/utils/chrome-night.js";
 const SWIPE_COMMIT = 90; // px de drag avant de valider le swipe
 const SEEN_KEY = "pg-cartes-seen"; // cartes déjà regardées (badge « Nouveau »)
 
-function loadSeen() {
+// Exportée : le profil élève construit son propre `state.seen` avant de
+// déléguer le rendu du paquet à buildDeck (cf. CARD_DECK_STYLE ci-dessus).
+export function loadSeen() {
   try {
     return new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || "[]"));
   } catch {
@@ -46,26 +48,15 @@ function markSeen(id) {
   }
 }
 
-const STYLE = `<style>
-${chromeNight("#181241", "#0b0a1c")}
-.col { max-width: 480px; margin: 0 auto; padding: 14px 16px calc(96px + env(safe-area-inset-bottom));
-  min-height: calc(100dvh - 52px); font-family:'Archivo',sans-serif; color:#f2f0fa;
-  background:
-    radial-gradient(120% 40% at 50% -5%, rgba(255,190,70,.10) 0%, transparent 55%),
-    radial-gradient(120% 55% at 50% 30%, rgba(110,70,220,.22) 0%, transparent 62%),
-    linear-gradient(180deg,#181241 0%,#0f0d24 58%,#0b0a1c 100%); }
-
-/* Barre de progression + pastilles par monde */
-.col-prog { margin:10px 0 4px; }
-.col-hd { margin:2px 0 12px; }
-.col-title { margin:0; font:800 24px/1.1 'Archivo',sans-serif; letter-spacing:-.02em; color:#fff; }
-.col-sub { margin:4px 0 0; font:600 12.5px/1.35 'Archivo',sans-serif; color:#cabfef; }
-.col-prog-lbl { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:7px; }
-.col-prog-lbl b { font:800 14px/1 'Archivo',sans-serif; color:#fff; }
-.col-prog-lbl span { font:600 12px/1 'Archivo',sans-serif; color:#cabfef; }
-.col-prog-bar { height:8px; border-radius:99px; background:rgba(255,255,255,.12); overflow:hidden; }
-.col-prog-fill { height:100%; border-radius:99px; background:linear-gradient(90deg,#f0a93f,#eab308); transition:width .6s cubic-bezier(.34,1.4,.64,1); }
-
+// ── CSS du paquet (deck), PARTAGÉE avec le profil élève ──────────────
+// src/pages/common/profil.js#mountEleveArene importe dynamiquement ce module
+// (« Mes cartes » y devient le héros de la page, décision Rayan 06/08/2026 :
+// le profil élève DEVIENT la maison des cartes) et réutilise CE bloc de CSS
+// tel quel + les fonctions cardEl/buildDeck/wireControls/enableTilt ci-dessous
+// pour que le paquet ait EXACTEMENT le même visuel et le même comportement
+// (glisser/taper/retourner) sur les deux écrans. ⚠️ Ne JAMAIS dupliquer ces
+// règles ailleurs : une seule source, un seul geste appris par l'élève.
+export const CARD_DECK_STYLE = `
 /* Le deck */
 .col-stage { position:relative; height:min(58vh,470px); margin:12px 0 6px;
   perspective:1200px; touch-action:pan-y; user-select:none; }
@@ -189,6 +180,29 @@ ${chromeNight("#181241", "#0b0a1c")}
   .col-flip { transition:none; }
   .col-face { transition:none; }
 }
+`;
+
+const STYLE = `<style>
+${chromeNight("#181241", "#0b0a1c")}
+.col { max-width: 480px; margin: 0 auto; padding: 14px 16px calc(96px + env(safe-area-inset-bottom));
+  min-height: calc(100dvh - 52px); font-family:'Archivo',sans-serif; color:#f2f0fa;
+  background:
+    radial-gradient(120% 40% at 50% -5%, rgba(255,190,70,.10) 0%, transparent 55%),
+    radial-gradient(120% 55% at 50% 30%, rgba(110,70,220,.22) 0%, transparent 62%),
+    linear-gradient(180deg,#181241 0%,#0f0d24 58%,#0b0a1c 100%); }
+
+/* Barre de progression + pastilles par monde */
+.col-prog { margin:10px 0 4px; }
+.col-hd { margin:2px 0 12px; }
+.col-title { margin:0; font:800 24px/1.1 'Archivo',sans-serif; letter-spacing:-.02em; color:#fff; }
+.col-sub { margin:4px 0 0; font:600 12.5px/1.35 'Archivo',sans-serif; color:#cabfef; }
+.col-prog-lbl { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:7px; }
+.col-prog-lbl b { font:800 14px/1 'Archivo',sans-serif; color:#fff; }
+.col-prog-lbl span { font:600 12px/1 'Archivo',sans-serif; color:#cabfef; }
+.col-prog-bar { height:8px; border-radius:99px; background:rgba(255,255,255,.12); overflow:hidden; }
+.col-prog-fill { height:100%; border-radius:99px; background:linear-gradient(90deg,#f0a93f,#eab308); transition:width .6s cubic-bezier(.34,1.4,.64,1); }
+
+${CARD_DECK_STYLE}
 </style>`;
 
 function header() {
@@ -345,7 +359,9 @@ function fmtDate(iso) {
   }
 }
 
-function cardEl(carte, state, { reveal = false } = {}) {
+// Exportée : profil.js construit une carte pour son mini-aperçu de secours
+// (rare) et surtout pour laisser buildDeck reconstruire la pile.
+export function cardEl(carte, state, { reveal = false } = {}) {
   const isUnlocked = state.unlocked.has(carte.id);
   const isNew = isUnlocked && !state.seen.has(carte.id);
   const el = document.createElement("div");
@@ -384,7 +400,10 @@ function render(root, state) {
 }
 
 // Reconstruit les 3 couches empilées à partir de state.cur.
-function buildDeck(root, state) {
+// Exportée : LE mécanisme du paquet, appelé tel quel par profil.js — un
+// container avec #col-stage (+ .col-hint-l/.col-hint-r) suffit, cf. commentaire
+// CARD_DECK_STYLE plus haut.
+export function buildDeck(root, state) {
   const stage = root.querySelector("#col-stage");
   if (!stage) return;
   // enlève les anciennes cartes (garde les indices de hint)
@@ -469,7 +488,8 @@ function advance(root, state, dir) {
   }, 480);
 }
 
-function wireControls(root, state) {
+// Exportée : branche #col-prev/#col-next. profil.js les inclut telles quelles.
+export function wireControls(root, state) {
   root
     .querySelector("#col-next")
     ?.addEventListener("click", () => advance(root, state, +1));
@@ -570,7 +590,8 @@ function requestTiltPermission() {
     DOE.requestPermission().catch(() => {});
   }
 }
-function enableTilt(root) {
+// Exportée : reflet holographique qui suit l'inclinaison du téléphone.
+export function enableTilt(root) {
   if (_tiltOn) return;
   _tiltOn = true;
   window.addEventListener("deviceorientation", (e) => {

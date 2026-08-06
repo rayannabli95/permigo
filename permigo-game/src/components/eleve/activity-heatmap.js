@@ -102,9 +102,16 @@ export function renderHeatmap({
   activityDetails = {},
   weeks = 14,
   title = null,
+  showStats = true,
 } = {}) {
   // Titre par défaut traduit ("" explicite = pas de titre, cf. accueil).
   const _title = title == null ? hmt("title", "Mon activité") : title;
+  // L'en-tête (titre + « X jours actifs ») ne s'affiche que si l'un des deux
+  // a quelque chose à dire. Corrige le bug du 06/08/2026 : accueil.js passe
+  // `title:""` (son propre en-tête « Mon mois · X jour actif » vit juste
+  // au-dessus, dans la bottom sheet) mais `hmap-stats` s'affichait quand
+  // même EN PLUS → « X jours actifs » écrit deux fois de suite à l'écran.
+  const _showHead = Boolean(_title) || showStats;
   const _days = hmt("days", DAYS_FR);
   const _months = hmt("months", MONTHS_FR);
   const active = new Set(activeDates);
@@ -170,23 +177,37 @@ export function renderHeatmap({
     return (today - dd) / 86400000 < 7;
   }).length;
 
+  // Même gabarit de colonnes ici que sur .hmap-grid ci-dessous : sinon les
+  // deux grilles comptent un nombre de colonnes différent (la CSS de
+  // .hmap-months défaut à 14 via --cols, jamais posée) et les étiquettes de
+  // mois dérivent par rapport aux cases sous elles (bug du 06/08/2026).
+  const _colsStyle = `grid-template-columns:auto repeat(${weeks},1fr)`;
+
   return `
     <div class="hmap">
-      <div class="hmap-head">
-        <div class="hmap-title">${hmRtl(_title)}</div>
-        <div class="hmap-stats">
+      ${
+        _showHead
+          ? `<div class="hmap-head">
+        ${_title ? `<div class="hmap-title">${hmRtl(_title)}</div>` : ""}
+        ${
+          showStats
+            ? `<div class="hmap-stats">
           <span>${hmRtl(
             hmt("stats", "<b>{t}</b> jours actifs · <b>{w}</b> cette semaine")
               .replace("{t}", totalActive)
               .replace("{w}", last7Active),
           )}</span>
-        </div>
-      </div>
+        </div>`
+            : ""
+        }
+      </div>`
+          : ""
+      }
       <div class="hmap-scroll" tabindex="0" role="region" aria-label="${hmt("scroll_aria", "Historique d'activité, défilement horizontal")}">
-        <div class="hmap-months">
+        <div class="hmap-months" style="${_colsStyle}">
           ${monthsLabels.map((m) => `<span style="grid-column-start:${m.weekIdx + 2}">${m.monthName}</span>`).join("")}
         </div>
-        <div class="hmap-grid" style="grid-template-columns:auto repeat(${weeks},1fr)">
+        <div class="hmap-grid" style="${_colsStyle}">
           ${grid
             .map(
               (row, dayIdx) => `

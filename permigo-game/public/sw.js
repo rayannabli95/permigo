@@ -72,16 +72,16 @@ const NOTIF_DEFAULTS = {
 
 const NOTIF_COPY = {
   post_validation_quiz: {
-    title: "🎉 Compétence validée !",
-    body: "Ton moniteur a validé une compétence. Lance le quiz de 3 questions maintenant !",
+    title: "🎉 Compétence validée",
+    body: "Lance le quiz · 3 questions",
   },
   consolidation_quiz: {
     title: "🔄 Consolide tes acquis",
-    body: "Il est temps de revoir une compétence. 2 questions, 2 minutes.",
+    body: "2 questions · 2 minutes",
   },
   streak_risk: {
     title: "🔥 Ta série t'attend",
-    body: "Ne laisse pas ta flamme s'éteindre. Une petite session suffit !",
+    body: "Une petite session suffit",
   },
 };
 

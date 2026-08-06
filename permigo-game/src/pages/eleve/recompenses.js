@@ -45,7 +45,12 @@ import { getCurUser } from "@/auth/cur-user.js";
 import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { haptic } from "@/utils/haptic.js";
-import { getStreak, getMyChests } from "@/utils/game-state.js";
+import { getMyChests } from "@/utils/game-state.js";
+// Source unique de la série (cf. src/services/streak.js) : même valeur que
+// accueil.js / profil.js / reviser.js (bug des séries incohérentes corrigé
+// le 06/08/2026). L'ancien utils/game-state.js#getStreak() est un cache
+// localStorage figé au boot de l'app, pas la donnée serveur fraîche.
+import { getStreak } from "@/services/streak.js";
 import { medallion } from "@/utils/medallions.js";
 import { volantImg } from "@/utils/volant.js";
 import { ASSETS } from "@/utils/assets.js";
@@ -73,8 +78,8 @@ const REC_I18N = {
     serie_lab: "Streak:",
     day_sing: "day",
     day_plur: "days",
-    kicker_big: "The Wheel · real big prizes",
-    kicker: "The Wheel",
+    kicker_big: "Real big prizes",
+    kicker: "Daily reward",
     t_spin_html: "Your <em>free spin</em> is waiting",
     t_back: "Come back tomorrow to play again",
     sub_std: "Steering wheels · avatars · titles to win every day.",
@@ -134,8 +139,8 @@ const REC_I18N = {
     serie_lab: "السلسلة:",
     day_sing: "يوم",
     day_plur: "أيام",
-    kicker_big: "العجلة · جوائز كبرى حقيقية",
-    kicker: "العجلة",
+    kicker_big: "جوائز كبرى حقيقية",
+    kicker: "مكافأة اليوم",
     t_spin_html: "دورتك <em>المجانية</em> بانتظارك",
     t_back: "عد غدًا للعب من جديد",
     sub_std: "مقاود وصور رمزية وألقاب تربحها كل يوم.",
@@ -525,9 +530,11 @@ function renderHero(ctx) {
   } = ctx;
 
   const lang = getLang();
+  // Un seul « roue » fort dans le bloc : le CTA (cf. ctaLabel). L'eyebrow
+  // annonce la récompense sans répéter le mot (audit visuel Rayan, 06/08).
   const kicker = anyBig
-    ? rtR("kicker_big", "La Roue · gros lots réels")
-    : rtR("kicker", "La Roue");
+    ? rtR("kicker_big", "Gros lots réels")
+    : rtR("kicker", "Récompense du jour");
   const title = spinAvailable
     ? rrtl(rtR("t_spin_html", `Ton <em>tour gratuit</em> t'attend`))
     : rtD("t_back", `Reviens demain pour rejouer`);
@@ -829,6 +836,7 @@ export async function mount(root) {
     itemsRes,
     condRes,
     selfValRes,
+    streakRes,
   ] = await Promise.allSettled([
     sb
       .from("roue_daily_spins")
@@ -849,6 +857,7 @@ export async function mount(root) {
     // `validations`, fusionnée pour ne pas laisser le palier permis bloqué.
     // Même pattern que accueil.js.
     sb.from("self_validations").select("competence_id").eq("eleve_id", me.id),
+    getStreak(),
   ]);
 
   const resultError = (result) =>
@@ -890,7 +899,9 @@ export async function mount(root) {
   const anyBig = realLots.some((l) => l && l.big);
 
   // ── Série (pour "prochain coffre") ──
-  const streak = getStreak();
+  const streak = {
+    count: streakRes.status === "fulfilled" ? streakRes.value.current : 0,
+  };
 
   // ── Coffres ──
   const chests = chestsRes.status === "fulfilled" ? chestsRes.value || [] : [];

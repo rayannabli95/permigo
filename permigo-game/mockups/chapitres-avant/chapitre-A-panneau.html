@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapitre A · Panneau d'itinéraire</title>
+<style>
+@font-face { font-family:'Archivo'; font-style:normal; font-weight:400 900; font-display:block; src:url(archivo.woff2) format('woff2'); }
+*{ box-sizing:border-box; }
+html,body{ margin:0; padding:0; }
+body{ font-family:'Archivo', system-ui, sans-serif; background:#0b0719; }
+.page{ max-width:480px; margin:0 auto; min-height:100dvh; overflow-x:hidden; color:#fff;
+  background:linear-gradient(#120a24 0%, #1a1030 46%, #0b0719 100%); padding-bottom:40px; }
+.flag{ margin:0; padding:9px 18px; background:#2a1b52; color:#ffd24a; font:800 11px/1 'Archivo',sans-serif; letter-spacing:.16em; text-transform:uppercase; }
+
+/* ── L'en-tête de chapitre prend tout le haut de l'écran ──── */
+.chap{ position:relative; overflow:hidden; padding:26px 20px 24px;
+  background:
+    radial-gradient(150% 90% at 50% 0%, rgba(255,180,64,.26) 0%, rgba(255,180,64,0) 58%),
+    radial-gradient(120% 80% at 88% 4%, rgba(168,85,247,.5) 0%, rgba(168,85,247,0) 62%),
+    linear-gradient(168deg, #47257f 0%, #2d1a5c 52%, #1a1036 100%);
+  border-bottom:1px solid rgba(255,210,74,.28);
+  box-shadow:0 26px 50px -26px rgba(120,60,255,.75); }
+/* Le grand numéro en creux : il dit « où j'en suis » sans un mot. */
+.chap .bignum{ position:absolute; right:-6px; top:-22px; margin:0; z-index:0; pointer-events:none;
+  font:900 150px/1 'Archivo',sans-serif; letter-spacing:-.07em;
+  color:transparent; -webkit-text-stroke:2px rgba(255,214,120,.20); }
+.chap .road{ position:absolute; left:-10px; bottom:-34px; width:200px; height:180px; opacity:.5; z-index:0; }
+.chap-in{ position:relative; z-index:2; }
+.kick{ display:inline-flex; align-items:center; gap:8px; padding:7px 13px; border-radius:999px;
+  background:rgba(12,5,28,.55); border:1px solid rgba(255,210,74,.45);
+  font:800 11.5px/1 'Archivo',sans-serif; letter-spacing:.14em; text-transform:uppercase; color:#ffe1a0; }
+.kick .dot{ width:7px; height:7px; border-radius:50%; background:linear-gradient(#ffd24a,#ff9c1c); box-shadow:0 0 8px #ffb840; }
+.chap h1{ margin:16px 0 0; font-weight:900; font-size:38px; line-height:.98; letter-spacing:-.045em;
+  background:linear-gradient(180deg,#fff 0%,#ffe9b0 52%,#f6c85f 100%);
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent;
+  filter:drop-shadow(0 4px 14px rgba(0,0,0,.45)); }
+.chap .sub{ margin:12px 0 0; max-width:26ch; font:600 15px/1.45 'Archivo',sans-serif; color:#d5c9ff; }
+
+/* Progression en 9 blocs : on VOIT les étapes, pas un pourcentage flou. */
+.seg{ display:flex; gap:5px; margin:22px 0 0; }
+.seg i{ flex:1; height:9px; border-radius:3px; background:rgba(8,3,22,.6); box-shadow:inset 0 1px 3px rgba(0,0,0,.6); }
+.seg i.on{ background:linear-gradient(180deg,#ffe08a,#ff9c1c); box-shadow:0 0 10px rgba(255,156,28,.55), inset 0 1px 0 rgba(255,255,255,.5); }
+.seg-lab{ display:flex; align-items:baseline; justify-content:space-between; margin:11px 0 0; }
+.seg-lab span{ font:700 12.5px/1 'Archivo',sans-serif; color:#c0b2ee; }
+.seg-lab b{ font:900 15px/1 'Archivo',sans-serif; color:#ffe9a8; }
+
+/* ── Le sélecteur : des noms, pas des pastilles muettes ───── */
+.rail-k{ margin:22px 20px 9px; font:800 11px/1 'Archivo',sans-serif; letter-spacing:.16em; text-transform:uppercase; color:#8e7fc0; }
+.rail{ display:flex; gap:9px; overflow-x:auto; padding:0 20px 6px; scrollbar-width:none; }
+.rail::-webkit-scrollbar{ display:none; }
+.rl{ flex:0 0 auto; min-width:150px; padding:12px 14px; border-radius:16px; text-align:left;
+  background:rgba(42,27,82,.55); border:1.5px solid rgba(168,85,247,.26); }
+.rl .n{ display:flex; align-items:center; gap:7px; font:800 10.5px/1 'Archivo',sans-serif; letter-spacing:.12em; text-transform:uppercase; color:#a495d8; }
+.rl .t{ margin:7px 0 0; font:800 14px/1.15 'Archivo',sans-serif; color:#e6ddff; }
+.rl.done{ border-color:rgba(46,200,110,.4); background:rgba(20,80,46,.34); }
+.rl.done .n{ color:#6ef0a4; }
+.rl.cur{ background:linear-gradient(160deg,#ffe08a,#ffb33f); border-color:#ffd24a;
+  box-shadow:0 8px 22px -8px rgba(255,156,28,.75); }
+.rl.cur .n{ color:#7a4200; }
+.rl.cur .t{ color:#3a1c00; }
+.rl.next{ border-color:rgba(168,85,247,.55); background:rgba(58,32,112,.7); }
+.rl.next .n{ color:#d7bcff; }
+.rl.lock{ opacity:.6; }
+
+/* ── Suite de la page : l'itinéraire (volontairement discret) ── */
+.route-head{ display:flex; align-items:baseline; justify-content:space-between; padding:26px 22px 0; }
+.route-head h2{ margin:0; font-weight:800; font-size:17px; color:#e6ddff; }
+.route-head .cnt{ font:700 12px/1 'Archivo',sans-serif; color:#9d8ecf; }
+.route{ position:relative; height:200px; margin:14px 22px 0; }
+.node{ position:absolute; width:56px; height:56px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(180deg,#2f2159,#221546); border:2px solid rgba(168,85,247,.35); color:#cdbff5; font:800 14px/1 'Archivo',sans-serif; }
+.node.done{ background:linear-gradient(180deg,#1f6b3f,#14512d); border-color:rgba(46,200,110,.5); color:#8ff5bb; }
+.node.cur{ background:linear-gradient(160deg,#ffe08a,#ffb33f); border-color:#ffd24a; color:#3a1c00; }
+</style>
+</head>
+<body>
+<div class="page">
+  <p class="flag">Variante A · panneau d'itinéraire</p>
+
+  <div class="chap">
+    <p class="bignum" aria-hidden="true">01</p>
+    <svg class="road" viewBox="0 0 200 180" fill="none" aria-hidden="true">
+      <path d="M-10 175 C 60 140, 20 90, 90 60 S 150 20, 210 -10" stroke="rgba(255,255,255,.14)" stroke-width="30" stroke-linecap="round"/>
+      <path d="M-10 175 C 60 140, 20 90, 90 60 S 150 20, 210 -10" stroke="rgba(255,210,74,.45)" stroke-width="2.5" stroke-dasharray="9 13" stroke-linecap="round"/>
+    </svg>
+    <div class="chap-in">
+      <span class="kick"><span class="dot"></span>Chapitre 1 sur 4</span>
+      <h1>Maîtriser le véhicule</h1>
+      <p class="sub">Les bases. Démarrer. Freiner. Diriger.</p>
+      <div class="seg" role="img" aria-label="9 étapes sur 9 terminées">
+        <i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i>
+      </div>
+      <div class="seg-lab"><span>Étapes terminées</span><b>9 / 9</b></div>
+    </div>
+  </div>
+
+  <p class="rail-k">Tes 4 chapitres</p>
+  <div class="rail">
+    <div class="rl cur">
+      <span class="n">Chapitre 1 · en cours</span>
+      <p class="t">Maîtriser le véhicule</p>
+    </div>
+    <div class="rl next">
+      <span class="n">Chapitre 2 · ouvert</span>
+      <p class="t">Circuler en ville</p>
+    </div>
+    <div class="rl lock">
+      <span class="n"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2.3" stroke="currentColor" stroke-width="2.4"/><path d="M8 11V8.5a4 4 0 0 1 8 0V11" stroke="currentColor" stroke-width="2.4"/></svg>Chapitre 3</span>
+      <p class="t">Conditions difficiles</p>
+    </div>
+    <div class="rl lock">
+      <span class="n"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2.3" stroke="currentColor" stroke-width="2.4"/><path d="M8 11V8.5a4 4 0 0 1 8 0V11" stroke="currentColor" stroke-width="2.4"/></svg>Chapitre 4</span>
+      <p class="t">Conduite autonome</p>
+    </div>
+  </div>
+
+  <div class="route-head"><h2>Ton itinéraire</h2><span class="cnt">9 étapes</span></div>
+  <div class="route">
+    <span class="node done" style="left:14px; top:6px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4 10-11" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    <span class="node done" style="right:20px; top:72px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4 10-11" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    <span class="node cur" style="left:30px; top:138px;">★</span>
+  </div>
+</div>
+</body>
+</html>

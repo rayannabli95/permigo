@@ -82,7 +82,10 @@ Deno.serve(async (req) => {
 
         const remaining = 28 - (nComp ?? 0);
         const title = `🎓 Plus que ${remaining} avant l'examen blanc`;
-        const bodyText = `Tu es si proche, ${e.prenom} ! ${nComp}/31 acquises. Une dernière ligne droite.`;
+        // ⚠️ Le rendu EN/AR extrait le prénom de CE gabarit
+        // (`notifications.js` → /proche,\s*([^!]+?)\s*!/). Garder la forme
+        // « … proche, {prénom} ! » si on retouche ce texte.
+        const bodyText = `Tu es si proche, ${e.prenom} ! ${nComp}/31 acquises`;
 
         const { error } = await sb.from("notifications").insert({
           user_id: e.id,

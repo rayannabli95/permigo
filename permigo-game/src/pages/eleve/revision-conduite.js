@@ -334,6 +334,88 @@ function useGrouped(methode, groups) {
   );
 }
 
+// ═══════════════════════════════════════════════════════════════
+// Fiche « variante A » (maquette mockups/fiches-lisibles/fiche-A-consigne-
+// detail.html, validée) : chaque geste devient une carte « consigne en gras
+// puis détail ». Le découpage est 100 % AUTOMATIQUE à partir du texte déjà en
+// base (aucune donnée réécrite) : la 1re clause avant le premier point ou
+// deux-points devient la consigne, le reste se découpe en phrases, ce qui
+// était entre parenthèses part dans un encart annexe.
+//
+// Règle mécanique, pas sémantique : on ne « comprend » pas la phrase, on
+// coupe à la ponctuation. D'où un filet de sécurité strict — mieux vaut
+// RIEN découper qu'afficher un titre absurde ou coupé en plein milieu d'une
+// parenthèse. Validé à la main sur les 215 gestes réels des 4 mondes
+// (src/data/fiches/monde-1..4.json) : 175 se découpent proprement (81 %),
+// 40 se replient sur l'affichage à plat existant (repli du bloc appelant,
+// cf. card() dans renderFicheDeck) — jamais de carte vide, jamais de titre
+// tronqué. Ne s'applique qu'au FRANÇAIS (cf. appel dans card()) : la
+// ponctuation d'une traduction n'a aucune raison de suivre la même
+// structure que la source.
+function splitStepCard(raw) {
+  let text = String(raw || "").trim();
+  if (!text) return null;
+
+  // 1. Sort les parenthèses du flux principal (contenu d'annexe), dans
+  // l'ordre. Une parenthèse non refermée après ce retrait (imbrication,
+  // longueur qui dépasse) est un signal d'abandon : mieux vaut replier que
+  // couper une phrase en plein milieu d'une parenthèse.
+  const asides = [];
+  text = text.replace(/\(([^()]{2,220})\)/g, (_, inner) => {
+    asides.push(inner.trim());
+    return "";
+  });
+  if (/[()]/.test(text)) return null;
+  text = text
+    .replace(/\s+([.,:;])/g, "$1")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+  if (!text) return null;
+
+  // 2. Première frontière franche : point ou deux-points suivi d'un espace
+  // ou de la fin de chaîne. On ignore un point décimal (chiffre des deux
+  // côtés, ex. « 2.5 ») et un point d'initiale isolée (ex. « M. »).
+  const boundRe = /[.:](?=\s|$)/g;
+  let boundIdx = -1;
+  let m;
+  while ((m = boundRe.exec(text))) {
+    const i = m.index;
+    const before = text[i - 1] || "";
+    const after = text[i + 1] || "";
+    if (text[i] === "." && /\d/.test(before) && /\d/.test(after)) continue;
+    if (
+      text[i] === "." &&
+      /[A-Z]/.test(before) &&
+      /(^|\s)$/.test(text.slice(Math.max(0, i - 2), i - 1))
+    )
+      continue;
+    boundIdx = i;
+    break;
+  }
+  if (boundIdx === -1) return null; // aucune frontière → repli
+
+  const consigne = text.slice(0, boundIdx).trim();
+  const rest = text.slice(boundIdx + 1).trim();
+
+  // Une consigne trop courte (un seul mot, un label de section échappé du
+  // regroupement) ou trop longue (elle n'a plus rien d'un titre) → repli.
+  if (consigne.length < 8 || consigne.length > 62 || !/\s/.test(consigne))
+    return null;
+
+  // 3. Détail : le reste, une phrase par ligne.
+  const detail = rest
+    ? rest
+        .split(/(?<=[.!?])\s+(?=[A-ZÀ-Ý«"“])|(?<=[.!?])$/)
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : [];
+  const detailFinal = detail.length ? detail : rest ? [rest] : [];
+
+  const aside = asides.length ? asides.join(" · ") : null;
+
+  return { consigne, detail: detailFinal, aside };
+}
+
 // sources = ["chaine-slug/videoId", …] : on n'affiche QUE le nom de la
 // chaîne, humanisé — l'id vidéo brut à l'écran faisait note de dev.
 function sourceChannels(f) {
@@ -368,49 +450,37 @@ function hashStr(s) {
   return h;
 }
 const INTRO_TPL = {
+  // Le kicker au-dessus dit déjà « AUJOURD'HUI » : la phrase ne le répète pas
+  // (même redondance que « La roue » + « Lancer la roue », signalée par Rayan).
+  // Elle ouvre sur le prénom, qui est le mot mis en or.
   fr: [
+    (p, t) => (p ? `${p}. Tu attaques « ${t} ».` : `Tu attaques « ${t} ».`),
     (p, t) =>
-      p
-        ? `Aujourd'hui ${p}, tu attaques « ${t} ».`
-        : `Aujourd'hui, tu attaques « ${t} ».`,
+      p ? `${p}. À toi de jouer sur « ${t} ».` : `À toi de jouer sur « ${t} ».`,
     (p, t) =>
-      p
-        ? `À toi de jouer, ${p} : « ${t} », ça se travaille dès maintenant.`
-        : `À toi de jouer : « ${t} », ça se travaille dès maintenant.`,
-    (p, t) =>
-      p
-        ? `C'est parti, ${p} ! Prochaine étape : « ${t} ».`
-        : `C'est parti ! Prochaine étape : « ${t} ».`,
+      p ? `${p}. Prochaine étape « ${t} ».` : `Prochaine étape « ${t} ».`,
   ],
   en: [
     (p, t) =>
-      p
-        ? `Today ${p}, you're taking on "${t}".`
-        : `Today, you're taking on "${t}".`,
-    (p, t) =>
-      p
-        ? `Your turn, ${p}: "${t}" starts right now.`
-        : `Your turn: "${t}" starts right now.`,
-    (p, t) =>
-      p
-        ? `Here we go, ${p}! Next step: "${t}".`
-        : `Here we go! Next step: "${t}".`,
+      p ? `${p}. You're taking on "${t}".` : `You're taking on "${t}".`,
+    (p, t) => (p ? `${p}. Your turn on "${t}".` : `Your turn on "${t}".`),
+    (p, t) => (p ? `${p}. Next step "${t}".` : `Next step "${t}".`),
   ],
   ar: [
-    (p, t) => (p ? `اليوم يا ${p}، تبدأ « ${t} ».` : `اليوم تبدأ « ${t} ».`),
+    (p, t) => (p ? `يا ${p}. تبدأ « ${t} ».` : `تبدأ « ${t} ».`),
+    (p, t) => (p ? `يا ${p}. دورك مع « ${t} ».` : `دورك مع « ${t} ».`),
     (p, t) =>
-      p ? `دورك يا ${p} : « ${t} » يبدأ الآن.` : `دورك : « ${t} » يبدأ الآن.`,
-    (p, t) =>
-      p
-        ? `هيا يا ${p} ! الخطوة التالية : « ${t} ».`
-        : `هيا ! الخطوة التالية : « ${t} ».`,
+      p ? `يا ${p}. الخطوة التالية « ${t} ».` : `الخطوة التالية « ${t} ».`,
   ],
 };
-function introText(lang, i, prenom, titre, pourquoi) {
+// Variante A (maquette validée) : deux blocs distincts, pas une phrase
+// fusionnée. « lead » = la phrase d'accroche courte, en gros et centré,
+// « why » = la 1re phrase du pourquoi, plus discrète en dessous.
+function introParts(lang, i, prenom, titre, pourquoi) {
   const bank = INTRO_TPL[lang] || INTRO_TPL.fr;
   const lead = bank[i % bank.length](prenom, titre);
   const why = firstSentence(pourquoi);
-  return why ? `${lead} ${why}` : lead;
+  return { lead, why };
 }
 
 const STYLE = `<style>
@@ -496,42 +566,81 @@ ${chromeNight("#5a4fc0", "#423a96")}
   background:linear-gradient(180deg,#ffe9b0,#f0a93f 55%,#d98a1f);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.7), inset 0 -3px 4px rgba(150,80,0,.45); transition:width .35s cubic-bezier(.23,1,.32,1); }
 
-/* Intro narrative personnalisée (prénom) — bloc discret sous le héros. */
-.fd-intro{ margin:0 18px 2px; display:flex; gap:11px; align-items:flex-start; padding:13px 15px 14px; border-radius:16px;
+/* Intro narrative personnalisée (prénom) — première chose lue sur la fiche.
+   Variante A (maquette validée) : kicker « AUJOURD'HUI » minuscule, puis la
+   phrase d'accroche en gros (26 à 31px, le prénom en or), puis le « pourquoi »
+   en dessous, plus discret. Trois blocs distincts — avant, une seule phrase
+   fusionnée « accroche + pourquoi » tournait sur plusieurs lignes à 15px et
+   se lisait comme un pavé, pas comme un titre. */
+.fd-intro{ margin:0 18px 4px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:4px;
+  padding:22px 20px 20px; border-radius:18px;
   background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.16); box-shadow:inset 0 1px 0 rgba(255,255,255,.10); }
-.fd-intro-ic{ flex:0 0 30px; width:30px; height:30px; border-radius:10px; display:flex; align-items:center; justify-content:center;
-  background:rgba(255,223,150,.14); border:1px solid rgba(255,223,150,.30); }
-.fd-intro p{ margin:0; font:600 13.5px/1.6 'Archivo',sans-serif; color:#efe9ff; }
-.fd-intro p .fd-fr{ color:#b9aee0; opacity:.85; }
+.fd-intro-ic{ flex:0 0 36px; width:36px; height:36px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+  background:rgba(255,223,150,.16); border:1px solid rgba(255,223,150,.32); margin-bottom:6px; }
+.fd-intro-day{ margin:0 0 2px; font:800 11px/1 'Archivo',sans-serif; letter-spacing:.18em; text-transform:uppercase; color:#c9bcff; }
+/* color:inherit obligatoire (cf. .fd-title) : base.css pose une couleur sur
+   h1..h4, une règle directe bat l'héritage sinon le titre repasse en encre
+   sombre sur ce fond sombre. */
+.fd-intro-lead{ color:inherit; margin:0; max-width:22ch; font:800 clamp(24px,7vw,28px)/1.16 'Archivo',sans-serif; letter-spacing:-.02em; }
+.fd-intro-lead strong{ color:#ffd76e; font-weight:900; }
+.fd-intro-lead .fd-fr{ font-size:.55em; color:#cabef7; opacity:.85; font-weight:600; margin-top:6px; }
+.fd-intro-why{ margin:8px 0 0; max-width:30ch; font:600 14px/1.5 'Archivo',sans-serif; color:#c3b6f0; }
+.fd-intro-why .fd-fr{ color:#a89bd6; opacity:.85; font-weight:600; }
 
 .fd-seclab{ display:flex; align-items:center; gap:10px; padding:0 18px; margin:22px 0 12px; }
 .fd-seclab h2{ font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; letter-spacing:.10em; text-transform:uppercase; color:#ded7ff; white-space:nowrap; margin:0; }
 .fd-seclab .line{ height:1px; flex:1; background:linear-gradient(90deg,rgba(222,215,255,.55),transparent); }
 
-.fd-deck{ padding:0 18px; display:flex; flex-direction:column; gap:9px; }
+.fd-deck{ padding:0 18px; display:flex; flex-direction:column; gap:11px; }
 .fd-deck + .fd-seclab{ margin-top:20px; }
-.fd-card{ position:relative; display:flex; align-items:center; gap:12px; width:100%; text-align:left; cursor:pointer;
-  padding:12px 14px 12px 12px; border-radius:16px; background:#f6f4ff; border:1px solid #e6e2fb; border-top-color:#fff;
-  box-shadow:0 4px 0 rgba(20,12,60,.35), inset 0 1px 0 rgba(255,255,255,.8);
-  -webkit-tap-highlight-color:transparent; transition:transform .1s ease; }
-.fd-card:active{ transform:scale(.99); }
+/* Carte « variante A » : consigne en gras en tête (le geste à faire), puis
+   le détail en dessous, une idée par ligne, puis l'annexe (l'ex-parenthèse)
+   dans son propre encart. Le conteneur n'est plus le <button> : un <ul> n'est
+   pas du contenu phrasé, il n'a rien à faire dans un <button> (cf. la même
+   règle déjà posée pour .fd-cc plus bas). Seule la tête (chk + consigne)
+   reste un <button> — c'est la zone qui coche le geste. */
+.fd-card{ position:relative; width:100%; padding:14px 16px 14px 14px; border-radius:18px;
+  background:#f6f4ff; border:1px solid #e6e2fb; border-top-color:#fff;
+  box-shadow:0 4px 0 rgba(20,12,60,.35), inset 0 1px 0 rgba(255,255,255,.8); }
 .fd-card.done{ background:linear-gradient(180deg,#fff8ea,#fdefcc); border-color:rgba(240,169,63,.55); border-top-color:#fff3d4;
   box-shadow:0 4px 0 rgba(150,95,10,.32), inset 0 1px 0 rgba(255,255,255,.8), 0 0 0 1px rgba(240,169,63,.18); }
 .fd-card.next{ border-color:#c9bff5; border-top-color:#fff;
   box-shadow:0 4px 0 rgba(20,12,60,.35), inset 0 1px 0 rgba(255,255,255,.8), 0 0 0 2px rgba(150,120,255,.38); }
-.fd-next-flag{ position:absolute; top:-9px; left:44px; font-family:'Archivo',sans-serif; font-weight:800; font-size:9px; letter-spacing:.10em;
+.fd-next-flag{ position:absolute; top:-9px; left:16px; font-family:'Archivo',sans-serif; font-weight:800; font-size:9px; letter-spacing:.10em;
   color:#1a1240; background:linear-gradient(180deg,#e6d4ff,#b296ff); padding:2px 8px; border-radius:999px; text-transform:uppercase; box-shadow:0 2px 4px rgba(20,12,60,.3); }
-.fd-chk{ flex:0 0 34px; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+/* Compteur de position (« 1 / 6 ») : hérité de l'ancien numéro de geste, mais
+   au format de la maquette — position DANS sa section, coin haut droit. */
+.fd-rank{ position:absolute; top:15px; right:16px; font-family:'Archivo', system-ui, sans-serif; font-weight:800; font-size:11px;
+  letter-spacing:.02em; color:#a89cd6; }
+.fd-card.done .fd-rank{ color:#c79a3c; }
+.fd-card-head{ display:flex; align-items:flex-start; gap:12px; width:100%; margin:0; padding:0; border:0; background:none;
+  text-align:left; font-family:inherit; cursor:pointer; -webkit-tap-highlight-color:transparent; transition:transform .1s ease; }
+.fd-card-head:active{ transform:scale(.99); }
+.fd-chk{ flex:0 0 32px; width:32px; height:32px; margin-top:1px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
 .fd-chk.empty{ border:2.5px dashed rgba(107,95,160,.55); background:rgba(90,79,192,.05); }
 .fd-chk.filled{ background:radial-gradient(circle at 36% 28%,#ffe9b0,#f0a93f 58%,#b46a10);
   box-shadow:inset 0 -3px 4px rgba(120,60,0,.55), inset 0 2px 2px rgba(255,255,255,.7), 0 2px 5px rgba(20,12,60,.3); }
-.fd-num{ flex:0 0 auto; font-family:'Archivo', system-ui, sans-serif; font-weight:800; font-size:15px; width:20px; text-align:center; color:#8579b8; }
-.fd-card.done .fd-num{ color:#b46a10; }
-.fd-card.next .fd-num{ color:#5a4fc0; }
-.fd-txt{ font-size:13px; line-height:1.4; color:#241a45; font-weight:600; flex:1; }
-.fd-card.done .fd-txt{ color:#4a3712; }
-.fd-txt b{ color:#140f33; font-weight:800; }
-.fd-card.done .fd-txt b{ color:#7a4c0d; }
+/* Le geste : court, gras, 16px. Seule ligne à lire pour qui est pressé. */
+.fd-act{ flex:1; padding-right:36px; font-weight:800; font-size:16px; line-height:1.24; letter-spacing:-.01em; color:#241a45; }
+.fd-card.done .fd-act{ color:#4a3712; }
+.fd-act .fd-fr{ display:block; font-size:.85em; font-weight:600; color:#5b5286; opacity:.72; margin-top:3px; }
+/* Repli : le découpage n'a pas pris (texte trop long/court, pas de
+   frontière franche) → on garde le rendu plat d'avant, plus petit et moins
+   gras qu'une vraie consigne pour ne pas mimer un titre qui n'en est pas un. */
+.fd-act-plain{ font-weight:600; font-size:13px; line-height:1.4; }
+.fd-detail{ margin:10px 0 0; padding:0 0 0 44px; list-style:none; display:flex; flex-direction:column; gap:6px; }
+.fd-detail li{ position:relative; padding-left:14px; font:600 13px/1.42 'Archivo',sans-serif; color:#5b5089; }
+.fd-detail li::before{ content:""; position:absolute; left:0; top:7px; width:5px; height:5px; border-radius:50%; background:#c3b6f0; }
+.fd-card.done .fd-detail li{ color:#7a5f28; }
+.fd-card.done .fd-detail li::before{ background:#e0b463; }
+/* Annexe : ce qui était entre parenthèses vit ici, sur sa propre ligne
+   encadrée, plutôt qu'au milieu de la phrase. */
+.fd-aside{ margin:10px 0 0 44px; padding:8px 11px; border-radius:11px; display:flex; gap:7px; align-items:flex-start;
+  background:rgba(122,90,220,.09); border:1px solid rgba(122,90,220,.16); }
+.fd-aside svg{ flex:0 0 14px; margin-top:2px; }
+.fd-aside p{ margin:0; font:600 12px/1.4 'Archivo',sans-serif; color:#5f4fa8; }
+.fd-card.done .fd-aside{ background:rgba(240,169,63,.10); border-color:rgba(240,169,63,.22); }
+.fd-card.done .fd-aside p{ color:#8a6a1c; }
 
 .fd-schemas{ margin-top:2px; }
 .fd-gal{ display:flex; gap:12px; overflow-x:auto; scroll-snap-type:x mandatory; padding:2px 18px 8px; scrollbar-width:none; }
@@ -653,8 +762,8 @@ ${chromeNight("#5a4fc0", "#423a96")}
    span — l'app reste LTR). Voir lang.js + fiches-i18n.js. */
 .fd-tr{ display:block; }
 .fd-fr{ display:block; margin-top:4px; font-weight:500; opacity:.62; }
-.fd-txt .fd-fr{ font-size:.9em; color:#5b5286; opacity:.72; }
-.fd-card.done .fd-txt .fd-fr{ color:#6f5a2a; }
+.fd-act-plain .fd-fr{ font-size:.9em; color:#5b5286; opacity:.72; }
+.fd-card.done .fd-act-plain .fd-fr{ color:#6f5a2a; }
 .fd-cc-p .fd-fr{ font-size:.94em; color:#8a7fb5; opacity:.8; margin-top:3px; }
 .fd-title .fd-tr{ display:block; }
 .fd-title .fd-fr{ -webkit-text-fill-color:#cabef7; color:#cabef7; background:none;
@@ -1255,15 +1364,38 @@ export async function mount(root, param) {
     const pct = total ? Math.round((count / total) * 100) : 0;
 
     const CHK = `<svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 6" stroke="#5a3406" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-    const card = (s, i, sTr) => {
+    // Petit picto générique pour l'encart annexe (l'ex-parenthèse) : on ne
+    // sait pas deviner s'il s'agit d'un avertissement ou d'une précision, un
+    // seul picto « information » pour tous plutôt qu'une fausse distinction.
+    const ASIDE_IC = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="#7c5fe0"/><path d="M12 11v5.2" stroke="#fff" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="8" r="1.15" fill="#fff"/></svg>`;
+    // rank/rankTotal = position DANS la section affichée (un groupe, ou la
+    // fiche entière si pas de groupe) — c'est le « 1 / 6 » de la maquette.
+    const card = (s, i, sTr, rank, rankTotal) => {
       const done = doneSet.has(i);
       const next = i === firstUnchecked;
-      return `<button class="fd-card${done ? " done" : ""}${next ? " next" : ""}" data-geste="${i}" aria-pressed="${done}">
-        ${next ? `<span class="fd-next-flag">${esc(ui("next", "à toi"))}</span>` : ""}
+      // Le découpage « consigne + détail » ne s'applique qu'au français : il
+      // coupe sur la ponctuation du texte SOURCE, une traduction n'a aucune
+      // raison de porter la même structure (cf. commentaire sur splitStepCard).
+      const parsed = lang === "fr" ? splitStepCard(s) : null;
+      const head = `<button type="button" class="fd-card-head" data-geste="${i}" aria-pressed="${done}">
         <span class="fd-chk ${done ? "filled" : "empty"}">${done ? CHK : ""}</span>
-        <span class="fd-num">${i + 1}</span>
-        <span class="fd-txt">${bi(s, sTr)}</span>
+        <span class="fd-act${parsed ? "" : " fd-act-plain"}">${parsed ? bi(parsed.consigne, null) : bi(s, sTr)}</span>
       </button>`;
+      const detailHtml =
+        parsed && parsed.detail.length
+          ? `<ul class="fd-detail">${parsed.detail.map((d) => `<li>${bi(d, null)}</li>`).join("")}</ul>`
+          : "";
+      const asideHtml =
+        parsed && parsed.aside
+          ? `<div class="fd-aside">${ASIDE_IC}<p>${bi(parsed.aside, null)}</p></div>`
+          : "";
+      return `<div class="fd-card${done ? " done" : ""}${next ? " next" : ""}">
+        ${next ? `<span class="fd-next-flag">${esc(ui("next", "à toi"))}</span>` : ""}
+        <span class="fd-rank">${rank} / ${rankTotal}</span>
+        ${head}
+        ${detailHtml}
+        ${asideHtml}
+      </div>`;
     };
 
     // Le sous-titre de section fait office d'en-tête « La méthode » (pas de
@@ -1279,7 +1411,9 @@ export async function mount(root, param) {
         .map((g, gi) => {
           const gTR = groupsTR ? groupsTR[gi] : null;
           const cards = g.steps
-            .map((s, j) => card(s, idx++, gTR ? gTR.steps[j] : null))
+            .map((s, j) =>
+              card(s, idx++, gTR ? gTR.steps[j] : null, j + 1, g.steps.length),
+            )
             .join("");
           const lab = g.label || "La méthode";
           const labTR = g.label ? (gTR ? gTR.label : null) : methLab;
@@ -1288,7 +1422,7 @@ export async function mount(root, param) {
         .join("");
     } else {
       deckHtml = `${seclab("La méthode", methLab)}<div class="fd-deck">${steps
-        .map((s, i) => card(s, i, stepsTR ? stepsTR[i] : null))
+        .map((s, i) => card(s, i, stepsTR ? stepsTR[i] : null, i + 1, total))
         .join("")}</div>`;
     }
 
@@ -1400,23 +1534,60 @@ export async function mount(root, param) {
 
     // Intro narrative personnalisée (ton voulu par Rayan : « Aujourd'hui
     // {prenom}, tu attaques le giratoire… »). Composée par template stable
-    // (hash du code), esc() appliqué via bi(). Bilingue comme le reste de la
-    // page : traduction affichée + français gardé dessous.
+    // (hash du code). Bilingue comme le reste de la page : traduction
+    // affichée + français gardé dessous.
+    // Variante A (maquette validée) : la phrase d'accroche (lead) et la 1re
+    // phrase du pourquoi (why) sont deux blocs SÉPARÉS — un kicker « AUJOURD'HUI »
+    // au-dessus, l'accroche en gros, le pourquoi plus discret en dessous.
+    // Le prénom est mis en gras : on le remplace par un jeton (caractère
+    // zone privée Unicode, jamais tapé par personne) AVANT d'appeler
+    // introParts(), on esc() la phrase entière (comme bi()), PUIS on
+    // ré-injecte le prénom échappé dans un <strong> à la place du jeton.
+    // Échapper après coup casserait la balise. L'ordre compte.
     const prenom = String(getCurUser()?.prenom || "").trim();
+    const NAME_TOKEN = "\uE000"; // zone privee Unicode, jamais tapee par personne
     const tplIdx = hashStr(f.code) % INTRO_TPL.fr.length;
-    const introFr = introText("fr", tplIdx, prenom, f.titre, f.pourquoi);
-    const introTr =
+    const introFrParts = introParts(
+      "fr",
+      tplIdx,
+      prenom ? NAME_TOKEN : "",
+      f.titre,
+      f.pourquoi,
+    );
+    const introTrParts =
       lang !== "fr" && tr
-        ? introText(
+        ? introParts(
             lang,
             tplIdx,
-            prenom,
+            prenom ? NAME_TOKEN : "",
             tr.titre || f.titre,
             tr.pourquoi || f.pourquoi,
           )
         : null;
-    const SPARK_IC = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.2 6.6L21 11l-6.8 2.4L12 20l-2.2-6.6L3 11l6.8-2.4L12 2z" fill="#ffd76e"/></svg>`;
-    const introHtml = `<div class="fd-intro"><span class="fd-intro-ic" aria-hidden="true">${SPARK_IC}</span><p>${bi(introFr, introTr)}</p></div>`;
+    const boldPrenom = (escapedTxt) =>
+      prenom
+        ? escapedTxt.split(NAME_TOKEN).join(`<strong>${esc(prenom)}</strong>`)
+        : escapedTxt;
+    const leadBi =
+      lang === "fr" || !introTrParts || !introTrParts.lead
+        ? boldPrenom(esc(introFrParts.lead))
+        : `<span class="fd-tr"${rtl ? ' dir="rtl" lang="ar"' : ""}>${boldPrenom(esc(introTrParts.lead))}</span>` +
+          `<span class="fd-fr" lang="fr" dir="ltr">${boldPrenom(esc(introFrParts.lead))}</span>`;
+    const whyFr = introFrParts.why;
+    const whyTr = introTrParts ? introTrParts.why : null;
+    const whyBi = !whyFr
+      ? ""
+      : lang === "fr" || !whyTr
+        ? esc(whyFr)
+        : `<span class="fd-tr"${rtl ? ' dir="rtl" lang="ar"' : ""}>${esc(whyTr)}</span>` +
+          `<span class="fd-fr" lang="fr" dir="ltr">${esc(whyFr)}</span>`;
+    const SPARK_IC = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.2 6.6L21 11l-6.8 2.4L12 20l-2.2-6.6L3 11l6.8-2.4L12 2z" fill="#ffd76e"/></svg>`;
+    const introHtml = `<div class="fd-intro">
+      <span class="fd-intro-ic" aria-hidden="true">${SPARK_IC}</span>
+      <p class="fd-intro-day"${rtl ? ' dir="rtl" lang="ar"' : ""}>${esc(ui("today", "Aujourd'hui"))}</p>
+      <h2 class="fd-intro-lead">${leadBi}</h2>
+      ${whyBi ? `<p class="fd-intro-why">${whyBi}</p>` : ""}
+    </div>`;
 
     const BACK = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="#3d2f7a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 

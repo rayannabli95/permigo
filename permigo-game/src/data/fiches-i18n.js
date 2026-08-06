@@ -37,6 +37,7 @@ const FICHE_UI = {
     bva_h: "Automatic gearbox",
     source: "Seen with real instructors:",
     monde: "World",
+    today: "Today",
   },
   ar: {
     sub: "علّم على خطواتك، ثمّ صادق على المهارة.",
@@ -66,6 +67,7 @@ const FICHE_UI = {
     bva_h: "علبة السرعة الأوتوماتيكية",
     source: "مأخوذ من مدرّبين حقيقيين:",
     monde: "عالم",
+    today: "اليوم",
   },
 };
 

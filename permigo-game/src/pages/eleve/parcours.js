@@ -75,6 +75,11 @@ const PRC_I18N = {
     chapnav_aria: "Journey chapters",
     chap_n: "Chapter {n}",
     chap_shown: ". Shown",
+    rail_k: "Your {n} chapters",
+    rail_cur_lbl: "Chapter {n} · in progress",
+    rail_open_lbl: "Chapter {n} · unlocked",
+    rail_done_lbl: "Chapter {n} · done",
+    rail_lock_lbl: "Chapter {n}",
     themesw_aria: "Display: light or dark",
     theme_dark: "Dark",
     theme_light: "Light",
@@ -134,6 +139,11 @@ const PRC_I18N = {
     chapnav_aria: "فصول المسار",
     chap_n: "الفصل {n}",
     chap_shown: ". معروض",
+    rail_k: "فصولك ({n})",
+    rail_cur_lbl: "الفصل {n} · جارٍ",
+    rail_open_lbl: "الفصل {n} · مفتوح",
+    rail_done_lbl: "الفصل {n} · مكتمل",
+    rail_lock_lbl: "الفصل {n}",
     themesw_aria: "العرض: فاتح أو داكن",
     theme_dark: "داكن",
     theme_light: "فاتح",
@@ -911,7 +921,10 @@ const STYLE = `<style>
 }
 
 /* ── Textes codés en dur : override pour le mode clair ── */
-.prc-cv.is-light .prc-cv-world-title { color: var(--cv-ink); text-shadow: none; }
+.prc-cv.is-light .prc-cv-world-title {
+  background: none; -webkit-text-fill-color: initial;
+  color: var(--cv-ink); text-shadow: none; filter: none;
+}
 .prc-cv.is-light .prc-cv-world-sub { color: var(--cv-ink-sub); }
 .prc-cv.is-light .prc-cv-chip {
   background: rgba(124,77,255,.1);
@@ -923,19 +936,19 @@ const STYLE = `<style>
   background:
     radial-gradient(300px 160px at 88% -10%, rgba(180,130,255,.22), transparent 60%),
     linear-gradient(150deg, #ede7f9 0%, #e4dcf6 48%, #ddd5f0 100%);
-  border-color: rgba(124,77,255,.25);
+  border-bottom-color: rgba(124,77,255,.3);
   box-shadow:
     0 1px 0 rgba(255,255,255,.9) inset,
     0 -20px 40px -20px rgba(124,77,255,.18) inset,
-    0 14px 28px -12px rgba(100,80,180,.18),
-    0 0 40px -20px rgba(124,77,255,.14);
+    0 14px 28px -12px rgba(100,80,180,.18);
 }
-.prc-cv.is-light .prc-cv-wp-bar {
+.prc-cv.is-light .prc-cv-bignum { -webkit-text-stroke-color: rgba(124,77,255,.16); }
+.prc-cv.is-light .prc-cv-seg i {
   background: rgba(124,77,255,.12);
-  box-shadow: inset 0 2px 4px rgba(100,80,180,.1), inset 0 -1px 0 rgba(255,255,255,.6);
+  box-shadow: inset 0 1px 2px rgba(100,80,180,.12);
 }
-.prc-cv.is-light .prc-cv-wp-top span { color: var(--cv-mute); }
-.prc-cv.is-light .prc-cv-wp-top b { color: #5a2fa0; }
+.prc-cv.is-light .prc-cv-seg-lab span { color: var(--cv-mute); }
+.prc-cv.is-light .prc-cv-seg-lab b { color: #5a2fa0; }
 .prc-cv.is-light .prc-cv-route-head h2 { color: var(--cv-ink); }
 .prc-cv.is-light .prc-cv-step-count {
   color: var(--cv-mute);
@@ -957,14 +970,21 @@ const STYLE = `<style>
   box-shadow: 0 4px 0 #c8bfe4, 0 8px 14px -6px rgba(100,80,180,.15), inset 0 1px 0 rgba(255,255,255,.85);
 }
 
-/* Chapnav en clair */
-.prc-cv.is-light .prc-cv-cn {
-  color: #5a4a8a;
-  background: rgba(124,77,255,.08);
+/* Rail des chapitres en clair */
+.prc-cv.is-light .prc-cv-rail-k { color: var(--cv-mute); }
+.prc-cv.is-light .prc-cv-rl {
+  background: rgba(124,77,255,.07);
   border-color: rgba(124,77,255,.22);
 }
-.prc-cv.is-light .prc-cv-cn.done { color: #1a6637; border-color: rgba(46,200,110,.4); background: rgba(46,200,110,.1); }
-.prc-cv.is-light .prc-cv-cn.lock { color: #9e8cbf; opacity: .9; }
+.prc-cv.is-light .prc-cv-rl .n { color: #5a4a8a; }
+.prc-cv.is-light .prc-cv-rl .t { color: var(--cv-ink); }
+.prc-cv.is-light .prc-cv-rl.done { border-color: rgba(46,200,110,.4); background: rgba(46,200,110,.1); }
+.prc-cv.is-light .prc-cv-rl.done .n { color: #1a6637; }
+.prc-cv.is-light .prc-cv-rl.next { border-color: rgba(124,77,255,.32); background: rgba(124,77,255,.1); }
+.prc-cv.is-light .prc-cv-rl.next .n { color: #5a2fa0; }
+.prc-cv.is-light .prc-cv-rl.lock { opacity: .85; }
+.prc-cv.is-light .prc-cv-rl.lock .n { color: #9e8cbf; }
+.prc-cv.is-light .prc-cv-rl.cur .t { color: #3a1c00; }
 
 /* Milestones labels */
 .prc-cv.is-light .prc-cv-ms-ttl { color: var(--cv-ink); }
@@ -1080,55 +1100,38 @@ const STYLE = `<style>
 }
 .prc-cv-screen::-webkit-scrollbar { display: none; }
 
-/* ── Barre du haut : stepper des chapitres + bouton Carte ─────────── */
+/* ── Barre du haut : bouton Carte (clair/sombre), le sélecteur de
+   chapitres vit maintenant SOUS le bandeau (cf. .prc-cv-rail) ────── */
 .prc-cv-topbar {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  display: flex; align-items: center; justify-content: flex-end; gap: 12px;
   padding: 10px 16px 2px;
 }
-.prc-cv-chapnav { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.prc-cv-cn {
-  position: relative;
-  min-width: 34px; height: 34px; padding: 0 5px;
-  display: inline-flex; align-items: center; justify-content: center;
-  border-radius: 11px;
-  font: 800 14px/1 'Archivo', sans-serif;
-  color: #cdbff5;
-  background: rgba(42,27,82,.6);
-  border: 1.5px solid rgba(168,85,247,.28);
-  cursor: pointer; -webkit-tap-highlight-color: transparent;
-  transition: transform .12s, border-color .15s, background .15s, color .15s;
-}
-/* zone tactile ≥44px sans gonfler le visuel */
-.prc-cv-cn::after { content: ""; position: absolute; inset: -6px; }
-.prc-cv-cn:active { transform: scale(.93); }
-.prc-cv-cn.done { color: #6ef0a4; border-color: rgba(46,200,110,.45); background: rgba(20,80,46,.4); }
-.prc-cv-cn.lock { color: #8e7fc0; opacity: .85; }
-.prc-cv-cn.cur {
-  color: #3a1c00;
-  background: linear-gradient(160deg,#ffe08a,#ffb33f);
-  border-color: #ffd24a;
-  box-shadow: 0 4px 14px -4px rgba(255,156,28,.7), inset 0 1px 0 rgba(255,255,255,.6);
-  transform: translateY(-1px);
-}
-.prc-cv-cn.cur.done { color: #16431f; }
-.prc-cv-cn:focus-visible { outline: 2px solid var(--cv-gold); outline-offset: 2px; }
 
-/* ── HERO : monde courant ─────────────────────────────────────── */
-.prc-cv-hero-wrap { padding: 10px 18px 6px; }
+/* ── HERO : monde courant — bandeau plein cadre, touche les 2 bords ──
+   (retour Rayan : « les chapitres ne sont pas assez mis en avant »).
+   Plus de marge latérale ni de coins arrondis : le bandeau est un
+   panneau d'itinéraire, pas une carte posée sur la page. ──────────── */
+.prc-cv-hero-wrap { padding: 10px 0 6px; }
 .prc-cv-world-card {
   position: relative;
-  border-radius: 28px;
-  padding: 22px 22px 20px;
+  padding: 26px 20px 24px;
   overflow: hidden;
   background:
+    radial-gradient(150% 90% at 50% 0%, rgba(255,180,64,.2) 0%, transparent 58%),
     radial-gradient(380px 200px at 88% -10%, rgba(168,85,247,.55), transparent 60%),
     linear-gradient(150deg, #3a2070 0%, #2a1655 48%, #1d1040 100%);
-  border: 1px solid rgba(168,85,247,.4);
+  border-bottom: 1px solid rgba(255,210,74,.28);
   box-shadow:
     0 1px 0 rgba(255,255,255,.1) inset,
     0 -30px 50px -30px rgba(124,77,255,.7) inset,
-    0 24px 44px -18px rgba(10,4,26,.9),
-    0 0 50px -16px rgba(124,77,255,.55);
+    0 26px 50px -26px rgba(120,60,255,.75);
+}
+/* Le grand numéro en creux : il dit « où j'en suis » sans un mot,
+   pur décor (aria-hidden), jamais une info dupliquée du chip au-dessus. */
+.prc-cv-bignum {
+  position: absolute; right: -6px; top: -20px; margin: 0; z-index: 0; pointer-events: none;
+  font: 900 128px/1 'Archivo', sans-serif; letter-spacing: -.06em;
+  color: transparent; -webkit-text-stroke: 2px rgba(255,214,120,.2);
 }
 /* route stylisée en fond de la carte monde */
 .prc-cv-world-card .prc-cv-road-deco {
@@ -1145,39 +1148,72 @@ const STYLE = `<style>
   box-shadow: 0 2px 10px -4px rgba(255,156,28,.5);
 }
 .prc-cv-chip .dot { width: 7px; height: 7px; border-radius: 50%; background: linear-gradient(#ffd24a, #ff9c1c); box-shadow: 0 0 8px #ffb840; }
+/* Titre 38px (au lieu de 27), dégradé or : le chapitre en cours DOIT
+   sauter aux yeux (retour Rayan). */
 .prc-cv-world-title {
   font-family: 'Archivo', sans-serif;
-  font-weight: 800; font-size: 27px; line-height: 1.02; letter-spacing: -.6px;
-  margin: 13px 0 4px;
-  text-shadow: 0 2px 14px rgba(10,2,30,.6);
-  color: var(--cv-ink, #fff);
+  font-weight: 900; font-size: 38px; line-height: .98; letter-spacing: -.03em;
+  margin: 14px 0 4px;
+  background: linear-gradient(180deg, #fff 0%, #ffe9b0 52%, #f6c85f 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+  filter: drop-shadow(0 4px 14px rgba(10,2,30,.5));
 }
 .prc-cv-world-sub { font-size: 13px; color: var(--cv-ink-sub, #d9cffa); font-weight: 500; max-width: 235px; line-height: 1.35; }
 .prc-cv-world-prog { position: relative; z-index: 2; margin-top: 18px; }
-.prc-cv-wp-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
-.prc-cv-wp-top span { font-size: 12px; color: var(--cv-mute); font-weight: 600; }
-.prc-cv-wp-top b { font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 14px; color: #ffe9a8; }
-.prc-cv-wp-bar {
-  height: 13px; border-radius: 10px;
-  background: rgba(11,5,24,.7);
-  box-shadow: inset 0 2px 5px rgba(0,0,0,.55), inset 0 -1px 0 rgba(255,255,255,.05);
-  overflow: hidden; position: relative;
+/* Progression en blocs séparés : on VOIT les étapes, pas un pourcentage flou. */
+.prc-cv-seg { display: flex; gap: 5px; }
+.prc-cv-seg i {
+  flex: 1; height: 9px; border-radius: 3px; min-width: 4px;
+  background: rgba(8,3,22,.6);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,.6);
 }
-.prc-cv-wp-fill {
-  position: absolute; inset: 0; border-radius: 10px;
-  background: linear-gradient(90deg, var(--cv-gold), #ff9c1c 65%, #ff8a0d);
-  box-shadow: 0 0 16px rgba(255,156,28,.7), inset 0 1px 0 rgba(255,255,255,.55);
-  transition: width .7s var(--ease-out);
+.prc-cv-seg i.on {
+  background: linear-gradient(180deg, #ffe08a, #ff9c1c);
+  box-shadow: 0 0 10px rgba(255,156,28,.55), inset 0 1px 0 rgba(255,255,255,.5);
 }
-.prc-cv-wp-fill::after {
-  content: ""; position: absolute; inset: 0; border-radius: 10px;
-  background: linear-gradient(100deg, transparent 20%, rgba(255,255,255,.5) 48%, transparent 76%);
-  background-size: 200% 100%;
+.prc-cv-seg-lab { display: flex; align-items: baseline; justify-content: space-between; margin-top: 10px; }
+.prc-cv-seg-lab span { font-size: 12px; color: var(--cv-mute); font-weight: 600; }
+.prc-cv-seg-lab b { font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 14px; color: #ffe9a8; }
+
+/* ── Rail des chapitres : des noms, pas des pastilles muettes ──────
+   (⭐ le point le plus important du retour Rayan : le sélecteur ne
+   se lisait pas). Rail horizontal défilable sous le bandeau. ─────── */
+.prc-cv-rail-k {
+  margin: 22px 20px 9px; font: 800 11px/1 'Archivo', sans-serif;
+  letter-spacing: .16em; text-transform: uppercase; color: var(--cv-mute);
 }
-@media (prefers-reduced-motion: no-preference) {
-  .prc-cv-wp-fill::after { animation: cvShimmer 3.2s linear infinite; }
+.prc-cv-rail { display: flex; gap: 9px; overflow-x: auto; padding: 0 20px 6px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.prc-cv-rail::-webkit-scrollbar { display: none; }
+.prc-cv-rl {
+  flex: 0 0 auto; min-width: 150px; min-height: 44px; padding: 12px 14px;
+  border-radius: 16px; text-align: left;
+  background: rgba(42,27,82,.55);
+  border: 1.5px solid rgba(168,85,247,.26);
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: transform .12s, border-color .15s, background .15s;
 }
-@keyframes cvShimmer { to { background-position: -200% 0; } }
+.prc-cv-rl:active { transform: scale(.97); }
+.prc-cv-rl .n {
+  display: flex; align-items: center; gap: 7px;
+  font: 800 10.5px/1 'Archivo', sans-serif; letter-spacing: .1em; text-transform: uppercase;
+  color: #a495d8;
+}
+.prc-cv-rl .t { margin: 7px 0 0; font: 800 14px/1.15 'Archivo', sans-serif; color: #e6ddff; }
+.prc-cv-rl.done { border-color: rgba(46,200,110,.4); background: rgba(20,80,46,.34); }
+.prc-cv-rl.done .n { color: #6ef0a4; }
+.prc-cv-rl.next { border-color: rgba(168,85,247,.55); background: rgba(58,32,112,.7); }
+.prc-cv-rl.next .n { color: #d7bcff; }
+.prc-cv-rl.lock { opacity: .6; }
+/* .cur en dernier : gagne même combiné à .done (chapitre affiché terminé) */
+.prc-cv-rl.cur {
+  background: linear-gradient(160deg, #ffe08a, #ffb33f);
+  border-color: #ffd24a;
+  box-shadow: 0 8px 22px -8px rgba(255,156,28,.75);
+}
+.prc-cv-rl.cur .n { color: #7a4200; }
+.prc-cv-rl.cur .t { color: #3a1c00; }
+.prc-cv-rl:focus-visible { outline: 2px solid var(--cv-gold); outline-offset: 2px; }
 
 /* ── Titre section route ─────────────────────────────────────── */
 .prc-cv-route-head {
@@ -1873,9 +1909,9 @@ export async function mount(root) {
       }),
     );
 
-    // Navigation entre chapitres (stepper + carte chapitre suivant)
+    // Navigation entre chapitres (rail de chapitres + carte chapitre suivant)
     root
-      .querySelectorAll(".prc-cv-next[data-chap], .prc-cv-cn[data-chap]")
+      .querySelectorAll(".prc-cv-next[data-chap], .prc-cv-rl[data-chap]")
       .forEach((el) =>
         el.addEventListener("click", () => {
           const idx = parseInt(el.dataset.chap, 10);
@@ -1885,6 +1921,17 @@ export async function mount(root) {
           renderAndWire();
         }),
       );
+
+    // Le rail défile jusqu'au chapitre affiché à l'ouverture/switch.
+    // scrollLeft direct sur le rail (pas scrollIntoView, qui remuerait
+    // aussi le scroll VERTICAL de .prc-cv-screen, l'ancêtre scrollable).
+    const railEl = root.querySelector(".prc-cv-rail");
+    const curCard = root.querySelector(".prc-cv-rl.cur");
+    if (railEl && curCard) {
+      const target =
+        curCard.offsetLeft - (railEl.clientWidth - curCard.clientWidth) / 2;
+      railEl.scrollLeft = Math.max(0, target);
+    }
     // Vue Chapitre — jalons cliquables (milestones non-next + carte CTA or)
     // Milestones avec data-comp (états done/a_valider/todo)
     root.querySelectorAll(".prc-cv-ms[data-comp]").forEach((ms) => {
@@ -2292,13 +2339,14 @@ function renderChapterView(
   const meta = WORLDS_META[currentIdx];
   const world = ws.world ?? {};
   const chapTitle = world.titre ?? world.nom ?? `Chapitre ${currentIdx + 1}`;
-  const chapPct = ws.total ? Math.round((ws.done / ws.total) * 100) : 0;
   const nextWs = worldStates[currentIdx + 1] ?? null;
 
-  // ── Hero monde courant (carte avec route décorative en fond) ─────
+  // ── Hero monde courant (bandeau plein cadre, numéro géant en creux) ──
   const heroHTML = `
     <div class="prc-cv-hero-wrap">
       <div class="prc-cv-world-card">
+        <!-- Le numéro du chapitre en géant, en creux : pur décor. -->
+        <p class="prc-cv-bignum" aria-hidden="true">${String(currentIdx + 1).padStart(2, "0")}</p>
         <!-- Route décorative SVG en fond de la carte -->
         <svg class="prc-cv-road-deco" viewBox="0 0 170 200" fill="none" aria-hidden="true">
           <path d="M120 -10 C 60 30, 150 70, 80 110 S 30 170, 110 210"
@@ -2312,18 +2360,14 @@ function renderChapterView(
           <p class="prc-cv-world-sub">${nameBi(world.description ?? "", chapDescTr(world))}</p>
         </div>
         <div class="prc-cv-world-prog">
-          <div class="prc-cv-wp-top">
-            <span>${prcD("prog_chap", "Progression du chapitre")}</span>
-            <!-- « jalons » ne parlait à personne (retour Rayan 31/07/2026) :
-                 le compte se lit tout seul, le mot ne servait à rien. -->
-            <b>${prcDyn(`${ws.done} / ${ws.total}`)}</b>
-          </div>
-          <div class="prc-cv-wp-bar"
-               role="progressbar" aria-valuenow="${chapPct}" aria-valuemin="0" aria-valuemax="100"
+          <!-- Progression en blocs séparés : on VOIT les étapes, pas une barre floue. -->
+          <div class="prc-cv-seg" role="img"
                aria-label="${prcT("aria_jalons", `${ws.done} sur ${ws.total} dans ce chapitre`, { d: ws.done, t: ws.total })}">
-            <!-- Le « > » manquait ici : la barre avalait son propre remplissage
-                 comme un attribut, elle restait donc vide même à 7 / 7. -->
-            <div class="prc-cv-wp-fill" style="width:${chapPct}%"></div>
+            ${Array.from({ length: ws.total || 0 }, (_, i) => `<i class="${i < ws.done ? "on" : ""}"></i>`).join("")}
+          </div>
+          <div class="prc-cv-seg-lab">
+            <span>${prcD("prog_chap", "Progression du chapitre")}</span>
+            <b>${prcDyn(`${ws.done} / ${ws.total}`)}</b>
           </div>
         </div>
       </div>
@@ -2535,31 +2579,57 @@ function renderChapterView(
   const ICO_MOON = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   const isLightNow =
     (localStorage.getItem("permigo_parcours_theme") ?? "dark") === "light";
-  const chapNav = `
-    <div class="prc-cv-chapnav" role="tablist" aria-label="${prcT("chapnav_aria", "Chapitres du parcours")}">
+  const themeSwitchHTML = `
+    <div class="prc-cv-themesw" role="group" aria-label="${prcT("themesw_aria", "Affichage : clair ou sombre")}">
+      <button class="prc-cv-th-btn ${isLightNow ? "" : "on"}" data-prc-theme="dark" type="button" aria-pressed="${!isLightNow}">${ICO_MOON}<span>${prcD("theme_dark", "Sombre")}</span></button>
+      <button class="prc-cv-th-btn ${isLightNow ? "on" : ""}" data-prc-theme="light" type="button" aria-pressed="${isLightNow}">${ICO_SUN}<span>${prcD("theme_light", "Clair")}</span></button>
+    </div>`;
+
+  // ── Rail des chapitres : des NOMS, pas des pastilles muettes (⭐ le point
+  // le plus important du retour Rayan : « les pastilles, personne ne les
+  // lit »). Rail horizontal défilable, un chapitre = une carte avec son nom.
+  const railHTML = `
+    <p class="prc-cv-rail-k">${prcD("rail_k", `Tes ${worldStates.length} chapitres`, { n: worldStates.length })}</p>
+    <div class="prc-cv-rail" role="tablist" aria-label="${prcT("chapnav_aria", "Chapitres du parcours")}">
       ${worldStates
         .map((w, i) => {
           const isCur = i === currentIdx;
-          const cls =
-            (isCur ? "cur " : "") +
-            (w.status === "complete"
+          const n = i + 1;
+          const wTitle = w.world?.titre ?? w.world?.nom ?? `Chapitre ${n}`;
+          const clsParts = [
+            isCur ? "cur" : null,
+            w.status === "complete"
               ? "done"
               : w.status === "locked"
                 ? "lock"
-                : "todo");
-          const inner =
+                : !isCur
+                  ? "next"
+                  : null,
+          ].filter(Boolean);
+          // Le verrou prime toujours sur "en cours" : un chapitre gaté ne
+          // peut pas prétendre être en cours même s'il est affiché à l'écran
+          // (sinon on lit « 🔒 Chapitre 2 · en cours », contradictoire).
+          const statusLbl =
+            w.status === "locked"
+              ? prcD("rail_lock_lbl", `Chapitre ${n}`, { n })
+              : isCur
+                ? prcD("rail_cur_lbl", `Chapitre ${n} · en cours`, { n })
+                : w.status === "complete"
+                  ? prcD("rail_done_lbl", `Chapitre ${n} · terminé`, { n })
+                  : prcD("rail_open_lbl", `Chapitre ${n} · ouvert`, { n });
+          const icon =
             w.status === "complete"
               ? ICO_CHK
               : w.status === "locked"
                 ? ICO_LK
-                : `${i + 1}`;
-          return `<button class="prc-cv-cn ${cls}" data-chap="${i}" type="button" role="tab" aria-selected="${isCur}" aria-label="${prcT("chap_n", `Chapitre ${i + 1}`, { n: i + 1 })}${isCur ? prcT("chap_shown", ". Affiché") : ""}">${inner}</button>`;
+                : "";
+          return `<button class="prc-cv-rl ${clsParts.join(" ")}" data-chap="${i}" type="button" role="tab" aria-selected="${isCur}"
+            aria-label="${prcT("chap_n", `Chapitre ${n}`, { n })}: ${escAttr(wTitle)}${isCur ? prcT("chap_shown", ". Affiché") : ""}">
+            <span class="n">${icon}${statusLbl}</span>
+            <p class="t">${nameBi(wTitle, chapTr(w.world))}</p>
+          </button>`;
         })
         .join("")}
-    </div>
-    <div class="prc-cv-themesw" role="group" aria-label="${prcT("themesw_aria", "Affichage : clair ou sombre")}">
-      <button class="prc-cv-th-btn ${isLightNow ? "" : "on"}" data-prc-theme="dark" type="button" aria-pressed="${!isLightNow}">${ICO_MOON}<span>${prcD("theme_dark", "Sombre")}</span></button>
-      <button class="prc-cv-th-btn ${isLightNow ? "on" : ""}" data-prc-theme="light" type="button" aria-pressed="${isLightNow}">${ICO_SUN}<span>${prcD("theme_light", "Clair")}</span></button>
     </div>`;
 
   // ── Coffre du chapitre : la récompense, débloquée quand le boss tombe ──
@@ -2578,9 +2648,10 @@ function renderChapterView(
   return `<style>${chromeNight("#1d1140", "#0b0719")}</style><div class="prc-cv" role="main" aria-label="${prcT("main_aria", "Ton parcours. Vue chapitre")}">
   <div class="prc-cv-screen">
     <div class="prc-cv-topbar">
-      ${chapNav}
+      ${themeSwitchHTML}
     </div>
     ${heroHTML}
+    ${railHTML}
     ${routeHTML}
     ${chestHTML}
     ${gateHTML}

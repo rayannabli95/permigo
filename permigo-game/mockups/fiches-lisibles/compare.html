@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Planche · fiches lisibles</title>
+<style>
+@font-face { font-family:'Archivo'; font-style:normal; font-weight:400 900; font-display:block; src:url(archivo.woff2) format('woff2'); }
+*{ box-sizing:border-box; }
+body{ margin:0; padding:34px 30px 44px; font-family:'Archivo', system-ui, sans-serif; background:#15102e; color:#fff; }
+h1{ margin:0 0 6px; font-weight:900; font-size:30px; letter-spacing:-.03em; }
+.lead{ margin:0 0 28px; font:600 15px/1.5 'Archivo',sans-serif; color:#b6a9e6; max-width:80ch; }
+.row{ display:flex; gap:24px; align-items:flex-start; }
+.col{ flex:1 1 0; min-width:0; }
+.cap{ margin:0 0 10px; }
+.cap b{ display:block; font-weight:900; font-size:17px; letter-spacing:-.02em; }
+.cap span{ display:block; margin-top:5px; font:600 13px/1.45 'Archivo',sans-serif; color:#a99bdc; }
+.col.avant .cap b{ color:#ff9d7a; }
+.col.apres .cap b{ color:#ffd76e; }
+.shot{ width:100%; border-radius:14px; display:block; border:1px solid rgba(255,255,255,.14); }
+</style>
+</head>
+<body>
+<h1>Les fiches de révision · 3 mises en forme</h1>
+<p class="lead">Même contenu. Les 5 gestes « Au giratoire » de la fiche C2f, découpés en 6 consignes courtes. Bandeau d'intro plus gros et centré avec le prénom en or.</p>
+<div class="row">
+  <div class="col avant">
+    <p class="cap"><b>Avant</b><span>Pavés de 4 à 6 lignes. Virgules et parenthèses en cascade.</span></p>
+    <img class="shot" src="shots/_avant.png" alt="">
+  </div>
+  <div class="col apres">
+    <p class="cap"><b>A · consigne puis détail</b><span>Une action en gras par carte. Le détail dessous en plus petit.</span></p>
+    <img class="shot" src="shots/fiche-A-consigne-detail.png" alt="">
+  </div>
+  <div class="col apres">
+    <p class="cap"><b>B · feuille surlignée</b><span>Une seule feuille claire. Le mot qui décide est surligné.</span></p>
+    <img class="shot" src="shots/fiche-B-feuille-surlignee.png" alt="">
+  </div>
+  <div class="col apres">
+    <p class="cap"><b>C · trois temps</b><span>Résumé en 10 secondes puis j'approche · je m'engage · je sors.</span></p>
+    <img class="shot" src="shots/fiche-C-trois-temps.png" alt="">
+  </div>
+</div>
+</body>
+</html>

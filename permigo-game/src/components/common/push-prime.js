@@ -26,8 +26,8 @@ const PPR_I18N = {
   en: {
     title_eleve: "Turn on your reminders",
     title_other: "Turn on your notifications",
-    sub_eleve: "One tap now. We handle the rest.",
-    sub_other: "One tap now. Never more than one a day.",
+    sub_eleve: "One tap now. We handle the rest",
+    sub_other: "One tap now. Never more than one a day",
     cta_eleve: "Turn on my reminders",
     cta_other: "Turn on notifications",
     activating: "Turning on…",
@@ -43,8 +43,8 @@ const PPR_I18N = {
   ar: {
     title_eleve: "فعّل تذكيراتك",
     title_other: "فعّل إشعاراتك",
-    sub_eleve: "لمسة واحدة الآن. ونحن نتكفّل بالباقي.",
-    sub_other: "لمسة واحدة الآن. أبدًا أكثر من واحدة في اليوم.",
+    sub_eleve: "لمسة واحدة الآن. ونحن نتكفّل بالباقي",
+    sub_other: "لمسة واحدة الآن. أبدًا أكثر من واحدة في اليوم",
     cta_eleve: "فعّل تذكيراتي",
     cta_other: "فعّل الإشعارات",
     activating: "جارٍ التفعيل…",
@@ -197,8 +197,8 @@ function show(me) {
     ? pp("title_eleve", "Active tes rappels")
     : pp("title_other", "Activez vos notifications");
   const sub = tu
-    ? pp("sub_eleve", "Un tap maintenant. On s'occupe du reste.")
-    : pp("sub_other", "Un tap maintenant. Jamais plus d'une par jour.");
+    ? pp("sub_eleve", "Un tap maintenant. On s'occupe du reste")
+    : pp("sub_other", "Un tap maintenant. Jamais plus d'une par jour");
   const cta = tu
     ? pp("cta_eleve", "Activer mes rappels")
     : pp("cta_other", "Activer les notifications");

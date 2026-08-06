@@ -154,6 +154,27 @@ function repIco(emoji, size = 24) {
   return m ? medallion(m[0], m[1], { size }) : emoji;
 }
 
+// Mélange l'ordre des réponses affichées (Fisher-Yates, même algo que
+// quiz-engine.js/exam-blanc.js). Contrairement à ces deux moteurs, la bonne
+// réponse ici est repérée par un ID (`s.bonne`), pas par un index : mélanger
+// `reponses` ne casse rien niveau correction (onAnswer compare des IDs), ça
+// change juste l'ordre visuel. Sans ce mélange, `bonne` était TOUJOURS
+// reponses[0] sur les 71 scènes → la bonne réponse tombait toujours en
+// premier à l'écran. Le mélange se fait ici, au rendu : la donnée source
+// (data/situations-conduite.js) n'est pas touchée.
+function shuffleArray(a) {
+  const arr = [...a];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+function withShuffledReponses(s) {
+  if (!Array.isArray(s.reponses) || s.reponses.length < 2) return s;
+  return { ...s, reponses: shuffleArray(s.reponses) };
+}
+
 const ROUND_SIZE = 6;
 const INTRO_SIZE = 3; // manche courte de l'accroche post-onboarding
 const VOLANTS_PAR_BONNE = 2;
@@ -214,8 +235,7 @@ export async function mount(root, param) {
       ? esc(fr)
       : `<span class="sit-tr"${rtl ? ' dir="rtl" lang="ar"' : ""}>${esc(tr)}</span><span class="sit-fr" lang="fr">${esc(fr)}</span>`;
   const sT1 = (fr, tr) => esc(lang !== "fr" && tr ? tr : fr);
-  const sUI = (key, fr) =>
-    sT1(fr, situationI18n?.SITU_UI[lang]?.[key]);
+  const sUI = (key, fr) => sT1(fr, situationI18n?.SITU_UI[lang]?.[key]);
   const sScene = (id) =>
     lang !== "fr" ? situationI18n?.SITU_I18N[id]?.[lang] : null;
   const sTheme = (theme) =>
@@ -288,6 +308,8 @@ export async function mount(root, param) {
       session = session.slice(0, 1);
       consumeFree("scene");
     }
+    // Ordre des cartes-réponses mélangé par scène (cf. withShuffledReponses).
+    session = session.map(withShuffledReponses);
     idx = 0;
     bonnes = 0;
     manquees = [];
@@ -489,7 +511,7 @@ export async function mount(root, param) {
             : sit("title_welcome", "Bienvenue à bord !");
       stage.innerHTML = `
         <div class="sit-top">
-          <button class="sit-x" id="sit-quit" type="button" aria-label="${escAttr(sit('skip', 'Passer'))}">✕</button>
+          <button class="sit-x" id="sit-quit" type="button" aria-label="${escAttr(sit("skip", "Passer"))}">✕</button>
         </div>
         <div class="sit-recap">
           <div class="sit-kicker"${sitRtl()}>${esc(sit("done", "Terminé"))}</div>
@@ -539,11 +561,14 @@ export async function mount(root, param) {
         ? sit("sub_flawless", "Tu lis la route comme un chef.")
         : pct >= 60
           ? sit("sub_good", "Encore quelques réflexes et c’est du solide.")
-          : sit("sub_keep", "Chaque erreur vue ici, c’est une erreur en moins en vraie leçon.");
+          : sit(
+              "sub_keep",
+              "Chaque erreur vue ici, c’est une erreur en moins en vraie leçon.",
+            );
 
     stage.innerHTML = `
       <div class="sit-top">
-        <button class="sit-x" id="sit-quit" type="button" aria-label="${escAttr(sit('quit', 'Quitter le jeu'))}">✕</button>
+        <button class="sit-x" id="sit-quit" type="button" aria-label="${escAttr(sit("quit", "Quitter le jeu"))}">✕</button>
       </div>
       <div class="sit-recap">
         <div class="sit-kicker"${sitRtl()}>${esc(sit("round_done", "Manche terminée"))}</div>
