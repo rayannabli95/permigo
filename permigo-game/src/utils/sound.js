@@ -82,6 +82,11 @@ export const playDefeat = () => play("defeat", 0.5); // quiz recap échoué / ex
 // ─── Alias sémantiques quiz/examen (remappés sur .mp3 existants en attendant vrais sons) ───
 export const playCorrect = () => play("success"); // bonne réponse
 export const playWrong = () => play("hint"); // mauvaise réponse
+// Carillon dédié à la réaction mascotte du quiz (06/08, Rayan : « crée un
+// nouveau son »). Composé pour ce moment précis, pas un remap d'un .mp3
+// existant. Sert UNIQUEMENT au call site quiz-engine.js (pas playCorrect
+// ailleurs : pilote-mission/exam-blanc/en-situation gardent le son actuel).
+export const playMascotDing = () => play("mascotte-ding", 0.5);
 export const playStreak = () => play("whoosh", 0.5); // 2+ bonnes d'affilée
 export const playPerfect = () => play("reward"); // quiz sans-faute
 export const playLevelup = () => play("unlock"); // compétence validée
