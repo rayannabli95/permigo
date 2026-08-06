@@ -270,6 +270,67 @@ body.mp-open #header-bar {
 
 .mp-play-title {
   margin-top: 19px;
+  position: relative;
+  padding-right: 66px;
+}
+
+/* Mascotte réactive (bonne/mauvaise réponse). Coussinet sombre dédié : le
+   mp4 n'a pas de vraie transparence (fond noir pur), mix-blend-mode:lighten
+   l'efface dessus. Même traitement que exam-blanc/en-situation/quiz. */
+.mp-mascot-badge {
+  position: absolute;
+  top: -4px;
+  right: 0;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: radial-gradient(75% 75% at 50% 38%, #2e2768, #14102e);
+  box-shadow:
+    0 5px 12px rgb(10 13 26 / 35%),
+    inset 0 1px 0 rgb(255 255 255 / 8%);
+  animation: mpMascotIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.mp-mascot {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+@keyframes mpMascotIn {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.mp-mascot-badge.mp-mascot--pop {
+  animation: mpMascotPop 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes mpMascotPop {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.2);
+  }
+  70% {
+    transform: scale(0.96);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mp-mascot-badge,
+  .mp-mascot-badge.mp-mascot--pop {
+    animation: none !important;
+  }
 }
 
 .mp-play-title p {

@@ -600,7 +600,11 @@ function renderQuestionBody(
     ? mascotState
     : "think";
   return `<div class="exb-qbody" id="exb-qbody">
-        ${mascot ? `<img class="exb-mascot" src="/skins/mascot-${safeMascotState}.png" alt="" aria-hidden="true" />` : ""}
+        ${
+          mascot
+            ? `<div class="exb-mascot-badge"><video class="exb-mascot" poster="/skins/mascot-${safeMascotState}.png" muted playsinline aria-hidden="true"></video></div>`
+            : ""
+        }
         <p class="exb-qnum">${esc(examUi("qNum", "Question"))} ${num}</p>
         <div class="exb-qhead">
           ${muteButtonHTML()}
@@ -883,14 +887,29 @@ function runExbQuiz(
       // Mascotte réactive : celebrate (bonne) / coach (mauvaise) — uniquement
       // quand la mascotte est activée (mode parcours, pas officiel / révision).
       if (mascot) {
+        const badge = root.querySelector(".exb-mascot-badge");
         const mascotEl = root.querySelector(".exb-mascot");
-        if (mascotEl) {
+        // matchMedia, pas juste la classe CSS : animation:none n'arrête PAS
+        // la lecture d'une vidéo (piège relevé sur #719/#722).
+        const reduced = window.matchMedia?.(
+          "(prefers-reduced-motion: reduce)",
+        ).matches;
+        if (mascotEl && !reduced) {
+          mascotEl.style.mixBlendMode = "lighten";
           mascotEl.src = isCorrect
+            ? "/video/mascotte-quiz-bonne-reponse.mp4"
+            : "/video/mascotte-quiz-mauvaise-reponse.mp4";
+          mascotEl.currentTime = 0;
+          mascotEl.play().catch(() => {});
+        } else if (mascotEl) {
+          mascotEl.poster = isCorrect
             ? "/skins/mascot-celebrate.png"
             : "/skins/mascot-coach.png";
-          mascotEl.classList.remove("exb-mascot--pop");
-          void mascotEl.offsetWidth;
-          mascotEl.classList.add("exb-mascot--pop");
+        }
+        if (badge) {
+          badge.classList.remove("exb-mascot--pop");
+          void badge.offsetWidth;
+          badge.classList.add("exb-mascot--pop");
         }
       }
       root.querySelectorAll(".exb-choice").forEach((b) => {
@@ -1711,21 +1730,32 @@ const EXB_CSS = `
   padding: 20px 16px 32px;
   flex: 1;
 }
-.exb-mascot {
-  display: block; width: 56px; height: 56px; object-fit: contain;
-  margin: 0 0 8px; filter: drop-shadow(0 5px 12px rgba(10,13,26,.16));
+/* Coussinet sombre dédié : la vidéo mascotte (mp4, fond noir pur, pas de
+   vrai alpha) a besoin d'un fond sombre local pour que mix-blend-mode:
+   lighten efface son noir. exam-blanc suit le thème clair/sombre du
+   système (var(--bg)) — on ne peut pas compter sur un fond sombre de
+   page, donc on lui donne le sien, toujours sombre, quel que soit le
+   thème. Double bénéfice : ça fait aussi un joli médaillon d'avatar. */
+.exb-mascot-badge {
+  width: 62px; height: 62px; margin: 0 0 8px; border-radius: 50%;
+  display: grid; place-items: center; overflow: hidden;
+  background: radial-gradient(75% 75% at 50% 38%, #2e2768, #14102e);
+  box-shadow: 0 5px 12px rgba(10,13,26,.28), inset 0 1px 0 rgba(255,255,255,.08);
   animation: exbMascotIn .4s cubic-bezier(.34,1.56,.64,1) both;
+}
+.exb-mascot {
+  display: block; width: 100%; height: 100%; object-fit: contain;
 }
 @keyframes exbMascotIn { from { opacity: 0; transform: scale(.6) } to { opacity: 1; transform: scale(1) } }
 /* Micro-pop sur changement d'état (celebrate / coach) */
-.exb-mascot--pop { animation: exbMascotPop .38s cubic-bezier(.34,1.56,.64,1) both }
+.exb-mascot-badge.exb-mascot--pop { animation: exbMascotPop .38s cubic-bezier(.34,1.56,.64,1) both }
 @keyframes exbMascotPop {
   0%  { transform: scale(1) translateY(0) }
   30% { transform: scale(1.22) translateY(-6px) }
   70% { transform: scale(.96) translateY(1px) }
   100%{ transform: scale(1) translateY(0) }
 }
-@media (prefers-reduced-motion: reduce) { .exb-mascot, .exb-mascot--pop { animation: none !important } }
+@media (prefers-reduced-motion: reduce) { .exb-mascot-badge, .exb-mascot-badge.exb-mascot--pop { animation: none !important } }
 .exb-qnum {
   font: 700 11px/1 'Archivo', sans-serif;
   color: var(--a-txt);
