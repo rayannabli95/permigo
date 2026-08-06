@@ -351,24 +351,46 @@ const MASCOT_STATES = new Set(["think", "celebrate", "coach", "hello"]);
 function safeMascotState(state) {
   return MASCOT_STATES.has(state) ? state : "think";
 }
+// "celebrate"/"coach" jouent une courte vidéo (mascotte animée, 06/08) ;
+// les autres états restent une image fixe (poster). Un seul <video>, jamais
+// remplacé par un <img> : le corner mascot n'a qu'un seul élément DOM à vie
+// (setMascot le retrouve par la même classe, cf. commentaire plus bas).
+const MASCOT_VIDEOS = {
+  celebrate: "/video/mascotte-quiz-bonne-reponse.mp4",
+  coach: "/video/mascotte-quiz-mauvaise-reponse.mp4",
+};
 
 export function mascotHTML(state = "think") {
   const safeState = safeMascotState(state);
-  return `<img class="qz-mascot" src="/skins/mascot-${safeState}.png" alt="" aria-hidden="true" />`;
+  const src = MASCOT_VIDEOS[safeState];
+  return `<video class="qz-mascot" poster="/skins/mascot-${safeState}.png"${src ? ` src="${src}" autoplay` : ""} muted playsinline aria-hidden="true"></video>`;
 }
 
 export function setMascot(container, state) {
-  const img = container.querySelector(".qz-mascot");
-  if (!img) return;
-  // Swap src only if actually different (avoids spurious reflow)
-  const next = `/skins/mascot-${safeMascotState(state)}.png`;
-  if (img.src.endsWith(next.replace(/^\//, ""))) return;
-  img.src = next;
+  const vid = container.querySelector(".qz-mascot");
+  if (!vid) return;
+  const safeState = safeMascotState(state);
+  const src = MASCOT_VIDEOS[safeState];
+  if (src) {
+    // Le mp4 n'a pas de vraie transparence (fond noir pur) : mix-blend-mode
+    // lighten l'efface sur le fond sombre de l'arène. Retiré hors animation,
+    // sinon l'image fixe (poster) en pâtirait aussi.
+    vid.style.mixBlendMode = "lighten";
+    vid.src = src;
+    vid.currentTime = 0;
+    vid.play().catch(() => {});
+  } else {
+    vid.style.mixBlendMode = "";
+    vid.pause();
+    vid.removeAttribute("src");
+    vid.load(); // revient au poster (image fixe de l'état)
+    vid.poster = `/skins/mascot-${safeState}.png`;
+  }
   // Micro-pop on state change: remove + force reflow + re-add so the
   // animation fires even when called twice in a row with different states.
-  img.classList.remove("qz-mascot--pop");
-  void img.offsetWidth; // force reflow
-  img.classList.add("qz-mascot--pop");
+  vid.classList.remove("qz-mascot--pop");
+  void vid.offsetWidth; // force reflow
+  vid.classList.add("qz-mascot--pop");
 }
 
 // ─── Styles partagés ─────────────────────────────────────────────

@@ -20,8 +20,21 @@ import { setupReveals } from "@/utils/reveal-on-scroll.js";
 import { navigate } from "@/router.js";
 import { getFicheMeta } from "@/data/conduite-meta.js";
 import { getLang } from "@/utils/lang.js";
+import { chromeNight } from "@/utils/chrome-night.js";
+import {
+  isFreeTierUser,
+  isFreeCentre,
+  FREE_CENTRE,
+} from "@/utils/free-tier.js";
 
 const CENTRES_PREMIUM_LOCKED = false;
+
+// L'élève en mode découverte lit UN centre en entier, les autres chips sont
+// cadenassées. ⚠️ Le routeur mure déjà `#/centre-examen/{autre-slug}`, mais le
+// sélecteur de centre ne passe PAS par le routeur : il fait un replaceState et
+// re-rend la page sur place. Sans ce garde-fou, deux clics dans les chips
+// ouvraient les 30 fiches payantes.
+let _gated = false;
 
 // ── i18n de la COQUE (les données propres à chaque centre restent dans
 // data/centres-examen.js). Dict local, repli FR systématique.
@@ -29,6 +42,8 @@ const I18N = {
   en: {
     difficulty: "Difficulty",
     other_centres: "More centres coming soon",
+    read_more: "Details",
+    read_less: "Collapse",
     access_title: "Access and address",
     open_map: "Open in Maps",
     traps_title: "Pitfalls at {name}",
@@ -57,6 +72,8 @@ const I18N = {
   ar: {
     difficulty: "الصعوبة",
     other_centres: "مراكز أخرى قريبًا",
+    read_more: "التفاصيل",
+    read_less: "طيّ",
     access_title: "الوصول والعنوان",
     open_map: "فتح في الخرائط",
     traps_title: "مطبّات مركز {name}",
@@ -153,17 +170,59 @@ function diffColor(n) {
 // ─── CSS ─────────────────────────────────────────────────────────
 const STYLE = `<style>
 /* ─────────────────────────────────────────────────
-   CEA — Centre Examen Variant A
+   CEA — Centre d'examen, DA Arène (nuit-violet + or)
    Tout préfixé .cea- pour zéro collision.
+
+   ⚠️ Cette page vivait en BLANC avec un gros aplat moutarde en hero, au milieu
+   d'un produit qui est en Arène 3D (cf. reviser.js). Retour Rayan 05/08/2026 :
+   « les centres d'exam sont pas sur la même DA que PermiGo ».
+
+   ⚠️⚠️ ZÉRO BACKTICK dans ce commentaire : il vit DANS un template littéral,
+   un seul backtick le referme et le build casse (« is not a function »).
+
+   Le geste : on garde TOUTE la structure et on repeint, en redéfinissant les
+   tokens de thème SUR .cea (bloc ci-dessous). Chaque règle plus bas continue
+   d'écrire var(--bg3) / var(--bo) / var(--ink) et atterrit dans la nuit. C'est
+   pour ça qu'il ne faut PAS remplacer ces var() par des couleurs en dur : la
+   page se re-peindrait à la main, règle par règle, et le prochain qui touche
+   une couleur en oublierait la moitié.
+
+   Palette : la même que l'Arène de Réviser, au pixel près.
 ───────────────────────────────────────────────── */
+${chromeNight("#241a52", "#1a1340")}
+
 .cea {
   max-width: 480px;
   margin: 0 auto;
   padding: 0 0 calc(110px + env(safe-area-inset-bottom));
-  background: var(--bg);
-  color: var(--ink);
   font-family: 'Archivo', sans-serif;
   position: relative;
+
+  /* ── Les tokens de la page, repeints en nuit ── */
+  --bg:   #1a1340;                    /* fond de page */
+  --bg3:  linear-gradient(180deg,#2c2264 0%,#241a56 100%);  /* carte */
+  --su:   linear-gradient(180deg,#2c2264 0%,#241a56 100%);  /* idem (rangées) */
+  --bo:   #3a3178;                    /* bord de carte / séparateur */
+  --bo2:  #3a3178;
+  --ink:  #f4f2ff;                    /* titres */
+  --mu:   rgba(244,242,255,.72);      /* corps de texte */
+  --mu2:  rgba(244,242,255,.58);      /* secondaire */
+  --mu3:  rgba(244,242,255,.42);      /* icônes discrètes */
+  --a:    #6c63ff;                    /* accent plein (boutons, chip active) */
+  --a-ink:#fff;
+  --a-txt:#b3adff;                    /* accent LISIBLE sur fond nuit */
+  --am:   #f0aa2c;                    /* ambre des pièges */
+  --amp:  rgba(245,196,81,.14);
+  --amk:  #f7cf68;
+  --gr:   #4ade80;                    /* vert des conseils */
+
+  color: var(--ink);
+  /* Le fond couvre toute la hauteur même quand la fiche est courte : sans ça
+     on voyait le blanc de l'app réapparaître sous le dernier bloc. */
+  min-height: 100%;
+  background:
+    radial-gradient(120% 45% at 50% 0%, rgba(142,135,255,.16) 0%, transparent 60%),
+    linear-gradient(180deg,#241a52 0%,#1e1648 46%,#1a1340 100%);
 }
 
 /* ── Reveal au scroll ── */
@@ -271,6 +330,13 @@ const STYLE = `<style>
 /* sur la puce active, le n° de département (span opacity:.65) doit rester lisible
    sur fond accent → opacité pleine, sinon le blend tombe sous 4.5:1 (a11y) */
 .cea-chip.active span { opacity: 1 !important; }
+/* Découverte : chip d'un centre payant. Assez visible pour donner envie, assez
+   discrète pour qu'on voie tout de suite laquelle est ouverte. Pas d'opacité
+   sous .7 : le nom du centre est justement l'argument. */
+.cea-chip.locked {
+  opacity: .78;
+  border-style: dashed;
+}
 .cea-chip.soon {
   opacity: .5;
   cursor: default;
@@ -285,9 +351,10 @@ const STYLE = `<style>
   position: relative;
   overflow: hidden;
   padding: 22px 20px 20px;
-  /* La couleur vient d'une variable CSS injectée inline */
-  background: var(--cea-hero-bg, linear-gradient(140deg, #0a1a10 0%, #132d1c 100%));
-  box-shadow: 0 8px 32px -8px var(--cea-hero-glow, rgba(16,185,129,.35));
+  /* La teinte de difficulté vient d'une variable injectée inline (heroBg) */
+  background: var(--cea-hero-bg, linear-gradient(180deg,#2c2264 0%,#241a56 100%));
+  border: 1px solid var(--bo);
+  box-shadow: 0 18px 38px -20px rgba(6,2,22,.9);
 }
 /* Shimmer / sheen premium — bande lumineuse qui défile */
 .cea-hero::after {
@@ -804,6 +871,83 @@ const STYLE = `<style>
   text-align: center;
   margin: 6px 0 0;
 }
+
+/* ── Lire l'essentiel, déplier le reste ──
+   Le bouton est volontairement discret : c'est une sortie de secours pour qui
+   veut tout lire, pas un appel à l'action. La porte de la page reste
+   « Révise les pièges de X ». */
+.cea-plus {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 9px;
+  padding: 7px 12px 7px 13px;
+  min-height: 34px;
+  border-radius: 999px;
+  border: 1px solid var(--bo);
+  background: rgba(255,255,255,.04);
+  color: var(--a-txt);
+  font: 800 11.5px/1 'Archivo', sans-serif;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .14s cubic-bezier(.23,1,.32,1), background .16s;
+}
+.cea-plus:active { transform: scale(.95); }
+.cea-plus svg { transition: transform .28s cubic-bezier(.23,1,.32,1); }
+.cea-plus[aria-expanded="true"] { background: rgba(255,255,255,.09); }
+/* 90deg et pas 180 : l'icône « chevron » pointe à DROITE au repos, la tourner
+   d'un demi-tour la ferait pointer à gauche (= retour en arrière). */
+.cea-plus[aria-expanded="true"] svg { transform: rotate(90deg); }
+.cea-hero-resume-rest .cea-hero-resume,
+.cea-piege-rest { margin-top: 9px; }
+.cea-piege-rest {
+  font: 500 13px/1.55 'Archivo', sans-serif;
+  color: var(--mu);
+}
+
+/* ── Accès en chips ──
+   Avant : trois lignes de 90 caractères empilées, dont l'élève ne lit que le
+   premier mot (« RER A », « Métro 5 »). C'est donc ce premier mot qui devient
+   la chip, et la ligne complète s'ouvre dessous quand il la touche. */
+.cea-acces-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+.cea-acces-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--bo);
+  background: rgba(255,255,255,.05);
+  color: var(--ink);
+  font: 700 13px/1 'Archivo', sans-serif;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .14s cubic-bezier(.23,1,.32,1), background .16s, border-color .16s;
+}
+.cea-acces-chip svg { color: var(--a-txt); }
+.cea-acces-chip:active { transform: scale(.94); }
+.cea-acces-chip[aria-expanded="true"] {
+  background: var(--a);
+  border-color: var(--a);
+  color: var(--a-ink);
+}
+.cea-acces-chip[aria-expanded="true"] svg { color: var(--a-ink); }
+.cea-acces-detail {
+  font: 500 13.5px/1.55 'Archivo', sans-serif;
+  color: var(--mu);
+  margin: 10px 0 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cea-plus, .cea-plus svg, .cea-acces-chip { transition: none; }
+}
 </style>`;
 
 // ─── Helpers couleur difficulté ──────────────────────────────
@@ -811,10 +955,67 @@ function diffCss(c, alpha = 1) {
   return `hsl(${c.h} ${c.s} ${c.l} / ${alpha})`;
 }
 
+// ─── Couper un texte éditorial en « ce qu'on lit » / « le reste » ───
+//
+// La fiche empilait des pavés : 5 lignes de résumé, puis 3 pièges de 4 lignes
+// chacun, puis 4 conseils, puis 5 questions. Personne ne lit ça sur un
+// téléphone. Retour Rayan 05/08/2026 : « réduit le texte à l'essentiel, fais
+// une belle mise en forme qu'on veut lire ».
+//
+// ⚠️ On ne SUPPRIME rien : les 21 fiches sont du contenu éditorial original,
+// écrit à la main, et il porte le SEO. On le HIÉRARCHISE. La première phrase
+// se lit tout de suite, le reste se déplie d'un geste. « L'essentiel » c'est
+// ce qu'on VOIT, pas ce qui reste dans le fichier.
+//
+// Découpe sur le premier point suivi d'une majuscule (ou fin de chaîne). Pas
+// sur n'importe quel point : « 6 à 8 ronds-points. » et « A15 / N184 » en
+// contiennent, et « M. Dupont » aussi.
+function splitLead(texte) {
+  const t = String(texte || "").trim();
+  const m = t.match(/^(.{20,190}?[.!?])\s+(?=[A-ZÀÂÉÈÊÎÔÙÜÇ«])/);
+  if (!m) return { lead: t, rest: "" };
+  return { lead: m[1], rest: t.slice(m[0].length).trim() };
+}
+
+// Un pavé éditorial rendu en « première phrase + Le détail ».
+function renderPlie(texte, cls) {
+  const { lead, rest } = splitLead(texte);
+  if (!rest) return `<p class="cea-${cls}">${esc(lead)}</p>`;
+  return `<p class="cea-${cls}">${esc(lead)}</p>
+    <div class="cea-${cls}-rest" hidden><p class="cea-${cls}">${esc(rest)}</p></div>
+    <button class="cea-plus" type="button" data-plus aria-expanded="false">
+      <span>${txt("read_more", "Le détail")}</span>${icon("chevron", { size: 14 })}
+    </button>`;
+}
+
+// Étiquette courte d'un moyen d'accès, pour la chip.
+//
+// Les 21 fiches suivent toutes la même écriture : « RER A. Arrêt … »,
+// « Métro ligne 5. Stations … », « En voiture : axes A15 / N184, … ». On prend
+// donc ce qui précède le premier point ou deux-points. Si ça ne matche pas (une
+// fiche écrite autrement plus tard), on se replie sur les premiers mots plutôt
+// que de rendre une chip vide.
+function accesChip(texte) {
+  const t = String(texte || "").trim();
+  const m = t.match(/^([^.:]{2,26})\s*[.:]/);
+  const brut = m ? m[1] : t.split(/\s+/).slice(0, 3).join(" ");
+  // « En voiture : … » → « Voiture ». La majuscule est remise à la main : sans
+  // elle la chip affichait « voiture » en minuscule à côté de « RER A ».
+  const court = brut.replace(/^En\s+/i, "").trim();
+  return court.charAt(0).toUpperCase() + court.slice(1);
+}
+
+// Le hero est une CARTE DE L'ARÈNE, pas un aplat de couleur.
+//
+// Avant : la difficulté peignait tout le bloc, du sol au plafond. À 3/5 ça
+// donnait une dalle moutarde de 400 px au milieu d'une app nuit-violet, et le
+// résumé se lisait en doré sur doré. La difficulté reste lisible — c'est la
+// JAUGE qui la porte, plus une teinte de 8 % en haut de la carte. Un seul objet
+// coloré au lieu d'un mur.
 function heroBg(c) {
-  const base = diffCss(c, 1);
-  const dark = `hsl(${c.h} ${c.s} ${parseFloat(c.l) - 18}%)`;
-  return `linear-gradient(145deg, ${dark} 0%, ${base} 100%)`;
+  const teinte = diffCss(c, 0.16);
+  return `radial-gradient(120% 70% at 50% 0%, ${teinte} 0%, transparent 62%),
+          linear-gradient(180deg, #2c2264 0%, #241a56 100%)`;
 }
 
 // ─── Jauge de difficulté (HTML) ──────────────────────────────
@@ -842,12 +1043,21 @@ function mapsUrl(c) {
 // ─── Chips sélecteur ─────────────────────────────────────────
 function renderChips(activeSlug) {
   const chips = listCentres()
-    .map(
-      (c) =>
-        `<button class="cea-chip${c.slug === activeSlug ? " active" : ""}" data-slug="${escAttr(c.slug)}" type="button">
-           ${esc(c.nom)} <span style="opacity:.65;font-weight:600">${esc(c.deptNum)}</span>
-         </button>`,
-    )
+    .map((c) => {
+      // Découverte : le centre offert reste cliquable, les autres deviennent
+      // une invitation à débloquer. On garde le NOM lisible plutôt qu'un chip
+      // grisé anonyme : l'élève doit voir ce qu'il y a derrière le cadenas.
+      const locked = _gated && !isFreeCentre(c.slug);
+      const attr = locked
+        ? `data-lock="${escAttr(c.slug)}"`
+        : `data-slug="${escAttr(c.slug)}"`;
+      const mark = locked
+        ? `<span style="opacity:.8">${icon("lock", { size: 12 })}</span> `
+        : "";
+      return `<button class="cea-chip${c.slug === activeSlug ? " active" : ""}${locked ? " locked" : ""}" ${attr} type="button">
+           ${mark}${esc(c.nom)} <span style="opacity:.65;font-weight:600">${esc(c.deptNum)}</span>
+         </button>`;
+    })
     .join("");
   const soon = `<span class="cea-chip soon">${icon("plus", { size: 13 })} ${txt("other_centres", "Autres centres bientôt")}</span>`;
   return `<div class="cea-chips-wrap"><div class="cea-chips">${chips}${soon}</div></div>`;
@@ -857,12 +1067,8 @@ function renderChips(activeSlug) {
 function renderFiche(c) {
   const col = diffColor(c.difficulte);
   const colCss = diffCss(col);
-  const glow = diffCss(col, 0.38);
 
-  const heroCss = `
-    --cea-hero-bg: ${heroBg(col)};
-    --cea-hero-glow: ${glow};
-  `.trim();
+  const heroCss = `--cea-hero-bg: ${heroBg(col)};`;
 
   return `
   <!-- HERO -->
@@ -873,18 +1079,28 @@ function renderFiche(c) {
       </div>
       <h1 class="cea-hero-nom">${esc(c.nom)}</h1>
       ${diffGauge(c.difficulte, c.difficulteLabel, colCss)}
-      <p class="cea-hero-resume">${esc(c.resume)}</p>
+      ${renderPlie(c.resume, "hero-resume")}
     </div>
   </div>
 
-  <!-- ACCÈS -->
+  <!-- ACCÈS — chips : le moyen de transport d'abord, le détail au clic -->
   <div class="cea-section reveal">
     <h2 class="cea-section-tit">${icon("map-pin", { size: 17 })} ${txt("access_title", "Accès et adresse")}</h2>
     <div class="cea-addr-row">${icon("map-pin", { size: 17 })} ${esc(c.adresse)}</div>
+    <div class="cea-acces-chips">
+      ${c.acces
+        .map(
+          (a, i) =>
+            `<button class="cea-acces-chip" type="button" data-acces="${i}" aria-expanded="false">
+               ${icon(a.ico, { size: 14 })} ${esc(accesChip(a.texte))}
+             </button>`,
+        )
+        .join("")}
+    </div>
     ${c.acces
       .map(
-        (a) =>
-          `<div class="cea-acces-item">${icon(a.ico, { size: 16 })} <span>${esc(a.texte)}</span></div>`,
+        (a, i) =>
+          `<p class="cea-acces-detail" data-acces-detail="${i}" hidden>${esc(a.texte)}</p>`,
       )
       .join("")}
     <a class="cea-maps-btn" href="${escAttr(mapsUrl(c))}" target="_blank" rel="noopener" data-act="maps">
@@ -892,21 +1108,30 @@ function renderFiche(c) {
     </a>
   </div>
 
-  <!-- PIÈGES -->
+  <!-- PIÈGES — le titre et la phrase qui pique, le reste au clic -->
   <div class="cea-section reveal">
     <h2 class="cea-section-tit">${icon("alert-triangle", { size: 17 })} ${rtl(esc(format("traps_title", "Les pièges à {name}", { name: c.nom })))}</h2>
     <div class="cea-pieges-list">
       ${c.pieges
-        .map(
-          (p) => `
+        .map((p) => {
+          const { lead, rest } = splitLead(p.texte);
+          return `
         <div class="cea-piege">
           <div class="cea-piege-ico">${icon(p.ico, { size: 20 })}</div>
           <div class="cea-piege-body">
             <div class="cea-piege-tit">${esc(p.titre)}</div>
-            <div class="cea-piege-txt">${esc(p.texte)}</div>
+            <div class="cea-piege-txt">${esc(lead)}</div>
+            ${
+              rest
+                ? `<div class="cea-piege-rest" hidden>${esc(rest)}</div>
+                   <button class="cea-plus" type="button" data-plus aria-expanded="false">
+                     <span>${txt("read_more", "Le détail")}</span>${icon("chevron", { size: 14 })}
+                   </button>`
+                : ""
+            }
           </div>
-        </div>`,
-        )
+        </div>`;
+        })
         .join("")}
     </div>
   </div>
@@ -1109,12 +1334,18 @@ export async function mount(root, param) {
 
   root.innerHTML = skeleton();
 
-  const active = getCentre(param) ? param : CENTRES_EXAMEN[0].slug;
+  _gated = isFreeTierUser(me);
+
+  let active = getCentre(param) ? param : CENTRES_EXAMEN[0].slug;
+  // Filet : le routeur ne laisse déjà passer que le centre offert en découverte,
+  // mais mount() est aussi appelé par le sélecteur et par un retour arrière.
+  if (_gated && !isFreeCentre(active)) active = FREE_CENTRE;
 
   track("page_view", {
     page: "centre-examen",
     centre: active,
     user_role: me.role,
+    gated: _gated,
   });
 
   root.innerHTML = template(active);
@@ -1143,6 +1374,18 @@ function wire(root, active) {
     });
   });
 
+  // Découverte : chip d'un centre payant → le mur, avec le nom du centre dans
+  // l'événement. C'est le meilleur signal d'intention d'achat de la page : il a
+  // lu une fiche en entier et il en veut une autre.
+  root.querySelectorAll(".cea-chip[data-lock]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      haptic("select");
+      track("centre_examen_locked_click", { centre: btn.dataset.lock });
+      const { mount: mountWall } = await import("@/pages/eleve/pass-requis.js");
+      await mountWall(root, getCurUser());
+    });
+  });
+
   // Bouton carte
   root.querySelector('[data-act="maps"]')?.addEventListener("click", () => {
     haptic("tap");
@@ -1151,6 +1394,46 @@ function wire(root, active) {
 
   // Accordéon FAQ
   wireAccordion(root, active);
+
+  // « Le détail » — déplie le pavé qu'on avait replié (résumé, piège).
+  // Le bloc caché est le frère JUSTE AVANT le bouton : c'est ce que renderPlie
+  // et le rendu des pièges produisent tous les deux, donc une seule règle suffit
+  // pour les deux endroits.
+  root.querySelectorAll("[data-plus]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const bloc = btn.previousElementSibling;
+      if (!bloc) return;
+      const ouvert = btn.getAttribute("aria-expanded") === "true";
+      bloc.hidden = ouvert;
+      btn.setAttribute("aria-expanded", ouvert ? "false" : "true");
+      btn.querySelector("span").textContent = ouvert
+        ? txt("read_more", "Le détail")
+        : txt("read_less", "Replier");
+      haptic("tap");
+      if (!ouvert) track("centre_examen_detail_open", { centre: active });
+    });
+  });
+
+  // Chips d'accès — une seule ouverte à la fois : deux détails côte à côte
+  // reformaient le pavé qu'on vient de défaire.
+  root.querySelectorAll("[data-acces]").forEach((chip) => {
+    chip.addEventListener("click", () => {
+      const i = chip.dataset.acces;
+      const deja = chip.getAttribute("aria-expanded") === "true";
+      root.querySelectorAll("[data-acces]").forEach((c2) => {
+        c2.setAttribute("aria-expanded", "false");
+      });
+      root.querySelectorAll("[data-acces-detail]").forEach((d) => {
+        d.hidden = true;
+      });
+      if (!deja) {
+        chip.setAttribute("aria-expanded", "true");
+        const d = root.querySelector(`[data-acces-detail="${i}"]`);
+        if (d) d.hidden = false;
+      }
+      haptic("select");
+    });
+  });
 
   // Bouton « Révise les pièges de <centre> »
   root.querySelector("#cea-revise")?.addEventListener("click", () => {

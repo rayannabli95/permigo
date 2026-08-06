@@ -49,13 +49,13 @@ function chargerQuestions({ competenceId, type, lang, nbQuestions, boite }) {
   return requete.limit(Math.max(nbQuestions * 3, 15));
 }
 import {
-  playCorrect,
   playWrong,
   playStreak,
   playVictory,
   playDefeat,
   playWhoosh,
   playQuizMusic,
+  playMascotDing,
 } from "@/utils/sound.js";
 
 /**
@@ -191,7 +191,10 @@ export async function lancerQuiz({
     if (correct) {
       score++;
       streak++;
-      playCorrect();
+      // Carillon dédié (06/08) : remplace playCorrect() ICI seulement, au
+      // même instant que la mascotte animée. playCorrect reste inchangé
+      // pour pilote-mission / exam-blanc / en-situation.
+      playMascotDing();
       if (streak >= 2) playStreak(); // escalade à partir de la 2e bonne d'affilée
       navigator.vibrate?.(20);
       setMascot(overlay, "celebrate");

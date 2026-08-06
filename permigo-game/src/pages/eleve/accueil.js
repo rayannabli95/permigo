@@ -142,6 +142,12 @@ const ACC_I18N = {
     reason_consol: "🔁 Achieved. Worth consolidating",
     freeze_wait: "⏳ Freezing…",
     freeze_need: "You need 50 steering wheels to freeze your streak.",
+    freeze_error:
+      "Something's stopping your streak from freezing right now. Try again later.",
+    freeze_already: "Your streak is already frozen today.",
+    freeze_invalid_date: "You can only freeze today's or yesterday's streak.",
+    freeze_need_balance:
+      "You need 50 steering wheels to freeze your streak. You have {n}.",
     freeze_ok_toast: "Streak frozen for 24 h.",
     freeze_ok_btn: "✓ Streak frozen",
     freeze_fail: "The freeze failed. Try again.",
@@ -236,6 +242,10 @@ const ACC_I18N = {
     reason_consol: "🔁 مكتسبة. للترسيخ",
     freeze_wait: "⏳ جارٍ التجميد…",
     freeze_need: "تحتاج 50 مقودًا لتجميد سلسلتك.",
+    freeze_error: "تعذّر تجميد سلسلتك الآن. أعد المحاولة لاحقًا.",
+    freeze_already: "سلسلتك مجمّدة بالفعل اليوم.",
+    freeze_invalid_date: "يمكنك تجميد سلسلة اليوم أو الأمس فقط.",
+    freeze_need_balance: "تحتاج 50 مقودًا لتجميد سلسلتك. لديك {n}.",
     freeze_ok_toast: "جُمّدت السلسلة لمدة 24 ساعة.",
     freeze_ok_btn: "✓ جُمّدت السلسلة",
     freeze_fail: "فشل التجميد. أعد المحاولة.",
@@ -2575,8 +2585,8 @@ function wire(
             typeof data.current === "number"
               ? atR(
                   "freeze_need_balance",
-                  `Il te faut 50 volants pour geler ta série. Tu en as ${data.current}.`,
-                )
+                  "Il te faut 50 volants pour geler ta série. Tu en as {n}.",
+                ).replace("{n}", data.current)
               : atR(
                   "freeze_need",
                   "Il te faut 50 volants pour geler ta série.",

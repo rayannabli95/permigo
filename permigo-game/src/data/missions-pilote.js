@@ -123,7 +123,10 @@ export const MISSIONS = [
       "Un témoin rouge reste visible après le contrôle du tableau de bord.",
     choices: [
       { id: "wait", label: "Partir doucement et surveiller plus tard" },
-      { id: "signal", label: "Ne pas partir du tout et le signaler tout de suite" },
+      {
+        id: "signal",
+        label: "Ne pas partir du tout et le signaler tout de suite",
+      },
       { id: "wipe", label: "Actionner les essuie-glaces" },
     ],
     solution: "signal",
@@ -182,7 +185,10 @@ export const MISSIONS = [
     prompt: "Ta sortie approche. Quelle action vient en premier ?",
     visual: "roundabout",
     choices: [
-      { id: "accelerate", label: "Accélérer tout de suite pour prendre la sortie" },
+      {
+        id: "accelerate",
+        label: "Accélérer tout de suite pour prendre la sortie",
+      },
       {
         id: "check-signal",
         label: "Contrôler puis mettre le clignotant",
@@ -398,7 +404,10 @@ export const MISSIONS = [
     choices: [
       { id: "accelerate", label: "Accélérer pour arriver avant les autres" },
       { id: "brake-hard", label: "Freiner fort immédiatement" },
-      { id: "lift", label: "Lever le pied et laisser la voiture ralentir toute seule" },
+      {
+        id: "lift",
+        label: "Lever le pied et laisser la voiture ralentir toute seule",
+      },
     ],
     solution: "lift",
     hint: "Tu as de la distance : utilise-la avant de solliciter fortement le frein.",
@@ -552,31 +561,39 @@ export const MISSIONS = [
       "Placer le siège assez près des commandes sans bloquer les mouvements.",
     prompt: "Fais glisser le siège jusqu’à la bonne distance des pédales.",
     visual: "seat-profile",
-    piece: { label: "Siège avec conducteur" },
+    // Coordonnées calées sur le nouveau décor photo (Art Bible 2.0, 05/08/2026,
+    // rail visible entre 68 % et 88 % de hauteur, pédales vers 82-89 % en x).
+    piece: {
+      label: "Siège avec conducteur",
+      largeur: 20,
+      hauteur: 42,
+      departX: 19,
+      departY: 68,
+    },
     spots: [
       {
         id: "trop-loin",
         label: "Position gauche",
-        x: 18,
-        y: 43,
-        w: 20,
-        h: 40,
+        x: 6,
+        y: 55,
+        w: 26,
+        h: 35,
       },
       {
         id: "juste",
         label: "Position centrale",
-        x: 44,
-        y: 43,
-        w: 20,
-        h: 40,
+        x: 37,
+        y: 55,
+        w: 26,
+        h: 35,
       },
       {
         id: "trop-pres",
         label: "Position droite",
-        x: 70,
-        y: 43,
-        w: 20,
-        h: 40,
+        x: 67,
+        y: 55,
+        w: 26,
+        h: 35,
       },
     ],
     solution: "juste",
@@ -629,7 +646,10 @@ export const MISSIONS = [
     symptom:
       "Dans chaque virage à droite, tu te retrouves collé au bord et tu dois corriger.",
     choices: [
-      { id: "regard", label: "Tu regardes le bord de la route au lieu de la sortie" },
+      {
+        id: "regard",
+        label: "Tu regardes le bord de la route au lieu de la sortie",
+      },
       { id: "volant", label: "Ton volant est trop dur à tourner" },
       { id: "vitesse", label: "Tu roules beaucoup trop lentement pour ça" },
     ],
@@ -1016,9 +1036,15 @@ export const MISSIONS = [
     prompt: "Ton créneau part de travers et tu ne rentres pas. Tu fais quoi ?",
     visual: "parking",
     choices: [
-      { id: "reprendre", label: "Tu ressors complètement et tu repars depuis le début" },
+      {
+        id: "reprendre",
+        label: "Tu ressors complètement et tu repars depuis le début",
+      },
       { id: "forcer", label: "Tu forces au volant en reculant" },
-      { id: "abandonner", label: "Tu laisses la voiture en travers et tu sors" },
+      {
+        id: "abandonner",
+        label: "Tu laisses la voiture en travers et tu sors",
+      },
     ],
     solution: "reprendre",
     hint: "Une manœuvre ratée ne se rattrape pas en insistant. Elle se recommence.",
@@ -1690,7 +1716,10 @@ export const MISSIONS = [
         id: "switch",
         label: "Tu repasses en feux de croisement tout de suite",
       },
-      { id: "keep", label: "Tu gardes tes pleins phares jusqu'à ce qu'elle passe" },
+      {
+        id: "keep",
+        label: "Tu gardes tes pleins phares jusqu'à ce qu'elle passe",
+      },
       { id: "flash", label: "Tu fais un appel de phares pour la prévenir" },
     ],
     solution: "switch",
@@ -1786,7 +1815,10 @@ export const MISSIONS = [
         id: "lift",
         label: "Tu lèves le pied et tu tiens le volant",
       },
-      { id: "steer", label: "Tu braques pour sortir de la flaque au plus vite" },
+      {
+        id: "steer",
+        label: "Tu braques pour sortir de la flaque au plus vite",
+      },
     ],
     solution: "lift",
     hint: "Tes pneus ne touchent plus la route. Un geste fort ne sera transmis à rien.",
@@ -1815,10 +1847,12 @@ export const MISSIONS = [
       { id: "wet", label: "C'est de la pluie et tu continues normalement" },
       {
         id: "ice",
-        label:
-          "Sans doute du verglas et tu ralentis bien avant",
+        label: "Sans doute du verglas et tu ralentis bien avant",
       },
-      { id: "test", label: "Tu freines un coup pour tester l'adhérence au sol" },
+      {
+        id: "test",
+        label: "Tu freines un coup pour tester l'adhérence au sol",
+      },
     ],
     solution: "ice",
     hint: "Trois indices qui vont ensemble valent une certitude. Tu n'as pas besoin d'attendre le quatrième.",
@@ -2044,7 +2078,7 @@ export const MISSIONS = [
     title: "Ce que le véhicule cache",
     objective: "Regarder l'endroit d'où un piéton peut surgir.",
     prompt:
-      "Un véhicule est arrêté à droite. Touche l'endroit d'où quelqu'un peut sortir sans te voir.",
+      "Un véhicule est arrêté à gauche. Touche l'endroit d'où quelqu'un peut sortir sans te voir.",
     visual: "intersection",
     hotspots: [
       {

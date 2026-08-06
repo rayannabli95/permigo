@@ -36,6 +36,18 @@ const FREE_ONCE = { "exam-conduite": 1 };
 // « en vrai c'est la moitié de l'app » (Rayan).
 export const FREE_SUBS = ["C1a", "C1b", "C1c"];
 
+// Le SEUL centre d'examen ouvert au compte gratuit. C'est le premier de
+// `CENTRES_EXAMEN` (data/centres-examen.js), donc aussi celui que la page
+// affiche par défaut quand l'URL n'a pas de slug : les deux restent alignés
+// tant qu'on ne réordonne pas la liste. Si tu changes l'ordre là-bas, change
+// cette valeur ici.
+export const FREE_CENTRE = "cergy";
+
+/** Ce centre d'examen est-il ouvert au compte gratuit ? */
+export function isFreeCentre(slug) {
+  return !slug || slug === FREE_CENTRE;
+}
+
 // Surfaces que l'élève en mode découverte peut explorer librement (chrome
 // affiché ; les quotas sont appliqués DANS la page). Tout le reste est muré
 // vers le paywall — fail-closed côté monétisation : une future route « premium »
@@ -51,6 +63,12 @@ const DISCOVERY_ROUTES = new Set([
   // Le filtrage par code se fait dans isDiscoveryAllowedRoute(), la présence
   // ici ne suffit pas. Cf. le commentaire de FREE_SUBS_ROUTES juste dessous.
   "valider-seul",
+  // Centre d'examen : la tuile est VISIBLE dans Réviser, donc le compte
+  // gratuit la voyait et se prenait le paywall en pleine face — la seule
+  // tuile du hub à faire ça. On en ouvre UN en entier (décision Rayan,
+  // 05/08/2026) : il lit une vraie fiche, il comprend ce qu'il rate sur les
+  // autres. Le filtrage par slug se fait dans isDiscoveryAllowedRoute().
+  "centre-examen",
   // Comptes / neutres / upsell — jamais murés (l'élève doit pouvoir gérer son
   // compte, lire les mentions légales, ou aller vers l'achat).
   "profil",
@@ -98,6 +116,11 @@ export function isFreeTierUser(me) {
 // compétences, et le mur du produit tomberait entièrement.
 const FREE_SUBS_ROUTES = new Set(["valider-seul"]);
 
+// Même idée, mais le paramètre est un slug de centre d'examen : `#/centre-examen`
+// sans slug (la page choisit alors le centre par défaut) et le centre gratuit
+// passent, les 30 autres fiches sont murées.
+const FREE_CENTRE_ROUTES = new Set(["centre-examen"]);
+
 /**
  * Cette route est-elle jouable en mode découverte, ou murée vers le paywall ?
  *
@@ -108,6 +131,7 @@ export function isDiscoveryAllowedRoute(routeName, param = null) {
   const nom = routeName || "default";
   if (!DISCOVERY_ROUTES.has(nom)) return false;
   if (FREE_SUBS_ROUTES.has(nom)) return isFreeSub(param);
+  if (FREE_CENTRE_ROUTES.has(nom)) return isFreeCentre(param);
   return true;
 }
 

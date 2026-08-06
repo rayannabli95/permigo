@@ -87,7 +87,11 @@ ${chromeNight("var(--adk)", "#0a0820")}
 
 /* ── En-tête ── */
 .arn-hd{ padding:14px 20px 0; text-align:center; }
-.arn-hd h1{ font:800 22px/1.1 'Archivo',sans-serif; letter-spacing:-.02em; margin:0; }
+/* La couleur est REPOSÉE ici, elle ne peut pas venir de .arn{color:var(--aink)} :
+   la règle globale h1,h2,h3,h4{color:var(--ink)} de base.css vise le titre en
+   direct, et une règle qui touche l'élément bat toujours l'héritage du parent.
+   Sans cette ligne le titre sortait en #0b0d1a sur la nuit violette (1.9:1). */
+.arn-hd h1{ font:800 22px/1.1 'Archivo',sans-serif; letter-spacing:-.02em; margin:0; color:var(--aink); }
 .arn-hd .arn-sub{ font:600 12.5px/1.4 'Archivo',sans-serif; color:var(--amute); margin:5px 0 0; }
 
 /* ── Segmented control (ligues) ── */
