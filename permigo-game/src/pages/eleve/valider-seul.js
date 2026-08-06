@@ -306,6 +306,9 @@ a.vs-cta { text-decoration:none; }
 /* ── Écran résultat : DA Arène nuit-violet + or (célébration) ── */
 .vsr { position:relative; min-height: calc(100dvh - 60px); padding: 30px 20px calc(120px + env(safe-area-inset-bottom));
   color:#f2f0fa; font-family:'Archivo',sans-serif; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
+  /* isolation fige le fond contre lequel la mascotte se détoure : sans lui, un
+     ancêtre transformé sortirait le calque et ramènerait le carré noir. */
+  isolation:isolate;
   background:
     radial-gradient(120% 55% at 50% -5%, rgba(255,190,70,.12) 0%, transparent 55%),
     radial-gradient(120% 60% at 50% 22%, rgba(110,70,220,.24) 0%, transparent 62%),
@@ -566,8 +569,14 @@ function successScreen(sub, scorePct, volants = 0) {
     @keyframes vsrCarte { 0%{opacity:0; transform:scale(.55) rotate(-9deg);} 60%{transform:scale(1.06) rotate(2deg);} 100%{opacity:1; transform:scale(1) rotate(0);} }
     @keyframes vsrShine { to { transform:translateX(120%); } }
     @keyframes vsrGloss { 0%{background-position:120% 0;} 50%{background-position:-20% 0;} 100%{background-position:120% 0;} }
+    /* La mascotte est un mp4 : le h264 ne sait pas faire de transparence, son
+       fond est NOIR PUR. Posé tel quel sur le violet nuit, il dessine un carré
+       noir de 150 px autour d'elle. Le mélange lighten garde le pixel le plus
+       clair des deux : le noir s'efface dans le fond, la mascotte reste
+       entière. Pas d'ombre portée ici, elle serait plus sombre que le fond
+       donc mangée par le même mélange. */
     .vsr-mascot { width:150px; height:150px; margin:0 auto 4px; display:block; object-fit:contain;
-      filter:drop-shadow(0 10px 22px rgba(0,0,0,.5)); animation: vsrPop .5s cubic-bezier(.34,1.56,.64,1) both; }
+      mix-blend-mode:lighten; animation: vsrPop .5s cubic-bezier(.34,1.56,.64,1) both; }
     .vsr-name { font:800 17px/1.25 'Archivo',sans-serif; color:#fff; margin:2px 0 0; max-width:300px; }
     .vsr-encourage { font:700 14.5px/1.4 'Archivo',sans-serif; color:#ffe9b0; margin:10px auto 0; max-width:290px; }
     .vsr-vaut { font:600 12.5px/1.5 'Archivo',sans-serif; color:rgba(255,255,255,.72); margin:9px auto 0; max-width:310px; }
