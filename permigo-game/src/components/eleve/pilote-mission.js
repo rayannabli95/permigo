@@ -71,6 +71,10 @@ const PIECE_PLACEMENT = Object.freeze({
  * lui a retiré son fond, ne reste que la silhouette du siège et du conducteur.
  * `voiture` : une voiture vue de dessus, pour tout ce qui se joue en plan
  * (la place dans la voie, l'espace pour doubler, la distance à garder).
+ * `voiture-droite` : la même, nez vers la droite, pour les décors où la route
+ * traverse l'écran à l'horizontale (l'entrée d'autoroute). Une voiture qui
+ * pointe vers le haut sur une route qui va vers la droite se voit tout de
+ * suite, et casse la lecture de la scène.
  */
 const FORMES_PIECE = {
   conducteur: `
@@ -83,6 +87,14 @@ const FORMES_PIECE = {
       <path class="mp-car-glass" d="M14 62H46V78H14Z"/>
       <path class="mp-car-roof" d="M13 40H47V60H13Z"/>
       <path class="mp-car-mirror" d="M4 40H10M50 40H56"/>
+    </svg>`,
+  "voiture-droite": `
+    <svg class="mp-placement-car" viewBox="0 0 100 60" aria-hidden="true">
+      <rect class="mp-car-body" x="4" y="6" width="92" height="48" rx="11"/>
+      <path class="mp-car-glass" d="M22 14V46H38V14Z"/>
+      <path class="mp-car-glass" d="M62 14V46H78V14Z"/>
+      <path class="mp-car-roof" d="M40 13V47H60V13Z"/>
+      <path class="mp-car-mirror" d="M40 4V10M40 50V56"/>
     </svg>`,
 };
 

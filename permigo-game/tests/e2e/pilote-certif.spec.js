@@ -8,6 +8,7 @@ import { test, expect } from "@playwright/test";
 import { ELEVE } from "./_creds.js";
 import { REMC } from "../../src/data/remc.js";
 import {
+  MISSIONS,
   competencesAvecMission,
   missionsPour,
 } from "../../src/data/missions-pilote.js";
@@ -51,9 +52,7 @@ async function glisserAuDoigt(page, source, cible) {
     y: arrivee.y + arrivee.height / 2,
   };
   const session = await page.context().newCDPSession(page);
-  const point = (x, y) => [
-    { x, y, id: 0, radiusX: 1, radiusY: 1, force: 1 },
-  ];
+  const point = (x, y) => [{ x, y, id: 0, radiusX: 1, radiusY: 1, force: 1 }];
 
   await session.send("Input.dispatchTouchEvent", {
     type: "touchStart",
@@ -75,6 +74,68 @@ async function glisserAuDoigt(page, source, cible) {
   });
   await session.detach();
 }
+
+/**
+ * Trois vérifications de DONNÉES, sans navigateur.
+ *
+ * Elles existent à cause de l'audit du 06/08/2026 : les décors dessinés en CSS
+ * ont été remplacés par des images sans que personne rejoue les missions, et
+ * huit missions sur dix-huit se sont retrouvées avec leurs zones posées sur le
+ * tableau de bord au lieu de la route. Rien ne l'avait signalé : une zone mal
+ * placée reste cliquable, le build est vert et la mission se valide quand
+ * même. Ces trois tests attrapent ce qu'on PEUT attraper sans regarder
+ * l'image : une zone hors cadre, deux zones qui se chevauchent, et le départ
+ * d'une pièce qui offre la bonne réponse.
+ *
+ * ⚠️ Ils ne remplacent PAS le fait de rejouer et de REGARDER : aucun test ne
+ * sait si une zone tombe sur le bon élément du décor.
+ */
+test.describe("Mode Pilote — la géométrie des zones", () => {
+  const dansLeCadre = (z) =>
+    z.x >= 0 && z.y >= 0 && z.x + z.w <= 100 && z.y + z.h <= 100;
+
+  test("aucune zone ne sort de la scène", () => {
+    const dehors = [];
+    for (const m of MISSIONS) {
+      for (const z of m.hotspots || [])
+        if (!dansLeCadre(z)) dehors.push(`${m.id} · ${z.id}`);
+      for (const s of m.spots || [])
+        if (!dansLeCadre(s)) dehors.push(`${m.id} · ${s.id}`);
+    }
+    expect(dehors, "zones hors cadre").toEqual([]);
+  });
+
+  test("deux zones d'une même mission ne se chevauchent jamais", () => {
+    // Sinon le clic part sur la première du DOM, pas sur celle qu'on vise.
+    const chevauche = (a, b) =>
+      a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+    const collisions = [];
+    for (const m of MISSIONS) {
+      const zones = m.hotspots || m.spots || [];
+      for (let i = 0; i < zones.length; i += 1)
+        for (let j = i + 1; j < zones.length; j += 1)
+          if (chevauche(zones[i], zones[j]))
+            collisions.push(`${m.id} · ${zones[i].id} ↔ ${zones[j].id}`);
+    }
+    expect(collisions, "zones qui se chevauchent").toEqual([]);
+  });
+
+  test("une pièce ne démarre jamais au plus près de la bonne réponse", () => {
+    // Au relâché, le placement retombe sur la zone la PLUS PROCHE. Une pièce
+    // posée au départ près de la solution se valide donc d'un simple appui,
+    // sans rien avoir déplacé.
+    const fautes = [];
+    for (const m of MISSIONS.filter((x) => x.mode === "placement")) {
+      const centre = (s) => ({ x: s.x + s.w / 2, y: s.y + s.h / 2 });
+      const d2 = (s) =>
+        (centre(s).x - m.piece.departX) ** 2 +
+        (centre(s).y - m.piece.departY) ** 2;
+      const proche = m.spots.reduce((a, b) => (d2(b) < d2(a) ? b : a));
+      if (proche.id === m.solution) fautes.push(`${m.id} → ${proche.id}`);
+    }
+    expect(fautes, "départ trop près de la solution").toEqual([]);
+  });
+});
 
 test.describe("Mode Pilote — la mission avant les questions", () => {
   test("la mission de placement existe pour les deux boîtes", () => {
@@ -102,10 +163,9 @@ test.describe("Mode Pilote — la mission avant les questions", () => {
     await expect(page.locator("[data-suite]")).toBeVisible();
   });
 
-  test("le siège se place au doigt sans faire défiler la page", async (
-    { page },
-    testInfo,
-  ) => {
+  test("le siège se place au doigt sans faire défiler la page", async ({
+    page,
+  }, testInfo) => {
     test.skip(
       !testInfo.project.name.includes("mobile"),
       "le geste tactile est vérifié sur le projet mobile",

@@ -215,6 +215,22 @@ Rayan a demandé de continuer sur les décors encore dessinés en CSS (`cockpit`
 
 **Les 22 décors du Mode Pilote sont maintenant tous en Art Bible 2.0, tous branchés.** Reste ouvert : l'absence de coordonnées vérifiées en conditions réelles pour les 4 décors `placement` de cette vague (`brouillard-file`, `insertion`, `voie-garee`, `overtake-top-libre`) : vérifiés sur une page statique hors-app plutôt qu'en jouant la vraie mission, faute de connaître la bonne réponse des missions précédentes pour y arriver en cliquant.
 
+### 🔴 Ce que les 22 décors ont réellement coûté (audit joué du 06/08/2026)
+
+Les 65 missions ont enfin été JOUÉES, sur un vrai écran de téléphone (390×844), les deux boîtes, jusqu'au bout de chaque compétence. Le risque laissé ouvert ci-dessus n'était pas un risque : **les 4 décors vérifiés hors-app étaient les 4 cassés**, et 4 autres missions l'étaient aussi. Huit sur les dix-huit qui portent des zones.
+
+**La cause, unique et mécanique** : les zones sont posées en POURCENTAGE de la scène. Les décors dessinés en CSS étalaient la route sur toute la boîte. Les décors image consacrent leurs deux tiers du bas à l'habitacle. Donc toute zone qui tombait sur la route est tombée sur le tableau de bord. « Touche l'endroit où roulent tes roues » proposait quatre réponses posées sur le volant, la console, la boîte à gants et la portière.
+
+⭐⭐ **La leçon, à retenir avant la prochaine vague : composer une image POUR des coordonnées existantes ne se vérifie qu'en jouant la mission.** La méthode a marché sur `cockpit` et `intersection` parce qu'on les a regardés dans l'app ; elle a échoué partout où on s'est contenté d'une page statique. Une zone mal placée reste cliquable, le build reste vert, la mission se valide quand même : **rien ne prévient**.
+
+**Ce qui a été fait le 06/08** :
+- Les 4 décors `placement` REFAITS en vue de dessus stricte (`-2026-08-06`), sans aucune voiture du joueur. Deux d'entre eux (`insertion`, `overtake-top-libre`) en contenaient une alors que la voiture du joueur EST la pièce qu'on fait glisser : l'élève en voyait deux. Une distance de suivi, une marge latérale et un créneau d'insertion ne se jugent pas depuis le siège conducteur, exactement ce que disaient les commentaires des anciens décors CSS.
+- Les zones des 6 missions `spot` recalées sur les repères réels de chaque image, relevés à la grille de pourcentages.
+- `c1a-commodos` : la zone « Volant » recouvrait le bord droit des deux commodos. Deux zones qui se chevauchent, c'est la dernière du DOM qui prend le clic : un doigt sur la droite de la bonne réponse répondait « volant ».
+- Trois contradictions texte/image de la même famille que `c3g-masque` : `c3b-brouillard` posait « tu ne vois plus à cinquante mètres » sur un décor de PLUIE (rue nette et lumineuse) ; `c3e-insertion` et `c3e-panne` annonçaient « Vue de dessus » devant des images en vue subjective. Le décor de brouillard vu du poste de conduite, libéré par le passage de `brouillard-file` en vue de dessus, sert maintenant la question sur la visibilité.
+- `exterior` déclarait 1600×1067 alors qu'il fait 1600×1195 : la page sautait de 12 % de hauteur au chargement.
+- **Trois tests de données ajoutés** à `pilote-certif.spec.js` : zone hors cadre, zones qui se chevauchent, pièce de placement qui démarre au plus près de la bonne réponse. Ils ne remplacent pas le fait de regarder (aucun test ne sait si une zone tombe sur le bon élément du décor), mais ils attrapent les trois fautes mécaniques.
+
 ## 8. Ce qui reste ouvert (prochaine session)
 
 - [ ] Construire le kit France (§5) élément par élément, avec validation visuelle de chaque pièce

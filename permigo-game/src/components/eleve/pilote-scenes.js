@@ -107,10 +107,36 @@ const ILLUSTRATIONS = {
  * qui fait ENTRER sur l'autoroute, mesure « 1 MÈTRE D'ÉCART » incrustée qui
  * donnait la réponse d'une mission de tracé).
  */
+/**
+ * ⚠️ Quatrième vague (06/08/2026) : les quatre décors des missions « Placer »
+ * ont été REFAITS en vue de dessus. Ceux du 05/08 étaient vus du poste de
+ * conduite, et une mission de placement demande de poser une voiture sur une
+ * route : les deux tiers du bas de ces images sont l'habitacle, donc les
+ * cibles tombaient sur le tableau de bord. Deux d'entre eux contenaient en
+ * plus la voiture du joueur, alors que la voiture du joueur EST la pièce
+ * qu'on fait glisser : l'élève en voyait deux.
+ *
+ * Les quatre nouveaux (`-2026-08-06`) sont en vue de dessus stricte, sans
+ * aucune voiture du joueur, avec la voie de circulation laissée vide pour que
+ * les cibles se posent sur du bitume. Nom de fichier redaté : les `-08-05`
+ * sont déjà partis en prod, réutiliser leur nom laisserait l'ancienne image
+ * chez qui a déjà installé.
+ */
 const DECORS = {
   bend: { alt: "Une route qui amorce un virage, vue à travers le pare-brise" },
+  // Le brouillard vu du poste de conduite. C'est l'image qui servait à
+  // `brouillard-file` avant que celui-ci passe en vue de dessus : elle reste
+  // la bonne pour la question « tu ne vois plus à cinquante mètres, tu
+  // allumes quoi ? », qui se posait jusque-là sur un décor de PLUIE, une rue
+  // nette et lumineuse. Une question sur la visibilité a besoin d'une scène
+  // où l'on ne voit pas.
+  brouillard: {
+    alt: "Une route noyée dans le brouillard, vue à travers le pare-brise",
+    src: "brouillard-file-2026-08-05",
+  },
   "brouillard-file": {
-    alt: "Une route dans le brouillard, les feux d'une voiture visibles devant",
+    alt: "Vue de dessus d'une route dans le brouillard, une voiture devant, feux rouges allumés",
+    src: "brouillard-file-2026-08-06",
   },
   "city-light": { alt: "Un feu tricolore isolé, la nuit, en ville" },
   cockpit: {
@@ -122,10 +148,15 @@ const DECORS = {
   },
   exterior: {
     alt: "La voiture vue de trois quarts avant, un pneu affaissé",
+    // Seul décor en 4/3 : sans ces dimensions, le navigateur réserve la place
+    // d'une image 3/2 et la page saute de 12 % de hauteur au chargement.
+    width: 1600,
+    height: 1195,
   },
   gps: { alt: "Une sortie d'autoroute déjà passée, vue dans le rétroviseur" },
   insertion: {
-    alt: "Une bretelle d'autoroute avec des espaces de tailles différentes entre les voitures",
+    alt: "Vue de dessus d'une entrée d'autoroute, deux espaces serrés et un large entre les voitures",
+    src: "insertion-2026-08-06",
   },
   intersection: {
     alt: "Un carrefour au crépuscule, une voiture garée et une rue qui débouche",
@@ -145,7 +176,8 @@ const DECORS = {
     alt: "Vue de dessus, un cycliste devant la voiture sur une route à deux voies",
   },
   "overtake-top-libre": {
-    alt: "Vue de dessus, un cycliste et la voiture qui s'apprête à le dépasser",
+    alt: "Vue de dessus, un cycliste seul sur une route à deux voies",
+    src: "overtake-top-libre-2026-08-06",
   },
   // Le premier jet du 05/08 avait un DEHORS photoréaliste (rue photo, piéton
   // photo, brume de tunnel) derrière un habitacle jouet : repéré en jouant
@@ -171,7 +203,8 @@ const DECORS = {
     height: 894,
   },
   "voie-garee": {
-    alt: "Une rue avec des voitures garées sur la droite",
+    alt: "Vue de dessus d'une rue, une file de voitures garées à droite dont une portière ouverte",
+    src: "voie-garee-2026-08-06",
   },
 };
 
@@ -195,9 +228,11 @@ export function renderArt(visual, options = {}) {
   const decor = DECORS[visual];
   if (decor) {
     const fichier = decor.src || `${visual}-2026-08-05`;
+    // 1600×1074, la taille réelle des fichiers. La valeur 1067 qui traînait
+    // ici décrivait un 3/2 parfait que plus aucun décor n'a.
     return `<img class="mp-decor" src="/pilote/decors/${fichier}.webp"
       alt="${decor.alt}" loading="eager" decoding="async"
-      width="${decor.width || 1600}" height="${decor.height || 1067}" aria-hidden="true">`;
+      width="${decor.width || 1600}" height="${decor.height || 1074}" aria-hidden="true">`;
   }
   if (estUnePiece(visual)) return renderPiece(visual, options);
   // Aucun décor CSS ne reste : les 22 scènes du Mode Pilote sont toutes en

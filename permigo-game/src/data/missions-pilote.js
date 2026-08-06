@@ -36,11 +36,19 @@ export const MISSIONS = [
     prompt:
       "Tu vas tourner à gauche. Touche la commande que ta main doit trouver.",
     visual: "cockpit",
+    // Zones resserrées le 06/08/2026 sur les vrais repères de l'image :
+    // commodo gauche vers x 22-33 % / y 51-62 %, commodo droit vers
+    // x 70-78 % / y 46-56 %, compte-tours vers x 14-27 % / y 25-45 %, moyeu du
+    // volant avec le badge vers x 41-74 % / y 40-75 %.
+    // ⚠️ « Volant » était une grande boîte (34→66 %) qui RECOUVRAIT le bord
+    // droit des deux commodos. Deux zones qui se chevauchent, c'est la
+    // dernière du DOM qui prend le clic : un doigt posé sur la droite du
+    // commodo gauche, la bonne réponse, répondait « volant ».
     hotspots: [
-      { id: "left-stalk", label: "Commodo gauche", x: 18, y: 57, w: 22, h: 17 },
-      { id: "dashboard", label: "Tableau de bord", x: 40, y: 31, w: 20, h: 18 },
-      { id: "right-stalk", label: "Commodo droit", x: 61, y: 57, w: 22, h: 17 },
-      { id: "wheel", label: "Volant", x: 34, y: 48, w: 32, h: 40 },
+      { id: "left-stalk", label: "Commodo gauche", x: 20, y: 48, w: 15, h: 17 },
+      { id: "dashboard", label: "Tableau de bord", x: 12, y: 24, w: 16, h: 17 },
+      { id: "right-stalk", label: "Commodo droit", x: 68, y: 44, w: 15, h: 17 },
+      { id: "wheel", label: "Volant", x: 44, y: 48, w: 22, h: 25 },
     ],
     solution: "left-stalk",
     hint: "Le clignotant est placé du côté gauche du volant.",
@@ -149,18 +157,25 @@ export const MISSIONS = [
     objective: "Détecter une intersection avant d’arriver dessus.",
     prompt: "Un véhicule peut déboucher. Touche l’indice qui révèle la rue.",
     visual: "intersection",
+    // ⚠️ Coordonnées relues sur le décor image le 06/08/2026, en jouant la
+    // mission. Elles dataient des décors dessinés en CSS, qui étalaient la rue
+    // sur toute la hauteur de la boîte : sur une image vue du poste de
+    // conduite, les deux tiers du bas sont l'habitacle, et les quatre zones
+    // tombaient sur le tableau de bord. Repères de l'image : pare-brise entre
+    // 20 % et 53 % de hauteur, voiture garée à gauche vers x 27-38 %,
+    // ouverture de la rue à droite vers x 58-73 %, ciel au centre.
     hotspots: [
       {
         id: "side-street",
         label: "Ouverture entre les bâtiments",
-        x: 66,
-        y: 35,
-        w: 25,
-        h: 42,
+        x: 58,
+        y: 36,
+        w: 15,
+        h: 17,
       },
-      { id: "parked-car", label: "Voiture garée", x: 7, y: 54, w: 22, h: 24 },
-      { id: "sky", label: "Ciel", x: 35, y: 4, w: 27, h: 21 },
-      { id: "lane", label: "Ta voie", x: 33, y: 62, w: 32, h: 34 },
+      { id: "parked-car", label: "Voiture garée", x: 26, y: 36, w: 14, h: 17 },
+      { id: "sky", label: "Ciel", x: 41, y: 18, w: 14, h: 17 },
+      { id: "lane", label: "Ta voie", x: 41, y: 37, w: 14, h: 17 },
     ],
     solution: "side-street",
     hint: "Cherche une ouverture entre les bâtiments et l’arrondi du trottoir.",
@@ -258,18 +273,29 @@ export const MISSIONS = [
     prompt:
       "Les phares arrivent en face. Touche la zone que ton regard doit suivre.",
     visual: "night",
+    // Repères du décor image (relus en jouant, 06/08/2026) : pare-brise entre
+    // 12 % et 53 % de hauteur, voiture en face vers x 38-47 %, bord droit de
+    // la chaussée vers x 58-63 %, rétroviseur extérieur droit vers x 86-96 %,
+    // compteurs vers x 26-44 % / y 61-76 %.
     hotspots: [
-      { id: "headlights", label: "Phares en face", x: 43, y: 28, w: 19, h: 22 },
+      { id: "headlights", label: "Phares en face", x: 36, y: 30, w: 13, h: 17 },
       {
         id: "right-edge",
         label: "Bord droit de ta voie",
-        x: 64,
-        y: 58,
-        w: 27,
-        h: 35,
+        x: 55,
+        y: 38,
+        w: 14,
+        h: 17,
       },
-      { id: "mirror", label: "Rétroviseur", x: 6, y: 15, w: 21, h: 17 },
-      { id: "dashboard", label: "Compteur", x: 31, y: 70, w: 28, h: 20 },
+      {
+        id: "mirror",
+        label: "Rétroviseur extérieur",
+        x: 84,
+        y: 48,
+        w: 13,
+        h: 17,
+      },
+      { id: "dashboard", label: "Compteur", x: 27, y: 60, w: 16, h: 17 },
     ],
     solution: "right-edge",
     hint: "Ne fixe pas la source lumineuse. Cherche un repère stable sur ta droite.",
@@ -467,18 +493,24 @@ export const MISSIONS = [
     prompt:
       "Un défaut est visible avant de partir. Touche celui que tu dois signaler.",
     visual: "exterior",
+    // Le défaut EST dans l'image (le pneu avant est visiblement à plat), mais
+    // les quatre zones dataient du décor dessiné : la bonne réponse tombait à
+    // côté de la roue, sur le bas de caisse. Repères relus le 06/08/2026 sur
+    // l'image : roue avant affaissée x 46-60 % / y 57-80 %, toit x 40-65 %,
+    // portière et sa poignée x 62-78 % / y 34-50 %, pare-chocs avant
+    // x 15-33 % / y 60-75 %.
     hotspots: [
       {
         id: "flat-tire",
         label: "Pneu avant affaissé",
-        x: 58,
-        y: 65,
-        w: 20,
-        h: 22,
+        x: 44,
+        y: 57,
+        w: 15,
+        h: 20,
       },
-      { id: "mirror", label: "Rétroviseur", x: 23, y: 35, w: 17, h: 16 },
-      { id: "door", label: "Portière", x: 38, y: 38, w: 28, h: 28 },
-      { id: "plate", label: "Plaque propre", x: 72, y: 50, w: 15, h: 14 },
+      { id: "roof", label: "Le toit", x: 40, y: 20, w: 16, h: 15 },
+      { id: "door", label: "Portière", x: 64, y: 34, w: 15, h: 15 },
+      { id: "bumper", label: "Pare-chocs avant", x: 17, y: 60, w: 15, h: 15 },
     ],
     solution: "flat-tire",
     hint: "Cherche un élément qui compromet le contact de la voiture avec la route.",
@@ -721,7 +753,11 @@ export const MISSIONS = [
     id: "c1e-dose-frein",
     competence: "C1e",
     order: 3,
-    boites: ["manuelle", "auto"],
+    // ⚠️ Deux variantes plutôt qu'une seule mission pour les deux boîtes : le
+    // dessin `pedales-manuelle` montre trois pédales dont un EMBRAYAGE, et il
+    // était servi tel quel aux élèves en boîte automatique, qui n'en ont pas.
+    // Le contenu de la mission ne change pas, seule la planche de pédales.
+    boites: ["manuelle"],
     mode: "reglage",
     modeLabel: "Doser",
     title: "Le freinage qui ne secoue personne",
@@ -730,6 +766,39 @@ export const MISSIONS = [
     prompt:
       "Un feu passe au rouge à cinquante mètres. Pousse la pédale comme tu le ferais.",
     visual: "pedales-manuelle",
+    commande: {
+      label: "Pédale de frein",
+      article: "la pédale de frein",
+      depart: 0,
+    },
+    crans: [
+      { id: "effleure", label: "À peine" },
+      { id: "franc", label: "Franc puis relâché" },
+      { id: "ecrase", label: "Tout d'un coup" },
+    ],
+    solution: "franc",
+    hint: "Le bon freinage commence tôt et finit doucement, jamais l'inverse.",
+    retry:
+      "Là tu arrives trop vite ou tu jettes tes passagers en avant. Cherche entre les deux.",
+    success: "Franc au début, relâché à la fin. Personne n'a bougé.",
+    why: "Un freinage se dose à l'envers de ce qu'on croit : on appuie fort au début, quand il reste de la distance, et on relâche en approchant. C'est le relâché final qui évite le coup de tête des passagers, et c'est lui que l'examinateur sent.",
+    transfer:
+      "À ta prochaine leçon, essaie de relâcher la pédale juste avant l'arrêt et regarde si la voiture se pose au lieu de piquer.",
+  },
+  {
+    ...commun,
+    id: "c1e-dose-frein-auto",
+    competence: "C1e",
+    order: 3,
+    boites: ["auto"],
+    mode: "reglage",
+    modeLabel: "Doser",
+    title: "Le freinage qui ne secoue personne",
+    objective:
+      "Sentir la différence entre freiner fort et freiner brutalement.",
+    prompt:
+      "Un feu passe au rouge à cinquante mètres. Pousse la pédale comme tu le ferais.",
+    visual: "pedales-auto",
     commande: {
       label: "Pédale de frein",
       article: "la pédale de frein",
@@ -1319,40 +1388,45 @@ export const MISSIONS = [
     objective: "Tenir le milieu de sa voie plutôt qu'un bord.",
     prompt: "La route est libre. Touche l'endroit où roulent tes roues.",
     visual: "overtake-empty",
+    // ⚠️ Les quatre zones tiennent dans la BANDE DE CHAUSSÉE visible par le
+    // pare-brise, entre 38 % et 55 % de hauteur. Plus bas commence le tableau
+    // de bord, et c'est là qu'elles étaient toutes les quatre avant le
+    // 06/08/2026 : on demandait où roulent tes roues en posant les réponses
+    // sur le volant et la boîte à gants.
+    // À mi-hauteur de cette bande, la chaussée va de x 24 % à x 80 %, la ligne
+    // du milieu est à x 50 %, le bord droit vers x 76 %.
     hotspots: [
-      // Les zones suivent la perspective de la route : plus on monte dans la
-      // scène, plus le bitume est étroit. Elles sont volontairement basses.
       {
         id: "center-line",
         label: "Collé à la ligne du milieu",
         x: 43,
-        y: 64,
+        y: 38,
         w: 12,
-        h: 26,
+        h: 17,
       },
       {
         id: "lane-middle",
         label: "Au milieu de ta voie",
         x: 57,
-        y: 64,
-        w: 14,
-        h: 26,
+        y: 38,
+        w: 12,
+        h: 17,
       },
       {
         id: "right-edge",
         label: "Collé au bord droit",
-        x: 74,
-        y: 70,
-        w: 16,
-        h: 22,
+        x: 71,
+        y: 38,
+        w: 12,
+        h: 17,
       },
       {
         id: "other-lane",
         label: "Sur la voie d'en face",
-        x: 22,
-        y: 68,
-        w: 17,
-        h: 22,
+        x: 29,
+        y: 38,
+        w: 12,
+        h: 17,
       },
     ],
     solution: "lane-middle",
@@ -1404,38 +1478,47 @@ export const MISSIONS = [
     prompt:
       "Des voitures sont garées à droite. Fais glisser ta voiture là où tu roulerais.",
     visual: "voie-garee",
+    // Décor en vue de dessus (06/08/2026). Repères : chaussée entre x 37 % et
+    // x 73 %, ligne du milieu à x 50 %, file de voitures garées entre x 62 %
+    // et x 72 %, portière ouverte vers y 36-58 %. Les trois positions sont
+    // POSÉES SOUS la portière ouverte : la bonne réponse ne doit pas tomber
+    // là où la portière balaie, sinon on valide un placement qui se fait
+    // ouvrir dessus.
+    // ⚠️ La pièce démarre DANS `empiete`, une mauvaise réponse : au relâché
+    // sans avoir bougé, le placement retombe sur la zone la plus proche, donc
+    // un départ près de la bonne réponse la validerait d'un simple appui.
     piece: {
       label: "Ta voiture",
       article: "ta voiture",
       forme: "voiture",
-      largeur: 12,
-      hauteur: 21,
-      departX: 70,
-      departY: 88,
+      largeur: 6,
+      hauteur: 13,
+      departX: 47,
+      departY: 73,
     },
     spots: [
       {
         id: "serre",
         label: "Contre les voitures garées",
-        x: 62,
-        y: 30,
-        w: 10,
+        x: 58.5,
+        y: 58,
+        w: 6,
         h: 30,
       },
       {
         id: "juste",
         label: "Au milieu de la voie",
-        x: 51,
-        y: 30,
-        w: 10,
+        x: 52,
+        y: 58,
+        w: 6,
         h: 30,
       },
       {
         id: "empiete",
         label: "Sur la ligne du milieu",
-        x: 38,
-        y: 30,
-        w: 10,
+        x: 44,
+        y: 58,
+        w: 6,
         h: 30,
       },
     ],
@@ -1537,32 +1620,40 @@ export const MISSIONS = [
     objective: "Choisir l'espace à laisser en doublant un cycliste.",
     prompt: "Tu doubles ce cycliste. Fais glisser ta voiture où tu passerais.",
     visual: "overtake-top-libre",
+    // Décor en vue de dessus refait le 06/08/2026, SANS voiture du joueur :
+    // l'ancien en contenait une, et comme la pièce à glisser est justement ta
+    // voiture, l'élève en voyait deux à l'écran. Repères : chaussée entre
+    // x 37 % et x 63 %, ligne du milieu à x 50 %, cycliste collé au bord
+    // droit vers x 57-63 % / y 15-35 %.
+    // La pièce démarre DANS `attendre`, derrière le cycliste : c'est la
+    // position réelle avant un dépassement, et c'est une mauvaise réponse,
+    // donc un relâché sans geste ne valide rien.
     piece: {
       label: "Ta voiture",
       article: "ta voiture",
       forme: "voiture",
-      largeur: 12,
-      hauteur: 20,
-      departX: 66,
-      departY: 88,
+      largeur: 8,
+      hauteur: 14,
+      departX: 55,
+      departY: 62,
     },
     spots: [
-      { id: "large", label: "Largement à gauche", x: 36, y: 22, w: 12, h: 20 },
+      { id: "large", label: "Largement à gauche", x: 38, y: 14, w: 8, h: 24 },
       {
         id: "serre",
         label: "Juste à côté du cycliste",
-        x: 53,
-        y: 22,
-        w: 10,
-        h: 20,
+        x: 49,
+        y: 14,
+        w: 8,
+        h: 24,
       },
       {
         id: "attendre",
         label: "Derrière le cycliste",
-        x: 60,
-        y: 55,
-        w: 12,
-        h: 20,
+        x: 51,
+        y: 50,
+        w: 8,
+        h: 24,
       },
     ],
     solution: "large",
@@ -1742,7 +1833,7 @@ export const MISSIONS = [
     title: "Le brouillard tombe",
     objective: "Choisir l'éclairage qui aide au lieu de gêner.",
     prompt: "Tu ne vois plus à cinquante mètres. Tu allumes quoi ?",
-    visual: "rain",
+    visual: "brouillard",
     choices: [
       { id: "high", label: "Tes pleins phares pour voir bien plus loin" },
       {
@@ -1773,19 +1864,27 @@ export const MISSIONS = [
     prompt:
       "Le brouillard tombe. Fais glisser ta voiture à la distance que tu garderais.",
     visual: "brouillard-file",
+    // Décor en vue de dessus refait le 06/08/2026 : une distance de suivi se
+    // pose en profondeur, et l'ancien décor était vu du poste de conduite, où
+    // la chaussée ne fait que 12 % de hauteur. Deux des trois cibles
+    // tombaient sur le tableau de bord, la troisième débordait sous l'image.
+    // Repères : chaussée entre x 37 % et x 63 %, ligne du milieu à x 50 %,
+    // voiture de devant dans la voie de droite vers y 7-30 %, voile de
+    // brouillard sur le tiers haut.
+    // La pièce démarre sous `loin`, une mauvaise réponse.
     piece: {
       label: "Ta voiture",
       article: "ta voiture",
       forme: "voiture",
-      largeur: 13,
-      hauteur: 18,
-      departX: 50,
-      departY: 92,
+      largeur: 10,
+      hauteur: 15,
+      departX: 56,
+      departY: 91,
     },
     spots: [
-      { id: "colle", label: "Tout près", x: 44, y: 30, w: 13, h: 16 },
-      { id: "juste", label: "À bonne distance", x: 44, y: 52, w: 13, h: 16 },
-      { id: "loin", label: "Très loin derrière", x: 44, y: 74, w: 13, h: 16 },
+      { id: "colle", label: "Tout près", x: 51, y: 32, w: 10, h: 15 },
+      { id: "juste", label: "À bonne distance", x: 51, y: 52, w: 10, h: 15 },
+      { id: "loin", label: "Très loin derrière", x: 51, y: 72, w: 10, h: 15 },
     ],
     solution: "juste",
     hint: "Tu dois pouvoir t'arrêter dans la distance que tes yeux couvrent.",
@@ -1906,7 +2005,7 @@ export const MISSIONS = [
     title: "Entrer dans le flot",
     objective: "S'insérer à la vitesse des autres et pas à la sienne.",
     prompt:
-      "Vue de dessus. Tu arrives par la voie d'insertion. Remets la chaîne dans l'ordre.",
+      "Tu arrives par la voie d'insertion. Remets la chaîne dans l'ordre.",
     visual: "motorway",
     steps: [
       { id: "look", label: "Regarder le trafic qui arrive" },
@@ -1935,7 +2034,7 @@ export const MISSIONS = [
     title: "En panne sur la bande d'arrêt",
     objective: "Se mettre à l'abri avant de s'occuper de la voiture.",
     prompt:
-      "Vue de dessus. Ta voiture s'arrête sur la bande d'arrêt d'urgence. Remets les gestes dans l'ordre.",
+      "Ta voiture s'arrête sur la bande d'arrêt d'urgence. Remets les gestes dans l'ordre.",
     visual: "motorway-shoulder",
     steps: [
       { id: "warning", label: "Feux de détresse" },
@@ -1966,39 +2065,49 @@ export const MISSIONS = [
     prompt:
       "Tu arrives par la bretelle. Fais glisser ta voiture dans l'espace que tu vises.",
     visual: "insertion",
+    // Décor en vue de dessus refait le 06/08/2026. L'ancien contenait déjà la
+    // voiture du joueur (donc deux à l'écran avec la pièce), et son seul
+    // espace franc était masqué par un panneau : la bonne réponse tombait sur
+    // le panneau. Le nouveau montre quatre voitures : deux collées à gauche,
+    // un grand vide au milieu, deux collées à droite.
+    // Repères : voie de circulation vers y 50-63 %, espace serré de gauche à
+    // x 13-14 %, grand espace de x 26 % à x 73 %, espace serré de droite vers
+    // x 86 %. La bretelle arrive par le coin bas gauche.
+    // La pièce démarre sur la bretelle, donc plus près de `serre` que de la
+    // bonne réponse. Nez à droite : ici la route traverse l'écran.
     piece: {
       label: "Ta voiture",
       article: "ta voiture",
-      forme: "voiture",
-      largeur: 14,
-      hauteur: 15,
-      departX: 12,
-      departY: 78,
+      forme: "voiture-droite",
+      largeur: 11,
+      hauteur: 8,
+      departX: 13,
+      departY: 82,
     },
     spots: [
       {
         id: "serre",
         label: "Entre les deux premières",
-        x: 16,
-        y: 30,
-        w: 10,
-        h: 15,
+        x: 10,
+        y: 48,
+        w: 7,
+        h: 22,
       },
       {
         id: "large",
         label: "Dans le grand espace",
-        x: 48,
-        y: 30,
-        w: 16,
-        h: 15,
+        x: 38,
+        y: 48,
+        w: 22,
+        h: 22,
       },
       {
         id: "queue",
-        label: "Tout au bout, derrière",
-        x: 86,
-        y: 30,
-        w: 13,
-        h: 15,
+        label: "Entre les deux dernières",
+        x: 83,
+        y: 48,
+        w: 7,
+        h: 22,
       },
     ],
     solution: "large",
@@ -2080,18 +2189,33 @@ export const MISSIONS = [
     prompt:
       "Un véhicule est arrêté à gauche. Touche l'endroit d'où quelqu'un peut sortir sans te voir.",
     visual: "intersection",
+    // Même décor que `c2f-indices`, mêmes repères relus le 06/08/2026. La
+    // bonne réponse est la bande de chaussée qui LONGE le véhicule arrêté,
+    // côté route : c'est par là que sort le piéton qui le contourne. Avant,
+    // elle était posée sur le montant du pare-brise, à côté de la voiture.
+    // « Le milieu de ta voie » a disparu : il tombait sur la console centrale
+    // et il n'y a pas la place de le poser sur la chaussée sans chevaucher la
+    // bonne réponse. Le véhicule lui-même le remplace, et c'est un meilleur
+    // leurre : regarder la voiture au lieu de regarder devant elle.
     hotspots: [
       {
         id: "front",
         label: "Devant le véhicule arrêté",
-        x: 6,
-        y: 40,
-        w: 24,
-        h: 14,
+        x: 36,
+        y: 35,
+        w: 13,
+        h: 17,
       },
-      { id: "sky", label: "Le ciel", x: 35, y: 4, w: 27, h: 18 },
-      { id: "lane", label: "Le milieu de ta voie", x: 35, y: 64, w: 28, h: 30 },
-      { id: "roof", label: "Le toit du bâtiment", x: 68, y: 8, w: 24, h: 18 },
+      {
+        id: "vehicule",
+        label: "Le véhicule arrêté",
+        x: 24,
+        y: 33,
+        w: 12,
+        h: 17,
+      },
+      { id: "sky", label: "Le ciel", x: 41, y: 15, w: 14, h: 17 },
+      { id: "roof", label: "Le toit du bâtiment", x: 62, y: 20, w: 14, h: 17 },
     ],
     solution: "front",
     hint: "Quelqu'un qui traverse devant un véhicule arrêté ne te voit pas, et toi non plus.",
