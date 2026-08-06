@@ -1,7 +1,12 @@
 // ═══════════════════════════════════════════════════════════════
-// Élève — La Roue de la chance (tour gratuit du jour)
+// Élève — Le coffre du jour (1 ouverture offerte par jour)
+// La roue de la fortune a été retirée le 06/08/2026 (décision Rayan) : elle
+// faisait « casino générique », ses chiffres tournaient avec les parts donc la
+// police ne se reconnaissait plus, et trois blocs s'empilaient sous elle. Le
+// coffre reprend l'imagerie déjà dessinée pour l'app. La mécanique, elle, n'a
+// pas bougé d'un pouce.
 // Le tirage ET le crédit des volants se font CÔTÉ SERVEUR via le RPC
-// spin_roue_daily() (1 tour/jour garanti, impossible à tricher).
+// spin_roue_daily() (1 ouverture/jour garantie, impossible à tricher).
 // Repli « aperçu » propre tant que la migration n'est pas posée en prod
 // (le RPC renvoie alors une erreur « fonction inconnue »).
 // Les gros lots réels (disque A, heure offerte) + le gacha cosmétique
@@ -35,16 +40,15 @@ import { getLang } from "@/utils/lang.js";
 const ROUE_I18N = {
   en: {
     back: "Back",
-    title: "The Wheel",
-    kicker_apercu: "Preview · playable soon",
-    kicker_free: "Free daily spin",
-    h1: "Wheel of fortune",
-    sub_solo: "Win steering wheels every day. Skins to unlock coming soon.",
-    sub: "Win steering wheels every day. Soon: skins and real gifts from your instructor.",
+    title: "Your daily chest",
+    gifts_link: "Real gifts · coming soon",
+    gifts_link_live: "Real gifts · in play",
+    how_link: "How it works",
+    sheet_close: "Close",
     cta_done: "Come back tomorrow",
-    cta_free: "Free spin of the day",
-    free_done: "Your spin for today is already used.",
-    free_ok: "1 free spin a day · real steering wheels.",
+    cta_free: "Open",
+    free_done: "Today's chest is already open.",
+    free_ok: "1 free chest every day",
     lot_disque: "A-plate for new drivers",
     lot_heure: "1 free driving hour",
     gifts_h: "Real gifts",
@@ -63,28 +67,27 @@ const ROUE_I18N = {
       "Steering wheels are earned by playing, <b>never</b> with money.",
     note: "A <b>big prize</b> can drop (rare!) if your instructor has put one in play. You collect it for real with your code. Steering wheels are earned by playing, <b>never</b> with money.",
     res_apercu:
-      "Preview. Your steering wheels will be credited when the wheel opens.",
+      "Preview. Your steering wheels will be credited once the chest goes live.",
     res_credited: "steering wheels added to your balance!",
     gros_badge: "🎁 BIG PRIZE!",
     gros_code: "Your pickup code",
     gros_show_pre: "Show this code to",
     gros_show_post: "to collect your prize. It’s their gift.",
-    spinning: "The wheel is spinning…",
+    spinning: "Opening…",
     retry_toast: "Try again in a moment.",
-    already_toast: "You already spun today. Come back tomorrow!",
+    already_toast: "You already opened today's chest. Come back tomorrow!",
   },
   ar: {
     back: "رجوع",
-    title: "العجلة",
-    kicker_apercu: "معاينة · قابلة للعب قريبًا",
-    kicker_free: "دورة اليوم المجانية",
-    h1: "عجلة الحظ",
-    sub_solo: "اربح مقاود كل يوم. قريبًا أشكال جديدة للفتح.",
-    sub: "اربح مقاود كل يوم. قريبًا: أشكال وهدايا حقيقية من مدرّبك.",
+    title: "صندوقك اليومي",
+    gifts_link: "هدايا حقيقية · قريبًا",
+    gifts_link_live: "هدايا حقيقية · قيد اللعب",
+    how_link: "كيف يعمل",
+    sheet_close: "إغلاق",
     cta_done: "عد غدًا",
-    cta_free: "دورة اليوم المجانية",
-    free_done: "استُخدمت دورتك لهذا اليوم.",
-    free_ok: "دورة مجانية واحدة يوميًا · مقاود حقيقية.",
+    cta_free: "افتح",
+    free_done: "صندوق اليوم مفتوح بالفعل.",
+    free_ok: "صندوق مجاني كل يوم",
     lot_disque: "لوحة A للسائق الجديد",
     lot_heure: "ساعة قيادة مجانية",
     gifts_h: "هدايا حقيقية",
@@ -101,22 +104,21 @@ const ROUE_I18N = {
     win_show: "أرِ هذا الرمز لمدرّبك",
     note_solo: "تُربح المقاود باللعب. <b>وليس</b> بالمال أبدًا.",
     note: "قد تسقط <b>جائزة كبرى</b> (نادرًا!) إذا وضعها مدرّبك قيد اللعب. تستلمها فعليًا برمزك. تُربح المقاود باللعب. <b>وليس</b> بالمال أبدًا.",
-    res_apercu: "معاينة. ستُضاف مقاودك عند افتتاح العجلة.",
+    res_apercu: "معاينة. ستُضاف مقاودك عند إطلاق الصندوق.",
     res_credited: "مقود أُضيفت إلى رصيدك!",
     gros_badge: "🎁 جائزة كبرى!",
     gros_code: "رمز الاستلام الخاص بك",
     gros_show_pre: "أرِ هذا الرمز إلى",
     gros_show_post: "لاستلام جائزتك. هو من يقدّمها.",
-    spinning: "العجلة تدور…",
+    spinning: "يُفتح…",
     retry_toast: "أعد المحاولة بعد لحظة.",
-    already_toast: "لقد أدرت العجلة اليوم. عد غدًا!",
+    already_toast: "لقد فتحت صندوق اليوم. عد غدًا!",
   },
 };
 const ROUE_FR_RICH = {
   note_solo:
     "Les volants se gagnent en jouant, <b>jamais</b> avec de l’argent.",
-  note:
-    "Un <b>gros lot</b> peut tomber (rare !) si ton moniteur en a mis en jeu. Tu le récupères en vrai avec ton code. Les volants se gagnent en jouant, <b>jamais</b> avec de l’argent.",
+  note: "Un <b>gros lot</b> peut tomber (rare !) si ton moniteur en a mis en jeu. Tu le récupères en vrai avec ton code. Les volants se gagnent en jouant, <b>jamais</b> avec de l’argent.",
 };
 function wtR(key, fr) {
   const l = getLang();
@@ -131,7 +133,10 @@ function wrtl(html) {
   return getLang() === "ar" ? `<span dir="rtl">${html}</span>` : html;
 }
 
-const SPIN_MS = 5200; // = durée de la transition CSS du disque
+// Durée de la mise en scène d'ouverture. Une roue avait besoin de 5 s pour
+// ralentir de façon crédible ; un coffre qui tressaute n'a besoin que d'une
+// seconde et demie. Au-delà on fait juste attendre l'élève.
+const OPEN_MS = 1500;
 
 const LS_FREE = "pg-roue-free-last"; // repli aperçu : YYYY-MM-DD du dernier tour
 
@@ -159,34 +164,41 @@ function todayKey() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-// 8 segments = paliers de volants (alignés sur la distribution serveur).
-// L'ordre suit le disque (0 = premier segment sous le pointeur haut).
-const SEGMENTS = [20, 50, 10, 30, 100, 10, 20, 30];
-
-// Renvoie l'index d'un segment portant ce montant (aléatoire si plusieurs).
-function segmentFor(amount) {
-  const idx = SEGMENTS.map((v, i) => (v === amount ? i : -1)).filter(
-    (i) => i >= 0,
-  );
-  if (!idx.length) return 0;
-  return idx[Math.floor(Math.random() * idx.length)];
-}
+// Paliers de volants, alignés sur la distribution serveur. Ne sert plus qu'au
+// mode « aperçu » (migration pas encore posée) pour tirer un montant plausible.
+const PALIERS = [20, 50, 10, 30, 100, 10, 20, 30];
 
 const STYLE = `<style>
+/* L'écran tient dans UNE hauteur, sans défilement : colonne flex, le coffre et
+   son bouton forment un groupe centré. Le reste (cadeaux, historique, note) vit
+   dans la feuille du bas. C'est ce qui supprime le tiers de vide noir et la
+   carte coupée par la barre de navigation. */
 .roue {
   --pnl: #241644; --pnl2: #2b1b54; --line: rgba(167,139,250,.20);
   --mu: #c3b8e8; --mu2: #9488bf; --gold: #ffd24a; --gold-s: #ffe9a8;
   position: relative;
   margin-top: calc(-1 * (var(--th, 52px) + env(safe-area-inset-top, 0px)));
-  padding: calc(var(--th, 52px) + env(safe-area-inset-top, 0px) + 8px) 16px 96px;
+  /* #app pose un padding bas de 60px pour la barre de nav (components.css).
+     Additionné à min-height:100dvh il faisait dépasser la page de 60px : un
+     ruban noir qui n'apparaissait qu'en défilant. On l'annule ici pour que
+     l'écran fasse exactement une hauteur, ni plus ni moins. */
+  margin-bottom: calc(-60px - env(safe-area-inset-bottom, 0px));
+  padding: calc(var(--th, 52px) + env(safe-area-inset-top, 0px) + 8px) 16px
+    calc(78px + env(safe-area-inset-bottom, 0px));
   min-height: 100dvh; max-width: 480px; margin-inline: auto;
+  display: flex; flex-direction: column;
   color: #fff; font-family: 'Archivo', system-ui, sans-serif; overflow: hidden;
   background:
     radial-gradient(120% 55% at 20% -6%, rgba(168,85,247,.42) 0%, transparent 54%),
     radial-gradient(110% 45% at 96% 4%, rgba(255,156,28,.16) 0%, transparent 50%),
     linear-gradient(180deg, #1d1138 0%, #150d2b 46%, #100a22 100%);
 }
-.roue-top { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.roue-body {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+.roue-foot { width: 100%; display: flex; flex-direction: column; align-items: center; margin-top: 22px; }
+.roue-top { display: flex; align-items: center; gap: 10px; flex: none; }
 .roue-back {
   width: 44px; height: 44px; flex: none; border-radius: 13px;
   border: 1px solid var(--line); background: rgba(255,255,255,.06);
@@ -195,68 +207,50 @@ const STYLE = `<style>
 .roue-back svg { width: 20px; height: 20px; }
 .roue-title { font: 800 20px/1 'Archivo', system-ui, sans-serif; text-shadow: 0 0 18px rgba(168,85,247,.4); }
 
-.roue-hero { text-align: center; padding: 8px 8px 2px; }
-.roue-kicker {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 4px 12px; border-radius: 999px; margin-bottom: 8px;
-  background: rgba(255,210,74,.16); border: 1px solid rgba(255,210,74,.4);
-  font: 600 10px/1 'Archivo', sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--gold-s);
+/* ── Le coffre ──
+   Une seule image, deux états (fermé / ouvert). Les deux visuels sont une
+   paire dessinée ensemble, indigo et or, avec le volant gravé : ils tiennent
+   la DA de l'app là où la roue arc-en-ciel sonnait « casino générique ». */
+.roue-stage {
+  position: relative; width: min(340px, 88vw); aspect-ratio: 1;
+  display: grid; place-items: center;
 }
-.roue-h1 {
-  font: 800 25px/1.05 'Archivo', system-ui, sans-serif;
-  background: linear-gradient(180deg, #fff 0%, #fff7e0 55%, #ffd86b 100%);
-  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+.roue-halo {
+  position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(closest-side, rgba(255,210,74,.32) 0%, rgba(168,85,247,.16) 50%, transparent 74%);
+  filter: blur(6px);
 }
-.roue-sub { margin-top: 5px; font: 700 12.5px/1.5 'Archivo', sans-serif; color: var(--mu); }
-
-.roue-zone { position: relative; margin: 14px auto 4px; width: 290px; height: 290px; }
-.roue-zone::before {
-  content: ""; position: absolute; left: 50%; top: 50%; width: 330px; height: 330px;
-  transform: translate(-50%,-50%);
-  background: radial-gradient(closest-side, rgba(255,210,74,.28) 0%, rgba(168,85,247,.16) 45%, transparent 72%);
-  filter: blur(8px); pointer-events: none;
+.roue-rays {
+  position: absolute; inset: 0; border-radius: 50%; pointer-events: none; opacity: .28;
+  background: repeating-conic-gradient(from 0deg, rgba(255,255,255,.18) 0deg 4deg, transparent 4deg 22deg);
+  -webkit-mask: radial-gradient(closest-side, transparent 34%, #000 62%, transparent 88%);
+          mask: radial-gradient(closest-side, transparent 34%, #000 62%, transparent 88%);
+  animation: roueRays 26s linear infinite;
 }
-.roue-rim {
-  position: absolute; inset: 0; border-radius: 50%; padding: 10px;
-  background: conic-gradient(from 0deg, #ffe9a8, #f0a818 18%, #ffd24a 35%, #c87d12 52%, #ffe9a8 70%, #f0a818 86%, #ffe9a8 100%);
-  box-shadow: 0 18px 40px -10px rgba(0,0,0,.7), 0 0 34px -4px rgba(255,180,40,.5),
-    inset 0 2px 4px rgba(255,255,255,.55), inset 0 -3px 6px rgba(122,74,5,.6);
+@keyframes roueRays { to { transform: rotate(360deg); } }
+.roue-socle {
+  position: absolute; bottom: 12%; width: 52%; height: 22px; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(0,0,0,.55), transparent 78%);
+  pointer-events: none;
 }
-.roue-disc {
-  position: absolute; inset: 10px; border-radius: 50%; overflow: hidden;
-  transform: rotate(0deg); transition: transform 5.2s cubic-bezier(.16,.84,.28,1);
-  box-shadow: inset 0 0 0 3px rgba(10,7,24,.85), inset 0 4px 18px rgba(0,0,0,.6);
-  background: conic-gradient(
-    #9a6bff 0deg 45deg, #54a0ff 45deg 90deg, #6fe016 90deg 135deg, #ffb347 135deg 180deg,
-    #ffd24a 180deg 225deg, #6fe016 225deg 270deg, #9a6bff 270deg 315deg, #ffb347 315deg 360deg);
+.roue-chest {
+  position: relative; width: 72%; z-index: 2;
+  filter: drop-shadow(0 22px 26px rgba(0,0,0,.6));
+  animation: roueBob 3.4s ease-in-out infinite;
 }
-.roue-disc::after {
-  content: ""; position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
-  background: repeating-conic-gradient(from 0deg, transparent 0deg 44.4deg, rgba(10,7,24,.8) 44.4deg 45deg);
+@keyframes roueBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+/* Ouverture : le coffre tressaute, puis l'image bascule sur la version ouverte. */
+.roue-chest.shaking { animation: roueShake .16s linear infinite; }
+@keyframes roueShake {
+  0%,100% { transform: translate(0,0) rotate(0deg); }
+  25% { transform: translate(-3px,1px) rotate(-1.4deg); }
+  75% { transform: translate(3px,-1px) rotate(1.4deg); }
 }
-.roue-seg { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform: translate(-50%,-50%) rotate(var(--a)); }
-.roue-seg > span {
-  position: absolute; left: 50%; top: -98px; transform: translateX(-50%);
-  display: inline-flex; align-items: center; gap: 3px; white-space: nowrap;
-  font: 800 15px/1 'Archivo', system-ui, sans-serif; color: #1a1030; text-shadow: 0 1px 0 rgba(255,255,255,.35);
-}
-.roue-hub {
-  position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); z-index: 4;
-  width: 66px; height: 66px; border-radius: 50%;
-  background: radial-gradient(circle at 38% 32%, #fff7da 0%, var(--gold-s) 22%, var(--gold) 55%, #ff9c1c 100%);
-  border: 3px solid #fff7df; display: grid; place-items: center; color: #6a4506;
-  box-shadow: 0 6px 0 #c87d12, 0 12px 22px -6px rgba(0,0,0,.6);
-}
-.roue-hub svg { width: 30px; height: 30px; }
-.roue-ptr {
-  position: absolute; left: 50%; top: -12px; transform: translateX(-50%); z-index: 6;
-  width: 0; height: 0; border-left: 14px solid transparent; border-right: 14px solid transparent;
-  border-top: 24px solid var(--gold);
-  filter: drop-shadow(0 3px 5px rgba(0,0,0,.6)) drop-shadow(0 0 8px rgba(255,180,40,.7));
-}
+.roue-chest.opened { animation: rouePop2 .42s cubic-bezier(.34,1.56,.64,1) both; }
+@keyframes rouePop2 { from { transform: scale(.9); } to { transform: scale(1.06); } }
 
 .roue-cta {
-  display: block; width: 100%; max-width: 330px; margin: 16px auto 0; min-height: 60px;
+  display: block; width: 100%; max-width: 330px; margin: 0 auto; min-height: 60px;
   border: 0; border-radius: 18px; cursor: pointer;
   font: 800 17px/1 'Archivo', system-ui, sans-serif; color: #fff; text-shadow: 0 2px 0 rgba(40,90,5,.55);
   background: linear-gradient(180deg, var(--a-lt), var(--a));
@@ -266,6 +260,41 @@ const STYLE = `<style>
 .roue-cta:active { transform: translateY(3px); box-shadow: inset 0 1.5px 0 rgba(255,255,255,.5), 0 3px 0 var(--adk); }
 .roue-cta:disabled { filter: grayscale(.5) brightness(.8); cursor: default; }
 .roue-free { text-align: center; margin-top: 10px; font: 600 12px/1.4 'Archivo', sans-serif; color: var(--mu); }
+
+/* Lien discret vers la feuille : c'est lui qui absorbe les 3 blocs qui
+   encombraient l'écran (vrais cadeaux, lots gagnés, la note). */
+.roue-link {
+  margin-top: 14px; font: 700 12px/1 'Archivo', sans-serif; color: #c9c0ff;
+  background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.16);
+  padding: 10px 16px; border-radius: 999px; cursor: pointer;
+}
+.roue-link:active { transform: scale(.97); }
+
+/* ── Feuille du bas ── */
+/* z-index au-dessus du bandeau et de la barre du bas, qui sont à 300 et 320 :
+   une feuille modale qui passe SOUS la barre se fait couper son bouton Fermer. */
+.roue-sheet {
+  position: fixed; inset: 0; z-index: 400; display: flex; align-items: flex-end;
+  background: rgba(8,6,22,.66); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+  animation: roueFade .2s ease both;
+}
+@keyframes roueFade { from { opacity: 0; } to { opacity: 1; } }
+.roue-sheet-in {
+  width: 100%; max-height: 86dvh; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  background: linear-gradient(180deg, #241644, #180f34);
+  border-top-left-radius: 26px; border-top-right-radius: 26px;
+  border-top: 1px solid rgba(167,139,250,.3);
+  padding: 10px 16px calc(26px + env(safe-area-inset-bottom, 0px));
+  animation: roueUp .26s cubic-bezier(.22,1,.32,1) both;
+}
+@keyframes roueUp { from { transform: translateY(24px); } to { transform: translateY(0); } }
+.roue-sheet-grip { width: 40px; height: 4px; border-radius: 999px; background: rgba(255,255,255,.24); margin: 4px auto 12px; }
+.roue-sheet-close {
+  display: block; width: 100%; margin-top: 16px; min-height: 48px;
+  border: 1px solid rgba(255,255,255,.16); border-radius: 15px; cursor: pointer;
+  background: rgba(255,255,255,.06); color: #fff;
+  font: 700 14px/1 'Archivo', sans-serif;
+}
 
 .roue-result {
   margin: 14px auto 0; max-width: 360px; text-align: center;
@@ -334,13 +363,11 @@ const STYLE = `<style>
 
 .roue-real-big { flex: none; font: 700 9px/1 'Archivo', sans-serif; letter-spacing: .06em; text-transform: uppercase;
   color: #3a2408; background: linear-gradient(180deg, #ffe9a8, #ffd24a); padding: 3px 7px; border-radius: 999px; }
-@media (prefers-reduced-motion: reduce) { .roue-disc { transition: transform 1.2s ease-out; } .roue-result { animation: none; } }
-</style>`;
-
-function segLabel(v) {
-  // Même volant que partout ailleurs dans l'app (header, boutique…).
-  return `<span>${volantImg(14, { drop: true })}${v}</span>`;
+@media (prefers-reduced-motion: reduce) {
+  .roue-chest, .roue-chest.shaking, .roue-chest.opened, .roue-rays { animation: none; }
+  .roue-result, .roue-sheet, .roue-sheet-in { animation: none; }
 }
+</style>`;
 
 // Panneau « gros lots réels » : les lots ACTIVÉS par le moniteur (via
 // get_moniteur_rewards) — sinon les 2 lots par défaut. Signé à sa marque.
@@ -422,9 +449,15 @@ function clearTickTimers() {
   _tickTimers.length = 0;
 }
 
+// Feuilles posées sur <body> : elles ne partent pas avec le contenu de #app,
+// donc on les retire nous-mêmes au démontage.
+const _openSheets = [];
+
 // Démontage (appelé par le router avant de monter la page suivante).
 export function unmount() {
   clearTickTimers();
+  _openSheets.forEach((s) => s.remove());
+  _openSheets.length = 0;
 }
 
 export async function mount(root) {
@@ -479,14 +512,20 @@ export async function mount(root) {
   const disabled = mode === "done";
   const ctaLabel = disabled
     ? wtR("cta_done", "Reviens demain")
-    : wtR("cta_free", "Tour gratuit du jour");
+    : wtR("cta_free", "Ouvrir");
   const freeLabel = disabled
-    ? wtR("free_done", "Ton tour du jour est déjà passé.")
-    : wtR("free_ok", "1 tour offert par jour · de vrais volants.");
-  const kicker =
-    mode === "apercu"
-      ? wtR("kicker_apercu", "Aperçu · bientôt jouable")
-      : wtR("kicker_free", "Tour gratuit du jour");
+    ? wtR("free_done", "Ton coffre du jour est déjà ouvert.")
+    : wtR("free_ok", "1 coffre offert chaque jour");
+  // Le lien dit la vérité : « en jeu » seulement si le moniteur a vraiment
+  // posé un gros lot, « bientôt » sinon.
+  const anyBig = Array.isArray(realLots) && realLots.some((l) => l && l.big);
+  // Un élève solo n'a pas de moniteur : lui promettre des « vrais cadeaux »
+  // serait un mensonge, sa feuille ne contient que la note. On change le lien.
+  const linkLabel = solo
+    ? wtR("how_link", "Comment ça marche")
+    : anyBig
+      ? wtR("gifts_link_live", "Vrais cadeaux · en jeu")
+      : wtR("gifts_link", "Vrais cadeaux · bientôt");
 
   root.innerHTML = `${STYLE}
 <div class="roue">
@@ -494,39 +533,23 @@ export async function mount(root) {
     <button class="roue-back" id="roue-back" aria-label="${wt("back", "Retour")}">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
-    <div class="roue-title">${wt("title", "La Roue")}</div>
+    <div class="roue-title">${wt("title", "Ton coffre du jour")}</div>
   </div>
 
-  <div class="roue-hero">
-    <div class="roue-kicker">${esc(kicker)}</div>
-    <div class="roue-h1">${wt("h1", "Roue de la chance")}</div>
-    <div class="roue-sub">${solo ? wrtl(wt("sub_solo", "Gagne des volants chaque jour. Bientôt des skins à débloquer.")) : wrtl(wt("sub", "Gagne des volants chaque jour. Bientôt des skins et de vrais cadeaux de ton moniteur."))}</div>
-  </div>
-
-  <div class="roue-zone">
-    <div class="roue-ptr" aria-hidden="true"></div>
-    <div class="roue-rim">
-      <div class="roue-disc" id="roue-disc">
-        ${SEGMENTS.map((v, i) => `<div class="roue-seg" style="--a:${22.5 + i * 45}deg">${segLabel(v)}</div>`).join("")}
-      </div>
+  <div class="roue-body">
+    <div class="roue-stage">
+      <div class="roue-halo" aria-hidden="true"></div>
+      <div class="roue-rays" aria-hidden="true"></div>
+      <div class="roue-socle" aria-hidden="true"></div>
+      <img class="roue-chest" id="roue-chest" src="/skins/chest-closed.png" alt="" draggable="false" />
     </div>
-    <div class="roue-hub" aria-hidden="true">
-      <svg viewBox="0 0 64 64" fill="#fff"><path d="M32 13a18 18 0 0 0-18 18h10.5a7.5 7.5 0 0 1 15 0H50A18 18 0 0 0 32 13z M14.4 35a18 18 0 0 0 13.1 13.6c.3-4.6-1.3-9.3-4.5-11.7-2.4-1.9-5.5-2.5-8.6-1.9z M49.6 35c-3.1-.6-6.2 0-8.6 1.9-3.2 2.4-4.8 7.1-4.5 11.7A18 18 0 0 0 49.6 35z"/><circle cx="32" cy="31" r="3.8"/></svg>
+
+    <div class="roue-foot">
+      <button class="roue-cta" id="roue-spin" ${disabled ? "disabled" : ""}>${esc(ctaLabel)}</button>
+      <div class="roue-free" id="roue-free">${esc(freeLabel)}</div>
+      <div id="roue-result-slot"></div>
+      <button class="roue-link" id="roue-more">${esc(linkLabel)}</button>
     </div>
-  </div>
-
-  <button class="roue-cta" id="roue-spin" ${disabled ? "disabled" : ""}>${ctaLabel}</button>
-  <div class="roue-free" id="roue-free">${freeLabel}</div>
-
-  <div id="roue-result-slot"></div>
-
-  ${solo ? "" : renderRealLots(realLots, moniteurName)}
-
-  ${renderMyWins(myWins)}
-
-  <div class="roue-note">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
-    <p>${solo ? wrtl(wtR("note_solo", ROUE_FR_RICH.note_solo)) : wrtl(wtR("note", ROUE_FR_RICH.note))}</p>
   </div>
 </div>`;
 
@@ -534,45 +557,59 @@ export async function mount(root) {
     .querySelector("#roue-back")
     ?.addEventListener("click", () => navigate("/boutique"));
 
-  const disc = root.querySelector("#roue-disc");
+  // ── La feuille : tout ce qui encombrait l'écran vit ici ──
+  const sheetBody = `
+    ${solo ? "" : renderRealLots(realLots, moniteurName)}
+    ${renderMyWins(myWins)}
+    <div class="roue-note">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+      <p>${solo ? wrtl(wtR("note_solo", ROUE_FR_RICH.note_solo)) : wrtl(wtR("note", ROUE_FR_RICH.note))}</p>
+    </div>`;
+
+  root.querySelector("#roue-more")?.addEventListener("click", () => {
+    playClick();
+    const sheet = document.createElement("div");
+    sheet.className = "roue-sheet";
+    sheet.innerHTML = `<div class="roue-sheet-in" role="dialog" aria-modal="true">
+      <div class="roue-sheet-grip" aria-hidden="true"></div>
+      ${sheetBody}
+      <button class="roue-sheet-close">${wt("sheet_close", "Fermer")}</button>
+    </div>`;
+    const close = () => sheet.remove();
+    sheet.addEventListener("click", (e) => {
+      if (e.target === sheet || e.target.closest(".roue-sheet-close")) close();
+    });
+    // Posée sur <body>, pas dans .roue : la page anime des transform, et un
+    // ancêtre qui se transforme casse le position:fixed de la feuille.
+    // unmount() la retire si l'élève quitte la page sans la fermer.
+    document.body.appendChild(sheet);
+    _openSheets.push(sheet);
+  });
+
+  const chest = root.querySelector("#roue-chest");
   const btn = root.querySelector("#roue-spin");
   const free = root.querySelector("#roue-free");
-  let turns = 0;
-  let prevRot = 0;
   let busy = false;
   clearTickTimers(); // défensif : aucun tic fantôme d'un montage précédent
 
-  // Ratchet de roulette : un « tic » chaque fois qu'une frontière de segment
-  // (45°) passe sous le pointeur, avec un ralenti calqué sur l'easing du disque
-  // (fort ease-out) → tic-tic-tic rapide au départ … tic … tic à la fin.
-  function scheduleSpinSound(deltaDeg) {
-    if (!isSoundEnabled()) return;
-    const crossings = Math.max(1, Math.floor(deltaDeg / 45));
-    const N = 240;
-    let last = 0;
-    let lastMs = -100;
-    for (let i = 1; i <= N; i++) {
-      const t = i / N;
-      const prog = 1 - Math.pow(1 - t, 4); // ease-out quart ≈ courbe du disque
-      const b = Math.floor(prog * crossings);
-      if (b > last) {
-        last = b;
-        const ms = t * SPIN_MS;
-        if (ms - lastMs >= 55) {
-          // évite un débit d'audio ingérable
-          lastMs = ms;
-          _tickTimers.push(setTimeout(playTick, ms));
-        }
+  // Le suspense du coffre : quelques tics rapprochés pendant qu'il tressaute,
+  // puis le couvercle saute. Beaucoup plus court que le ralenti d'une roue.
+  function openChest() {
+    if (!chest) return;
+    chest.classList.remove("opened");
+    chest.classList.add("shaking");
+    if (isSoundEnabled()) {
+      for (let ms = 160; ms < OPEN_MS - 120; ms += 150) {
+        _tickTimers.push(setTimeout(playTick, ms));
       }
     }
-  }
-
-  function spinTo(segIdx) {
-    turns += 5;
-    const target = 360 * turns + (360 - (segIdx * 45 + 22.5));
-    disc.style.transform = `rotate(${target}deg)`;
-    scheduleSpinSound(target - prevRot);
-    prevRot = target;
+    _tickTimers.push(
+      setTimeout(() => {
+        chest.classList.remove("shaking");
+        chest.src = "/skins/chest-open.png";
+        chest.classList.add("opened");
+      }, OPEN_MS - 120),
+    );
   }
 
   function showResult(volants, apercu) {
@@ -586,7 +623,12 @@ export async function mount(root) {
       <div class="roue-result-v">${volantImg(24, { drop: true })}+${volants}</div>
       <div class="roue-result-s">${
         apercu
-          ? wrtl(wt("res_apercu", "Aperçu. Tes volants seront crédités à l’ouverture de la roue."))
+          ? wrtl(
+              wt(
+                "res_apercu",
+                "Aperçu. Tes volants seront crédités à l’ouverture des coffres.",
+              ),
+            )
           : wrtl(wt("res_credited", "volants ajoutés à ton solde !"))
       }</div>
     </div>`;
@@ -609,7 +651,11 @@ export async function mount(root) {
   function finishDone() {
     btn.textContent = wtR("cta_done", "Reviens demain");
     btn.disabled = true;
-    if (free) free.textContent = wtR("free_done", "Ton tour du jour est déjà passé.");
+    if (free)
+      free.textContent = wtR(
+        "free_done",
+        "Ton coffre du jour est déjà ouvert.",
+      );
     busy = false;
   }
 
@@ -619,23 +665,23 @@ export async function mount(root) {
     haptic("select");
     playClick(); // son au clic du bouton
     btn.disabled = true;
-    btn.textContent = wtR("spinning", "La roue tourne…");
+    btn.textContent = wtR("spinning", "Le coffre s’ouvre…");
 
     if (mode === "apercu") {
       // Repli visuel : la migration n'est pas posée → aucun crédit réel.
       track("roue.spin", { kind: "apercu" });
-      const seg = Math.floor(Math.random() * SEGMENTS.length);
-      spinTo(seg);
+      const gain = PALIERS[Math.floor(Math.random() * PALIERS.length)];
+      openChest();
       setTimeout(() => {
         try {
           localStorage.setItem(LS_FREE, todayKey());
         } catch {
           /* noop */
         }
-        showResult(SEGMENTS[seg], true);
+        showResult(gain, true);
         finishDone();
         maybeInstallAfterSpin();
-      }, 5300);
+      }, OPEN_MS + 100);
       return;
     }
 
@@ -651,25 +697,32 @@ export async function mount(root) {
       console.warn("[roue] spin_roue_daily failed", e?.message);
       toast(wtR("retry_toast", "Réessaie dans un instant."), "error", 2200);
       btn.disabled = false;
-      btn.textContent = wtR("cta_free", "Tour gratuit du jour");
+      btn.textContent = wtR("cta_free", "Ouvrir");
       busy = false;
       return;
     }
 
     if (res?.already) {
-      // Le serveur (date de Paris) sait que le tour du jour est DÉJÀ passé,
+      // Le serveur (date de Paris) sait que le coffre du jour est DÉJÀ ouvert,
       // même si le front (date locale) le croyait dispo — cas de la fenêtre
-      // minuit → ~02h où l'UTC est en retard d'un jour. On NE lance PAS de
-      // faux spin (roue qui tourne sans rien créditer = incompréhensible) :
-      // on affiche honnêtement l'état « déjà tourné » et on resynchronise
-      // l'état local pour ne plus reproposer le bouton (ni au reload).
+      // minuit → ~02h où l'UTC est en retard d'un jour. On NE joue PAS une
+      // fausse ouverture (un coffre qui s'ouvre sans rien créditer =
+      // incompréhensible) : on affiche honnêtement l'état « déjà ouvert » et
+      // on resynchronise l'état local pour ne plus reproposer le bouton.
       mode = "done";
       try {
         localStorage.setItem(LS_FREE, todayKey());
       } catch {
         /* noop */
       }
-      toast(wtR("already_toast", "Tu as déjà tourné aujourd’hui. Reviens demain !"), "info", 2600);
+      toast(
+        wtR(
+          "already_toast",
+          "Tu as déjà ouvert ton coffre aujourd’hui. Reviens demain !",
+        ),
+        "info",
+        2600,
+      );
       finishDone();
       return;
     }
@@ -677,17 +730,17 @@ export async function mount(root) {
     // Gros lot ! (le serveur a tiré un vrai lot du moniteur)
     if (res?.gros_lot) {
       track("roue.gros_lot_win");
-      spinTo(Math.floor(Math.random() * SEGMENTS.length));
+      openChest();
       setTimeout(() => {
         showGrosLot(res.gros_lot);
         finishDone();
         maybeInstallAfterSpin();
-      }, 5300);
+      }, OPEN_MS + 100);
       return;
     }
 
     const volants = res?.volants ?? 10;
-    spinTo(segmentFor(volants));
+    openChest();
     setTimeout(() => {
       showResult(volants, false);
       // Met à jour le solde du header (event écouté dans header-top.js)
@@ -701,6 +754,6 @@ export async function mount(root) {
       haptic("tap");
       finishDone();
       maybeInstallAfterSpin();
-    }, 5300);
+    }, OPEN_MS + 100);
   });
 }

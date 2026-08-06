@@ -1,0 +1,77 @@
+@font-face {
+  font-family: 'Archivo';
+  src: url('../../public/fonts/archivo-latin.woff2') format('woff2');
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: block;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  width: 390px; height: 844px; overflow: hidden;
+  font-family: 'Archivo', system-ui, sans-serif;
+  color: #f4f2ff;
+  background:
+    radial-gradient(120% 50% at 50% 0%, rgba(109,77,255,.34), transparent 62%),
+    linear-gradient(168deg, #3a2a8f 0%, #1a1342 38%, #0b0820 100%);
+  display: flex; flex-direction: column;
+}
+
+/* ── Bandeau ── */
+.top {
+  flex: none; display: flex; align-items: center; gap: 12px;
+  padding: 16px 18px 6px;
+}
+.top .back {
+  width: 38px; height: 38px; flex: none; border-radius: 13px;
+  background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.14);
+  display: grid; place-items: center;
+}
+.top .back svg { width: 19px; height: 19px; stroke: #f4f2ff; }
+.top h1 { font: 800 21px/1 'Archivo', sans-serif; letter-spacing: -.02em; }
+
+/* ── Corps ──
+   L'objet et son bouton forment UN groupe, centré d'un bloc. Le vide restant
+   se répartit également en haut et en bas : ça respire au lieu de faire deux
+   poches noires (le défaut de la page actuelle, et de ma 1re version). */
+.body {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 0 22px;
+}
+.body .foot {
+  display: flex; flex-direction: column; align-items: center;
+  width: 100%; margin-top: 26px;
+}
+
+/* ── Bouton principal ── */
+.cta {
+  width: 100%; max-width: 300px; min-height: 58px; border: 0; border-radius: 18px;
+  font: 800 17px/1 'Archivo', sans-serif; color: #3a2408; cursor: pointer;
+  background: linear-gradient(180deg, #ffd873 0%, #f7b32b 52%, #e8990b 100%);
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.6), 0 6px 0 #b5730a,
+    0 16px 30px -10px rgba(247,179,43,.6);
+}
+.hint {
+  margin-top: 12px; font: 600 12.5px/1.4 'Archivo', sans-serif;
+  color: #a79ed8; text-align: center;
+}
+.ghost {
+  margin-top: 14px; font: 700 12px/1 'Archivo', sans-serif; color: #c9c0ff;
+  text-decoration: none; padding: 9px 15px; border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.05);
+}
+
+/* ── Barre du bas, juste pour prouver que rien n'est coupé ── */
+.nav {
+  flex: none; height: 66px; display: flex; align-items: center;
+  border-top: 1px solid rgba(255,255,255,.1);
+  background: rgba(10,8,32,.72); backdrop-filter: blur(12px);
+}
+.nav div {
+  flex: 1; text-align: center; font: 600 9.5px/1 'Archivo', sans-serif;
+  color: rgba(244,242,255,.55);
+}
+.nav div.on { color: #bbb7ff; }
+.nav i { display: block; font-size: 17px; font-style: normal; margin-bottom: 5px; opacity: .85; }

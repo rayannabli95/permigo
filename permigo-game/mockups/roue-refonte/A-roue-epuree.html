@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<title>A · La roue épurée</title>
+<link rel="stylesheet" href="_base.css" />
+<style>
+.wheel { position: relative; width: 346px; height: 346px; }
+
+/* Anneau fin, pas de bourrelet doré bombé */
+.rim {
+  position: absolute; inset: 0; border-radius: 50%; padding: 7px;
+  background: linear-gradient(160deg, #ffe3a0, #f7b32b 45%, #b5730a);
+  box-shadow: 0 22px 44px -14px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.5);
+}
+.disc {
+  position: absolute; inset: 7px; border-radius: 50%; overflow: hidden;
+  box-shadow: inset 0 0 0 2px rgba(11,8,32,.9);
+  /* 6 parts, la palette de l'app : deux violets qui alternent, l'or pour le gros lot */
+  background: conic-gradient(
+    #5b3fd6 0deg 60deg, #35257f 60deg 120deg, #5b3fd6 120deg 180deg,
+    #35257f 180deg 240deg, #5b3fd6 240deg 300deg, #f7b32b 300deg 360deg);
+}
+.disc::after {
+  content: ""; position: absolute; inset: 0; border-radius: 50%;
+  background: repeating-conic-gradient(from 0deg, transparent 0deg 59.6deg, rgba(11,8,32,.55) 59.6deg 60deg);
+}
+/* Chiffres DROITS : le parent tourne, l'enfant se remet d'aplomb */
+.seg { position: absolute; left: 50%; top: 50%; width: 0; height: 0; z-index: 3; }
+.seg > span {
+  position: absolute; left: 0; top: -114px; transform: translate(-50%, -50%) rotate(var(--r));
+  display: block; white-space: nowrap;
+  font: 800 21px/1 'Archivo', sans-serif; color: #fff;
+  text-shadow: 0 2px 3px rgba(11,8,32,.55);
+}
+.seg.gold > span { color: #3a2408; text-shadow: 0 1px 0 rgba(255,255,255,.4); font-size: 13px; letter-spacing: .06em; }
+
+.hub {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); z-index: 5;
+  width: 62px; height: 62px; border-radius: 50%;
+  background: radial-gradient(circle at 38% 30%, #fff7da, #ffd873 26%, #f7b32b 62%, #e08e0b 100%);
+  border: 3px solid #fff4d0; display: grid; place-items: center;
+  box-shadow: 0 5px 0 #b5730a, 0 14px 24px -8px rgba(0,0,0,.7);
+  font: 900 25px/1 'Archivo', sans-serif; color: #7a4d04;
+}
+.ptr {
+  position: absolute; left: 50%; top: -9px; transform: translateX(-50%); z-index: 6;
+  width: 0; height: 0; border-left: 13px solid transparent; border-right: 13px solid transparent;
+  border-top: 22px solid #ffd873;
+  filter: drop-shadow(0 3px 4px rgba(0,0,0,.7));
+}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></div>
+  <h1>La roue du jour</h1>
+</div>
+
+<div class="body">
+  <div class="wheel">
+    <div class="ptr"></div>
+    <div class="rim"></div>
+    <div class="disc"></div>
+    <div class="seg" style="transform:rotate(30deg)"><span style="--r:-30deg">20</span></div>
+    <div class="seg" style="transform:rotate(90deg)"><span style="--r:-90deg">30</span></div>
+    <div class="seg" style="transform:rotate(150deg)"><span style="--r:-150deg">10</span></div>
+    <div class="seg" style="transform:rotate(210deg)"><span style="--r:-210deg">50</span></div>
+    <div class="seg" style="transform:rotate(270deg)"><span style="--r:-270deg">15</span></div>
+    <div class="seg gold" style="transform:rotate(330deg)"><span style="--r:-330deg">GROS LOT</span></div>
+    <div class="hub">P</div>
+  </div>
+
+  <div class="foot">
+    <button class="cta">Tourner</button>
+    <p class="hint">1 tour offert chaque jour</p>
+    <a class="ghost" href="#">Vrais cadeaux · bientôt</a>
+  </div>
+</div>
+
+<div class="nav">
+  <div><i>⌂</i>Accueil</div>
+  <div><i>⚡</i>Réviser</div>
+  <div><i>🗺</i>Mon permis</div>
+  <div class="on"><i>🎁</i>Récompenses</div>
+  <div><i>👤</i>Profil</div>
+</div>
+
+</body>
+</html>

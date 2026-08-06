@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<title>B · Le coffre du jour</title>
+<link rel="stylesheet" href="_base.css" />
+<style>
+.stage { position: relative; width: 356px; height: 356px; display: grid; place-items: center; }
+.halo {
+  position: absolute; width: 356px; height: 356px; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(247,179,43,.34), rgba(109,77,255,.16) 52%, transparent 74%);
+  filter: blur(6px);
+}
+/* Rayons discrets, l'objet reste le héros */
+.rays {
+  position: absolute; width: 356px; height: 356px; border-radius: 50%; opacity: .3;
+  background: repeating-conic-gradient(from 0deg, rgba(255,255,255,.16) 0deg 4deg, transparent 4deg 22deg);
+  -webkit-mask: radial-gradient(closest-side, transparent 34%, #000 62%, transparent 88%);
+          mask: radial-gradient(closest-side, transparent 34%, #000 62%, transparent 88%);
+}
+.chest { position: relative; width: 252px; filter: drop-shadow(0 22px 26px rgba(0,0,0,.6)); animation: bob 3.4s ease-in-out infinite; }
+@keyframes bob { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-9px) } }
+.socle {
+  position: absolute; bottom: 34px; width: 172px; height: 22px; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(0,0,0,.55), transparent 78%);
+}
+.tag {
+  font: 700 10px/1 'Archivo', sans-serif; letter-spacing: .14em; text-transform: uppercase;
+  color: #ffd873; padding: 7px 13px; border-radius: 999px; margin-bottom: 12px;
+  background: rgba(247,179,43,.13); border: 1px solid rgba(247,179,43,.34);
+}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></div>
+  <h1>Ton coffre du jour</h1>
+</div>
+
+<div class="body">
+  <div class="stage">
+    <div class="halo"></div>
+    <div class="rays"></div>
+    <div class="socle"></div>
+    <img class="chest" src="../../public/skins/chests/chest_welcome.png" alt="" />
+  </div>
+
+  <div class="foot">
+    <button class="cta">Ouvrir</button>
+    <p class="hint">1 coffre offert chaque jour</p>
+    <a class="ghost" href="#">Vrais cadeaux · bientôt</a>
+  </div>
+</div>
+
+<div class="nav">
+  <div><i>⌂</i>Accueil</div>
+  <div><i>⚡</i>Réviser</div>
+  <div><i>🗺</i>Mon permis</div>
+  <div class="on"><i>🎁</i>Récompenses</div>
+  <div><i>👤</i>Profil</div>
+</div>
+
+</body>
+</html>
