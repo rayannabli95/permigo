@@ -35,8 +35,10 @@ const FICHE_UI = {
     rsk_h: "What you risk",
     inf_h: "The effect on others",
     bva_h: "Automatic gearbox",
+    bva_off_h: "This card is not for you",
     source: "Seen with real instructors:",
     monde: "World",
+    today: "Today",
   },
   ar: {
     sub: "علّم على خطواتك، ثمّ صادق على المهارة.",
@@ -64,8 +66,10 @@ const FICHE_UI = {
     rsk_h: "ما الذي تخاطر به",
     inf_h: "التأثير على الآخرين",
     bva_h: "علبة السرعة الأوتوماتيكية",
+    bva_off_h: "هذه البطاقة لا تعنيك",
     source: "مأخوذ من مدرّبين حقيقيين:",
     monde: "عالم",
+    today: "اليوم",
   },
 };
 

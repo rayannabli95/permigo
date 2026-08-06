@@ -4,6 +4,11 @@
     "titre": "Préparer son trajet avant de tourner la clé",
     "monde": 4,
     "competence": "Autonome",
+    "resume10s": [
+      "Je regarde mon itinéraire en entier avant de partir.",
+      "Je note deux ou trois repères visuels et les zones difficiles.",
+      "Je règle GPS · téléphone · siège · rétros avant de démarrer."
+    ],
     "methode": [
       "Regarde ton itinéraire en entier sur le GPS, pas juste le départ et l'arrivée.",
       "Repère 2-3 points de repère visuels le long du trajet : « après le McDo je tourne », « la grande station, c'est là que je sors ». Ça te rassure si le GPS bug.",
@@ -40,6 +45,11 @@
     "titre": "Suivre un itinéraire sans lâcher la route des yeux",
     "monde": 4,
     "competence": "Autonome",
+    "resume10s": [
+      "Je programme mon GPS à l'arrêt et j'écoute sa voix.",
+      "Je lis les panneaux de loin et je me place tôt.",
+      "En cas de doute la route gagne toujours sur l'écran."
+    ],
     "methode": [
       "Programme et règle ton GPS à l'arrêt (volume audible, écran bien placé).",
       "Écoute la voix plutôt que de fixer l'écran : laisse le GPS te parler.",
@@ -75,6 +85,11 @@
     "titre": "Conduire souple pour brûler moins de carburant (éco-conduite)",
     "monde": 4,
     "competence": "Autonome",
+    "resume10s": [
+      "J'accélère en douceur pour garder le moteur bas.",
+      "Je lève le pied tôt et je laisse le frein moteur agir.",
+      "Je garde une vitesse stable c'est là que j'économise."
+    ],
     "methode": [
       "Démarre en douceur : pas de coup d'accélérateur au départ.",
       "Passe les rapports tôt pour rouler en bas régime. Repère sonore d'abord : tu changes quand tu sens « le moteur qui monte », sans le pousser. Repère chiffré indicatif : vers 2000 tr/min en diesel, 2500 tr/min en essence. Sur une belle ligne droite dégagée, n'hésite pas à monter jusqu'à la 5e/6e : c'est plus économique.",
@@ -86,7 +101,7 @@
     ],
     "pourquoi": "Une conduite souple, c'est jusqu'à environ 20 % de carburant économisé, une voiture qui s'use moins, et des passagers qui ne sont pas malmenés. Bonus : à l'examen, l'éco-conduite (passer les rapports au bon moment, anticiper, ne pas caler, doser le frein) fait partie des compétences notées.",
     "erreur": "Le freinage « non anticipé » : tu arrives vite sur un feu ou un giratoire, tu n'as pas levé le pied, et tu freines fort à la dernière seconde. C'est mauvais pour la conso, mauvais pour tes passagers, et pas sûr pour ceux qui te suivent. La fluidité bat la nervosité.",
-    "bva": null,
+    "bva": "Ce n'est plus toi qui passes les rapports, mais tu gardes la main sur la consommation. La règle tient en une phrase : accélère progressivement. Une pression douce fait monter les rapports tôt et garde le moteur bas. À l'inverse, écraser l'accélérateur est lu par la boîte comme « je veux aller vite » : elle reste sur un petit rapport et la consommation grimpe. Tu évites donc le kickdown quand tu n'en as pas besoin. Le reste est identique : anticipe, lève le pied tôt, garde une allure stable, et reste en D (ou en mode Éco s'il existe) plutôt qu'en mode Sport.",
     "questions": [
       {
         "q": "En éco-conduite, tu passes tes rapports tôt ou tard ?",
@@ -111,6 +126,11 @@
     "titre": "Anticiper le danger et rester calme au volant",
     "monde": 4,
     "competence": "Autonome",
+    "resume10s": [
+      "Je regarde loin devant à quinze ou vingt secondes.",
+      "J'imagine le pire raisonnable pour être prêt avant qu'il arrive.",
+      "Je garde mon calme et je ne réponds jamais à l'agressivité."
+    ],
     "methode": [
       "Regarde loin devant : ton regard porte à 15-20 secondes en avant, pas sur le capot.",
       "Balaye en continu : rétros, devant, côtés, devant. Tu prends l'information avant qu'elle ne devienne un problème.",
@@ -146,6 +166,11 @@
     "titre": "Partager la route avec les plus fragiles",
     "monde": 4,
     "competence": "Autonome",
+    "resume10s": [
+      "Je repère tôt piétons · cyclistes · trottinettes · deux-roues.",
+      "Je laisse un mètre au cycliste et un mètre cinquante hors agglomération.",
+      "Le piéton qui attend de traverser est déjà prioritaire."
+    ],
     "methode": [
       "Repère tôt les usagers fragiles : piétons, cyclistes, trottinettes, deux-roues.",
       "Pour dépasser un cycliste, laisse de l'écart : 1 m en ville, 1,5 m hors agglomération. Si tu ne peux pas, tu attends.",
@@ -181,6 +206,11 @@
     "titre": "Aborder l'examen pratique sans paniquer",
     "monde": 4,
     "competence": "Autonome",
+    "resume10s": [
+      "J'installe mon poste de conduite exactement comme à l'entraînement.",
+      "Les trois questions de vérification sont trois points à prendre.",
+      "Après une petite erreur je continue calmement sans me figer."
+    ],
     "methode": [
       "Installe ton poste comme à l'entraînement : siège (hauteur, profondeur, dossier, appuie-tête), volant, rétros, ceinture. Pas d'ordre imposé pour les rétros. Si tu re-règles ton siège, re-règle tes rétros derrière.",
       "Assure la sécurité à bord : vérifie que tout le monde est attaché, que les portières sont fermées (pas de voyant), pas de voyant rouge au tableau de bord. C'est un point facile.",
@@ -218,6 +248,11 @@
     "titre": "Bien démarrer en jeune permis (période probatoire)",
     "monde": 4,
     "competence": "Autonome",
+    "resume10s": [
+      "Je colle mon disque A à l'arrière dès le permis.",
+      "Je respecte les vitesses réduites du permis probatoire.",
+      "Zéro alcool et je soigne mes six points de départ."
+    ],
     "methode": [
       "Colle ton disque A à l'arrière : pendant 3 ans en filière classique, 2 ans si tu as fait la conduite accompagnée (AAC).",
       "Respecte les vitesses réduites jeune conducteur : 110 km/h sur autoroute, 100 km/h sur voie rapide (chaussées séparées), 80 km/h sur route hors agglo.",

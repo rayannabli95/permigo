@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Planche · le chapitre mis en avant</title>
+<style>
+@font-face { font-family:'Archivo'; font-style:normal; font-weight:400 900; font-display:block; src:url(archivo.woff2) format('woff2'); }
+*{ box-sizing:border-box; }
+body{ margin:0; padding:34px 30px 44px; font-family:'Archivo', system-ui, sans-serif; background:#15102e; color:#fff; }
+h1{ margin:0 0 6px; font-weight:900; font-size:30px; letter-spacing:-.03em; }
+.lead{ margin:0 0 28px; font:600 15px/1.5 'Archivo',sans-serif; color:#b6a9e6; max-width:80ch; }
+.row{ display:flex; gap:24px; align-items:flex-start; }
+.col{ flex:1 1 0; min-width:0; }
+.cap{ margin:0 0 10px; }
+.cap b{ display:block; font-weight:900; font-size:17px; letter-spacing:-.02em; }
+.cap span{ display:block; margin-top:5px; font:600 13px/1.45 'Archivo',sans-serif; color:#a99bdc; }
+.col.avant .cap b{ color:#ff9d7a; }
+.col.apres .cap b{ color:#ffd76e; }
+.shot{ width:100%; border-radius:14px; display:block; border:1px solid rgba(255,255,255,.14); }
+</style>
+</head>
+<body>
+<h1>Le chapitre en cours · 3 façons de le faire ressortir</h1>
+<p class="lead">Premier écran seulement. C'est là que se joue « est-ce que le chapitre accroche l'œil ». Même donnée qu'aujourd'hui. Chapitre 1 sur 4 · Maîtriser le véhicule · 9 étapes sur 9.</p>
+<div class="row">
+  <div class="col avant">
+    <p class="cap"><b>Avant</b><span>Carte violette sur fond violet. 4 pastilles muettes au-dessus.</span></p>
+    <img class="shot" src="shots/_avant-1er-ecran.png" alt="">
+  </div>
+  <div class="col apres">
+    <p class="cap"><b>A · panneau d'itinéraire</b><span>Bandeau plein cadre. Numéro géant en creux. Sélecteur avec les noms.</span></p>
+    <img class="shot" src="shots/chapitre-A-panneau-1er-ecran.png" alt="">
+  </div>
+  <div class="col apres">
+    <p class="cap"><b>B · couverture</b><span>Le chapitre prend tout l'écran. Une seule action en or.</span></p>
+    <img class="shot" src="shots/chapitre-B-couverture-1er-ecran.png" alt="">
+  </div>
+  <div class="col apres">
+    <p class="cap"><b>C · dalle claire</b><span>Carte claire sur fond nuit. Les 4 arrêts du voyage en haut.</span></p>
+    <img class="shot" src="shots/chapitre-C-dalle-claire-1er-ecran.png" alt="">
+  </div>
+</div>
+</body>
+</html>

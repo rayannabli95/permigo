@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Profil élève · variante C · La vitrine</title>
+<style>
+@font-face{font-family:'Archivo';font-style:normal;font-weight:400 900;font-display:block;src:url(/fonts/archivo-latin.woff2) format('woff2')}
+@font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:700;font-display:block;src:url(/fonts/plexmono-700-latin.woff2) format('woff2')}
+
+:root{
+  --a:#6c63ff; --adk:#4a3fc9; --a-lt:#8e87ff; --a-ink:#fff; --a-txt:#b4aeff;
+  --su:#1c1548; --su2:#221a54; --bo:rgba(255,255,255,.08); --bo2:rgba(255,255,255,.07);
+  --ink:#f3efff; --mu:#c3bce6; --mu2:#8b83b8;
+  --gd:#f7b32b; --gd-lt:#ffd27a; --gd-pale:#ffe6a8; --gd-2:#ff9b1e; --gd-deep:#b5610a;
+  --edge:#0c0922;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:#08071a;font-family:'Archivo',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+
+.pg{max-width:480px;margin:0 auto;min-height:100dvh;color:var(--ink);overflow:hidden;position:relative;padding:0 0 34px;
+  background:
+    radial-gradient(120% 34% at 50% 0%, rgba(124,92,255,.42), transparent 62%),
+    linear-gradient(178deg,#241a5c 0%,#181241 30%,#0d0a26 70%,#08071a 100%);}
+.pg::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.45;
+  background-image:
+    radial-gradient(1.4px 1.4px at 16% 5%, rgba(255,255,255,.7), transparent),
+    radial-gradient(1.2px 1.2px at 84% 4%, rgba(255,255,255,.5), transparent),
+    radial-gradient(1.1px 1.1px at 62% 10%, rgba(255,255,255,.45), transparent);}
+.pg>*{position:relative;z-index:2}
+
+/* ── LE bloc dominant : qui je suis, et un seul chiffre ── */
+.hero{padding:26px 20px 0;text-align:center}
+.hero-av{display:block;width:104px;height:104px;margin:0 auto;border-radius:32px;overflow:hidden;position:relative;
+  background:linear-gradient(160deg,#3a2f7e,#221a4e);
+  box-shadow:0 0 0 3px rgba(247,179,43,.55),0 14px 34px rgba(0,0,0,.55),inset 0 2px 0 rgba(255,255,255,.16)}
+.hero-av img{width:100%;height:100%;object-fit:cover;display:block}
+.hero-edit{position:absolute;right:-6px;bottom:-6px;width:36px;height:36px;border:2.5px solid #1d1545;border-radius:50%;cursor:pointer;
+  display:grid;place-items:center;color:#43250a;background:linear-gradient(180deg,var(--gd-pale),var(--gd) 55%,var(--gd-2));box-shadow:0 2px 0 var(--gd-deep)}
+.hero-edit svg{width:15px;height:15px}
+.hero-name{margin:16px 0 0;font:800 25px/1 'Archivo',sans-serif;color:#fff;letter-spacing:-.025em}
+.hero-name i{font-style:normal;color:var(--gd-lt);opacity:.7}
+.hero-legal{margin:7px 0 0;font:600 12px/1 'Archivo',sans-serif;color:var(--mu2)}
+
+.score{margin:22px 16px 0;border-radius:22px;padding:16px 18px;
+  background:linear-gradient(180deg,#211952,#171139);
+  box-shadow:0 8px 0 var(--edge),inset 0 1px 0 rgba(255,255,255,.09),inset 0 0 0 1px rgba(247,179,43,.2)}
+.score-l{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.score-n{font:700 15px/1 'Archivo',sans-serif;color:#fff}
+.score-n b{font:700 25px/1 'Archivo',sans-serif;color:var(--gd-lt);margin-right:3px}
+.score-r{font:600 12px/1 'Archivo',sans-serif;color:var(--mu2)}
+.bar{margin-top:11px;height:11px;border-radius:99px;background:#120d33;position:relative;overflow:hidden;
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.55),inset 0 0 0 1px rgba(124,92,255,.2)}
+.bar i{position:absolute;top:2px;bottom:2px;left:2px;border-radius:99px;
+  background:linear-gradient(180deg,var(--gd-pale) 0%,var(--gd) 48%,var(--gd-2) 100%);box-shadow:0 0 12px rgba(247,179,43,.55)}
+
+/* ── Mes cartes : un éventail compact qui appelle l'ouverture ── */
+.sec{margin:30px 16px 0}
+.sec-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 2px 4px}
+.sec-ttl{margin:0;font:800 19px/1 'Archivo',sans-serif;color:#fff;letter-spacing:-.02em}
+.sec-sub{margin:0 2px 14px;font:600 12px/1.4 'Archivo',sans-serif;color:var(--mu2)}
+.wallet{display:flex;align-items:center;gap:6px;padding:6px 12px 6px 8px;border-radius:99px;
+  font:800 13px/1 'Archivo',sans-serif;color:var(--gd-lt);background:rgba(247,179,43,.12);box-shadow:inset 0 0 0 1px rgba(247,179,43,.3)}
+.wallet img{width:18px;height:18px}
+
+.fan{border-radius:24px;padding:16px;display:flex;align-items:center;gap:14px;
+  background:linear-gradient(180deg,#1f1850,#161038);
+  box-shadow:0 9px 0 var(--edge),inset 0 1px 0 rgba(255,255,255,.09),inset 0 0 0 1px rgba(247,179,43,.2)}
+.fan-stack{position:relative;width:132px;height:170px;flex:0 0 auto}
+.fan-stack .c{position:absolute;left:0;top:0;width:104px;aspect-ratio:5/7;border-radius:15px;overflow:hidden;background:#0a0a10;
+  box-shadow:0 14px 26px -10px rgba(0,0,0,.8), inset 0 0 0 2px var(--rc,#9fb0c3)}
+.fan-stack .c img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.fan-stack .c .sh{position:absolute;inset:0;background:linear-gradient(180deg,transparent 46%,rgba(6,7,20,.85) 100%)}
+.fan-stack .k3{transform:translate(0,20px) rotate(-11deg) scale(.9);filter:brightness(.5)}
+.fan-stack .k2{transform:translate(13px,10px) rotate(-5deg) scale(.95);filter:brightness(.7)}
+.fan-stack .k1{transform:translate(26px,0) rotate(3deg)}
+.fan-gloss{position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;
+  background:radial-gradient(58% 44% at 34% 14%, rgba(255,255,255,.44), transparent 60%)}
+.fan-new{position:absolute;top:7px;right:7px;z-index:3;font:800 7.5px/1 'Archivo',sans-serif;letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 7px;border-radius:99px;color:#1a1030;background:linear-gradient(180deg,#ffe9b0,#f5b73d)}
+.fan-meta{position:absolute;left:0;right:0;bottom:0;padding:8px 9px;z-index:2}
+.fan-meta b{display:block;font:800 10px/1.2 'Archivo',sans-serif;color:#fff}
+.fan-b{flex:1;min-width:0}
+.fan-n{font:700 26px/1 'Archivo',sans-serif;color:#fff;letter-spacing:-.03em}
+.fan-n span{font:700 15px/1 'Archivo',sans-serif;color:var(--gd-lt)}
+.fan-t{margin:8px 0 0;font:600 12.5px/1.4 'Archivo',sans-serif;color:var(--mu)}
+.fan-cta{margin-top:14px;width:100%;border:0;cursor:pointer;padding:13px;border-radius:14px;
+  font:700 14.5px/1 'Archivo',sans-serif;color:var(--a-ink);display:flex;align-items:center;justify-content:center;gap:7px;
+  background:linear-gradient(180deg,var(--a-lt) 0%,var(--a) 52%,var(--adk) 100%);box-shadow:0 4px 0 var(--adk),inset 0 1px 0 rgba(255,255,255,.5)}
+.fan-cta svg{width:16px;height:16px}
+
+/* ── La vitrine : le cœur de cette variante ── */
+.gr-hd{margin:20px 2px 10px;font:800 11px/1 'Archivo',sans-serif;letter-spacing:.2em;text-transform:uppercase;color:var(--mu2)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.tile{border-radius:20px;padding:12px 11px 11px;text-align:center;
+  background:linear-gradient(180deg,#1f1850,#161038);box-shadow:0 5px 0 var(--edge),inset 0 1px 0 rgba(255,255,255,.08),inset 0 0 0 1px rgba(255,255,255,.06)}
+.tile-plate{height:100px;border-radius:14px;display:grid;place-items:center;overflow:hidden;
+  background:radial-gradient(80% 70% at 50% 22%, rgba(124,92,255,.3), rgba(10,8,26,.5))}
+.tile-plate img{width:86px;height:86px;object-fit:contain;filter:drop-shadow(0 5px 10px rgba(0,0,0,.5))}
+.tile-n{margin:10px 0 0;font:700 12.5px/1.2 'Archivo',sans-serif;color:#fff}
+.tag{margin-top:9px;display:flex;align-items:center;justify-content:center;gap:5px;height:32px;border-radius:11px;font:800 12px/1 'Archivo',sans-serif}
+.tag img{width:15px;height:15px}
+.tag svg{width:14px;height:14px}
+.tag.buy{color:#1c1140;background:linear-gradient(180deg,var(--gd-pale),var(--gd) 58%,var(--gd-2));box-shadow:0 3px 0 var(--gd-deep)}
+.tag.own{color:#a9f0c0;background:rgba(88,204,2,.14);box-shadow:inset 0 0 0 1px rgba(121,230,58,.35)}
+.tag.eq{color:#1c3306;background:linear-gradient(180deg,#79e63a,#58cc02 60%,#3a8a02);box-shadow:0 3px 0 #2c6a01}
+.tag.lock{color:var(--mu2);background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.tile.is-locked .tile-plate img{filter:grayscale(1) brightness(.55)}
+.linkall{margin-top:12px;width:100%;border:0;cursor:pointer;padding:13px;border-radius:15px;
+  font:700 14px/1 'Archivo',sans-serif;color:var(--gd-lt);background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(247,179,43,.22)}
+
+/* ── Les 2 trophées de conduite, une ligne, rien de plus ── */
+.troph{margin:26px 16px 0;border-radius:18px;padding:13px 15px;display:flex;align-items:center;gap:11px;
+  background:linear-gradient(180deg,#1c1548,#15103a);box-shadow:0 6px 0 var(--edge),inset 0 0 0 1px rgba(255,255,255,.06)}
+.troph .medal{width:38px;height:38px;flex:0 0 auto;border-radius:11px;display:grid;place-items:center;overflow:hidden;
+  background:linear-gradient(180deg,#221a52,#171038);box-shadow:inset 0 0 0 1px rgba(255,255,255,.07)}
+.troph .medal img{width:30px;height:30px;object-fit:contain;filter:grayscale(1) brightness(.95);opacity:.72}
+.troph-t{flex:1;font:700 13px/1.3 'Archivo',sans-serif;color:var(--mu)}
+.troph-t small{display:block;font:600 11px/1.3 'Archivo',sans-serif;color:var(--mu2);margin-top:3px}
+.troph-c{font:800 12px/1 'Archivo',sans-serif;color:var(--mu2)}
+
+/* ── Réglages ── */
+.set{margin:26px 16px 0}
+.set-ttl{margin:0 6px 11px;font:800 11px/1 'Archivo',sans-serif;letter-spacing:.2em;text-transform:uppercase;color:var(--mu2)}
+.set-list{border-radius:20px;overflow:hidden;background:linear-gradient(180deg,#1c1548,#15103a);
+  box-shadow:0 7px 0 var(--edge),inset 0 1px 0 rgba(255,255,255,.08),inset 0 0 0 1px rgba(255,255,255,.06)}
+.row{display:flex;align-items:center;gap:13px;padding:15px 16px;border-bottom:1px solid var(--bo2);min-height:56px}
+.row:last-child{border-bottom:0}
+.row-ico{width:34px;height:34px;flex:0 0 auto;border-radius:11px;display:grid;place-items:center;color:var(--gd-lt);
+  background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.row-ico svg{width:17px;height:17px}
+.row-l{flex:1;font:700 14.5px/1.2 'Archivo',sans-serif;color:var(--ink)}
+.row-l small{display:block;font:600 11.5px/1.3 'Archivo',sans-serif;color:var(--mu2);margin-top:3px}
+.row-chev{color:var(--mu2)}
+.row-chev svg{width:17px;height:17px}
+.tog{width:50px;height:29px;border-radius:99px;position:relative;flex:0 0 auto;background:linear-gradient(180deg,#79e63a,#58cc02 60%,#3a8a02);box-shadow:inset 0 1px 0 rgba(255,255,255,.3)}
+.tog i{position:absolute;top:3px;left:24px;width:23px;height:23px;border-radius:50%;background:linear-gradient(180deg,#fff,#dcd6f5);box-shadow:0 2px 4px rgba(0,0,0,.4)}
+
+.out{margin:18px 16px 0;width:calc(100% - 32px);border:0;cursor:pointer;padding:15px;border-radius:16px;
+  font:700 15px/1 'Archivo',sans-serif;color:#ffd4cf;display:flex;align-items:center;justify-content:center;gap:9px;
+  background:linear-gradient(180deg,#2c1a44,#1f1234);box-shadow:0 5px 0 #130a22,inset 0 0 0 1px rgba(255,120,120,.14)}
+.out svg{width:17px;height:17px}
+.del{display:block;margin:14px auto 0;background:none;border:0;color:var(--mu2);font:500 12.5px/1 'Archivo',sans-serif;text-decoration:underline;cursor:pointer;padding:9px}
+.since{text-align:center;margin:14px 0 0;font:700 10.5px/1 'Archivo',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:rgba(139,131,184,.7)}
+</style>
+</head>
+<body>
+<div class="pg">
+
+  <!-- L'unique bloc dominant : l'identité, et un seul chiffre -->
+  <div class="hero">
+    <div style="position:relative;display:inline-block">
+      <span class="hero-av"><img src="/skins/avatars/pilote-f1.webp" alt="" /></span>
+      <button class="hero-edit" aria-label="Changer ma photo">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="14" rx="3" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="13" r="3.4" stroke="currentColor" stroke-width="2"/><path d="M9 6l1.5-2h3L15 6" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+    <h1 class="hero-name"><i>@</i>speedy_lea</h1>
+    <p class="hero-legal">Léa Bertrand · membre depuis juillet 2026</p>
+  </div>
+
+  <div class="score">
+    <div class="score-l">
+      <span class="score-n"><b>12</b>compétences certifiées</span>
+      <span class="score-r">sur 31</span>
+    </div>
+    <div class="bar"><i style="width:38%"></i></div>
+  </div>
+
+  <!-- Mes cartes -->
+  <div class="sec">
+    <div class="sec-hd"><h2 class="sec-ttl">Mes cartes</h2></div>
+    <p class="sec-sub">Une carte gagnée par compétence certifiée.</p>
+    <div class="fan">
+      <div class="fan-stack">
+        <div class="c k3" style="--rc:#3ba3f0"><img src="/cartes/c2a.webp" alt="" /><div class="sh"></div></div>
+        <div class="c k2" style="--rc:#3ba3f0"><img src="/cartes/c2b.webp" alt="" /><div class="sh"></div></div>
+        <div class="c k1" style="--rc:#3ba3f0">
+          <img src="/cartes/c2c.webp" alt="Carte Trajectoire et placement" />
+          <i class="fan-gloss"></i>
+          <div class="sh"></div>
+          <span class="fan-new">Nouveau</span>
+          <div class="fan-meta"><b>Trajectoire et placement</b></div>
+        </div>
+      </div>
+      <div class="fan-b">
+        <div class="fan-n">12 <span>/ 31</span></div>
+        <p class="fan-t">Ta dernière carte date du 4 août.</p>
+        <button class="fan-cta">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M9 6l-6 6 6 6M15 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Feuilleter
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- La vitrine : le cœur de la variante -->
+  <div class="sec">
+    <div class="sec-hd">
+      <h2 class="sec-ttl">Ma vitrine</h2>
+      <span class="wallet"><img src="/skins/volant-coin.webp" alt="" />1009</span>
+    </div>
+    <p class="sec-sub">Ta photo de profil dans toute l'app.</p>
+
+    <p class="gr-hd" style="margin-top:4px">Personnages</p>
+    <div class="grid">
+      <div class="tile">
+        <div class="tile-plate"><img src="/skins/avatars/pilote-f1.webp" alt="" /></div>
+        <p class="tile-n">Le Pilote F1</p>
+        <div class="tag eq"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Équipé</div>
+      </div>
+      <div class="tile">
+        <div class="tile-plate"><img src="/skins/avatars/skin3.webp" alt="" /></div>
+        <p class="tile-n">La Rookie</p>
+        <div class="tag own">Possédé</div>
+      </div>
+      <div class="tile">
+        <div class="tile-plate"><img src="/skins/avatars/warrior.webp" alt="" /></div>
+        <p class="tile-n">Le Guerrier</p>
+        <div class="tag buy"><img src="/skins/volant-coin.webp" alt="" />450</div>
+      </div>
+      <div class="tile is-locked">
+        <div class="tile-plate"><img src="/skins/avatars/legend.webp" alt="" /></div>
+        <p class="tile-n">La Légende</p>
+        <div class="tag lock"><svg viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 11V8a4 4 0 118 0v3" stroke="currentColor" stroke-width="2"/></svg>2000</div>
+      </div>
+    </div>
+
+    <p class="gr-hd">Voitures</p>
+    <div class="grid">
+      <div class="tile">
+        <div class="tile-plate"><img src="/skins/avatars/car-citadine.webp" alt="" /></div>
+        <p class="tile-n">La Citadine</p>
+        <div class="tag buy"><img src="/skins/volant-coin.webp" alt="" />150</div>
+      </div>
+      <div class="tile">
+        <div class="tile-plate"><img src="/skins/avatars/car-sportive.webp" alt="" /></div>
+        <p class="tile-n">La Sportive</p>
+        <div class="tag buy"><img src="/skins/volant-coin.webp" alt="" />450</div>
+      </div>
+      <div class="tile">
+        <div class="tile-plate"><img src="/skins/avatars/car-suv.webp" alt="" /></div>
+        <p class="tile-n">Le SUV Prestige</p>
+        <div class="tag buy"><img src="/skins/volant-coin.webp" alt="" />900</div>
+      </div>
+      <div class="tile is-locked">
+        <div class="tile-plate"><img src="/skins/avatars/car-supercar.webp" alt="" /></div>
+        <p class="tile-n">La Supercar</p>
+        <div class="tag lock"><svg viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 11V8a4 4 0 118 0v3" stroke="currentColor" stroke-width="2"/></svg>2000</div>
+      </div>
+    </div>
+    <button class="linkall">Voir les 14 skins</button>
+  </div>
+
+  <!-- Les 2 seuls trophées liés à la conduite -->
+  <div class="troph">
+    <span class="medal"><img src="/skins/badge-3d-05.webp" alt="" /></span>
+    <span class="medal"><img src="/skins/badge-3d-ultimate.webp" alt="" /></span>
+    <div class="troph-t">Trophées de conduite<small>Prêt examen blanc · Route ouverte</small></div>
+    <span class="troph-c">0 / 2</span>
+  </div>
+
+  <!-- Réglages -->
+  <div class="set">
+    <p class="set-ttl">Réglages</p>
+    <div class="set-list">
+      <div class="row">
+        <span class="row-ico"><svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16v12H4z" stroke="currentColor" stroke-width="2"/><path d="M4 7l8 6 8-6" stroke="currentColor" stroke-width="2"/></svg></span>
+        <span class="row-l">Mes notifications<small>Validations · encouragements</small></span>
+        <span class="row-chev"><svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </div>
+      <div class="row">
+        <span class="row-ico"><svg viewBox="0 0 24 24" fill="none"><path d="M18 8a6 6 0 10-12 0c0 7-3 8-3 8h18s-3-1-3-8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M10.3 21a2 2 0 003.4 0" stroke="currentColor" stroke-width="2"/></svg></span>
+        <span class="row-l">Rappels de révision<small>Reste dans le rythme</small></span>
+        <span class="tog"><i></i></span>
+      </div>
+      <div class="row">
+        <span class="row-ico"><svg viewBox="0 0 24 24" fill="none"><path d="M5 21v-7M5 10V3M12 21v-9M12 8V3M19 21v-5M19 12V3M2 14h6M9 8h6M16 16h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+        <span class="row-l">Réglages<small>Thème · langue · confidentialité</small></span>
+        <span class="row-chev"><svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </div>
+    </div>
+  </div>
+
+  <button class="out">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M15 12H4m0 0l4-4m-4 4l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 3h8a2 2 0 012 2v14a2 2 0 01-2 2H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Se déconnecter
+  </button>
+  <button class="del">Supprimer mon compte</button>
+  <div class="since">PermiGo v7</div>
+</div>
+</body>
+</html>

@@ -24,7 +24,7 @@ const TEMPLATES: Record<string, any> = {
     tone: "urgent",
   },
   palier_2: {
-    title: "🔥 Tu y es presque !",
+    title: "🔥 Tu y es presque",
     body: "Plus que {n} compétences pour atteindre le palier {target}",
     cta: "Continuer",
     route: "#/parcours",
@@ -32,7 +32,7 @@ const TEMPLATES: Record<string, any> = {
   },
   come_back_3d: {
     title: "👋 Ton parcours t'attend",
-    body: "Ça fait 3 jours. 5 minutes suffisent pour reprendre le rythme",
+    body: "3 jours déjà. 5 minutes suffisent pour reprendre le rythme",
     cta: "Reprendre",
     route: "#/parcours",
     tone: "gentle",
@@ -46,7 +46,7 @@ const TEMPLATES: Record<string, any> = {
   },
   week_summary: {
     title: "✨ Belle semaine",
-    body: "Tu as validé {n_comp} compétences cette semaine. Bravo",
+    body: "{n_comp} compétences cette semaine. Bravo",
     cta: "Voir mon bilan",
     route: "#/",
     tone: "celebrate",

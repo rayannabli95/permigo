@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fiche C · Trois temps</title>
+<style>
+@font-face { font-family:'Archivo'; font-style:normal; font-weight:400 900; font-display:block; src:url(archivo.woff2) format('woff2'); }
+*{ box-sizing:border-box; }
+html,body{ margin:0; padding:0; }
+body{ font-family:'Archivo', system-ui, sans-serif; background:#3a3288; }
+.fd{ position:relative; max-width:480px; margin:0 auto; min-height:100dvh; color:#ded7ff; overflow-x:hidden;
+  padding:0 0 40px;
+  background:
+    radial-gradient(120% 55% at 50% -6%, rgba(240,169,63,.16) 0%, rgba(240,169,63,0) 55%),
+    radial-gradient(120% 60% at 82% 12%, rgba(150,120,255,.30) 0%, rgba(150,120,255,0) 60%),
+    linear-gradient(#5a4fc0 0%, #4a3fa4 60%, #423a96 100%); }
+.flag{ margin:0; padding:9px 18px; background:#2a2170; color:#ffd76e; font:800 11px/1 'Archivo',sans-serif; letter-spacing:.16em; text-transform:uppercase; }
+
+.hero{ padding:16px 18px 6px; }
+.topbar{ display:flex; align-items:center; gap:12px; }
+.back{ width:44px; height:44px; flex:0 0 44px; border-radius:14px;
+  background:linear-gradient(180deg,#ffffff,#efecff); border:1px solid #e6e2fb; border-top-color:#fff;
+  box-shadow:0 4px 0 rgba(20,12,60,.35), inset 0 1px 0 rgba(255,255,255,.9);
+  display:flex; align-items:center; justify-content:center; }
+.tag{ display:inline-flex; align-items:center; gap:7px; padding:7px 13px 7px 9px; border-radius:999px;
+  background:linear-gradient(180deg,rgba(240,169,63,.28),rgba(240,169,63,.10)); border:1px solid rgba(240,169,63,.55); }
+.tag .dot{ width:20px; height:20px; border-radius:50%; flex:0 0 20px;
+  background:radial-gradient(circle at 35% 28%,#ffe9b0,#f0a93f 60%,#b46a10); }
+.tag b{ font-weight:800; font-size:12px; letter-spacing:.08em; color:#ffe4a6; text-transform:uppercase; white-space:nowrap; }
+.gold{ background:linear-gradient(180deg,#ffe9b0 0%,#f6c85f 40%,#f0a93f 72%,#d98a1f 100%);
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent; }
+h1.title{ font-weight:800; font-size:27px; line-height:1.07; letter-spacing:-.01em; margin:15px 0 2px; }
+
+/* ── Intro ────────────────────────────────────────────────── */
+.intro{ margin:20px 18px 0; padding:26px 18px 24px; border-radius:26px; text-align:center; position:relative; overflow:hidden;
+  background:linear-gradient(180deg, rgba(255,223,150,.16), rgba(255,255,255,.05) 70%);
+  border:1px solid rgba(255,223,150,.28); }
+.intro .halo{ position:absolute; left:50%; top:-64px; width:220px; height:130px; transform:translateX(-50%);
+  background:radial-gradient(closest-side, rgba(255,215,110,.42), transparent); pointer-events:none; }
+.intro .day{ position:relative; margin:0 0 8px; font:800 12px/1 'Archivo',sans-serif; letter-spacing:.2em; text-transform:uppercase; color:#c9bcff; }
+.intro h2{ position:relative; margin:0 auto; max-width:14ch; font-weight:900; font-size:31px; line-height:1.1; letter-spacing:-.035em; color:#fff; }
+.intro h2 strong{ color:#ffd76e; }
+.intro p{ position:relative; margin:14px auto 0; max-width:25ch; font:600 14px/1.5 'Archivo',sans-serif; color:#c3b6f0; }
+
+/* ── En 10 secondes : la version pressée ──────────────────── */
+.quick{ margin:16px 18px 0; padding:16px 16px 15px; border-radius:20px;
+  background:rgba(12,6,36,.34); border:1px solid rgba(255,255,255,.14); }
+.quick .k{ margin:0 0 12px; font:800 11.5px/1 'Archivo',sans-serif; letter-spacing:.16em; text-transform:uppercase; color:#ffd76e; }
+.quick ol{ margin:0; padding:0; list-style:none; counter-reset:q; }
+.quick li{ counter-increment:q; display:flex; align-items:center; gap:11px; font:800 15.5px/1.25 'Archivo',sans-serif; color:#fff; }
+.quick li + li{ margin-top:11px; }
+.quick li::before{ content:counter(q); flex:0 0 22px; width:22px; height:22px; border-radius:7px;
+  display:flex; align-items:center; justify-content:center; font:800 12px/1 'Archivo',sans-serif;
+  color:#2b1a55; background:rgba(255,255,255,.82); }
+
+/* ── Les trois temps ──────────────────────────────────────── */
+.beat{ margin:26px 18px 0; }
+.beat-head{ display:flex; align-items:center; gap:12px; margin:0 0 14px; }
+.beat-num{ flex:0 0 46px; width:46px; height:46px; border-radius:16px; display:flex; align-items:center; justify-content:center;
+  font:900 20px/1 'Archivo',sans-serif; color:#3a1c00;
+  background:linear-gradient(160deg,#ffe08a,#ffb33f); border:1px solid #ffd24a;
+  box-shadow:0 5px 16px -6px rgba(255,156,28,.8), inset 0 1px 0 rgba(255,255,255,.6); }
+.beat-when{ margin:0; font:800 11.5px/1 'Archivo',sans-serif; letter-spacing:.16em; text-transform:uppercase; color:#bcaef5; }
+.beat-title{ margin:5px 0 0; font-weight:900; font-size:22px; line-height:1.05; letter-spacing:-.03em; color:#fff; }
+
+.acts{ display:flex; flex-direction:column; gap:10px; }
+.act{ padding:15px 16px 14px; border-radius:18px; background:#fbfaff; border:1px solid #e6e2fb; border-top-color:#fff;
+  box-shadow:0 5px 0 rgba(20,12,60,.3), inset 0 1px 0 rgba(255,255,255,.9); }
+/* Ce que je fais : gros, gras, seul sur sa ligne. */
+.act .do{ display:flex; align-items:flex-start; gap:11px; margin:0; }
+.act .do .ic{ flex:0 0 22px; margin-top:1px; }
+.act .do span{ font-weight:800; font-size:17.5px; line-height:1.2; letter-spacing:-.02em; color:#160f34; }
+/* Le détail : plus petit, plus clair, une idée par ligne. */
+.act ul{ margin:11px 0 0; padding:0 0 0 33px; list-style:none; }
+.act li{ position:relative; padding-left:14px; font:600 14px/1.45 'Archivo',sans-serif; color:#5b5089; }
+.act li + li{ margin-top:7px; }
+/* Puce ronde et non un trait : un tiret se lirait comme de la ponctuation. */
+.act li::before{ content:""; position:absolute; left:1px; top:7px; width:6px; height:6px; border-radius:50%; background:#c3b6f0; }
+.act li b{ color:#241a45; font-weight:800; }
+.act .note{ margin:11px 0 0 33px; padding:9px 12px; border-radius:12px; font:600 13px/1.42 'Archivo',sans-serif;
+  color:#5f4fa8; background:rgba(122,90,220,.09); border:1px solid rgba(122,90,220,.16); }
+.act .note.warn{ color:#a3421c; background:rgba(239,106,58,.10); border-color:rgba(239,106,58,.24); }
+
+/* ── Pourquoi ─────────────────────────────────────────────── */
+.why{ margin:28px 18px 0; padding:20px; border-radius:22px;
+  background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+  border:1px solid rgba(255,255,255,.18); }
+.why .k{ margin:0 0 9px; font:800 11.5px/1 'Archivo',sans-serif; letter-spacing:.16em; text-transform:uppercase; color:#ffd76e; }
+.why p{ margin:0; font:700 16px/1.5 'Archivo',sans-serif; color:#fff; }
+.why p + p{ margin-top:9px; font-weight:600; font-size:14px; color:#c2b5f2; }
+</style>
+</head>
+<body>
+<div class="fd">
+  <p class="flag">Variante C · trois temps</p>
+  <div class="hero">
+    <div class="topbar">
+      <span class="back"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="#3d2f7a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span class="tag"><span class="dot"></span><b>C2f · Circulation · Monde 2</b></span>
+    </div>
+    <h1 class="title gold">Intersections et ronds-points</h1>
+  </div>
+
+  <div class="intro">
+    <span class="halo"></span>
+    <p class="day">Aujourd'hui</p>
+    <h2><strong>Rayan</strong>. Tu attaques le giratoire.</h2>
+    <p>Tout se joue avant d'y être. Qui passe en premier.</p>
+  </div>
+
+  <div class="quick">
+    <p class="k">En 10 secondes</p>
+    <ol>
+      <li>Je ralentis et je choisis ma voie.</li>
+      <li>Je laisse passer puis j'entre.</li>
+      <li>Clignotant droite et je contrôle.</li>
+    </ol>
+  </div>
+
+  <!-- Temps 1 -->
+  <div class="beat">
+    <div class="beat-head">
+      <span class="beat-num">1</span>
+      <div>
+        <p class="beat-when">Avant d'entrer</p>
+        <p class="beat-title">J'approche</p>
+      </div>
+    </div>
+    <div class="acts">
+      <div class="act">
+        <p class="do"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#7c5fe0"/><path d="M7 14.5l5-5 5 5" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Ralentis avant d'entrer</span></p>
+        <ul>
+          <li>Un coup d'œil dans le rétro.</li>
+          <li>Tu ralentis en douceur.</li>
+          <li>Tu passes en <b>2e</b>.</li>
+        </ul>
+        <p class="note">Le panneau à l'entrée dit « Cédez le passage ».</p>
+      </div>
+      <div class="act">
+        <p class="do"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#7c5fe0"/><path d="M12 17.5V7.5M12 7.5L8.4 11M12 7.5l3.6 3.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Choisis ta voie</span></p>
+        <ul>
+          <li><b>Petit giratoire</b> voie de droite.</li>
+          <li><b>Tu sors à la première</b> voie de droite.</li>
+          <li><b>Grand giratoire</b> la voie qui mène à ta sortie.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Temps 2 -->
+  <div class="beat">
+    <div class="beat-head">
+      <span class="beat-num">2</span>
+      <div>
+        <p class="beat-when">Sur l'anneau</p>
+        <p class="beat-title">Je m'engage</p>
+      </div>
+    </div>
+    <div class="acts">
+      <div class="act">
+        <p class="do"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#14968c"/><path d="M12 7v5.2l3.2 2" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Laisse passer ceux qui tournent</span></p>
+        <ul>
+          <li>Ceux déjà sur l'anneau sont prioritaires.</li>
+          <li>Regarde leur distance. Puis leur vitesse.</li>
+          <li>Dans le doute <b>tu attends</b>.</li>
+        </ul>
+        <p class="note">Tu peux même refaire un tour. Personne ne t'en voudra.</p>
+      </div>
+      <div class="act">
+        <p class="do"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#7c5fe0"/><path d="M8 12h8M13 8.6l3.4 3.4L13 15.4" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Entre dans un vrai trou</span></p>
+        <ul>
+          <li>Pas de clignotant à gauche pour entrer.</li>
+        </ul>
+        <p class="note">Une seule exception. Tu fais le tour ou tu vas nettement à gauche.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Temps 3 -->
+  <div class="beat">
+    <div class="beat-head">
+      <span class="beat-num">3</span>
+      <div>
+        <p class="beat-when">Pour sortir</p>
+        <p class="beat-title">Je quitte l'anneau</p>
+      </div>
+    </div>
+    <div class="acts">
+      <div class="act">
+        <p class="do"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#f0a93f"/><path d="M9.5 8.2l4.6 3.8-4.6 3.8z" fill="#4a2a00"/></svg></span><span>Clignotant à droite avant ta sortie</span></p>
+        <ul>
+          <li>Tu le mets juste avant la sortie.</li>
+          <li>Il s'efface parfois entre deux sorties. Remets-le.</li>
+        </ul>
+      </div>
+      <div class="act">
+        <p class="do"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#ef6a3a"/><path d="M12 6.5v7.2" stroke="#fff" stroke-width="2.3" stroke-linecap="round"/><circle cx="12" cy="17.1" r="1.3" fill="#fff"/></svg></span><span>Contrôle avant de sortir</span></p>
+        <ul>
+          <li><b>Angle mort à gauche.</b> Quelqu'un peut te couper la route.</li>
+          <li><b>Un œil à droite.</b> Vélos et bande cyclable.</li>
+          <li>Tu sors. Tu coupes le clignotant.</li>
+        </ul>
+        <p class="note warn">Passage piéton en sortie. Tu n'accélères pas avant d'avoir vérifié.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="why">
+    <p class="k">Pourquoi ça compte</p>
+    <p>Une intersection est l'endroit où les trajectoires se croisent.</p>
+    <p>Tout le travail se fait avant d'y être. Savoir qui passe en premier.</p>
+  </div>
+</div>
+</body>
+</html>

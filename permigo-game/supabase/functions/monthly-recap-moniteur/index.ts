@@ -122,19 +122,19 @@ Deno.serve(async (req) => {
         toneTitle = {
           tone: "celebrate",
           title: "👑 #1 ce mois-ci",
-          body: `${hours}h · ${nVal} validations · ${eleves} élèves · ${days} jours actifs. Bravo ${mo.prenom} !`,
+          body: `${hours}h · ${nVal} validations · ${eleves} élèves · ${days} jours actifs`,
         };
       } else if (SHOW_RANK && rank && rank <= 3) {
         toneTitle = {
           tone: "celebrate",
           title: `🥇 Top ${rank} en ${monthLabel}`,
-          body: `${hours}h · ${nVal} validations · ${eleves} élèves. Continue !`,
+          body: `${hours}h · ${nVal} validations · ${eleves} élèves`,
         };
       } else {
         toneTitle = {
           tone: "gentle",
-          title: `📊 Ton mois — ${monthLabel}`,
-          body: `${hours}h · ${nVal} validations · ${eleves} élèves ce mois-ci. Bravo ${mo.prenom} !`,
+          title: `📊 Ton mois · ${monthLabel}`,
+          body: `${hours}h · ${nVal} validations · ${eleves} élèves ce mois-ci`,
         };
       }
 

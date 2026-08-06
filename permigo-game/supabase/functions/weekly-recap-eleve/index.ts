@@ -30,7 +30,7 @@ function pickRecapTemplate(stats: {
       template_id: "recap_quiet_week",
       tone: "gentle",
       title: "💫 Ta semaine sur PermiGo",
-      body: "Une semaine calme. Reprends quand tu veux — 5 minutes suffisent pour relancer la dynamique.",
+      body: "Reprends quand tu veux. 5 minutes suffisent",
       cta: "Reprendre",
       route: "#/parcours",
     };
@@ -39,8 +39,8 @@ function pickRecapTemplate(stats: {
     return {
       template_id: "recap_strong_week",
       tone: "celebrate",
-      title: "🔥 Quelle semaine !",
-      body: `Tu as validé ${stats.n_comp} compétences et joué ${stats.n_quiz} quiz. Continue comme ça !`,
+      title: "🔥 Quelle semaine",
+      body: `${stats.n_comp} compétences · ${stats.n_quiz} quiz cette semaine`,
       cta: "Voir mon parcours",
       route: "#/parcours",
     };
@@ -50,7 +50,7 @@ function pickRecapTemplate(stats: {
       template_id: "recap_solid_week",
       tone: "celebrate",
       title: "✨ Belle semaine",
-      body: `${stats.n_comp} compétences validées · ${stats.n_quiz} quiz · ${stats.n_jours} jours actifs.`,
+      body: `${stats.n_comp} compétences validées · ${stats.n_quiz} quiz · ${stats.n_jours} jours actifs`,
       cta: "Voir mon bilan",
       route: "#/parcours",
     };
@@ -60,7 +60,7 @@ function pickRecapTemplate(stats: {
     template_id: "recap_warm_week",
     tone: "warm",
     title: "🌱 Petit à petit",
-    body: `${stats.n_quiz} quiz cette semaine. La prochaine sera la bonne pour valider !`,
+    body: `${stats.n_quiz} quiz cette semaine. La prochaine sera la bonne`,
     cta: "Reprendre",
     route: "#/parcours",
   };

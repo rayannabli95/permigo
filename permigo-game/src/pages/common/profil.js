@@ -13,15 +13,25 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb, logout } from "@/auth/auth.js";
 import { yesterdayKey } from "@/services/daily-quiz.js";
+// Source unique de la série (cf. src/services/streak.js) : même calcul que
+// accueil.js et reviser.js, pour ne plus jamais afficher un chiffre différent
+// sur cette page (bug des 3 séries incohérentes corrigé le 06/08/2026).
+import { getStreak } from "@/services/streak.js";
 import { getCurUser, setCurUser } from "@/auth/cur-user.js";
 import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { mountPermisCard } from "@/components/eleve/permis-card.js";
 import { mountProfileCard } from "@/components/common/profile-card.js";
 import { changeAvatar } from "@/components/common/avatar-edit.js";
-import { getEquippedAsset } from "@/utils/game-state.js";
+import { getEquippedAsset, getEquipped } from "@/utils/game-state.js";
 import { REMC, REMC_TOTAL } from "@/data/remc.js";
 import { CATALOG, STREAK_SEUIL } from "@/data/achievements.js";
+// « Mes cartes » (profil variante B, 06/08/2026) : la liste des 31 cartes
+// vient de la MÊME source que #/cartes (src/data/cartes.js), le paquet
+// lui-même (mécanique + CSS) vient d'un import dynamique de collection.js
+// (cf. mountEleveArene) — jamais dupliqué, cf. commentaire dans ce fichier.
+import { CARTES } from "@/data/cartes.js";
+import { itemName } from "@/data/rewards-i18n.js";
 import { icon } from "@/utils/icons.js";
 import { medallion } from "@/utils/medallions.js";
 import { volantImg, volantLabel } from "@/utils/volant.js";
@@ -1449,62 +1459,28 @@ function _wireNotifToggle(root) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// PROFIL ÉLÈVE — « Carte de joueur » (Arène)
-// DA Arène 3D (nuit-violet + or, plastique 3D), vocabulaire cohérent :
-//   • le PSEUDO est l'identité (pas le nom légal)
-//   • compteur = VALIDATIONS x/31 (pas de « niveau » inventé)
-//   • « arène » = COMPÉTENCE REMC en cours (C1–C4) + emblème réel
-//   • monnaie = volants (profiles.gemmes) · succès = vrais badges
+// PROFIL ÉLÈVE — « Le paquet » (variante B, décision Rayan 06/08/2026)
+// « Rempli d'infos, trop de choses inutiles, on sait pas où donner de la
+// tête. Mets à la place des succès mes cartes, ça s'ouvre comme les
+// applis de rencontre. » Le profil élève DEVIENT la maison des cartes :
+//   • identité = 44px en haut (photo + pseudo), plus de « carte de joueur »
+//   • héros = le paquet de cartes REMC (mécanique PARTAGÉE avec #/cartes,
+//     cf. le commentaire CARD_DECK_STYLE dans src/pages/eleve/collection.js
+//     : jamais dupliquée, importée dynamiquement dans mountEleveArene)
+//   • trophées : 13 → 2 (seuls comp_28/comp_31 marquent un vrai moment de
+//     la conduite, les autres comptent ce que les cartes montrent déjà ou
+//     mesurent l'usage de l'app, pas la conduite)
+//   • monnaie = volants (profiles.gemmes), affichés dans l'en-tête de la
+//     vitrine (grille skins façon Duolingo), là où ils servent vraiment
 // ═══════════════════════════════════════════════════════════════
-const REMC_EMBLEM = {
-  C1: "/skins/permigo-remc-maitrise-vehicule-flag-v1.webp",
-  C2: "/skins/permigo-remc-circulation-normale-v3.webp",
-  C3: "/skins/permigo-remc-conditions-difficiles-v1.webp",
-  C4: "/skins/permigo-autonomie-crown-v1.webp",
-};
-
-// Quelle compétence REMC l'élève travaille (d'après le nb de validations).
-function _competenceState(validated) {
-  let acc = 0;
-  for (let i = 0; i < REMC.length; i++) {
-    const comp = REMC[i];
-    const n = comp.subs.length;
-    if (validated < acc + n) {
-      return {
-        comp,
-        idx: i + 1,
-        inComp: validated - acc,
-        total: n,
-        next: comp.subs[validated - acc] || null,
-        allDone: false,
-      };
-    }
-    acc += n;
-  }
-  const last = REMC[REMC.length - 1];
-  return {
-    comp: last,
-    idx: REMC.length,
-    inComp: last.subs.length,
-    total: last.subs.length,
-    next: null,
-    allDone: true,
-  };
-}
-
-// Succès (vrais badges) — source de vérité UNIQUE : le CATALOG de la salle des
-// trophées (mêmes visuels badge-3d, mêmes titres). Déblocage = table serveur
-// (get_my_achievements) pour coller EXACTEMENT aux trophées. Repli local sur
-// validations/série si la RPC échoue (réseau). Débloqués d'abord.
-function _areneAchievements(unlockedKeys, achOk, validated, streak) {
-  return CATALOG.map((def) => ({
-    image: def.image,
-    name: ptAch(def.key, def.title),
-    need: achOk
-      ? unlockedKeys.has(def.key)
-      : _fallbackUnlocked(def.key, validated, streak),
-  })).sort((a, b) => (a.need === b.need ? 0 : a.need ? -1 : 1));
-}
+// Les 2 seuls trophées qui restent sur le profil : ils marquent un vrai
+// jalon de la conduite (prêt pour l'examen blanc, permis virtuel complet),
+// contrairement aux comp_5/10/15/20/25 (déjà montrés par les 31 cartes),
+// aux streak_* (mesurent l'usage de l'app, pas la conduite) et aux quiz_*
+// (idem). Le CATALOG complet (13 trophées) reste la source unique pour
+// tout autre écran qui en aurait besoin : on FILTRE à l'affichage ici,
+// on ne retire rien du catalogue partagé.
+const PROFIL_TROPHIES = ["comp_28", "comp_31"];
 
 // Repli quand get_my_achievements est indisponible : on déduit ce qu'on peut
 // des compteurs locaux (compétences + série). Les succès quiz restent
@@ -1543,143 +1519,90 @@ ${chromeNight("#2a1a5e", "#08071a")}
     radial-gradient(1.2px 1.2px at 30% 13%, rgba(255,255,255,.4), transparent),
     radial-gradient(1px 1px at 91% 11%, rgba(255,255,255,.4), transparent);}
 .arn>*{position:relative;z-index:2}
-.arn-h1{font-family:'Archivo',sans-serif;font-weight:600;font-size:20px;margin:0;padding:2px 20px 0;color:var(--tx)}
 
-/* ── Carte de joueur ── */
-.arn-card{margin:14px 16px 0;border-radius:28px;position:relative;overflow:hidden;padding:0 0 22px;
-  background:radial-gradient(120% 70% at 50% -5%, rgba(247,179,43,.10), transparent 62%),linear-gradient(180deg,var(--ctop) 0%,#1d1545 58%,var(--cbot) 100%);
-  box-shadow:0 16px 0 var(--cedge),0 30px 56px rgba(0,0,0,.5),inset 0 1.5px 0 rgba(255,255,255,.12),inset 0 0 0 1.5px var(--gl);}
-.arn-corner{position:absolute;width:22px;height:22px;border:1.5px solid var(--gl);pointer-events:none;opacity:.7}
-.arn-corner.tl{top:54px;left:14px;border-right:0;border-bottom:0;border-radius:6px 0 0 0}
-.arn-corner.tr{top:54px;right:14px;border-left:0;border-bottom:0;border-radius:0 6px 0 0}
-.arn-corner.bl{bottom:14px;left:14px;border-right:0;border-top:0;border-radius:0 0 0 6px}
-.arn-corner.br{bottom:14px;right:14px;border-left:0;border-top:0;border-radius:0 0 6px 0}
+/* ═══ VARIANTE « PAQUET » (06/08/2026) ═══════════════════════════
+   Refonte Rayan : « rempli d'infos, trop de choses inutiles, on sait pas
+   où donner de la tête. Mets à la place des succès mes cartes, ça
+   s'ouvre comme les applis de rencontre. » Le profil élève DEVIENT la
+   maison des cartes : l'identité tient dans une barre de 44px, « Mes
+   cartes » domine, les trophées tombent de 13 à 2, la vitrine se lit
+   d'un regard. Maquette : mockups/profil-refonte/profil-B-paquet.html
+   ═══════════════════════════════════════════════════════════════ */
+.arn{ --csu:#1c1548; --csu2:#221a54; --cbo2:rgba(255,255,255,.07); }
 
-/* bandeau pseudo — or bombé (riche) */
-.arn-banner{position:relative;text-align:center;padding:15px 16px 17px;
-  background:linear-gradient(180deg,rgba(255,255,255,.22),transparent 44%),linear-gradient(180deg,var(--gd-pale) 0%,var(--gd) 44%,var(--gd-2) 78%,var(--gd-deep) 100%);
-  box-shadow:inset 0 2px 0 rgba(255,255,255,.65),0 6px 0 var(--gd-deep),inset 0 -3px 8px rgba(120,60,0,.4);}
-.arn-banner::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.10;background-image:repeating-linear-gradient(180deg,rgba(0,0,0,.5) 0 1px,transparent 1px 3px)}
-.arn-pseudo-row{position:relative;display:inline-flex;align-items:center;gap:9px}
-.arn-pseudo{font-family:'Archivo',sans-serif;font-weight:600;font-size:25px;color:var(--gd-ink);letter-spacing:.3px;line-height:1;text-shadow:0 1px 0 rgba(255,255,255,.45)}
-.arn-pseudo .at{opacity:.55;font-weight:500}
-.arn-pseudo.unset{opacity:.78}
-.arn-edit{width:30px;height:30px;border:0;border-radius:10px;cursor:pointer;display:grid;place-items:center;color:var(--gd-lt);
-  background:linear-gradient(180deg,#4a3208,#33220a);box-shadow:0 2px 0 #1c1304,inset 0 1px 0 rgba(255,255,255,.22);transition:transform .08s,box-shadow .08s}
-.arn-edit:active{transform:translateY(2px);box-shadow:0 0 0 #1c1304,inset 0 1px 0 rgba(255,255,255,.22)}
-.arn-edit svg{width:15px;height:15px}
-.arn-legal{margin-top:4px;font-size:11px;font-weight:700;color:#5a3a08;opacity:.72;letter-spacing:.4px;text-transform:uppercase}
+/* ── Barre d'identité : 44px, un tap sur la photo ou le nom suffit ── */
+.arn2-top{display:flex;align-items:center;gap:11px;padding:0 20px}
+.arn2-av{width:44px;height:44px;flex:0 0 auto;border-radius:14px;overflow:hidden;border:0;padding:0;cursor:pointer;
+  box-shadow:0 0 0 2px var(--gl),0 5px 14px rgba(0,0,0,.5)}
+.arn2-av img{width:100%;height:100%;object-fit:cover;display:block}
+.arn2-av .ini{width:100%;height:100%;display:grid;place-items:center;background:linear-gradient(155deg,#7c5cff 0%,#5a3fd6 45%,#3a2a9e 100%);color:#fff;font:700 17px/1 'Archivo',sans-serif}
+.arn2-name{flex:1;min-width:0;background:none;border:0;padding:0;text-align:left;cursor:pointer;color:inherit;font-family:inherit}
+.arn2-name b{display:block;font:700 16px/1.15 'Archivo',sans-serif;letter-spacing:-.01em;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.arn2-name b i{font-style:normal;color:var(--gd-lt);opacity:.8}
+.arn2-name small{display:block;font:600 11px/1 'Archivo',sans-serif;color:var(--tx-mu);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-/* corps : écusson + identité */
-.arn-body{padding:20px 20px 0;display:flex;gap:16px;align-items:center}
-.arn-crest{position:relative;flex:0 0 auto;width:84px;height:84px}
-.arn-crest-disc{position:absolute;inset:0;border-radius:24px;padding:3px;background:linear-gradient(155deg,#7c5cff 0%,#5a3fd6 45%,#3a2a9e 100%);box-shadow:0 10px 22px rgba(0,0,0,.5)}
-.arn-crest-disc::after{content:"";position:absolute;inset:-2px;border-radius:26px;border:2px solid transparent;background:linear-gradient(150deg,var(--gd-pale),var(--gd-deep)) border-box;-webkit-mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
-.arn-crest-inner{width:100%;height:100%;border-radius:21px;background:linear-gradient(160deg,#3a2f7e,#221a4e);display:grid;place-items:center;position:relative;overflow:hidden;font-family:'Archivo',sans-serif;font-weight:600;font-size:32px;color:#fff;letter-spacing:1px;text-shadow:0 2px 5px rgba(0,0,0,.5);box-shadow:inset 0 3px 9px rgba(0,0,0,.4)}
-.arn-crest-inner::before{content:"";position:absolute;top:-30%;left:-20%;width:80%;height:90%;background:linear-gradient(120deg,rgba(255,255,255,.22),transparent 60%);transform:rotate(8deg)}
-.arn-crest-inner img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
-.arn-crest-edit{position:absolute;right:-5px;bottom:-5px;width:29px;height:29px;border:2.5px solid #1d1545;border-radius:50%;cursor:pointer;display:grid;place-items:center;color:var(--gd-ink);background:linear-gradient(180deg,var(--gd-pale) 0%,var(--gd) 55%,var(--gd-2) 100%);box-shadow:0 2px 0 var(--gd-deep),inset 0 1px 0 rgba(255,255,255,.6);transition:transform .08s,box-shadow .08s}
-.arn-crest-edit:active{transform:translateY(2px);box-shadow:0 0 0 var(--gd-deep),inset 0 1px 0 rgba(255,255,255,.6)}
-.arn-crest-edit svg{width:14px;height:14px}
-.arn-meta{flex:1;min-width:0}
-.arn-permis{display:inline-flex;align-items:center;gap:7px;background:rgba(124,92,255,.16);border:1px solid rgba(167,139,255,.28);color:#cdbcff;font-size:11px;font-weight:800;letter-spacing:.6px;padding:5px 11px;border-radius:999px;text-transform:uppercase}
-.arn-permis .dot{width:7px;height:7px;border-radius:50%;background:var(--gr);box-shadow:0 0 7px var(--gr)}
-.arn-comp{margin-top:12px;display:flex;align-items:center;gap:12px}
-.arn-comp-emblem{width:52px;height:52px;flex:0 0 auto;border-radius:14px;display:grid;place-items:center;overflow:hidden;background:radial-gradient(120% 120% at 30% 18%,#2a2160,#171038);box-shadow:inset 0 0 0 1.5px var(--gl),0 5px 12px rgba(0,0,0,.4)}
-.arn-comp-emblem img{width:100%;height:100%;object-fit:cover}
-.arn-rank{font-family:'Archivo',sans-serif;font-weight:600;font-size:15.5px;color:var(--gd-lt);line-height:1.1}
-.arn-csub{font-size:11.5px;font-weight:700;color:var(--tx-mu);margin-top:2px}
+/* ── LE héros : « Mes cartes » ── */
+.arn2-cards-hd{display:flex;align-items:baseline;justify-content:space-between;padding:22px 20px 0}
+.arn2-cards-ttl{margin:0;font:800 26px/1 'Archivo',sans-serif;color:#fff;letter-spacing:-.03em}
 
-/* compteur validations */
-.arn-valid{margin:20px 20px 0;border-radius:18px;padding:16px 18px;display:flex;align-items:center;gap:16px;
-  background:linear-gradient(180deg,#1c1548,#15103a);box-shadow:inset 0 1px 0 rgba(255,255,255,.07),inset 0 0 0 1px var(--gl2),0 6px 0 var(--cedge)}
-.arn-valid-emblem{width:42px;height:42px;flex:0 0 auto;border-radius:12px;display:grid;place-items:center;background:rgba(247,179,43,.10);box-shadow:inset 0 0 0 1px var(--gl)}
-.arn-valid-emblem img{width:30px;height:30px;object-fit:contain}
-.arn-valid-num{display:flex;align-items:baseline;gap:3px;line-height:1}
-.arn-valid-num b{font-family:'Archivo',sans-serif;font-weight:700;font-size:40px;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.3)}
-.arn-valid-num .sl{font-family:'Archivo',sans-serif;font-weight:600;font-size:24px;color:var(--tx-mu)}
-.arn-valid-num .tt{font-family:'Archivo',sans-serif;font-weight:600;font-size:24px;color:var(--gd-lt)}
-.arn-valid-meta{margin-left:auto;text-align:right}
-.arn-vm-lab{font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--gd-lt)}
-.arn-vm-sub{font-size:11px;font-weight:700;color:var(--tx-mu);margin-top:2px}
+/* ── Prochaine carte + trophées de conduite, une seule bande ── */
+.arn2-strip{margin:22px 16px 0;border-radius:20px;overflow:hidden;
+  background:linear-gradient(180deg,var(--csu),var(--csu2));box-shadow:0 7px 0 var(--cedge),inset 0 1px 0 rgba(255,255,255,.08),inset 0 0 0 1px var(--gl2)}
+.arn2-strip-a{display:flex;align-items:center;gap:13px;padding:14px 16px;border-bottom:1px solid var(--cbo2)}
+.arn2-strip-img{width:42px;height:58px;flex:0 0 auto;border-radius:10px;overflow:hidden;position:relative;background:#0a0a10;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.12)}
+.arn2-strip-img img{width:100%;height:100%;object-fit:cover;filter:grayscale(1) brightness(.36) blur(1px)}
+.arn2-strip-img i{position:absolute;inset:0;display:grid;place-items:center;color:rgba(255,255,255,.65)}
+.arn2-strip-b{flex:1;min-width:0}
+.arn2-strip-k{font:800 9.5px/1 'Archivo',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--gd-lt)}
+.arn2-strip-n{margin-top:5px;font:700 14.5px/1.2 'Archivo',sans-serif;color:#fff;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.arn2-strip-go{height:44px;padding:0 16px;flex:0 0 auto;border:0;border-radius:13px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;color:#1c1140;font:800 13px/1 'Archivo',sans-serif;
+  background:linear-gradient(180deg,var(--gd-pale),var(--gd) 55%,var(--gd-2));box-shadow:0 3px 0 var(--gd-deep)}
+.arn2-strip-b2{display:flex;align-items:center;gap:11px;padding:13px 16px}
+.arn2-medal{width:40px;height:40px;flex:0 0 auto;border-radius:12px;display:grid;place-items:center;overflow:hidden;
+  background:linear-gradient(180deg,#221a52,#171038);box-shadow:inset 0 0 0 1px rgba(255,255,255,.07)}
+.arn2-medal img{width:32px;height:32px;object-fit:contain}
+.arn2-medal.locked img{filter:grayscale(1) brightness(.6);opacity:.55}
+.arn2-strip-t{flex:1;font:700 12.5px/1.3 'Archivo',sans-serif;color:var(--tx-dim)}
+.arn2-strip-t small{display:block;font:600 11px/1.3 'Archivo',sans-serif;color:var(--tx-mu);margin-top:3px}
 
-/* barre progression compétence */
-.arn-bar-wrap{margin:14px 20px 0}
-.arn-bar-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px;padding:0 2px}
-.arn-bar-l{font-size:12px;font-weight:800;color:var(--tx-dim)}
-.arn-bar-r{font-family:'Archivo',sans-serif;font-weight:600;font-size:12.5px;color:var(--gd-lt)}
-.arn-bar{position:relative;height:14px;border-radius:999px;background:#120d33;overflow:hidden;box-shadow:inset 0 2px 5px rgba(0,0,0,.55),inset 0 0 0 1px rgba(124,92,255,.2)}
-.arn-bar-fill{position:absolute;inset:2px auto 2px 2px;border-radius:999px;background:linear-gradient(180deg,var(--gd-pale) 0%,var(--gd) 48%,var(--gd-2) 100%);box-shadow:0 0 12px rgba(247,179,43,.55),inset 0 1px 0 rgba(255,255,255,.7)}
-.arn-bar-fill::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.5) 50%,transparent 65%);animation:arnShine 3.4s ease-in-out infinite}
-@keyframes arnShine{0%{transform:translateX(-130%)}55%,100%{transform:translateX(280%)}}
+/* ── Ma vitrine ── */
+.arn2-sec{margin:28px 16px 0}
+.arn2-sec-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 2px 4px}
+.arn2-sec-ttl{margin:0;font:800 18px/1 'Archivo',sans-serif;color:#fff;letter-spacing:-.02em}
+.arn2-sec-sub{margin:0 2px 14px;font:600 12px/1.4 'Archivo',sans-serif;color:var(--tx-mu)}
+.arn2-wallet{display:flex;align-items:center;gap:6px;padding:6px 12px 6px 8px;border-radius:99px;flex-shrink:0;
+  font:800 13px/1 'Archivo',sans-serif;color:var(--gd-lt);background:rgba(247,179,43,.12);box-shadow:inset 0 0 0 1px rgba(247,179,43,.3)}
+.arn2-wallet img{width:18px;height:18px}
+.arn2-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.arn2-tile{display:block;border:0;text-align:center;padding:12px 11px 11px;border-radius:20px;cursor:pointer;font-family:inherit;color:inherit;text-decoration:none;
+  background:linear-gradient(180deg,var(--csu2),var(--csu));box-shadow:0 5px 0 var(--cedge),inset 0 1px 0 rgba(255,255,255,.08),inset 0 0 0 1px rgba(255,255,255,.06)}
+.arn2-tile-plate{height:88px;border-radius:14px;display:grid;place-items:center;overflow:hidden;
+  background:radial-gradient(80% 70% at 50% 22%, rgba(124,92,255,.28), rgba(10,8,26,.5))}
+.arn2-tile-plate img{width:74px;height:74px;object-fit:contain;filter:drop-shadow(0 5px 10px rgba(0,0,0,.5))}
+.arn2-tile.is-locked .arn2-tile-plate img{filter:grayscale(1) brightness(.55)}
+.arn2-tile-n{margin:10px 0 0;font:700 12.5px/1.2 'Archivo',sans-serif;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.arn2-tag{margin-top:9px;display:flex;align-items:center;justify-content:center;gap:5px;height:32px;border-radius:11px;font:800 12px/1 'Archivo',sans-serif}
+.arn2-tag img{width:15px;height:15px}
+.arn2-tag svg{width:14px;height:14px}
+.arn2-tag.buy{color:#1c1140;background:linear-gradient(180deg,var(--gd-pale),var(--gd) 58%,var(--gd-2));box-shadow:0 3px 0 var(--gd-deep)}
+.arn2-tag.own{color:#a9f0c0;background:rgba(88,204,2,.14);box-shadow:inset 0 0 0 1px rgba(121,230,58,.35)}
+.arn2-tag.eq{color:#1c3306;background:linear-gradient(180deg,#79e63a,#58cc02 60%,#3a8a02);box-shadow:0 3px 0 #2c6a01}
+.arn2-tag.lock{color:var(--tx-mu);background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.arn2-linkall{margin-top:12px;width:100%;border:0;cursor:pointer;padding:13px;border-radius:15px;text-decoration:none;display:block;text-align:center;
+  font:700 14px/1 'Archivo',sans-serif;color:var(--gd-lt);background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(247,179,43,.22)}
 
-/* stats */
-.arn-stats{display:flex;gap:11px;margin:18px 16px 0}
-.arn-stat{flex:1;border-radius:18px;padding:15px 8px 13px;text-align:center;background:linear-gradient(180deg,#1f1850,#161038);box-shadow:0 6px 0 var(--cedge),inset 0 1px 0 rgba(255,255,255,.08),inset 0 0 0 1px var(--gl2)}
-.arn-s-ico{height:30px;margin:0 auto 7px;display:block}
-.arn-s-num{font-family:'Archivo',sans-serif;font-weight:700;font-size:22px;color:var(--tx);line-height:1}
-.arn-s-num.gd{color:var(--gd-lt)}
-.arn-s-lab{font-size:10.5px;font-weight:700;color:var(--tx-mu);margin-top:4px}
-
-/* succès */
-.arn-ach-block{margin:24px 0 0}
-.arn-ach-head{display:flex;align-items:baseline;justify-content:space-between;margin:0 22px 12px}
-.arn-ach-title{font-family:'Archivo',sans-serif;font-weight:600;font-size:16px;color:var(--tx)}
-.arn-ach-count{font-size:11.5px;font-weight:800;color:var(--gd-lt)}
-.arn-ach-scroll{display:flex;gap:13px;overflow-x:auto;padding:4px 18px 14px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
-.arn-ach-scroll::-webkit-scrollbar{height:0}
-.arn-ach{flex:0 0 auto;width:92px;scroll-snap-align:start;text-align:center}
-.arn-medal{position:relative;width:92px;height:92px;border-radius:20px;display:grid;place-items:center;overflow:hidden;background:linear-gradient(180deg,#221a52,#171038);box-shadow:0 7px 0 var(--cedge),inset 0 1px 0 rgba(255,255,255,.08),inset 0 0 0 1px var(--gl)}
-.arn-medal img{width:74px;height:74px;object-fit:contain;filter:drop-shadow(0 3px 6px rgba(0,0,0,.45))}
-.arn-medal::before{content:"";position:absolute;width:66px;height:66px;border-radius:50%;background:radial-gradient(circle,rgba(247,179,43,.28),transparent 70%)}
-.arn-ach.locked .arn-medal{box-shadow:0 7px 0 var(--cedge),inset 0 1px 0 rgba(255,255,255,.04),inset 0 0 0 1px rgba(255,255,255,.05)}
-.arn-ach.locked .arn-medal::before{display:none}
-.arn-ach.locked .arn-medal img{filter:grayscale(1) brightness(.45);opacity:.5}
-.arn-lock{position:absolute;width:26px;height:26px;border-radius:50%;background:rgba(10,8,26,.72);display:grid;place-items:center;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
-.arn-lock svg{width:18px;height:18px}
-.arn-ach-name{font-size:10.5px;font-weight:700;color:var(--tx-dim);margin-top:8px;line-height:1.25}
-.arn-ach.locked .arn-ach-name{color:var(--tx-fa)}
-
-/* prochain défi */
-.arn-next{margin:24px 16px 0;border-radius:24px;padding:18px 18px 20px;position:relative;overflow:hidden;background:linear-gradient(160deg,#251d5a 0%,#181140 100%);box-shadow:0 12px 0 var(--cedge),0 22px 36px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.12),inset 0 0 0 1.5px var(--gl)}
-.arn-next::before{content:"";position:absolute;right:-40px;top:-50px;width:170px;height:170px;border-radius:50%;background:radial-gradient(circle,rgba(124,92,255,.28),transparent 68%);pointer-events:none}
-.arn-next-kick{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:var(--gd-lt)}
-.arn-next-kick svg{width:14px;height:14px}
-.arn-next-main{display:flex;align-items:center;gap:14px;margin-top:13px}
-.arn-next-emblem{width:56px;height:56px;flex:0 0 auto;border-radius:16px;display:grid;place-items:center;overflow:hidden;background:linear-gradient(160deg,#7c5cff,#4a2fc4);box-shadow:0 6px 0 #2c1d80,inset 0 1px 0 rgba(255,255,255,.3),inset 0 0 0 1.5px var(--gl)}
-.arn-next-emblem img{width:100%;height:100%;object-fit:cover}
-.arn-next-info{flex:1;min-width:0}
-.arn-next-code{font-size:10.5px;font-weight:800;color:var(--tx-mu);letter-spacing:.6px;text-transform:uppercase}
-.arn-next-name{font-family:'Archivo',sans-serif;font-weight:600;font-size:18px;color:var(--tx);line-height:1.18;margin-top:3px}
-.arn-cta{margin-top:17px;width:100%;border:0;cursor:pointer;font-family:'Archivo',sans-serif;font-weight:600;font-size:17px;color:var(--a-ink);padding:15px;border-radius:16px;display:flex;align-items:center;justify-content:center;gap:9px;
-  /* Accent (tokens), plus le vert en dur : une couleur d'action partout,
-     et l'accent choisi (Réglages ou thème boutique) recolore ce CTA aussi. */
-  background:linear-gradient(180deg,var(--a-lt) 0%,var(--a) 52%,var(--adk) 100%);box-shadow:0 6px 0 var(--adk),inset 0 1px 0 rgba(255,255,255,.5);transition:transform .08s,box-shadow .08s}
-.arn-cta:active{transform:translateY(4px);box-shadow:0 2px 0 var(--adk),inset 0 1px 0 rgba(255,255,255,.5)}
-.arn-cta svg{width:18px;height:18px}
-
-/* réglages */
-.arn-set{margin:26px 16px 0}
-.arn-set-title{font-size:11px;font-weight:800;color:var(--tx-mu);letter-spacing:2px;text-transform:uppercase;margin:0 6px 11px}
-.arn-set-list{border-radius:20px;overflow:hidden;background:linear-gradient(180deg,#1c1548,#15103a);box-shadow:0 8px 0 var(--cedge),inset 0 1px 0 rgba(255,255,255,.08),inset 0 0 0 1px var(--gl2)}
-.arn-row{display:flex;align-items:center;gap:14px;padding:16px 17px;border-bottom:1px solid rgba(255,255,255,.05);width:100%;background:none;border-left:0;border-right:0;border-top:0;color:inherit;text-align:left;cursor:pointer;font-family:inherit}
-.arn-row:last-child{border-bottom:0}
-.arn-row-ico{width:30px;height:30px;flex:0 0 auto;display:grid;place-items:center}
-.arn-row-ico svg{width:30px;height:30px}
-.arn-row-lab{flex:1;font-size:15px;font-weight:700;color:var(--tx)}
-.arn-row-lab small{display:block;font-size:11.5px;font-weight:600;color:var(--tx-mu);margin-top:2px}
-.arn-chev{color:var(--tx-mu)}.arn-chev svg{width:18px;height:18px}
-.arn-tog{width:52px;height:30px;border-radius:999px;border:0;cursor:pointer;position:relative;flex:0 0 auto;background:#120d33;box-shadow:inset 0 2px 4px rgba(0,0,0,.5);transition:background .2s}
-.arn-tog.on{background:linear-gradient(180deg,var(--gr) 0%,var(--gr-dk) 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.3)}
-.arn-tog .knob{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:linear-gradient(180deg,#fff,#dcd6f5);box-shadow:0 2px 4px rgba(0,0,0,.4);transition:transform .2s}
-.arn-tog.on .knob{transform:translateX(22px)}
-
-.arn-logout{margin:18px 16px 0;width:calc(100% - 32px);border:0;cursor:pointer;font-family:'Archivo',sans-serif;font-weight:600;font-size:15.5px;color:#ffd4cf;padding:15px;border-radius:16px;display:flex;align-items:center;justify-content:center;gap:10px;
-  background:linear-gradient(180deg,#2c1a44,#1f1234);box-shadow:0 5px 0 #130a22,inset 0 1px 0 rgba(255,255,255,.08),inset 0 0 0 1px rgba(255,120,120,.14);transition:transform .08s,box-shadow .08s}
-.arn-logout:active{transform:translateY(3px);box-shadow:0 2px 0 #130a22,inset 0 1px 0 rgba(255,255,255,.08),inset 0 0 0 1px rgba(255,120,120,.14)}
-.arn-logout svg{width:18px;height:18px}
-.arn-del{display:block;margin:14px auto 0;background:none;border:0;color:var(--tx-fa);font:500 12.5px/1 'Archivo',sans-serif;text-decoration:underline;cursor:pointer;padding:8px}
-.arn-since{text-align:center;margin:16px 0 4px;font-size:11px;font-weight:700;color:var(--tx-fa);letter-spacing:.6px;text-transform:uppercase}
+/* ── Accès rapide + bas de page ── */
+.arn2-linkrow{margin:22px 16px 0;display:flex;align-items:center;gap:12px;padding:14px 16px;min-height:52px;border-radius:16px;text-decoration:none;color:var(--tx);
+  background:var(--csu);box-shadow:0 5px 0 var(--cedge),inset 0 1px 0 rgba(255,255,255,.07),inset 0 0 0 1px var(--gl2)}
+.arn2-linkrow span.lbl{flex:1;font:700 14px/1.2 'Archivo',sans-serif}
+.arn2-linkrow svg{width:20px;height:20px;flex-shrink:0;color:var(--tx-mu)}
+.arn2-foot{margin:22px 16px 0;display:flex;gap:10px}
+.arn2-foot a,.arn2-foot button{flex:1;border:0;cursor:pointer;text-decoration:none;padding:15px 10px;border-radius:16px;font:700 13.5px/1 'Archivo',sans-serif;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;gap:8px}
+.arn2-foot svg{width:16px;height:16px}
+.arn2-f-set{color:var(--tx);background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
+.arn2-f-out{color:#ffd4cf;background:linear-gradient(180deg,#2c1a44,#1f1234);box-shadow:0 4px 0 #130a22,inset 0 0 0 1px rgba(255,120,120,.14)}
+.arn2-del{display:block;margin:15px auto 0;background:none;border:0;color:var(--tx-mu);font:500 12.5px/1 'Archivo',sans-serif;text-decoration:underline;cursor:pointer;padding:9px}
 
 /* La carte profil entre avec une translation (slide-up partagé, fill-mode
    « both »). Or un élément qui ANIME un transform reste un bloc conteneur pour
@@ -1715,10 +1638,7 @@ ${chromeNight("#2a1a5e", "#08071a")}
 .arn-modal-save{margin-top:18px;width:100%;border:0;cursor:pointer;font-family:'Archivo',sans-serif;font-weight:600;font-size:17px;color:#1c3306;padding:15px;border-radius:16px;background:linear-gradient(180deg,var(--gr-rim) 0%,var(--gr) 52%,var(--gr-dk) 100%);box-shadow:0 6px 0 var(--gr-dk),inset 0 1px 0 rgba(255,255,255,.5);transition:transform .08s,box-shadow .08s}
 .arn-modal-save:active{transform:translateY(4px);box-shadow:0 2px 0 var(--gr-dk),inset 0 1px 0 rgba(255,255,255,.5)}
 .arn-modal-save:disabled{opacity:.5;cursor:not-allowed}
-@media (prefers-reduced-motion: reduce){.arn-bar-fill::after{animation:none}}
 </style>`;
-
-const _LOCK_SVG = medallion("cadenas", "slate", { size: 18 });
 
 // ── i18n des coques profil (EN/AR) : élève, moniteur et composants communs.
 // Dict LOCAL au composant. pt() échappe le contenu HTML, ptA() les attributs et
@@ -2063,13 +1983,19 @@ function ptAch(key, fr) {
 }
 
 async function mountEleveArene(root, me) {
-  root.innerHTML = `${STYLE_ARENE}<div class="arn"${profileDir()}><div class="skel skel-card" style="height:300px;margin:14px 16px 0;border-radius:28px"></div><div class="skel skel-card" style="height:90px;margin:18px 16px 0;border-radius:18px"></div></div>`;
+  root.innerHTML = `${STYLE_ARENE}<div class="arn"${profileDir()}><div class="skel skel-card" style="height:44px;margin:0 16px 20px;border-radius:14px"></div><div class="skel skel-card" style="height:420px;margin:0 16px;border-radius:26px"></div></div>`;
 
   // ── Fetch réel ─────────────────────────────────────────────
-  // get_my_achievements = MÊME source que la salle des trophées → « Tes
-  // succès » affiche exactement les mêmes badges (débloqués inclus).
-  const [profileRes, valRes, streakRes, achRes, selfValRes] =
-    await Promise.allSettled([
+  // get_my_achievements = MÊME source que la salle des trophées → les 2
+  // trophées qui restent ici sont EXACTEMENT dans le même état débloqué/pas.
+  // get_items_catalog + le module collection.js (le paquet, importé
+  // dynamiquement pour ne pas alourdir CE chunk pour le moniteur/gérant qui
+  // ne le verront jamais) sont chargés dans le même lot.
+  const [
+    [profileRes, valRes, achRes, selfValRes, itemsRes, deckRes],
+    streakData,
+  ] = await Promise.all([
+    Promise.allSettled([
       sb
         .from("profiles")
         .select("email, prenom, nom, username, gemmes, created_at, avatar_url")
@@ -2080,58 +2006,60 @@ async function mountEleveArene(root, me) {
         .select("competence_id")
         .eq("eleve_id", me.id)
         .eq("statut", "acquis"),
-      sb
-        .from("streaks")
-        .select("current_streak, last_activity_date")
-        .eq("user_id", me.id)
-        .maybeSingle(),
       sb.rpc("get_my_achievements"),
       // Validation autonome (élève solo, valider-seul.js) : table séparée de
-      // `validations`, fusionnée en lecture pour que le profil élève solo ne
-      // reste pas figé à 0/31. Même pattern que accueil.js.
-      sb.from("self_validations").select("competence_id").eq("eleve_id", me.id),
-    ]);
+      // `validations`, fusionnée en lecture pour que le paquet et la carte
+      // « prochaine » élève solo ne restent pas figés à 0/31.
+      sb
+        .from("self_validations")
+        .select("competence_id, validated_at")
+        .eq("eleve_id", me.id),
+      // Lecture seule (même RPC que boutique.js) : juste un APERÇU de la
+      // vitrine ici, l'achat/l'équipement complet reste sur #/boutique.
+      sb.rpc("get_items_catalog"),
+      import("@/pages/eleve/collection.js"),
+    ]),
+    getStreak(),
+  ]);
 
   _reportQueryErrors(
     "carte élève",
     [
       ["profil", profileRes],
       ["validations", valRes],
-      ["série", streakRes],
       ["trophées", achRes],
       ["auto-validations", selfValRes],
+      ["boutique", itemsRes],
     ],
     "Certaines données du profil sont indisponibles.",
   );
   const profile = _queryData(profileRes);
-  const streakRow = _queryData(streakRes);
   const valData = _queryData(valRes);
   const selfValData = _queryData(selfValRes);
   const achData = _queryData(achRes);
-  const validatedSet = new Set((valData || []).map((v) => v.competence_id));
-  for (const s of selfValData || []) validatedSet.add(s.competence_id);
-  const validated = validatedSet.size;
-  const _yStrS = yesterdayKey();
-  // Série d'activité : périmée si dernière activité < hier (cf. accueil).
-  const streak =
-    streakRow && streakRow.last_activity_date >= _yStrS
-      ? (streakRow.current_streak ?? 0)
-      : 0;
+  const catalogData = _queryData(itemsRes) || [];
+  // Le paquet est un import dynamique (pas un appel Supabase) : géré à part.
+  const deck = deckRes.status === "fulfilled" ? deckRes.value : null;
+  if (deckRes.status === "rejected")
+    console.error("[profil] chargement du paquet", deckRes.reason);
+
+  // compId → date de déblocage (préférence à la certif élève), même logique
+  // que collection.js#mount pour que « Carte X sur 31 » raconte la même
+  // histoire des deux côtés.
+  const unlockedMap = new Map();
+  for (const s of selfValData || [])
+    unlockedMap.set(s.competence_id, s.validated_at || null);
+  for (const v of valData || [])
+    if (!unlockedMap.has(v.competence_id))
+      unlockedMap.set(v.competence_id, null);
+  const validated = unlockedMap.size;
+  // Série : déjà à 0 si cassée, déjà bumpée si un quiz a été fait aujourd'hui
+  // (même règle que l'accueil et Réviser, cf. src/services/streak.js).
+  const streak = streakData.current;
   const volants = typeof profile?.gemmes === "number" ? profile.gemmes : 0;
-  const restantes = Math.max(0, REMC_TOTAL - validated);
   // Photo de profil : même source que le header (avatar équipé de la boutique,
   // sinon la photo persistée). Repli sur les initiales si aucune image.
   const avatarUrl = getEquippedAsset("avatar") || profile?.avatar_url || null;
-
-  const st = _competenceState(validated);
-  const emblem = REMC_EMBLEM[st.comp.id] || REMC_EMBLEM.C1;
-  const compPct = st.total ? Math.round((st.inComp / st.total) * 100) : 0;
-  // « Compétence N » traduit ; le nom de la compétence (REMC) reste à sa source.
-  const compLabel = (n) => ptR("comp_n", `Compétence ${n}`).replace("{n}", n);
-  const nextName = st.allDone
-    ? ptR("all_done", "Tout est validé. Permis virtuel débloqué")
-    : st.next?.n || ptR("next_skill", "Compétence suivante");
-  const nextCode = `${compLabel(st.idx)} · ${esc(st.comp.name)}`;
 
   const pseudo = (profile?.username || "").trim();
   const legalName =
@@ -2145,187 +2073,150 @@ async function mountEleveArene(root, me) {
     "?"
   ).toUpperCase();
 
-  let memberSince = "";
-  if (profile?.created_at) {
-    const d = new Date(profile.created_at);
-    const _dateLoc =
-      { fr: "fr-FR", en: "en-GB", ar: "ar" }[getLang()] || "fr-FR";
-    if (!isNaN(d))
-      memberSince = d.toLocaleDateString(_dateLoc, {
-        month: "long",
-        year: "numeric",
-      });
-  }
-
+  // ── Les 2 seuls trophées : même source que la salle des trophées ──
   const achOk = Array.isArray(achData);
   const unlockedKeys = new Set((achData || []).map((u) => u.achievement_key));
-  const achievements = _areneAchievements(
-    unlockedKeys,
-    achOk,
-    validated,
-    streak,
+  const trophies = CATALOG.filter((d) => PROFIL_TROPHIES.includes(d.key)).map(
+    (def) => ({
+      image: def.image,
+      name: ptAch(def.key, def.title),
+      need: achOk
+        ? unlockedKeys.has(def.key)
+        : _fallbackUnlocked(def.key, validated, streak),
+    }),
   );
-  const unlocked = achievements.filter((a) => a.need).length;
-  // Compteur succès + suffixe « jours » (pluriel FR géré, invariant EN/AR).
-  const _lg = getLang();
-  const _toCome = achievements.length - unlocked;
-  const achCountTxt =
-    _lg === "fr"
-      ? `${unlocked} débloqué${unlocked > 1 ? "s" : ""} · ${_toCome} à venir`
-      : ptR("unlocked_to_come", "{unlocked} débloqués · {locked} à venir", {
-          unlocked,
-          locked: _toCome,
-        });
-  const daysSuffix = _lg === "en" ? " d" : _lg === "ar" ? " يوم" : " j";
 
-  // ── Notifications : état réel ──────────────────────────────
-  const notifSupported = "Notification" in window;
-  const notifDenied = notifSupported && Notification.permission === "denied";
-  const notifOn = notifSupported && isPushEnabled();
+  // ── La prochaine carte à préparer (première non débloquée) ──
+  const nextCarte = CARTES.find((c) => !unlockedMap.has(c.id)) || null;
+
+  // ── Ma vitrine : un aperçu (6 pièces), le reste vit sur #/boutique ──
+  const equippedId = getEquipped()?.avatar || null;
+  const avatarItems = catalogData.filter((i) => i.type === "avatar");
+  const tileRank = (it) =>
+    equippedId && it.id === equippedId ? 0 : it.owned ? 1 : 2;
+  const previewItems = [...avatarItems]
+    .sort((a, b) => tileRank(a) - tileRank(b) || a.cost_gemmes - b.cost_gemmes)
+    .slice(0, 6);
+
+  // ── État initial du paquet (même règle que collection.js#mount : on ouvre
+  // sur la première carte non débloquée, la « à viser », sinon la 1ère). ──
+  let deckState = null;
+  if (deck) {
+    const firstLocked = CARTES.findIndex((c) => !unlockedMap.has(c.id));
+    deckState = {
+      cur: firstLocked >= 0 ? firstLocked : 0,
+      unlocked: unlockedMap,
+      seen: deck.loadSeen(),
+      reveal: null,
+    };
+  }
 
   // ── Render ─────────────────────────────────────────────────
-  root.innerHTML = `${STYLE_ARENE}
+  root.innerHTML = `${STYLE_ARENE}${deck ? `<style>${deck.CARD_DECK_STYLE}</style>` : ""}
 <div class="arn anim-slide-up"${profileDir()}>
-  <h1 class="arn-h1">${pt("h1_title", "Mon profil")}</h1>
 
-  <div class="arn-card">
-    <span class="arn-corner tl"></span><span class="arn-corner tr"></span>
-    <span class="arn-corner bl"></span><span class="arn-corner br"></span>
-
-    <div class="arn-banner">
-      <div class="arn-pseudo-row">
-        <span class="arn-pseudo ${pseudo ? "" : "unset"}" id="arn-pseudo"><span class="at">@</span>${esc(pseudo || ptR("pseudo_ph", "ton_pseudo"))}</span>
-        <button class="arn-edit" id="arn-edit-pseudo" aria-label="${ptA("pseudo_edit_aria", "Changer de pseudo")}">
-          ${icon("edit", { size: 14, strokeWidth: 2.2 })}
-        </button>
-      </div>
-      <div class="arn-legal">${esc(legalName)}</div>
-    </div>
-
-    <div class="arn-body">
-      <div class="arn-crest">
-        <div class="arn-crest-disc"><div class="arn-crest-inner">${avatarUrl ? `<img src="${escAttr(avatarUrl)}" alt="" referrerpolicy="no-referrer" />` : esc(initials)}</div></div>
-        <button class="arn-crest-edit" id="arn-edit-avatar" aria-label="${ptA("photo_edit", "Changer ma photo")}" title="${ptA("photo_edit", "Changer ma photo")}">${icon("image", { size: 14, strokeWidth: 2.2 })}</button>
-      </div>
-      <div class="arn-meta">
-        <span class="arn-permis"><span class="dot"></span>${pt("licence_b", "Permis B")}</span>
-        <div class="arn-comp">
-          <span class="arn-comp-emblem"><img src="${emblem}" alt="" /></span>
-          <div class="arn-comp-txt">
-            <div class="arn-rank">${esc(st.comp.tname)}</div>
-            <div class="arn-csub">${compLabel(st.idx)} · ${esc(st.comp.name)}</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="arn-valid">
-      <span class="arn-valid-emblem"><img src="/skins/trophy-permis-virtuel.webp" alt="" /></span>
-      <div class="arn-valid-num"><b>${validated}</b><span class="sl">/</span><span class="tt">${REMC_TOTAL}</span></div>
-      <div class="arn-valid-meta">
-        <div class="arn-vm-lab">${pt("valid_lab", "Validations")}</div>
-        <div class="arn-vm-sub">${pt("valid_sub", "objectifs du livret")}</div>
-      </div>
-    </div>
-
-    <div class="arn-bar-wrap">
-      <div class="arn-bar-head">
-        <span class="arn-bar-l">${compLabel(st.idx)} · ${st.inComp} / ${st.total}</span>
-        <span class="arn-bar-r">${st.allDone ? pt("bar_done", "terminé ✓") : pt("bar_next", "prochaine validation")}</span>
-      </div>
-      <div class="arn-bar"><div class="arn-bar-fill" style="width:${Math.max(4, compPct)}%"></div></div>
-    </div>
-  </div>
-
-  <!-- stats : série · volants · restantes (tous réels) -->
-  <div class="arn-stats">
-    <div class="arn-stat">
-      <img class="arn-s-ico" src="/skins/permigo-streak-flame-v1.webp" alt="" />
-      <div class="arn-s-num gd">${streak}${daysSuffix}</div>
-      <div class="arn-s-lab">${pt("stat_streak", "Série")}</div>
-    </div>
-    <div class="arn-stat">
-      <img class="arn-s-ico" src="/skins/volant-coin.webp" alt="" />
-      <div class="arn-s-num gd">${volants}</div>
-      <div class="arn-s-lab">${pt("stat_volants", "Volants")}</div>
-    </div>
-    <div class="arn-stat">
-      ${medallion("etoile", "gold", { size: 30, cls: "arn-s-ico" })}
-      <div class="arn-s-num">${restantes}</div>
-      <div class="arn-s-lab">${pt("stat_remaining", "Restantes")}</div>
-    </div>
-  </div>
-
-  <!-- succès : vrais badges -->
-  <div class="arn-ach-block">
-    <div class="arn-ach-head">
-      <span class="arn-ach-title">${pt("ach_title", "Tes succès")}</span>
-      <span class="arn-ach-count">${achCountTxt}</span>
-    </div>
-    <div class="arn-ach-scroll" tabindex="0" role="group" aria-label="${ptA("ach_list_aria", "Tes succès (liste défilante)")}">
-      ${achievements
-        .map(
-          (a) => `
-      <div class="arn-ach ${a.need ? "" : "locked"}">
-        <div class="arn-medal">
-          <img src="${a.image}" alt="" loading="lazy" />
-          ${a.need ? "" : `<span class="arn-lock">${_LOCK_SVG}</span>`}
-        </div>
-        <div class="arn-ach-name">${esc(a.name)}</div>
-      </div>`,
-        )
-        .join("")}
-    </div>
-  </div>
-
-  <!-- prochain défi -->
-  <div class="arn-next">
-    <span class="arn-next-kick">${icon("zap", { size: 14 })} ${pt("next_kick", "Ton prochain défi")}</span>
-    <div class="arn-next-main">
-      <span class="arn-next-emblem"><img src="${emblem}" alt="" /></span>
-      <div class="arn-next-info">
-        <div class="arn-next-code">${nextCode}</div>
-        <div class="arn-next-name">${esc(nextName)}</div>
-      </div>
-    </div>
-    <button class="arn-cta" id="arn-reviser">
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 4l13 8-13 8V4z" fill="#1c3306"/></svg> ${pt("cta_review", "Réviser maintenant")}
+  <!-- Identité : 44px, un tap sur la photo ou le nom suffit. Pas de bouton
+       Réglages ici : le bandeau global (header-top.js) en a déjà un, tout en
+       haut de CHAQUE page — l'empiler ici aurait remis du bruit qu'on vient
+       de retirer. « Réglages » reste accessible en bas de page. -->
+  <div class="arn2-top">
+    <button class="arn2-av" id="arn2-avatar-btn" type="button" aria-label="${ptA("photo_edit", "Changer ma photo")}">
+      ${
+        avatarUrl
+          ? // onerror : un avatar_url orphelin (fichier renommé/supprimé côté
+            // skins, jamais nettoyé en base) ne doit jamais afficher l'icône
+            // « image cassée » du navigateur — repli sur les initiales, même
+            // idiome que le helper partagé components/common/avatar.js.
+            `<img src="${escAttr(avatarUrl)}" alt="" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'"><span class="ini" style="display:none">${esc(initials)}</span>`
+          : `<span class="ini">${esc(initials)}</span>`
+      }
+    </button>
+    <button class="arn2-name" id="arn2-pseudo-btn" type="button" aria-label="${ptA("pseudo_edit_aria", "Changer de pseudo")}">
+      <b id="arn2-pseudo-lbl">${pseudo ? `<i>@</i>${esc(pseudo)}` : esc(ptR("pseudo_ph", "ton_pseudo"))}</b>
+      <small>${esc(legalName)}</small>
     </button>
   </div>
 
-  <!-- réglages -->
-  <div class="arn-set">
-    <p class="arn-set-title">${pt("settings", "Réglages")}</p>
-    <div class="arn-set-list">
-      <a class="arn-row" href="#/notifications">
-        <span class="arn-row-ico">${medallion("message", "blue", { size: 30, shape: "tile" })}</span>
-        <span class="arn-row-lab">${pt("row_notifs", "Mes notifications")}<small>${pt("row_notifs_sub", "Validations · encouragements · comptes-rendus")}</small></span>
-        <span class="arn-chev"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-      </a>
-      ${
-        notifSupported
-          ? `
-      <button class="arn-row" id="arn-notif" type="button" aria-pressed="${notifOn}">
-        <span class="arn-row-ico">${medallion("cloche", "orange", { size: 30, shape: "tile" })}</span>
-        <span class="arn-row-lab">${pt("row_reminders", "Rappels de révision")}<small id="arn-notif-sub">${notifDenied ? pt("notif_blocked", "Bloqués par le navigateur") : notifOn ? pt("notif_rhythm", "Reste dans le rythme") : pt("notif_off", "Désactivés")}</small></span>
-        ${notifDenied ? "" : `<span class="arn-tog ${notifOn ? "on" : ""}" id="arn-notif-tog"><span class="knob"></span></span>`}
-      </button>`
-          : ""
-      }
-      <a class="arn-row" href="#/settings">
-        <span class="arn-row-ico">${medallion("reglages", "slate", { size: 30, shape: "tile" })}</span>
-        <span class="arn-row-lab">${pt("settings", "Réglages")}<small>${pt("row_settings_sub", "Thème · langue · confidentialité")}</small></span>
-        <span class="arn-chev"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-      </a>
+  <!-- LE héros : le paquet, mécanique partagée avec #/cartes (jamais dupliquée) -->
+  <div class="arn2-cards-hd">
+    <h1 class="arn2-cards-ttl">Mes cartes</h1>
+  </div>
+  ${
+    deck
+      ? `
+  <div class="col-stage" id="col-stage">
+    <div class="col-hint-l">${icon("check", { size: 14 })} Suivante</div>
+    <div class="col-hint-r">Précédente ${icon("chevron-right", { size: 14 })}</div>
+  </div>
+  <div class="col-ctrls">
+    <button class="col-arrow" id="col-prev" aria-label="Carte précédente">${icon("chevron-left", { size: 22 })}</button>
+    <div class="col-counter" id="col-counter"></div>
+    <button class="col-arrow" id="col-next" aria-label="Carte suivante">${icon("chevron-right", { size: 22 })}</button>
+  </div>
+  <p class="col-swipe-tip" id="col-tip"></p>`
+      : `<div style="margin:16px 20px 0;padding:22px;border-radius:20px;background:var(--csu);color:var(--tx-mu);font:600 13px/1.5 'Archivo',sans-serif;text-align:center">Tes cartes ne se chargent pas. Vérifie ta connexion puis réessaie.</div>`
+  }
+
+  <!-- Prochaine carte + les 2 trophées de conduite, une seule bande -->
+  <div class="arn2-strip">
+    ${
+      nextCarte
+        ? `
+    <div class="arn2-strip-a">
+      <span class="arn2-strip-img">
+        <img src="${esc(nextCarte.img)}" alt="" loading="lazy" />
+        <i>${icon("lock", { size: 16 })}</i>
+      </span>
+      <div class="arn2-strip-b">
+        <div class="arn2-strip-k">Prochaine carte</div>
+        <div class="arn2-strip-n">${esc(nextCarte.n)}</div>
+      </div>
+      <a class="arn2-strip-go" href="#/revision-conduite/${escAttr(nextCarte.id)}">Préparer</a>
+    </div>`
+        : ""
+    }
+    <div class="arn2-strip-b2">
+      ${trophies
+        .map(
+          (t) =>
+            `<span class="arn2-medal${t.need ? "" : " locked"}"><img src="${t.image}" alt="" loading="lazy" /></span>`,
+        )
+        .join("")}
+      <div class="arn2-strip-t">${trophies.length} trophée${trophies.length > 1 ? "s" : ""} de conduite<small>Prêt examen blanc à 28 cartes · Route ouverte à 31</small></div>
     </div>
   </div>
 
-  <button class="arn-logout" id="arn-logout">
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 12H4m0 0l4-4m-4 4l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 3h8a2 2 0 012 2v14a2 2 0 01-2 2H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> ${pt("logout", "Se déconnecter")}
-  </button>
-  <button class="arn-del" id="arn-del">${pt("delete_account", "Supprimer mon compte")}</button>
+  <!-- Ma vitrine : un aperçu lisible, l'achat complet vit sur #/boutique -->
+  <div class="arn2-sec">
+    <div class="arn2-sec-hd">
+      <h2 class="arn2-sec-ttl">Ma vitrine</h2>
+      <span class="arn2-wallet">${volantImg(18)}${volants}</span>
+    </div>
+    <p class="arn2-sec-sub">Ta photo de profil dans toute l'app.</p>
+    ${
+      previewItems.length
+        ? `
+    <div class="arn2-grid">
+      ${previewItems.map((it) => _vitrineTile(it, equippedId, volants)).join("")}
+    </div>
+    <a class="arn2-linkall" href="#/boutique">Voir les ${avatarItems.length} skins</a>`
+        : `<a class="arn2-linkall" href="#/boutique">Découvrir la boutique</a>`
+    }
+  </div>
 
-  <div class="arn-since">${memberSince ? `${pt("member_since", "Membre depuis")} ${esc(memberSince)}` : ""}</div>
+  <a class="arn2-linkrow" href="#/notifications">
+    <span class="lbl">${pt("row_notifs", "Mes notifications")}</span>
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </a>
+
+  <div class="arn2-foot">
+    <a class="arn2-f-set" href="#/settings">${icon("settings", { size: 16 })} ${pt("settings", "Réglages")}</a>
+    <button class="arn2-f-out" id="arn-logout" type="button">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 12H4m0 0l4-4m-4 4l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 3h8a2 2 0 012 2v14a2 2 0 01-2 2H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      ${pt("logout", "Se déconnecter")}
+    </button>
+  </div>
+  <button class="arn2-del" id="arn-del" type="button">${pt("delete_account", "Supprimer mon compte")}</button>
 
   <!-- modale changer de pseudo -->
   <div class="arn-modal-scrim" id="arn-modal" role="dialog" aria-modal="true" aria-label="${ptA("pseudo_edit_aria", "Changer de pseudo")}">
@@ -2350,19 +2241,48 @@ async function mountEleveArene(root, me) {
   </div>
 </div>`;
 
+  // ── Le paquet : mécanique 100% partagée avec #/cartes (buildDeck/
+  // wireControls/enableTilt viennent tels quels de collection.js) ──
+  if (deck && deckState) {
+    deck.buildDeck(root, deckState);
+    deck.wireControls(root, deckState);
+    deck.enableTilt(root);
+  }
+
   _wireEleveArene(root, me, avatarUrl);
 }
 
-function _wireEleveArene(root, me, avatarUrl) {
-  // ── Réviser → parcours ──
-  root.querySelector("#arn-reviser")?.addEventListener("click", () => {
-    haptic("select");
-    location.hash = "#/parcours";
-  });
+// Une tuile de la vitrine (aperçu lecture seule — l'achat/l'équipement
+// complet vivent sur #/boutique, on ne duplique pas ce flux ici). États
+// évidents façon Duolingo : équipé (vert plein) · possédé (vert sourdine) ·
+// achetable (or) · verrouillé (gris + prix). Un tap va sur la boutique.
+function _vitrineTile(it, equippedId, volants) {
+  const isEquipped = it.owned && equippedId === it.id;
+  const isOwned = it.owned && !isEquipped;
+  const canAfford = volants >= (it.cost_gemmes || 0);
+  const name = itemName(it.id, it.name, getLang());
+  let tag;
+  if (isEquipped) {
+    tag = `<div class="arn2-tag eq">${icon("check", { size: 14 })}${pt("equipped_short", "Équipé")}</div>`;
+  } else if (isOwned) {
+    tag = `<div class="arn2-tag own">${pt("owned_lab", "Possédé")}</div>`;
+  } else if (canAfford) {
+    tag = `<div class="arn2-tag buy">${volantImg(15)}${it.cost_gemmes}</div>`;
+  } else {
+    tag = `<div class="arn2-tag lock">${icon("lock", { size: 14 })}${it.cost_gemmes}</div>`;
+  }
+  return `<a class="arn2-tile${it.owned ? "" : " is-locked"}" href="#/boutique">
+    <div class="arn2-tile-plate">${it.asset_url ? `<img src="${escAttr(it.asset_url)}" alt="" loading="lazy" />` : ""}</div>
+    <p class="arn2-tile-n">${esc(name)}</p>
+    ${tag}
+  </a>`;
+}
 
-  // ── Changer ma photo (avatars au choix + ma photo) ──
+function _wireEleveArene(root, me, avatarUrl) {
+  // ── Changer ma photo (avatars au choix + ma photo) — tap sur la vignette
+  // de la barre d'identité (44px), même geste qu'une appli de rencontre. ──
   root
-    .querySelector("#arn-edit-avatar")
+    .querySelector("#arn2-avatar-btn")
     ?.addEventListener("click", async () => {
       haptic("select");
       const url = await changeAvatar({
@@ -2371,9 +2291,9 @@ function _wireEleveArene(root, me, avatarUrl) {
       });
       if (!url) return;
       me.avatar_url = url;
-      const inner = root.querySelector(".arn-crest-inner");
-      if (inner)
-        inner.innerHTML = `<img src="${escAttr(url)}" alt="" referrerpolicy="no-referrer" />`;
+      const btn = root.querySelector("#arn2-avatar-btn");
+      if (btn)
+        btn.innerHTML = `<img src="${escAttr(url)}" alt="" referrerpolicy="no-referrer" />`;
       haptic("success");
       track("profile.avatar_updated", { user_role: me.role });
       const { toast } = await import("@/components/common/toast.js");
@@ -2403,38 +2323,6 @@ function _wireEleveArene(root, me, avatarUrl) {
     _openDeleteSheet(root, me);
   });
 
-  // ── Notifications (toggle réel) ──
-  const notifRow = root.querySelector("#arn-notif");
-  if (
-    notifRow &&
-    !("Notification" in window && Notification.permission === "denied")
-  ) {
-    notifRow.addEventListener("click", async () => {
-      haptic("tap");
-      const tog = root.querySelector("#arn-notif-tog");
-      const sub = root.querySelector("#arn-notif-sub");
-      if (isPushEnabled()) {
-        await optOutPush();
-        tog?.classList.remove("on");
-        notifRow.setAttribute("aria-pressed", "false");
-        if (sub) sub.textContent = ptR("notif_off", "Désactivés");
-      } else {
-        const ok = await optInPush();
-        if (ok) {
-          haptic("success");
-          tog?.classList.add("on");
-          notifRow.setAttribute("aria-pressed", "true");
-          if (sub)
-            sub.textContent = ptR("notif_rhythm", "Reste dans le rythme");
-        } else if (Notification.permission === "denied") {
-          if (sub)
-            sub.textContent = ptR("notif_blocked", "Bloqués par le navigateur");
-          tog?.remove();
-        }
-      }
-    });
-  }
-
   // ── Modale pseudo ──
   const modal = root.querySelector("#arn-modal");
   const input = root.querySelector("#arn-input");
@@ -2450,7 +2338,7 @@ function _wireEleveArene(root, me, avatarUrl) {
   };
   const closeModal = () => modal?.classList.remove("open");
 
-  root.querySelector("#arn-edit-pseudo")?.addEventListener("click", openModal);
+  root.querySelector("#arn2-pseudo-btn")?.addEventListener("click", openModal);
   root.querySelector("#arn-modal-close")?.addEventListener("click", closeModal);
   modal?.addEventListener("click", (e) => {
     if (e.target === modal) closeModal();
@@ -2527,11 +2415,12 @@ function _wireEleveArene(root, me, avatarUrl) {
             : ptR("toast_pseudo_removed", "Pseudo retiré"),
           "success",
         );
-        // Met à jour le bandeau sans recharger
-        const ps = root.querySelector("#arn-pseudo");
+        // Met à jour la barre d'identité sans recharger
+        const ps = root.querySelector("#arn2-pseudo-lbl");
         if (ps) {
-          ps.innerHTML = `<span class="at">@</span>${esc(value || ptR("pseudo_ph", "ton_pseudo"))}`;
-          ps.classList.toggle("unset", !value);
+          ps.innerHTML = value
+            ? `<i>@</i>${esc(value)}`
+            : esc(ptR("pseudo_ph", "ton_pseudo"));
         }
         closeModal();
       }

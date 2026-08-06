@@ -128,11 +128,13 @@ const ROUTES = {
     parcours: () => import("@/pages/eleve/parcours.js"),
     quiz: () => import("@/pages/eleve/quiz.js"),
     // Collection de cartes « Monument Valley » : une carte par compétence,
-    // débloquée à la certification. Swipe deck (#/cartes). Remplace les
-    // trophées (décision Rayan 30/07) — l'ancienne URL #/trophees redirige
-    // vers la collection pour ne casser aucun lien existant.
+    // débloquée à la certification. Le profil élève est devenu la maison du
+    // paquet (refonte « Le paquet », décision Rayan 06/08/2026, cf. FLOWS.md)
+    // : cette route ne vit plus DANS la nav générale, elle ne sert plus que
+    // de lien de révélation direct posé par valider-seul.js après une
+    // certification (#/cartes/{compId} → collection.js#mount redirige vers
+    // #/profil si aucun id valide n'est fourni, cf. commentaire du fichier).
     cartes: () => import("@/pages/eleve/collection.js"),
-    trophees: () => import("@/pages/eleve/collection.js"),
     classement: () => import("@/pages/eleve/classement.js"),
     galerie: () => import("@/pages/eleve/galerie.js"),
     recompenses: () => import("@/pages/eleve/recompenses.js"),
@@ -264,6 +266,12 @@ const ROUTES_RETIREES = {
   // dans la voiture le lendemain, et le score quiz parlait du code alors
   // qu'on prépare la conduite.
   examen: "#/parcours",
+  // #/trophees retirée le 06/08/2026 : c'était déjà un alias de la même page
+  // que #/cartes (collection.js) depuis le 30/07. Le paquet vit maintenant
+  // dans le profil élève, et #/trophees n'a jamais porté d'id de compétence
+  // dans aucun flux du code (contrairement à #/cartes/{compId}) — un simple
+  // renvoi vers le profil ne perd donc aucun lien direct existant.
+  trophees: "#/profil",
 };
 
 // Libellés de titre de page (a11y lecteur d'écran, onglet, historique, SEO).
@@ -283,7 +291,6 @@ const ROUTE_TITLES = {
   insights: "Insights",
   bilan: "Bilan",
   quiz: "Quiz",
-  trophees: "Cartes",
   cartes: "Cartes",
   classement: "Classement",
   galerie: "Ma collection",

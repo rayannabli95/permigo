@@ -8,6 +8,17 @@
 
 ---
 
+## Principes de code (tous agents, tout le temps)
+- Ne préserve pas de rétrocompatibilité. Retire les chemins obsolètes au lieu d'ajouter des couches de compat, des fallbacks ou des migrations.
+- Choisis l'implémentation la plus simple qui répond au besoin actuel. Évite les abstractions spéculatives, la configuration et l'indirection inutiles.
+- Fais grandir le système par couches. Pars de la plus petite version qui marche de bout en bout, puis ajoute chaque nouvelle capacité sur un produit qui marche déjà. N'échange jamais un produit qui fonctionne contre une complexité inachevée.
+- Garde les composants modulaires, les responsabilités bien séparées.
+- Privilégie les librairies établies et bien maintenues quand elles réduisent la complexité ou améliorent la fiabilité. Ne réimplémente pas une fonctionnalité existante sans raison claire.
+- Appuie-toi sur les dépendances déjà présentes dans le projet avant d'en ajouter une nouvelle. Ne suppose pas qu'une lib manque de capacité sans avoir vérifié sa doc et ses types.
+- Prends des décisions d'architecture pour le long terme. N'accepte pas un pis-aller qui ne tient que pour l'instant en se disant qu'on le remplacera plus tard.
+
+---
+
 ## Le projet en 4 lignes
 PermiGo = **le compagnon qui prépare l'élève avant chaque heure de conduite** (boucle : Préparer → Conduire → Débriefer → Consolider — pivot du 17/07/2026). Le moniteur **observe** (dashboard passif, abo 9,99 €/mois) ; l'élève **certifie lui-même** son parcours.
 Stack : **Vanilla JS (ES modules) + Vite + Supabase + Vercel**. Langue du projet : **français** (UI, commits, docs).

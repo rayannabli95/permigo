@@ -45,7 +45,13 @@ import {
 } from "@/components/eleve/league-hero.js";
 // ⚠️ daily-quiz.js ne sert plus qu'aux helpers de date : la « question du
 // jour » a quitté l'accueil (pivot 17/07 — le hero prépare la prochaine leçon).
-import { todayKey, yesterdayKey, dayKey } from "@/services/daily-quiz.js";
+import { todayKey, dayKey } from "@/services/daily-quiz.js";
+// Source unique de la série (cf. src/services/streak.js) : accueil.js a déjà
+// `streaks` + `quiz_attempts` en main (pour sa heatmap), donc on réutilise
+// les helpers PURS (zéro requête réseau en plus) plutôt que `getStreak()`
+// async — même résultat que profil.js/reviser.js, sans perdre le fetch
+// parallèle existant.
+import { getStreakStatus, computeEffectiveStreak } from "@/services/streak.js";
 import { isStandalone } from "@/utils/pwa.js";
 import { openInstallSheet } from "@/components/common/install-nudge.js";
 import { getLang } from "@/utils/lang.js";
@@ -1787,22 +1793,24 @@ export async function mount(root) {
     // Heure LOCALE (l'élève vit en local ; le serveur date la série en
     // Europe/Paris → mêmes jours en France). Cohérent avec heatmap + daily-quiz.
     const _todayStr = todayKey();
-    const _yesterday = yesterdayKey();
     const _didActivityToday = (attemptsRes.value?.data || []).some(
       (a) => a.completed_at && dayKey(a.completed_at) === _todayStr,
     );
-    let streak = rawStreak;
-    if (_didActivityToday && rawStreak.last_activity_date !== _todayStr) {
-      const _bumped =
-        rawStreak.last_activity_date === _yesterday
-          ? (rawStreak.current_streak || 0) + 1
-          : 1;
-      streak = {
-        current_streak: _bumped,
-        longest_streak: Math.max(rawStreak.longest_streak || 0, _bumped),
-        last_activity_date: _todayStr,
-      };
-    }
+    // Source unique (src/services/streak.js) : mêmes règles qu'affichées sur
+    // Profil et Réviser — bump optimiste + série cassée affichée à 0 (jamais
+    // un vieux nombre figé en base qui ment). `streak.current_streak` reste
+    // le nom de champ historique consommé par le reste de la page/ses
+    // composants (bandeau SOS, streak-launch…), seule la VALEUR change.
+    const _effective = computeEffectiveStreak(rawStreak, _didActivityToday);
+    const streakSt = getStreakStatus(
+      _effective.current_streak,
+      _effective.last_activity_date,
+    );
+    const streak = {
+      current_streak: streakSt === "broken" ? 0 : _effective.current_streak,
+      longest_streak: _effective.longest_streak,
+      last_activity_date: _effective.last_activity_date,
+    };
     const allValRows = validRes.value?.data || [];
     const validated = new Set(
       allValRows
@@ -1831,7 +1839,6 @@ export async function mount(root) {
     ensureHeatmapStyles();
 
     const worlds = computeWorlds(validated);
-    const streakSt = streakStatus(streak);
     const gemmes = profile.gemmes || 0;
 
     // « Prépare ta prochaine leçon » — le hero de l'accueil (pivot 17/07 :
@@ -2073,18 +2080,10 @@ function computeWorlds(validatedIds) {
   });
 }
 
-function streakStatus(streak) {
-  if (!streak.current_streak) return "broken";
-  const today = todayKey();
-  // Série d'activité : « sauvée » seulement si une activité a été faite AUJOURD'HUI.
-  if (streak.last_activity_date === today) return "saved";
-  const yesterday = yesterdayKey();
-  // Dernière activité ≥ 2 jours → la série est effectivement perdue.
-  if (streak.last_activity_date !== yesterday) return "broken";
-  // Dernière activité HIER, rien encore aujourd'hui → en danger (saute à minuit).
-  const hoursLeft = 24 - new Date().getHours() - new Date().getMinutes() / 60;
-  return hoursLeft < 6 ? "critical" : "at_risk";
-}
+// (statut de série calculé par src/services/streak.js#getStreakStatus,
+// appelé une fois au mount — voir plus haut. Fonction locale retirée pour
+// ne garder qu'un seul calcul dans toute l'app, cf. bug des 3 chiffres
+// différents corrigé le 06/08/2026.)
 
 // Bandeau « série en danger » : n'apparaît QUE les jours où l'élève n'a pas
 // encore fait son activité (série d'activité). Il pousse d'abord vers le quiz
@@ -2152,7 +2151,12 @@ function render({
   // ouvrait l'app sur trois sollicitations empilées (tuto guidé, bandeau
   // d'installation, alerte de série) et zéro contenu. On installe une app qui
   // a déjà servi à quelque chose ; l'inverse, on le refuse par réflexe.
-  const _neverDidAnything = totalValidated === 0 && !streak.current_streak;
+  // longest_streak (jamais remis à 0, cf. src/services/streak.js) : signal
+  // fiable de « a déjà fait quelque chose », contrairement à current_streak
+  // qui vaut désormais 0 dès que la série est cassée (même si l'élève a été
+  // actif il y a quelques jours). Sinon un élève revenant après une pause
+  // se ferait traiter comme tout nouveau.
+  const _neverDidAnything = totalValidated === 0 && !streak.longest_streak;
   const installBanner =
     !isStandalone() && !_neverDidAnything
       ? `<style>
@@ -2175,8 +2179,10 @@ function render({
     </div>`
       : "";
   const isActive = streakSt !== "broken";
-  // First-run: no competence validated AND no streak yet → student has never done anything
-  const isFirstRun = totalValidated === 0 && !streak.current_streak;
+  // First-run: no competence validated AND no streak ever (longest_streak,
+  // pas current_streak — cf. _neverDidAnything plus haut) → student has
+  // never done anything.
+  const isFirstRun = totalValidated === 0 && !streak.longest_streak;
 
   // ── Séance à confirmer (priorité absolue quand présente) ──
 
@@ -2440,7 +2446,7 @@ function render({
         ),
       )}</span>
     </div>
-    ${renderHeatmap({ activeDates: activityDays.activeDates, activityLevels: activityDays.levels, activityDetails: activityDays.details, weeks: 5, title: "" })}
+    ${renderHeatmap({ activeDates: activityDays.activeDates, activityLevels: activityDays.levels, activityDetails: activityDays.details, weeks: 5, title: "", showStats: false })}
     <div class="hmap-tap-info" id="hmap-info" style="opacity:0"> </div>
   </div>
   ${

@@ -1,7 +1,13 @@
 // ═══════════════════════════════════════════════════════════════
-// Élève — MA COLLECTION de cartes « Monument Valley »
-// Route #/cartes  (ou #/cartes/{compId} pour ouvrir sur une carte
-// précise + jouer la révélation quand elle vient d'être débloquée).
+// Élève — révélation d'une carte « Monument Valley »
+// Route #/cartes/{compId} UNIQUEMENT (décision Rayan 06/08/2026, cf.
+// FLOWS.md) : ce n'est plus un onglet de navigation générale, la
+// consultation du paquet complet vit désormais sur #/profil (qui
+// réutilise le deck ci-dessous par import dynamique). Cette page ne
+// sert plus que de lien de révélation direct posé par valider-seul.js
+// juste après une certification. Sans id, ou avec un id qui ne
+// correspond à aucune compétence débloquée, il n'y a rien à révéler
+// ici → redirection vers #/profil (cf. mount() plus bas).
 //
 // 31 cartes illustrées, une par compétence REMC. Une carte se
 // débloque quand l'élève certifie la compétence (self_validations)
@@ -19,7 +25,6 @@ import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { haptic } from "@/utils/haptic.js";
 import { burstConfetti } from "@/components/common/confetti.js";
-import { recompensesTabs } from "@/components/eleve/recompenses-tabs.js";
 import { CARTES, CARTES_TOTAL } from "@/data/cartes.js";
 import { getFiche } from "@/data/fiches-conduite.js";
 import { chromeNight } from "@/utils/chrome-night.js";
@@ -27,7 +32,9 @@ import { chromeNight } from "@/utils/chrome-night.js";
 const SWIPE_COMMIT = 90; // px de drag avant de valider le swipe
 const SEEN_KEY = "pg-cartes-seen"; // cartes déjà regardées (badge « Nouveau »)
 
-function loadSeen() {
+// Exportée : le profil élève construit son propre `state.seen` avant de
+// déléguer le rendu du paquet à buildDeck (cf. CARD_DECK_STYLE ci-dessus).
+export function loadSeen() {
   try {
     return new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || "[]"));
   } catch {
@@ -46,26 +53,15 @@ function markSeen(id) {
   }
 }
 
-const STYLE = `<style>
-${chromeNight("#181241", "#0b0a1c")}
-.col { max-width: 480px; margin: 0 auto; padding: 14px 16px calc(96px + env(safe-area-inset-bottom));
-  min-height: calc(100dvh - 52px); font-family:'Archivo',sans-serif; color:#f2f0fa;
-  background:
-    radial-gradient(120% 40% at 50% -5%, rgba(255,190,70,.10) 0%, transparent 55%),
-    radial-gradient(120% 55% at 50% 30%, rgba(110,70,220,.22) 0%, transparent 62%),
-    linear-gradient(180deg,#181241 0%,#0f0d24 58%,#0b0a1c 100%); }
-
-/* Barre de progression + pastilles par monde */
-.col-prog { margin:10px 0 4px; }
-.col-hd { margin:2px 0 12px; }
-.col-title { margin:0; font:800 24px/1.1 'Archivo',sans-serif; letter-spacing:-.02em; color:#fff; }
-.col-sub { margin:4px 0 0; font:600 12.5px/1.35 'Archivo',sans-serif; color:#cabfef; }
-.col-prog-lbl { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:7px; }
-.col-prog-lbl b { font:800 14px/1 'Archivo',sans-serif; color:#fff; }
-.col-prog-lbl span { font:600 12px/1 'Archivo',sans-serif; color:#cabfef; }
-.col-prog-bar { height:8px; border-radius:99px; background:rgba(255,255,255,.12); overflow:hidden; }
-.col-prog-fill { height:100%; border-radius:99px; background:linear-gradient(90deg,#f0a93f,#eab308); transition:width .6s cubic-bezier(.34,1.4,.64,1); }
-
+// ── CSS du paquet (deck), PARTAGÉE avec le profil élève ──────────────
+// src/pages/common/profil.js#mountEleveArene importe dynamiquement ce module
+// (« Mes cartes » y devient le héros de la page, décision Rayan 06/08/2026 :
+// le profil élève DEVIENT la maison des cartes) et réutilise CE bloc de CSS
+// tel quel + les fonctions cardEl/buildDeck/wireControls/enableTilt ci-dessous
+// pour que le paquet ait EXACTEMENT le même visuel et le même comportement
+// (glisser/taper/retourner) sur les deux écrans. ⚠️ Ne JAMAIS dupliquer ces
+// règles ailleurs : une seule source, un seul geste appris par l'élève.
+export const CARD_DECK_STYLE = `
 /* Le deck */
 .col-stage { position:relative; height:min(58vh,470px); margin:12px 0 6px;
   perspective:1200px; touch-action:pan-y; user-select:none; }
@@ -189,14 +185,44 @@ ${chromeNight("#181241", "#0b0a1c")}
   .col-flip { transition:none; }
   .col-face { transition:none; }
 }
+`;
+
+const STYLE = `<style>
+${chromeNight("#181241", "#0b0a1c")}
+.col { max-width: 480px; margin: 0 auto; padding: 14px 16px calc(96px + env(safe-area-inset-bottom));
+  min-height: calc(100dvh - 52px); font-family:'Archivo',sans-serif; color:#f2f0fa;
+  background:
+    radial-gradient(120% 40% at 50% -5%, rgba(255,190,70,.10) 0%, transparent 55%),
+    radial-gradient(120% 55% at 50% 30%, rgba(110,70,220,.22) 0%, transparent 62%),
+    linear-gradient(180deg,#181241 0%,#0f0d24 58%,#0b0a1c 100%); }
+
+/* Retour au profil : cette page n'est plus un onglet de nav générale, juste
+   un détour de révélation après une certification. */
+.col-back { display:inline-flex; align-items:center; gap:6px; margin:2px 0 12px;
+  font:700 12.5px/1 'Archivo',sans-serif; color:#cabfef; text-decoration:none; }
+.col-back:active { opacity:.7; }
+
+/* Barre de progression + pastilles par monde */
+.col-prog { margin:10px 0 4px; }
+.col-hd { margin:2px 0 12px; }
+.col-title { margin:0; font:800 24px/1.1 'Archivo',sans-serif; letter-spacing:-.02em; color:#fff; }
+.col-sub { margin:4px 0 0; font:600 12.5px/1.35 'Archivo',sans-serif; color:#cabfef; }
+.col-prog-lbl { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:7px; }
+.col-prog-lbl b { font:800 14px/1 'Archivo',sans-serif; color:#fff; }
+.col-prog-lbl span { font:600 12px/1 'Archivo',sans-serif; color:#cabfef; }
+.col-prog-bar { height:8px; border-radius:99px; background:rgba(255,255,255,.12); overflow:hidden; }
+.col-prog-fill { height:100%; border-radius:99px; background:linear-gradient(90deg,#f0a93f,#eab308); transition:width .6s cubic-bezier(.34,1.4,.64,1); }
+
+${CARD_DECK_STYLE}
 </style>`;
 
 function header() {
-  // Un titre, comme ses 3 sœurs (Boutique, Ma collection, Classement) : cette
-  // page était la seule sans, donc sans repère à l'œil ni pour le lecteur
-  // d'écran (le router cherche un h1 pour annoncer la page).
-  return `${recompensesTabs("cartes", { dark: true })}
-    <div class="col-hd"><h1 class="col-title">Cartes</h1>
+  // Plus de bandeau des 4 salles ici : cette page n'est plus un onglet de la
+  // nav générale (le paquet complet se consulte sur #/profil). Un simple
+  // retour suffit — le router cherche un h1 pour annoncer la page aux
+  // lecteurs d'écran.
+  return `<a class="col-back" href="#/profil">${icon("chevron-left", { size: 14 })} Retour à mon profil</a>
+    <div class="col-hd"><h1 class="col-title">Carte débloquée</h1>
     <p class="col-sub">Une carte par compétence certifiée.</p></div>`;
 }
 
@@ -283,7 +309,14 @@ function skeleton() {
 export async function mount(root, param) {
   const me = getCurUser();
   if (!me) return;
-  track("page_view", { page: "cartes", role: me.role });
+  // Plus un onglet de navigation générale (06/08/2026) : sans id de
+  // compétence à révéler, aucun lien de l'app ne mène plus ici. Le paquet
+  // complet se consulte sur #/profil, seule maison des cartes désormais.
+  if (!param) {
+    navigate("#/profil");
+    return;
+  }
+  track("page_view", { page: "cartes", role: me.role, competence_id: param });
 
   root.innerHTML = skeleton();
 
@@ -312,23 +345,23 @@ export async function mount(root, param) {
       if (!unlocked.has(r.competence_id)) unlocked.set(r.competence_id, null);
   }
 
+  // L'id ne correspond à aucune compétence débloquée (mauvais lien, course
+  // avec l'écriture de la certification…) : rien à révéler, direction le
+  // profil plutôt qu'un deck générique qui ferait doublon.
+  if (!unlocked.has(param)) {
+    navigate("#/profil");
+    return;
+  }
+
   const state = {
     cur: 0,
     unlocked,
     seen: loadSeen(), // cartes déjà regardées → pas de badge « Nouveau »
-    // carte à révéler (arrivée depuis une certif) : #/cartes/{compId}
-    reveal: param && unlocked.has(param) ? param : null,
+    reveal: param, // carte à révéler (arrivée depuis une certif) : #/cartes/{compId}
   };
-  // Démarre sur la carte demandée si fournie.
-  if (param) {
-    const i = CARTES.findIndex((c) => c.id === param);
-    if (i >= 0) state.cur = i;
-  } else {
-    // Sinon démarre sur la première carte non débloquée (« à viser »),
-    // ou la dernière si tout est débloqué.
-    const firstLocked = CARTES.findIndex((c) => !unlocked.has(c.id));
-    state.cur = firstLocked >= 0 ? firstLocked : 0;
-  }
+  // Démarre sur la carte demandée.
+  const i = CARTES.findIndex((c) => c.id === param);
+  if (i >= 0) state.cur = i;
 
   render(root, state);
 }
@@ -345,7 +378,9 @@ function fmtDate(iso) {
   }
 }
 
-function cardEl(carte, state, { reveal = false } = {}) {
+// Exportée : profil.js construit une carte pour son mini-aperçu de secours
+// (rare) et surtout pour laisser buildDeck reconstruire la pile.
+export function cardEl(carte, state, { reveal = false } = {}) {
   const isUnlocked = state.unlocked.has(carte.id);
   const isNew = isUnlocked && !state.seen.has(carte.id);
   const el = document.createElement("div");
@@ -384,7 +419,10 @@ function render(root, state) {
 }
 
 // Reconstruit les 3 couches empilées à partir de state.cur.
-function buildDeck(root, state) {
+// Exportée : LE mécanisme du paquet, appelé tel quel par profil.js — un
+// container avec #col-stage (+ .col-hint-l/.col-hint-r) suffit, cf. commentaire
+// CARD_DECK_STYLE plus haut.
+export function buildDeck(root, state) {
   const stage = root.querySelector("#col-stage");
   if (!stage) return;
   // enlève les anciennes cartes (garde les indices de hint)
@@ -469,7 +507,8 @@ function advance(root, state, dir) {
   }, 480);
 }
 
-function wireControls(root, state) {
+// Exportée : branche #col-prev/#col-next. profil.js les inclut telles quelles.
+export function wireControls(root, state) {
   root
     .querySelector("#col-next")
     ?.addEventListener("click", () => advance(root, state, +1));
@@ -570,7 +609,8 @@ function requestTiltPermission() {
     DOE.requestPermission().catch(() => {});
   }
 }
-function enableTilt(root) {
+// Exportée : reflet holographique qui suit l'inclinaison du téléphone.
+export function enableTilt(root) {
   if (_tiltOn) return;
   _tiltOn = true;
   window.addEventListener("deviceorientation", (e) => {

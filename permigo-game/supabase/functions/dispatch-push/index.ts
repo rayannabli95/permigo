@@ -35,31 +35,31 @@ type EventPayloadFn = (data: Record<string, unknown>) => {
 // poussés via un payload générique construit depuis le title/body de la notif.
 const EVENT_PAYLOADS: Record<string, EventPayloadFn> = {
   post_validation_quiz: (d) => ({
-    title: "Compétence validée !",
-    body: "Ton moniteur a validé une compétence. Lance le quiz maintenant !",
+    title: "Compétence validée",
+    body: "Lance le quiz maintenant",
     data: { route: `#/quiz/${d?.competence_id ?? ""}/post_validation` },
   }),
   consolidation_quiz: (d) => ({
     title: "Consolide tes acquis",
-    body: "Il est temps de revoir une compétence. 2 questions, 2 minutes.",
+    body: "2 questions · 2 minutes",
     data: { route: `#/quiz/${d?.competence_id ?? ""}/consolidation` },
   }),
   streak_risk: () => ({
     title: "Ta série t'attend",
-    body: "Ne perds pas ta flamme ! Une session rapide suffit.",
+    body: "Une session rapide suffit",
     data: { route: "#/" },
   }),
 };
 
 const DAILY_PAYLOAD = {
   title: "Ta question du jour t'attend",
-  body: "3 questions · 2 minutes — garde ton avance dans la ligue Théorie.",
+  body: "3 questions · 2 minutes",
   type: "daily_quiz",
   data: { route: "#/" },
 };
 const COMEBACK_PAYLOAD = (days: number) => ({
   title: "On t'a gardé ta place",
-  body: `Ça fait ${days} jours — reprends en 2 minutes, ta question du jour t'attend.`,
+  body: `${days} jours sans toi. Ta question du jour t'attend`,
   type: "comeback",
   data: { route: "#/" },
 });

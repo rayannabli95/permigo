@@ -1,8 +1,11 @@
 // ═══════════════════════════════════════════════════════════════
-// Bandeau « Récompenses » — 1 porte, 4 salles (nav 5 portes)
-// Inséré en tête de boutique / galerie / trophées / ligue pour que
-// ces 4 pages se vivent comme UN hub. Theme-aware via tokens, avec
-// une variante sombre pour l'Arène (classement).
+// Bandeau « Récompenses » — 1 porte, 3 salles (nav 5 portes)
+// Inséré en tête de boutique / galerie / ligue pour que ces pages se
+// vivent comme UN hub. Theme-aware via tokens, avec une variante
+// sombre pour l'Arène (classement).
+// ⚠️ La 4e salle « Cartes » a été retirée le 06/08/2026 : le paquet de
+// cartes REMC vit désormais sur #/profil (refonte « Le paquet »,
+// décision Rayan, cf. FLOWS.md), plus comme un onglet de ce hub.
 // ═══════════════════════════════════════════════════════════════
 import { navigate } from "@/router.js";
 import { getLang } from "@/utils/lang.js";
@@ -10,11 +13,10 @@ import { getLang } from "@/utils/lang.js";
 const ROOMS = [
   { id: "boutique", label: "Boutique", route: "/boutique" },
   { id: "galerie", label: "Ma collection", route: "/galerie" },
-  { id: "cartes", label: "Cartes", route: "/cartes" },
   { id: "classement", label: "Classement", route: "/classement" },
 ];
 
-// i18n du bandeau (EN/AR) — composant 100 % élève (les 4 salles sont des
+// i18n du bandeau (EN/AR) — composant 100 % élève (les salles sont des
 // routes élève), pas de scope rôle nécessaire. Évalué à chaque appel de
 // recompensesTabs() (les pages re-montent à chaque navigation → toujours à
 // jour ; pas besoin d'écouter permigo:lang-changed ici).
@@ -22,14 +24,12 @@ const RCT_I18N = {
   en: {
     boutique: "Shop",
     galerie: "Collection",
-    cartes: "Cards",
     classement: "Leaderboard",
     aria: "Rewards rooms",
   },
   ar: {
     boutique: "المتجر",
     galerie: "المجموعة",
-    cartes: "البطاقات",
     classement: "الترتيب",
     aria: "غرف المكافآت",
   },
@@ -59,7 +59,7 @@ export function recompensesTabs(active, { dark = false } = {}) {
   background: color-mix(in srgb, var(--ink) 5%, transparent);
   border: 1px solid var(--bo);
 }
-/* nowrap + 11.5px : « Ma collection » est le plus long des 4 libellés et
+/* nowrap + 11.5px : « Ma collection » est le plus long des libellés et
    repassait sur deux lignes en 390 px, ce qui décalait toute la rangée. */
 .rct-tab {
   flex: 1; border: 0; border-radius: 12px; padding: 8px 2px; min-height: 44px;

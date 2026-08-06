@@ -10,9 +10,12 @@
 //      (mêmes mots que la barre des 4 pages — cf. components/eleve/recompenses-tabs.js)
 //
 // Réutilisation (ne duplique PAS la grosse logique métier des pages dédiées) :
-//   - Boutique / Ma collection / Trophées → résumé fidèle + « Tout voir »
-//     vers #/boutique, #/galerie, #/trophees (achat, équipement, modales
-//     détaillées restent SUR ces pages, pas ici).
+//   - Boutique / Ma collection → résumé fidèle + « Tout voir » vers
+//     #/boutique, #/galerie (achat, équipement, modales détaillées restent
+//     SUR ces pages, pas ici).
+//   - Trophées → résumé fidèle + « Tout voir » vers #/profil (06/08/2026 :
+//     le paquet de cartes REMC et les 2 trophées de conduite retenus vivent
+//     désormais sur le profil élève, #/trophees a été retirée, cf. FLOWS.md).
 //   - Ligue → le composant partagé `league-hero.js` (déjà utilisé par
 //     accueil.js) est monté tel quel : zéro duplication, données 100% réelles.
 //
@@ -45,7 +48,12 @@ import { getCurUser } from "@/auth/cur-user.js";
 import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
 import { haptic } from "@/utils/haptic.js";
-import { getStreak, getMyChests } from "@/utils/game-state.js";
+import { getMyChests } from "@/utils/game-state.js";
+// Source unique de la série (cf. src/services/streak.js) : même valeur que
+// accueil.js / profil.js / reviser.js (bug des séries incohérentes corrigé
+// le 06/08/2026). L'ancien utils/game-state.js#getStreak() est un cache
+// localStorage figé au boot de l'app, pas la donnée serveur fraîche.
+import { getStreak } from "@/services/streak.js";
 import { medallion } from "@/utils/medallions.js";
 import { volantImg } from "@/utils/volant.js";
 import { ASSETS } from "@/utils/assets.js";
@@ -73,8 +81,8 @@ const REC_I18N = {
     serie_lab: "Streak:",
     day_sing: "day",
     day_plur: "days",
-    kicker_big: "The Wheel · real big prizes",
-    kicker: "The Wheel",
+    kicker_big: "Real big prizes",
+    kicker: "Daily reward",
     t_spin_html: "Your <em>free spin</em> is waiting",
     t_back: "Come back tomorrow to play again",
     sub_std: "Steering wheels · avatars · titles to win every day.",
@@ -134,8 +142,8 @@ const REC_I18N = {
     serie_lab: "السلسلة:",
     day_sing: "يوم",
     day_plur: "أيام",
-    kicker_big: "العجلة · جوائز كبرى حقيقية",
-    kicker: "العجلة",
+    kicker_big: "جوائز كبرى حقيقية",
+    kicker: "مكافأة اليوم",
     t_spin_html: "دورتك <em>المجانية</em> بانتظارك",
     t_back: "عد غدًا للعب من جديد",
     sub_std: "مقاود وصور رمزية وألقاب تربحها كل يوم.",
@@ -525,9 +533,11 @@ function renderHero(ctx) {
   } = ctx;
 
   const lang = getLang();
+  // Un seul « roue » fort dans le bloc : le CTA (cf. ctaLabel). L'eyebrow
+  // annonce la récompense sans répéter le mot (audit visuel Rayan, 06/08).
   const kicker = anyBig
-    ? rtR("kicker_big", "La Roue · gros lots réels")
-    : rtR("kicker", "La Roue");
+    ? rtR("kicker_big", "Gros lots réels")
+    : rtR("kicker", "Récompense du jour");
   const title = spinAvailable
     ? rrtl(rtR("t_spin_html", `Ton <em>tour gratuit</em> t'attend`))
     : rtD("t_back", `Reviens demain pour rejouer`);
@@ -562,7 +572,7 @@ function renderHero(ctx) {
   }
   if (freshTrophies.length > 0) {
     claims.push(`
-      <a class="rec-claim" href="#/trophees" data-track="claim_trophee">
+      <a class="rec-claim" href="#/profil" data-track="claim_trophee">
         ${medallion("trophee", "violet", { size: 34 })}
         <span class="rec-claim-b">
           <span class="rec-claim-t">${rt("claim_troph_t", "Trophée à réclamer")}</span>
@@ -771,7 +781,7 @@ function renderTropheesPanel(ctx) {
 
   const claimHtml = freshTrophies.length
     ? `
-    <a class="rec-gold-card" href="#/trophees" data-track="trophee_claim_card">
+    <a class="rec-gold-card" href="#/profil" data-track="trophee_claim_card">
       <span class="rec-gold-k">${rt("new", "Nouveau")}</span>
       <div class="rec-star-row">
         <span style="width:56px;height:56px;flex:none;display:flex;align-items:center;justify-content:center">${badgeMarkup(freshTrophies[0], 56)}</span>
@@ -794,13 +804,13 @@ function renderTropheesPanel(ctx) {
     : "";
 
   return `${claimHtml}${gridHtml}
-    <a class="rec-tout-voir" href="#/trophees" data-track="tout_voir_trophees">${rt("see_all_troph", "Tout voir mes trophées →")}</a>`;
+    <a class="rec-tout-voir" href="#/profil" data-track="tout_voir_trophees">${rt("see_all_troph", "Tout voir mes trophées →")}</a>`;
 }
 
 function renderTrophyTile(t, unlocked) {
   const color = RARITY_COLOR[t.rarity] || "var(--mu2)";
   return `
-  <a class="rec-tro${unlocked ? "" : " locked"}" href="#/trophees" data-track="trophee_item">
+  <a class="rec-tro${unlocked ? "" : " locked"}" href="#/profil" data-track="trophee_item">
     ${unlocked ? `<span class="rec-tro-dot" style="background:${color}" aria-hidden="true"></span>` : ""}
     ${badgeMarkup(t, 48)}
     <div class="rec-tro-t">${unlocked ? rrtl(esc(trophyTitle(t.key, t.title, getLang()))) : "???"}</div>
@@ -829,6 +839,7 @@ export async function mount(root) {
     itemsRes,
     condRes,
     selfValRes,
+    streakRes,
   ] = await Promise.allSettled([
     sb
       .from("roue_daily_spins")
@@ -849,6 +860,7 @@ export async function mount(root) {
     // `validations`, fusionnée pour ne pas laisser le palier permis bloqué.
     // Même pattern que accueil.js.
     sb.from("self_validations").select("competence_id").eq("eleve_id", me.id),
+    getStreak(),
   ]);
 
   const resultError = (result) =>
@@ -890,7 +902,9 @@ export async function mount(root) {
   const anyBig = realLots.some((l) => l && l.big);
 
   // ── Série (pour "prochain coffre") ──
-  const streak = getStreak();
+  const streak = {
+    count: streakRes.status === "fulfilled" ? streakRes.value.current : 0,
+  };
 
   // ── Coffres ──
   const chests = chestsRes.status === "fulfilled" ? chestsRes.value || [] : [];

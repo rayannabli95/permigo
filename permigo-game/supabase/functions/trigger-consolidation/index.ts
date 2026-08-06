@@ -74,7 +74,7 @@ Deno.serve(async () => {
     user_id: v.eleve_id,
     type: "consolidation_quiz",
     title: "Quiz de consolidation 🧠",
-    body: "Il est temps de consolider ta compétence — 2 questions rapides !",
+    body: "2 questions rapides pour consolider",
     data: { competence_id: v.competence_id, validation_id: v.id },
     read: false,
   }));
