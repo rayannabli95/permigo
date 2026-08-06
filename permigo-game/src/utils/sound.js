@@ -93,6 +93,11 @@ export const playLevelup = () => play("unlock"); // compétence validée
 export const playFanfare = () => play("horn", 0.45); // exam réussi / monde débloqué
 export const playStar = () => play("coin"); // quête réclamée
 
+// ─── Duel synchronisé (06/08) ───
+// La petite montée à 4 notes jouée à chaque bascule vers la question
+// suivante : c'est elle qui donne l'envie d'enchaîner, pas le silence.
+export const playDuelBoost = () => play("duel-vroom", 0.55);
+
 // Joué une seule fois par session (jingle long ~2-3s, page souvent revisitée)
 export function playParcours() {
   if (sessionStorage.getItem(PARCOURS_KEY)) return;
