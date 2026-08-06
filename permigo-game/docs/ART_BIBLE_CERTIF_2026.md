@@ -203,7 +203,7 @@ Rayan a demandé de continuer sur les décors encore dessinés en CSS (`cockpit`
 
 **`intersection` sert DEUX missions avec des zones différentes** (`c2f-indices` : voiture garée à gauche + ouverture à droite ; `c3g-masque` : devant du véhicule + toit de bâtiment). Une image ne peut pas bouger sans casser l'une des deux : le nouveau décor a donc été composé pour satisfaire les deux jeux de coordonnées à la fois (voiture à gauche, ouverture à droite, ciel en haut, toit visible en haut à droite), sans toucher `missions-pilote.js`.
 
-⚠️ Repéré au passage sans le corriger (hors sujet du jour) : le texte de `c3g-masque` dit « un véhicule est arrêté à droite » mais sa zone `front` est positionnée à GAUCHE (x=6). Le déplacer casserait `c2f-indices`, qui a besoin de sa voiture garée exactement là. À trancher séparément : soit le texte se trompe de côté, soit il faudrait deux décors distincts au lieu d'un partagé.
+✅ **Corrigé (06/08) :** le texte de `c3g-masque` disait « un véhicule est arrêté à droite » alors que sa zone `front`, la seule bonne réponse, est à GAUCHE (x=6), exactement là où `c2f-indices` a aussi besoin de sa voiture garée. Les deux missions partagent le même décor et la même position : c'est le texte qui se trompait de côté, pas la zone ni le décor. Corrigé en « à gauche », sans toucher aux coordonnées ni à l'image.
 
 **Les 10 restants faits dans la foulée (même soir, 05/08).** Bonne surprise : les 10 étaient déjà générés depuis la session initiale, jamais branchés. Trois étaient bons tels quels après vérification (`night`, `brouillard-file`, `exterior` avaient déjà eu leur passe de correction dans la session initiale, cf. §7ter), quatre de plus se sont révélés corrects à l'inspection (`bend`, `overtake-empty`, `voie-garee`, `overtake-top-libre`). Trois ont eu besoin d'une deuxième génération :
 
@@ -213,7 +213,7 @@ Rayan a demandé de continuer sur les décors encore dessinés en CSS (`cockpit`
 
 ⚠️ **Piège de spécificité CSS découvert au passage** : `.mp-trajectory-interaction .mp-scene { height: 275px }` (deux classes) l'emportait sur la règle générale qui redonne sa hauteur naturelle à un décor image (une classe + un `:has`, même poids), simplement parce qu'elle vient plus tard dans le fichier. Sans le correctif, `bend` et `overtake-top` (les deux seuls décors image en mode « tracer ») auraient été rognés dans une boîte à 275 px comme avant la correction du 05/08 après-midi. Repéré avant la mise en prod, pas en audit après coup.
 
-**Les 22 décors du Mode Pilote sont maintenant tous en Art Bible 2.0, tous branchés.** Reste ouvert (hors sujet du jour, cf. plus haut) : la contradiction de côté sur `c3g-masque` (texte « à droite », zone à gauche), et l'absence de coordonnées vérifiées en conditions réelles pour les 4 décors `placement` de cette vague (`brouillard-file`, `insertion`, `voie-garee`, `overtake-top-libre`) : vérifiés sur une page statique hors-app plutôt qu'en jouant la vraie mission, faute de connaître la bonne réponse des missions précédentes pour y arriver en cliquant.
+**Les 22 décors du Mode Pilote sont maintenant tous en Art Bible 2.0, tous branchés.** Reste ouvert : l'absence de coordonnées vérifiées en conditions réelles pour les 4 décors `placement` de cette vague (`brouillard-file`, `insertion`, `voie-garee`, `overtake-top-libre`) : vérifiés sur une page statique hors-app plutôt qu'en jouant la vraie mission, faute de connaître la bonne réponse des missions précédentes pour y arriver en cliquant.
 
 ## 8. Ce qui reste ouvert (prochaine session)
 
