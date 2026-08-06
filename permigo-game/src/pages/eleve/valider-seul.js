@@ -41,7 +41,6 @@ import {
   monterMissions,
   missionsPour,
 } from "@/components/eleve/pilote-mission.js";
-import { vocabulairePour } from "@/data/vocabulaire-conduite.js";
 
 // ⚠️ Le routeur RÉUTILISE le même nœud `root` d'une page à l'autre (il fait
 // `root.innerHTML = ...`, jamais un nouveau conteneur). Toute écriture posée
@@ -126,6 +125,7 @@ const VS_I18N = {
     ok_volants: "+{n} Steering wheels (volants)",
     ok_vaut:
       "It becomes done in My licence. It replaces neither the lesson nor the test.",
+    ok_encourage: "One more move that will stick with you on the road.",
     ok_cta: "Find this skill in My licence",
     fail_kick: "Not yet",
     fail_title: "Almost!",
@@ -149,10 +149,6 @@ const VS_I18N = {
     boite_auto: "Automatic gearbox",
     boite_auto_s: "Two pedals and a P R N D selector",
     boite_hint: "You can change this in your settings.",
-    vocab_kick: "Words to know",
-    vocab_sub:
-      "Your instructor will say these in French. Listen and learn them.",
-    vocab_play: "Listen",
   },
   ar: {
     back: "رجوع",
@@ -205,6 +201,7 @@ const VS_I18N = {
     ok_p: "«{n}» أصبحت الآن مكتملة في مسارك.",
     ok_volants: "+{n} مقود (volants)",
     ok_vaut: "تصبح مكتسبة في «رخصتي». وهي لا تعوّض الدرس ولا الامتحان.",
+    ok_encourage: "حركة إضافية لن تفارقك على الطريق.",
     ok_cta: "اعثر على هذه المهارة في رخصتي",
     fail_kick: "ليس بعد",
     fail_title: "اقتربت!",
@@ -228,9 +225,6 @@ const VS_I18N = {
     boite_auto: "علبة سرعة أوتوماتيكية",
     boite_auto_s: "دواستان ومُحدِّد P R N D",
     boite_hint: "يمكنك تغيير ذلك في الإعدادات.",
-    vocab_kick: "كلمات تتعلمها",
-    vocab_sub: "سيقولها مدرّبك بالفرنسية. استمع إليها وتعلّمها.",
-    vocab_play: "استماع",
   },
 };
 function vsTR(key, fr, vars) {
@@ -269,15 +263,14 @@ const STYLE = `<style>
 .vs-h1 { font:800 21px/1.2 'Archivo',sans-serif; letter-spacing:-.02em; margin:0; }
 
 .vs-card { background:var(--su,#fff); border:1px solid var(--bo); border-radius:20px; padding:18px; margin-top:16px; box-shadow:0 4px 18px -12px rgba(11,13,26,.25); }
-.vs-warn { display:flex; gap:12px; align-items:flex-start; }
-.vs-warn svg { color:var(--am,#f59e0b); flex-shrink:0; margin-top:2px; }
-.vs-warn p { margin:0; font:500 13.5px/1.5 'Archivo',sans-serif; color:var(--mu); }
 
 .vs-hero { text-align:center; padding:6px 4px 4px; }
 .vs-hero-med { margin:0 auto 10px; width:56px; height:56px; }
 .vs-hero-cat { font:700 10px/1 'Archivo',sans-serif; letter-spacing:.14em; text-transform:uppercase; color:var(--mu2); margin-bottom:6px; }
 .vs-hero-ttl { font:800 19px/1.25 'Archivo',sans-serif; margin:0 0 8px; }
 .vs-hero-p { font:500 13.5px/1.55 'Archivo',sans-serif; color:var(--mu); margin:0; }
+.vs-hero-ic { margin:0 auto 12px; width:52px; height:52px; border-radius:50%; display:grid; place-items:center;
+  background:color-mix(in srgb, var(--am,#f59e0b) 14%, transparent); color:var(--am,#f59e0b); }
 
 .vs-steps { margin-top:18px; display:flex; flex-direction:column; gap:10px; }
 .vs-step { display:flex; gap:12px; align-items:flex-start; background:var(--su,#fff); border:1px solid var(--bo); border-radius:16px; padding:14px; }
@@ -339,7 +332,7 @@ a.vs-cta { text-decoration:none; }
 .vsr.fail .vsr-kick { color:#ffb0b0; background:rgba(255,120,120,.1); border-color:rgba(255,120,120,.28); }
 .vsr.fail .vsr-ttl { background:linear-gradient(180deg,#ffd0d0,#ff9c9c); -webkit-background-clip:text; background-clip:text; color:transparent; }
 
-@media (prefers-reduced-motion: reduce) { .vsr-med { animation:none; } }
+@media (prefers-reduced-motion: reduce) { .vsr-med, .vsr-mascot { animation:none; } }
 </style>`;
 
 function catMedallion(ico, size = 40) {
@@ -370,11 +363,12 @@ function wireBack(root) {
 }
 
 function notFoundScreen() {
-  return `${STYLE}<div class="vs">
+  return `${STYLE}<div class="vs anim-slide-up">
     ${topBar(vsTR("nf_title", "Compétence introuvable"))}
-    <div class="vs-card vs-warn">
-      ${icon("alert-circle", { size: 20 })}
-      <p>${vsD("nf_body", "Cette compétence n'existe pas. Retourne à ton parcours pour en choisir une.")}</p>
+    <div class="vs-card vs-hero">
+      <div class="vs-hero-ic">${icon("alert-circle", { size: 24 })}</div>
+      <h2 class="vs-hero-ttl">${vsD("nf_title2", "Cette compétence n'existe pas")}</h2>
+      <p class="vs-hero-p">${vsD("nf_body", "Retourne à ton parcours pour en choisir une.")}</p>
     </div>
   </div>`;
 }
@@ -390,7 +384,7 @@ function notFoundScreen() {
  * `parMoi` : la compétence a été certifiée par l'élève lui-même (et non
  * validée par son enseignant) — la phrase ne peut pas être la même.
  */
-function blockedScreen(sub, avecMission, parMoi = false) {
+function blockedScreen(sub, avecMission, parMoi = false, cat = null) {
   // Le « : » n'est pas encodé : c'est le séparateur que lit revision-conduite
   // pour ouvrir le quiz directement, pas une donnée.
   const quizHref = `#/revision-conduite/${encodeURIComponent(String(sub?.c ?? ""))}:quiz`;
@@ -398,12 +392,9 @@ function blockedScreen(sub, avecMission, parMoi = false) {
     ? avecMission
       ? vsD(
           "self_m",
-          "Tu as déjà certifié cette compétence. La mise en situation reste ouverte pour t'entraîner autant que tu veux.",
+          "La mise en situation reste ouverte pour t'entraîner autant que tu veux.",
         )
-      : vsD(
-          "self",
-          "Tu as déjà certifié cette compétence. Le quiz reste ouvert pour t'entraîner autant que tu veux.",
-        )
+      : vsD("self", "Le quiz reste ouvert pour t'entraîner autant que tu veux.")
     : avecMission
       ? // ⚠️ Ne JAMAIS nommer l'enseignant sur l'écran de certification. On y
         // entre pour relever un défi, et s'entendre dire « quelqu'un d'autre a
@@ -411,18 +402,17 @@ function blockedScreen(sub, avecMission, parMoi = false) {
         // arrive. Le résultat affiché est le même, la phrase parle de l'élève.
         vsD(
           "blocked_m",
-          "Cette compétence est déjà acquise. La mise en situation reste ouverte pour entretenir le geste.",
+          "La mise en situation reste ouverte pour entretenir le geste.",
         )
-      : vsD(
-          "blocked_q",
-          "Cette compétence est déjà acquise. Le quiz reste ouvert pour entretenir le geste.",
-        );
+      : vsD("blocked_q", "Le quiz reste ouvert pour entretenir le geste.");
 
-  return `${STYLE}<div class="vs">
+  return `${STYLE}<div class="vs anim-slide-up">
     ${topBar(sub?.n || vsTR("comp_fallback", "Compétence"))}
-    <div class="vs-card vs-warn">
-      ${icon("check-circle", { size: 20 })}
-      <p>${phrase}</p>
+    <div class="vs-card vs-hero">
+      <div class="vs-hero-med">${catMedallion(cat?.ico, 56)}</div>
+      <p class="vs-hero-cat">${vsD("blocked_kick", "Déjà acquise")}</p>
+      <h2 class="vs-hero-ttl">${esc(sub?.n || "")}</h2>
+      <p class="vs-hero-p">${phrase}</p>
     </div>
     ${
       avecMission
@@ -435,16 +425,14 @@ function blockedScreen(sub, avecMission, parMoi = false) {
 }
 
 function loadErrorScreen(sub) {
-  return `${STYLE}<div class="vs">
+  return `${STYLE}<div class="vs anim-slide-up">
     ${topBar(sub?.n || vsTR("comp_fallback", "Compétence"))}
-    <div class="vs-card vs-warn">
-      ${icon("alert-circle", { size: 20 })}
-      <div>
-        <b>${vsD("load_title", "Vérification indisponible")}</b>
-        <p>${vsD("load_body", "Impossible de vérifier cette compétence. Vérifie ta connexion puis réessaie.")}</p>
-        <button class="vs-ghost" id="vs-retry-load" type="button">${vsD("retry", "Réessayer")}</button>
-      </div>
+    <div class="vs-card vs-hero">
+      <div class="vs-hero-ic">${icon("alert-circle", { size: 24 })}</div>
+      <h2 class="vs-hero-ttl">${vsD("load_title", "Vérification indisponible")}</h2>
+      <p class="vs-hero-p">${vsD("load_body", "Vérifie ta connexion puis réessaie.")}</p>
     </div>
+    <button class="vs-cta" id="vs-retry-load" type="button">${vsD("retry", "Réessayer")}</button>
   </div>`;
 }
 
@@ -563,34 +551,6 @@ function successScreen(sub, scorePct, volants = 0) {
         <div class="vsr-carte-shine"></div>
       </div>`
     : "";
-  // Le lexique français (décision Rayan 05/08) : un élève qui joue en anglais
-  // ou en arabe traduit toute l'app, mais son moniteur lui parle en français
-  // DANS la voiture. On lui donne donc 1 à 4 mots réels de cette
-  // compétence, leur sens dans sa langue en petite trad (façon astérisque)
-  // et un bouton pour les ENTENDRE. Masqué en français : un francophone les
-  // connaît déjà. Pilote sur C1a-C1c (rollout progressif ensuite).
-  const lang = getLang();
-  const vocab = lang !== "fr" ? vocabulairePour(sub.c) : [];
-  const vocabBlock = vocab.length
-    ? `<div class="vsr-vocab">
-        <p class="vsr-vocab-kick">${vsD("vocab_kick", "Mots à connaître")}</p>
-        <p class="vsr-vocab-sub">${vsD("vocab_sub", "Ton moniteur les dira en français. Écoute-les et retiens-les.")}</p>
-        <div class="vsr-vocab-list">
-          ${vocab
-            .map(
-              (v) => `
-            <button type="button" class="vsr-vocab-item" data-vocab-audio="${escAttr(v.audio)}">
-              <span class="vsr-vocab-play">${icon("volume", { size: 15 })}</span>
-              <span class="vsr-vocab-txt">
-                <span class="vsr-vocab-fr">${esc(v.mot)}<sup>*</sup></span>
-                <span class="vsr-vocab-tr">* ${esc(lang === "ar" ? v.ar : v.en)}</span>
-              </span>
-            </button>`,
-            )
-            .join("")}
-        </div>
-      </div>`
-    : "";
   return `${STYLE}
     <style>
     .vsr-carte { position:relative; width:172px; aspect-ratio:5/7; margin:4px auto 6px; border-radius:18px; overflow:hidden;
@@ -606,41 +566,32 @@ function successScreen(sub, scorePct, volants = 0) {
     @keyframes vsrCarte { 0%{opacity:0; transform:scale(.55) rotate(-9deg);} 60%{transform:scale(1.06) rotate(2deg);} 100%{opacity:1; transform:scale(1) rotate(0);} }
     @keyframes vsrShine { to { transform:translateX(120%); } }
     @keyframes vsrGloss { 0%{background-position:120% 0;} 50%{background-position:-20% 0;} 100%{background-position:120% 0;} }
+    .vsr-mascot { width:150px; height:150px; margin:0 auto 4px; display:block; object-fit:contain;
+      filter:drop-shadow(0 10px 22px rgba(0,0,0,.5)); animation: vsrPop .5s cubic-bezier(.34,1.56,.64,1) both; }
     .vsr-name { font:800 17px/1.25 'Archivo',sans-serif; color:#fff; margin:2px 0 0; max-width:300px; }
+    .vsr-encourage { font:700 14.5px/1.4 'Archivo',sans-serif; color:#ffe9b0; margin:10px auto 0; max-width:290px; }
     .vsr-vaut { font:600 12.5px/1.5 'Archivo',sans-serif; color:rgba(255,255,255,.72); margin:9px auto 0; max-width:310px; }
     .vsr-cta-carte { width:100%; max-width:340px; margin-top:20px; padding:15px; border:0; border-radius:14px; cursor:pointer;
       font:800 14px/1 'Archivo',sans-serif; color:#4a2500;
       background:linear-gradient(180deg,#ffd76e,#f0a93f); box-shadow:0 6px 0 #b46a10, 0 12px 22px rgba(0,0,0,.4); }
     .vsr-cta-carte:active { transform:translateY(3px); box-shadow:0 3px 0 #b46a10, 0 7px 14px rgba(0,0,0,.4); }
     @media (prefers-reduced-motion: reduce) { .vsr-carte, .vsr-carte-shine, .vsr-carte-gloss { animation:none; } .vsr-carte-shine { display:none; } }
-    .vsr-vocab { width:100%; max-width:340px; margin:18px auto 0; padding:14px 16px; border-radius:16px;
-      background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); text-align:left; }
-    .vsr-vocab-kick { font:800 11px/1 'Archivo',sans-serif; letter-spacing:.08em; text-transform:uppercase;
-      color:rgba(255,215,110,.9); margin:0 0 4px; }
-    .vsr-vocab-sub { font:500 11.5px/1.4 'Archivo',sans-serif; color:rgba(255,255,255,.6); margin:0 0 10px; }
-    .vsr-vocab-list { display:flex; flex-direction:column; gap:8px; }
-    .vsr-vocab-item { display:flex; align-items:center; gap:10px; width:100%; padding:9px 10px; border:0; border-radius:11px;
-      cursor:pointer; background:rgba(255,255,255,.05); text-align:left; }
-    .vsr-vocab-item:active { background:rgba(255,255,255,.11); }
-    .vsr-vocab-play { flex-shrink:0; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-      background:rgba(255,215,110,.16); color:#ffd76e; }
-    .vsr-vocab-play.is-playing { background:rgba(255,215,110,.32); }
-    .vsr-vocab-txt { display:flex; flex-direction:column; gap:1px; min-width:0; }
-    .vsr-vocab-fr { font:800 14px/1.25 'Archivo',sans-serif; color:#fff; }
-    .vsr-vocab-fr sup { color:rgba(255,215,110,.9); }
-    .vsr-vocab-tr { font:600 11.5px/1.3 'Archivo',sans-serif; color:rgba(255,255,255,.58); }
-    [dir="rtl"] .vsr-vocab, [dir="rtl"] .vsr-vocab-item { text-align:right; }
     </style>
     <div class="vsr anim-slide-up">
-    ${carteBlock || `<div class="vsr-med">${medallion("check", "violet", { size: 96 })}</div>`}
+    ${
+      carteBlock ||
+      `<video class="vsr-mascot" src="/video/mascotte-competence-certifiee.mp4" poster="/video/mascotte-competence-certifiee-poster.jpg" autoplay muted playsinline preload="auto" aria-hidden="true"></video>`
+    }
     <h1 class="vsr-ttl">${vsD("ok_title", "Compétence certifiée")}</h1>
     <p class="vsr-name">${esc(sub.n)}</p>
+    <!-- Le texte qui doit marquer, pas juste le score (Rayan, 06/08) : on
+         parle de la route, pas de l'app. -->
+    <p class="vsr-encourage">${vsD("ok_encourage", "Un geste de plus qui ne te lâchera plus sur la route.")}</p>
     <!-- Ce que ça vaut, dit une fois, au moment où on vient de le donner.
          Aucun écran ne le disait (audit 01/08) : entre « compétence
          certifiée », une carte à collectionner et des volants, un élève ne
          sait plus s'il est dans un jeu ou dans un suivi sérieux. -->
     <p class="vsr-vaut">${vsD("ok_vaut", "Elle passe en acquise dans Mon permis. Ça ne remplace ni la leçon ni l'examen.")}</p>
-    ${vocabBlock}
     ${volants > 0 ? `<span class="vsr-volants"><img src="/skins/volant-coin.webp" alt="volant"> +${volants}</span>` : ""}
     ${carte ? `<button class="vsr-cta-carte" id="vs-cta-carte" type="button">${vsD("ok_cta_carte", "Voir ma carte")}</button>` : ""}
     <button class="vsr-ghost" id="vs-cta-parcours" type="button" data-comp="${escAttr(sub.c)}">${vsD("ok_cta", "Retrouve cette compétence dans Mon permis")}</button>
@@ -764,7 +715,7 @@ export async function mount(root, param) {
   // par soi renvoyait sur l'écran « certifie-le en 2 étapes », qui reproposait
   // une certification déjà faite (remonté par Rayan, 02/08/2026).
   if (acquisMoniteur || already) {
-    root.innerHTML = blockedScreen(sub, avecMission, !acquisMoniteur);
+    root.innerHTML = blockedScreen(sub, avecMission, !acquisMoniteur, cat);
     wireBack(root);
     track("valider_seul.entrainement_propose", {
       competence_id: compId,
@@ -1141,32 +1092,5 @@ function wireResult(root, me, compId, sub, cat) {
     const fiche = await loadFiche(compId).catch(() => null);
     root.innerHTML = introScreen(sub, cat, null, fiche);
     wireIntro(root, me, compId, sub, cat);
-  });
-  wireVocabAudio(root);
-}
-
-/**
- * Un seul mot joue à la fois (un player réutilisé, pas un <audio> par
- * bouton) : si l'élève enchaîne les clics, le précédent s'arrête net au
- * lieu de superposer deux voix.
- */
-let _vocabPlayer = null;
-function wireVocabAudio(root) {
-  root.querySelectorAll("[data-vocab-audio]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const src = btn.getAttribute("data-vocab-audio");
-      if (!src) return;
-      root
-        .querySelectorAll(".vsr-vocab-play.is-playing")
-        .forEach((el) => el.classList.remove("is-playing"));
-      if (_vocabPlayer) _vocabPlayer.pause();
-      _vocabPlayer = new Audio(src);
-      const ic = btn.querySelector(".vsr-vocab-play");
-      ic?.classList.add("is-playing");
-      _vocabPlayer.addEventListener("ended", () =>
-        ic?.classList.remove("is-playing"),
-      );
-      _vocabPlayer.play().catch(() => ic?.classList.remove("is-playing"));
-    });
   });
 }
