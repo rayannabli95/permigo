@@ -10,7 +10,25 @@
 // partagé. Elle est déployée en --no-verify-jwt (les invités n'ont pas de
 // jeton) ; l'action `create` vérifie le JWT à la main.
 //
-// Actions : create · join · questions · finish · results
+// ── Synchro temps réel (06/08) ────────────────────────────────────────────
+// Avant, chaque téléphone jouait sa propre copie des 10 questions à son
+// rythme. Maintenant, `duels` porte un ÉTAT DE MANCHE unique (status /
+// current_index / round_deadline), pareil pour tout le monde. Cette fonction
+// diffuse chaque changement à tous les téléphones via Supabase Realtime
+// Broadcast (canal `duel:<code>`), en appelant directement l'API REST du
+// service Realtime plutôt qu'en ouvrant un websocket : une edge function vit
+// le temps d'une requête, un websocket n'aurait pas le temps de s'établir.
+// Le client garde en plus un sondage de secours (action `state`) pour le cas
+// où un message de diffusion se perd (réseau qui tousse) : la vitesse vient
+// de la diffusion, la fiabilité vient du sondage.
+//
+// Le score n'est plus calculé par le client puis simplement plafonné ici :
+// il est calculé ICI, à partir de l'horloge du SERVEUR (temps restant avant
+// round_deadline), pour qu'un téléphone à l'heure fausse ne puisse pas se
+// donner un avantage de vitesse. Une bonne réponse vaut de 1 à 10 points
+// selon la rapidité, une mauvaise ou un temps écoulé vaut 0.
+//
+// Actions : create · join · questions · start · answer · next · state · results
 //
 // ⚠️ `questions` renvoie correct_index : la correction se fait dans le
 // navigateur pour que le joueur ait sa réponse tout de suite. C'est assumé,
@@ -23,8 +41,7 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
-const SERVICE_KEY =
-  Deno.env.get("SERVICE_ROLE_KEY") ??
+const SERVICE_KEY = Deno.env.get("SERVICE_ROLE_KEY") ??
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const CORS = {
@@ -43,10 +60,17 @@ function json(body: unknown, status = 200) {
 
 const NB_QUESTIONS = 10;
 const MAX_JOUEURS = 8;
-// Points de vitesse : une bonne réponse vaut de 500 (au buzzer) à 1000
-// (instantanée). Le plafond sert uniquement à borner ce qu'un client peut
-// envoyer, la règle de calcul vit dans la page.
-const PTS_MAX = 1000;
+// 20 secondes par question (inchangé, décision Rayan 03/08). Une bonne
+// réponse vaut de 1 point (au buzzer) à 10 points (instantanée).
+const DUREE_MS = 20000;
+const PTS_MAX_Q = 10;
+// L'écran de reveal (les deux réponses côte à côte + le commentaire) tient
+// 4 secondes avant d'enchaîner tout seul sur la question suivante.
+const REVEAL_MS = 4000;
+// La pause de mi-temps, entre la question 5 et la question 6. Même durée que
+// l'ancien écran d'entracte côté page.
+const INTERMISSION_MS = 5000;
+const MI_TEMPS = 5;
 // Langues servies pour les questions. Une valeur inconnue retombe en français
 // plutôt que de renvoyer une partie vide.
 const LANGUES = new Set(["en", "ar"]);
@@ -83,16 +107,59 @@ const admin = createClient(SUPABASE_URL, SERVICE_KEY, {
   auth: { persistSession: false },
 });
 
+// Diffuse un événement à tous les téléphones connectés au salon `duel:<code>`.
+// Passe par l'API REST du Realtime (pas par un websocket : une edge function
+// n'a pas le temps d'en ouvrir un proprement) et ne fait JAMAIS échouer
+// l'action qui l'appelle : si la diffusion tombe, le sondage de secours
+// (`state`) rattrape le client dans les 2 secondes qui suivent.
+async function diffuse(code: string, event: string, payload: unknown) {
+  try {
+    await fetch(`${SUPABASE_URL}/realtime/v1/api/broadcast`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${SERVICE_KEY}`,
+        apikey: SERVICE_KEY,
+      },
+      body: JSON.stringify({
+        messages: [{ topic: `duel:${code}`, event, payload }],
+      }),
+    });
+  } catch (e) {
+    console.error("[duel:diffuse]", event, e);
+  }
+}
+
 // Charge la partie par son code, en refusant celles qui ont expiré.
 async function chargeDuel(code: string) {
   const { data, error } = await admin
     .from("duels")
-    .select("id, code, host_id, question_ids, expires_at")
+    .select(
+      "id, code, host_id, question_ids, expires_at, status, current_index, round_deadline, reveal_until, intermission_shown",
+    )
     .eq("code", code)
     .maybeSingle();
   if (error || !data) return null;
   if (new Date(data.expires_at).getTime() < Date.now()) return null;
   return data;
+}
+
+// L'état public de la manche : ce que `start` / `next` diffusent, et ce que
+// `state` renvoie au sondage de secours. Toujours la même forme, pour que le
+// client n'ait qu'UN seul rendu à écrire des deux côtés (diffusion ou sondage).
+function etatManche(duel: {
+  status: string;
+  current_index: number;
+  round_deadline: string | null;
+  reveal_until: string | null;
+}) {
+  return {
+    status: duel.status,
+    index: duel.current_index,
+    deadline: duel.round_deadline,
+    revealUntil: duel.reveal_until,
+    total: NB_QUESTIONS,
+  };
 }
 
 Deno.serve(async (req) => {
@@ -178,6 +245,9 @@ Deno.serve(async (req) => {
     if (action === "join") {
       const duel = await chargeDuel(code);
       if (!duel) return json({ error: "introuvable" }, 404);
+      // La partie ferme ses portes dès qu'elle a démarré : impossible de
+      // rejoindre une question déjà en cours dans une partie synchronisée.
+      if (duel.status !== "lobby") return json({ error: "commencee" }, 409);
       const prenom = nettoiePrenom(body.name);
       if (!prenom) return json({ error: "prenom" }, 400);
 
@@ -242,75 +312,238 @@ Deno.serve(async (req) => {
           const x = parTr.get(q.id);
           return x
             ? {
-                ...q,
-                question: x.question,
-                options: x.options,
-                explanation: x.explanation,
-              }
+              ...q,
+              question: x.question,
+              options: x.options,
+              explanation: x.explanation,
+            }
             : q;
         });
       }
 
-      return json({ questions, lang });
+      return json({ questions, lang, status: duel.status });
     }
 
-    // ── progress : le score EN COURS, à la mi-temps ──────────────────────
-    // Écrit le score sans marquer la partie finie, pour que le classement de
-    // la mi-temps montre qui mène. Sans ça les scores n'existent qu'à la fin
-    // et l'écran de mi-temps n'afficherait que des zéros.
-    if (action === "progress") {
+    // ── start : l'hôte lance la première question pour TOUT LE MONDE ─────
+    if (action === "start") {
       const playerId = String(body.playerId ?? "");
-      const score = Number(body.score);
-      const correct = Number(body.correct);
-      if (!playerId || !Number.isInteger(score) || score < 0) {
-        return json({ error: "score" }, 400);
-      }
-      const { error } = await admin
+      const duel = await chargeDuel(code);
+      if (!duel) return json({ error: "introuvable" }, 404);
+      if (duel.status !== "lobby") return json(etatManche(duel)); // déjà lancée : idempotent
+      const { data: joueur } = await admin
         .from("duel_players")
-        .update({
-          score: Math.min(score, NB_QUESTIONS * PTS_MAX),
-          correct_count: Number.isInteger(correct)
-            ? Math.min(Math.max(correct, 0), NB_QUESTIONS)
-            : null,
-        })
+        .select("is_host")
         .eq("id", playerId)
-        .is("finished_at", null); // une partie finie ne se réécrit jamais
-      if (error) throw error;
-      return json({ ok: true });
-    }
+        .eq("duel_id", duel.id)
+        .maybeSingle();
+      if (!joueur?.is_host) return json({ error: "hote" }, 403);
 
-    // ── finish : le jeton du joueur autorise l'écriture de SON score ─────
-    if (action === "finish") {
-      const playerId = String(body.playerId ?? "");
-      const score = Number(body.score);
-      const correct = Number(body.correct);
-      if (!playerId || !Number.isInteger(score) || score < 0) {
-        return json({ error: "score" }, 400);
-      }
-      const missed = Array.isArray(body.missed)
-        ? (body.missed as string[]).slice(0, NB_QUESTIONS)
-        : [];
-
-      const { data, error } = await admin
-        .from("duel_players")
+      const deadline = new Date(Date.now() + DUREE_MS).toISOString();
+      const { data: maj, error } = await admin
+        .from("duels")
         .update({
-          // Points de VITESSE, plus un nombre de bonnes réponses : le plafond
-          // est celui d'une partie parfaite, pas celui du nombre de questions.
-          score: Math.min(score, NB_QUESTIONS * PTS_MAX),
-          correct_count: Number.isInteger(correct)
-            ? Math.min(Math.max(correct, 0), NB_QUESTIONS)
-            : null,
-          missed_ids: missed,
-          finished_at: new Date().toISOString(),
+          status: "playing",
+          current_index: 0,
+          round_deadline: deadline,
         })
-        .eq("id", playerId)
-        .is("finished_at", null) // on ne rejoue pas son score
-        .select("id")
+        .eq("id", duel.id)
+        .eq("status", "lobby") // idempotent si deux clics se croisent
+        .select("status, current_index, round_deadline, reveal_until")
         .maybeSingle();
       if (error) throw error;
-      if (!data) return json({ error: "deja_joue" }, 409);
+      const etat = maj ? etatManche(maj) : etatManche({
+        ...duel,
+        status: "playing",
+        current_index: 0,
+        round_deadline: deadline,
+      });
+      await diffuse(code, "round", etat);
+      return json(etat);
+    }
 
-      return json({ ok: true });
+    // ── answer : un joueur répond à la question en cours ─────────────────
+    // Le score dépend du temps restant sur L'HORLOGE DU SERVEUR, jamais de
+    // celle envoyée par le téléphone. Dès que tout le monde a répondu (ou
+    // qu'un dernier retardataire arrive avec choice=-1 à l'expiration de son
+    // chrono local), cette requête bascule elle-même la manche en `reveal` et
+    // diffuse le résultat : aucun cron n'est nécessaire.
+    if (action === "answer") {
+      const playerId = String(body.playerId ?? "");
+      const qIndex = Number(body.index);
+      const choix = Number.isInteger(body.choice) ? Number(body.choice) : -1;
+      const duel = await chargeDuel(code);
+      if (!duel) return json({ error: "introuvable" }, 404);
+      if (duel.status !== "playing" || duel.current_index !== qIndex) {
+        // La manche a déjà avancé : ce n'est pas une erreur pour ce
+        // téléphone, juste une réponse arrivée trop tard. Il rattrapera
+        // l'état réel au prochain sondage.
+        return json({ ok: true, perime: true });
+      }
+
+      const q = await admin
+        .from("questions_competence")
+        .select("correct_index")
+        .eq("id", duel.question_ids[qIndex])
+        .maybeSingle();
+      const correctIndex = q.data?.correct_index ?? -1;
+      const correct = choix === correctIndex;
+      const restant = Math.max(
+        0,
+        new Date(duel.round_deadline!).getTime() - Date.now(),
+      );
+      const points = correct
+        ? Math.max(1, Math.round((PTS_MAX_Q * restant) / DUREE_MS))
+        : 0;
+
+      const { error: ansErr } = await admin.from("duel_answers").insert({
+        duel_id: duel.id,
+        player_id: playerId,
+        q_index: qIndex,
+        choice: choix,
+        correct,
+        points,
+      });
+      // Conflit = ce joueur a déjà répondu à cette question (double appel,
+      // p. ex. un clic ET l'expiration du chrono qui se croisent) : on ne
+      // compte pas deux fois, on renvoie simplement l'état.
+      if (ansErr && ansErr.code !== "23505") throw ansErr;
+
+      if (!ansErr) {
+        await admin.rpc("increment_duel_score", {
+          p_player_id: playerId,
+          p_points: points,
+          p_correct: correct ? 1 : 0,
+        });
+      }
+
+      // Tout le monde a-t-il répondu ? Si oui, on bascule en reveal.
+      const [{ count: nbJoueurs }, { data: reponses }] = await Promise.all([
+        admin
+          .from("duel_players")
+          .select("id", { count: "exact", head: true })
+          .eq("duel_id", duel.id),
+        admin
+          .from("duel_answers")
+          .select("player_id, choice, correct, points")
+          .eq("duel_id", duel.id)
+          .eq("q_index", qIndex),
+      ]);
+
+      let reveal = null;
+      if ((reponses ?? []).length >= (nbJoueurs ?? 0) && (nbJoueurs ?? 0) > 0) {
+        const revealUntil = new Date(Date.now() + REVEAL_MS).toISOString();
+        const { data: maj } = await admin
+          .from("duels")
+          .update({ status: "reveal", reveal_until: revealUntil })
+          .eq("id", duel.id)
+          .eq("status", "playing")
+          .eq("current_index", qIndex)
+          .select("status, current_index, round_deadline, reveal_until")
+          .maybeSingle();
+        if (maj) {
+          const { data: joueurs } = await admin
+            .from("duel_players")
+            .select("id, name, score")
+            .eq("duel_id", duel.id);
+          const parJoueur = new Map((joueurs ?? []).map((p) => [p.id, p]));
+          reveal = {
+            ...etatManche(maj),
+            correctIndex,
+            reponses: (reponses ?? []).map((r) => ({
+              playerId: r.player_id,
+              name: parJoueur.get(r.player_id)?.name ?? "?",
+              choice: r.choice,
+              correct: r.correct,
+              points: r.points,
+              total: parJoueur.get(r.player_id)?.score ?? 0,
+            })),
+          };
+          await diffuse(code, "reveal", reveal);
+        }
+      }
+
+      return json({ ok: true, correct, points, correctIndex, reveal });
+    }
+
+    // ── next : fait avancer la manche (reveal→question suivante, ou
+    // reveal→intermission, ou intermission→question, ou dernière→classement).
+    // Gardée par l'état ATTENDU : si un autre téléphone a déjà fait avancer
+    // la partie entre-temps, cet appel est un no-op qui renvoie l'état réel.
+    // N'importe quel téléphone peut appeler `next`, c'est voulu : c'est celui
+    // dont le minuteur local arrive à zéro en premier qui fait avancer tout
+    // le monde.
+    if (action === "next") {
+      const duel = await chargeDuel(code);
+      if (!duel) return json({ error: "introuvable" }, 404);
+      const expectedStatus = String(body.expectedStatus ?? "");
+      const expectedIndex = Number(body.expectedIndex);
+      if (
+        duel.status !== expectedStatus ||
+        duel.current_index !== expectedIndex
+      ) {
+        return json(etatManche(duel)); // déjà avancée par un autre téléphone
+      }
+
+      let patch: Record<string, unknown>;
+      if (expectedStatus === "reveal") {
+        const prochain = expectedIndex + 1;
+        if (prochain >= NB_QUESTIONS) {
+          patch = { status: "finished" };
+          await admin
+            .from("duel_players")
+            .update({ finished_at: new Date().toISOString() })
+            .eq("duel_id", duel.id)
+            .is("finished_at", null);
+        } else if (prochain === MI_TEMPS && !duel.intermission_shown) {
+          patch = {
+            status: "intermission",
+            current_index: prochain,
+            reveal_until: new Date(Date.now() + INTERMISSION_MS).toISOString(),
+            intermission_shown: true,
+          };
+        } else {
+          patch = {
+            status: "playing",
+            current_index: prochain,
+            round_deadline: new Date(Date.now() + DUREE_MS).toISOString(),
+          };
+        }
+      } else if (expectedStatus === "intermission") {
+        patch = {
+          status: "playing",
+          round_deadline: new Date(Date.now() + DUREE_MS).toISOString(),
+        };
+      } else {
+        return json(etatManche(duel));
+      }
+
+      const { data: maj, error } = await admin
+        .from("duels")
+        .update(patch)
+        .eq("id", duel.id)
+        .eq("status", expectedStatus)
+        .eq("current_index", expectedIndex)
+        .select("status, current_index, round_deadline, reveal_until")
+        .maybeSingle();
+      if (error) throw error;
+      const etat = maj ? etatManche(maj) : etatManche(duel);
+      await diffuse(
+        code,
+        etat.status === "finished"
+          ? "finished"
+          : etat.status === "intermission"
+          ? "intermission"
+          : "round",
+        etat,
+      );
+      return json(etat);
+    }
+
+    // ── state : l'état courant de la manche, sondé en filet de sécurité ──
+    if (action === "state") {
+      const duel = await chargeDuel(code);
+      if (!duel) return json({ error: "introuvable" }, 404);
+      return json(etatManche(duel));
     }
 
     // ── results : le classement + la question que tout le monde a ratée ──
@@ -338,16 +571,20 @@ Deno.serve(async (req) => {
         .sort((a, b) => (b.score ?? -1) - (a.score ?? -1));
 
       // La question la plus ratée du groupe : c'est elle qu'on propose de
-      // revoir à la fin. Sans elle, l'écran final n'est qu'un score.
-      const compte = new Map<string, number>();
-      for (const p of joueurs ?? []) {
-        for (const qid of p.missed_ids ?? []) {
-          compte.set(qid, (compte.get(qid) ?? 0) + 1);
-        }
+      // revoir à la fin. On la déduit maintenant de duel_answers (choix
+      // incorrects), missed_ids n'étant plus alimenté par le client.
+      const { data: rates } = await admin
+        .from("duel_answers")
+        .select("q_index")
+        .eq("duel_id", duel.id)
+        .eq("correct", false);
+      const compte = new Map<number, number>();
+      for (const r of rates ?? []) {
+        compte.set(r.q_index, (compte.get(r.q_index) ?? 0) + 1);
       }
-      let pire: { id: string; rates: number } | null = null;
-      for (const [id, rates] of compte) {
-        if (!pire || rates > pire.rates) pire = { id, rates };
+      let pire: { index: number; rates: number } | null = null;
+      for (const [index, n] of compte) {
+        if (!pire || n > pire.rates) pire = { index, rates: n };
       }
 
       let ratee = null;
@@ -355,7 +592,7 @@ Deno.serve(async (req) => {
         const { data: q } = await admin
           .from("questions_competence")
           .select("id, question, options, correct_index, explanation")
-          .eq("id", pire.id)
+          .eq("id", duel.question_ids[pire.index])
           .maybeSingle();
         if (q) ratee = { ...q, rates: pire.rates };
       }
@@ -365,7 +602,13 @@ Deno.serve(async (req) => {
       // ligne. C'est lui qui donne le « Machin te défie » de l'écran d'accueil.
       const hote = (joueurs ?? []).find((p) => p.is_host)?.name ?? null;
 
-      return json({ classement, ratee, hote, total: NB_QUESTIONS });
+      return json({
+        classement,
+        ratee,
+        hote,
+        total: NB_QUESTIONS,
+        ...etatManche(duel),
+      });
     }
 
     return json({ error: "action" }, 400);

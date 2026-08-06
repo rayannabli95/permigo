@@ -14,6 +14,15 @@
 // session, donc pas de RLS possible. Le jeton du joueur vit dans localStorage,
 // ce qui permet de reprendre si l'écran se verrouille au milieu.
 //
+// ── Synchro temps réel (06/08, demande Rayan) ─────────────────────────────
+// La partie n'est plus une course où chacun joue sa copie des 10 questions à
+// son rythme : les téléphones voient la MÊME question en même temps, avec le
+// MÊME chrono, et un écran de reveal après chaque question montre qui a
+// répondu quoi. L'état de la manche (question affichée, échéance) vit dans
+// `duels` côté serveur et se diffuse à tous les téléphones via Supabase
+// Realtime Broadcast (canal `duel:<code>`), avec un sondage de secours en
+// filet (action `state`) si un message de diffusion se perd en route.
+//
 // Ce n'est PAS un quiz certifiant : aucune compétence n'est validée ici.
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
@@ -26,6 +35,8 @@ import { haptic } from "@/utils/haptic.js";
 import { toast } from "@/components/common/toast.js";
 import { chromeNight } from "@/utils/chrome-night.js";
 import { prochainMessage } from "@/pages/common/duel-intermission.js";
+import { commentaireReveal } from "@/pages/common/duel-commentary.js";
+import { playCorrect, playWrong, playDuelBoost } from "@/utils/sound.js";
 
 const LS = (code) => `duel_${code}`;
 const LS_LANG = "duel_lang";
@@ -97,6 +108,15 @@ const I18N = {
     copied: "Link copied",
     ad: "Advertisement",
     next_round: "Next round",
+    wait_title: "Everyone's in",
+    wait_sub: "The host starts the game. Stay on this screen.",
+    already_started: "This game already started",
+    already_started_sub:
+      "You just missed it.<br>Create your own in ten seconds.",
+    create_own: "Create my own game",
+    you_picked: "Picked",
+    both_answered: "Waiting for the others",
+    right_answer: "Right answer",
   },
   ar: {
     host_title: "تحدَّ أصدقاءك",
@@ -148,6 +168,14 @@ const I18N = {
     copied: "تم نسخ الرابط",
     ad: "إعلان",
     next_round: "الجولة التالية",
+    wait_title: "الجميع هنا",
+    wait_sub: "المضيف يبدأ اللعبة. ابقَ في هذه الشاشة.",
+    already_started: "بدأت هذه اللعبة بالفعل",
+    already_started_sub: "فاتتك للتو.<br>أنشئ لعبتك الخاصة في عشر ثوانٍ.",
+    create_own: "أنشئ لعبتي الخاصة",
+    you_picked: "اختار",
+    both_answered: "في انتظار الباقين",
+    right_answer: "الإجابة الصحيحة",
   },
 };
 
@@ -187,23 +215,16 @@ function R() {
   return _lang === "ar" ? ' dir="rtl" lang="ar"' : "";
 }
 
-// Chrono : 20 secondes par question (décision Rayan 03/08). Une bonne réponse
-// vaut 500 points au buzzer et 1000 instantanément. C'est la VITESSE qui
-// départage, pas seulement le nombre de bonnes réponses.
+// Chrono : 20 secondes par question (décision Rayan 03/08). L'échéance vient
+// du SERVEUR (`etat.deadline`) : cette constante ne sert plus qu'à l'affichage
+// des textes de règles, jamais à armer un minuteur local.
 const DUREE = 20000;
-const PTS_BASE = 500;
-const PTS_VITESSE = 500;
 
 // ── L'entracte ───────────────────────────────────────────────────────────
 // Les 10 questions se jouent en DEUX manches de 5 (décision Rayan 03/08).
 // Entre les deux : un écran de cinq secondes, en pleine page, qui s'ouvre et
-// se ferme tout seul. Aucun bouton, aucun geste : la manche 2 repart au
-// buzzer.
-//
-// Le placement n'est pas neutre. Avant la première question, ce serait le
-// tout premier contact d'un inconnu avec PermiGo, et une coupure y ferait
-// fuir. Entre deux manches, les joueurs s'attendent les uns les autres :
-// c'est le seul moment où une pause ne casse rien.
+// se ferme tout seul, synchronisé pour tous les téléphones (le serveur pose
+// `status = 'intermission'` avec sa propre échéance).
 const MI_TEMPS = 5;
 
 // L'emplacement publicitaire.
@@ -214,17 +235,7 @@ const MI_TEMPS = 5;
 // c'est la SEULE chose à changer ici : une fonction qui reçoit l'élément et
 // y pose son bloc. ⚠️ Un script de régie est un tiers : il ne se charge
 // qu'après acceptation du bandeau de consentement.
-// ⚠️ LE JOUR OÙ TU BRANCHES UNE RÉGIE, trois choses à faire ENSEMBLE :
-//   1. renseigner `externe` ci-dessous ;
-//   2. corriger DEUX textes qui promettent aujourd'hui qu'il n'y a aucune
-//      publicité : `txt_short` dans src/components/common/cookie-banner.js
-//      et la section cookies de src/pages/common/legal.js. Sinon la promesse
-//      devient fausse le jour du branchement ;
-//   3. ne charger le script de la régie QU'APRÈS acceptation du bandeau.
-const PUB = {
-  duree: 5000, // cinq secondes pile, puis la manche suivante démarre seule
-  externe: null,
-};
+const PUB = { externe: null };
 
 const COULEURS = [
   "linear-gradient(180deg,#8e87ff,#6058d8)",
@@ -237,26 +248,48 @@ const COULEURS = [
   "linear-gradient(180deg,#c4a6ff,#8b5cf6)",
 ];
 
-// Minuteries vivantes : le chrono d'une question et le rafraîchissement du
-// salon. Elles doivent mourir quand on quitte la page, sinon elles tournent
-// dans le vide et rejouent sur un écran démonté.
+// Minuteries vivantes : le chrono d'une question, la bascule automatique
+// (reveal → suivante), le rafraîchissement du salon et le sondage de secours.
+// Elles doivent mourir quand on quitte la page, sinon elles tournent dans le
+// vide et rejouent sur un écran démonté.
 let _tick = null;
 let _fin = null;
+let _avance = null;
 let _salon = null;
+let _sonde = null;
+let _canal = null;
 
 function stopChrono() {
   if (_tick) clearInterval(_tick);
   if (_fin) clearTimeout(_fin);
+  if (_avance) clearTimeout(_avance);
   _tick = null;
   _fin = null;
+  _avance = null;
 }
 function stopSalon() {
   if (_salon) clearInterval(_salon);
   _salon = null;
 }
+function stopSonde() {
+  if (_sonde) clearInterval(_sonde);
+  _sonde = null;
+}
+function stopCanal() {
+  if (_canal) {
+    try {
+      sb.removeChannel(_canal);
+    } catch {
+      /* canal déjà fermé */
+    }
+  }
+  _canal = null;
+}
 export function unmount() {
   stopChrono();
   stopSalon();
+  stopSonde();
+  stopCanal();
 }
 
 function appel(action, payload = {}) {
@@ -403,6 +436,10 @@ ${chromeNight("#241a52", "#1a1340")}
    écran figé et croit que le lien n'a pas marché. */
 .du-slot.neuf .du-pl { animation:duPop .45s cubic-bezier(.34,1.56,.64,1) both; }
 @keyframes duPop { 0%{transform:scale(.4);opacity:0} 60%{transform:scale(1.15)} 100%{transform:scale(1);opacity:1} }
+/* La pastille de l'écran d'attente respire doucement : elle prouve à l'ami
+   que la page est vivante pendant qu'il patiente. */
+.du-wait-pulse { animation:duBreath 1.8s ease-in-out infinite; }
+@keyframes duBreath { 0%,100%{opacity:1} 50%{opacity:.55} }
 
 /* ===== Le chrono ===== */
 .du-chrono { display:flex; align-items:center; gap:12px; margin:6px 0 4px; }
@@ -410,11 +447,10 @@ ${chromeNight("#241a52", "#1a1340")}
   box-shadow:inset 0 2px 3px rgba(0,0,0,.5); }
 .du-jauge i { position:absolute; inset:0; transform-origin:left center; border-radius:8px;
   background:linear-gradient(90deg,#ffd95e,#f59b16); }
-.du-jauge.go i { transition:transform ${DUREE}ms linear; transform:scaleX(0); }
 .du-jauge.urgent i { background:linear-gradient(90deg,#ff8a6b,#e2442d); }
 .du-secondes { min-width:34px; text-align:right; font:800 17px/1 var(--fn,'IBM Plex Mono',monospace); color:#ffd06a; }
 .du-secondes.urgent { color:#ff8a6b; }
-@media (prefers-reduced-motion: reduce){ .du-jauge.go i{transition:none} .du-slot.neuf .du-pl{animation:none} }
+@media (prefers-reduced-motion: reduce){ .du-jauge i{transition:none !important} .du-slot.neuf .du-pl{animation:none} .du-wait-pulse{animation:none} }
 
 .du-score { font:800 15px/1 var(--fn,'IBM Plex Mono',monospace); color:#f5c451; display:block; text-align:right; }
 .du-combo { font:800 11px/1 'Archivo',sans-serif; letter-spacing:.06em; text-transform:uppercase;
@@ -431,22 +467,36 @@ ${chromeNight("#241a52", "#1a1340")}
   transition:transform .08s ease, box-shadow .08s ease; }
 .du-opt:active { transform:translateY(3px); box-shadow:0 4px 0 #15113a; }
 .du-opt[disabled] { cursor:default; }
-.du-opt.ok { background:linear-gradient(180deg,#ffd24a,#ff9c1c); color:#3a1d00;
-  border:1px solid rgba(255,255,255,.35); box-shadow:0 5px 0 #b85e00, 0 10px 20px rgba(255,140,30,.4); }
-.du-opt.ko { background:linear-gradient(180deg,#4a2740,#34203a); border-color:rgba(255,160,90,.3);
-  color:#ffd9c2; box-shadow:0 5px 0 #1f1430; }
+.du-opt.moi { background:linear-gradient(180deg,#5b52c9,#403894); border-color:rgba(255,255,255,.3);
+  box-shadow:0 5px 0 #241f6b, 0 10px 20px rgba(74,63,201,.4); }
 .du-key { flex:none; display:grid; place-items:center; width:38px; height:38px; border-radius:12px;
   background:linear-gradient(180deg,#2b2560,#1b1545); color:#cfc7ff;
   font:800 17px/1 'Archivo',sans-serif; box-shadow:inset 0 1px 0 rgba(255,255,255,.16), 0 3px 0 #110d35; }
-.du-opt.ok .du-key { background:linear-gradient(180deg,#fff,#ffe7a8); color:#c46a00; box-shadow:0 3px 0 #c46a00; }
+.du-opt.moi .du-key { background:linear-gradient(180deg,#ffd24a,#ff9c1c); color:#3a1d00; box-shadow:0 3px 0 #b85e00; }
 
-.du-gain { text-align:center; margin:18px 0 0; font:800 34px/1 'Archivo',sans-serif; letter-spacing:-.03em;
-  background:linear-gradient(110deg,#ffe27a,#ff9b1e); -webkit-background-clip:text; background-clip:text;
-  color:transparent; animation:duGain .45s cubic-bezier(.34,1.56,.64,1) both; }
-.du-gain.rate { background:none; color:#8c85bd; font-size:19px; }
+.du-waiting { display:flex; align-items:center; gap:10px; margin:18px 0 0; padding:14px 16px;
+  border-radius:16px; background:rgba(0,0,0,.24); border:1px solid #3a3178;
+  font:700 14px/1.4 'Archivo',sans-serif; color:#cfc7ff; }
+.du-waiting .dot { width:8px; height:8px; border-radius:50%; background:#ffd06a; flex:none;
+  animation:duBreath 1s ease-in-out infinite; }
+
+/* ===== Le reveal ===== */
+.du-reveal-q { font:700 17px/1.4 'Archivo',sans-serif; color:#cfc7ff; margin:0 0 16px; }
+.du-comment { text-align:center; margin:2px 0 18px; font:800 26px/1.15 'Archivo',sans-serif;
+  letter-spacing:-.02em; background:linear-gradient(110deg,#ffe27a,#ff9b1e); -webkit-background-clip:text;
+  background-clip:text; color:transparent; animation:duGain .45s cubic-bezier(.34,1.56,.64,1) both; }
 @keyframes duGain { 0%{transform:translateY(14px) scale(.8);opacity:0} 100%{transform:none;opacity:1} }
-.du-expl { margin:14px 0 0; padding:14px 16px; border-radius:16px; background:rgba(0,0,0,.24);
-  border:1px solid #3a3178; font:600 14px/1.5 'Archivo',sans-serif; color:#cfc7ff; }
+.du-rrow { display:flex; align-items:center; gap:12px; padding:13px 15px; border-radius:16px;
+  background:rgba(255,255,255,.04); border:1px solid #3a3178; margin-top:10px; }
+.du-rrow .who { width:36px; height:36px; border-radius:50%; flex:none; display:grid; place-items:center;
+  font:800 14px/1 'Archivo',sans-serif; color:#fff; }
+.du-rrow .info { flex:1; min-width:0; }
+.du-rrow .nm { font:800 14.5px/1.2 'Archivo',sans-serif; color:#fff; overflow:hidden; text-overflow:ellipsis; }
+.du-rrow .pick { font:600 12.5px/1.3 'Archivo',sans-serif; color:#9089c7; margin-top:2px; }
+.du-rrow .gain { font:800 17px/1 var(--fn,'IBM Plex Mono',monospace); flex:none; }
+.du-rrow.ok .gain { color:#35d07f; }
+.du-rrow.ko .gain { color:#8c85bd; }
+.du-rrow.ok { border-color:rgba(53,208,127,.35); }
 
 /* ===== Podium ===== */
 .du-podium { display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:auto 84px;
@@ -555,7 +605,7 @@ ${chromeNight("#241a52", "#1a1340")}
 /* Sur un téléphone réglé sur « moins d'animations », le décor se fige et le
    mot arrive sans grandir. La jauge, elle, continue de se vider : c'est une
    information, pas une décoration. */
-@media (prefers-reduced-motion: reduce){ .du-skel{animation:none} .du-cta,.du-opt{transition:none} .du-gain{animation:none}
+@media (prefers-reduced-motion: reduce){ .du-skel{animation:none} .du-cta,.du-opt{transition:none} .du-comment{animation:none}
   .dui-bg,.dui-bg i,.dui-ray{ animation:none; }
   .dui-ray{ display:none; }
   .dui-mot,.dui-ligne,.dui-bas{ animation-duration:.01ms; animation-delay:0s; } }
@@ -688,27 +738,48 @@ function vueArrivee(etat) {
   `);
 }
 
+// L'écran d'attente : l'ami a rejoint, il patiente que l'hôte lance la
+// partie. Sans lui, un invité voit un chrono partir tout seul sans savoir
+// pourquoi (c'était l'ancien bug : chacun jouait sa propre copie).
+function vueAttente(etat) {
+  return coque(`
+    <div class="du-wordmark">PermiGo</div>
+    <img class="du-mascot du-wait-pulse" src="/skins/mascot-hello-remastered.png" alt="">
+    <h1 class="du-title"${R()}>${t("wait_title", "On t'attend tous")}</h1>
+    <p class="du-sub"${R()}>${t("wait_sub", "L'hôte lance la partie.<br>Reste sur cet écran.")}</p>
+    <div class="du-card">
+      <span class="du-eyebrow"${R()}>${t("in_party", "Dans la partie")}</span>
+      <div class="du-players" id="du-wait-players">${pastilles(etat.joueurs || [])}</div>
+    </div>
+  `);
+}
+
+function vueDejaCommencee() {
+  return coque(`
+    <div class="du-wordmark">PermiGo</div>
+    <h1 class="du-title" style="margin-top:40px"${R()}>${t("already_started", "Cette partie a déjà commencé")}</h1>
+    <p class="du-sub"${R()}>${t("already_started_sub", "Tu l'as ratée de peu.<br>Crée la tienne en dix secondes.")}</p>
+    <button class="du-cta gold" data-creer-perso>${t("create_own", "Créer ma propre partie")}</button>
+  `);
+}
+
 // ───────────────────────────── Une question ──────────────────────────────
+// `attends` : ce joueur a déjà répondu et patiente que les autres finissent
+// (ou que le temps s'écoule). Le résultat détaillé n'apparaît qu'au reveal,
+// synchronisé pour tout le monde : montrer sa propre correction tout de
+// suite spoilerait la question à l'ami qui regarde encore l'écran.
 function vueQuestion(etat) {
-  const q = etat.questions[etat.i];
-  const rep = etat.reponse; // null = pas encore joué, -1 = temps écoulé
-  const joue = rep !== null;
-  const bon = joue && rep === q.correct_index;
+  const q = etat.questions[etat.index];
+  const attends = etat.reponse !== null;
 
   const options = (q.options || [])
     .map((opt, i) => {
-      let cls = "";
-      if (joue) {
-        if (i === q.correct_index) cls = " ok";
-        else if (i === rep) cls = " ko";
-      }
-      return `<button class="du-opt${cls}" data-rep="${i}"${joue ? " disabled" : ""}>
+      const choisi = attends && i === etat.reponse;
+      return `<button class="du-opt${choisi ? " moi" : ""}" data-rep="${i}"${attends ? " disabled" : ""}>
         <span class="du-key">${LETTRES[i] || i + 1}</span><span>${esc(opt)}</span>
       </button>`;
     })
     .join("");
-
-  const dernier = etat.i === etat.questions.length - 1;
 
   return coque(`
     <div class="du-top" style="padding-bottom:8px">
@@ -720,11 +791,11 @@ function vueQuestion(etat) {
     </div>
 
     ${
-      joue
+      attends
         ? ""
         : `<div class="du-chrono">
              <div class="du-jauge" id="du-jauge"><i></i></div>
-             <span class="du-secondes" id="du-sec">${DUREE / 1000}</span>
+             <span class="du-secondes" id="du-sec">${Math.ceil(DUREE / 1000)}</span>
            </div>`
     }
 
@@ -732,32 +803,59 @@ function vueQuestion(etat) {
     <div class="du-opts">${options}</div>
 
     ${
-      joue
-        ? `<p class="du-gain${bon ? "" : " rate"}">${
-            bon
-              ? `+${chiffres(etat.dernierGain)}`
-              : rep === -1
-                ? t("timeout", "Temps écoulé")
-                : t("missed", "Raté")
-          }</p>
-           ${q.explanation ? `<p class="du-expl"${R()}>${esc(q.explanation)}</p>` : ""}
-           <button class="du-cta" data-suite style="margin-top:14px">${
-             dernier
-               ? t("see_rank", "Voir le classement")
-               : t("next", "Suivante")
-           }</button>`
-        : `<p class="du-note"${R()}>${t("of", "{i} sur {n}", { i: etat.i + 1, n: etat.questions.length })}</p>`
+      attends
+        ? `<div class="du-waiting"><span class="dot"></span><span${R()}>${t("both_answered", "En attente des autres")}</span></div>`
+        : `<p class="du-note"${R()}>${t("of", "{i} sur {n}", { i: etat.index + 1, n: etat.questions.length })}</p>`
     }
+  `);
+}
+
+// ───────────────────────────── Le reveal ─────────────────────────────────
+// Après CHAQUE question (pas seulement à la fin) : ce que chacun a choisi,
+// les points de la manche, le score qui monte, et un commentaire qui fait
+// vivre le match. Le passage à la question suivante est automatique.
+function vueReveal(etat) {
+  const q = etat.questions[etat.index];
+  const rep = etat.reveal || { reponses: [], correctIndex: -1 };
+  const lignes = rep.reponses
+    .map((r, i) => {
+      const pick =
+        r.choice >= 0 && q.options?.[r.choice] !== undefined
+          ? q.options[r.choice]
+          : t("timeout", "Temps écoulé");
+      return `<div class="du-rrow ${r.correct ? "ok" : "ko"}">
+        <div class="who" style="background:${COULEURS[i % COULEURS.length]}">${esc(initiale(r.name))}</div>
+        <div class="info">
+          <div class="nm">${esc(r.name)}</div>
+          <div class="pick"${R()}>${t("you_picked", "A choisi")} · ${esc(pick)}</div>
+        </div>
+        <div class="gain">${r.correct ? `+${r.points}` : "+0"}</div>
+      </div>`;
+    })
+    .join("");
+
+  return coque(`
+    <div class="du-top" style="padding-bottom:8px">
+      <div class="du-players">${pastilles(etat.joueurs || [])}</div>
+      <span class="du-score">${chiffres(etat.points)}</span>
+    </div>
+    <p class="du-reveal-q"${R()}>${esc(q.question)}</p>
+    ${rep.commentaire ? `<p class="du-comment">${esc(rep.commentaire)}</p>` : ""}
+    ${
+      rep.correctIndex >= 0 && q.options?.[rep.correctIndex] !== undefined
+        ? `<p class="du-bonne" style="margin:0 0 4px"${R()}>${t("right_answer", "La bonne réponse")} · ${esc(q.options[rep.correctIndex])}</p>`
+        : ""
+    }
+    ${lignes}
+    ${q.explanation ? `<p class="du-expl" style="margin-top:14px; padding:14px 16px; border-radius:16px; background:rgba(0,0,0,.24); border:1px solid #3a3178; font:600 14px/1.5 'Archivo',sans-serif; color:#cfc7ff;"${R()}>${esc(q.explanation)}</p>` : ""}
   `);
 }
 
 // ───────────────────────────── L'entracte ────────────────────────────────
 // Un écran plein, cinq secondes, sans un seul bouton : un décor qui respire,
-// un mot énorme, une phrase, et une barre qui se vide.
+// un mot énorme, une phrase, et une barre qui se vide. Synchronisé : tous
+// les téléphones l'ouvrent et le ferment à la même seconde (echéance serveur).
 function vueEntracte(msg) {
-  const sec = Math.round(PUB.duree / 1000);
-  // Pas de `coque()` ici : cet écran est plein bord à bord, il ne veut ni la
-  // gouttière ni le rembourrage bas des autres vues du duel.
   return `${STYLE}<div class="du">
     <div class="dui">
       <div class="dui-bg" aria-hidden="true">
@@ -780,7 +878,7 @@ function vueEntracte(msg) {
       <div class="dui-bas">
         <div class="dui-meta">
           <span class="dui-tag"${R()}>${t("next_round", "Manche suivante")}</span>
-          <span class="dui-sec" id="dui-sec">${chiffres(sec)}</span>
+          <span class="dui-sec" id="dui-sec">0</span>
         </div>
         <div class="dui-piste"><span class="dui-jauge" id="dui-jauge"></span></div>
       </div>
@@ -924,24 +1022,29 @@ export async function mount(root, param) {
   const garde = jeton(code);
   const etat = {
     code,
-    i: 0,
+    index: 0,
+    status: "lobby",
+    deadline: null,
+    revealUntil: null,
     reponse: null,
+    reveal: null,
     points: 0,
     bonnes: 0,
     serie: 0,
-    dernierGain: 0,
-    ratees: [],
     joueurs: [],
     questions: [],
     total: 10,
+    leaderAvant: new Map(), // nom → total, pour détecter un changement de tête
     playerId: garde?.playerId || null,
     fini: !!garde?.fini,
+    _sig: null,
   };
 
   if (etat.fini) return afficheClassement(root, etat);
 
+  let info;
   try {
-    const info = await appel("results", { code });
+    info = await appel("results", { code });
     etat.joueurs = (info.classement || []).map((p) => p.name);
     etat.hote = info.hote || info.classement?.[0]?.name || null;
     etat.total = info.total || 10;
@@ -962,7 +1065,16 @@ export async function mount(root, param) {
     return;
   }
 
-  if (etat.playerId) return lanceJeu(root, etat);
+  if (info.status === "finished") {
+    poseJeton(code, { playerId: etat.playerId, fini: true });
+    etat.fini = true;
+    return afficheClassement(root, etat);
+  }
+
+  if (etat.playerId) {
+    // Déjà dans la partie (rejoint plus tôt, ou reprise après un refresh).
+    return demarrePartieSynchro(root, etat, info);
+  }
 
   root.innerHTML = vueArrivee(etat);
   cableArrivee(root, etat);
@@ -1045,6 +1157,7 @@ function cableCreation(root, me, etat) {
       const prenom = me.prenom || me.full_name?.split(" ")[0] || "Moi";
       const r = await appel("create", { name: prenom });
       etat.code = r.code;
+      etat.playerId = r.playerId;
       etat.joueurs = [prenom];
       poseJeton(r.code, { playerId: r.playerId, fini: false });
       track("duel.cree", { code: r.code });
@@ -1083,10 +1196,19 @@ function cableCreation(root, me, etat) {
     copie(lien);
   });
 
-  root.querySelector("[data-jouer]")?.addEventListener("click", () => {
+  root.querySelector("[data-jouer]")?.addEventListener("click", async (ev) => {
+    const btn = ev.currentTarget;
+    btn.disabled = true;
     haptic("tap");
-    stopSalon();
-    navigate(`/duel/${etat.code}`);
+    try {
+      await appel("start", { code: etat.code, playerId: etat.playerId });
+      stopSalon();
+      navigate(`/duel/${etat.code}`);
+    } catch (e) {
+      console.error("[duel:start]", e);
+      btn.disabled = false;
+      toast("La partie n'a pas pu démarrer", "error");
+    }
   });
 }
 
@@ -1120,10 +1242,17 @@ function cableArrivee(root, etat) {
       etat.joueurs = [...(r.players || []), r.name];
       poseJeton(etat.code, { playerId: r.playerId, fini: false });
       track("duel.rejoint", { code: etat.code });
-      lanceJeu(root, etat);
+      demarrePartieSynchro(root, etat, { status: "lobby" });
     } catch (e) {
       console.error("[duel:join]", e);
       if (btn) btn.disabled = false;
+      if (String(e.message) === "commencee") {
+        root.innerHTML = vueDejaCommencee();
+        root
+          .querySelector("[data-creer-perso]")
+          ?.addEventListener("click", () => navigate("/duel"));
+        return;
+      }
       toast(
         String(e.message) === "complet"
           ? t("full", "La partie est complète")
@@ -1139,197 +1268,313 @@ function cableArrivee(root, etat) {
   input?.focus();
 }
 
-async function lanceJeu(root, etat) {
+// ═══════════════════════════ La partie synchronisée ═══════════════════════
+// Point d'entrée unique une fois `playerId` connu, que ce soit juste après un
+// `join`, juste après le `start` de l'hôte, ou une reprise après un refresh.
+async function demarrePartieSynchro(root, etat, infoInitiale) {
   stopSalon();
-  root.innerHTML = squelette();
-  try {
-    // La langue voyage avec la demande : les 415 questions existent en
-    // anglais et en arabe (table question_translations). Une traduction
-    // absente se replie sur le français, question par question.
-    const r = await appel("questions", { code: etat.code, lang: _lang });
-    etat.questions = r.questions || [];
-  } catch (e) {
-    console.error("[duel:questions]", e);
-    toast("Les questions n'ont pas pu être chargées", "error");
-    return;
-  }
   if (!etat.questions.length) {
-    toast("Cette partie n'a plus de questions", "error");
-    return;
-  }
-  etat.i = 0;
-  etat.reponse = null;
-  etat.points = 0;
-  etat.bonnes = 0;
-  etat.serie = 0;
-  etat.ratees = [];
-  etat.miTempsVue = false; // une reprise de partie ne rejoue pas la mi-temps
-  dessineQuestion(root, etat);
-}
-
-// Enregistre la réponse (index choisi, ou -1 si le temps est écoulé) puis
-// redessine. Les points suivent la VITESSE : 1000 tout de suite, 500 au buzzer.
-function repond(root, etat, choix) {
-  if (etat.reponse !== null) return;
-  stopChrono();
-  const q = etat.questions[etat.i];
-  const restant = Math.max(0, etat.echeance - Date.now());
-  etat.reponse = choix;
-  if (choix === q.correct_index) {
-    etat.dernierGain = PTS_BASE + Math.round((PTS_VITESSE * restant) / DUREE);
-    etat.points += etat.dernierGain;
-    etat.bonnes++;
-    etat.serie++;
-    haptic("success");
-  } else {
-    etat.dernierGain = 0;
-    etat.serie = 0;
-    etat.ratees.push(q.id);
-    haptic("error");
-  }
-  dessineQuestion(root, etat);
-}
-
-function dessineQuestion(root, etat) {
-  root.innerHTML = vueQuestion(etat);
-
-  // Question pas encore jouée : on arme le chrono.
-  if (etat.reponse === null) {
-    etat.echeance = Date.now() + DUREE;
-    const jauge = root.querySelector("#du-jauge");
-    const sec = root.querySelector("#du-sec");
-    // La barre part APRÈS un tour de rendu, sinon la transition n'a pas d'état
-    // de départ et la jauge saute directement à zéro.
-    requestAnimationFrame(() => jauge?.classList.add("go"));
-    _tick = setInterval(() => {
-      const reste = Math.max(0, Math.ceil((etat.echeance - Date.now()) / 1000));
-      if (sec) sec.textContent = String(reste);
-      if (reste <= 5) {
-        jauge?.classList.add("urgent");
-        sec?.classList.add("urgent");
-      }
-    }, 200);
-    _fin = setTimeout(() => repond(root, etat, -1), DUREE);
-  }
-
-  root.querySelectorAll("[data-rep]").forEach((b) => {
-    b.addEventListener("click", () =>
-      repond(root, etat, Number(b.getAttribute("data-rep"))),
-    );
-  });
-
-  root.querySelector("[data-suite]")?.addEventListener("click", async () => {
-    haptic("tap");
-    if (etat.i < etat.questions.length - 1) {
-      etat.i++;
-      etat.reponse = null;
-      // Fin de la première manche : mi-temps avant de repartir.
-      if (etat.i === MI_TEMPS && !etat.miTempsVue) {
-        etat.miTempsVue = true;
-        return afficheMiTemps(root, etat);
-      }
-      dessineQuestion(root, etat);
+    try {
+      const r = await appel("questions", { code: etat.code, lang: _lang });
+      etat.questions = r.questions || [];
+    } catch (e) {
+      console.error("[duel:questions]", e);
+      toast("Les questions n'ont pas pu être chargées", "error");
       return;
     }
-    stopChrono();
-    root.innerHTML = squelette();
+  }
+  abonneCanal(root, etat);
+  sondeEtat(root, etat);
+  appliqueEtatServeur(root, etat, infoInitiale);
+}
+
+// Écoute la diffusion Realtime : c'est elle qui donne l'instantanéité (les
+// deux téléphones basculent à la même frappe de clavier serveur, pas au
+// prochain sondage de 2,5 s).
+function abonneCanal(root, etat) {
+  stopCanal();
+  _canal = sb
+    .channel(`duel:${etat.code}`)
+    .on("broadcast", { event: "round" }, ({ payload }) =>
+      appliqueEtatServeur(root, etat, payload),
+    )
+    .on("broadcast", { event: "intermission" }, ({ payload }) =>
+      appliqueEtatServeur(root, etat, payload),
+    )
+    .on("broadcast", { event: "reveal" }, ({ payload }) =>
+      appliqueEtatServeur(root, etat, payload, payload),
+    )
+    .on("broadcast", { event: "finished" }, ({ payload }) =>
+      appliqueEtatServeur(root, etat, payload),
+    )
+    .subscribe();
+}
+
+// Le filet de sécurité : si un message de diffusion se perd (réseau qui
+// tousse, onglet mis en veille), ce sondage rattrape l'état réel dans les
+// 2,5 secondes qui suivent plutôt que de laisser un téléphone figé.
+function sondeEtat(root, etat) {
+  stopSonde();
+  _sonde = setInterval(async () => {
+    if (!document.body.contains(root)) return stopSonde();
     try {
-      await appel("finish", {
-        playerId: etat.playerId,
-        score: etat.points,
-        correct: etat.bonnes,
-        missed: etat.ratees,
-      });
-      poseJeton(etat.code, { playerId: etat.playerId, fini: true });
-      track("duel.termine", {
-        code: etat.code,
-        score: etat.points,
-        bonnes: etat.bonnes,
-      });
-    } catch (e) {
-      // « déjà joué » n'est pas une erreur pour le joueur : il verra le
-      // classement, c'est ce qu'il attend.
-      if (String(e.message) !== "deja_joue") console.error("[duel:finish]", e);
+      const s = await appel("state", { code: etat.code });
+      appliqueEtatServeur(root, etat, s);
+    } catch {
+      /* on retentera au prochain tour */
     }
+  }, 2500);
+}
+
+function signatureEtat(s) {
+  return `${s.status}:${s.index}`;
+}
+
+// Le seul endroit qui décide de ce qui s'affiche, qu'on arrive par la
+// diffusion, le sondage, ou la réponse directe d'un appel réseau. Centraliser
+// ici évite qu'un double événement (diffusion + sondage qui se croisent)
+// redessine ou rejoue un son deux fois.
+async function appliqueEtatServeur(root, etat, s, revealPayload) {
+  if (!s || !s.status) return;
+  const sig = signatureEtat(s);
+  const dejaVu = sig === etat._sig;
+  etat.status = s.status;
+  etat.index = s.index;
+  etat.deadline = s.deadline;
+  etat.revealUntil = s.revealUntil;
+
+  if (s.status === "lobby") {
+    if (!dejaVu) {
+      root.innerHTML = vueAttente(etat);
+      etat._sig = sig;
+    }
+    return;
+  }
+
+  if (s.status === "playing") {
+    if (etat.reponse !== null && etat._sig === sig) return; // déjà en attente, rien à changer
+    if (dejaVu && etat.reponse === null) return; // déjà affichée, pas de flicker
+    etat.reponse = null;
+    etat._sig = sig;
+    afficheQuestion(root, etat);
+    return;
+  }
+
+  if (s.status === "reveal") {
+    if (dejaVu && etat.reveal) return;
+    etat._sig = sig;
+    let payload = revealPayload;
+    // Le sondage de secours ne porte pas le détail des réponses (seulement
+    // l'état), on le reconstruit depuis `results` : moins riche (pas de « qui
+    // a choisi quoi »), mais jamais un écran figé.
+    if (!payload || !payload.reponses) {
+      try {
+        const r = await appel("results", { code: etat.code });
+        payload = {
+          reponses: (r.classement || []).map((p) => ({
+            playerId: p.id,
+            name: p.name,
+            correct: null,
+            points: null,
+            choice: -1,
+            total: p.score,
+          })),
+        };
+      } catch {
+        payload = { reponses: [] };
+      }
+    }
+    const commentaire = commentaireReveal(
+      payload.reponses,
+      etat.leaderAvant,
+      _lang,
+    );
+    etat.leaderAvant = new Map(
+      payload.reponses.map((r) => [r.name, r.total ?? 0]),
+    );
+    if (payload.correctIndex != null) etat.correctIndex = payload.correctIndex;
+    etat.reveal = { ...payload, commentaire };
+    stopChrono();
+    playDuelBoost();
+    root.innerHTML = vueReveal(etat);
+    planifieAvance(root, etat, "reveal", etat.index);
+    return;
+  }
+
+  if (s.status === "intermission") {
+    if (dejaVu) return;
+    etat._sig = sig;
+    stopChrono();
+    const msg = prochainMessage(_lang);
+    root.innerHTML = vueEntracte(msg);
+    root.__code = etat.code;
+    window.scrollTo(0, 0);
+    caleEcran(root);
+    ajusteMot(root);
+    document.fonts?.ready.then(() => ajusteMot(root)).catch(() => {});
+    track("duel.entracte", {
+      code: etat.code,
+      score: etat.points,
+      message: msg.index,
+    });
+    if (typeof PUB.externe === "function") {
+      const slot = root.querySelector("#du-pub-slot");
+      try {
+        if (slot) PUB.externe(slot);
+      } catch (e) {
+        console.error("[duel:pub]", e);
+      }
+    }
+    armeBarreEcheance(root, etat.revealUntil);
+    planifieAvance(root, etat, "intermission", etat.index);
+    return;
+  }
+
+  if (s.status === "finished") {
+    stopChrono();
+    stopSonde();
+    stopCanal();
+    poseJeton(etat.code, { playerId: etat.playerId, fini: true });
     etat.fini = true;
     afficheClassement(root, etat);
+  }
+}
+
+// La question s'affiche, on arme le chrono sur l'ÉCHÉANCE DU SERVEUR (pas une
+// durée locale) : un téléphone qui rejoint le rendu deux secondes après les
+// autres voit quand même le bon temps restant, pas 20 secondes pleines.
+function afficheQuestion(root, etat) {
+  root.innerHTML = vueQuestion(etat);
+  if (etat.reponse === null) {
+    armeChronoSync(root, etat);
+  } else {
+    stopChrono(); // déjà répondu : plus de compte à rebours à afficher ni à armer
+  }
+  root.querySelectorAll("[data-rep]").forEach((b) => {
+    b.addEventListener("click", () =>
+      soumetsReponse(root, etat, Number(b.getAttribute("data-rep"))),
+    );
   });
 }
 
-// L'entracte : cinq secondes exactement, puis la manche 2 démarre seule.
-//
-// Le score en cours part au serveur pendant que l'écran s'affiche, pas avant :
-// l'entracte ne doit JAMAIS attendre le réseau. Si l'appel traîne ou tombe, la
-// partie continue et le classement final reste juste, parce qu'il est
-// recalculé à la fin.
-async function afficheMiTemps(root, etat) {
+function armeChronoSync(root, etat) {
   stopChrono();
-
-  const msg = prochainMessage(_lang);
-  root.innerHTML = vueEntracte(msg);
-  root.__code = etat.code;
-  // L'écran de question qu'on quitte est plus haut que la fenêtre. Sans ce
-  // rappel en haut, l'entracte s'ouvre à la position de défilement héritée et
-  // le mot se retrouve sous le bord haut : le rendu paraît décentré alors que
-  // la mise en page est juste.
-  window.scrollTo(0, 0);
-  caleEcran(root);
-  ajusteMot(root);
-  // Si Archivo n'est pas encore posée, la première mesure porte sur la police
-  // de secours et tombe à côté. On remesure dès que la vraie arrive.
-  document.fonts?.ready.then(() => ajusteMot(root)).catch(() => {});
-  track("duel.entracte", {
-    code: etat.code,
-    score: etat.points,
-    message: msg.index,
-  });
-
-  appel("progress", {
-    playerId: etat.playerId,
-    score: etat.points,
-    correct: etat.bonnes,
-  }).catch((e) => console.error("[duel:progress]", e));
-
-  // Une régie tierce, le jour où il y en a une, remplace le message maison.
-  if (typeof PUB.externe === "function") {
-    const slot = root.querySelector("#du-pub-slot");
-    try {
-      if (slot) PUB.externe(slot);
-    } catch (e) {
-      console.error("[duel:pub]", e);
-      /* la régie tombe : le message maison reste, plutôt qu'un trou */
+  const jauge = root.querySelector("#du-jauge");
+  const sec = root.querySelector("#du-sec");
+  const echeance = new Date(etat.deadline).getTime();
+  const restant0 = Math.max(0, echeance - Date.now());
+  if (jauge) {
+    const i = jauge.querySelector("i");
+    if (i) {
+      i.style.transition = "none";
+      i.style.transform = "scaleX(1)";
+      requestAnimationFrame(() => {
+        i.style.transition = `transform ${restant0}ms linear`;
+        i.style.transform = "scaleX(0)";
+      });
     }
   }
+  _tick = setInterval(() => {
+    const reste = Math.max(0, Math.ceil((echeance - Date.now()) / 1000));
+    if (sec) sec.textContent = String(reste);
+    if (reste <= 5) {
+      jauge?.classList.add("urgent");
+      sec?.classList.add("urgent");
+    }
+  }, 200);
+  _fin = setTimeout(() => {
+    if (etat.reponse === null) soumetsReponse(root, etat, -1);
+  }, restant0);
+}
 
+// Une barre qui se vide, réutilisée pour le reveal ET l'intermission : les
+// deux sont « une pause avec une échéance serveur », seule la durée change.
+function armeBarreEcheance(root, revealUntil) {
   const jauge = root.querySelector("#dui-jauge");
   const sec = root.querySelector("#dui-sec");
-  const fin = Date.now() + PUB.duree;
-
-  // La jauge se vide par une seule transition : le navigateur la joue sur son
-  // fil de composition, donc elle reste lisse même si le reste rame.
+  const echeance = new Date(revealUntil).getTime();
   if (jauge) {
     requestAnimationFrame(() => {
-      jauge.style.transition = `transform ${PUB.duree}ms linear`;
+      jauge.style.transition = `transform ${Math.max(0, echeance - Date.now())}ms linear`;
       jauge.style.transform = "scaleX(0)";
     });
   }
-
-  // On réutilise `_tick` : aucune question ne tourne pendant l'entracte, et ça
-  // garantit que le compte à rebours meurt si on quitte la page en plein
-  // milieu. Un intervalle court sert seulement à rafraîchir le chiffre.
   _tick = setInterval(() => {
-    const reste = fin - Date.now();
-    if (sec) sec.textContent = chiffres(Math.max(0, Math.ceil(reste / 1000)));
-    if (reste > 0) return;
-    stopChrono();
-    haptic("tap");
-    dessineQuestion(root, etat);
+    const reste = Math.max(0, Math.ceil((echeance - Date.now()) / 1000));
+    if (sec) sec.textContent = chiffres(reste);
   }, 120);
+}
+
+// N'importe quel téléphone peut faire avancer la manche : c'est celui dont le
+// minuteur local touche zéro EN PREMIER qui gagne la course, les autres
+// reçoivent juste l'état qui en résulte (diffusion ou sondage). Le serveur
+// est gardé par l'état ATTENDU, donc deux appels concurrents ne font jamais
+// avancer la partie deux fois.
+function planifieAvance(root, etat, statusAttendu, indexAttendu) {
+  const echeance = new Date(etat.revealUntil).getTime();
+  const delai = Math.max(50, echeance - Date.now());
+  _avance = setTimeout(async () => {
+    try {
+      const s = await appel("next", {
+        code: etat.code,
+        expectedStatus: statusAttendu,
+        expectedIndex: indexAttendu,
+      });
+      appliqueEtatServeur(root, etat, s);
+    } catch (e) {
+      console.error("[duel:next]", e);
+      // Le sondage de secours (2,5 s) rattrapera de toute façon l'état réel.
+    }
+  }, delai);
+}
+
+// Envoie la réponse (index choisi, ou -1 si le temps est écoulé). Le retour
+// donne à CE téléphone ses points tout de suite (pas besoin d'attendre le
+// reveal pour savoir combien il a gagné) ; si ce joueur est le dernier à
+// répondre, la réponse porte aussi le reveal complet, prêt à afficher sans
+// attendre l'aller retour de la diffusion.
+async function soumetsReponse(root, etat, choix) {
+  if (etat.reponse !== null) return;
+  stopChrono();
+  const q = etat.questions[etat.index];
+  etat.reponse = choix;
+  const localementCorrect = choix === q.correct_index;
+  if (localementCorrect) {
+    playCorrect();
+    haptic("success");
+  } else {
+    playWrong();
+    haptic("error");
+  }
+  afficheQuestion(root, etat); // repasse en mode « attends », boutons désactivés
+
+  try {
+    const r = await appel("answer", {
+      code: etat.code,
+      playerId: etat.playerId,
+      index: etat.index,
+      choice: choix,
+    });
+    if (r.perime) return; // la manche a déjà avancé, le sondage rattrapera
+    etat.points += r.points || 0;
+    if (r.correct) {
+      etat.bonnes++;
+      etat.serie++;
+    } else {
+      etat.serie = 0;
+    }
+    if (r.reveal) appliqueEtatServeur(root, etat, r.reveal, r.reveal);
+  } catch (e) {
+    console.error("[duel:answer]", e);
+    // Le sondage de secours rattrapera l'état réel dans les 2,5 s.
+  }
 }
 
 async function afficheClassement(root, etat) {
   stopChrono();
   stopSalon();
+  stopSonde();
+  stopCanal();
   root.innerHTML = squelette();
   try {
     const r = await appel("results", { code: etat.code });
