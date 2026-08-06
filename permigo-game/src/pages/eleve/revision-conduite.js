@@ -36,7 +36,7 @@ import {
 } from "@/data/conduite-meta.js";
 import { loadFiche } from "@/data/fiches-loader.js";
 import { chromeNight } from "@/utils/chrome-night.js";
-import { chargerBoite } from "@/utils/transmission.js";
+import { chargerBoite, boiteConnue } from "@/utils/transmission.js";
 import {
   marquerTermes,
   poserLexique,
@@ -587,6 +587,47 @@ ${chromeNight("#5a4fc0", "#423a96")}
 .fd-intro-why{ margin:8px 0 0; max-width:30ch; font:600 14px/1.5 'Archivo',sans-serif; color:#c3b6f0; }
 .fd-intro-why .fd-fr{ color:#a89bd6; opacity:.85; font-weight:600; }
 
+/* « En boîte auto » remontée en tête de fiche. Bleu (comme le picto voiture de
+   l'ancienne carte coach) pour se distinguer de l'or de l'intro. Variante
+   .off = la fiche ne concerne pas l'automatique : on passe en orange, la même
+   teinte que l'avertissement du bas de page, pour que ça se lise comme un
+   « passe ton chemin » et pas comme un conseil de plus. */
+.fd-auto{ display:flex; align-items:flex-start; gap:11px; margin:0 18px 14px; padding:14px 15px;
+  border-radius:18px; background:rgba(63,130,214,.16); border:1px solid rgba(63,130,214,.42); }
+.fd-auto-ic{ flex:0 0 22px; display:flex; }
+.fd-auto-ic svg{ display:block; }
+.fd-auto-body{ min-width:0; }
+.fd-auto-h{ margin:0 0 5px; font:800 11.5px/1.2 'Archivo',sans-serif; letter-spacing:.14em;
+  text-transform:uppercase; color:#bcdcff; }
+.fd-auto-p{ margin:0; font:600 14px/1.5 'Archivo',sans-serif; color:#e7f1ff; }
+.fd-auto-p .fd-fr{ display:block; margin-top:6px; color:#b9cfe8; opacity:.85; }
+.fd-auto.off{ background:rgba(239,106,58,.15); border-color:rgba(239,106,58,.45); }
+.fd-auto.off .fd-auto-h{ color:#ffc7ad; }
+.fd-auto.off .fd-auto-p{ color:#ffe6da; }
+.fd-auto.off .fd-auto-p .fd-fr{ color:#e0b6a4; }
+
+/* « En 10 secondes » — la version pressée, pour l'élève qui a 30 s avant sa
+   leçon. Posé juste sous l'intro, avant la méthode : il repart avec le
+   principal même s'il ne lit rien d'autre. Écrit à la main dans les JSON
+   (resume10s), FRANÇAIS SEULEMENT : on ne traduit pas à la volée une règle de
+   conduite. Fiche sans résumé = pas de bloc du tout, jamais d'encart vide. */
+.fd-quick{ margin:14px 18px 0; padding:16px 16px 15px; border-radius:20px;
+  background:rgba(12,6,36,.34); border:1px solid rgba(255,255,255,.14); }
+.fd-quick .fd-quick-k{ margin:0 0 12px; font:800 11.5px/1 'Archivo',sans-serif;
+  letter-spacing:.16em; text-transform:uppercase; color:#ffd76e; }
+.fd-quick ol{ margin:0; padding:0; list-style:none; counter-reset:fdq; }
+.fd-quick li{ counter-increment:fdq; display:flex; align-items:center; gap:11px;
+  font:800 15.5px/1.25 'Archivo',sans-serif; color:#fff; }
+.fd-quick li + li{ margin-top:11px; }
+.fd-quick li::before{ content:counter(fdq); flex:0 0 22px; width:22px; height:22px; border-radius:7px;
+  display:flex; align-items:center; justify-content:center; font:800 12px/1 'Archivo',sans-serif;
+  color:#2b1a55; background:rgba(255,255,255,.82); }
+/* La ligne vit dans son propre span, et c'est obligatoire : le glossaire
+   souligne des mots APRÈS coup en enveloppant du texte. Sans ce span, le
+   terme injecté devient un enfant direct du <li>, donc un ITEM de la flexbox,
+   et la phrase se casse en colonnes (vu sur « cède le passage »). */
+.fd-quick li > span{ flex:1 1 auto; min-width:0; }
+
 .fd-seclab{ display:flex; align-items:center; gap:10px; padding:0 18px; margin:22px 0 12px; }
 .fd-seclab h2{ font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; letter-spacing:.10em; text-transform:uppercase; color:#ded7ff; white-space:nowrap; margin:0; }
 .fd-seclab .line{ height:1px; flex:1; background:linear-gradient(90deg,rgba(222,215,255,.55),transparent); }
@@ -1010,7 +1051,16 @@ export async function mount(root, param) {
   // Fusionne les lectures déjà enregistrées en base (autres appareils) AVANT
   // toute lecture de `loadRead()` — corrige le « 0/31 » multi-appareils et la
   // résolution de « next ».
-  await hydrateReadFromServer();
+  // La boîte de l'élève conditionne désormais le CONTENU de la fiche (et plus
+  // seulement les mots soulignés du glossaire). On la charge AVANT le premier
+  // rendu : la lire après ferait clignoter la fiche. Le résultat est mis en
+  // cache par le module, donc les rendus suivants la lisent sans réseau, via
+  // boiteConnue(). Échec ou colonne absente → null, et la fiche s'affiche
+  // entière comme avant : jamais d'écran cassé pour un profil incomplet.
+  await Promise.all([
+    hydrateReadFromServer(),
+    chargerBoite().catch(() => null),
+  ]);
 
   // Deep-link : #/revision-conduite/{code} (ex. depuis « Ton centre ») ouvre
   // directement la fiche de la compétence.
@@ -1325,6 +1375,28 @@ export async function mount(root, param) {
           `<span class="fd-fr" lang="fr" dir="ltr">${esc(fr)}</span>`;
     const ui = (key, frTxt) => uiFiche(lang, key, frTxt);
 
+    // ── La boîte de l'élève ────────────────────────────────────────────────
+    // L'app SAIT depuis l'inscription quelle boîte il conduit
+    // (profiles.transmission). Jusqu'ici elle ne servait qu'à choisir les mots
+    // soulignés du glossaire : un élève en automatique lisait quatorze gestes
+    // d'embrayage comme s'ils le concernaient, et la carte « En boîte auto »
+    // arrivait tout en bas — poussée en plus à ceux qui roulent en manuelle,
+    // à qui elle ne sert à rien.
+    // Ce qu'on fait, sans réécrire une seule ligne de fiche :
+    //   · manuelle   → la carte « En boîte auto » disparaît ;
+    //   · automatique→ le MÊME texte remonte en tête de fiche ;
+    //   · fiche que l'automatique ne concerne pas (le champ bva le dit
+    //     littéralement, d'où le drapeau bvaHorsSujet) → on le dit d'emblée,
+    //     et le résumé « En 10 secondes » écrit pour la manuelle se tait.
+    // Boîte inconnue (colonne pas encore migrée, hors-ligne, profil sans
+    // réglage) → strictement l'ancien comportement : la fiche entière, carte
+    // « En boîte auto » comprise, à sa place d'avant. On ne cache jamais du
+    // contenu sur une supposition.
+    const boite = boiteConnue();
+    const enAuto = boite === "auto";
+    const enManuelle = boite === "manuelle";
+    const bvaHorsSujet = enAuto && f.bvaHorsSujet === true;
+
     const steps = Array.isArray(f.methode) ? f.methode : [];
     const total = steps.length;
     const groups = groupSteps(steps);
@@ -1484,7 +1556,10 @@ export async function mount(root, param) {
         tr: tr?.erreur,
         ic: ERR_IC,
       });
-    if (f.bva)
+    // En manuelle : rien à dire sur la boîte auto. En automatique : le texte
+    // remonte en tête de fiche (autoNoteHtml), il n'a plus rien à faire ici.
+    // Boîte inconnue : on garde la carte à sa place historique.
+    if (f.bva && !enAuto && !enManuelle)
       coach.push({
         k: "auto",
         h: ui("bva_h", "En boîte auto"),
@@ -1526,6 +1601,26 @@ export async function mount(root, param) {
           }
         </div>`
       : "";
+
+    // ── « En boîte auto », remontée en tête de fiche ───────────────────────
+    // Même texte que la carte coach d'avant (f.bva), mot pour mot. Il ne
+    // change pas, il change de PLACE : l'élève en automatique le lit avant les
+    // gestes, pas quatorze gestes plus bas. Variante « off » quand le champ
+    // bva dit lui-même que la fiche ne le concerne pas.
+    const autoNoteHtml =
+      enAuto && f.bva
+        ? `<div class="fd-auto${bvaHorsSujet ? " off" : ""}">
+            <span class="fd-auto-ic" aria-hidden="true">${AUTO_IC}</span>
+            <div class="fd-auto-body">
+              <p class="fd-auto-h">${esc(
+                bvaHorsSujet
+                  ? ui("bva_off_h", "Cette fiche ne te concerne pas")
+                  : ui("bva_h", "En boîte auto"),
+              )}</p>
+              <p class="fd-auto-p">${bi(f.bva, tr?.bva)}</p>
+            </div>
+          </div>`
+        : "";
 
     const srcChaines = sourceChannels(f);
     const srcHtml = srcChaines.length
@@ -1589,6 +1684,28 @@ export async function mount(root, param) {
       ${whyBi ? `<p class="fd-intro-why">${whyBi}</p>` : ""}
     </div>`;
 
+    // ── « En 10 secondes » ────────────────────────────────────────────────
+    // Trois lignes écrites à la main par fiche (resume10s dans les JSON). La
+    // réponse à « on a la flemme » : l'élève qui n'a que 30 secondes avant sa
+    // leçon lit ça et repart avec le principal.
+    // FRANÇAIS SEULEMENT, et c'est un choix : le reste de la fiche se replie
+    // sur une traduction relue (fiches-i18n), ce résumé n'en a pas. Le traduire
+    // à la volée reviendrait à paraphraser une règle de conduite dans une
+    // langue non relue. En en/ar l'élève lit la méthode complète, comme avant.
+    // Un résumé écrit pour la boîte manuelle ne s'affiche pas à un élève que
+    // la fiche ne concerne pas : trois lignes fausses en tête de page seraient
+    // pires que pas de résumé du tout.
+    const quick =
+      lang === "fr" && !bvaHorsSujet && Array.isArray(f.resume10s)
+        ? f.resume10s
+        : [];
+    const quickHtml = quick.length
+      ? `<div class="fd-quick">
+          <p class="fd-quick-k">${esc(ui("quick_h", "En 10 secondes"))}</p>
+          <ol>${quick.map((l) => `<li><span>${esc(l)}</span></li>`).join("")}</ol>
+        </div>`
+      : "";
+
     const BACK = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="#3d2f7a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
     const competenceTxt =
@@ -1631,7 +1748,9 @@ export async function mount(root, param) {
         </div>
       </div>
 
+      ${autoNoteHtml}
       ${introHtml}
+      ${quickHtml}
       ${schemasHtml}
 
       ${deckHtml}

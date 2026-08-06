@@ -10,9 +10,12 @@
 //      (mêmes mots que la barre des 4 pages — cf. components/eleve/recompenses-tabs.js)
 //
 // Réutilisation (ne duplique PAS la grosse logique métier des pages dédiées) :
-//   - Boutique / Ma collection / Trophées → résumé fidèle + « Tout voir »
-//     vers #/boutique, #/galerie, #/trophees (achat, équipement, modales
-//     détaillées restent SUR ces pages, pas ici).
+//   - Boutique / Ma collection → résumé fidèle + « Tout voir » vers
+//     #/boutique, #/galerie (achat, équipement, modales détaillées restent
+//     SUR ces pages, pas ici).
+//   - Trophées → résumé fidèle + « Tout voir » vers #/profil (06/08/2026 :
+//     le paquet de cartes REMC et les 2 trophées de conduite retenus vivent
+//     désormais sur le profil élève, #/trophees a été retirée, cf. FLOWS.md).
 //   - Ligue → le composant partagé `league-hero.js` (déjà utilisé par
 //     accueil.js) est monté tel quel : zéro duplication, données 100% réelles.
 //
@@ -569,7 +572,7 @@ function renderHero(ctx) {
   }
   if (freshTrophies.length > 0) {
     claims.push(`
-      <a class="rec-claim" href="#/trophees" data-track="claim_trophee">
+      <a class="rec-claim" href="#/profil" data-track="claim_trophee">
         ${medallion("trophee", "violet", { size: 34 })}
         <span class="rec-claim-b">
           <span class="rec-claim-t">${rt("claim_troph_t", "Trophée à réclamer")}</span>
@@ -778,7 +781,7 @@ function renderTropheesPanel(ctx) {
 
   const claimHtml = freshTrophies.length
     ? `
-    <a class="rec-gold-card" href="#/trophees" data-track="trophee_claim_card">
+    <a class="rec-gold-card" href="#/profil" data-track="trophee_claim_card">
       <span class="rec-gold-k">${rt("new", "Nouveau")}</span>
       <div class="rec-star-row">
         <span style="width:56px;height:56px;flex:none;display:flex;align-items:center;justify-content:center">${badgeMarkup(freshTrophies[0], 56)}</span>
@@ -801,13 +804,13 @@ function renderTropheesPanel(ctx) {
     : "";
 
   return `${claimHtml}${gridHtml}
-    <a class="rec-tout-voir" href="#/trophees" data-track="tout_voir_trophees">${rt("see_all_troph", "Tout voir mes trophées →")}</a>`;
+    <a class="rec-tout-voir" href="#/profil" data-track="tout_voir_trophees">${rt("see_all_troph", "Tout voir mes trophées →")}</a>`;
 }
 
 function renderTrophyTile(t, unlocked) {
   const color = RARITY_COLOR[t.rarity] || "var(--mu2)";
   return `
-  <a class="rec-tro${unlocked ? "" : " locked"}" href="#/trophees" data-track="trophee_item">
+  <a class="rec-tro${unlocked ? "" : " locked"}" href="#/profil" data-track="trophee_item">
     ${unlocked ? `<span class="rec-tro-dot" style="background:${color}" aria-hidden="true"></span>` : ""}
     ${badgeMarkup(t, 48)}
     <div class="rec-tro-t">${unlocked ? rrtl(esc(trophyTitle(t.key, t.title, getLang()))) : "???"}</div>

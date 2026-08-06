@@ -418,7 +418,9 @@ function notifRoute(n) {
     case "new_message":
       return d.thread_id ? `#/messages/${d.thread_id}` : "#/messages";
     case "achievement_unlocked":
-      return "#/trophees";
+      // Le paquet de cartes et les trophées de conduite vivent sur le profil
+      // élève depuis le 06/08/2026 (#/trophees retirée, cf. FLOWS.md).
+      return "#/profil";
     case "streak_at_risk":
     case "streak_risk":
     case "post_validation_quiz":

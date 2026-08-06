@@ -3,8 +3,12 @@
 // Générées depuis docs/fiches-conduite/fiches/*.md (enrichies du vécu
 // de vrais moniteurs). Décisions de méthode = docs/fiches-conduite/ARBITRAGES.md.
 // Pas de Supabase → modifiable sans migration.
-// Chaque entrée : { code, titre, monde, competence, methode[], pourquoi,
-//                   erreur, bva|null, questions[{q,reponse,explication}], sources[] }
+// Chaque entrée : { code, titre, monde, competence, resume10s[3], methode[],
+//                   pourquoi, erreur, bva|null,
+//                   questions[{q,reponse,explication}], sources[] }
+// resume10s = « En 10 secondes », 3 lignes écrites À LA MAIN (jamais générées
+// depuis le texte : paraphraser une règle de conduite, c'est en inventer une).
+// Français uniquement, cf. le bloc de rendu dans revision-conduite.js.
 // ═══════════════════════════════════════════════════════════════
 import monde1 from "./fiches/monde-1.json";
 import monde2 from "./fiches/monde-2.json";

@@ -23,13 +23,6 @@ export function renderUserAvatar(
   { loading = "lazy" } = {},
 ) {
   const name = `${prenom || ""} ${nom || ""}`.trim();
-  if (avatar_url) {
-    // escAttr (pas esc) : dans un ATTRIBUT, les guillemets doivent être
-    // encodés, sinon une URL piégée sort de src="…" (XSS via onerror).
-    const loadingAttr = loading === "eager" ? "eager" : "lazy";
-    const src = optimizedAvatarUrl(avatar_url);
-    return `<img src="${escAttr(src)}" alt="${escAttr(name)}" width="${size}" height="${size}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;object-position:center;display:block" loading="${loadingAttr}" decoding="async" referrerpolicy="no-referrer">`;
-  }
   const init =
     (name || nom || "?")
       .split(/\s+/)
@@ -37,5 +30,18 @@ export function renderUserAvatar(
       .map((s) => s[0] || "")
       .join("")
       .toUpperCase() || "?";
-  return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:linear-gradient(135deg, var(--a), var(--adk));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:${Math.floor(size * 0.4)}px;font-family:var(--fd,system-ui)">${esc(init)}</div>`;
+  // Repli initiales — c'est L'avatar par défaut du projet (déjà ce que voit
+  // tout élève sans photo). `hidden` : quand un avatar_url existe, ce repli
+  // reste posé en DOM mais masqué, prêt à être révélé par l'onerror de l'img
+  // juste en dessous si le fichier est introuvable (avatar_url orphelin en
+  // base, skin renommé/supprimé…) — jamais l'icône « image cassée » du
+  // navigateur.
+  const fallback = (hidden) =>
+    `<div style="${hidden ? "display:none;" : "display:flex;"}width:${size}px;height:${size}px;border-radius:50%;background:linear-gradient(135deg, var(--a), var(--adk));color:#fff;align-items:center;justify-content:center;font-weight:800;font-size:${Math.floor(size * 0.4)}px;font-family:var(--fd,system-ui)">${esc(init)}</div>`;
+  if (!avatar_url) return fallback(false);
+  // escAttr (pas esc) : dans un ATTRIBUT, les guillemets doivent être
+  // encodés, sinon une URL piégée sort de src="…" (XSS via onerror).
+  const loadingAttr = loading === "eager" ? "eager" : "lazy";
+  const src = optimizedAvatarUrl(avatar_url);
+  return `<img src="${escAttr(src)}" alt="${escAttr(name)}" width="${size}" height="${size}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;object-position:center;display:block" loading="${loadingAttr}" decoding="async" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">${fallback(true)}`;
 }

@@ -90,17 +90,12 @@ const TABS = {
       id: "recompenses",
       label: "Récompenses",
       ico: "gift",
-      match: [
-        "boutique",
-        "galerie",
-        "cartes",
-        "trophees",
-        "mes-coffres",
-        "classement",
-        "roue",
-      ],
+      match: ["boutique", "galerie", "mes-coffres", "classement", "roue"],
     },
-    { id: "profil", label: "Profil", ico: "user" },
+    // match: "cartes" — écran de révélation posé par valider-seul.js après
+    // une certification (#/cartes/{compId}, 06/08/2026, cf. FLOWS.md) : le
+    // paquet complet vit sur Profil, la barre du bas doit y rester allumée.
+    { id: "profil", label: "Profil", ico: "user", match: ["cartes"] },
   ],
   enseignant: [
     { id: "default", label: "Aujourd'hui", ico: "activity" },

@@ -4,6 +4,11 @@
     "titre": "Bien voir et bien être vu la nuit",
     "monde": 3,
     "competence": "Conditions difficiles",
+    "resume10s": [
+      "J'allume mes feux de croisement dès qu'il fait nuit.",
+      "Je repasse en croisement dès qu'une lueur apparaît en face.",
+      "Je vise le bord droit et je n'accélère jamais dans le doute."
+    ],
     "methode": [
       "Avant de rouler. Avant de partir : vérifie que tes vitres et tes phares sont propres. Une vitre sale double les reflets la nuit.",
       "Avant de rouler. Dès que tu roules : allume tes feux de croisement. La nuit, ils sont obligatoires, même en ville éclairée.",
@@ -41,6 +46,11 @@
     "titre": "Adapter ta conduite à la pluie, la neige, le brouillard",
     "monde": 3,
     "competence": "Conditions difficiles",
+    "resume10s": [
+      "Je lance essuie-glaces et désembuage dès les premières gouttes.",
+      "Je double ma distance et je freine doux et tôt.",
+      "Sous la pluie le feu de brouillard arrière reste interdit."
+    ],
     "methode": [
       "Prépare, ralentis. Prépare la voiture dès les premières gouttes. Essuie-glaces avant (règle la vitesse selon l'intensité), essuie-glace arrière si besoin, et surtout le désembuage : clim + air chaud sur le pare-brise pour chasser la buée vite. Une vitre embuée, c'est de la visibilité en moins, comme la pluie.",
       "Prépare, ralentis. Lève le pied et respecte les limitations « pluie ». Sur autoroute : 130 → 110, 110 → 100. Et dans une courbe annoncée à 50, sous la pluie on ne la prend PAS à 50 : ça peut glisser.",
@@ -82,6 +92,11 @@
     "titre": "Garder le contrôle quand ça glisse",
     "monde": 3,
     "competence": "Conditions difficiles",
+    "resume10s": [
+      "Je repère les zones glissantes bien avant d'y être.",
+      "Je fais tout en souplesse sans aucun geste sec.",
+      "Si l'arrière glisse je lève le pied et je regarde loin."
+    ],
     "methode": [
       "Repère le danger à l'œil : zone d'ombre sous les arbres, plaque luisante, feuilles mortes, gravillons, sortie de tunnel mouillée. Tu anticipes AVANT d'y être.",
       "Lève le pied en douceur bien avant la zone glissante, jamais dessus.",
@@ -116,6 +131,11 @@
     "titre": "Freinage d'urgence & adhérence (l'ABS)",
     "monde": 3,
     "competence": "Conditions difficiles",
+    "resume10s": [
+      "Face à un obstacle je freine à fond immédiatement.",
+      "Je garde le pied enfoncé même si la pédale vibre.",
+      "Je regarde mon échappatoire pas l'obstacle et je peux diriger."
+    ],
     "methode": [
       "Un obstacle surgit. Premier geste : tu freines FORT, à fond, d'un coup. Le frein d'abord. C'est la priorité absolue.",
       "Tu gardes le pied enfoncé, sans relâcher. Sur une voiture à ABS (toutes les voitures-école modernes), c'est l'ABS qui empêche les roues de bloquer. Tu sentiras la pédale vibrer ou « tape-tape » sous ton pied : c'est normal, tu ne relâches pas.",
@@ -126,7 +146,7 @@
     ],
     "pourquoi": "En urgence, le plus court chemin pour s'arrêter, c'est freiner au maximum. L'ABS te permet de freiner à fond sans bloquer les roues, donc sans glisser tout droit : tu gardes la possibilité de diriger pour éviter l'obstacle. On débraye après, et pas avant, pour ne pas perdre le frein moteur au tout début du freinage.",
     "erreur": "Freiner « par à-coups » ou relâcher la pédale dès qu'elle vibre, par peur. La vibration EST le signe que l'ABS travaille : relâcher allonge la distance d'arrêt et te fait perdre le bénéfice du système. Autre erreur : débrayer AVANT de freiner. L'ordre est frein d'abord, embrayage ensuite.",
-    "bva": null,
+    "bva": "Le geste est plus simple, et c'est une bonne nouvelle en urgence : pas d'embrayage à enfoncer, donc aucun ordre à retenir. Tu écrases la pédale de frein, tu gardes le pied enfoncé jusqu'à l'arrêt, et c'est tout. La voiture ne peut pas caler. Le reste ne change pas : la pédale qui vibre, c'est l'ABS qui travaille, tu ne relâches surtout pas, et tu regardes ton échappatoire. Un piège propre à la boîte auto : ton pied gauche reste AU REPOS. Sous le coup de la panique il peut partir chercher un embrayage qui n'existe pas, tomber sur la pédale de frein et freiner beaucoup trop fort.",
     "questions": [
       {
         "q": "Freinage d'urgence sur une voiture à ABS. Tu freines comment, et dans quel ordre avec l'embrayage ?",
@@ -151,6 +171,11 @@
     "titre": "Voie rapide & autoroute : entrer, rouler, sortir",
     "monde": 3,
     "competence": "Conditions difficiles",
+    "resume10s": [
+      "J'accélère sur toute la bande pour entrer à leur vitesse.",
+      "Je reste à droite et je dépasse franchement sans traîner.",
+      "Je signale ma sortie tôt et je ralentis seulement une fois sorti."
+    ],
     "methode": [
       "Entrer. Repérer l'insertion : le combo « Cédez le passage » + interdiction de tourner à gauche annonce une bande d'insertion dans 9 cas sur 10. Dès que tu le vois, prépare-toi.",
       "Entrer. S'insérer : mets ton clignotant à gauche.",
@@ -165,7 +190,7 @@
     ],
     "pourquoi": "L'autoroute marche par flux rapide et régulier. Le but est de t'y fondre sans casser ce flux : arriver à la bonne vitesse pour t'insérer, et ralentir à l'écart (voie de décélération) pour en sortir, sans surprendre personne. C'est aussi pour ça qu'on contrôle l'angle mort à fond : même bien placé, quelqu'un peut se faufiler (un motard, une voiture qui force le passage).",
     "erreur": "S'insérer trop lentement (voire s'arrêter en bout de bande d'accélération) : tu obliges les voitures à freiner pour toi et tu crées un danger. L'insertion réussie, c'est arriver à LEUR vitesse. Autre erreur : freiner sur la voie de circulation au lieu d'attendre la voie de décélération.",
-    "bva": null,
+    "bva": "Tu n'as pas de rapport à choisir sur la bande d'insertion : tu restes en D et tu accélères franchement. Si tu appuies à fond, la boîte rétrograde d'elle-même pour te donner de la reprise : c'est le kickdown, et l'insertion fait partie de ses bons usages. L'objectif ne bouge pas : atteindre la vitesse du flux et ne jamais s'arrêter en bout de bande. Pour sortir, tu lèves le pied et tu freines une fois sur la voie de décélération, sans rien rétrograder.",
     "questions": [
       {
         "q": "Tu es sur la bande d'insertion pour entrer sur l'autoroute. Ton objectif de vitesse ?",
@@ -190,6 +215,11 @@
     "titre": "Tunnels, ponts & zones spécifiques",
     "monde": 3,
     "competence": "Conditions difficiles",
+    "resume10s": [
+      "J'allume mes feux de croisement avant d'entrer dans un tunnel.",
+      "Je repère la sortie de secours et je garde mes distances.",
+      "Sur un pont je tiens fermement le volant contre le vent."
+    ],
     "methode": [
       "Tunnel : avant d'entrer, allume tes feux de croisement (jamais les pleins phares dans un tunnel).",
       "Dès l'entrée : repère mentalement la sortie de secours la plus proche et garde tes distances.",
@@ -225,6 +255,11 @@
     "titre": "Ville dense : partager la route avec piétons, vélos et bus",
     "monde": 3,
     "competence": "Conditions difficiles",
+    "resume10s": [
+      "En ville dense je lève le pied c'est ma marge.",
+      "Je balaye les trottoirs et ce qui se cache derrière un bus.",
+      "Je contrôle mon angle mort avant chaque manœuvre pour les vélos."
+    ],
     "methode": [
       "Lève le pied. En ville dense, l'allure réduite est ta marge de sécurité numéro un : elle te laisse le temps de réagir à ce qui surgit. Les ralentisseurs, tu les prends en 2e, en douceur.",
       "Regarde loin ET large. Tu balayes les trottoirs, entre les voitures garées, devant les bus à l'arrêt. Un piéton peut surgir partout, surtout derrière un bus qui masque la vue (le piège classique : il sort pile sur le passage, caché par le bus).",
@@ -235,7 +270,7 @@
     ],
     "pourquoi": "En ville dense, le danger ne vient pas de la vitesse mais de l'imprévu : un piéton entre deux voitures, un vélo dans ton angle mort, une portière qui s'ouvre, un piéton caché derrière un bus. Rouler lentement et regarder partout, c'est ce qui te laisse le temps de t'arrêter à temps. Un moniteur le dit autrement : ta conduite « s'attire » ce que tes décisions provoquent. Une hésitation de trop et tu te retrouves collé à un cycliste que tu ne peux plus dépasser.",
     "erreur": "Oublier le contrôle de l'angle mort par-dessus l'épaule avant de tourner à droite : un cycliste qui remonte sur ta droite est invisible dans le rétroviseur, et c'est l'accident classique « voiture qui tourne / vélo tout droit ». Autre piège : s'engager devant un bus à l'arrêt sans imaginer le piéton qui traverse caché derrière.",
-    "bva": null,
+    "bva": "Le repère « les ralentisseurs, tu les prends en 2e » ne s'applique pas : tu restes en D et tu règles ton allure au frein. Tu arrives au pas, tu lèves le frein pour franchir en douceur, sans risque de caler. Tout le reste de la fiche est identique dans les deux boîtes, parce que ça ne dépend pas de la transmission : le regard large, l'angle mort par-dessus l'épaule, l'écart d'un mètre au cycliste, la priorité au piéton.",
     "questions": [
       {
         "q": "Tu vas tourner à droite en ville. Juste avant, tu contrôles quoi en plus du rétro ?",

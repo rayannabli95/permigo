@@ -2121,7 +2121,15 @@ async function mountEleveArene(root, me) {
        de retirer. « Réglages » reste accessible en bas de page. -->
   <div class="arn2-top">
     <button class="arn2-av" id="arn2-avatar-btn" type="button" aria-label="${ptA("photo_edit", "Changer ma photo")}">
-      ${avatarUrl ? `<img src="${escAttr(avatarUrl)}" alt="" referrerpolicy="no-referrer" />` : `<span class="ini">${esc(initials)}</span>`}
+      ${
+        avatarUrl
+          ? // onerror : un avatar_url orphelin (fichier renommé/supprimé côté
+            // skins, jamais nettoyé en base) ne doit jamais afficher l'icône
+            // « image cassée » du navigateur — repli sur les initiales, même
+            // idiome que le helper partagé components/common/avatar.js.
+            `<img src="${escAttr(avatarUrl)}" alt="" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'"><span class="ini" style="display:none">${esc(initials)}</span>`
+          : `<span class="ini">${esc(initials)}</span>`
+      }
     </button>
     <button class="arn2-name" id="arn2-pseudo-btn" type="button" aria-label="${ptA("pseudo_edit_aria", "Changer de pseudo")}">
       <b id="arn2-pseudo-lbl">${pseudo ? `<i>@</i>${esc(pseudo)}` : esc(ptR("pseudo_ph", "ton_pseudo"))}</b>

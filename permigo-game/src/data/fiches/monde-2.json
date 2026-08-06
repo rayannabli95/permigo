@@ -4,6 +4,11 @@
     "titre": "Lire la route avec tes yeux",
     "monde": 2,
     "competence": "Circulation",
+    "resume10s": [
+      "Je place mon regard loin devant jamais sur le capot.",
+      "Je garde l'œil mobile et je tourne vraiment la tête.",
+      "Je reviens dans mes rétroviseurs toutes les quelques secondes."
+    ],
     "methode": [
       "Place ton regard à mi-hauteur du pare-brise : ça t'oblige à viser loin et à voir arriver les choses au lieu de les subir.",
       "Garde l'œil mobile : ton regard se pose ailleurs à peu près toutes les secondes. Un point fixé trop longtemps, c'est une foule d'infos que ton cerveau rate.",
@@ -38,6 +43,11 @@
     "titre": "Régler ta vitesse sur l'environnement",
     "monde": 2,
     "competence": "Circulation",
+    "resume10s": [
+      "Je lis la signalisation le plus loin possible.",
+      "Je lève le pied avant la zone pas dedans.",
+      "Je garde deux secondes d'écart et quatre sous la pluie."
+    ],
     "methode": [
       "Va chercher la signalisation le plus loin possible : limitation, école, marché, virage, zone de travaux, sortie de véhicules. Même quand c'est calme, tu continues à lire les panneaux. C'est ton échauffement avant les zones chargées.",
       "Lève le pied AVANT la zone, pas une fois dedans. Souvent il suffit de relâcher l'accélérateur et de laisser la voiture décélérer toute seule, sans freinage brusque.",
@@ -72,6 +82,11 @@
     "titre": "Te placer au bon endroit sur la route",
     "monde": 2,
     "competence": "Circulation",
+    "resume10s": [
+      "Je roule au milieu de ma voie sans zigzaguer.",
+      "Je laisse une portière d'écart avec les voitures garées.",
+      "Je me fie à mes repères pas à mon impression."
+    ],
     "methode": [
       "Roule au milieu de ta voie, ni collé à droite, ni mordant sur le centre.",
       "Sers-toi de repères concrets : avec tes rétros, vérifie l'écart à gauche (ligne médiane) et à droite (bordure) ; et jette un petit coup d'œil bas pour situer la bordure de droite. Un repère répandu : elle « arrive » à peu près au milieu de ton pare-brise.",
@@ -106,6 +121,11 @@
     "titre": "Négocier un virage",
     "monde": 2,
     "competence": "Circulation",
+    "resume10s": [
+      "Je ralentis avant le virage sur la portion droite.",
+      "Mon regard part vers la sortie et la trajectoire suit.",
+      "Je reste sur ma voie puis je réaccélère en sortie."
+    ],
     "methode": [
       "Prépare ton regard tôt : dès que tu vois le virage, tes yeux partent vers la sortie (là où la route se rouvre). Penche-toi un peu, tourne la tête si les montants du pare-brise gênent.",
       "Freine et ralentis AVANT d'entrer, sur la portion encore droite. Si besoin, rétrograde pour avoir le bon rapport.",
@@ -116,7 +136,7 @@
     ],
     "pourquoi": "On freine en ligne droite, là où la voiture est stable. Freiner en plein virage la déséquilibre et fait perdre l'adhérence. La vitesse se règle AVANT, le volant se gère PENDANT. Et la trajectoire suit le regard : un moniteur le dit cash. « ma tête va à gauche et ma main suit en même temps ». Si tu regardes le bord, tu vas vers le bord.",
     "erreur": "Entrer trop vite et freiner au milieu du virage. Signe que tu as mal anticipé : la prochaine fois, ralentis plus tôt. Autre erreur fréquente : aborder le virage en sous-régime (rapport trop haut). La voiture peine, broute, et tu risques de caler en pleine courbe. Tu rétrogrades AVANT pour avoir de la force.",
-    "bva": null,
+    "bva": "Il n'y a pas de rapport à choisir avant le virage : tu restes en D et la boîte s'en occupe. Le geste qui compte, lui, ne change pas : tu ralentis au frein AVANT d'entrer, sur la portion encore droite. Tu ne peux ni te retrouver en sous-régime ni caler en pleine courbe. À la sortie, ré-accélère progressivement : si tu écrases l'accélérateur, la boîte rétrograde d'un coup (c'est le kickdown) alors que tu cherches justement de la douceur.",
     "questions": [
       {
         "q": "Tu abordes un virage serré. Tu freines avant ou pendant le virage ?",
@@ -141,6 +161,11 @@
     "titre": "Croiser et dépasser",
     "monde": 2,
     "competence": "Circulation",
+    "resume10s": [
+      "Je double seulement si c'est autorisé et que je vois loin.",
+      "Je contrôle · je signale · je vérifie l'angle mort puis je déboîte.",
+      "Je reviens à droite quand je le vois entier dans mon rétro."
+    ],
     "methode": [
       "Pour DÉPASSER. Vérifie que c'est autorisé : pas de ligne continue, pas de virage, pas de sommet de côte, pas de visibilité réduite.",
       "Assure-toi d'avoir la visibilité : tu dois voir loin et libre devant le véhicule à doubler.",
@@ -151,7 +176,7 @@
     ],
     "pourquoi": "Un dépassement, c'est un moment où tu roules dans la voie d'en face : tout doit être sûr AVANT, car une fois lancé tu ne peux plus reculer. Un moniteur insiste sur l'intérêt du clignotant même en dépassant un cycliste : il prévient ceux de derrière ET montre à l'inspecteur que tu as analysé la situation. Et la décision doit être nette : on choisit franchement de doubler ou de renoncer, on ne reste pas à hésiter au milieu.",
     "erreur": "Dépasser « parce que ça va passer » sans visibilité complète (virage, côte), ou céder à la pression d'une voiture qui te colle. Le bon réflexe quand le doute s'installe : tu lèves le pied, tu rétrogrades, tu renonces. Et si l'inspecteur te demande pourquoi tu as ralenti, tu te justifies (« j'avais un doute sur le comportement du cycliste, je ne voyais pas assez loin »).",
-    "bva": null,
+    "bva": "Renoncer à un dépassement demande un geste de moins : tu lèves le pied et tu freines, il n'y a rien à rétrograder. La décision, elle, est exactement la même : dans le doute, tu renonces clairement. Et pour la reprise quand tu dépasses vraiment, tu n'as pas non plus de rapport à choisir : en appuyant à fond sur l'accélérateur, la boîte rétrograde toute seule pour te donner la puissance. Cette fonction s'appelle le kickdown, et le dépassement est précisément l'usage pour lequel elle est prévue.",
     "questions": [
       {
         "q": "Tu hésites à dépasser : la visibilité n'est pas parfaite. Que fais-tu ?",
@@ -176,6 +201,11 @@
     "titre": "Intersections et ronds-points",
     "monde": 2,
     "competence": "Circulation",
+    "resume10s": [
+      "Je repère l'intersection tôt et je ralentis pour bien voir.",
+      "Sans panneau je laisse passer tout ce qui vient de droite.",
+      "Au giratoire je cède le passage puis clignotant droit en sortant."
+    ],
     "methode": [
       "Aux intersections. Repérer une intersection avant la priorité. Cherche les indices : passage piéton, arrondi du trottoir au loin (une rue débouche), ouverture entre les voitures garées ou entre les bâtiments, panneaux de direction.",
       "Aux intersections. À une intersection, identifie le type EN ARRIVANT : feu, stop, cédez-le-passage, ou rien.",
@@ -194,7 +224,7 @@
     ],
     "pourquoi": "Une intersection est l'endroit où les trajectoires se croisent : 99 % du travail, c'est savoir QUI PASSE EN PREMIER avant d'y être. Le clignotant droit en sortie de giratoire prévient les autres que tu quittes l'anneau, ce qui débloque ceux qui attendent d'entrer.",
     "erreur": "Deux grands classiques : oublier le clignotant à droite avant de sortir du giratoire (les usagers en attente restent bloqués ou s'engagent en pensant que tu continues) ; et ne pas détecter l'intersection à temps, d'où le refus de priorité à droite parce qu'on « pensait avoir le temps de passer ».",
-    "bva": null,
+    "bva": "Tu restes en D partout, à l'approche de l'intersection comme sur l'anneau. Les repères « tu reviens en 2e » et « ralentis et rétrograde » ne te concernent pas : c'est la boîte qui choisit le rapport. Ce qui compte reste identique : ralentir au frein assez tôt pour avoir le temps de bien regarder. Tu peux même rouler au pas sans aucun risque de caler, et en D la voiture avance toute seule au ralenti dès que tu lèves le frein, ce qui aide à se présenter tout doucement devant un « Cédez le passage ».",
     "questions": [
       {
         "q": "Comment fais-tu la différence entre un carrefour à sens giratoire et un rond-point ?",
@@ -219,6 +249,11 @@
     "titre": "Communiquer avec les autres usagers",
     "monde": 2,
     "competence": "Circulation",
+    "resume10s": [
+      "Je mets mon clignotant bien avant de changer de direction.",
+      "Je me place dès que possible une fois mon intention signalée.",
+      "Je croise le regard des piétons avant de passer."
+    ],
     "methode": [
       "Anticipe ton action (tourner, changer de voie, t'arrêter) AVANT de la faire.",
       "Mets ton clignotant suffisamment tôt, avant de changer de direction. Assez en avance pour laisser le temps aux autres de comprendre (repère ~3 s).",
@@ -254,6 +289,11 @@
     "titre": "Conduire seul en ville (synthèse)",
     "monde": 2,
     "competence": "Circulation",
+    "resume10s": [
+      "Je visualise mon itinéraire avant de tourner la clé.",
+      "J'enchaîne mes contrôles dans l'ordre sans jamais bâcler.",
+      "Sur un imprévu je reste calme et je reprends plus loin."
+    ],
     "methode": [
       "Avant de partir, visualise ton itinéraire : les rues, les changements de direction, les zones difficiles.",
       "Mets en boucle les réflexes du monde 2 : regard loin et mobile (C2a), vitesse adaptée (C2b), bon placement (C2c).",

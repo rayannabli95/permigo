@@ -1,7 +1,13 @@
 // ═══════════════════════════════════════════════════════════════
-// Élève — MA COLLECTION de cartes « Monument Valley »
-// Route #/cartes  (ou #/cartes/{compId} pour ouvrir sur une carte
-// précise + jouer la révélation quand elle vient d'être débloquée).
+// Élève — révélation d'une carte « Monument Valley »
+// Route #/cartes/{compId} UNIQUEMENT (décision Rayan 06/08/2026, cf.
+// FLOWS.md) : ce n'est plus un onglet de navigation générale, la
+// consultation du paquet complet vit désormais sur #/profil (qui
+// réutilise le deck ci-dessous par import dynamique). Cette page ne
+// sert plus que de lien de révélation direct posé par valider-seul.js
+// juste après une certification. Sans id, ou avec un id qui ne
+// correspond à aucune compétence débloquée, il n'y a rien à révéler
+// ici → redirection vers #/profil (cf. mount() plus bas).
 //
 // 31 cartes illustrées, une par compétence REMC. Une carte se
 // débloque quand l'élève certifie la compétence (self_validations)
@@ -19,7 +25,6 @@ import { track } from "@/services/analytics.js";
 import { navigate } from "@/router.js";
 import { haptic } from "@/utils/haptic.js";
 import { burstConfetti } from "@/components/common/confetti.js";
-import { recompensesTabs } from "@/components/eleve/recompenses-tabs.js";
 import { CARTES, CARTES_TOTAL } from "@/data/cartes.js";
 import { getFiche } from "@/data/fiches-conduite.js";
 import { chromeNight } from "@/utils/chrome-night.js";
@@ -191,6 +196,12 @@ ${chromeNight("#181241", "#0b0a1c")}
     radial-gradient(120% 55% at 50% 30%, rgba(110,70,220,.22) 0%, transparent 62%),
     linear-gradient(180deg,#181241 0%,#0f0d24 58%,#0b0a1c 100%); }
 
+/* Retour au profil : cette page n'est plus un onglet de nav générale, juste
+   un détour de révélation après une certification. */
+.col-back { display:inline-flex; align-items:center; gap:6px; margin:2px 0 12px;
+  font:700 12.5px/1 'Archivo',sans-serif; color:#cabfef; text-decoration:none; }
+.col-back:active { opacity:.7; }
+
 /* Barre de progression + pastilles par monde */
 .col-prog { margin:10px 0 4px; }
 .col-hd { margin:2px 0 12px; }
@@ -206,11 +217,12 @@ ${CARD_DECK_STYLE}
 </style>`;
 
 function header() {
-  // Un titre, comme ses 3 sœurs (Boutique, Ma collection, Classement) : cette
-  // page était la seule sans, donc sans repère à l'œil ni pour le lecteur
-  // d'écran (le router cherche un h1 pour annoncer la page).
-  return `${recompensesTabs("cartes", { dark: true })}
-    <div class="col-hd"><h1 class="col-title">Cartes</h1>
+  // Plus de bandeau des 4 salles ici : cette page n'est plus un onglet de la
+  // nav générale (le paquet complet se consulte sur #/profil). Un simple
+  // retour suffit — le router cherche un h1 pour annoncer la page aux
+  // lecteurs d'écran.
+  return `<a class="col-back" href="#/profil">${icon("chevron-left", { size: 14 })} Retour à mon profil</a>
+    <div class="col-hd"><h1 class="col-title">Carte débloquée</h1>
     <p class="col-sub">Une carte par compétence certifiée.</p></div>`;
 }
 
@@ -297,7 +309,14 @@ function skeleton() {
 export async function mount(root, param) {
   const me = getCurUser();
   if (!me) return;
-  track("page_view", { page: "cartes", role: me.role });
+  // Plus un onglet de navigation générale (06/08/2026) : sans id de
+  // compétence à révéler, aucun lien de l'app ne mène plus ici. Le paquet
+  // complet se consulte sur #/profil, seule maison des cartes désormais.
+  if (!param) {
+    navigate("#/profil");
+    return;
+  }
+  track("page_view", { page: "cartes", role: me.role, competence_id: param });
 
   root.innerHTML = skeleton();
 
@@ -326,23 +345,23 @@ export async function mount(root, param) {
       if (!unlocked.has(r.competence_id)) unlocked.set(r.competence_id, null);
   }
 
+  // L'id ne correspond à aucune compétence débloquée (mauvais lien, course
+  // avec l'écriture de la certification…) : rien à révéler, direction le
+  // profil plutôt qu'un deck générique qui ferait doublon.
+  if (!unlocked.has(param)) {
+    navigate("#/profil");
+    return;
+  }
+
   const state = {
     cur: 0,
     unlocked,
     seen: loadSeen(), // cartes déjà regardées → pas de badge « Nouveau »
-    // carte à révéler (arrivée depuis une certif) : #/cartes/{compId}
-    reveal: param && unlocked.has(param) ? param : null,
+    reveal: param, // carte à révéler (arrivée depuis une certif) : #/cartes/{compId}
   };
-  // Démarre sur la carte demandée si fournie.
-  if (param) {
-    const i = CARTES.findIndex((c) => c.id === param);
-    if (i >= 0) state.cur = i;
-  } else {
-    // Sinon démarre sur la première carte non débloquée (« à viser »),
-    // ou la dernière si tout est débloqué.
-    const firstLocked = CARTES.findIndex((c) => !unlocked.has(c.id));
-    state.cur = firstLocked >= 0 ? firstLocked : 0;
-  }
+  // Démarre sur la carte demandée.
+  const i = CARTES.findIndex((c) => c.id === param);
+  if (i >= 0) state.cur = i;
 
   render(root, state);
 }

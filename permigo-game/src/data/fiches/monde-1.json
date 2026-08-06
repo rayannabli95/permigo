@@ -4,6 +4,11 @@
     "titre": "Prendre en main le poste de conduite",
     "monde": 1,
     "competence": "Maniement",
+    "resume10s": [
+      "Je fais le tour de la voiture avant de monter.",
+      "Je repère les commodos et les commandes au pied.",
+      "Je mets le contact et je surveille les témoins."
+    ],
     "methode": [
       "Fais le tour rapide de la voiture : rien sous les roues, pneus pas à plat, feux et plaques propres.",
       "Installe-toi, ferme la portière, vérifie qu'elle est bien claquée.",
@@ -35,15 +40,18 @@
         "explication": "Un témoin qui reste allumé (huile, frein, batterie…) signale un défaut."
       }
     ],
-    "sources": [
-      "las-de-la-route/4vKI0ny8LI8"
-    ]
+    "sources": ["las-de-la-route/4vKI0ny8LI8"]
   },
   {
     "code": "C1b",
     "titre": "Régler son poste de conduite",
     "monde": 1,
     "competence": "Maniement",
+    "resume10s": [
+      "Je règle la distance du siège puis sa hauteur.",
+      "Je cale le dossier · l'appuie-tête · le volant.",
+      "Je règle mes trois rétroviseurs puis je boucle la ceinture."
+    ],
     "methode": [
       "Distance du siège (profondeur) : avance/recule le siège pour que ton pied gauche puisse enfoncer l'embrayage à fond avec la jambe encore un peu pliée (jamais tendue à bloc). Beaucoup d'élèves se mettent trop loin « pour avoir de la place » : si tu dois tendre la jambe, rapproche-toi.",
       "Hauteur du siège : règle pour voir la route sans te casser le cou. Repère concret du moniteur : abaisse le pare-soleil. Si tu vois la route en dessous, ta hauteur de regard est correcte ; si le pare-soleil te cache la route, tu es trop bas.",
@@ -76,15 +84,18 @@
         "explication": "À plat, pas vrillée."
       }
     ],
-    "sources": [
-      "evry-village/s0yN0M5bzjA"
-    ]
+    "sources": ["evry-village/s0yN0M5bzjA"]
   },
   {
     "code": "C1c",
     "titre": "Tenir le volant et tenir sa trajectoire",
     "monde": 1,
     "competence": "Maniement",
+    "resume10s": [
+      "Je place mes mains à neuf heures quinze.",
+      "Je regarde loin devant et ma trajectoire suit.",
+      "Je tourne sans croiser les mains à allure normale."
+    ],
     "methode": [
       "Place tes mains comme sur une horloge : 9h15 (« quart à trois »), pouces posés sur la jante, pas enroulés dessous.",
       "Regarde loin devant, pas le capot : ton regard « tire » la voiture vers où tu veux aller.",
@@ -117,15 +128,18 @@
         "explication": "Les coups de volant à répétition = tu te perds."
       }
     ],
-    "sources": [
-      "las-de-la-route/spEpsRbwVyo"
-    ]
+    "sources": ["las-de-la-route/spEpsRbwVyo"]
   },
   {
     "code": "C1d",
     "titre": "Démarrer et s'arrêter en douceur",
     "monde": 1,
     "competence": "Maniement",
+    "resume10s": [
+      "Je prépare la voiture à l'arrêt avant de mettre le contact.",
+      "Je fais avancer la voiture tout en douceur.",
+      "Je lâche l'accélérateur tôt puis je freine progressivement."
+    ],
     "methode": [
       "Avant de rouler. Avant de démarrer : frein à main serré, levier au point mort, embrayage enfoncé à fond, contact.",
       "Avant de rouler. Passe la 1ère.",
@@ -156,16 +170,18 @@
         "explication": "Trop tôt = tu roules en roue libre, trop tard = tu cales."
       }
     ],
-    "sources": [
-      "las-de-la-route/4vKI0ny8LI8",
-      "las-de-la-route/sV8hlEY349g"
-    ]
+    "sources": ["las-de-la-route/4vKI0ny8LI8", "las-de-la-route/sV8hlEY349g"]
   },
   {
     "code": "C1e",
     "titre": "Doser l'accélérateur et le frein",
     "monde": 1,
     "competence": "Maniement",
+    "resume10s": [
+      "J'accélère progressivement avec la pointe du pied droit.",
+      "Je regarde loin pour voir venir les ralentissements.",
+      "Je lâche l'accélérateur puis je freine en deux temps."
+    ],
     "methode": [
       "Accélère progressivement, avec la pointe du pied : le pied droit pousse doucement, jamais d'à-coup.",
       "Entraîne-toi à te stabiliser à différents régimes (ex. ~1000, ~1500, ~2500 tr/min) : plus tu appuies, plus le moteur monte ; si tu dépasses le régime visé, soulage un peu sans lâcher complètement, puis ré-ajuste. Ce dosage « par paliers » se travaille même à l'arrêt.",
@@ -194,15 +210,18 @@
         "explication": "Ça se fait même à l'arrêt."
       }
     ],
-    "sources": [
-      "las-de-la-route/sV8hlEY349g"
-    ]
+    "sources": ["las-de-la-route/sV8hlEY349g"]
   },
   {
     "code": "C1f",
     "titre": "Changer de vitesse au bon moment",
     "monde": 1,
     "competence": "Maniement",
+    "resume10s": [
+      "Je change de rapport quand j'entends le moteur monter.",
+      "Je tiens le levier paume posée sans quitter la route des yeux.",
+      "Je rétrograde avant le virage ou le freinage jamais pendant."
+    ],
     "methode": [
       "Écoute / regarde le régime moteur. Repère sonore d'abord (« le moteur monte ») ; chiffres indicatifs : ~2000 tr/min en diesel, ~2500 en essence.",
       "Pour passer un rapport : lâche l'accélérateur, débraye à fond, déplace le levier, relâche l'embrayage en douceur (en deux temps), reprends l'accélérateur.",
@@ -214,6 +233,7 @@
     ],
     "pourquoi": "Le bon rapport, c'est celui qui garde le moteur à l'aise : ni en train de forcer, ni de s'emballer. Rétrograder avant le virage te laisse de la reprise pour ré-accélérer proprement en sortie.",
     "erreur": "Regarder le levier en changeant de vitesse (tu ne regardes plus la route) et caler en rétrogradant parce qu'on relâche l'embrayage trop vite à bas régime. Et se tromper de rapport par mauvaise tenue de la main (4e visée, 2e enclenchée) : une erreur de boîte est souvent éliminatoire à l'examen.",
+    "bvaHorsSujet": true,
     "bva": "Il n'y a pas de changement de vitesse à faire : la boîte le fait pour toi. Pas d'embrayage, pas de levier de rapports : tu restes en D et tu gères tout avec l'accélérateur. Cette fiche (montée/rétrogradation manuelle) ne concerne pas un élève en boîte auto. Et le risque d'erreur de boîte éliminatoire n'existe pas. Bon à savoir : certaines BVA proposent un mode manuel (+/-), mais ce n'est pas exigé au démarrage de l'apprentissage.",
     "questions": [
       {
@@ -232,16 +252,18 @@
         "explication": "Rétrograder en plein virage déséquilibre la voiture."
       }
     ],
-    "sources": [
-      "evry-village/jK_mORq5XPU",
-      "las-de-la-route/-c6RPXS6X-A"
-    ]
+    "sources": ["evry-village/jK_mORq5XPU", "las-de-la-route/-c6RPXS6X-A"]
   },
   {
     "code": "C1g",
     "titre": "Les vérifications avant de rouler (tour de voiture)",
     "monde": 1,
     "competence": "Maniement",
+    "resume10s": [
+      "Je contrôle mes pneus · mes feux · mes vitres.",
+      "Je sais montrer où sont les niveaux sous le capot.",
+      "À l'examen je montre l'élément au lieu de réciter."
+    ],
     "methode": [
       "Pneus : pas dégonflés à l'œil, pas de coupure, gomme pas trop usée (témoin d'usure).",
       "Feux : allume et fais vérifier phares (croisement/route), clignotants, feux stop, feux de recul.",
@@ -276,6 +298,11 @@
     "titre": "Réussir les manœuvres-test (créneau, demi-tour, stationnement)",
     "monde": 1,
     "competence": "Maniement",
+    "resume10s": [
+      "Je mets le clignotant et je contrôle tout autour.",
+      "J'avance le plus lentement possible je ne suis pas chronométré.",
+      "Je garde mes repères et je corrige doucement sans forcer."
+    ],
     "methode": [
       "Les 6 familles (l'inspecteur en impose UNE) : marche arrière en ligne droite, marche arrière en courbe, stationnement en épi, demi-tour (en 3, 5 ou 7 temps), stationnement en bataille, créneau.",
       "La vraie clé de TOUTES les manœuvres : savoir déplacer ta voiture en marche arrière (à droite, à gauche). Et tu n'es jamais prioritaire en manœuvre : tu sécurises avant et tu laisses passer tout usager qui arrive.",
@@ -328,6 +355,11 @@
     "titre": "Enchaîner les manœuvres en autonomie",
     "monde": 1,
     "competence": "Maniement",
+    "resume10s": [
+      "J'analyse la place et je choisis moi-même la manœuvre.",
+      "Je sécurise avant de bouger je ne suis jamais prioritaire.",
+      "Si ça rate je me remets droit et je recommence."
+    ],
     "methode": [
       "Analyse la situation : quelle manœuvre la place demande (créneau, bataille, épi, demi-tour) ?",
       "Choisis toi-même la bonne manœuvre et le bon côté (rappel : créneau/bataille à gauche uniquement en sens unique, sinon tu te mets à contre-sens).",
