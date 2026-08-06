@@ -2078,7 +2078,7 @@ export const MISSIONS = [
     title: "Ce que le véhicule cache",
     objective: "Regarder l'endroit d'où un piéton peut surgir.",
     prompt:
-      "Un véhicule est arrêté à droite. Touche l'endroit d'où quelqu'un peut sortir sans te voir.",
+      "Un véhicule est arrêté à gauche. Touche l'endroit d'où quelqu'un peut sortir sans te voir.",
     visual: "intersection",
     hotspots: [
       {
