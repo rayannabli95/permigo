@@ -74,12 +74,14 @@ const VS_I18N = {
     kick: "Certification",
     loading: "Loading…",
     nf_title: "Skill not found",
-    nf_body: "This skill doesn't exist. Go back to your journey to pick one.",
+    nf_title2: "This skill doesn't exist.",
+    nf_body: "Go back to your journey to pick one.",
     load_title: "Verification unavailable",
     load_body:
       "We couldn't verify this skill. Check your connection and try again.",
     retry: "Try again",
     comp_fallback: "Skill",
+    blocked_kick: "Already done",
     blocked_q:
       "This skill is already done. The quiz stays open to keep the move sharp.",
     blocked_m:
@@ -155,11 +157,13 @@ const VS_I18N = {
     kick: "مصادقة",
     loading: "جارٍ التحميل…",
     nf_title: "المهارة غير موجودة",
-    nf_body: "هذه المهارة غير موجودة. عد إلى مسارك لاختيار واحدة.",
+    nf_title2: "هذه المهارة غير موجودة.",
+    nf_body: "عد إلى مسارك لاختيار واحدة.",
     load_title: "التحقق غير متاح",
     load_body: "تعذّر التحقق من هذه المهارة. افحص اتصالك وحاول مجددًا.",
     retry: "أعد المحاولة",
     comp_fallback: "مهارة",
+    blocked_kick: "مكتسبة سلفًا",
     blocked_q:
       "هذه المهارة مكتسبة سلفًا. ويبقى الاختبار مفتوحًا للحفاظ على الحركة.",
     blocked_m:
@@ -332,7 +336,7 @@ a.vs-cta { text-decoration:none; }
 .vsr.fail .vsr-kick { color:#ffb0b0; background:rgba(255,120,120,.1); border-color:rgba(255,120,120,.28); }
 .vsr.fail .vsr-ttl { background:linear-gradient(180deg,#ffd0d0,#ff9c9c); -webkit-background-clip:text; background-clip:text; color:transparent; }
 
-@media (prefers-reduced-motion: reduce) { .vsr-med, .vsr-mascot { animation:none; } }
+@media (prefers-reduced-motion: reduce) { .vsr-med { animation:none; } }
 </style>`;
 
 function catMedallion(ico, size = 40) {
@@ -542,6 +546,11 @@ function introScreen(sub, cat, fiche, avecMission) {
 
 function successScreen(sub, scorePct, volants = 0) {
   const carte = findCarte(sub.c);
+  // Les 31 compétences ont toutes leur carte : `carte` n'est jamais vide en
+  // pratique aujourd'hui. Il y avait ici une vidéo mascotte en repli, jamais
+  // vue par personne (audit Rayan 06/08). Retirée : la mascotte vit
+  // maintenant à chaque question du quiz, pas sur cet écran.
+  //
   // La carte se révèle UNE fois (vsrCarte), puis garde un gloss permanent
   // (vsr-carte-gloss) qui lui donne la texture d'un objet de collection.
   const carteBlock = carte
@@ -566,8 +575,6 @@ function successScreen(sub, scorePct, volants = 0) {
     @keyframes vsrCarte { 0%{opacity:0; transform:scale(.55) rotate(-9deg);} 60%{transform:scale(1.06) rotate(2deg);} 100%{opacity:1; transform:scale(1) rotate(0);} }
     @keyframes vsrShine { to { transform:translateX(120%); } }
     @keyframes vsrGloss { 0%{background-position:120% 0;} 50%{background-position:-20% 0;} 100%{background-position:120% 0;} }
-    .vsr-mascot { width:150px; height:150px; margin:0 auto 4px; display:block; object-fit:contain;
-      filter:drop-shadow(0 10px 22px rgba(0,0,0,.5)); animation: vsrPop .5s cubic-bezier(.34,1.56,.64,1) both; }
     .vsr-name { font:800 17px/1.25 'Archivo',sans-serif; color:#fff; margin:2px 0 0; max-width:300px; }
     .vsr-encourage { font:700 14.5px/1.4 'Archivo',sans-serif; color:#ffe9b0; margin:10px auto 0; max-width:290px; }
     .vsr-vaut { font:600 12.5px/1.5 'Archivo',sans-serif; color:rgba(255,255,255,.72); margin:9px auto 0; max-width:310px; }
@@ -578,10 +585,7 @@ function successScreen(sub, scorePct, volants = 0) {
     @media (prefers-reduced-motion: reduce) { .vsr-carte, .vsr-carte-shine, .vsr-carte-gloss { animation:none; } .vsr-carte-shine { display:none; } }
     </style>
     <div class="vsr anim-slide-up">
-    ${
-      carteBlock ||
-      `<video class="vsr-mascot" src="/video/mascotte-competence-certifiee.mp4" poster="/video/mascotte-competence-certifiee-poster.jpg" autoplay muted playsinline preload="auto" aria-hidden="true"></video>`
-    }
+    ${carteBlock}
     <h1 class="vsr-ttl">${vsD("ok_title", "Compétence certifiée")}</h1>
     <p class="vsr-name">${esc(sub.n)}</p>
     <!-- Le texte qui doit marquer, pas juste le score (Rayan, 06/08) : on
