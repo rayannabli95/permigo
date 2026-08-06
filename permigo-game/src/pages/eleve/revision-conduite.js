@@ -904,7 +904,15 @@ ${chromeNight("#5a4fc0", "#423a96")}
 
 const HUB_STYLE = `<style>
 ${chromeNight("#5a4fc0", "#423a96")}
-.hub{ position:relative; max-width:480px; margin:0 auto; min-height:100dvh;
+/* Cette page commence SOUS le bandeau (contrairement aux pages nuit qui se
+   glissent dessous par une marge haute négative) : elle démarre donc déjà à
+   52px du haut. Lui demander 100dvh en plus la faisait dépasser d'autant, et
+   #app ajoutait encore ses 60px de réserve pour la barre du bas. Résultat :
+   un ruban sombre qu'on ne découvrait qu'en tirant l'écran, alors que le
+   contenu tient largement. On retranche l'un et on annule l'autre. */
+.hub{ position:relative; max-width:480px; margin:0 auto;
+  min-height:calc(100dvh - 52px - env(safe-area-inset-top, 0px));
+  margin-bottom:calc(-60px - env(safe-area-inset-bottom, 0px));
   font-family:'Archivo',sans-serif; color:#ded7ff; overflow-x:hidden;
   padding:0 0 calc(96px + env(safe-area-inset-bottom));
   background:
