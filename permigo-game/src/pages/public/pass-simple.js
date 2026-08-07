@@ -90,7 +90,8 @@ const STR = {
     },
     secAvis: "Ils l'utilisent déjà",
     avisAge: "ans",
-    price: "4,99 € seulement",
+    price: "4,99 €",
+    priceOnly: "seulement",
     priceSub: "Par mois. Sans engagement.",
     priceBtn: "Tout débloquer",
     foot: "Paiement sécurisé par Stripe · Remboursé sous 3 jours",
@@ -112,7 +113,8 @@ const STR = {
     },
     secAvis: "They already use it",
     avisAge: "years old",
-    price: "Only €4.99",
+    price: "€4.99",
+    priceOnly: "only",
     priceSub: "Per month. No commitment.",
     priceBtn: "Unlock everything",
     foot: "Secure payment by Stripe · Money back within 3 days",
@@ -134,7 +136,8 @@ const STR = {
     },
     secAvis: "يستعملونه فعلاً",
     avisAge: "سنة",
-    price: "€4.99 فقط",
+    price: "€4.99",
+    priceOnly: "فقط",
     priceSub: "شهرياً. بلا التزام.",
     priceBtn: "افتح كل شيء",
     foot: "دفع آمن عبر Stripe · استرداد خلال 3 أيام",
@@ -289,10 +292,21 @@ const STYLE = `<style>
     box-shadow: 0 24px 50px -20px rgba(0,0,0,.85), inset 0 1.5px 0 rgba(255,255,255,.14);
     backdrop-filter: blur(10px);
   }
+  /* ⚠️ Le montant et le mot ne doivent PAS avoir la même taille. En 44px
+     tous les deux, « 4,99 € seulement » se cassait en deux lignes qui se
+     lisaient comme deux titres empilés. Le chiffre reste énorme, le mot
+     passe en étiquette dessous : il reste bien visible (c'est la demande de
+     Rayan) sans se battre avec le prix. */
   .ps-price-big {
-    font: 900 clamp(34px, 9.5vw, 44px)/1.1 'Archivo', sans-serif;
-    color: var(--gold); margin: 0 0 7px; text-wrap: balance;
+    font: 900 clamp(40px, 12vw, 52px)/1 'Archivo', sans-serif;
+    color: var(--gold); margin: 0; letter-spacing: -.02em;
     text-shadow: 0 2px 0 rgba(90,50,0,.5);
+    font-variant-numeric: tabular-nums;
+  }
+  .ps-price-only {
+    display: block; margin: 6px 0 9px;
+    font: 800 13px/1 'Archivo', sans-serif; letter-spacing: .22em;
+    text-transform: uppercase; color: var(--gold); opacity: .82;
   }
   .ps-price-sub { margin: 0; font: 600 13.5px/1.5 'Archivo', sans-serif; color: var(--ink-soft); }
   .ps-price-btn {
@@ -399,6 +413,7 @@ export async function mount(root) {
 
         <div class="ps-price">
           <div class="ps-price-big">${L.price}</div>
+          <span class="ps-price-only">${L.priceOnly}</span>
           <p class="ps-price-sub">${L.priceSub}</p>
           <button class="ps-price-btn" id="ps-buy" type="button">${L.priceBtn}</button>
         </div>
