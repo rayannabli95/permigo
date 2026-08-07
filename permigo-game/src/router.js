@@ -467,6 +467,12 @@ async function routePublic(app) {
     m = await import("@/pages/public/ecole.js");
   } else if (hash.startsWith("#/avis-depart")) {
     m = await import("@/pages/public/avis-depart.js");
+  } else if (hash.startsWith("#/simple")) {
+    // Version épurée de la page de vente, montée À CÔTÉ de #/pass pour que
+    // Rayan compare les deux en vrai (07/08/2026). Volontairement liée de
+    // nulle part : on y va par l'adresse. Quand le choix est fait, l'une des
+    // deux disparaît et cette branche avec.
+    m = await import("@/pages/public/pass-simple.js");
   } else if (hash.startsWith("#/pass")) {
     m = await import("@/pages/public/pass.js");
   } else if (
