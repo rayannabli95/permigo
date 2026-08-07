@@ -206,7 +206,54 @@ const DECORS = {
     alt: "Vue de dessus d'une rue, une file de voitures garées à droite dont une portière ouverte",
     src: "voie-garee-2026-08-06",
   },
+
+  // ── Les six gros plans de commande, en portrait ────────────────────────
+  // C'étaient les six derniers dessins vectoriels au milieu de vingt-deux
+  // photos jouet, et ils se voyaient. Leurs étiquettes flottaient en plus aux
+  // bords de la boîte pendant que le dessin restait au centre : « Embrayage »
+  // se posait loin de la pédale d'embrayage (audit joué du 06/08/2026).
+  //
+  // `vertical: true` = la scène prend l'écran au lieu de tenir dans une boîte
+  // de 270 px. Réservé à ces six-là : ce sont des gros plans d'objet, alors
+  // qu'une scène de route se regarde en large, à travers le pare-brise. Et
+  // surtout AUCUNE des six ne porte de zone à toucher, donc passer en plein
+  // cadre ne déplace aucune coordonnée (les zones sont en % de la scène).
+  "pedales-manuelle": {
+    alt: "Le pied de la voiture, les trois pédales d'une boîte manuelle",
+    src: "pedales-manuelle-2026-08-07",
+    vertical: true,
+  },
+  "pedales-auto": {
+    alt: "Le pied de la voiture en boîte automatique, deux pédales et un repose-pied à gauche",
+    src: "pedales-auto-2026-08-07",
+    vertical: true,
+  },
+  "voyant-moteur": {
+    alt: "Le tableau de bord de nuit, un seul témoin allumé en rouge",
+    src: "voyant-moteur-2026-08-07",
+    vertical: true,
+  },
+  levier: {
+    alt: "Le levier de vitesses d'une boîte manuelle posé dans sa grille",
+    src: "levier-2026-08-07",
+    vertical: true,
+  },
+  selecteur: {
+    alt: "Le sélecteur d'une boîte automatique, levier posé sur la position D",
+    src: "selecteur-2026-08-07",
+    vertical: true,
+  },
+  "compte-tours-bas": {
+    alt: "Le compte-tours en gros plan, aiguille basse et zone rouge à droite",
+    src: "compte-tours-2026-08-07",
+    vertical: true,
+  },
 };
+
+/** Le décor prend-il l'écran entier ? Sert à basculer la mise en page. */
+export function estDecorPlein(visual) {
+  return Boolean(DECORS[visual]?.vertical);
+}
 
 /**
  * @param {string} visual nom du décor, de la pièce ou de la photo
@@ -228,6 +275,12 @@ export function renderArt(visual, options = {}) {
   const decor = DECORS[visual];
   if (decor) {
     const fichier = decor.src || `${visual}-2026-08-05`;
+    // Les portraits sont générés en 768×1376 et se posent en plein cadre.
+    if (decor.vertical) {
+      return `<img class="mp-decor mp-decor-plein" src="/pilote/decors/${fichier}.webp"
+        alt="${decor.alt}" loading="eager" decoding="async"
+        width="768" height="1376" aria-hidden="true">`;
+    }
     // 1600×1074, la taille réelle des fichiers. La valeur 1067 qui traînait
     // ici décrivait un 3/2 parfait que plus aucun décor n'a.
     return `<img class="mp-decor" src="/pilote/decors/${fichier}.webp"
