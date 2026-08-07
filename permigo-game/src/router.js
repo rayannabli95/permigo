@@ -6,6 +6,7 @@ import { fbPageview } from "@/services/meta-pixel.js";
 import { accessGateFor } from "@/auth/route-guards.js";
 import { isFreeTierUser, isDiscoveryAllowedRoute } from "@/utils/free-tier.js";
 import { getCurUser } from "@/auth/cur-user.js";
+import { setCookieBannerBlocked } from "@/components/common/cookie-banner.js";
 
 const CHUNK_RELOAD_KEY = "pg-chunk-reloaded";
 const CHUNK_ERROR_RE =
@@ -355,6 +356,10 @@ export async function route(root, me) {
   // bloqué pouvait taper #/quiz dans l'URL pour atteindre l'app.
   const gate = accessGateFor(me);
   if (gate) {
+    // Même règle qu'au boot (main.js) : ce mur ne doit pas se faire recouvrir
+    // par le bandeau cookies. Rejoué ici car ce mur peut être re-déclenché
+    // par une navigation hash en cours de session (pas seulement au boot).
+    if (gate.blocksCookieBanner) setCookieBannerBlocked(true);
     await _unmountCurrent();
     await gate(root, me);
     _currentMod = null; // la page-mur se gère seule (pas d'unmount router)

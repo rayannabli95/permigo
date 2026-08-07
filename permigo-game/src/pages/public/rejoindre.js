@@ -63,8 +63,18 @@ const STYLE = `<style>
     font-family: 'Archivo', var(--fd), sans-serif;
     -webkit-font-smoothing: antialiased;
     background: var(--bg);
-    padding: max(10px, env(safe-area-inset-top)) 20px max(14px, env(safe-area-inset-bottom));
+    padding: max(10px, env(safe-area-inset-top)) 20px
+      calc(max(14px, env(safe-area-inset-bottom)) + var(--ck-h, 0px));
   }
+  /* Ceinture et bretelles : le bandeau cookies ne doit normalement jamais
+     s'afficher pendant l'inscription (cf. cookie-banner.js, blocage par
+     route sur #/rejoindre). --ck-h vaut 0px tant qu'aucun bandeau n'est
+     ouvert (posé/retiré par cookie-banner.js) : cette réserve ne coûte donc
+     rien au cas nominal, elle garantit juste que le bouton principal ne se
+     retrouve jamais recouvert si le bandeau apparaissait quand même.
+     Colonne flex fixe : un contenu trop grand ÉCRASE en silence plutôt que
+     de défiler, d'où l'importance de réserver la place plutôt que d'espérer
+     un scroll. */
   .rj-bgfx{ position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
   .rj-bgfx i{ position: absolute; display: block; border-radius: 50%; filter: blur(56px); opacity: .5; }
   .rj-bgfx i:nth-child(1){ width: 340px; height: 340px; top: -110px; left: -90px;

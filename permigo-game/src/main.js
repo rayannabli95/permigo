@@ -21,7 +21,10 @@ import { initThemeEarly, syncFromPrefs, applyTheme } from "@/utils/theme.js";
 import { initLangEarly, syncLangFromPrefs } from "@/utils/lang.js";
 import { initAccentEarly, applyAccent } from "@/utils/accent.js";
 import { initGameState, initEquippedTheme } from "@/utils/game-state.js";
-import { mountCookieBanner } from "@/components/common/cookie-banner.js";
+import {
+  mountCookieBanner,
+  setCookieBannerBlocked,
+} from "@/components/common/cookie-banner.js";
 import { initPosthog } from "@/services/posthog.js";
 import { initMetaPixel } from "@/services/meta-pixel.js";
 import { initVercelAnalytics } from "@/services/vercel-analytics.js";
@@ -174,6 +177,10 @@ async function boot() {
     // — boot ET navigation par hash — appliquent EXACTEMENT les mêmes règles.
     const gate = accessGateFor(me);
     if (gate) {
+      // Onboarding élève neuf : le bandeau cookies ne doit pas s'afficher
+      // par-dessus (premier geste = l'app, pas un choix juridique). Rien
+      // n'est tracké avant le choix de toute façon (cf. cookie-banner.js).
+      if (gate.blocksCookieBanner) setCookieBannerBlocked(true);
       await gate(app, me);
       return; // pas de chrome tant que le mur n'est pas levé
     }

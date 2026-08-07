@@ -51,10 +51,16 @@ export function accessGateFor(me) {
 
   // Élève tout neuf jamais passé par le flow d'accueil → onboarding d'abord.
   if (!me.first_value_action_at && !safeGet("permigo_eleve_onboarding_done")) {
-    return async (app) => {
+    const gate = async (app) => {
       const { mount } = await import("@/pages/onboarding/index.js");
       await mount(app);
     };
+    // Marqueur lu par main.js : le bandeau cookies ne doit pas s'afficher
+    // par-dessus ce mur (cf. cookie-banner.js#setCookieBannerBlocked). Une
+    // propriété sur la fonction, pas un nouvel export : zéro changement de
+    // signature pour les appelants existants.
+    gate.blocksCookieBanner = true;
+    return gate;
   }
 
   return null;
