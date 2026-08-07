@@ -107,6 +107,9 @@ const STR = {
 
     demoTitle: "Une scène. Une décision.",
 
+    cutA: "Tu la prépares ici.",
+    cutB: "Tu la conduis là.",
+
     langKicker: "Français · English · العربية",
     langFixe: "Ton moniteur parle français.",
     langTourne: [
@@ -158,6 +161,9 @@ const STR = {
 
     demoTitle: "One scene. One decision.",
 
+    cutA: "You prepare it here.",
+    cutB: "You drive it there.",
+
     langKicker: "Français · English · العربية",
     langFixe: "Your instructor speaks French.",
     langTourne: [
@@ -208,6 +214,9 @@ const STR = {
     ],
 
     demoTitle: "مشهد. قرار.",
+
+    cutA: "تحضّرها هنا.",
+    cutB: "تقودها هناك.",
 
     langKicker: "Français · English · العربية",
     langFixe: "مدرّبك يتكلّم الفرنسية.",
@@ -398,6 +407,47 @@ const STYLE = `<style>
     border-top: 1px solid rgba(255,203,61,.22); border-bottom: 1px solid rgba(255,203,61,.22);
   }
   @media (min-width: 620px) { .pg-demo { margin-inline: 0; border-radius: 26px; border: 1px solid rgba(255,203,61,.22); } }
+
+  /* ══════════ 04 bis · Le raccord ══════════
+     La scène de l'app, puis la meme scene vue de la route. Les deux images
+     occupent EXACTEMENT le meme cadre : c'est ce qui fait le raccord. La
+     premiere s'agrandit et s'efface, la route est dessous depuis le debut.
+
+     ⚠️ Pilote a l'INTERSECTION OBSERVER, pas a la timeline de defilement.
+     Le cadre a un overflow:hidden (obligatoire pour rogner l'agrandissement),
+     or un overflow:hidden cree un conteneur de defilement et fige
+     'animation-timeline: view()' a zero SANS la moindre erreur. Piege deja
+     paye, on ne le repaie pas.
+
+     ⚠️ La video est un plan de l'univers PermiGo, pas une prise de vue reelle.
+     Une image filmee au milieu d'une page entierement illustree casserait la
+     direction artistique. Point de depart = la carte de competence C1a, deja
+     dans l'app : seul le mouvement est genere. */
+  .pg-cut-w { padding: 4svh 0 10svh; }
+  .pg-cut-t { margin: 0 0 6px; }
+  .pg-cut-t .b { color: var(--gold); }
+  .pg-cut {
+    position: relative; margin-top: 20px; border-radius: 22px; overflow: hidden;
+    aspect-ratio: 3 / 2; background: #16103f;
+    box-shadow: 0 24px 50px -22px rgba(0,0,0,.85);
+    border: 1px solid rgba(255,203,61,.2);
+  }
+  .pg-cut video, .pg-cut-app {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; display: block;
+  }
+  .pg-cut-app {
+    z-index: 1; transform: scale(1); opacity: 1;
+    transition: transform 1.15s cubic-bezier(.45,0,.2,1), opacity .8s ease .35s;
+  }
+  /* Le raccord : la scene de l'app avance vers nous et disparait, la route
+     etait deja derriere. On ne coupe pas, on traverse. */
+  .pg-cut.passe .pg-cut-app { transform: scale(1.7); opacity: 0; }
+  .pg-cut-lg {
+    position: absolute; z-index: 2; inset-inline-start: 14px; bottom: 12px;
+    padding: 6px 12px; border-radius: 999px; background: rgba(12,7,32,.62);
+    font: 800 12px/1 'Archivo', sans-serif; color: var(--ink-soft);
+  }
 
   /* ══════════ 05 · Ta langue ══════════
      La séquence la plus importante de la page. Elle n'existait pas.
@@ -607,6 +657,17 @@ export async function mount(root) {
       </section>
     </div>
 
+    <!-- 04 bis · Le raccord : la scene preparee, puis la meme sur la route -->
+    <div class="pg-wrap">
+      <section class="pg-cut-w">
+        <h2 class="pg-h2 pg-cut-t rv">${L.cutA}<br><span class="b">${L.cutB}</span></h2>
+        <div class="pg-cut rv" id="pg-cut">
+          <video id="pg-cut-v" poster="/video/route-volant.webp" muted playsinline webkit-playsinline preload="none" aria-hidden="true"></video>
+          <img class="pg-cut-app" src="/showcase/eleve-en-situation.webp" alt="" loading="lazy" decoding="async" width="780" height="980">
+        </div>
+      </section>
+    </div>
+
     <!-- 05 · Ta langue -->
     <div class="pg-wrap">
       <section class="pg-lang-sec">
@@ -765,6 +826,59 @@ export async function mount(root) {
       ).observe(rot);
     } else {
       minuteur = setInterval(tour, 2600);
+    }
+  }
+
+  // ── Le raccord ──
+  // La vidéo n'est demandée QUE quand la séquence approche : elle est loin
+  // dans la page et beaucoup de visiteurs ne descendront jamais jusque-là.
+  // Quand elle entre à l'écran, la scène de l'app avance vers nous et
+  // s'efface, et la route est déjà derrière. On ne coupe pas, on traverse.
+  const cut = root.querySelector("#pg-cut");
+  const cutV = root.querySelector("#pg-cut-v");
+  if (cut && cutV) {
+    // ⚠️ iOS lit les ATTRIBUTS, pas seulement les propriétés (piège #743).
+    cutV.muted = true;
+    cutV.defaultMuted = true;
+    cutV.playsInline = true;
+    const net = navigator.connection;
+    const leger =
+      doux ||
+      (net && (net.saveData || /(^|-)2g$/.test(net.effectiveType || "")));
+    // Sans mouvement demandé ou sur un forfait compté : on garde la scène de
+    // l'app, le titre dit déjà tout. Aucun trou, aucune vidéo téléchargée.
+    if (!leger && "IntersectionObserver" in window) {
+      const io = new IntersectionObserver(
+        (ents) =>
+          ents.forEach((en) => {
+            if (!en.isIntersecting) return;
+            io.disconnect();
+            cutV.src = "/video/route-volant.mp4";
+            // ⚠️ `preload="none"` économise le réseau tant qu'on n'arrive pas
+            // ici, MAIS poser la source ne télécharge alors RIEN : sans ces
+            // deux lignes, `canplay` n'arrive jamais et le raccord ne se
+            // déclenche pas. Aucun message d'erreur, la vidéo reste vide.
+            cutV.preload = "auto";
+            cutV.load();
+            const traverser = () => {
+              const p = cutV.play();
+              if (p && typeof p.catch === "function") p.catch(() => {});
+              cut.classList.add("passe");
+            };
+            // On demande tout de suite, et `canplay` sert de filet si ce
+            // premier appel arrive trop tôt. On ne traverse qu'avec une vraie
+            // image prête, sinon la scène de l'app s'efface sur du vide.
+            cutV.addEventListener("canplay", traverser, { once: true });
+            // Filet : si la vidéo ne vient jamais, la scène de l'app reste.
+            cutV.addEventListener(
+              "error",
+              () => track("landing.cut_error", { lang }),
+              { once: true },
+            );
+          }),
+        { rootMargin: "0px 0px -18% 0px" },
+      );
+      io.observe(cut);
     }
   }
 
