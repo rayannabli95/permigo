@@ -12,6 +12,7 @@ import { navigate } from "@/router.js";
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { haptic } from "@/utils/haptic.js";
+import { hideHeader } from "@/utils/nav.js";
 import { mountPremiumQuiz } from "@/components/eleve/premium-quiz.js";
 import { loadQuizByCode } from "@/data/quiz-conduite-loader.js";
 import { track } from "@/services/analytics.js";
@@ -431,56 +432,22 @@ function sourceChannels(f) {
     : [];
 }
 
-// ═══════════════════════════════════════════════════════════════
-// Intro narrative personnalisée (demande Rayan 22/07) : une à deux phrases
-// chaleureuses qui s'adressent à l'élève par son prénom, composées PAR
-// TEMPLATE à partir des champs existants (titre + 1re phrase du « pourquoi »).
-// Template choisi par hash du code de fiche → stable d'un rendu à l'autre
-// (pas de Math.random au rendu). Prénom vide → formulation neutre sans trou.
-// Ton : encourageant simple — jamais « échec » ni « maîtrisé ».
-// ═══════════════════════════════════════════════════════════════
-function firstSentence(txt) {
-  const s = String(txt || "").trim();
-  const m = s.match(/^[\s\S]*?[.!?…؟](?=\s|$)/);
-  return (m ? m[0] : s).trim();
-}
-function hashStr(s) {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
-  return h;
-}
-const INTRO_TPL = {
-  // Le kicker au-dessus dit déjà « AUJOURD'HUI » : la phrase ne le répète pas
-  // (même redondance que « La roue » + « Lancer la roue », signalée par Rayan).
-  // Elle ouvre sur le prénom, qui est le mot mis en or.
-  fr: [
-    (p, t) => (p ? `${p}. Tu attaques « ${t} ».` : `Tu attaques « ${t} ».`),
-    (p, t) =>
-      p ? `${p}. À toi de jouer sur « ${t} ».` : `À toi de jouer sur « ${t} ».`,
-    (p, t) =>
-      p ? `${p}. Prochaine étape « ${t} ».` : `Prochaine étape « ${t} ».`,
-  ],
-  en: [
-    (p, t) =>
-      p ? `${p}. You're taking on "${t}".` : `You're taking on "${t}".`,
-    (p, t) => (p ? `${p}. Your turn on "${t}".` : `Your turn on "${t}".`),
-    (p, t) => (p ? `${p}. Next step "${t}".` : `Next step "${t}".`),
-  ],
-  ar: [
-    (p, t) => (p ? `يا ${p}. تبدأ « ${t} ».` : `تبدأ « ${t} ».`),
-    (p, t) => (p ? `يا ${p}. دورك مع « ${t} ».` : `دورك مع « ${t} ».`),
-    (p, t) =>
-      p ? `يا ${p}. الخطوة التالية « ${t} ».` : `الخطوة التالية « ${t} ».`,
-  ],
-};
-// Variante A (maquette validée) : deux blocs distincts, pas une phrase
-// fusionnée. « lead » = la phrase d'accroche courte, en gros et centré,
-// « why » = la 1re phrase du pourquoi, plus discrète en dessous.
-function introParts(lang, i, prenom, titre, pourquoi) {
-  const bank = INTRO_TPL[lang] || INTRO_TPL.fr;
-  const lead = bank[i % bank.length](prenom, titre);
-  const why = firstSentence(pourquoi);
-  return { lead, why };
+// Combien de mots « utiles » le texte long a-t-il en plus du titre court ?
+// Sert à ne pas répéter sous le pli une consigne qui redit le titre.
+// Accents retirés et mots de 3 lettres et moins ignorés (« le », « la »,
+// « de ») : ils ne portent jamais l'information qu'on cherche à mesurer.
+function motsEnPlus(long, court) {
+  const mots = (t) =>
+    new Set(
+      String(t || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .split(/[^a-z0-9]+/)
+        .filter((w) => w.length > 3),
+    );
+  const ref = mots(court);
+  return [...mots(long)].filter((w) => !ref.has(w)).length;
 }
 
 const STYLE = `<style>
@@ -522,7 +489,9 @@ const FD_STYLE = `<style>
 ${chromeNight("#5a4fc0", "#423a96")}
 .fd{ position:relative; max-width:480px; margin:0 auto; min-height:100dvh;
   font-family:'Archivo',sans-serif; color:#ded7ff; overflow-x:hidden;
-  padding:0 0 calc(96px + env(safe-area-inset-bottom));
+  /* Le bandeau global est masqué sur cette page (hideHeader) : #app ne pose
+     plus ses 52 px de padding haut, la fiche encaisse elle-même l'encoche. */
+  padding:calc(env(safe-area-inset-top, 0px) + 12px) 0 calc(96px + env(safe-area-inset-bottom));
   background:
     radial-gradient(120% 55% at 50% -6%, rgba(240,169,63,.16) 0%, rgba(240,169,63,0) 55%),
     radial-gradient(120% 60% at 82% 12%, rgba(150,120,255,.30) 0%, rgba(150,120,255,0) 60%),
@@ -531,7 +500,7 @@ ${chromeNight("#5a4fc0", "#423a96")}
 .fd-gold{ background:linear-gradient(180deg,#ffe9b0 0%,#f6c85f 40%,#f0a93f 72%,#d98a1f 100%);
   -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent; }
 
-.fd-hero{ position:relative; padding:16px 18px 20px; }
+.fd-hero{ position:relative; padding:14px 18px 2px; }
 .fd-topbar{ display:flex; align-items:center; gap:12px; }
 .fd-back{ width:44px; height:44px; flex:0 0 44px; border-radius:14px; cursor:pointer;
   background:linear-gradient(180deg,#ffffff,#efecff); border:1px solid #e6e2fb; border-top-color:#fff;
@@ -552,40 +521,6 @@ ${chromeNight("#5a4fc0", "#423a96")}
    fond sombre (illisible en thème clair). */
 .fd-title{ color:inherit; font-family:'Archivo', system-ui, sans-serif; font-weight:800; font-size:27px; line-height:1.07; letter-spacing:-.01em;
   margin:15px 0 4px; filter:drop-shadow(0 2px 0 rgba(60,30,0,.30)); }
-.fd-sub{ font-size:13px; color:#ded7ff; font-weight:600; margin-bottom:16px; }
-
-.fd-xp{ background:linear-gradient(180deg,#ffffff,#f6f4ff); border:1px solid #e6e2fb; border-top-color:#fff;
-  border-radius:18px; padding:13px 15px 15px; box-shadow:0 6px 18px rgba(20,12,60,.28), inset 0 1px 0 rgba(255,255,255,.9); }
-.fd-xp-top{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:9px; }
-.fd-xp-top .lab{ font-family:'Archivo',sans-serif; font-weight:800; font-size:12px; letter-spacing:.06em; color:#6b5fa0; text-transform:uppercase; }
-.fd-xp-top .cnt{ font-family:'Archivo', system-ui, sans-serif; font-weight:800; font-size:17px; }
-.fd-xp-top .cnt small{ font-size:13px; color:#6b5fa0; -webkit-text-fill-color:#6b5fa0; font-family:'Archivo',sans-serif; font-weight:700; }
-.fd-bar{ height:16px; border-radius:999px; background:#2a2170; border:1px solid rgba(20,12,60,.5);
-  box-shadow:inset 0 2px 4px rgba(0,0,0,.45); position:relative; overflow:hidden; }
-.fd-bar .fill{ position:absolute; top:2px; bottom:2px; left:2px; border-radius:999px;
-  background:linear-gradient(180deg,#ffe9b0,#f0a93f 55%,#d98a1f);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.7), inset 0 -3px 4px rgba(150,80,0,.45); transition:width .35s cubic-bezier(.23,1,.32,1); }
-
-/* Intro narrative personnalisée (prénom) — première chose lue sur la fiche.
-   Variante A (maquette validée) : kicker « AUJOURD'HUI » minuscule, puis la
-   phrase d'accroche en gros (26 à 31px, le prénom en or), puis le « pourquoi »
-   en dessous, plus discret. Trois blocs distincts — avant, une seule phrase
-   fusionnée « accroche + pourquoi » tournait sur plusieurs lignes à 15px et
-   se lisait comme un pavé, pas comme un titre. */
-.fd-intro{ margin:0 18px 4px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:4px;
-  padding:22px 20px 20px; border-radius:18px;
-  background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.16); box-shadow:inset 0 1px 0 rgba(255,255,255,.10); }
-.fd-intro-ic{ flex:0 0 36px; width:36px; height:36px; border-radius:12px; display:flex; align-items:center; justify-content:center;
-  background:rgba(255,223,150,.16); border:1px solid rgba(255,223,150,.32); margin-bottom:6px; }
-.fd-intro-day{ margin:0 0 2px; font:800 11px/1 'Archivo',sans-serif; letter-spacing:.18em; text-transform:uppercase; color:#c9bcff; }
-/* color:inherit obligatoire (cf. .fd-title) : base.css pose une couleur sur
-   h1..h4, une règle directe bat l'héritage sinon le titre repasse en encre
-   sombre sur ce fond sombre. */
-.fd-intro-lead{ color:inherit; margin:0; max-width:22ch; font:800 clamp(24px,7vw,28px)/1.16 'Archivo',sans-serif; letter-spacing:-.02em; }
-.fd-intro-lead strong{ color:#ffd76e; font-weight:900; }
-.fd-intro-lead .fd-fr{ font-size:.55em; color:#cabef7; opacity:.85; font-weight:600; margin-top:6px; }
-.fd-intro-why{ margin:8px 0 0; max-width:30ch; font:600 14px/1.5 'Archivo',sans-serif; color:#c3b6f0; }
-.fd-intro-why .fd-fr{ color:#a89bd6; opacity:.85; font-weight:600; }
 
 /* « En boîte auto » remontée en tête de fiche. Bleu (comme le picto voiture de
    l'ancienne carte coach) pour se distinguer de l'or de l'intro. Variante
@@ -606,82 +541,91 @@ ${chromeNight("#5a4fc0", "#423a96")}
 .fd-auto.off .fd-auto-p{ color:#ffe6da; }
 .fd-auto.off .fd-auto-p .fd-fr{ color:#e0b6a4; }
 
-/* « En 10 secondes » — la version pressée, pour l'élève qui a 30 s avant sa
-   leçon. Posé juste sous l'intro, avant la méthode : il repart avec le
-   principal même s'il ne lit rien d'autre. Écrit à la main dans les JSON
-   (resume10s), FRANÇAIS SEULEMENT : on ne traduit pas à la volée une règle de
-   conduite. Fiche sans résumé = pas de bloc du tout, jamais d'encart vide. */
-.fd-quick{ margin:14px 18px 0; padding:16px 16px 15px; border-radius:20px;
-  background:rgba(12,6,36,.34); border:1px solid rgba(255,255,255,.14); }
-.fd-quick .fd-quick-k{ margin:0 0 12px; font:800 11.5px/1 'Archivo',sans-serif;
-  letter-spacing:.16em; text-transform:uppercase; color:#ffd76e; }
-.fd-quick ol{ margin:0; padding:0; list-style:none; counter-reset:fdq; }
-.fd-quick li{ counter-increment:fdq; display:flex; align-items:center; gap:11px;
-  font:800 15.5px/1.25 'Archivo',sans-serif; color:#fff; }
-.fd-quick li + li{ margin-top:11px; }
-.fd-quick li::before{ content:counter(fdq); flex:0 0 22px; width:22px; height:22px; border-radius:7px;
-  display:flex; align-items:center; justify-content:center; font:800 12px/1 'Archivo',sans-serif;
-  color:#2b1a55; background:rgba(255,255,255,.82); }
-/* La ligne vit dans son propre span, et c'est obligatoire : le glossaire
-   souligne des mots APRÈS coup en enveloppant du texte. Sans ce span, le
-   terme injecté devient un enfant direct du <li>, donc un ITEM de la flexbox,
-   et la phrase se casse en colonnes (vu sur « cède le passage »). */
-.fd-quick li > span{ flex:1 1 auto; min-width:0; }
-
 .fd-seclab{ display:flex; align-items:center; gap:10px; padding:0 18px; margin:22px 0 12px; }
 .fd-seclab h2{ font-family:'Archivo',sans-serif; font-weight:800; font-size:13px; letter-spacing:.10em; text-transform:uppercase; color:#ded7ff; white-space:nowrap; margin:0; }
 .fd-seclab .line{ height:1px; flex:1; background:linear-gradient(90deg,rgba(222,215,255,.55),transparent); }
 
-.fd-deck{ padding:0 18px; display:flex; flex-direction:column; gap:11px; }
+/* ── La liste des gestes, façon antisèche (choix Rayan 07/08) ─────────────
+   Avant : une carte par geste, chacune sur 3 à 5 lignes, la fiche faisait
+   3,6 écrans et l'élève abandonnait avant la fin. Maintenant les gestes
+   tiennent tous dans UNE carte blanche, un titre court par ligne. Le détail
+   du geste n'est pas supprimé, il est replié : un tap l'ouvre.
+   Le tout tient sur un écran, on voit la fin avant de commencer. */
+.fd-deck{ margin:14px 18px 0; padding:8px 0 6px; border-radius:22px;
+  background:linear-gradient(180deg,#ffffff,#f4f1ff);
+  border:1px solid #e6e2fb; border-top-color:#fff;
+  box-shadow:0 6px 0 rgba(20,12,60,.30), 0 16px 30px rgba(20,12,60,.34), inset 0 1px 0 rgba(255,255,255,.95); }
 .fd-deck + .fd-seclab{ margin-top:20px; }
-/* Carte « variante A » : consigne en gras en tête (le geste à faire), puis
-   le détail en dessous, une idée par ligne, puis l'annexe (l'ex-parenthèse)
-   dans son propre encart. Le conteneur n'est plus le <button> : un <ul> n'est
-   pas du contenu phrasé, il n'a rien à faire dans un <button> (cf. la même
-   règle déjà posée pour .fd-cc plus bas). Seule la tête (chk + consigne)
-   reste un <button> — c'est la zone qui coche le geste. */
-.fd-card{ position:relative; width:100%; padding:14px 16px 14px 14px; border-radius:18px;
-  background:#f6f4ff; border:1px solid #e6e2fb; border-top-color:#fff;
-  box-shadow:0 4px 0 rgba(20,12,60,.35), inset 0 1px 0 rgba(255,255,255,.8); }
-.fd-card.done{ background:linear-gradient(180deg,#fff8ea,#fdefcc); border-color:rgba(240,169,63,.55); border-top-color:#fff3d4;
-  box-shadow:0 4px 0 rgba(150,95,10,.32), inset 0 1px 0 rgba(255,255,255,.8), 0 0 0 1px rgba(240,169,63,.18); }
-.fd-card.next{ border-color:#c9bff5; border-top-color:#fff;
-  box-shadow:0 4px 0 rgba(20,12,60,.35), inset 0 1px 0 rgba(255,255,255,.8), 0 0 0 2px rgba(150,120,255,.38); }
-.fd-next-flag{ position:absolute; top:-9px; left:16px; font-family:'Archivo',sans-serif; font-weight:800; font-size:9px; letter-spacing:.10em;
-  color:#1a1240; background:linear-gradient(180deg,#e6d4ff,#b296ff); padding:2px 8px; border-radius:999px; text-transform:uppercase; box-shadow:0 2px 4px rgba(20,12,60,.3); }
-/* Compteur de position (« 1 / 6 ») : hérité de l'ancien numéro de geste, mais
-   au format de la maquette — position DANS sa section, coin haut droit. */
-.fd-rank{ position:absolute; top:15px; right:16px; font-family:'Archivo', system-ui, sans-serif; font-weight:800; font-size:11px;
-  letter-spacing:.02em; color:#a89cd6; }
-.fd-card.done .fd-rank{ color:#c79a3c; }
-.fd-card-head{ display:flex; align-items:flex-start; gap:12px; width:100%; margin:0; padding:0; border:0; background:none;
-  text-align:left; font-family:inherit; cursor:pointer; -webkit-tap-highlight-color:transparent; transition:transform .1s ease; }
-.fd-card-head:active{ transform:scale(.99); }
-.fd-chk{ flex:0 0 32px; width:32px; height:32px; margin-top:1px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
-.fd-chk.empty{ border:2.5px dashed rgba(107,95,160,.55); background:rgba(90,79,192,.05); }
-.fd-chk.filled{ background:radial-gradient(circle at 36% 28%,#ffe9b0,#f0a93f 58%,#b46a10);
-  box-shadow:inset 0 -3px 4px rgba(120,60,0,.55), inset 0 2px 2px rgba(255,255,255,.7), 0 2px 5px rgba(20,12,60,.3); }
-/* Le geste : court, gras, 16px. Seule ligne à lire pour qui est pressé. */
-.fd-act{ flex:1; padding-right:36px; font-weight:800; font-size:16px; line-height:1.24; letter-spacing:-.01em; color:#241a45; }
-.fd-card.done .fd-act{ color:#4a3712; }
-.fd-act .fd-fr{ display:block; font-size:.85em; font-weight:600; color:#5b5286; opacity:.72; margin-top:3px; }
-/* Repli : le découpage n'a pas pris (texte trop long/court, pas de
-   frontière franche) → on garde le rendu plat d'avant, plus petit et moins
-   gras qu'une vraie consigne pour ne pas mimer un titre qui n'en est pas un. */
-.fd-act-plain{ font-weight:600; font-size:13px; line-height:1.4; }
-.fd-detail{ margin:10px 0 0; padding:0 0 0 44px; list-style:none; display:flex; flex-direction:column; gap:6px; }
-.fd-detail li{ position:relative; padding-left:14px; font:600 13px/1.42 'Archivo',sans-serif; color:#5b5089; }
-.fd-detail li::before{ content:""; position:absolute; left:0; top:7px; width:5px; height:5px; border-radius:50%; background:#c3b6f0; }
-.fd-card.done .fd-detail li{ color:#7a5f28; }
-.fd-card.done .fd-detail li::before{ background:#e0b463; }
+.fd-line{ position:relative; padding:3px 14px; }
+/* Le pointillé qui relie les médaillons : les gestes SE SUIVENT, ce n'est pas
+   une liste de courses. Il s'arrête au dernier (:last-child). */
+/* Ancre en px, PAS en pourcentage : quand un geste s'ouvre, la ligne grandit
+   et un top:50% ferait redescendre le pointillé au milieu du détail, loin du
+   médaillon auquel il est censé se raccrocher. */
+.fd-line::after{ content:""; position:absolute; left:31px; top:42px; bottom:-6px; width:3px; border-radius:2px;
+  background:repeating-linear-gradient(#ded7f8 0 6px, transparent 6px 12px); }
+.fd-line:last-child::after{ display:none; }
+.fd-line.done::after{ background:repeating-linear-gradient(#f3ddab 0 6px, transparent 6px 12px); }
+.fd-line-top{ display:flex; align-items:center; gap:14px; }
+/* Le médaillon plastique : le numéro tant que ce n'est pas fait, la coche
+   après. C'est LUI qui coche, pas la ligne entière — le reste ouvre le détail. */
+.fd-med{ position:relative; z-index:1; flex:0 0 36px; width:36px; height:36px; margin:0; padding:0; border:0;
+  border-radius:50%; cursor:pointer; -webkit-tap-highlight-color:transparent;
+  display:flex; align-items:center; justify-content:center; font-family:inherit;
+  background:radial-gradient(circle at 34% 26%,#8a7ce8,#5a4fc0 62%,#3b3190); color:#fff;
+  box-shadow:inset 0 -3px 4px rgba(20,10,60,.55), inset 0 2px 2px rgba(255,255,255,.45), 0 2px 5px rgba(20,12,60,.30);
+  transition:transform .1s ease; }
+.fd-med b{ font-weight:900; font-size:15px; }
+.fd-med:active{ transform:scale(.92); }
+.fd-line.next .fd-med{ box-shadow:inset 0 -3px 4px rgba(20,10,60,.55), inset 0 2px 2px rgba(255,255,255,.45), 0 0 0 5px rgba(150,120,255,.30); }
+.fd-line.done .fd-med{ background:radial-gradient(circle at 34% 26%,#ffe9b0,#f0a93f 60%,#b46a10);
+  box-shadow:inset 0 -3px 4px rgba(120,60,0,.55), inset 0 2px 2px rgba(255,255,255,.75), 0 2px 5px rgba(20,12,60,.28); }
+/* La tête du geste : titre court écrit à la main (champ « titres »). */
+.fd-tete{ flex:1; min-width:0; display:flex; align-items:center; gap:10px; margin:0;
+  padding:11px 2px 11px 0; border:0; background:none; text-align:left; font-family:inherit;
+  cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.fd-tete > span{ flex:1; min-width:0; font-weight:800; font-size:16.5px; line-height:1.22;
+  letter-spacing:-.015em; color:#211a4d; }
+.fd-line.done .fd-tete > span{ color:#6b5a2c; }
+.fd-tete .fd-fr{ display:block; font-size:.82em; font-weight:600; color:#5b5286; opacity:.72; margin-top:3px; }
+.fd-tete svg{ flex:0 0 18px; color:#c1b8ec; transition:transform .18s ease; }
+.fd-tete[aria-expanded="true"] svg{ transform:rotate(90deg); }
+.fd-tete-fixe{ cursor:default; }
+/* Le détail, sous le pli. Il porte le geste ENTIER : on raccourcit ce qui
+   s'affiche, jamais le cours. */
+.fd-plus{ padding:0 6px 12px 50px; }
+.fd-plus ul{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:6px; }
+.fd-plus li{ position:relative; padding-left:14px; font:600 13.5px/1.45 'Archivo',sans-serif; color:#5b5089; }
+.fd-plus .fd-aside{ margin-left:0; margin-right:0; }
+.fd-plus li::before{ content:""; position:absolute; left:0; top:7px; width:5px; height:5px; border-radius:50%; background:#c3b6f0; }
+.fd-line.done .fd-plus li{ color:#7a5f28; }
+.fd-line.done .fd-plus li::before{ background:#e0b463; }
+
+/* ── Le piège : l'erreur à éviter, en clair sous la liste ───────────────── */
+.fd-piege{ margin:16px 18px 0; padding:13px 15px; border-radius:14px;
+  background:linear-gradient(180deg,#fff3ec,#ffe7da);
+  border:1px solid #ffcdb2; border-left:4px solid #ef6a3a; }
+.fd-piege b{ display:block; font-family:'Archivo',sans-serif; font-weight:800; font-size:11px;
+  letter-spacing:.09em; text-transform:uppercase; color:#c1400f; margin-bottom:5px; }
+.fd-piege p{ margin:0; font:600 14.5px/1.45 'Archivo',sans-serif; color:#5a2a12; }
+.fd-piege .fd-fr{ display:block; margin-top:5px; font-size:.88em; color:#8a5238; opacity:.9; }
+
+/* ── Le briefing : la mascotte annonce, le prénom en or ─────────────────── */
+.fd-brief{ position:relative; margin:14px 18px 0; padding:4px 124px 2px 2px; min-height:100px; }
+.fd-brief .nom{ display:block; font-family:'Archivo',sans-serif; font-weight:900; font-size:26px; line-height:1;
+  letter-spacing:-.02em; filter:drop-shadow(0 2px 0 rgba(60,30,0,.34)); }
+.fd-brief .dit{ display:block; margin-top:9px; font-size:16.5px; line-height:1.28; font-weight:700; color:#efeaff; }
+.fd-brief img{ position:absolute; right:-10px; bottom:-6px; width:138px; height:auto;
+  filter:drop-shadow(0 10px 16px rgba(10,6,40,.55)); pointer-events:none; }
+@media (max-width:340px){ .fd-brief{ padding-right:104px; } .fd-brief img{ width:112px; } }
 /* Annexe : ce qui était entre parenthèses vit ici, sur sa propre ligne
    encadrée, plutôt qu'au milieu de la phrase. */
 .fd-aside{ margin:10px 0 0 44px; padding:8px 11px; border-radius:11px; display:flex; gap:7px; align-items:flex-start;
   background:rgba(122,90,220,.09); border:1px solid rgba(122,90,220,.16); }
 .fd-aside svg{ flex:0 0 14px; margin-top:2px; }
 .fd-aside p{ margin:0; font:600 12px/1.4 'Archivo',sans-serif; color:#5f4fa8; }
-.fd-card.done .fd-aside{ background:rgba(240,169,63,.10); border-color:rgba(240,169,63,.22); }
-.fd-card.done .fd-aside p{ color:#8a6a1c; }
+.fd-line.done .fd-aside{ background:rgba(240,169,63,.10); border-color:rgba(240,169,63,.22); }
+.fd-line.done .fd-aside p{ color:#8a6a1c; }
 
 .fd-schemas{ margin-top:2px; }
 .fd-gal{ display:flex; gap:12px; overflow-x:auto; scroll-snap-type:x mandatory; padding:2px 18px 8px; scrollbar-width:none; }
@@ -803,8 +747,6 @@ ${chromeNight("#5a4fc0", "#423a96")}
    span — l'app reste LTR). Voir lang.js + fiches-i18n.js. */
 .fd-tr{ display:block; }
 .fd-fr{ display:block; margin-top:4px; font-weight:500; opacity:.62; }
-.fd-act-plain .fd-fr{ font-size:.9em; color:#5b5286; opacity:.72; }
-.fd-card.done .fd-act-plain .fd-fr{ color:#6f5a2a; }
 .fd-cc-p .fd-fr{ font-size:.94em; color:#8a7fb5; opacity:.8; margin-top:3px; }
 .fd-title .fd-tr{ display:block; }
 .fd-title .fd-fr{ -webkit-text-fill-color:#cabef7; color:#cabef7; background:none;
@@ -1126,7 +1068,18 @@ export async function mount(root, param) {
     }
   }
 
+  // Le bandeau du haut (volants, réglages, avatar) est masqué SUR LA FICHE
+  // seulement (choix Rayan 07/08) : c'est un écran de lecture, le compteur de
+  // monnaie n'y a rien à faire, et la fiche a déjà son propre bouton retour.
+  // hideHeader() se restaure tout seul au changement de hash — insuffisant
+  // ici, où l'on passe de la fiche au hub SANS changer de hash (view + render).
+  // D'où la restauration manuelle à chaque rendu d'une autre vue.
+  let rendreLeBandeau = null;
   function render() {
+    if (view !== "fiche" && rendreLeBandeau) {
+      rendreLeBandeau();
+      rendreLeBandeau = null;
+    }
     if (view === "fiche") return renderFicheDeck();
     if (view === "quiz") return renderQuiz();
     if (view === "monde") return renderMonde();
@@ -1448,33 +1401,63 @@ export async function mount(root, param) {
     // sait pas deviner s'il s'agit d'un avertissement ou d'une précision, un
     // seul picto « information » pour tous plutôt qu'une fausse distinction.
     const ASIDE_IC = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="#7c5fe0"/><path d="M12 11v5.2" stroke="#fff" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="8" r="1.15" fill="#fff"/></svg>`;
-    // rank/rankTotal = position DANS la section affichée (un groupe, ou la
-    // fiche entière si pas de groupe) — c'est le « 1 / 6 » de la maquette.
-    const card = (s, i, sTr, rank, rankTotal) => {
+    const CHEV = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    // Titres courts écrits à la main, un par geste, dans le champ « titres »
+    // des fiches (215 au total). Ils n'existent qu'en français : une longueur
+    // qui tient sur une ligne dépend de la langue, on ne la devine pas. Sans
+    // eux (fiche pas encore pourvue, autre langue) on retombe exactement sur
+    // l'affichage d'avant — la fiche reste lisible, juste plus longue.
+    const titresFr =
+      lang === "fr" && Array.isArray(f.titres) && f.titres.length === total
+        ? f.titres
+        : null;
+    // rank = position DANS la section affichée (un groupe, ou la fiche
+    // entière si pas de groupe) — c'est le numéro du médaillon.
+    const card = (s, i, sTr, rank) => {
       const done = doneSet.has(i);
       const next = i === firstUnchecked;
       // Le découpage « consigne + détail » ne s'applique qu'au français : il
       // coupe sur la ponctuation du texte SOURCE, une traduction n'a aucune
       // raison de porter la même structure (cf. commentaire sur splitStepCard).
       const parsed = lang === "fr" ? splitStepCard(s) : null;
-      const head = `<button type="button" class="fd-card-head" data-geste="${i}" aria-pressed="${done}">
-        <span class="fd-chk ${done ? "filled" : "empty"}">${done ? CHK : ""}</span>
-        <span class="fd-act${parsed ? "" : " fd-act-plain"}">${parsed ? bi(parsed.consigne, null) : bi(s, sTr)}</span>
-      </button>`;
-      const detailHtml =
-        parsed && parsed.detail.length
-          ? `<ul class="fd-detail">${parsed.detail.map((d) => `<li>${bi(d, null)}</li>`).join("")}</ul>`
-          : "";
-      const asideHtml =
-        parsed && parsed.aside
-          ? `<div class="fd-aside">${ASIDE_IC}<p>${bi(parsed.aside, null)}</p></div>`
-          : "";
-      return `<div class="fd-card${done ? " done" : ""}${next ? " next" : ""}">
-        ${next ? `<span class="fd-next-flag">${esc(ui("next", "à toi"))}</span>` : ""}
-        <span class="fd-rank">${rank} / ${rankTotal}</span>
-        ${head}
-        ${detailHtml}
-        ${asideHtml}
+      const teteHtml = titresFr
+        ? esc(titresFr[i])
+        : parsed
+          ? bi(parsed.consigne, null)
+          : bi(s, sTr);
+      // Sous le pli : le geste ENTIER. Quand un titre court le remplace en
+      // tête, la consigne d'origine redescend ici — sinon on perdrait du cours.
+      // Sauf si elle ne dit rien de plus que le titre : « Fais le tour de la
+      // voiture » suivi de « Fais le tour rapide de la voiture » se lit comme
+      // un bégaiement. On la garde dès qu'elle apporte deux mots nouveaux
+      // (« derrière le volant », « et vérifie qu'elle est bien claquée »).
+      const sous = [];
+      if (titresFr) {
+        const brut = parsed ? parsed.consigne : s;
+        if (motsEnPlus(brut, titresFr[i]) >= 2) sous.push(brut);
+      }
+      if (parsed && parsed.detail.length) sous.push(...parsed.detail);
+      const aside = parsed && parsed.aside ? parsed.aside : "";
+      const ouvrable = sous.length > 0 || Boolean(aside);
+      const tete = ouvrable
+        ? `<button type="button" class="fd-tete" data-ouvre="${i}" aria-expanded="false" aria-controls="fd-plus-${i}">
+             <span>${teteHtml}</span>${CHEV}
+           </button>`
+        : `<span class="fd-tete fd-tete-fixe"><span>${teteHtml}</span></span>`;
+      return `<div class="fd-line${done ? " done" : ""}${next ? " next" : ""}">
+        <div class="fd-line-top">
+          <button type="button" class="fd-med" data-geste="${i}" aria-pressed="${done}"
+            aria-label="${escAttr(ui("coche", "Cocher ce geste"))}">${done ? CHK : `<b>${rank}</b>`}</button>
+          ${tete}
+        </div>
+        ${
+          ouvrable
+            ? `<div class="fd-plus" id="fd-plus-${i}" hidden>
+            ${sous.length ? `<ul>${sous.map((d) => `<li>${bi(d, null)}</li>`).join("")}</ul>` : ""}
+            ${aside ? `<div class="fd-aside">${ASIDE_IC}<p>${bi(aside, null)}</p></div>` : ""}
+          </div>`
+            : ""
+        }
       </div>`;
     };
 
@@ -1501,13 +1484,16 @@ export async function mount(root, param) {
         })
         .join("");
     } else {
-      deckHtml = `${seclab("La méthode", methLab)}<div class="fd-deck">${steps
+      // Fiche d'un seul tenant : pas de bandeau « La méthode ». Il ne
+      // séparerait rien (une seule section) et le briefing juste au-dessus
+      // annonce déjà la liste. Les fiches groupées gardent leurs libellés :
+      // là, ils portent une vraie information (créneau, bataille, giratoire).
+      deckHtml = `<div class="fd-deck">${steps
         .map((s, i) => card(s, i, stepsTR ? stepsTR[i] : null, i + 1, total))
         .join("")}</div>`;
     }
 
     // Cartes coach : uniquement celles présentes dans la fiche (repli gracieux).
-    const ERR_IC = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3l9.5 16.5H2.5L12 3z" fill="#ef6a3a"/><path d="M12 10v4.5" stroke="#fff0e8" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17.4" r="1.2" fill="#fff0e8"/></svg>`;
     const WHY_IC = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 18h6M9.5 21h5" stroke="#7c5fe0" stroke-width="1.8" stroke-linecap="round"/><path d="M12 3a6 6 0 0 1 3.6 10.8c-.7.5-1.1 1.2-1.1 2H9.5c0-.8-.4-1.5-1.1-2A6 6 0 0 1 12 3z" fill="#7c5fe0"/></svg>`;
     const AUTO_IC = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 13l1.6-4.4A2 2 0 0 1 7.5 7h9a2 2 0 0 1 1.9 1.6L20 13v5a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-1H7v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-5z" fill="#3f82d6"/><circle cx="7.2" cy="15.4" r="1.1" fill="#eaf3ff"/><circle cx="16.8" cy="15.4" r="1.1" fill="#eaf3ff"/></svg>`;
     // ICRI : horloge (quand), panneau danger (ce qu'on risque), deux usagers
@@ -1556,14 +1542,10 @@ export async function mount(root, param) {
         tr: tr?.influence,
         ic: INF_IC,
       });
-    if (f.erreur)
-      coach.push({
-        k: "err",
-        h: ui("err_h", "L’erreur à éviter"),
-        fr: f.erreur,
-        tr: tr?.erreur,
-        ic: ERR_IC,
-      });
+    // « L'erreur à éviter » ne fait plus partie du deck coach : c'est la seule
+    // des cinq cartes qui change la leçon de demain, elle monte donc en clair
+    // juste sous les gestes (le « piège »). L'enfouir dans une pile qu'il faut
+    // faire défiler la rendait invisible.
     // En manuelle : rien à dire sur la boîte auto. En automatique : le texte
     // remonte en tête de fiche (autoNoteHtml), il n'a plus rien à faire ici.
     // Boîte inconnue : on garde la carte à sa place historique.
@@ -1589,6 +1571,13 @@ export async function mount(root, param) {
     coach.forEach((c, i) => {
       c.html = `<button type="button" class="fd-cc ${c.k}" data-coach="${i}" aria-haspopup="dialog"><span class="fd-cc-zoom" aria-hidden="true">${ZOOM_IC}</span><span class="fd-ic">${c.ic}</span><span class="fd-cc-h">${esc(c.h)}</span><span class="fd-cc-p">${bi(c.fr, c.tr)}</span></button>`;
     });
+    // Le piège : une seule chose à ne pas rater demain, en clair sous la liste.
+    const piegeHtml = f.erreur
+      ? `<div class="fd-piege">
+          <b>${esc(ui("piege_h", "Le piège"))}</b>
+          <p${rtl && tr?.erreur ? ' dir="rtl" lang="ar"' : ""}>${bi(f.erreur, tr?.erreur)}</p>
+        </div>`
+      : "";
     const coachHtml = coach.length
       ? `<div class="fd-coach-wrap">
           ${seclab("Cartes coach", lang !== "fr" ? ui("coach", "Cartes coach") : null)}
@@ -1635,96 +1624,32 @@ export async function mount(root, param) {
       ? `<div class="fd-source">${esc(ui("source", "Vu chez de vrais moniteurs :"))} <b>${srcChaines.map((s) => esc(s)).join(", ")}</b></div>`
       : "";
 
-    // Intro narrative personnalisée (ton voulu par Rayan : « Aujourd'hui
-    // {prenom}, tu attaques le giratoire… »). Composée par template stable
-    // (hash du code). Bilingue comme le reste de la page : traduction
-    // affichée + français gardé dessous.
-    // Variante A (maquette validée) : la phrase d'accroche (lead) et la 1re
-    // phrase du pourquoi (why) sont deux blocs SÉPARÉS — un kicker « AUJOURD'HUI »
-    // au-dessus, l'accroche en gros, le pourquoi plus discret en dessous.
-    // Le prénom est mis en gras : on le remplace par un jeton (caractère
-    // zone privée Unicode, jamais tapé par personne) AVANT d'appeler
-    // introParts(), on esc() la phrase entière (comme bi()), PUIS on
-    // ré-injecte le prénom échappé dans un <strong> à la place du jeton.
-    // Échapper après coup casserait la balise. L'ordre compte.
+    // ── Le briefing ────────────────────────────────────────────────────────
+    // Remplace l'ancienne intro narrative (« Aujourd'hui Rayan, tu attaques
+    // … ») : elle prenait 277 px pour annoncer ce que le titre juste
+    // au-dessus disait déjà, et sa 1re phrase de « pourquoi » était redite
+    // plus bas dans les cartes coach.
+    // Ici la mascotte annonce, le prénom porte l'adresse. Deux lignes.
+    // Sans prénom (profil pas encore rempli) on garde la seule ligne utile,
+    // jamais une salutation à trou.
     const prenom = String(getCurUser()?.prenom || "").trim();
-    const NAME_TOKEN = "\uE000"; // zone privee Unicode, jamais tapee par personne
-    const tplIdx = hashStr(f.code) % INTRO_TPL.fr.length;
-    const introFrParts = introParts(
-      "fr",
-      tplIdx,
-      prenom ? NAME_TOKEN : "",
-      f.titre,
-      f.pourquoi,
-    );
-    const introTrParts =
-      lang !== "fr" && tr
-        ? introParts(
-            lang,
-            tplIdx,
-            prenom ? NAME_TOKEN : "",
-            tr.titre || f.titre,
-            tr.pourquoi || f.pourquoi,
-          )
-        : null;
-    const boldPrenom = (escapedTxt) =>
-      prenom
-        ? escapedTxt.split(NAME_TOKEN).join(`<strong>${esc(prenom)}</strong>`)
-        : escapedTxt;
-    const leadBi =
-      lang === "fr" || !introTrParts || !introTrParts.lead
-        ? boldPrenom(esc(introFrParts.lead))
-        : `<span class="fd-tr"${rtl ? ' dir="rtl" lang="ar"' : ""}>${boldPrenom(esc(introTrParts.lead))}</span>` +
-          `<span class="fd-fr" lang="fr" dir="ltr">${boldPrenom(esc(introFrParts.lead))}</span>`;
-    const whyFr = introFrParts.why;
-    const whyTr = introTrParts ? introTrParts.why : null;
-    const whyBi = !whyFr
-      ? ""
-      : lang === "fr" || !whyTr
-        ? esc(whyFr)
-        : `<span class="fd-tr"${rtl ? ' dir="rtl" lang="ar"' : ""}>${esc(whyTr)}</span>` +
-          `<span class="fd-fr" lang="fr" dir="ltr">${esc(whyFr)}</span>`;
-    const SPARK_IC = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.2 6.6L21 11l-6.8 2.4L12 20l-2.2-6.6L3 11l6.8-2.4L12 2z" fill="#ffd76e"/></svg>`;
-    const introHtml = `<div class="fd-intro">
-      <span class="fd-intro-ic" aria-hidden="true">${SPARK_IC}</span>
-      <p class="fd-intro-day"${rtl ? ' dir="rtl" lang="ar"' : ""}>${esc(ui("today", "Aujourd'hui"))}</p>
-      <h2 class="fd-intro-lead">${leadBi}</h2>
-      ${whyBi ? `<p class="fd-intro-why">${whyBi}</p>` : ""}
+    const briefHtml = `<div class="fd-brief">
+      ${prenom ? `<span class="nom fd-gold">${esc(prenom)}</span>` : ""}
+      <span class="dit"${rtl ? ' dir="rtl" lang="ar"' : ""}>${esc(
+        prenom
+          ? ui("brief", `Tes ${total} gestes dans l'ordre`)
+          : ui("brief_seul", `Les ${total} gestes dans l'ordre`),
+      )}</span>
+      <img class="fd-brief-masc" src="/skins/mascot-pointing.png" alt=""
+        aria-hidden="true" width="138" height="138" loading="eager" decoding="async">
     </div>`;
 
-    // ── « En 10 secondes » ────────────────────────────────────────────────
-    // Trois lignes écrites à la main par fiche (resume10s dans les JSON). La
-    // réponse à « on a la flemme » : l'élève qui n'a que 30 secondes avant sa
-    // leçon lit ça et repart avec le principal.
-    // FRANÇAIS SEULEMENT, et c'est un choix : le reste de la fiche se replie
-    // sur une traduction relue (fiches-i18n), ce résumé n'en a pas. Le traduire
-    // à la volée reviendrait à paraphraser une règle de conduite dans une
-    // langue non relue. En en/ar l'élève lit la méthode complète, comme avant.
-    // Un résumé écrit pour la boîte manuelle ne s'affiche pas à un élève que
-    // la fiche ne concerne pas : trois lignes fausses en tête de page seraient
-    // pires que pas de résumé du tout.
-    // Quand un geste n'a PAS le même sens dans les deux boîtes (le point de
-    // patinage, le passage des rapports), la fiche porte un second jeu de trois
-    // lignes, `resume10sBva`, écrit pour l'automatique. Il prend la place du
-    // premier, et il vaut MÊME sur une fiche hors sujet en auto : c'est
-    // justement là que l'élève n'avait rien à lire (C1f, où l'app lui annonçait
-    // que la fiche ne le concerne pas et le laissait sans résumé).
-    // Boîte inconnue → version manuelle, comme le reste de la page.
-    const resumeAuto =
-      enAuto && Array.isArray(f.resume10sBva) && f.resume10sBva.length
-        ? f.resume10sBva
-        : null;
-    const quick =
-      lang !== "fr"
-        ? []
-        : resumeAuto ||
-          (!bvaHorsSujet && Array.isArray(f.resume10s) ? f.resume10s : []);
-    const quickHtml = quick.length
-      ? `<div class="fd-quick">
-          <p class="fd-quick-k">${esc(ui("quick_h", "En 10 secondes"))}</p>
-          <ol>${quick.map((l) => `<li><span>${esc(l)}</span></li>`).join("")}</ol>
-        </div>`
-      : "";
+    // Le bloc « En 10 secondes » (resume10s / resume10sBva) n'est plus
+    // affiché : c'était la méthode résumée en 3 lignes, juste au-dessus de la
+    // méthode en entier. Cette redite existait parce que la liste des gestes
+    // était illisible d'un coup d'œil ; maintenant qu'elle tient en une carte
+    // de titres courts, elle EST le résumé. Les champs restent dans les JSON,
+    // rien n'est perdu si on veut les ré-afficher ailleurs.
 
     const BACK = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="#3d2f7a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
@@ -1741,7 +1666,10 @@ export async function mount(root, param) {
             "En images",
             lang === "en" ? "In pictures" : lang === "ar" ? "بالصور" : null,
           )}
-          <div class="fd-gal">
+          <!-- tabindex : la galerie défile horizontalement, sans lui on ne peut
+               pas la parcourir au clavier (axe, « scrollable-region-focusable »). -->
+          <div class="fd-gal" tabindex="0" role="group"
+            aria-label="${escAttr(ui("gal_a11y", "Les images de la fiche, défilement horizontal"))}">
             ${shots
               .map(
                 (s) => `<figure class="fd-shot">
@@ -1754,6 +1682,20 @@ export async function mount(root, param) {
         </div>`
       : "";
 
+    // Séparateur du bas de page : ce qui suit est optionnel, il faut que ça se
+    // voie. Sans lui, l'élève croit que la fiche continue vraiment et il scrolle.
+    // (Défini ici, après schemasHtml/coachHtml/autoNoteHtml dont il dépend.)
+    const plusLoinHtml =
+      schemasHtml || coachHtml || autoNoteHtml
+        ? seclab(
+            "Pour aller plus loin",
+            lang !== "fr" ? ui("plus_loin", "Pour aller plus loin") : null,
+          )
+        : "";
+
+    // Une seule pose : renderFicheDeck() est rappelée à chaque coche.
+    if (!rendreLeBandeau) rendreLeBandeau = hideHeader();
+
     root.innerHTML = `${FD_STYLE}<div class="fd">
       <div class="fd-hero">
         <div class="fd-topbar">
@@ -1761,22 +1703,11 @@ export async function mount(root, param) {
           <span class="fd-tag"><span class="fd-dot"></span><b>${esc(f.code)} · ${esc(competenceTxt)} · ${esc(ui("monde", "Monde"))} ${esc(String(f.monde))}</b></span>
         </div>
         <h1 class="fd-title fd-gold">${bi(f.titre, tr?.titre)}</h1>
-        <div class="fd-sub">${esc(ui("sub", "Coche tes gestes puis certifie la compétence."))}</div>
-        <div class="fd-xp">
-          <div class="fd-xp-top"><span class="lab">${esc(ui("deck", "Ton deck"))}</span><span class="cnt fd-gold">${count}<small> / ${total} ${esc(ui(total > 1 ? "gestes" : "geste", total > 1 ? "gestes" : "geste"))}</small></span></div>
-          <div class="fd-bar"><div class="fill" style="width:${count ? Math.max(pct, 4) : 0}%"></div></div>
-        </div>
       </div>
 
-      ${autoNoteHtml}
-      ${introHtml}
-      ${quickHtml}
-      ${schemasHtml}
-
+      ${briefHtml}
       ${deckHtml}
-
-      ${coachHtml}
-      ${srcHtml}
+      ${piegeHtml}
 
       <div class="fd-actions">
         <!-- La prévention ne sert qu'AVANT : une fois la compétence acquise,
@@ -1795,6 +1726,15 @@ export async function mount(root, param) {
             : ui("cta", "Certifie la compétence"),
         )}</span></button>
       </div>
+
+      <!-- Sous le bouton : la profondeur. Rien n'a été supprimé, tout ce qui
+           doublonnait avec la liste des gestes est simplement descendu ici,
+           après le chemin principal (lire → se tester). -->
+      ${plusLoinHtml}
+      ${autoNoteHtml}
+      ${schemasHtml}
+      ${coachHtml}
+      ${srcHtml}
     </div>`;
 
     wireFicheDeck(f, flatSteps, flatStepsTR, coach, rtl);
@@ -1828,6 +1768,22 @@ export async function mount(root, param) {
       view = "home";
       render();
     });
+    // Déplier un geste : le détail vit sous le pli, un tap l'ouvre. En JS pur
+    // (pas de <details>) pour garder le médaillon cliquable à côté du titre.
+    // Pas de re-render ici : cocher un geste re-rend la fiche et refermerait
+    // tout, ce qui est le bon comportement (on coche quand on a fini de lire).
+    root.querySelectorAll("[data-ouvre]").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        const zone = document.getElementById(
+          `fd-plus-${btn.getAttribute("data-ouvre")}`,
+        );
+        if (!zone) return;
+        const ouvert = btn.getAttribute("aria-expanded") === "true";
+        btn.setAttribute("aria-expanded", ouvert ? "false" : "true");
+        zone.hidden = ouvert;
+        haptic("select");
+      }),
+    );
     // Cocher / décocher un geste : local, re-render en place (scroll conservé).
     root.querySelectorAll("[data-geste]").forEach((btn) =>
       btn.addEventListener("click", () => {
