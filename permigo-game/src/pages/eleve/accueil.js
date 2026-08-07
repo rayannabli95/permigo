@@ -1598,7 +1598,9 @@ function savePrepCycle(c) {
   }
 }
 function prepHrefFor(code, step) {
-  if (step === 1) return `#/revision-conduite/${code}:quiz`;
+  // « Je me prépare » doit TOUJOURS ouvrir la fiche de révision (retour
+  // Rayan 07/08 : le saut direct au quiz surprenait, l'élève n'a rien lu).
+  // Seule variété gardée : de temps en temps, la mise en situation.
   if (step === 2) return "#/en-situation";
   return `#/revision-conduite/${code}`;
 }
@@ -2179,8 +2181,10 @@ function render({
   // ── Hero « Prépare ta prochaine leçon » (maquette A validée 17/07) ──
   // Toujours le même message : l'élève prépare sa vraie leçon de conduite.
   // Le CTA king garde l'id action-cta-btn (tour guidé + wire inchangés).
-  // La DESTINATION tourne selon le cycle (fiche → questions → situation) :
-  // variété invisible, zéro encombrement du hero.
+  // La DESTINATION est TOUJOURS la fiche, sauf une fois de temps en temps
+  // où le cycle envoie vers la mise en situation pour varier (fix 07/08 :
+  // avant, un des trois clics sautait direct au quiz, sans passer par la
+  // fiche — l'élève se retrouvait face à des questions sur rien).
   // Repli sans fiche (données indisponibles) : le hub Réviser.
   const _heroTitle = prep?.titre || "Prépare ta prochaine leçon";
   const _scene = prepScene();
@@ -2650,8 +2654,8 @@ function wire(
     });
   });
 
-  // CTA king (hero prep) — enregistre le cycle AVANT de naviguer : l'angle
-  // tourne pour la prochaine prep (fiche → questions → situation → questions…)
+  // CTA king (hero prep) — enregistre le cycle AVANT de naviguer : le pas
+  // avance pour la prochaine prep (fiche, fiche, mise en situation, fiche…)
   // et `startedAt` arme le bloc « Revenons sur ta leçon » (~4 h plus tard).
   root.querySelector("#action-cta-btn")?.addEventListener("click", (e) => {
     const href = e.currentTarget.dataset.href;
@@ -2664,8 +2668,8 @@ function wire(
         const step = same ? (cyc.step || 0) % 3 : 0;
         savePrepCycle({
           code: prep.code,
-          // Après la mise en situation (2), on repart sur les questions (1) —
-          // la fiche (0) ne revient que sur un NOUVEAU thème.
+          // Après la mise en situation (2), on repart sur la fiche (1) —
+          // le pas 0 ne revient que sur un NOUVEAU thème.
           step: step === 2 ? 1 : step + 1,
           startedAt: Date.now(),
           hinted: same ? cyc.hinted || false : false,
