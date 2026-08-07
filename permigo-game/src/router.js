@@ -266,11 +266,10 @@ const ROUTES_RETIREES = {
   // dans la voiture le lendemain, et le score quiz parlait du code alors
   // qu'on prépare la conduite.
   examen: "#/parcours",
-  // #/trophees retirée le 06/08/2026 : c'était déjà un alias de la même page
-  // que #/cartes (collection.js) depuis le 30/07. Le paquet vit maintenant
-  // dans le profil élève, et #/trophees n'a jamais porté d'id de compétence
-  // dans aucun flux du code (contrairement à #/cartes/{compId}) — un simple
-  // renvoi vers le profil ne perd donc aucun lien direct existant.
+  // #/trophees retirée le 06/08/2026, puis les trophées EUX-MÊMES le
+  // 07/08/2026 (décision Rayan : « salle des trophées inutile »). Les 31
+  // cartes du profil racontent déjà la progression de conduite. Le renvoi
+  // reste pour les vieilles notifications « trophée débloqué » déjà reçues.
   trophees: "#/profil",
   // #/galerie retirée le 07/08/2026 : ses 2 onglets avaient perdu leur
   // raison d'être. « Trophées » listait tout le catalogue alors que le

@@ -4,9 +4,6 @@
  * Vérifie les états vides actuels :
  *  - composant empty-state (déplacé dans components/common/) : styles injectés
  *    une seule fois
- *  - trophées élève : la galerie « tr2 » n'est JAMAIS vide — les trophées
- *    verrouillés s'affichent en cartes mystère (décision produit : plus
- *    d'écran vide sur cette page)
  *  - mes-élèves enseignant : liste (.me-row) ou état vide (.me-empty), et
  *    « Aucun résultat » quand la recherche ne matche rien
  *
@@ -89,34 +86,6 @@ test.describe("Empty states — composant", () => {
         ).length,
     );
     expect(styleCount).toBe(1);
-  });
-});
-
-test.describe("Trophées élève — jamais d'écran vide", () => {
-  test("la galerie affiche des cartes même sans trophée débloqué (cartes mystère)", async ({
-    page,
-  }) => {
-    await loginAs(page, ELEVE);
-    await goTo(page, "#/trophees");
-
-    // Racine actuelle de la page trophées = .tr2 (refonte galerie)
-    const found = await page
-      .waitForSelector(".tr2", { timeout: 8_000 })
-      .catch(() => null);
-    if (!found) await injectPage(page, "/src/pages/eleve/trophees.js");
-    await page.waitForSelector(".tr2", { timeout: 8_000 });
-
-    // Décision produit : plus d'empty state — la grille rend TOUJOURS le
-    // catalogue complet, les trophées verrouillés en cartes mystère.
-    // Délai large : la grille attend la RPC get_my_achievements (lente
-    // quand toute la suite tourne en parallèle).
-    await page.waitForSelector(".tr2-card", { timeout: 20_000 });
-    const cards = await page.locator(".tr2-card").count();
-    expect(cards).toBeGreaterThan(0);
-
-    // Le compteur héro « X / total » est rendu (pas de « — » résiduel)
-    const countTxt = (await page.locator("#tr2-count").textContent()) || "";
-    expect(countTxt).toMatch(/\d+\s*\/\s*\d+/);
   });
 });
 
