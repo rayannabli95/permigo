@@ -172,13 +172,19 @@ const ITEM_I18N = {
   en: {
     car_citadine: {
       n: "City car",
-      d: "The perfect car to start your licence journey.",
+      d: "Your first car. Nothing fancy but it gets you going.",
     },
-    car_sportive: { n: "Sports car", d: "For those picking up speed." },
-    car_suv: { n: "Prestige SUV", d: "Comfort and style, no compromise." },
+    car_sportive: {
+      n: "Sports car",
+      d: "Chrome rims and a spoiler. It is picking up speed.",
+    },
+    car_suv: {
+      n: "The Furious",
+      d: "Wide body and a light strip on the floor. It stopped smiling.",
+    },
     car_supercar: {
-      n: "Supercar",
-      d: "The ultimate skin. Reserved for road legends.",
+      n: "The Golden One",
+      d: "Solid gold. Flames out the back. The last step.",
     },
     avatar_warrior: {
       n: "The Warrior",
@@ -204,13 +210,19 @@ const ITEM_I18N = {
   ar: {
     car_citadine: {
       n: "سيارة المدينة",
-      d: "السيارة المثالية لبداية موفّقة نحو رخصتك.",
+      d: "سيارتك الأولى. بسيطة لكنها تنطلق بك.",
     },
-    car_sportive: { n: "سيارة رياضية", d: "لمن بدأوا يكتسبون السرعة." },
-    car_suv: { n: "دفع رباعي فاخر", d: "الراحة والأناقة دون أي تنازل." },
+    car_sportive: {
+      n: "سيارة رياضية",
+      d: "جنوط كروم وجناح خلفي. بدأت تكتسب السرعة.",
+    },
+    car_suv: {
+      n: "الغاضبة",
+      d: "هيكل عريض وشريط مضيء على الأرض. لم تعد تبتسم.",
+    },
     car_supercar: {
-      n: "سيارة خارقة",
-      d: "الشكل الأمثل. محجوز لأساطير الطريق.",
+      n: "الذهبية",
+      d: "ذهب خالص. ألسنة لهب من العادم. الدرجة الأخيرة.",
     },
     avatar_warrior: {
       n: "المحارب",
