@@ -35,9 +35,10 @@ const FTW_I18N = {
     lesson_sub:
       "The first 3 are yours for good. The rest of the course opens with your Pass.",
     route_kick: "Discovery mode",
-    route_title: "Here is your whole course",
-    route_sub:
-      "This part opens with your Pass. The full training. Your progress. Your rewards.",
+    route_title: "Your road continues.",
+    route_cta: "Open what's next",
+    route_amount: "€4.99/month",
+    route_price: "3 days money-back · cancel anytime in one click",
     perk0_t: "Training without limits",
     perk0_d: "Questions · lesson sheets · road scenarios",
     perk1_t: "Your progress and your rewards",
@@ -61,8 +62,10 @@ const FTW_I18N = {
     lesson_sub:
       "الدروس الثلاثة الأولى لك إلى الأبد. بقية المسار تُفتح مع باقتك.",
     route_kick: "وضع الاكتشاف",
-    route_title: "هذا مسارك كاملاً",
-    route_sub: "هذا الجزء يُفتح مع باقتك. التدريب الكامل وتقدّمك ومكافآتك.",
+    route_title: "طريقك يتواصل.",
+    route_cta: "افتح ما يلي",
+    route_amount: "€4.99/شهر",
+    route_price: "استرداد خلال 3 أيام · إلغاء بنقرة واحدة",
     perk0_t: "تدريب بلا حدود",
     perk0_d: "أسئلة · دروس · سيناريوهات الطريق",
     perk1_t: "تقدّمك ومكافآتك",
@@ -109,29 +112,38 @@ const COPY = {
     title: "Tu as fini les leçons offertes",
     sub: "Les 3 premières sont à toi pour toujours. La suite du parcours s'ouvre avec ton Pass.",
   },
+  // Le mur qui remplace toute la page /parcours : une scène, pas une fiche
+  // produit (décision Rayan, 08/08 : « fin de démo de jeu », pas de liste de
+  // fonctionnalités). Titre et sous-titre volontairement minimaux, l'image
+  // fait le travail.
   route: {
     kick: "Mode découverte",
     ico: "map",
-    title: "Voilà tout ton parcours",
-    sub: "Cette partie s'ouvre avec ton Pass : l'entraînement complet, ta progression et tes récompenses.",
+    title: "Ta route continue.",
+    sub: "",
   },
 };
 
-// Icônes maison (utils/icons.js) — pas d'emoji : ils changent de dessin d'un
-// téléphone à l'autre, cassent l'alignement en arabe et font « brouillon ».
+// Le rideau de garage grand ouvert (ce que l'élève entrevoit, généré via
+// Higgsfield le 08/08 avec l'accord explicite de Rayan pour CET écran
+// seulement, la règle « zéro asset généré » reste la norme partout ailleurs)
+// puis le même garage rideau presque baissé : monde1nuit.webp, déjà dans le
+// dépôt, aucune génération pour cette seconde image.
+const HERO_OPEN = "/skins/eleve/mur-porte-ouverte.webp";
+const HERO_CLOSED = "/skins/eleve/mur-porte-fermee.webp";
+
+// Avantages listés : uniquement pour les murs sobres (quota/lesson). Le mur
+// « route » cinématique n'en a plus, décision Rayan 08/08.
 const PERKS = [
   [
-    "zap",
     "Entraînement sans limite",
     "Questions, fiches et mises en situation à volonté",
   ],
   [
-    "award",
     "Ta progression + tes récompenses",
     "Compétences, coffres, volants et classement",
   ],
   [
-    "target",
     "Examen blanc & certification",
     "Tout ce qu'il faut pour être prêt le jour J",
   ],
@@ -162,13 +174,11 @@ const STYLE = `<style>
 .ftw-sub{ text-align:center; font-size:14px; font-weight:600; color:#c3bdf0;
   margin:0 auto 22px; max-width:330px; line-height:1.5; }
 .ftw-perks{ display:flex; flex-direction:column; gap:10px; margin-bottom:24px; }
-.ftw-perk{ display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:16px;
-  background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); }
-.ftw-perk .ico{ flex:none; width:34px; height:34px; display:grid; place-items:center; color:#b9a9ff;
-  border-radius:11px; background:rgba(143,123,255,.16); }
-.ftw-perk .tx{ min-width:0; }
-.ftw-perk .tx b{ display:block; font-size:14px; font-weight:800; color:#fff; }
-.ftw-perk .tx span{ display:block; font-size:11.5px; font-weight:600; color:#a99ddb; margin-top:1px; }
+.ftw-perk{ padding:12px 14px 12px 16px; border-radius:16px; border-left:3px solid #f5c451;
+  background:rgba(255,255,255,.05); border-top:1px solid rgba(255,255,255,.1);
+  border-right:1px solid rgba(255,255,255,.1); border-bottom:1px solid rgba(255,255,255,.1); }
+.ftw-perk b{ display:block; font-size:14px; font-weight:800; color:#fff; }
+.ftw-perk span{ display:block; font-size:11.5px; font-weight:600; color:#a99ddb; margin-top:1px; }
 .ftw-unlock{ width:100%; padding:17px; border:0; border-radius:16px; cursor:pointer;
   font:800 16.5px/1 'Archivo',sans-serif; letter-spacing:-.01em; color:#241a45;
   background:linear-gradient(180deg,#ffe9b0,#f0a93f);
@@ -179,11 +189,68 @@ const STYLE = `<style>
   font:700 14px/1 'Archivo',sans-serif; color:#b3aede;
   text-decoration:underline; text-underline-offset:3px; }
 .ftw-note{ text-align:center; font-size:11.5px; font-weight:600; color:#8f86c4; margin:16px 0 0; }
-/* Arabe : le conteneur porte dir="rtl", donc les rangées d'avantages se
-   retournent toutes seules (l'icône passe à droite). On ne redresse à la main
-   que ce que le flux ne retourne pas : l'alignement du texte des rangées. */
-.ftw[dir="rtl"] .ftw-perk .tx{ text-align:right; }
+.ftw-guarantee{ text-align:center; font-size:11.5px; font-weight:600; color:#a99ddb;
+  margin:12px auto 0; max-width:300px; line-height:1.5; }
+/* Arabe : le conteneur porte dir="rtl", le texte s'aligne à droite et le
+   liseré doré (repère visuel, pas une flèche) passe du même côté que le texte. */
+.ftw[dir="rtl"] .ftw-perk{ border-left:1px solid rgba(255,255,255,.1); border-right:3px solid #f5c451; }
+.ftw[dir="rtl"] .ftw-perk b, .ftw[dir="rtl"] .ftw-perk span{ text-align:right; }
 @media (prefers-reduced-motion: reduce){ .ftw-unlock{ transition:none; } }
+
+/* ─── Mur « route » : la scène cinématique ────────────────────────────────
+   La porte est grande ouverte au chargement (on entrevoit les 4 mondes),
+   puis elle se referme sur une fente (état où l'écran se stabilise). Le
+   texte n'apparaît qu'une fois la porte refermée : l'image raconte, le
+   texte ne fait que confirmer. Décision Rayan 08/08 : « fin de démo de jeu
+   vidéo », pas de fiche produit. */
+.ftw-route{ position:relative; overflow:hidden; background:#0d0820; min-height:100dvh;
+  padding:0; display:block; }
+.ftw-cine{ position:absolute; inset:0; }
+.ftw-cine-layer{ position:absolute; inset:0; background-size:cover; background-position:center; }
+.ftw-cine-open{ background-image:url("${HERO_OPEN}");
+  animation: ftw-cine-open-seq 2.4s cubic-bezier(.4,0,.2,1) forwards; }
+.ftw-cine-closed{ background-image:url("${HERO_CLOSED}"); opacity:0;
+  animation: ftw-cine-closed-seq 2.4s cubic-bezier(.4,0,.2,1) forwards; }
+@keyframes ftw-cine-open-seq{
+  0%{ opacity:0; transform:scale(1.05); }
+  12%{ opacity:1; transform:scale(1.05); }
+  58%{ opacity:1; transform:scale(1); }
+  82%{ opacity:0; transform:scale(.985); }
+  100%{ opacity:0; transform:scale(.985); }
+}
+@keyframes ftw-cine-closed-seq{
+  0%{ opacity:0; transform:scale(1.03); }
+  58%{ opacity:0; transform:scale(1.03); }
+  82%{ opacity:1; transform:scale(1); }
+  100%{ opacity:1; transform:scale(1); }
+}
+.ftw-cine-fade{ position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(13,8,32,.1) 0%, rgba(13,8,32,.22) 38%, rgba(13,8,32,.8) 74%, #0d0820 100%); }
+.ftw-route-content{ position:relative; z-index:1; min-height:100dvh;
+  display:flex; flex-direction:column; justify-content:flex-end; align-items:center;
+  gap:22px; padding:0 26px calc(36px + env(safe-area-inset-bottom)); text-align:center; }
+.ftw-route-content .ftw-kick{ margin:0; text-shadow:0 2px 12px rgba(0,0,0,.6); }
+/* Le titre porte tout le poids émotionnel de l'écran : plus grand, plus
+   serré, une ombre portée pour rester lisible quel que soit l'endroit de la
+   photo où il tombe (le rideau n'a pas toujours la même luminosité). */
+.ftw-route-content .ftw-title{ font-size:34px; letter-spacing:-.02em; max-width:280px;
+  margin:-14px 0 0; text-shadow:0 4px 24px rgba(0,0,0,.55); }
+.ftw-route-content .ftw-cta{ display:flex; flex-direction:column; align-items:center;
+  gap:14px; width:100%; }
+.ftw-route-content .ftw-unlock{ max-width:360px; }
+.ftw-route-content .ftw-price{ display:flex; flex-direction:column; gap:3px; }
+.ftw-route-content .ftw-price b{ font:800 15px/1 'Archivo',sans-serif; color:#fff; }
+.ftw-route-content .ftw-price span{ font:600 12px/1.5 'Archivo',sans-serif; color:#9d94c9; }
+.ftw-route-content .ftw-explore{ margin:0; }
+.ftw-reveal{ opacity:0; animation: ftw-reveal .7s cubic-bezier(.16,.84,.44,1) forwards;
+  animation-delay:var(--d,0s); }
+@keyframes ftw-reveal{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:translateY(0); } }
+@media (prefers-reduced-motion: reduce){
+  .ftw-cine-open, .ftw-cine-closed{ animation:none; }
+  .ftw-cine-open{ opacity:0; }
+  .ftw-cine-closed{ opacity:1; }
+  .ftw-reveal{ opacity:1; transform:none; animation:none; }
+}
 </style>`;
 
 /**
@@ -220,25 +287,48 @@ export async function mountFreeTierWall(
       ? `<p class="ftw-note">${esc(discoveryCounterLabel(kind))}</p>`
       : "";
 
-  root.innerHTML = `${STYLE}<div class="ftw"${isAr() ? ' dir="rtl" lang="ar"' : ""}>
-    <div>
-      <div class="ftw-badge" aria-hidden="true">${icon(c.ico, { size: 34, strokeWidth: 2 })}</div>
-      <div class="ftw-kick">${wt(`${ck}_kick`, c.kick)}</div>
-      <h1 class="ftw-title" tabindex="-1">${wt(`${ck}_title`, c.title)}</h1>
-      <p class="ftw-sub">${wt(`${ck}_sub`, c.sub)}</p>
-      <div class="ftw-perks">
-        ${PERKS.map(
-          ([ico, t, s], i) => `<div class="ftw-perk">
-            <span class="ico" aria-hidden="true">${icon(ico, { size: 18, strokeWidth: 2.2 })}</span>
-            <span class="tx"><b>${wt(`perk${i}_t`, t)}</b><span>${wt(`perk${i}_d`, s)}</span></span>
-          </div>`,
-        ).join("")}
-      </div>
-      <button class="ftw-unlock" id="ftw-unlock" type="button">${wt("unlock", "Tout débloquer · 4,99 €/mois")}</button>
-      <button class="ftw-explore" id="ftw-explore" type="button">${wt("explore", "Continuer à explorer")}</button>
-      ${counter}
-    </div>
-  </div>`;
+  // Le mur « route » remplace toute la page /parcours : c'est LUI qui doit
+  // vendre, donc lui seul porte la scène cinématique. Les murs « quota » et
+  // « lesson » gardent le gabarit sobre (ils coupent une action ponctuelle,
+  // pas tout le produit) : icône, sous-titre, avantages listés.
+  const markup =
+    ck === "route"
+      ? `<div class="ftw ftw-route"${isAr() ? ' dir="rtl" lang="ar"' : ""}>
+          <div class="ftw-cine" aria-hidden="true">
+            <div class="ftw-cine-layer ftw-cine-open"></div>
+            <div class="ftw-cine-layer ftw-cine-closed"></div>
+            <div class="ftw-cine-fade"></div>
+          </div>
+          <div class="ftw-route-content">
+            <div class="ftw-kick ftw-reveal" style="--d:1.65s">${wt("route_kick", c.kick)}</div>
+            <h1 class="ftw-title ftw-reveal" style="--d:1.8s" tabindex="-1">${wt("route_title", c.title)}</h1>
+            <div class="ftw-cta ftw-reveal" style="--d:2.15s">
+              <button class="ftw-unlock" id="ftw-unlock" type="button">${wt("route_cta", "Ouvrir la suite")}</button>
+              <p class="ftw-price"><b>${wt("route_amount", "4,99 €/mois")}</b><span>${wt("route_price", "3 jours satisfait ou remboursé · résiliable en un clic")}</span></p>
+              <button class="ftw-explore" id="ftw-explore" type="button">${wt("explore", "Continuer à explorer")}</button>
+            </div>
+          </div>
+        </div>`
+      : `<div class="ftw"${isAr() ? ' dir="rtl" lang="ar"' : ""}>
+          <div>
+            <div class="ftw-badge" aria-hidden="true">${icon(c.ico, { size: 34, strokeWidth: 2 })}</div>
+            <div class="ftw-kick">${wt(`${ck}_kick`, c.kick)}</div>
+            <h1 class="ftw-title" tabindex="-1">${wt(`${ck}_title`, c.title)}</h1>
+            <p class="ftw-sub">${wt(`${ck}_sub`, c.sub)}</p>
+            <div class="ftw-perks">
+              ${PERKS.map(
+                ([t, s], i) => `<div class="ftw-perk">
+                  <b>${wt(`perk${i}_t`, t)}</b><span>${wt(`perk${i}_d`, s)}</span>
+                </div>`,
+              ).join("")}
+            </div>
+            <button class="ftw-unlock" id="ftw-unlock" type="button">${wt("unlock", "Tout débloquer · 4,99 €/mois")}</button>
+            <button class="ftw-explore" id="ftw-explore" type="button">${wt("explore", "Continuer à explorer")}</button>
+            ${counter}
+          </div>
+        </div>`;
+
+  root.innerHTML = `${STYLE}${markup}`;
 
   root.querySelector("#ftw-unlock")?.addEventListener("click", async () => {
     track("freetier.unlock_click", { reason, kind: kind || null });
