@@ -1703,10 +1703,22 @@ export async function mount(root, param) {
     // Un résumé écrit pour la boîte manuelle ne s'affiche pas à un élève que
     // la fiche ne concerne pas : trois lignes fausses en tête de page seraient
     // pires que pas de résumé du tout.
+    // Quand un geste n'a PAS le même sens dans les deux boîtes (le point de
+    // patinage, le passage des rapports), la fiche porte un second jeu de trois
+    // lignes, `resume10sBva`, écrit pour l'automatique. Il prend la place du
+    // premier, et il vaut MÊME sur une fiche hors sujet en auto : c'est
+    // justement là que l'élève n'avait rien à lire (C1f, où l'app lui annonçait
+    // que la fiche ne le concerne pas et le laissait sans résumé).
+    // Boîte inconnue → version manuelle, comme le reste de la page.
+    const resumeAuto =
+      enAuto && Array.isArray(f.resume10sBva) && f.resume10sBva.length
+        ? f.resume10sBva
+        : null;
     const quick =
-      lang === "fr" && !bvaHorsSujet && Array.isArray(f.resume10s)
-        ? f.resume10s
-        : [];
+      lang !== "fr"
+        ? []
+        : resumeAuto ||
+          (!bvaHorsSujet && Array.isArray(f.resume10s) ? f.resume10s : []);
     const quickHtml = quick.length
       ? `<div class="fd-quick">
           <p class="fd-quick-k">${esc(ui("quick_h", "En 10 secondes"))}</p>

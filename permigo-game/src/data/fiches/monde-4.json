@@ -86,9 +86,14 @@
     "monde": 4,
     "competence": "Autonome",
     "resume10s": [
-      "J'accélère en douceur pour garder le moteur bas.",
+      "Je passe mes rapports tôt pour rouler bas en régime.",
       "Je lève le pied tôt et je laisse le frein moteur agir.",
       "Je garde une vitesse stable c'est là que j'économise."
+    ],
+    "resume10sBva": [
+      "J'accélère en douceur la boîte monte les rapports toute seule.",
+      "Je lève le pied tôt et je laisse le frein moteur agir.",
+      "J'évite d'écraser l'accélérateur elle redescend aussitôt."
     ],
     "methode": [
       "Démarre en douceur : pas de coup d'accélérateur au départ.",
@@ -250,7 +255,7 @@
     "competence": "Autonome",
     "resume10s": [
       "Je colle mon disque A à l'arrière dès le permis.",
-      "Je respecte les vitesses réduites du permis probatoire.",
+      "Je roule à 110 sur autoroute · 100 sur voie rapide · 80 hors agglo.",
       "Zéro alcool et je soigne mes six points de départ."
     ],
     "methode": [
