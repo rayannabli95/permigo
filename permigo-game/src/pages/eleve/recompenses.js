@@ -1,24 +1,23 @@
 // ═══════════════════════════════════════════════════════════════
-// Élève — Hub « Récompenses » : 1 porte, 4 salles (nav 5 portes,
+// Élève — Hub « Récompenses » : 1 porte, 2 salles (nav 5 portes,
 // maquette validée Rayan : mockups/nav-hub-recompenses-A.html).
 //
 // Hiérarchie (fidèle à la maquette) :
-//   1. Hero « La Roue » — tour gratuit dispo (ou reviens demain) + pastilles
-//      « à réclamer maintenant » (coffre, trophée) + ligne « gros lot réel »
+//   1. Hero « La Roue » — tour gratuit dispo (ou reviens demain) + pastille
+//      « coffre à ouvrir » + ligne « gros lot réel »
 //      (si le moniteur en a configuré) + « prochain coffre » (série).
-//   2. 4 onglets internes : Boutique · Ma collection · Cartes · Classement
-//      (mêmes mots que la barre des 4 pages — cf. components/eleve/recompenses-tabs.js)
+//   2. 2 onglets internes : Boutique · Classement
+//      (mêmes mots que la barre des pages — cf. components/eleve/recompenses-tabs.js)
 //
 // Réutilisation (ne duplique PAS la grosse logique métier des pages dédiées) :
 //   - Boutique → résumé fidèle + « Tout voir » vers #/boutique (achat,
 //     équipement, modales détaillées restent SUR cette page, pas ici).
-//   - Ma collection → résumé autonome (données ci-dessous), « Tout voir »
-//     pointe vers #/profil depuis le 07/08/2026 : #/galerie est supprimée
-//     (cf. FLOWS.md), rien à équiper là bas (le fond de carte permis se
-//     choisit tout seul selon la progression, cf. getPermisBg).
-//   - Trophées → résumé fidèle + « Tout voir » vers #/profil (06/08/2026 :
-//     le paquet de cartes REMC et les 2 trophées de conduite retenus vivent
-//     désormais sur le profil élève, #/trophees a été retirée, cf. FLOWS.md).
+//   - Ma collection → RETIRÉE le 07/08/2026 (décision Rayan : « en doublon
+//     avec la page profil »). Il n'y restait que les 3 fonds de permis, qui
+//     ne s'équipent pas à la main (getPermisBg les choisit selon la
+//     progression) et que la carte de permis du profil montre déjà.
+//   - Trophées → RETIRÉS le 07/08/2026 (décision Rayan : « salle des
+//     trophées inutile »). Les 31 cartes du profil racontent la progression.
 //   - Ligue → le composant partagé `league-hero.js` (déjà utilisé par
 //     accueil.js) est monté tel quel : zéro duplication, données 100% réelles.
 //
@@ -30,9 +29,7 @@
 // Données 100% réelles, repli gracieux si indisponible :
 //   - Roue         : roue_daily_spins (tour du jour) + get_moniteur_rewards
 //   - Coffres      : get_my_chests (game-state.js)
-//   - Trophées     : get_my_achievements + data/achievements.js CATALOG
 //   - Boutique     : get_items_catalog
-//   - Collection   : mêmes données que trophées + paliers fonds permis
 //   - Ligue        : get_eleve_leaderboard (compétences certifiées, /31)
 //     (via league-hero.js, identique à accueil.js)
 //
@@ -59,19 +56,12 @@ import { getMyChests } from "@/utils/game-state.js";
 import { getStreak } from "@/services/streak.js";
 import { medallion } from "@/utils/medallions.js";
 import { volantImg } from "@/utils/volant.js";
-import { ASSETS } from "@/utils/assets.js";
-import { CATALOG, RARITY_COLOR } from "@/data/achievements.js";
 import {
   mountLeagueHero,
   LEAGUE_HERO_CSS,
 } from "@/components/eleve/league-hero.js";
 import { getLang } from "@/utils/lang.js";
-import {
-  trophyTitle,
-  trophyBody,
-  itemName,
-  rarityLabel,
-} from "@/data/rewards-i18n.js";
+import { itemName, rarityLabel } from "@/data/rewards-i18n.js";
 
 // ── i18n de la COQUE (EN/AR) — dict local (convention coque, cf. profil #555).
 // rt(key, fr) = traduit-ou-français esc() intégré ; rtR = brut (interpolation).
@@ -99,7 +89,6 @@ const REC_I18N = {
     claim_chest_t: "Chest to open",
     claim_chest_many: "chests ready",
     claim_chest_one: "Ready to open",
-    claim_troph_t: "Trophy to claim",
     cap1_b: "1 real big prize max per quarter",
     cap1_rest: "displayed, honest odds",
     cap2_next: "Next chest:",
@@ -109,8 +98,6 @@ const REC_I18N = {
       "Next chest: <b>{days}-day streak</b>. {remaining} {day_word} to go",
     tabs_aria: "Rewards rooms",
     tab_shop: "Shop",
-    tab_col: "My collection",
-    tab_troph: "Cards",
     tab_league: "Leaderboard",
     shop_unavailable: "“Shop” unavailable.",
     open_shop: "Open the shop →",
@@ -124,20 +111,6 @@ const REC_I18N = {
     skins_s: "your car and your licence",
     owned: "Owned",
     see_all_shop: "See the whole shop →",
-    tag_bg: "Licence bg",
-    locked: "Locked",
-    unlocked: "Unlocked",
-    empty_col: "Validate your first skill to unlock a trophy.",
-    see_all_col: "See my whole collection →",
-    new: "New",
-    see_troph: "See my trophies",
-    my_troph: "My trophies",
-    of_unlocked_mid: "of",
-    of_unlocked_end: "unlocked",
-    see_all_troph: "See all my trophies →",
-    tier_mesh: "“Mesh” background",
-    tier_route: "“Road” background",
-    tier_holographic: "“Holographic” background",
   },
   ar: {
     title: "المكافآت",
@@ -160,7 +133,6 @@ const REC_I18N = {
     claim_chest_t: "صندوق للفتح",
     claim_chest_many: "صناديق جاهزة",
     claim_chest_one: "جاهز للفتح",
-    claim_troph_t: "كأس للاستلام",
     cap1_b: "جائزة كبرى حقيقية واحدة كحد أقصى كل ثلاثة أشهر",
     cap1_rest: "نِسَب معلنة وصادقة",
     cap2_next: "الصندوق التالي:",
@@ -170,8 +142,6 @@ const REC_I18N = {
       "الصندوق التالي: <b>سلسلة {days} أيام</b>. بقي {remaining} {day_word}",
     tabs_aria: "غرف المكافآت",
     tab_shop: "المتجر",
-    tab_col: "مجموعتي",
-    tab_troph: "البطاقات",
     tab_league: "الترتيب",
     shop_unavailable: "«المتجر» غير متاح.",
     open_shop: "افتح المتجر ←",
@@ -185,20 +155,6 @@ const REC_I18N = {
     skins_s: "سيارتك ورخصتك",
     owned: "مِلكك",
     see_all_shop: "عرض كل المتجر ←",
-    tag_bg: "خلفية رخصة",
-    locked: "مقفلة",
-    unlocked: "مفتوحة",
-    empty_col: "تحقّق من مهارتك الأولى لفتح كأس.",
-    see_all_col: "عرض كل مجموعتي ←",
-    new: "جديد",
-    see_troph: "عرض كؤوسي",
-    my_troph: "كؤوسي",
-    of_unlocked_mid: "من",
-    of_unlocked_end: "مفتوحة",
-    see_all_troph: "عرض كل كؤوسي ←",
-    tier_mesh: "خلفية «شبكي»",
-    tier_route: "خلفية «الطريق»",
-    tier_holographic: "خلفية «هولوغرافي»",
   },
 };
 function rtR(key, fr, vars) {
@@ -224,16 +180,6 @@ function rrtl(html) {
 // ─── Petites constantes locales (dupliquées volontairement — même convention
 // que reviser.js : pas de dépendance page→page pour 2-3 valeurs) ──────────
 const STREAK_MILESTONES = [7, 14, 30];
-const PERMIS_TIERS = [
-  { key: "mesh", min: 0, nom: "Fond « Mesh »", img: ASSETS.permisBg?.mesh },
-  { key: "route", min: 10, nom: "Fond « Route »", img: ASSETS.permisBg?.route },
-  {
-    key: "holographic",
-    min: 20,
-    nom: "Fond « Holographique »",
-    img: ASSETS.permisBg?.holographic,
-  },
-];
 const RARITY_ORDER = { legendaire: 3, epique: 2, rare: 1, commun: 0 };
 const RARITY_LABEL_SHOP = {
   commun: "Commun",
@@ -241,31 +187,10 @@ const RARITY_LABEL_SHOP = {
   epique: "Épique",
   legendaire: "Légendaire",
 };
-const LS_TROPH_SEEN = "pg-troph-seen";
-
 function nextStreakMilestone(days) {
   const next = STREAK_MILESTONES.find((n) => days < n);
   if (!next) return null;
   return { days: next, remaining: next - days };
-}
-
-// Trophées débloqués mais jamais vus sur #/trophees — LECTURE SEULE (on ne
-// touche jamais le ledger localStorage ici, c'est trophees.js qui le tient).
-function getFreshTrophies(unlockedDefs) {
-  let raw;
-  try {
-    raw = localStorage.getItem(LS_TROPH_SEEN);
-  } catch {
-    return [];
-  }
-  if (raw == null) return []; // jamais visité #/trophees → pas de faux "nouveau"
-  let seen;
-  try {
-    seen = new Set(JSON.parse(raw));
-  } catch {
-    seen = new Set();
-  }
-  return unlockedDefs.filter((d) => !seen.has(d.key));
 }
 
 function byPrestige(a, b) {
@@ -273,16 +198,6 @@ function byPrestige(a, b) {
     (RARITY_ORDER[b.rarity] ?? 0) - (RARITY_ORDER[a.rarity] ?? 0) ||
     (b.cost_gemmes ?? 0) - (a.cost_gemmes ?? 0)
   );
-}
-
-function badgeMarkup(def, size) {
-  if (def.image) {
-    return `<img src="${escAttr(def.image)}" alt="" loading="lazy" width="${size}" height="${size}"
-      onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'"
-      style="width:${size}px;height:${size}px;object-fit:contain">
-      <span style="display:none">${medallion("trophee", "gold", { size })}</span>`;
-  }
-  return medallion("trophee", "gold", { size });
 }
 
 // ─── STYLE (scopé .rec-*, tokens theme-aware) ───────────────────
@@ -462,33 +377,6 @@ const STYLE = `<style>
 .rec-item-r { font-size: 9.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; margin-top: 2px; color: var(--mu2); }
 .rec-item-p { display: inline-flex; align-items: center; gap: 5px; margin-top: 6px; font: 800 12px/1 'Archivo', system-ui, sans-serif; color: var(--gold-ink); }
 .rec-item-owned { display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; font-size: 10px; font-weight: 800; color: var(--grdk); }
-.rec-tag {
-  position: absolute; left: 8px; top: 8px; z-index: 2; padding: 3px 9px; border-radius: 999px;
-  font: 600 8.5px/1 'Archivo', sans-serif; letter-spacing: .06em; text-transform: uppercase; color: #fff;
-  background: linear-gradient(180deg, var(--a), var(--adk)); box-shadow: 0 2px 6px rgba(83,72,232,.4);
-}
-.rec-tag.gold { color: #5e430f; background: linear-gradient(180deg, var(--gold-1), var(--gold-2)); box-shadow: 0 2px 6px rgba(201,125,18,.35); }
-
-/* Collection head */
-.rec-col-head {
-  display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding: 12px 14px; border-radius: 18px;
-  background: var(--su); border: 1px solid var(--bo);
-}
-.rec-col-hb { flex: 1; min-width: 0; }
-.rec-col-ht { font: 800 14px/1 'Archivo', system-ui, sans-serif; color: var(--ink); }
-.rec-col-track { margin-top: 6px; height: 8px; border-radius: 5px; background: var(--bg2); overflow: hidden; }
-.rec-col-track i { display: block; height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--adk), var(--a)); }
-.rec-col-hn { flex: none; font: 800 13px/1 'Archivo', system-ui, sans-serif; color: var(--a-txt); white-space: nowrap; }
-
-/* Trophées grid (dot rareté réutilise RARITY_COLOR d'achievements.js) */
-.rec-tro-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
-.rec-tro { position: relative; border-radius: 16px; padding: 10px 8px 9px; text-align: center; background: var(--su); border: 1px solid var(--bo); }
-.rec-tro img, .rec-tro .pg-med { width: 48px; height: 48px; object-fit: contain; }
-.rec-tro-t { font: 700 10.5px/1.15 'Archivo', system-ui, sans-serif; margin-top: 5px; color: var(--ink); }
-.rec-tro.locked img { filter: grayscale(1) opacity(.4); }
-.rec-tro.locked .rec-tro-t { color: var(--mu2); }
-.rec-tro-dot { position: absolute; top: 7px; right: 7px; width: 8px; height: 8px; border-radius: 50%; }
-
 .rec-note { text-align: center; color: var(--mu2); font: 600 10.5px/1.4 'Archivo', sans-serif; margin: 6px 4px 4px; }
 .rec-empty { text-align: center; padding: 28px 16px; color: var(--mu); font: 600 12.5px/1.5 'Archivo', sans-serif; }
 
@@ -512,20 +400,13 @@ function skeleton() {
   return `${STYLE}<div class="rec">
     <h1 class="rec-title" tabindex="-1">${rt("title", "Récompenses")}</h1>
     <div class="rec-hero" style="min-height:260px;background:var(--bg2);border-color:var(--bo)"></div>
-    <div class="rec-tabs">${[...Array(4)].map(() => `<div class="rec-tab" style="opacity:.4"></div>`).join("")}</div>
+    <div class="rec-tabs">${[...Array(2)].map(() => `<div class="rec-tab" style="opacity:.4"></div>`).join("")}</div>
   </div>`;
 }
 
 // ─── Hero « La Roue » ─────────────────────────────────────────
 function renderHero(ctx) {
-  const {
-    spinAvailable,
-    anyBig,
-    moniteurPrenom,
-    coffresToOpen,
-    freshTrophies,
-    streak,
-  } = ctx;
+  const { spinAvailable, anyBig, moniteurPrenom, coffresToOpen, streak } = ctx;
 
   const lang = getLang();
   // Un seul « roue » fort dans le bloc : le CTA (cf. ctaLabel). L'eyebrow
@@ -565,18 +446,6 @@ function renderHero(ctx) {
         <span class="rec-claim-n">${coffresToOpen}</span>
       </a>`);
   }
-  if (freshTrophies.length > 0) {
-    claims.push(`
-      <a class="rec-claim" href="#/profil" data-track="claim_trophee">
-        ${medallion("trophee", "violet", { size: 34 })}
-        <span class="rec-claim-b">
-          <span class="rec-claim-t">${rt("claim_troph_t", "Trophée à réclamer")}</span>
-          <span class="rec-claim-s">${rrtl(esc(trophyTitle(freshTrophies[0].key, freshTrophies[0].title, lang)))}</span>
-        </span>
-        <span class="rec-claim-n">${freshTrophies.length}</span>
-      </a>`);
-  }
-
   const capLine1 = anyBig
     ? `<div class="rec-hero-cap">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="14" height="14"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
@@ -703,118 +572,6 @@ function renderShopItem(it) {
   </a>`;
 }
 
-// ─── Onglet Ma collection (résumé autonome, #/galerie supprimée) ──
-function renderCollectionPanel(ctx) {
-  const { unlockedDefs, lockedDefs, unlockedPermisCount, validatedCount } = ctx;
-  const lang = getLang();
-  const totalCollect = CATALOG.length + PERMIS_TIERS.length;
-  const doneCollect = unlockedDefs.length + unlockedPermisCount;
-  const pct = totalCollect ? Math.round((100 * doneCollect) / totalCollect) : 0;
-
-  // 4 vignettes de prévisualisation : trophées débloqués d'abord, puis un
-  // aperçu verrouillé (trophée ou fond de permis) pour donner envie.
-  const tiles = [];
-  for (const t of unlockedDefs.slice(0, 2)) {
-    tiles.push({
-      img: t.image,
-      name: trophyTitle(t.key, t.title, lang),
-      locked: false,
-      tag: null,
-    });
-  }
-  for (const t of lockedDefs.slice(0, 2)) {
-    tiles.push({
-      img: t.image,
-      name: trophyTitle(t.key, t.title, lang),
-      locked: true,
-      tag: null,
-    });
-  }
-  for (const p of PERMIS_TIERS) {
-    if (tiles.length >= 4) break;
-    tiles.push({
-      img: p.img,
-      name: rtR(`tier_${p.key}`, p.nom),
-      locked: validatedCount < p.min,
-      tag: rtR("tag_bg", "Fond permis"),
-    });
-  }
-
-  return `
-    <div class="rec-col-head">
-      ${medallion("diamant", "violet", { size: 38 })}
-      <div class="rec-col-hb">
-        <div class="rec-col-ht">${rt("tab_col", "Ma collection")}</div>
-        <div class="rec-col-track" aria-hidden="true"><i style="width:${pct}%"></i></div>
-      </div>
-      <div class="rec-col-hn">${doneCollect} / ${totalCollect}</div>
-    </div>
-    ${
-      tiles.length
-        ? `<div class="rec-grid">${tiles.map((t) => renderCollectionTile(t)).join("")}</div>`
-        : `<div class="rec-empty">${rtD("empty_col", "Valide ta première compétence pour débloquer un trophée.")}</div>`
-    }
-    <a class="rec-tout-voir" href="#/profil" data-track="tout_voir_collection">${rt("see_all_col", "Tout voir ma collection →")}</a>`;
-}
-
-function renderCollectionTile(t) {
-  return `
-  <a class="rec-item" href="#/profil" data-track="collection_item">
-    ${t.tag ? `<span class="rec-tag${t.locked ? "" : " gold"}">${esc(t.tag)}</span>` : ""}
-    <div class="rec-item-vis${t.locked ? " locked" : ""}">
-      <img class="pad" src="${escAttr(t.img || "")}" alt="" loading="lazy" onerror="this.style.display='none'">
-    </div>
-    <div class="rec-item-b">
-      <div class="rec-item-t">${t.locked ? "???" : rrtl(esc(t.name))}</div>
-      <div class="rec-item-r">${t.locked ? rt("locked", "Verrouillé") : rt("unlocked", "Débloqué")}</div>
-    </div>
-  </a>`;
-}
-
-// ─── Onglet Trophées (résumé trophees.js) ─────────────────────
-function renderTropheesPanel(ctx) {
-  const { unlockedDefs, lockedDefs, freshTrophies } = ctx;
-  const lang = getLang();
-  const total = CATALOG.length;
-
-  const claimHtml = freshTrophies.length
-    ? `
-    <a class="rec-gold-card" href="#/profil" data-track="trophee_claim_card">
-      <span class="rec-gold-k">${rt("new", "Nouveau")}</span>
-      <div class="rec-star-row">
-        <span style="width:56px;height:56px;flex:none;display:flex;align-items:center;justify-content:center">${badgeMarkup(freshTrophies[0], 56)}</span>
-        <div class="rec-star-txt">
-          <div class="rec-star-t">${rrtl(esc(trophyTitle(freshTrophies[0].key, freshTrophies[0].title, lang)))}</div>
-          <div class="rec-star-s">${rrtl(esc(trophyBody(freshTrophies[0].key, freshTrophies[0].body || "", lang)))}</div>
-        </div>
-      </div>
-      <div class="rec-star-foot"><span></span><span class="rec-go-shop">${rt("see_troph", "Voir mes trophées")}</span></div>
-    </a>`
-    : "";
-
-  const preview = [
-    ...unlockedDefs.slice(0, 4),
-    ...lockedDefs.slice(0, 6 - Math.min(4, unlockedDefs.length)),
-  ].slice(0, 6);
-  const gridHtml = preview.length
-    ? `<div class="rec-sec-h"><h2>${rt("my_troph", "Mes trophées")}</h2><span>${unlockedDefs.length} ${rt("of_unlocked_mid", "sur")} ${total} ${rt("of_unlocked_end", "débloqués")}</span></div>
-       <div class="rec-tro-grid">${preview.map((t) => renderTrophyTile(t, ctx.unlockedSet.has(t.key))).join("")}</div>`
-    : "";
-
-  return `${claimHtml}${gridHtml}
-    <a class="rec-tout-voir" href="#/profil" data-track="tout_voir_trophees">${rt("see_all_troph", "Tout voir mes trophées →")}</a>`;
-}
-
-function renderTrophyTile(t, unlocked) {
-  const color = RARITY_COLOR[t.rarity] || "var(--mu2)";
-  return `
-  <a class="rec-tro${unlocked ? "" : " locked"}" href="#/profil" data-track="trophee_item">
-    ${unlocked ? `<span class="rec-tro-dot" style="background:${color}" aria-hidden="true"></span>` : ""}
-    ${badgeMarkup(t, 48)}
-    <div class="rec-tro-t">${unlocked ? rrtl(esc(trophyTitle(t.key, t.title, getLang()))) : "???"}</div>
-  </a>`;
-}
-
 // ─── Mount ────────────────────────────────────────────────────
 export async function mount(root) {
   const me = getCurUser();
@@ -828,38 +585,19 @@ export async function mount(root) {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   })();
 
-  const [
-    spinRes,
-    rewardsRes,
-    chestsRes,
-    achRes,
-    validRes,
-    itemsRes,
-    condRes,
-    selfValRes,
-    streakRes,
-  ] = await Promise.allSettled([
-    sb
-      .from("roue_daily_spins")
-      .select("volants")
-      .eq("spin_date", today)
-      .maybeSingle(),
-    sb.rpc("get_moniteur_rewards"),
-    getMyChests(),
-    sb.rpc("get_my_achievements"),
-    sb
-      .from("validations")
-      .select("competence_id")
-      .eq("eleve_id", me.id)
-      .eq("statut", "acquis"),
-    sb.rpc("get_items_catalog"),
-    sb.rpc("get_eleve_leaderboard", { p_scope: "ecole", p_limit: 50 }),
-    // Validation autonome (élève solo, valider-seul.js) : table séparée de
-    // `validations`, fusionnée pour ne pas laisser le palier permis bloqué.
-    // Même pattern que accueil.js.
-    sb.from("self_validations").select("competence_id").eq("eleve_id", me.id),
-    getStreak(),
-  ]);
+  const [spinRes, rewardsRes, chestsRes, itemsRes, condRes, streakRes] =
+    await Promise.allSettled([
+      sb
+        .from("roue_daily_spins")
+        .select("volants")
+        .eq("spin_date", today)
+        .maybeSingle(),
+      sb.rpc("get_moniteur_rewards"),
+      getMyChests(),
+      sb.rpc("get_items_catalog"),
+      sb.rpc("get_eleve_leaderboard", { p_scope: "ecole", p_limit: 50 }),
+      getStreak(),
+    ]);
 
   const resultError = (result) =>
     result.status === "rejected"
@@ -868,11 +606,8 @@ export async function mount(root) {
   const supabaseResults = [
     ["roue", spinRes],
     ["lots moniteur", rewardsRes],
-    ["trophées", achRes],
-    ["validations", validRes],
     ["catalogue", itemsRes],
     ["classement", condRes],
-    ["auto-validations", selfValRes],
   ];
   const dataErrors = supabaseResults
     .map(([label, result]) => [label, resultError(result)])
@@ -908,30 +643,6 @@ export async function mount(root) {
   const chests = chestsRes.status === "fulfilled" ? chestsRes.value || [] : [];
   const coffresToOpen = chests.filter((c) => !c.opened_at).length;
 
-  // ── Trophées / achievements ──
-  const unlockedList =
-    achRes.status === "fulfilled" && !achRes.value?.error
-      ? achRes.value.data || []
-      : [];
-  const unlockedSet = new Set(unlockedList.map((u) => u.achievement_key));
-  const unlockedDefs = CATALOG.filter((t) => unlockedSet.has(t.key));
-  const lockedDefs = CATALOG.filter((t) => !unlockedSet.has(t.key));
-  const freshTrophies = getFreshTrophies(unlockedDefs);
-
-  // Compétences acquises (moniteur ou auto-validées), dédupliquées.
-  const validOk = !resultError(validRes);
-  const selfValOk = !resultError(selfValRes);
-  const _compSet = new Set(
-    validOk ? (validRes.value?.data || []).map((v) => v.competence_id) : [],
-  );
-  if (selfValOk) {
-    for (const s of selfValRes.value?.data || []) _compSet.add(s.competence_id);
-  }
-  const validatedCount = _compSet.size;
-  const unlockedPermisCount = PERMIS_TIERS.filter(
-    (t) => validatedCount >= t.min,
-  ).length;
-
   // ── Boutique ──
   const itemsFailed = itemsRes.status === "rejected" || !!itemsRes.value?.error;
   const allItems =
@@ -945,15 +656,9 @@ export async function mount(root) {
     anyBig,
     moniteurPrenom,
     coffresToOpen,
-    freshTrophies,
     streak,
     itemsFailed,
     shopItems,
-    unlockedDefs,
-    lockedDefs,
-    unlockedSet,
-    unlockedPermisCount,
-    validatedCount,
   };
 
   root.innerHTML = `${STYLE}
@@ -969,14 +674,10 @@ export async function mount(root) {
 
     <div class="rec-tabs" role="tablist" aria-label="${rt("tabs_aria", "Salles Récompenses")}">
       <button class="rec-tab on" role="tab" aria-selected="true" data-p="boutique">${rt("tab_shop", "Boutique")}</button>
-      <button class="rec-tab" role="tab" aria-selected="false" data-p="collection">${rt("tab_col", "Ma collection")}</button>
-      <button class="rec-tab" role="tab" aria-selected="false" data-p="trophees">${rt("tab_troph", "Cartes")}</button>
       <button class="rec-tab" role="tab" aria-selected="false" data-p="ligue">${rt("tab_league", "Classement")}</button>
     </div>
 
     <div class="rec-panel on" id="rec-p-boutique" role="tabpanel">${renderBoutiquePanel(ctx)}</div>
-    <div class="rec-panel" id="rec-p-collection" role="tabpanel">${renderCollectionPanel(ctx)}</div>
-    <div class="rec-panel" id="rec-p-trophees" role="tabpanel">${renderTropheesPanel(ctx)}</div>
     <div class="rec-panel" id="rec-p-ligue" role="tabpanel"><div id="rec-ligue-slot"></div></div>
   </div>`;
 
