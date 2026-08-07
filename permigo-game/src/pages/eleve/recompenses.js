@@ -83,16 +83,16 @@ const REC_I18N = {
     day_plur: "days",
     kicker_big: "Real big prizes",
     kicker: "Daily reward",
-    t_spin_html: "Your <em>free spin</em> is waiting",
-    t_back: "Come back tomorrow to play again",
+    t_spin_html: "Your <em>daily chest</em> is waiting",
+    t_back: "Come back tomorrow for another one",
     sub_std: "Steering wheels · avatars · titles to win every day.",
     sub_big_head: "Avatars · backgrounds · titles… and sometimes a",
     sub_big_gift: "real gift",
     sub_big_from: "from",
     sub_big_full:
       "Avatars · backgrounds · titles… and sometimes a <b>real gift</b> from {name}.",
-    cta_spin: "Spin the wheel",
-    cta_view: "See the Wheel",
+    cta_spin: "Open your chest",
+    cta_view: "See your chest",
     claim_chest_t: "Chest to open",
     claim_chest_many: "chests ready",
     claim_chest_one: "Ready to open",
@@ -144,16 +144,16 @@ const REC_I18N = {
     day_plur: "أيام",
     kicker_big: "جوائز كبرى حقيقية",
     kicker: "مكافأة اليوم",
-    t_spin_html: "دورتك <em>المجانية</em> بانتظارك",
-    t_back: "عد غدًا للعب من جديد",
+    t_spin_html: "<em>صندوقك اليومي</em> بانتظارك",
+    t_back: "عد غدًا لفتح صندوق آخر",
     sub_std: "مقاود وصور رمزية وألقاب تربحها كل يوم.",
     sub_big_head: "صور رمزية وخلفيات وألقاب… وأحيانًا",
     sub_big_gift: "هدية حقيقية",
     sub_big_from: "من",
     sub_big_full:
       "صور رمزية وخلفيات وألقاب… وأحيانًا <b>هدية حقيقية</b> من {name}.",
-    cta_spin: "أدر العجلة",
-    cta_view: "عرض العجلة",
+    cta_spin: "افتح صندوقك",
+    cta_view: "اعرض صندوقك",
     claim_chest_t: "صندوق للفتح",
     claim_chest_many: "صناديق جاهزة",
     claim_chest_one: "جاهز للفتح",
@@ -334,27 +334,19 @@ const STYLE = `<style>
 .rec-hero-s { margin-top: 6px; font-size: 12.5px; font-weight: 700; color: var(--mu); line-height: 1.4; }
 .rec-hero-s b { color: var(--ink); }
 
-.rec-wheel-wrap { position: relative; width: 88px; height: 88px; flex: none; }
-.rec-wheel-ptr {
-  position: absolute; left: 50%; top: -4px; transform: translateX(-50%); z-index: 3;
-  width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent;
-  border-top: 11px solid var(--gold-3); filter: drop-shadow(0 2px 2px rgba(122,74,5,.4));
+/* La roue a été retirée le 06/08/2026 : annoncer une roue puis ouvrir un
+   coffre ne tenait pas debout. Même image que la page, en petit. */
+.rec-wheel-wrap { position: relative; width: 88px; height: 88px; flex: none; display: grid; place-items: center; }
+.rec-wheel-wrap::before {
+  content: ""; position: absolute; inset: -6px; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(247,179,43,.34), transparent 72%);
 }
-.rec-wheel {
-  position: absolute; inset: 0; border-radius: 50%;
-  background: conic-gradient(var(--gold-2) 0 45deg, #54a0ff 45deg 90deg, #b06bff 90deg 135deg, #b7b0d4 135deg 180deg,
-    var(--go-2) 180deg 225deg, #b06bff 225deg 270deg, #b7b0d4 270deg 315deg, #54a0ff 315deg 360deg);
-  border: 4px solid var(--gold-1);
-  box-shadow: 0 5px 0 var(--gold-deep), 0 12px 22px -8px rgba(201,125,18,.5), inset 0 2px 6px rgba(255,255,255,.35);
-  animation: recSpin 16s linear infinite;
+.rec-chest {
+  position: relative; width: 84px; z-index: 2;
+  filter: drop-shadow(0 8px 10px rgba(122,74,5,.35));
+  animation: recBob 3.4s ease-in-out infinite;
 }
-@keyframes recSpin { to { transform: rotate(360deg); } }
-.rec-wheel-hub {
-  position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); z-index: 2;
-  width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center;
-  background: radial-gradient(circle at 36% 30%, #fff7da, var(--gold-2) 62%, var(--gold-3));
-  border: 2px solid #fff5cf; box-shadow: 0 3px 6px rgba(122,74,5,.4);
-}
+@keyframes recBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 
 .rec-hero-cta {
   position: relative; z-index: 2; margin-top: 14px; display: flex; align-items: center; justify-content: center; gap: 9px;
@@ -507,7 +499,7 @@ const STYLE = `<style>
 #rec-ligue-slot .lgh { margin: 0; }
 
 @media (prefers-reduced-motion: reduce) {
-  .rec-wheel { animation: none; }
+  .rec-chest { animation: none; }
   .rec-panel.on { animation: none; }
 }
 </style>`;
@@ -539,8 +531,8 @@ function renderHero(ctx) {
     ? rtR("kicker_big", "Gros lots réels")
     : rtR("kicker", "Récompense du jour");
   const title = spinAvailable
-    ? rrtl(rtR("t_spin_html", `Ton <em>tour gratuit</em> t'attend`))
-    : rtD("t_back", `Reviens demain pour rejouer`);
+    ? rrtl(rtR("t_spin_html", `Ton <em>coffre du jour</em> t'attend`))
+    : rtD("t_back", `Reviens demain pour en ouvrir un autre`);
   const sub =
     anyBig && moniteurPrenom
       ? rrtl(
@@ -555,8 +547,8 @@ function renderHero(ctx) {
           `Des volants · des avatars · des titres à gagner chaque jour.`,
         );
   const ctaLabel = spinAvailable
-    ? rtR("cta_spin", "Lancer la roue")
-    : rtR("cta_view", "Voir la Roue");
+    ? rtR("cta_spin", "Ouvrir ton coffre")
+    : rtR("cta_view", "Voir ton coffre");
 
   const claims = [];
   if (coffresToOpen > 0) {
@@ -625,14 +617,17 @@ function renderHero(ctx) {
         <div class="rec-hero-s">${sub}</div>
       </div>
       <div class="rec-wheel-wrap" aria-hidden="true">
-        <span class="rec-wheel-ptr"></span>
-        <span class="rec-wheel"></span>
-        <span class="rec-wheel-hub">${volantImg(20)}</span>
+        <img class="rec-chest" src="/skins/chest-closed.png" alt="" draggable="false" />
       </div>
     </div>
 
     <a class="rec-hero-cta" href="#/roue" id="rec-roue-cta">
-      <svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.52.85l10.5-6.5a1 1 0 0 0 0-1.7L9.52 4.65A1 1 0 0 0 8 5.5Z"/></svg>
+      <!-- Cadenas qui s'ouvre, pas la flèche « lecture » de l'ancienne roue :
+           on n'lance plus rien, on ouvre. -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="4" y="11" width="16" height="10" rx="2.5"/>
+        <path d="M8 11V7a4 4 0 0 1 7.5-2"/>
+      </svg>
       ${esc(ctaLabel)}
     </a>
 

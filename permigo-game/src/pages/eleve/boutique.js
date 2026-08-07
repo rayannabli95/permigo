@@ -53,11 +53,11 @@ const BO_I18N = {
     sec_persos_sub: "Your avatar next to your name",
     sec_fonds: "Licence backgrounds",
     sec_fonds_sub: "Your virtual licence card",
-    roue_aria: "Open the Wheel",
-    roue_t: "The Wheel",
+    roue_aria: "Open your daily chest",
+    roue_t: "Your daily chest",
     roue_s_solo: "Skins · titles · <b>rewards</b> to unlock.",
     roue_s: "Skins · titles · <b>real big prizes</b> from your instructor.",
-    roue_go: "Free spin!",
+    roue_go: "Free!",
     hd_title: "Shop",
     hd_small: "Your style on the leaderboard",
     balance_lab: "Your balance:",
@@ -125,11 +125,11 @@ const BO_I18N = {
     sec_persos_sub: "صورتك الرمزية بجانب اسمك",
     sec_fonds: "خلفيات الرخصة",
     sec_fonds_sub: "بطاقة رخصتك الافتراضية",
-    roue_aria: "افتح العجلة",
-    roue_t: "العجلة",
+    roue_aria: "افتح صندوقك اليومي",
+    roue_t: "صندوقك اليومي",
     roue_s_solo: "أشكال وألقاب و<b>مكافآت</b> للفتح.",
     roue_s: "أشكال وألقاب و<b>جوائز كبرى حقيقية</b> من مدرّبك.",
-    roue_go: "دورة مجانية!",
+    roue_go: "مجاني!",
     hd_title: "المتجر",
     hd_small: "أسلوبك في التصنيف",
     balance_lab: "رصيدك:",
@@ -446,13 +446,14 @@ const STYLE = `<style>
   border-radius: 14px; background: var(--su); border: 1px solid var(--bo);
   text-decoration: none; color: inherit;
 }
+/* La roue a été retirée le 06/08/2026 : c'est un coffre qui s'ouvre au bout
+   du lien, annoncer une roue n'avait plus de sens. */
 .bo3-roue-w {
-  width: 32px; height: 32px; flex: none; border-radius: 50%;
-  background: conic-gradient(var(--acc) 0 90deg, var(--acc-lt) 90deg 180deg, var(--acc-dk) 180deg 270deg, color-mix(in srgb, var(--acc) 30%, #fff) 270deg 360deg);
-  border: 2px solid var(--su); box-shadow: 0 0 0 1.5px var(--bo);
-  animation: bo3Spin 13s linear infinite;
+  width: 38px; height: 38px; flex: none; object-fit: contain;
+  filter: drop-shadow(0 3px 5px rgba(20,16,60,.28));
+  animation: bo3Bob 3.4s ease-in-out infinite;
 }
-@keyframes bo3Spin { to { transform: rotate(360deg) } }
+@keyframes bo3Bob { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-3px) } }
 .bo3-roue-t { flex: 1; min-width: 0; }
 .bo3-roue-t b { display: block; font: 700 11px/1 var(--f-d); letter-spacing: .12em; text-transform: uppercase; color: var(--ink); }
 .bo3-roue-t span { display: block; margin-top: 4px; font: 500 11.5px/1.3 var(--f-b); color: var(--mu); }
@@ -744,10 +745,10 @@ export async function mount(root) {
       <div class="bo3-grid" id="bo3-grid">
         ${current.items.map((it, idx) => renderCard(it, gemmes, idx)).join("")}
       </div>
-      <a class="bo3-roue" href="#/roue" aria-label="${escAttr(btR("roue_aria", "Ouvrir la Roue"))}">
-        <span class="bo3-roue-w" aria-hidden="true"></span>
+      <a class="bo3-roue" href="#/roue" aria-label="${escAttr(btR("roue_aria", "Ouvrir ton coffre du jour"))}">
+        <img class="bo3-roue-w" src="/skins/chest-closed.png" alt="" aria-hidden="true" draggable="false" />
         <span class="bo3-roue-t">
-          <b>${bt("roue_t", "La Roue")}</b>
+          <b>${bt("roue_t", "Ton coffre du jour")}</b>
           <span>${brtl(
             solo
               ? btR(
@@ -760,7 +761,7 @@ export async function mount(root) {
                 ),
           )}</span>
         </span>
-        <span class="bo3-roue-g">${bt("roue_go", "Tour gratuit !")}</span>
+        <span class="bo3-roue-g">${bt("roue_go", "Offert !")}</span>
       </a>
       <div class="bo3-note">${bt("note", "Les skins sont 100 % cosmétiques : du style et jamais d’avantage.")}</div>`;
 

@@ -295,7 +295,7 @@ const ROUTE_TITLES = {
   classement: "Classement",
   galerie: "Ma collection",
   recompenses: "Récompenses",
-  roue: "La Roue",
+  roue: "Ton coffre du jour",
   "valider-seul": "Certifier une compétence",
   "exam-blanc": "Examen blanc du code",
   "revision-conduite": "Révision conduite",

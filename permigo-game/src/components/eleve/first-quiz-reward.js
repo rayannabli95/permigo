@@ -1,7 +1,8 @@
 // ═══════════════════════════════════════════════════════════════
 // Récompense « 1er quiz réussi » — overlay plein écran (Arène nuit-violet
-// + or). Le tout premier quiz réussi débloque un TOUR DE ROUE offert :
-//   - « Tourner la roue » → pose un drapeau session + va sur #/roue.
+// + or). Le tout premier quiz réussi débloque un COFFRE offert :
+//   - « Ouvrir le coffre » → pose un drapeau session + va sur #/roue
+//     (la route garde son nom, la roue elle-même a été retirée le 06/08/2026).
 //     L'install (A2HS) est pitchée JUSTE APRÈS le tour, sur la page roue
 //     (meilleur moment de valeur — cf. roue.js maybeInstallAfterSpin()).
 //   - « Plus tard » → ferme et pitche l'install ici (l'élève a quand même
@@ -32,11 +33,12 @@ const CSS = `
     animation:fqrRise .5s .12s cubic-bezier(.34,1.4,.64,1) both;}
   .fqr-glow{position:absolute;top:-40px;right:-30px;width:120px;height:120px;border-radius:50%;
     background:radial-gradient(circle,rgba(255,206,77,.35),transparent 70%);}
-  .fqr-wheel{width:64px;height:64px;flex-shrink:0;border-radius:50%;position:relative;border:3px solid #fff;
-    box-shadow:0 6px 16px -4px rgba(0,0,0,.5);
-    background:conic-gradient(#ff6b8b 0 45deg,#ffce4d 45deg 90deg,#6be2a0 90deg 135deg,#7c4dff 135deg 180deg,#ff6b8b 180deg 225deg,#ffce4d 225deg 270deg,#6be2a0 270deg 315deg,#7c4dff 315deg 360deg);
-    animation:fqrSpin 6s linear infinite;}
-  .fqr-wheel::after{content:"";position:absolute;top:50%;left:50%;width:16px;height:16px;border-radius:50%;background:#fff;transform:translate(-50%,-50%);}
+  /* La roue a ete retiree le 06/08/2026 : c'est un coffre qui attend au bout
+     du bouton, lui montrer une roue ici trompait sur ce qui allait s'ouvrir. */
+  .fqr-chest{width:72px;flex-shrink:0;position:relative;
+    filter:drop-shadow(0 6px 12px rgba(0,0,0,.5));
+    animation:fqrBob 3.4s ease-in-out infinite;}
+  @keyframes fqrBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
   .fqr-rbody{position:relative;flex:1;text-align:left;}
   .fqr-tag{font:800 11px/1 'Archivo',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#ffce4d;}
   .fqr-rt{font:700 16.5px/1.2 'Archivo',sans-serif;color:#fff;margin-top:3px;}
@@ -52,10 +54,9 @@ const CSS = `
   .fqr-later:active{color:#fff;}
   @keyframes fqrPop{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:scale(1)}}
   @keyframes fqrRise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-  @keyframes fqrSpin{to{transform:rotate(360deg)}}
   @keyframes fqrTwinkle{0%,100%{opacity:.25;transform:scale(.85)}50%{opacity:.7;transform:scale(1)}}
   @media (prefers-reduced-motion:reduce){
-    .fqr,.fqr-badge,.fqr-reward,.fqr-wheel,.fqr-star{animation:none!important;transition:opacity .2s ease!important;}
+    .fqr,.fqr-badge,.fqr-reward,.fqr-chest,.fqr-star{animation:none!important;transition:opacity .2s ease!important;}
   }
 `;
 
@@ -79,7 +80,7 @@ export function showFirstQuizReward({ me = null, scorePct = null } = {}) {
   ov.className = "fqr";
   ov.setAttribute("role", "dialog");
   ov.setAttribute("aria-modal", "true");
-  ov.setAttribute("aria-label", "Premier quiz réussi. Un tour de roue offert");
+  ov.setAttribute("aria-label", "Premier quiz réussi. Un coffre offert");
   ov.innerHTML = `
     <style>${CSS}</style>
     <div class="fqr-stars" aria-hidden="true">
@@ -90,17 +91,17 @@ export function showFirstQuizReward({ me = null, scorePct = null } = {}) {
     </div>
     <img class="fqr-badge" src="/skins/mascot-celebrate.png" alt="" />
     <h2 class="fqr-title">Premier quiz réussi&nbsp;! 🎉</h2>
-    <p class="fqr-sub">Tu débloques un tour de roue offert.</p>
+    <p class="fqr-sub">Tu débloques un coffre offert.</p>
     <div class="fqr-reward">
       <div class="fqr-glow" aria-hidden="true"></div>
-      <div class="fqr-wheel" aria-hidden="true"></div>
+      <img class="fqr-chest" src="/skins/chest-closed.png" alt="" aria-hidden="true" draggable="false" />
       <div class="fqr-rbody">
         <div class="fqr-tag">Cadeau débloqué</div>
-        <div class="fqr-rt">Un tour de roue offert</div>
+        <div class="fqr-rt">Un coffre offert</div>
         <div class="fqr-rs">De vrais volants à gagner 🪙</div>
       </div>
     </div>
-    <button class="fqr-cta" id="fqr-go" type="button">🎡 Tourner la roue</button>
+    <button class="fqr-cta" id="fqr-go" type="button">🎁 Ouvrir le coffre</button>
     <button class="fqr-later" id="fqr-later" type="button">Plus tard</button>
   `;
   document.body.appendChild(ov);
@@ -136,7 +137,7 @@ export function showFirstQuizReward({ me = null, scorePct = null } = {}) {
   function later() {
     track("first_quiz_reward.later");
     close();
-    // L'élève zappe la roue mais vient de réussir un quiz → moment de valeur.
+    // L'élève zappe le coffre mais vient de réussir un quiz → moment de valeur.
     import("@/components/common/install-nudge.js")
       .then((m) => m.promptInstallAtValueMoment(me, "eleve_first_quiz_skip"))
       .catch(() => {});
