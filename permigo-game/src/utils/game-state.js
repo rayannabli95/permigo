@@ -15,6 +15,7 @@
  */
 import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
+import { purgeAccountLocalCache } from "@/utils/account-cache.js";
 
 const XP_PER_COMP = 100;
 const XP_PER_LEVEL = 500;
@@ -147,26 +148,17 @@ function _scheduleSave() {
 }
 
 /**
- * Vide tout le cache local de progression (série, gemmes, coffres, objets,
- * équipement). À appeler à la déconnexion et avant toute inscription, pour
- * qu'un nouveau compte ne parte jamais avec les données du précédent.
+ * Vide tout le cache local lié à un compte : progression (série, gemmes,
+ * coffres, objets, équipement) ET tout le reste listé dans
+ * `account-cache.js` (quotas, jalons "déjà vu", préférences d'achat...).
+ * À appeler à la déconnexion et avant toute inscription, pour qu'un nouveau
+ * compte ne parte jamais avec les données du précédent. Point d'entrée
+ * unique : n'ajoute jamais un `localStorage.removeItem()` isolé ailleurs
+ * dans l'app pour ce genre de purge, complète `ACCOUNT_SCOPED_KEYS` à la
+ * place (sinon on recrée exactement le bug que ce module corrige).
  */
 export function clearLocalGameState() {
-  [
-    LS_STREAK_DATE,
-    LS_STREAK_COUNT,
-    LS_CHESTS_OPENED,
-    LS_CHESTS_DB_CACHE,
-    LS_GEMMES,
-    LS_OWNED,
-    LS_EQUIPPED,
-    LS_EQUIPPED_ASSETS,
-    LS_LAST_USER,
-  ].forEach((k) => {
-    try {
-      localStorage.removeItem(k);
-    } catch {}
-  });
+  purgeAccountLocalCache();
   _userId = null;
 }
 

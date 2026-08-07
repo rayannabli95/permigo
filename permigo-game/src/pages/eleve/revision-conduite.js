@@ -134,7 +134,7 @@ const RVC_I18N = {
     quiz_passed: "Quiz passed",
     cert_prompt: "Ready to certify this skill?",
     cert_prompt_body:
-      "You have just reviewed “{title}”. Certify it to move it forward in {product}. Five questions confirm you have acquired it.",
+      "You have just reviewed “{title}”. Certify it to move it forward in {product}.",
     certify: "Certify this skill",
     later: "Later",
   },
@@ -179,7 +179,7 @@ const RVC_I18N = {
     quiz_passed: "نجحت في الاختبار",
     cert_prompt: "هل أنت مستعد لاعتماد هذه المهارة؟",
     cert_prompt_body:
-      "لقد راجعت للتو « {title} ». اعتمدها لتتقدم في « {product} ». وخمسة أسئلة تؤكد أنك أتقنتها.",
+      "لقد راجعت للتو « {title} ». اعتمدها لتتقدم في « {product} ».",
     certify: "اعتماد هذه المهارة",
     later: "لاحقاً",
   },
@@ -2204,7 +2204,7 @@ export async function mount(root, param) {
         <div class="pont-med">${BOUCLIER}</div>
         <span class="pont-kick">${rvcText("quiz_passed", "Quiz réussi")}</span>
         <h1 class="pont-ttl">${rvcText("cert_prompt", "Prêt à certifier cette compétence ?")}</h1>
-        <p class="pont-p">${rvcRich("cert_prompt_body", "Tu viens de réviser « {title} ». Certifie-la pour la faire avancer dans {product}. Cinq questions confirment que c'est acquis.", { title: titre, product: rvcT("my_licence", "Mon permis") })}</p>
+        <p class="pont-p">${rvcRich("cert_prompt_body", "Tu viens de réviser « {title} ». Certifie-la pour la faire avancer dans {product}.", { title: titre, product: rvcT("my_licence", "Mon permis") })}</p>
         <button class="pont-cta" data-certify type="button">${rvcText("certify", "Certifier cette compétence")}</button>
         <button class="pont-ghost" data-continue type="button">${rvcText("later", "Plus tard")}</button>
       </div>`;

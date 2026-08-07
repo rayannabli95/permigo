@@ -22,6 +22,16 @@ import { recordCompetenceAnswer } from "@/utils/weak-points.js";
 import { chargerBoite } from "@/utils/transmission.js";
 import { setBoiteVisuels } from "@/components/eleve/quiz-visuals.js";
 
+// Garde-fou : un seul overlay de quiz à la fois. `lancerQuiz()` est le SEUL
+// point d'entrée (valider-seul.js, quiz.js, notif-listener.js) — sans ça,
+// une notif push peut ouvrir un 2e quiz par-dessus un premier déjà en cours
+// (notif-listener.js a son propre flag local, mais qui ignore un quiz ouvert
+// à la main ailleurs). Deux overlays superposés se disputaient aussi la même
+// instance audio partagée (bug corrigé le même jour dans sound.js) — fermer
+// l'un coupait la musique de l'autre, encore ouvert. Ici, le 2e appel est
+// simplement refusé (même contrat que « pas de questions » : `null`).
+let _overlayOpen = false;
+
 /**
  * Va chercher la banque de questions.
  *
@@ -74,6 +84,18 @@ export async function lancerQuiz({
   nbQuestions,
   onComplete,
 }) {
+  if (_overlayOpen) {
+    console.warn("[quiz] déjà un quiz ouvert, 2e appel ignoré", {
+      competenceId,
+      type,
+    });
+    return null;
+  }
+  // Posé tout de suite, pas seulement à l'ouverture de l'overlay : entre ici
+  // et `document.body.appendChild(overlay)` plus bas, plusieurs `await`
+  // rendent la main à l'event loop — un 2e appel pourrait sinon passer le
+  // test ci-dessus avant que le premier n'ait eu le temps de poser le flag.
+  _overlayOpen = true;
   const lang = getLang();
   // La boîte de l'élève écarte les questions qui ne s'adressent pas à elle :
   // on ne demande pas l'embrayage à quelqu'un qui n'en a pas (audit 01/08).
@@ -111,6 +133,7 @@ export async function lancerQuiz({
       const { toast } = await import("@/components/common/toast.js");
       toast("Ce quiz n'est pas encore prêt. Réessaie plus tard.", "info", 4000);
     } catch {}
+    _overlayOpen = false;
     return null;
   }
 
@@ -144,6 +167,7 @@ export async function lancerQuiz({
     stopMusic();
     stopSpeaking();
     overlay.remove();
+    _overlayOpen = false;
   };
   window.addEventListener("hashchange", fermerSiPartiAilleurs, {
     once: true,
@@ -274,6 +298,7 @@ export async function lancerQuiz({
       // déclenche sur la PROCHAINE navigation, ailleurs dans l'app.
       window.removeEventListener("hashchange", fermerSiPartiAilleurs);
       overlay.remove();
+      _overlayOpen = false;
       onComplete?.(score, total, answers);
     });
 
