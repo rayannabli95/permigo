@@ -40,6 +40,8 @@
 import { getLang, applyLang } from "@/utils/lang.js";
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
+import { startPassCheckout } from "@/services/billing.js";
+import { fbTrack } from "@/services/meta-pixel.js";
 import { AVIS } from "@/data/avis-eleves.js";
 import { mountDemoSituation } from "@/components/public/demo-situation.js";
 import {
@@ -94,6 +96,8 @@ const STR = {
     priceOnly: "seulement",
     priceSub: "Par mois. Sans engagement.",
     priceBtn: "Tout débloquer",
+    btnWait: "Ouverture du paiement…",
+    err: "Le paiement n'a pas pu démarrer. Réessaie.",
     foot: "Paiement sécurisé par Stripe · Remboursé sous 3 jours",
     legal: "Mentions légales",
   },
@@ -117,6 +121,8 @@ const STR = {
     priceOnly: "only",
     priceSub: "Per month. No commitment.",
     priceBtn: "Unlock everything",
+    btnWait: "Opening payment…",
+    err: "Payment could not start. Please try again.",
     foot: "Secure payment by Stripe · Money back within 3 days",
     legal: "Legal notice",
   },
@@ -140,6 +146,8 @@ const STR = {
     priceOnly: "فقط",
     priceSub: "شهرياً. بلا التزام.",
     priceBtn: "افتح كل شيء",
+    btnWait: "جارٍ فتح الدفع…",
+    err: "تعذّر بدء الدفع. حاول مرة أخرى.",
     foot: "دفع آمن عبر Stripe · استرداد خلال 3 أيام",
     legal: "الإشعارات القانونية",
   },
@@ -330,6 +338,12 @@ const STYLE = `<style>
   }
   @media (prefers-reduced-motion: reduce) { .ps-demo-cta.ps-pulse { animation: none; } }
 
+  .ps-err {
+    font: 700 13px/1.4 'Archivo', sans-serif; color: #ffb4a8;
+    text-align: center; margin: 10px 0 0; display: none;
+  }
+  .ps-err.on { display: block; }
+
   .ps-foot {
     text-align: center; padding: 34px 0 6px;
     font: 600 12px/1.7 'Archivo', sans-serif; color: var(--ink-dim);
@@ -416,6 +430,7 @@ export async function mount(root) {
           <span class="ps-price-only">${L.priceOnly}</span>
           <p class="ps-price-sub">${L.priceSub}</p>
           <button class="ps-price-btn" id="ps-buy" type="button">${L.priceBtn}</button>
+          <p class="ps-err" id="ps-err">${L.err}</p>
         </div>
       </section>
 
@@ -429,11 +444,38 @@ export async function mount(root) {
     track("simple.free_click", { lang });
     location.hash = "#/rejoindre?solo=1";
   });
-  // Le circuit Stripe vit dans #/pass tant que cette page est en comparaison :
-  // on ne duplique pas un paiement qui marche.
-  root.querySelector("#ps-buy")?.addEventListener("click", () => {
-    track("simple.buy_click", { lang });
-    location.hash = "#/pass";
+  // ── Le paiement ──
+  // ⚠️ Stripe REVIENT sur #/pass?checkout=success : c'est écrit en dur dans
+  // l'edge function pass-checkout (success_url/cancel_url), donc côté serveur
+  // et déjà déployé. On ne le change pas d'ici, et #/pass reste routée pour
+  // afficher l'écran de retour. Le jour où on veut le retour sur cette page,
+  // c'est l'edge function qu'il faut redéployer, pas ce fichier.
+  // Un clic = une session. On fige le bouton le temps de la redirection,
+  // sinon un double-tap sur mobile ouvre deux sessions de paiement.
+  const buy = root.querySelector("#ps-buy");
+  const err = root.querySelector("#ps-err");
+  buy?.addEventListener("click", async () => {
+    track("simple.checkout_click", { lang });
+    fbTrack("InitiateCheckout", {
+      content_name: "mensuel",
+      currency: "EUR",
+      value: 4.99,
+    });
+    err?.classList.remove("on");
+    buy.disabled = true;
+    const avant = buy.textContent;
+    buy.textContent = L.btnWait;
+    try {
+      await startPassCheckout("mensuel");
+      // Succès = redirection vers Stripe : on ne repasse jamais ici.
+    } catch (e) {
+      console.error("[simple] checkout", e);
+      track("simple.checkout_error", { lang });
+      buy.disabled = false;
+      buy.textContent = avant;
+      err?.classList.add("on");
+      err?.scrollIntoView({ block: "center", behavior: "smooth" });
+    }
   });
   root.querySelector("#ps-login")?.addEventListener("click", () => {
     location.hash = "#/login";
