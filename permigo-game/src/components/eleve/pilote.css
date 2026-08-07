@@ -356,6 +356,30 @@ body.mp-open #header-bar {
   flex: 1;
 }
 
+/* Les trois modes qui n'ont qu'une scène et une consigne.
+   Mesuré le 06/08/2026 sur 390×844 : le contenu s'arrêtait à 460 px et
+   laissait 380 px de noir en bas, sans défilement possible, soit près de la
+   moitié de l'écran. On rend la hauteur libre (`flex: none`) et on la
+   distribue en deux marges automatiques, une au-dessus du titre et une sous
+   la consigne : c'est le GROUPE titre + scène + consigne qui se centre, d'un
+   bloc. Centrer la scène seule l'aurait décollée de sa question, avec un trou
+   au milieu de l'écran.
+   ⚠️ Rien ne bouge quand le contenu remplit déjà la colonne : une marge
+   `auto` ne prend que l'espace LIBRE. Les modes bavards (« Décider »,
+   « Ordonner ») gardent donc leur `flex: 1` et leur mise en page. */
+.mp-play:has(.mp-spot-interaction) .mp-play-title,
+.mp-play:has(.mp-placement-interaction) .mp-play-title,
+.mp-play:has(.mp-balayage-interaction) .mp-play-title {
+  margin-top: auto;
+}
+
+.mp-spot-interaction,
+.mp-placement-interaction,
+.mp-balayage-interaction {
+  flex: none;
+  margin-bottom: auto;
+}
+
 /* Colonne, pour que la liste des réponses puisse prendre la place restante. */
 .mp-choice-interaction {
   display: flex;
