@@ -476,12 +476,14 @@ async function routePublic(app) {
   } else if (hash.startsWith("#/avis-depart")) {
     m = await import("@/pages/public/avis-depart.js");
   } else if (hash.startsWith("#/simple")) {
-    // Version épurée de la page de vente, montée À CÔTÉ de #/pass pour que
-    // Rayan compare les deux en vrai (07/08/2026). Volontairement liée de
-    // nulle part : on y va par l'adresse. Quand le choix est fait, l'une des
-    // deux disparaît et cette branche avec.
     m = await import("@/pages/public/pass-simple.js");
   } else if (hash.startsWith("#/pass")) {
+    // ⚠️ #/pass N'EST PLUS la page de vente par défaut (Rayan a tranché pour
+    // la version épurée, 07/08/2026), mais elle reste routée et elle DOIT le
+    // rester : Stripe renvoie l'acheteur sur #/pass?checkout=success, écrit
+    // en dur dans l'edge function pass-checkout, côté serveur et déjà
+    // déployée. Supprimer cette branche = l'écran de retour de paiement
+    // disparaît et l'acheteur atterrit nulle part.
     m = await import("@/pages/public/pass.js");
   } else if (
     hash === "#/pro" ||
@@ -501,9 +503,10 @@ async function routePublic(app) {
     // "#/?utm=…", fragments d'auth "#access_token=…") restent sur la landing.
     m = await import("@/pages/common/introuvable.js");
   } else {
-    // Défaut visiteur = page de vente Pass Permis (l'ancienne landing
-    // moniteur est supprimée — décision Rayan 16/07/2026).
-    m = await import("@/pages/public/pass.js");
+    // Défaut visiteur = la page de vente épurée (décision Rayan 07/08/2026,
+    // après comparaison des deux en vrai). L'ancienne, #/pass, reste
+    // joignable par son adresse et sert l'écran de retour de paiement.
+    m = await import("@/pages/public/pass-simple.js");
   }
   // Démonte la page précédente (ex: rAF d'animation du fond de login) avant de
   // monter la nouvelle page publique.
