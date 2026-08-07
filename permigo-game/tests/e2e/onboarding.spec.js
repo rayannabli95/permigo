@@ -1,10 +1,10 @@
 /**
- * E2E — Onboarding élève « une page » (src/pages/onboarding/index.js)
+ * E2E — Onboarding élève « écrans mascotte » (src/pages/onboarding/index.js)
  *
- * L'ancien modal 3 slides (components/onboarding-modal.js, showOnboarding)
- * a été REMPLACÉ par une page verticale unique, zéro swipe :
- *   hero « Salut {prenom} » + sections avatar/couleur, rappels, A2HS,
- *   barre de progression remplie au scroll, CTA collé en bas, bouton Passer.
+ * Tour en étapes plein écran, une seule décision par écran : accueil,
+ * « Ton style » (avatar + couleur), rappels du soir, A2HS (conditionnelle).
+ * Chaque étape a sa propre pose de mascotte. La barre de progression avance
+ * à chaque étape, plus au scroll (l'ancienne page unique a été remplacée).
  *
  * Stratégie :
  *  - Le gating réel (profiles.first_value_action_at IS NULL + flag
@@ -74,27 +74,21 @@ async function mountOnboarding(page) {
   await page.waitForSelector(".ob", { timeout: 10_000 });
 }
 
-test.describe("Onboarding élève — page unique", () => {
-  test("la page se monte : hero, sections numérotées, CTA et Passer", async ({
+test.describe("Onboarding élève — écrans mascotte", () => {
+  test("la page se monte : étape d'accueil, CTA et Passer", async ({
     page,
   }) => {
     await loginAsEleve(page);
     await mountOnboarding(page);
 
     await expect(page.locator(".ob")).toBeVisible();
-    // Hero personnalisé
-    await expect(page.locator("#ob-h1")).toBeVisible();
-    await expect(page.locator("#ob-h1")).toContainText(/Salut/);
-    // Au moins 2 sections (avatar + rappels ; A2HS conditionnelle)
-    expect(await page.locator(".ob-section").count()).toBeGreaterThanOrEqual(2);
-    // CTA principal. Le bouton « Passer », lui, est CONDITIONNEL : il n'est
-    // pas rendu quand la date de naissance manque, l'identité étant
-    // obligatoire (cf. onboarding/index.js). On vérifie donc sa présence
-    // seulement quand il existe, au lieu de l'exiger toujours.
+    // Étape d'accueil affichée en premier
+    await expect(page.locator("#ob-h1-intro")).toBeVisible();
+    await expect(page.locator("#ob-h1-intro")).toContainText(/Salut/);
+    // Au moins 3 étapes (accueil + style + rappels ; A2HS conditionnelle)
+    expect(await page.locator(".ob-scr").count()).toBeGreaterThanOrEqual(3);
     await expect(page.locator("#ob-cta")).toBeVisible();
-    if (await page.locator("#ob-skip").count()) {
-      await expect(page.locator("#ob-skip")).toBeVisible();
-    }
+    await expect(page.locator("#ob-skip")).toBeVisible();
     // Barre de progression accessible
     await expect(page.locator(".ob-prog")).toHaveAttribute(
       "role",
@@ -102,11 +96,32 @@ test.describe("Onboarding élève — page unique", () => {
     );
   });
 
+  test("« Continuer » avance d'une étape à la fois et la progression grimpe", async ({
+    page,
+  }) => {
+    await loginAsEleve(page);
+    await mountOnboarding(page);
+
+    const before = await page.locator(".ob-prog").getAttribute("aria-valuenow");
+
+    await page.locator("#ob-cta").evaluate((el) => el.click());
+
+    await expect(page.locator('.ob-scr[data-key="avatar"]')).toBeVisible();
+    await expect(page.locator('.ob-scr[data-key="intro"]')).toBeHidden();
+
+    const after = await page.locator(".ob-prog").getAttribute("aria-valuenow");
+    expect(parseInt(after, 10)).toBeGreaterThan(parseInt(before || "0", 10));
+  });
+
   test("choisir un avatar met à jour la sélection (radiogroup)", async ({
     page,
   }) => {
     await loginAsEleve(page);
     await mountOnboarding(page);
+
+    // Avancer jusqu'à l'étape « Ton style »
+    await page.locator("#ob-cta").evaluate((el) => el.click());
+    await expect(page.locator('.ob-scr[data-key="avatar"]')).toBeVisible();
 
     const avatars = page.locator("#ob-av-grid .ob-av");
     const count = await avatars.count();
@@ -123,24 +138,21 @@ test.describe("Onboarding élève — page unique", () => {
     ).toBe(1);
   });
 
-  test("la barre de progression se remplit au scroll", async ({ page }) => {
+  test("parcourir toutes les étapes amène la progression à 100 %", async ({
+    page,
+  }) => {
     await loginAsEleve(page);
     await mountOnboarding(page);
 
-    const before = await page.locator(".ob-prog").getAttribute("aria-valuenow");
+    const total = await page.locator(".ob-scr").count();
+    // S'arrête sur la DERNIÈRE étape (sans la finir : total - 1 clics).
+    for (let i = 0; i < total - 1; i++) {
+      await page.locator("#ob-cta").evaluate((el) => el.click());
+      await page.waitForTimeout(80);
+    }
 
-    // Scroller le conteneur interne jusqu'en bas
-    await page.evaluate(() => {
-      const el = document.querySelector("#ob-scroll");
-      el.scrollTop = el.scrollHeight;
-      el.dispatchEvent(new Event("scroll"));
-    });
-    await page.waitForTimeout(300);
-
-    const after = await page.locator(".ob-prog").getAttribute("aria-valuenow");
-    expect(parseInt(after, 10)).toBeGreaterThan(parseInt(before || "0", 10));
-    // En bas de page → 100 %
-    expect(parseInt(after, 10)).toBe(100);
+    const pct = await page.locator(".ob-prog").getAttribute("aria-valuenow");
+    expect(parseInt(pct, 10)).toBe(100);
   });
 
   test("« Passer » termine l'onboarding : flag posé + retour à l'accueil", async ({
@@ -149,14 +161,6 @@ test.describe("Onboarding élève — page unique", () => {
     await loginAsEleve(page);
     await blockFinishWrites(page);
     await mountOnboarding(page);
-
-    // « Passer » n'existe pas quand la date de naissance manque : l'identité
-    // est obligatoire (cf. onboarding/index.js). Sans le bouton, il n'y a rien
-    // à tester ici — on le dit au lieu d'échouer sur un élément absent.
-    test.skip(
-      (await page.locator("#ob-skip").count()) === 0,
-      "Compte de test sans date de naissance → « Passer » n'est pas rendu (identité obligatoire)",
-    );
 
     await page.locator("#ob-skip").evaluate((el) => el.click());
 
