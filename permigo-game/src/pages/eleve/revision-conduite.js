@@ -352,6 +352,58 @@ function useGrouped(methode, groups) {
 // tronqué. Ne s'applique qu'au FRANÇAIS (cf. appel dans card()) : la
 // ponctuation d'une traduction n'a aucune raison de suivre la même
 // structure que la source.
+/**
+ * Une ligne de détail commence par une majuscule. Le découpage coupe après un
+ * deux-points, et ce qui suit démarre presque toujours en minuscule dans la
+ * donnée source : « pas de zigzag. », « avec tes rétros, vérifie l'écart… ».
+ * Affiché tel quel, ça se lit comme un bout de phrase tombé de nulle part.
+ * On ne touche pas à un mot déjà capitalisé ni à un chiffre.
+ */
+function majusculeEnTete(ligne) {
+  const s = String(ligne || "").trim();
+  if (!s) return s;
+  const premier = s[0];
+  return premier === premier.toLocaleUpperCase("fr")
+    ? s
+    : premier.toLocaleUpperCase("fr") + s.slice(1);
+}
+
+/**
+ * Une énumération devient une ligne par élément.
+ * « rien sous les roues, pneus pas à plat, feux et plaques propres » se lit
+ * mieux en trois lignes qu'en une phrase à virgules. On ne coupe QUE si c'est
+ * vraiment une liste : au moins trois morceaux, tous courts, aucun qui
+ * ressemble à une phrase complète. Sinon on laisse la phrase entière, parce
+ * que « Sur sol mouillé, freiner prend deux fois plus de distance » coupée en
+ * deux ne veut plus rien dire.
+ */
+function couperEnumeration(ligne) {
+  const s = String(ligne || "").trim();
+  if (!s) return [];
+  // Le point-virgule est un vrai séparateur : on coupe toujours dessus.
+  const parPointVirgule = s
+    .split(/\s*;\s*/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+  if (parPointVirgule.length > 1)
+    return parPointVirgule.flatMap(couperEnumeration);
+
+  const morceaux = s
+    .replace(/[.!?]$/, "")
+    .split(/\s*,\s*/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+  const liste =
+    morceaux.length >= 3 &&
+    morceaux.every((p) => p.length <= 40) &&
+    !morceaux.some((p) =>
+      /\b(et|puis|donc|car|mais|si|quand)\b.*\b(tu|je|on|il|elle)\b/i.test(p),
+    );
+  // Pas de point final sur un élément de liste : « Feux et plaques propres. »
+  // au bout de trois lignes courtes ne sert à rien et pique l'œil.
+  return liste ? morceaux : [s];
+}
+
 function splitStepCard(raw) {
   let text = String(raw || "").trim();
   if (!text) return null;
@@ -367,7 +419,12 @@ function splitStepCard(raw) {
   });
   if (/[()]/.test(text)) return null;
   text = text
-    .replace(/\s+([.,:;])/g, "$1")
+    // Le point et la virgule se collent au mot. Les deux-points et le
+    // point-virgule prennent une espace AVANT en français : les coller
+    // donnait « Un repère répandu: elle arrive… », qui se lit mal et fait
+    // faute. On la remet, y compris quand la source ne l'avait pas.
+    .replace(/\s+([.,])/g, "$1")
+    .replace(/\s*([:;])\s*/g, " $1 ")
     .replace(/\s{2,}/g, " ")
     .trim();
   if (!text) return null;
@@ -409,7 +466,9 @@ function splitStepCard(raw) {
         .map((s) => s.trim())
         .filter(Boolean)
     : [];
-  const detailFinal = detail.length ? detail : rest ? [rest] : [];
+  const detailFinal = (detail.length ? detail : rest ? [rest] : [])
+    .flatMap(couperEnumeration)
+    .map(majusculeEnTete);
 
   const aside = asides.length ? asides.join(" · ") : null;
 
