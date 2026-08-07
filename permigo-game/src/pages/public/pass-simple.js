@@ -327,16 +327,12 @@ const STYLE = `<style>
   }
   .ps-price-btn:active { transform: translateY(3px); box-shadow: inset 0 2.5px 0 rgba(255,255,255,.35), 0 1px 0 var(--in-dk); }
 
-  /* La scène jouable, juste sous le titre. Le bouton qui la suit est celui
-     qui compte : on le propose au moment où le visiteur vient de réussir. */
+  /* La scène jouable, juste sous le titre. ⚠️ PAS de bouton en dessous : il
+     répétait mot pour mot celui du premier écran, à un demi-écran d'écart.
+     Le même mot deux fois ne se lit pas comme deux occasions, ça se lit comme
+     un doublon. La porte gratuite reste celle du hero, et la scène referme
+     elle-même la boucle par sa ligne de renfort. */
   .ps-demo { margin-top: 4px; }
-  .ps-demo-cta { margin-top: 16px; }
-  .ps-demo-cta.ps-pulse { animation: psPulse 1.7s ease-out; }
-  @keyframes psPulse {
-    0%, 100% { box-shadow: 0 6px 0 #b85e00, 0 14px 30px -8px rgba(255,155,30,.5); }
-    30% { box-shadow: 0 6px 0 #b85e00, 0 0 0 10px rgba(255,203,61,.28), 0 14px 30px -8px rgba(255,155,30,.6); }
-  }
-  @media (prefers-reduced-motion: reduce) { .ps-demo-cta.ps-pulse { animation: none; } }
 
   .ps-err {
     font: 700 13px/1.4 'Archivo', sans-serif; color: #ffb4a8;
@@ -389,8 +385,6 @@ export async function mount(root) {
 
       <section class="ps-sec" style="padding-top:22px">
         <div class="ps-demo" id="ps-demo"></div>
-        <button class="ps-cta ps-demo-cta" id="ps-cta2" type="button">${L.cta}</button>
-        <p class="ps-cta-note">${L.ctaNote}</p>
       </section>
 
       <section class="ps-sec">
@@ -481,25 +475,14 @@ export async function mount(root) {
     location.hash = "#/login";
   });
 
-  // La scène jouable. onCorrect : la motivation est à son maximum juste après
-  // la bonne réponse. On ne fabrique pas un deuxième bouton, on met en valeur
-  // celui qui est déjà juste en dessous.
+  // La scène jouable. Elle referme elle-même la boucle après une bonne
+  // réponse (« C'est exactement comme ça que PermiGo te prépare avant de
+  // conduire »), sans deuxième bouton : voir le commentaire de .ps-demo.
   const demo = root.querySelector("#ps-demo");
-  const cta2 = root.querySelector("#ps-cta2");
   if (demo)
     mountDemoSituation(demo, lang, {
-      onCorrect: () => {
-        track("simple.demo_success", { lang });
-        if (!cta2) return;
-        cta2.classList.remove("ps-pulse");
-        void cta2.offsetWidth; // force le rejeu si l'élève relance la démo
-        cta2.classList.add("ps-pulse");
-      },
+      onCorrect: () => track("simple.demo_success", { lang }),
     });
-  cta2?.addEventListener("click", () => {
-    track("simple.free_click", { lang, from: "demo" });
-    location.hash = "#/rejoindre?solo=1";
-  });
 
   wireBackdrop(root);
 }

@@ -135,17 +135,38 @@ export function wireBackdrop(root) {
   const charger = () => {
     const v = document.createElement("video");
     v.muted = true;
+    v.defaultMuted = true; // ⚠️ iOS lit l'ATTRIBUT, pas seulement la propriété
     v.playsInline = true;
+    v.setAttribute("muted", "");
+    v.setAttribute("playsinline", "");
+    v.setAttribute("webkit-playsinline", ""); // vieux iOS
     v.preload = "auto";
     v.setAttribute("aria-hidden", "true");
     v.src = VIDEO;
+
+    // ⚠️⚠️ LE PIÈGE QUI A FAIT « la vidéo ne se joue pas » SUR TÉLÉPHONE.
+    // On ne montre la vidéo QUE lorsqu'une vraie image a été peinte. Sur iOS,
+    // une vidéo qui n'a jamais été LUE ne dessine rien quand on se contente de
+    // déplacer `currentTime` : l'élément restait posé par-dessus l'image fixe,
+    // vide, et le décor semblait mort. Tant qu'aucune image n'est peinte, on
+    // garde l'illustration, qui est belle et qui suit déjà le défilement.
+    const montrer = () => v.classList.add("on");
+    if ("requestVideoFrameCallback" in v) v.requestVideoFrameCallback(montrer);
+    else v.addEventListener("seeked", montrer, { once: true });
 
     v.addEventListener(
       "loadedmetadata",
       () => {
         const duree = v.duration;
         if (!isFinite(duree) || duree <= 0) return; // illisible → on garde l'image
-        v.classList.add("on");
+
+        // L'amorçage : un play() suivi d'un pause() immédiat réveille le
+        // décodeur. Muette et `playsinline`, la lecture est autorisée sans
+        // geste de l'utilisateur. Si elle est refusée quand même, on continue :
+        // sur les navigateurs de bureau le déplacement suffit.
+        const amorce = v.play();
+        if (amorce && typeof amorce.then === "function")
+          amorce.then(() => v.pause()).catch(() => {});
 
         let visee = 0;
         let pos = 0;
