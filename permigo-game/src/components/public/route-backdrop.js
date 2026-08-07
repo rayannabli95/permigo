@@ -21,11 +21,12 @@
 // ── Les deux pièges qui restent ──
 //
 // 1. LE POIDS. La vidéo n'est JAMAIS dans le chemin du premier affichage : le
-//    fond est d'abord l'image fixe (92 Ko sur téléphone), et la vidéo n'est
-//    demandée qu'une fois la page posée. Réseau lent, mode économie de
-//    données, ou appareil qui demande moins d'animations : on reste sur
-//    l'image et personne ne voit de trou. Cette image se voit donc pendant
-//    plusieurs secondes chez tout le monde : elle mérite sa définition.
+//    fond est d'abord l'image fixe (92 Ko sur téléphone), peinte par la
+//    feuille de style. La vidéo part juste après et vient la remplacer quand
+//    elle est prête. Réseau lent, mode économie de données, ou appareil qui
+//    demande moins d'animations : on reste sur l'image et personne ne voit de
+//    trou. Cette image tient donc le premier écran chez tout le monde : elle
+//    mérite sa définition.
 //
 // 2. `animation-timeline: view()` NE MARCHE PAS ICI. Le décor est en position
 //    fixe : il ne défile jamais lui-même, sa progression resterait bloquée à
@@ -206,22 +207,28 @@ export function wireBackdrop(root) {
     // Muette et `playsinline`, la lecture automatique est autorisée sans geste
     // de l'utilisateur. Si un navigateur la refuse quand même, on ne force
     // rien et on ne montre rien : l'illustration reste, sans trou ni erreur.
-    v.addEventListener(
-      "canplay",
-      () => {
-        const p = v.play();
-        if (p && typeof p.catch === "function") p.catch(() => {});
-      },
-      { once: true },
-    );
+    const lancer = () => {
+      const p = v.play();
+      if (p && typeof p.catch === "function") p.catch(() => {});
+    };
 
     media.appendChild(v);
+    // On demande la lecture TOUT DE SUITE : le navigateur l'enchaîne dès qu'il
+    // a de quoi afficher, sans attendre un évènement de plus. `canplay` reste
+    // en filet si ce premier appel arrive trop tôt pour lui.
+    lancer();
+    v.addEventListener("canplay", lancer, { once: true });
   };
 
-  // Après l'affichage, jamais pendant. requestIdleCallback si le navigateur
-  // le connaît, sinon un simple délai : dans les deux cas la page est déjà
-  // lisible et cliquable quand le téléchargement commence.
-  if ("requestIdleCallback" in window)
-    requestIdleCallback(charger, { timeout: 2500 });
-  else setTimeout(charger, 1200);
+  // ⚠️ Rayan, 07/08/2026 : « je veux que la vidéo se joue seule dès l'ouverture
+  // du site ». Elle attendait un creux d'activité (requestIdleCallback, jusqu'à
+  // 2,5 s), et sur un téléphone qui vient d'ouvrir une page ce creux arrive
+  // tard : le décor restait figé pendant les premières secondes, celles qui
+  // décident. On lance donc le téléchargement au premier souffle après
+  // l'affichage.
+  // Le premier écran ne dépend toujours de rien : l'image de fond est peinte
+  // par la feuille de style, la vidéo ne fait que la remplacer quand elle est
+  // prête. Les deux `requestAnimationFrame` laissent simplement cette première
+  // image se poser avant de partager le réseau.
+  requestAnimationFrame(() => requestAnimationFrame(charger));
 }
