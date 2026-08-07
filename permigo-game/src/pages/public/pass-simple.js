@@ -84,17 +84,33 @@ const STR = {
     // arrive juste après l'inscription. « de l'app » lève le doute en 3 mots.
     ctaNote: "3 leçons de l'app offertes · sans carte bancaire",
     secFeats: "Ce qu'il y a dedans",
+    // ⚠️ Une carte dit ce que l'élève RÉCUPÈRE, jamais une jolie formule.
+    // « Une scène. Une décision. » sonnait bien et n'apprenait rien.
     feats: {
-      situation: { t: "Mise en situation", d: "Une scène. Une décision." },
-      prepa: { t: "Ta leçon préparée", d: "3 min avant de monter." },
-      pilote: { t: "Mode Pilote", d: "Les gestes au volant." },
-      examen: { t: "Examen blanc", d: "Noté comme le jour J." },
+      situation: {
+        t: "Mise en situation",
+        d: "Tu choisis. On t'explique pourquoi.",
+      },
+      prepa: {
+        t: "Ta leçon préparée",
+        d: "Tu sais quoi faire avant de monter.",
+      },
+      pilote: { t: "Mode Pilote", d: "Tu répètes les gestes au doigt." },
+      examen: { t: "Examen blanc", d: "Ta note sur 31 avant l'examen." },
     },
     secAvis: "Ils l'utilisent déjà",
     avisAge: "ans",
     price: "4,99 €",
     priceOnly: "seulement",
     priceSub: "Par mois. Sans engagement.",
+    // ⚠️ Sans cette ligne, la page disait « commencer gratuitement » en haut
+    // et « tout débloquer » en bas sans JAMAIS dire ce qui était bloqué. On
+    // demandait de payer pour une porte dont on ignorait le contenu.
+    // Les 3 promesses sont vraies, vérifiées dans `utils/free-tier.js` :
+    // FREE_SUBS = 3 sous-compétences sur les 31 du REMC, quotas quotidiens
+    // (3 questions, 1 scène) et Mode Pilote absent des routes découverte.
+    priceWhat:
+      "Les 31 leçons au lieu de 3 · scènes et questions sans limite · le Mode Pilote",
     priceBtn: "Tout débloquer",
     btnWait: "Ouverture du paiement…",
     err: "Le paiement n'a pas pu démarrer. Réessaie.",
@@ -110,16 +126,24 @@ const STR = {
     ctaNote: "3 in-app lessons free · no card needed",
     secFeats: "What is inside",
     feats: {
-      situation: { t: "Real situations", d: "One scene. One decision." },
-      prepa: { t: "Your lesson ready", d: "3 min before you drive." },
-      pilote: { t: "Pilot mode", d: "The moves behind the wheel." },
-      examen: { t: "Mock exam", d: "Marked like the real day." },
+      situation: { t: "Real situations", d: "You choose. We tell you why." },
+      prepa: {
+        t: "Your lesson ready",
+        d: "You know what to do before you drive.",
+      },
+      pilote: {
+        t: "Pilot mode",
+        d: "You practise the moves with your finger.",
+      },
+      examen: { t: "Mock exam", d: "Your score out of 31 before the test." },
     },
     secAvis: "They already use it",
     avisAge: "years old",
     price: "€4.99",
     priceOnly: "only",
     priceSub: "Per month. No commitment.",
+    priceWhat:
+      "All 31 lessons instead of 3 · scenes and questions with no limit · the full Pilot mode",
     priceBtn: "Unlock everything",
     btnWait: "Opening payment…",
     err: "Payment could not start. Please try again.",
@@ -135,16 +159,18 @@ const STR = {
     ctaNote: "3 دروس داخل التطبيق مجاناً · بلا بطاقة بنكية",
     secFeats: "ماذا يوجد بالداخل",
     feats: {
-      situation: { t: "وضعيات حقيقية", d: "مشهد. قرار." },
-      prepa: { t: "حصتك جاهزة", d: "3 دقائق قبل القيادة." },
-      pilote: { t: "نمط القيادة", d: "الحركات خلف المقود." },
-      examen: { t: "امتحان تجريبي", d: "مُقيَّم كيوم الامتحان." },
+      situation: { t: "وضعيات حقيقية", d: "أنت تختار. ونشرح لك السبب." },
+      prepa: { t: "حصتك جاهزة", d: "تعرف ما ستفعله قبل أن تركب." },
+      pilote: { t: "نمط القيادة", d: "تعيد الحركات بإصبعك." },
+      examen: { t: "امتحان تجريبي", d: "نقطتك على 31 قبل الامتحان." },
     },
     secAvis: "يستعملونه فعلاً",
     avisAge: "سنة",
     price: "€4.99",
     priceOnly: "فقط",
     priceSub: "شهرياً. بلا التزام.",
+    priceWhat:
+      "الدروس الـ31 بدل 3 · مشاهد وأسئلة بلا حدود · نمط القيادة كاملاً",
     priceBtn: "افتح كل شيء",
     btnWait: "جارٍ فتح الدفع…",
     err: "تعذّر بدء الدفع. حاول مرة أخرى.",
@@ -316,7 +342,20 @@ const STYLE = `<style>
     font: 800 13px/1 'Archivo', sans-serif; letter-spacing: .22em;
     text-transform: uppercase; color: var(--gold); opacity: .82;
   }
+  /* ⚠️ L'arabe s'écrit attaché. Un letter-spacing écarte les lettres et étire
+     le trait de liaison entre elles : « فقط » se lisait comme un mot souligné
+     par une barre. Même chose sur la ligne du haut. L'espacement des lettres
+     et les majuscules ne valent que pour l'alphabet latin. */
+  [dir="rtl"] .ps-price-only,
+  [dir="rtl"] .ps-kicker { letter-spacing: 0; text-transform: none; }
   .ps-price-sub { margin: 0; font: 600 13.5px/1.5 'Archivo', sans-serif; color: var(--ink-soft); }
+  /* Ce que le paiement débloque. Le trait doré au-dessus le détache du prix :
+     ce n'est plus une mention de plus, c'est la réponse à « j'achète quoi ». */
+  .ps-price-what {
+    margin: 13px auto 0; max-width: 30ch; padding-top: 13px;
+    border-top: 1px solid rgba(255,203,61,.24);
+    font: 600 13px/1.65 'Archivo', sans-serif; color: var(--ink-mu);
+  }
   .ps-price-btn {
     display: block; width: 100%; margin: 18px auto 0; min-height: 52px;
     border: 0; border-radius: 16px; cursor: pointer;
@@ -404,8 +443,9 @@ export async function mount(root) {
       <section class="ps-sec">
         <h2 class="ps-title">${L.secAvis}</h2>
         <div class="ps-lot">
-          ${AVIS.slice(0, 3).map(
-            (a) => `
+          ${AVIS.slice(0, 3)
+            .map(
+              (a) => `
             <figure class="ps-avis">
               <blockquote>${esc(a[lang] || a.fr)}</blockquote>
               <figcaption>
@@ -416,13 +456,15 @@ export async function mount(root) {
                 </span>
               </figcaption>
             </figure>`,
-          ).join("")}
+            )
+            .join("")}
         </div>
 
         <div class="ps-price">
           <div class="ps-price-big">${L.price}</div>
           <span class="ps-price-only">${L.priceOnly}</span>
           <p class="ps-price-sub">${L.priceSub}</p>
+          <p class="ps-price-what">${L.priceWhat}</p>
           <button class="ps-price-btn" id="ps-buy" type="button">${L.priceBtn}</button>
           <p class="ps-err" id="ps-err">${L.err}</p>
         </div>
