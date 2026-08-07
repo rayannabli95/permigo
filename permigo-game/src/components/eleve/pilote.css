@@ -680,8 +680,14 @@ body.mp-open #header-bar {
   flex: 1;
   /* La place va dans les CARTES, pas dans les écarts entre elles : une carte
      plus haute se vise mieux au pouce qu'un grand trou entre deux cartes.
-     Le `minmax` garde les 60 px de hauteur minimale quand la page est pleine. */
-  grid-auto-rows: minmax(60px, 1fr);
+     Le `minmax` garde les 60 px de hauteur minimale quand la page est pleine.
+
+     ⚠️ Plafond à 96 px. Avec `1fr` sans borne haute, trois réponses courtes
+     donnaient des cartes de 145 px : une ligne de texte perdue au milieu d'un
+     grand rectangle vide, et la liste devenait illisible d'un coup d'œil
+     (remonté par Rayan le 07/08/2026). Une carte de 96 px reste largement
+     au-dessus des 44 px de cible tactile. */
+  grid-auto-rows: minmax(60px, 96px);
 }
 
 .mp-answer-card {
