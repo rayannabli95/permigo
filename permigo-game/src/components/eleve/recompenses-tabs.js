@@ -1,18 +1,19 @@
 // ═══════════════════════════════════════════════════════════════
-// Bandeau « Récompenses » — 1 porte, 3 salles (nav 5 portes)
-// Inséré en tête de boutique / galerie / ligue pour que ces pages se
-// vivent comme UN hub. Theme-aware via tokens, avec une variante
-// sombre pour l'Arène (classement).
+// Bandeau « Récompenses » — 1 porte, 2 salles (nav 5 portes)
+// Inséré en tête de boutique / ligue pour que ces pages se vivent
+// comme UN hub. Theme-aware via tokens, avec une variante sombre
+// pour l'Arène (classement).
 // ⚠️ La 4e salle « Cartes » a été retirée le 06/08/2026 : le paquet de
 // cartes REMC vit désormais sur #/profil (refonte « Le paquet »,
 // décision Rayan, cf. FLOWS.md), plus comme un onglet de ce hub.
+// ⚠️ La 3e salle « Ma collection » a été retirée le 07/08/2026 : #/galerie
+// est supprimée, cf. FLOWS.md.
 // ═══════════════════════════════════════════════════════════════
 import { navigate } from "@/router.js";
 import { getLang } from "@/utils/lang.js";
 
 const ROOMS = [
   { id: "boutique", label: "Boutique", route: "/boutique" },
-  { id: "galerie", label: "Ma collection", route: "/galerie" },
   { id: "classement", label: "Classement", route: "/classement" },
 ];
 
@@ -23,13 +24,11 @@ const ROOMS = [
 const RCT_I18N = {
   en: {
     boutique: "Shop",
-    galerie: "Collection",
     classement: "Leaderboard",
     aria: "Rewards rooms",
   },
   ar: {
     boutique: "المتجر",
-    galerie: "المجموعة",
     classement: "الترتيب",
     aria: "غرف المكافآت",
   },
@@ -59,8 +58,8 @@ export function recompensesTabs(active, { dark = false } = {}) {
   background: color-mix(in srgb, var(--ink) 5%, transparent);
   border: 1px solid var(--bo);
 }
-/* nowrap + 11.5px : « Ma collection » est le plus long des libellés et
-   repassait sur deux lignes en 390 px, ce qui décalait toute la rangée. */
+/* nowrap + 11.5px : garde chaque libellé sur une seule ligne, même en
+   390 px, pour ne pas décaler la rangée. */
 .rct-tab {
   flex: 1; border: 0; border-radius: 12px; padding: 8px 2px; min-height: 44px;
   cursor: pointer; text-align: center; background: transparent;

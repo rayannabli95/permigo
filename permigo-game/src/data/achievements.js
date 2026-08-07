@@ -11,7 +11,8 @@
 //   streak_60 → débloqué à 30 jours d'affilée
 // Voir SEUILS ci-dessous (alignés sur les triggers serveur).
 //
-// Consommé par : pages/eleve/trophees.js + pages/eleve/galerie.js
+// Consommé par : pages/eleve/recompenses.js (+ pages/common/profil.js pour
+// les 2 trophées de conduite retenus)
 // ═══════════════════════════════════════════════════════════════
 
 export const CATALOG = [

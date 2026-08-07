@@ -137,7 +137,6 @@ const ROUTES = {
     // #/profil si aucun id valide n'est fourni, cf. commentaire du fichier).
     cartes: () => import("@/pages/eleve/collection.js"),
     classement: () => import("@/pages/eleve/classement.js"),
-    galerie: () => import("@/pages/eleve/galerie.js"),
     recompenses: () => import("@/pages/eleve/recompenses.js"),
     // ⛔ Deux pages supprimées le 02/08/2026 (décision Rayan) : le hub
     // condensé « mon-permis » (il redisait les compétences que `parcours`
@@ -273,6 +272,16 @@ const ROUTES_RETIREES = {
   // dans aucun flux du code (contrairement à #/cartes/{compId}) — un simple
   // renvoi vers le profil ne perd donc aucun lien direct existant.
   trophees: "#/profil",
+  // #/galerie retirée le 07/08/2026 : ses 2 onglets avaient perdu leur
+  // raison d'être. « Trophées » listait tout le catalogue alors que le
+  // profil élève (refonte 06/08) n'en garde que les 2 liés à la conduite.
+  // « Fonds carte permis » n'a jamais eu de bouton pour ÉQUIPER un fond
+  // (juste un état verrouillé/acquis) : le fond de la carte permis est
+  // choisi automatiquement selon la progression (getPermisBg), la famille
+  // permis_bg est d'ailleurs déjà hors boutique depuis le 30/07. Rien à
+  // migrer ailleurs, donc renvoi simple vers le profil (là où vit la
+  // carte de permis).
+  galerie: "#/profil",
 };
 
 // Libellés de titre de page (a11y lecteur d'écran, onglet, historique, SEO).
@@ -294,7 +303,6 @@ const ROUTE_TITLES = {
   quiz: "Quiz",
   cartes: "Cartes",
   classement: "Classement",
-  galerie: "Ma collection",
   recompenses: "Récompenses",
   roue: "Ton coffre du jour",
   "valider-seul": "Certifier une compétence",
