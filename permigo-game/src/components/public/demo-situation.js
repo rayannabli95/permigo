@@ -106,7 +106,9 @@ const STYLE = `<style>
   }
   .dmo-kick {
     display: inline-flex; align-items: center; gap: 6px;
-    font: 800 11px/1 'Archivo', sans-serif; letter-spacing: .14em; text-transform: uppercase;
+    /* 12px et pas 11 : c'est la pastille qui invite à jouer sur la page de
+       vente, elle est lue sur un téléphone à bout de bras. Rien sous 12 px. */
+    font: 800 12px/1 'Archivo', sans-serif; letter-spacing: .14em; text-transform: uppercase;
     color: #4a2500; padding: 7px 13px; border-radius: 999px;
     background: linear-gradient(180deg, #ffe27a 0%, #ffcb3d 45%, #ff9b1e 100%);
     box-shadow: 0 3px 0 #b85e00, 0 6px 14px rgba(255,155,30,.35);
