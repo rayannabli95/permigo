@@ -492,10 +492,6 @@ function boiteScreen(sub) {
 // « repasser le quiz » sont donc partis avec.
 function introScreen(sub, cat, fiche, avecMission) {
   const ficheHref = `#/revision-conduite/${encodeURIComponent(String(sub.c ?? ""))}`;
-  const steps = (fiche?.methode || []).slice(0, 4);
-  const ficheList = steps.length
-    ? `<ul class="vs-fiche-list">${steps.map((s, i) => `<li><b>${String(i + 1).padStart(2, "0")}</b>${esc(s)}</li>`).join("")}</ul>`
-    : "";
 
   return `${STYLE}<div class="vs anim-slide-up">
     ${topBar(sub.n)}
@@ -513,7 +509,6 @@ function introScreen(sub, cat, fiche, avecMission) {
         <div class="vs-step-tx">
           <b>${vsD("step1_t", "Relis la méthode")}</b>
           <span>${vsD("step1_s", "Un rappel rapide de ce qu'il faut maîtriser.")}</span>
-          <div class="vs-step-fiche">${ficheList}</div>
           <a class="vs-fiche-link" href="${escAttr(ficheHref)}">${icon("book", { size: 14 })} ${vsD("fiche_link", "Voir la fiche complète")}</a>
         </div>
       </div>
@@ -1077,6 +1072,12 @@ async function certify(root, me, compId, sub, cat, scorePct, answers) {
     if (gen !== _gen) return;
     root.innerHTML = successScreen(sub, scorePct, volants);
     wireResult(root, me, compId, sub, cat);
+    // Demande d'avis Google : ne s'affiche par dessus QUE si c'est la toute
+    // première compétence jamais acquise par cet élève (le module fait
+    // lui-même toutes les vérifications). Fire-and-forget, ne bloque rien.
+    import("@/components/eleve/avis-google-prompt.js")
+      .then((m) => m.maybeAskGoogleReview())
+      .catch(() => {});
   } catch (e) {
     console.warn("[valider-seul] self_validate_competence", e);
     toast(vsTR("toast_neterr", "Erreur réseau. Réessaie."), "error");
@@ -1097,8 +1098,12 @@ function wireResult(root, me, compId, sub, cat) {
     .querySelector("#vs-cta-carte")
     ?.addEventListener("click", () => navigate(`#/cartes/${compId}`));
   root.querySelector("#vs-retry")?.addEventListener("click", async () => {
-    const fiche = await loadFiche(compId).catch(() => null);
-    root.innerHTML = introScreen(sub, cat, null, fiche);
+    const [fiche, boite] = await Promise.all([
+      loadFiche(compId).catch(() => null),
+      chargerBoite(),
+    ]);
+    const avecMission = missionsPour(compId, boite).length > 0;
+    root.innerHTML = introScreen(sub, cat, fiche, avecMission);
     wireIntro(root, me, compId, sub, cat);
   });
 }

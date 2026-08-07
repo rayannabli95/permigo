@@ -20,6 +20,7 @@ import { getCurUser } from "@/auth/cur-user.js";
 import { icon } from "@/utils/icons.js";
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
+import { clearLocalGameState } from "@/utils/game-state.js";
 
 const STYLE = `<style>
   /* DA « Arène 3D » (nuit-violet + plastique 3D) — cohérence avec le login */
@@ -409,6 +410,7 @@ export async function mount(root) {
         //    (auth_id, role='eleve', prenom) sans auto_ecole_id ni email.
         //    Le rôle est promu 'enseignant' par la RPC de l'étape 2 (jamais
         //    depuis le client — le trigger ignore le metadata role).
+        clearLocalGameState(); // sinon un cache d'un ancien compte pollue le nouveau
         const { error: authErr } = await sb.auth.signUp({
           email,
           password: pwdEl.value,

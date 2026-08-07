@@ -12,6 +12,7 @@ import { sb } from "@/auth/auth.js";
 import { icon } from "@/utils/icons.js";
 import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
+import { clearLocalGameState } from "@/utils/game-state.js";
 
 const STYLE = `<style>
   /* DA « Arène 3D » (nuit-violet + plastique 3D) — cohérence avec le login */
@@ -571,6 +572,7 @@ function renderForm(root, invitation, token) {
     try {
       if (!accountCreated) {
         // 1. Sign up — le trigger handle_new_user_signup crée le profil "nu"
+        clearLocalGameState(); // sinon un cache d'un ancien compte pollue le nouveau
         const { error: authErr } = await sb.auth.signUp({
           email: invitation.email,
           password: pwdEl.value,

@@ -28,6 +28,7 @@ import { getCurUser } from "@/auth/cur-user.js";
 import { icon } from "@/utils/icons.js";
 import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
+import { clearLocalGameState } from "@/utils/game-state.js";
 import { getLang, applyLang } from "@/utils/lang.js";
 import { fbTrack } from "@/services/meta-pixel.js";
 
@@ -620,6 +621,7 @@ export async function mount(root) {
           // Aucun prénom transmis : le déclencheur handle_new_user_signup pose
           // la partie de l'email avant le @ comme prénom provisoire. L'élève
           // donnera le vrai le jour où il entre dans un classement.
+          clearLocalGameState(); // sinon un cache d'un ancien compte pollue le nouveau
           const { error: authErr } = await sb.auth.signUp({
             email,
             password: pwdEl.value,

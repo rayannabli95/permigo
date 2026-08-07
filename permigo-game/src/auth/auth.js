@@ -8,6 +8,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { env } from "../config/env.js";
 import { setCurUser } from "./cur-user.js";
+import { clearLocalGameState } from "../utils/game-state.js";
 
 export const sb =
   env.SUPABASE_URL && env.SUPABASE_ANON_KEY
@@ -143,6 +144,9 @@ export async function logout() {
   if (!sb) return;
   await sb.auth.signOut();
   setCurUser(null);
+  // Vide le cache local de progression : sinon un nouveau compte créé juste
+  // après hérite des données du précédent (série, gemmes, objets, équipement).
+  clearLocalGameState();
   // Dispatch les deux events (compat anciens + nouveaux listeners)
   window.dispatchEvent(new CustomEvent("auth:loggedout"));
   window.dispatchEvent(new CustomEvent("auth:signedout"));

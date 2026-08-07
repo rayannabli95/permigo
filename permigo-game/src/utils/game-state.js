@@ -25,6 +25,7 @@ const LS_CHESTS_DB_CACHE = "pg-chests-db-v1";
 const LS_GEMMES = "pg-gemmes";
 const LS_OWNED = "pg-owned"; // array d'item IDs achetés
 const LS_EQUIPPED = "pg-equipped"; // { permit, avatarFrame, theme }
+const LS_OWNER = "pg-owner-id"; // user_id auquel appartient le cache ci-dessus
 
 // ─── Ligues : seuils en XP ───
 const LEAGUES = [
@@ -146,11 +147,44 @@ function _scheduleSave() {
 }
 
 /**
+ * Vide tout le cache local de progression (série, gemmes, coffres, objets,
+ * équipement). À appeler à la déconnexion et avant toute inscription, pour
+ * qu'un nouveau compte ne parte jamais avec les données du précédent.
+ */
+export function clearLocalGameState() {
+  [
+    LS_STREAK_DATE,
+    LS_STREAK_COUNT,
+    LS_CHESTS_OPENED,
+    LS_CHESTS_DB_CACHE,
+    LS_GEMMES,
+    LS_OWNED,
+    LS_EQUIPPED,
+    LS_EQUIPPED_ASSETS,
+    LS_OWNER,
+  ].forEach((k) => {
+    try {
+      localStorage.removeItem(k);
+    } catch {}
+  });
+  _userId = null;
+}
+
+/**
  * À appeler une fois au boot après auth.
  * Charge user_preferences.custom depuis la DB et hydrate localStorage.
  * DB est source de vérité si un enregistrement existe.
  */
 export async function initGameState(userId) {
+  // Garde-fou : si le cache local appartient à un AUTRE compte (déconnexion
+  // qui n'a pas purgé, ou reprise de session sur un appareil partagé), on le
+  // jette avant de risquer de l'uploader vers ce nouveau compte.
+  try {
+    const prevOwner = localStorage.getItem(LS_OWNER);
+    if (prevOwner && prevOwner !== userId) clearLocalGameState();
+    localStorage.setItem(LS_OWNER, userId);
+  } catch {}
+
   _userId = userId;
   try {
     // Pull en parallèle : user_preferences (custom) + streaks (table dédiée) + profiles.gemmes
