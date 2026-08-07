@@ -112,6 +112,15 @@ async function boot() {
         const { mount } = await import("@/pages/public/ecole.js");
         return mount(app, slug);
       }
+      // Version épurée de la page de vente, en comparaison avec #/pass
+      // (07/08/2026). ⚠️ AVANT la branche #/pass, et surtout présente ICI :
+      // router.js ne sert que les changements de hash, cette fonction sert
+      // les ARRIVÉES directes sur l'adresse. Une route déclarée d'un seul
+      // côté s'affiche quand on navigue et jamais quand on ouvre le lien.
+      if (location.hash.startsWith("#/simple")) {
+        const { mount } = await import("@/pages/public/pass-simple.js");
+        return mount(app);
+      }
       // Pré-vente Pass Permis élève (lien partageable : /#/pass)
       if (location.hash.startsWith("#/pass")) {
         const { mount } = await import("@/pages/public/pass.js");
