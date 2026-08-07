@@ -1570,11 +1570,17 @@ body.mp-open #header-bar {
   display: contents;
 }
 
+/* `height: 0` + `flex-grow` : la scène prend la place QUI RESTE une fois le
+   bloc du bas posé, au lieu de sa hauteur naturelle. Sans le `height: 0`, la
+   boîte n'a pas de hauteur définie, l'image retombe sur son ratio d'origine
+   (390 × 1376/768 = 699 px), pousse la question sous le pli et la réglette
+   du mode « Doser » devient impossible à attraper. Mesuré sur l'aperçu de
+   la #733 : scène 756 px pour un écran de 844. */
 .mp-play--plein .mp-scene {
   order: 1;
-  height: auto;
-  min-height: 200px;
-  flex: 1;
+  height: 0;
+  min-height: 180px;
+  flex: 1 1 0;
   margin: 0;
   border: 0;
   border-radius: 0;
