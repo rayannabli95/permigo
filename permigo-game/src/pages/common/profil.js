@@ -12,7 +12,7 @@
 //  7. Bottom-sheet RGPD maison (remplace l'alert() auto-école incorrect)
 // ═══════════════════════════════════════════════════════════════
 import { sb, logout } from "@/auth/auth.js";
-import { yesterdayKey } from "@/services/daily-quiz.js";
+import { getStreakStatus } from "@/services/streak.js";
 import { getCurUser, setCurUser } from "@/auth/cur-user.js";
 import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
@@ -708,10 +708,15 @@ export async function mount(root) {
     const valData = _queryData(valRes);
     const streakRow = _queryData(streakRes);
     const rStats = _queryData(referralRes);
-    const _yStrE = yesterdayKey();
-    // Série d'activité : périmée si dernière activité < hier (cf. accueil).
+    // Même règle que accueil.js/reviser.js (services/streak.js, seule
+    // source de vérité depuis le 06/08/2026 — ce fichier avait sa propre
+    // demi-règle en doublon, cause du bug historique documenté là-bas).
     eleveStreak =
-      streakRow && streakRow.last_activity_date >= _yStrE
+      streakRow &&
+      getStreakStatus(
+        streakRow.current_streak ?? 0,
+        streakRow.last_activity_date ?? null,
+      ) !== "broken"
         ? (streakRow.current_streak ?? 0)
         : 0;
     permisData = {

@@ -1,15 +1,18 @@
 /**
- * Game State — moteur centralisé XP/Niveau/Streak/Ligue/Coffres.
+ * Game State — moteur centralisé Gemmes/Coffres/Inventaire/Équipement.
  *
  * Coffres : localStorage (cache immédiat) + RPC Supabase (persistance DB).
- * Le ground-truth des compétences acquises vient de `validations` Supabase
- * (passé en paramètre dans `computeStats({ doneCount, worldsCompleted })`).
  *
- * Streak / Gemmes / Owned / Equipped : localStorage comme cache synchrone
+ * Gemmes / Owned / Equipped : localStorage comme cache synchrone
  * + user_preferences.custom comme source de vérité DB (sync on init + writes).
  *
+ * ⚠️ XP/Niveau/Ligue/Streak ne vivent PLUS ici (retiré le 08/08/2026, code
+ * mort depuis le 06/08 : la série élève vient de `services/streak.js`, le
+ * classement/ligue de `utils/league-shared.js` — ce module gardait une 2e
+ * implémentation de chacun, jamais appelée, seulement testée à l'audit).
+ *
  * Usage :
- *   import { initGameState, computeStats, updateStreak, getOpenedChests,
+ *   import { initGameState, getOpenedChests,
  *            markChestOpened, getMyChests, unlockChest, openChest } from '@/utils/game-state.js';
  *   await initGameState(me.id);   // une fois au boot, après auth
  */
@@ -17,8 +20,6 @@ import { sb } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
 import { purgeAccountLocalCache } from "@/utils/account-cache.js";
 
-const XP_PER_COMP = 100;
-const XP_PER_LEVEL = 500;
 const LS_STREAK_DATE = "pg-streak-date";
 const LS_STREAK_COUNT = "pg-streak-count";
 const LS_CHESTS_OPENED = "pg-chests-opened";
@@ -27,71 +28,6 @@ const LS_GEMMES = "pg-gemmes";
 const LS_OWNED = "pg-owned"; // array d'item IDs achetés
 const LS_EQUIPPED = "pg-equipped"; // { permit, avatarFrame, theme }
 const LS_LAST_USER = "pg-last-user"; // id du dernier compte connecté sur cet appareil
-
-// ─── Ligues : seuils en XP ───
-const LEAGUES = [
-  {
-    id: "bronze",
-    name: "Bronze",
-    min: 0,
-    color: "#a16207",
-    glow: "rgba(161,98,7,.45)",
-    emoji: "🥉",
-  },
-  {
-    id: "argent",
-    name: "Argent",
-    min: 500,
-    color: "#94a3b8",
-    glow: "rgba(148,163,184,.45)",
-    emoji: "🥈",
-  },
-  {
-    id: "or",
-    name: "Or",
-    min: 1500,
-    color: "#fbbf24",
-    glow: "rgba(251,191,36,.5)",
-    emoji: "🥇",
-  },
-  {
-    id: "platine",
-    name: "Platine",
-    min: 2500,
-    color: "#22d3ee",
-    glow: "rgba(34,211,238,.5)",
-    emoji: "💎",
-  },
-  {
-    id: "diamant",
-    name: "Diamant",
-    min: 3000,
-    color: "#a78bfa",
-    glow: "rgba(167,139,250,.55)",
-    emoji: "💠",
-  },
-  {
-    id: "champion",
-    name: "Champion",
-    min: 3100,
-    color: "#f472b6",
-    glow: "rgba(244,114,182,.55)",
-    emoji: "👑",
-  },
-];
-
-function getLeague(xp) {
-  for (let i = LEAGUES.length - 1; i >= 0; i--) {
-    if (xp >= LEAGUES[i].min) return LEAGUES[i];
-  }
-  return LEAGUES[0];
-}
-
-function getNextLeague(xp) {
-  const cur = getLeague(xp);
-  const curIdx = LEAGUES.findIndex((l) => l.id === cur.id);
-  return LEAGUES[curIdx + 1] || null;
-}
 
 // ─── DB persistence (user_preferences.custom) ────────────────────
 let _userId = null;
@@ -248,101 +184,6 @@ export async function initGameState(userId) {
       e?.message,
     );
   }
-}
-
-// ─── Streak ──────────────────────────────────────────────────────
-function todayKey() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
-
-function dayDiff(a, b) {
-  const [y1, m1, d1] = a.split("-").map(Number);
-  const [y2, m2, d2] = b.split("-").map(Number);
-  return Math.round(
-    (new Date(y2, m2 - 1, d2) - new Date(y1, m1 - 1, d1)) / 86400000,
-  );
-}
-
-/** À appeler au mount du parcours. Met à jour le streak selon date dernière visite. */
-export function updateStreak() {
-  const last = localStorage.getItem(LS_STREAK_DATE);
-  const count = parseInt(localStorage.getItem(LS_STREAK_COUNT) || "0", 10);
-  const today = todayKey();
-  let result;
-
-  if (!last) {
-    localStorage.setItem(LS_STREAK_DATE, today);
-    localStorage.setItem(LS_STREAK_COUNT, "1");
-    result = { count: 1, isNewDay: true, justBroken: false };
-  } else if (last === today) {
-    result = { count: Math.max(count, 1), isNewDay: false, justBroken: false };
-  } else {
-    const diff = dayDiff(last, today);
-    if (diff === 1) {
-      const next = count + 1;
-      localStorage.setItem(LS_STREAK_DATE, today);
-      localStorage.setItem(LS_STREAK_COUNT, String(next));
-
-      let pendingChest = null;
-      if (next === 7)
-        pendingChest = {
-          chestType: "streak_7",
-          rewards: { xp: 150, gemmes: 30, title: "Persévérant" },
-        };
-      if (next === 14)
-        pendingChest = {
-          chestType: "streak_14",
-          rewards: { xp: 350, gemmes: 80, title: "Constant" },
-        };
-      if (next === 30)
-        pendingChest = {
-          chestType: "streak_30",
-          rewards: { xp: 800, gemmes: 200, title: "Inarrêtable" },
-        };
-
-      result = { count: next, isNewDay: true, justBroken: false, pendingChest };
-    } else {
-      localStorage.setItem(LS_STREAK_DATE, today);
-      localStorage.setItem(LS_STREAK_COUNT, "1");
-      result = { count: 1, isNewDay: true, justBroken: count > 1 };
-    }
-  }
-
-  _scheduleSave();
-  return result;
-}
-
-export function getStreak() {
-  const count = parseInt(localStorage.getItem(LS_STREAK_COUNT) || "0", 10);
-  const last = localStorage.getItem(LS_STREAK_DATE) || "";
-  return { count, isToday: last === todayKey(), last };
-}
-
-/** Renvoie les 7 derniers jours avec leur statut (active/inactive). */
-export function getLast7Days() {
-  const last = localStorage.getItem(LS_STREAK_DATE) || "";
-  const count = parseInt(localStorage.getItem(LS_STREAK_COUNT) || "0", 10);
-  const today = new Date();
-  const days = [];
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date(today);
-    d.setDate(today.getDate() - i);
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-    let active = false;
-    if (last) {
-      const distFromLast = dayDiff(key, last);
-      if (distFromLast >= 0 && distFromLast < count) active = true;
-    }
-    days.push({
-      key,
-      label: ["L", "M", "M", "J", "V", "S", "D"][(d.getDay() + 6) % 7],
-      num: d.getDate(),
-      active,
-      isToday: i === 0,
-    });
-  }
-  return days;
 }
 
 // ─── Coffres ─────────────────────────────────────────────────────
@@ -693,35 +534,4 @@ function applyThemeColor(themeId) {
 export function initEquippedTheme() {
   const eq = getEquipped();
   if (eq.theme) applyThemeColor(eq.theme);
-}
-
-// ─── Stats agrégées ───────────────────────────────────────────────
-/**
- * @param {{ doneCount: number, worldsCompleted: number[] }} ctx
- * @returns stats complètes pour le HUD
- */
-export function computeStats({ doneCount = 0, worldsCompleted = [] } = {}) {
-  const xp = doneCount * XP_PER_COMP;
-  const level = Math.floor(xp / XP_PER_LEVEL) + 1;
-  const xpInLevel = xp % XP_PER_LEVEL;
-  const xpForNextLevel = XP_PER_LEVEL - xpInLevel;
-  const pctLevel = (xpInLevel / XP_PER_LEVEL) * 100;
-  const league = getLeague(xp);
-  const nextLeague = getNextLeague(xp);
-  const streak = getStreak();
-  const opened = getOpenedSet();
-  const availableChests = worldsCompleted.filter((n) => !opened.has(n));
-  return {
-    xp,
-    level,
-    xpInLevel,
-    xpForNextLevel,
-    pctLevel,
-    league,
-    nextLeague,
-    streak,
-    availableChests,
-    openedChests: Array.from(opened),
-    gemmes: getGemmes(),
-  };
 }
