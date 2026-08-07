@@ -10,9 +10,12 @@
 //      (mêmes mots que la barre des 4 pages — cf. components/eleve/recompenses-tabs.js)
 //
 // Réutilisation (ne duplique PAS la grosse logique métier des pages dédiées) :
-//   - Boutique / Ma collection → résumé fidèle + « Tout voir » vers
-//     #/boutique, #/galerie (achat, équipement, modales détaillées restent
-//     SUR ces pages, pas ici).
+//   - Boutique → résumé fidèle + « Tout voir » vers #/boutique (achat,
+//     équipement, modales détaillées restent SUR cette page, pas ici).
+//   - Ma collection → résumé autonome (données ci-dessous), « Tout voir »
+//     pointe vers #/profil depuis le 07/08/2026 : #/galerie est supprimée
+//     (cf. FLOWS.md), rien à équiper là bas (le fond de carte permis se
+//     choisit tout seul selon la progression, cf. getPermisBg).
 //   - Trophées → résumé fidèle + « Tout voir » vers #/profil (06/08/2026 :
 //     le paquet de cartes REMC et les 2 trophées de conduite retenus vivent
 //     désormais sur le profil élève, #/trophees a été retirée, cf. FLOWS.md).
@@ -29,7 +32,7 @@
 //   - Coffres      : get_my_chests (game-state.js)
 //   - Trophées     : get_my_achievements + data/achievements.js CATALOG
 //   - Boutique     : get_items_catalog
-//   - Collection   : mêmes données que trophées + paliers fonds permis (galerie.js)
+//   - Collection   : mêmes données que trophées + paliers fonds permis
 //   - Ligue        : get_eleve_leaderboard (compétences certifiées, /31)
 //     (via league-hero.js, identique à accueil.js)
 //
@@ -700,7 +703,7 @@ function renderShopItem(it) {
   </a>`;
 }
 
-// ─── Onglet Ma collection (résumé galerie.js) ─────────────────
+// ─── Onglet Ma collection (résumé autonome, #/galerie supprimée) ──
 function renderCollectionPanel(ctx) {
   const { unlockedDefs, lockedDefs, unlockedPermisCount, validatedCount } = ctx;
   const lang = getLang();
@@ -751,12 +754,12 @@ function renderCollectionPanel(ctx) {
         ? `<div class="rec-grid">${tiles.map((t) => renderCollectionTile(t)).join("")}</div>`
         : `<div class="rec-empty">${rtD("empty_col", "Valide ta première compétence pour débloquer un trophée.")}</div>`
     }
-    <a class="rec-tout-voir" href="#/galerie" data-track="tout_voir_collection">${rt("see_all_col", "Tout voir ma collection →")}</a>`;
+    <a class="rec-tout-voir" href="#/profil" data-track="tout_voir_collection">${rt("see_all_col", "Tout voir ma collection →")}</a>`;
 }
 
 function renderCollectionTile(t) {
   return `
-  <a class="rec-item" href="#/galerie" data-track="collection_item">
+  <a class="rec-item" href="#/profil" data-track="collection_item">
     ${t.tag ? `<span class="rec-tag${t.locked ? "" : " gold"}">${esc(t.tag)}</span>` : ""}
     <div class="rec-item-vis${t.locked ? " locked" : ""}">
       <img class="pad" src="${escAttr(t.img || "")}" alt="" loading="lazy" onerror="this.style.display='none'">

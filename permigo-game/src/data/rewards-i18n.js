@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
 // i18n de l'univers RÉCOMPENSES (EN/AR) — données partagées entre
-// boutique.js / trophees.js / galerie.js / recompenses.js.
+// boutique.js / trophees.js (mort, cf. FLOWS.md) / recompenses.js.
 //
 // ⚠️ COHÉRENCE : les NOMS de trophées reprennent MOT POUR MOT les
 // traductions déjà en prod sur le profil (PROF_ACH_I18N, PR #555).

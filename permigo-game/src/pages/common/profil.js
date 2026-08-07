@@ -889,18 +889,10 @@ export async function mount(root) {
   <!-- 2. Les 3 stats clés sont déjà DANS le héro (ProfileCard) — source unique.
        On a retiré le bandeau bento qui les répétait à l'identique. -->
 
-  <!-- Carte permis (objet de collection) + lien galerie (élève) -->
+  <!-- Carte permis (objet de collection). Le lien « Voir ma galerie » vers
+       #/galerie a été retiré le 07/08/2026 : cette page est supprimée
+       (cf. FLOWS.md), et la carte de permis vit déjà juste au dessus. -->
   ${permisData ? `<div id="prf-permis-card" style="padding:0 16px;margin-top:6px"></div>` : ""}
-  ${
-    me.role === "eleve"
-      ? `
-  <a class="prf-linkrow" href="#/galerie" aria-label="${ptA("view_gallery", "Voir ma galerie")}">
-    <span class="prf-linkrow-ico" aria-hidden="true">${icon("image", { size: 17 })}</span>
-    <span class="prf-linkrow-lbl">${pt("view_gallery", "Voir ma galerie")}</span>
-    <span class="prf-linkrow-chev" aria-hidden="true">›</span>
-  </a>`
-      : ""
-  }
 
   <!-- Retrait de la gamification moniteur (30/07/2026) : le classement des
        moniteurs (points = validations données) vivait ici. -->
@@ -1703,7 +1695,6 @@ const PROF_I18N = {
     instructor_bio: "{count} student(s) supported · this year",
     stat_students: "Students",
     share_instructor: "{count} validations on PermiGo this year",
-    view_gallery: "View my gallery",
     my_year: "My year {year}",
     skills_validated: "Skills validated",
     students_supported: "Students supported",
@@ -1839,7 +1830,6 @@ const PROF_I18N = {
     instructor_bio: "متابعة {count} طالب · هذا العام",
     stat_students: "الطلاب",
     share_instructor: "{count} اعتمادًا على بيرميغو هذا العام",
-    view_gallery: "عرض معرضي",
     my_year: "عامي {year}",
     skills_validated: "المهارات المعتمدة",
     students_supported: "الطلاب المتابَعون",

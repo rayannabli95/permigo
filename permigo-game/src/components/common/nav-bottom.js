@@ -90,7 +90,7 @@ const TABS = {
       id: "recompenses",
       label: "Récompenses",
       ico: "gift",
-      match: ["boutique", "galerie", "mes-coffres", "classement", "roue"],
+      match: ["boutique", "mes-coffres", "classement", "roue"],
     },
     // match: "cartes" — écran de révélation posé par valider-seul.js après
     // une certification (#/cartes/{compId}, 06/08/2026, cf. FLOWS.md) : le
