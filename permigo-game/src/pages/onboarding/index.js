@@ -37,7 +37,6 @@ import { unlockChest } from "@/utils/game-state.js";
 import { ACCENTS, getAccent, setAccent } from "@/utils/accent.js";
 import { a2hsStepsHTML, A2HS_STYLE } from "@/components/common/a2hs-steps.js";
 import { getLang } from "@/utils/lang.js";
-import { chargerBoite, enregistrerBoite } from "@/utils/transmission.js";
 
 // ─── i18n (coque de l'onboarding) — traduction seule, repli FR systématique.
 // « moniteur » = instructor / مدرّب · « volants » = steering wheels / مقود ·
@@ -52,14 +51,6 @@ const OB_I18N = {
     skip_aria: "Skip the intro",
     hero_lead:
       "I'm <b>PermiGo</b>. In 30 seconds we'll set up your app. Then you'll revise <b>2 min each evening</b>.",
-    sec_boite: "Your gearbox",
-    boite_sub: "It decides which questions you get when you certify",
-    boite_manuelle: "Manual gearbox",
-    boite_manuelle_s: "Three pedals and a gear lever",
-    boite_auto: "Automatic gearbox",
-    boite_auto_s: "Two pedals and a P R N D selector",
-    boite_helper: "You can change this later in your settings",
-    boite_aria: "Choose your gearbox",
     sec_avatar: "Profile picture",
     avatar_group_aria: "Choose your avatar",
     avatar_item_aria: "Avatar {n}",
@@ -103,14 +94,6 @@ const OB_I18N = {
     skip_aria: "تخطّي المقدّمة",
     hero_lead:
       "أنا <b>بيرميغو</b>. في 30 ثانية نجهّز تطبيقك. بعدها تراجع <b>دقيقتين كل مساء</b>.",
-    sec_boite: "علبة السرعة لديك",
-    boite_sub: "هي التي تحدّد الأسئلة التي تُطرح عليك عند المصادقة",
-    boite_manuelle: "علبة سرعة يدوية",
-    boite_manuelle_s: "ثلاث دواسات وعصا نقل السرعات",
-    boite_auto: "علبة سرعة أوتوماتيكية",
-    boite_auto_s: "دواستان ومُحدِّد P R N D",
-    boite_helper: "يمكنك تغييرها لاحقاً من الإعدادات",
-    boite_aria: "اختر علبة السرعة",
     sec_avatar: "صورة الملف",
     avatar_group_aria: "اختر صورتك الرمزية",
     avatar_item_aria: "صورة رمزية {n}",
@@ -175,18 +158,6 @@ export async function mount(root) {
   // A2HS : section conditionnelle (uniquement si pas déjà installée).
   const showA2HS = !isStandalone();
 
-  // Boîte de vitesses : section conditionnelle (uniquement si jamais
-  // renseignée). Audit du 06/08/2026 : sur 101 élèves en prod, 97 n'avaient
-  // aucune boîte connue, parce qu'elle n'était demandée nulle part avant la
-  // toute première certification (valider-seul.js). Or c'est elle qui décide
-  // quelles fiches et quelles questions de certification l'élève voit
-  // ensuite (utils/transmission.js). On la demande donc ici, une fois, tout
-  // en la laissant PASSABLE : ni le bouton « Passer » ni le CTA principal ne
-  // sont bloqués si l'élève ne répond pas.
-  const boiteConnueAuDepart = await chargerBoite();
-  const showBoite = !boiteConnueAuDepart;
-  let boite = null;
-
   // ⚠️ Plus AUCUNE identité demandée ici (01/08/2026). Ni prénom, ni nom, ni
   // date de naissance : ce tour de bienvenue ne doit rien réclamer avant que
   // l'élève ait vu le produit. La date de naissance est demandée par une carte
@@ -195,7 +166,6 @@ export async function mount(root) {
   // formulaire ou « Continuer avec Google ».
   let _secIdx = 0;
   const secN = {};
-  if (showBoite) secN.boite = ++_secIdx;
   secN.avatar = ++_secIdx;
   secN.notif = ++_secIdx;
   if (showA2HS) secN.a2hs = ++_secIdx;
@@ -252,31 +222,6 @@ export async function mount(root) {
             <h1 class="ob-h1" id="ob-h1">${obGreet(prenom)}</h1>
             <p class="ob-lead">${obR("hero_lead", "Moi c'est <b>PermiGo</b>. En 30&nbsp;secondes, on prépare ton appli. Après, tu réviseras <b>2&nbsp;min par soir</b>.")}</p>
           </header>
-
-          ${
-            showBoite
-              ? `
-          <!-- ─── SECTION : Boîte de vitesses ─── -->
-          <section class="ob-section" aria-labelledby="ob-sec-boite-t">
-            <div class="ob-sec-head">
-              <span class="ob-sec-num">${secN.boite}</span>
-              <h2 class="ob-sec-title" id="ob-sec-boite-t">${ob("sec_boite", "Ta boîte de vitesses")}</h2>
-            </div>
-            <p class="ob-boite-sub">${ob("boite_sub", "Elle décide des questions qu'on te pose pour certifier")}</p>
-            <div class="ob-boite-grid" id="ob-boite-grid" role="radiogroup" aria-label="${ob("boite_aria", "Choix de ta boîte de vitesses")}">
-              <button class="ob-boite" data-boite="manuelle" role="radio" aria-checked="false" type="button">
-                <span class="ob-boite-ic" aria-hidden="true">1-5</span>
-                <span class="ob-boite-tx"><b>${ob("boite_manuelle", "Boîte manuelle")}</b><span>${ob("boite_manuelle_s", "Trois pédales et un levier de vitesses")}</span></span>
-              </button>
-              <button class="ob-boite" data-boite="auto" role="radio" aria-checked="false" type="button">
-                <span class="ob-boite-ic" aria-hidden="true">PRND</span>
-                <span class="ob-boite-tx"><b>${ob("boite_auto", "Boîte automatique")}</b><span>${ob("boite_auto_s", "Deux pédales et un sélecteur P R N D")}</span></span>
-              </button>
-            </div>
-            <p class="ob-helper">${ob("boite_helper", "Tu pourras le changer plus tard dans tes réglages")}</p>
-          </section>`
-              : ""
-          }
 
           <!-- ─── SECTION : Photo de profil ─── -->
           <section class="ob-section" aria-labelledby="ob-sec1-t">
@@ -676,30 +621,6 @@ export async function mount(root) {
     (sw) => sw.dataset.accent === accentId,
   );
 
-  // ─── Boîte de vitesses (manuelle / auto) ───────────────────────
-  // Aucun choix pré-coché : contrairement à l'avatar et à la couleur, cette
-  // question reste PASSABLE. Le CTA « C'est parti » ne dépend jamais de
-  // `boite` (cf. finish() ci-dessous). `enregistrerBoite()` invalide déjà son
-  // propre cache mémoire dès l'appel (transmission.js) : les fiches lisent la
-  // bonne valeur dès l'écran suivant, sans recharger l'app.
-  if (showBoite) {
-    const boiteBtns = Array.from(root.querySelectorAll(".ob-boite"));
-    boiteBtns.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        haptic("select");
-        const v = btn.dataset.boite;
-        boite = v;
-        boiteBtns.forEach((b) => {
-          const on = b.dataset.boite === v;
-          b.classList.toggle("sel", on);
-          b.setAttribute("aria-checked", on ? "true" : "false");
-        });
-        track("onboarding.boite_choisie", { boite: v });
-        enregistrerBoite(v).catch(() => {});
-      });
-    });
-  }
-
   // ─── Finish ───────────────────────────────────────────────────
   async function finish(opts = {}) {
     if (finishing) return;
@@ -710,7 +631,6 @@ export async function mount(root) {
       avatar_chosen: !!avatar,
       accent_id: accentId,
       reminders_on: notifWanted,
-      boite_chosen: boite || null,
       with_intro: withIntro,
       version: "v4-onepage",
     });
@@ -945,35 +865,6 @@ const STYLE = `<style>
     font: 500 13px/1.4 'Archivo', sans-serif;
     color: var(--ob-ink-3); text-align: center; margin: 14px 0 0;
   }
-
-  /* ── Boîte de vitesses (2 cartes empilées) ── */
-  .ob-boite-sub {
-    font: 500 13.5px/1.45 'Archivo', sans-serif;
-    color: var(--ob-ink-3); margin: -6px 0 16px;
-  }
-  .ob-boite-grid { display: flex; flex-direction: column; gap: 11px; }
-  .ob-boite {
-    display: flex; align-items: center; gap: 13px; width: 100%; padding: 16px 17px;
-    cursor: pointer; text-align: left; border-radius: 18px; border: 1px solid var(--ob-line);
-    background: linear-gradient(180deg, var(--ob-plate-2), var(--ob-plate));
-    box-shadow: 0 5px 0 rgba(0,0,0,.26), 0 1px 0 rgba(255,255,255,.06) inset;
-    transition: transform .12s, border-color .15s, box-shadow .15s;
-  }
-  .ob-boite:active { transform: scale(.98); }
-  .ob-boite-ic {
-    flex: none; width: 44px; height: 44px; border-radius: 13px;
-    display: grid; place-items: center; background: rgba(255,206,77,.14);
-    color: var(--ob-or); font: 800 13px/1 'Archivo', sans-serif; letter-spacing: .02em;
-  }
-  .ob-boite-tx { flex: 1; min-width: 0; }
-  .ob-boite-tx b { display: block; font: 700 15px/1.2 'Archivo', sans-serif; color: #fff; }
-  .ob-boite-tx span { display: block; font: 500 12.5px/1.35 'Archivo', sans-serif; color: var(--ob-ink-3); margin-top: 3px; }
-  .ob-boite.sel {
-    border-color: var(--ob-or);
-    box-shadow: 0 5px 0 rgba(0,0,0,.26), 0 0 0 3px rgba(255,206,77,.18), 0 0 16px rgba(255,206,77,.25);
-  }
-  .ob-boite.sel .ob-boite-ic { background: var(--ob-or); color: #1a1233; }
-  .ob-boite:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
 
   /* ── Couleur d'accent (rangée compacte) ── */
   .ob-color-label {
@@ -1260,20 +1151,6 @@ const STYLE = `<style>
     box-shadow: 0 2px 6px rgba(124,77,255,.45);
   }
   html[data-theme="light"] .ob-helper { color: var(--c-ink-3); }
-
-  /* Boîte de vitesses */
-  html[data-theme="light"] .ob-boite-sub { color: var(--c-ink-2); }
-  html[data-theme="light"] .ob-boite {
-    background: var(--c-bg); border: 1.5px solid var(--c-line); box-shadow: var(--c-shadow-soft);
-  }
-  html[data-theme="light"] .ob-boite-ic { background: var(--c-lav); color: var(--ob-violet); }
-  html[data-theme="light"] .ob-boite-tx b { color: var(--c-ink); }
-  html[data-theme="light"] .ob-boite-tx span { color: var(--c-ink-3); }
-  html[data-theme="light"] .ob-boite.sel {
-    border-color: var(--ob-violet); box-shadow: 0 0 0 3px rgba(124,77,255,.16), var(--c-shadow-card);
-  }
-  html[data-theme="light"] .ob-boite.sel .ob-boite-ic { background: var(--ob-violet); color: #fff; }
-  html[data-theme="light"] .ob-boite:focus-visible { outline: 3px solid var(--ob-violet); }
 
   html[data-theme="light"] .ob-color-label { color: var(--c-ink-3); }
   html[data-theme="light"] .ob-color.sel { border-color: var(--ob-violet); }

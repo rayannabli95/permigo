@@ -1,299 +1,229 @@
 // ═══════════════════════════════════════════════════════════════
-// Page publique — Inscription élève SELF-SERVE via CODE moniteur
-// URL : #/rejoindre  (ou #/rejoindre?code=PERMIS75 pour pré-remplir)
+// Page publique — Inscription élève, direction A validée par Rayan
+// (maquette mockups/inscription-3-ecrans/A-mascotte.html).
 //
-// Chemin BIS au lien d'invitation : l'élève crée son compte avec SON propre
-// email et tape le code de son moniteur (ex : "PERMIS75"). Le moniteur ne
-// manipule jamais l'email de l'élève (cf. règle non-négociable #1).
+// URL : #/rejoindre                    → chemin BIS au lien d'invitation.
+//       L'élève tape le code de son moniteur (ex : PERMIS75). Le moniteur ne
+//       manipule jamais l'email de l'élève (cf. règle non-négociable #1).
+//   #/rejoindre?code=PERMIS75          → code pré-rempli depuis un lien partagé
+//   #/rejoindre?solo=1                 → compte gratuit SANS moniteur
+//                                         (acheteurs du Pass Permis, campagne pub)
 //
-// Flow :
-//   1. Code (pré-rempli depuis l'URL) → get_join_code_info aperçoit l'école.
-//   2. DEUX CHAMPS et c'est tout : email perso + mot de passe. Le pseudo est
-//      AUTO-GÉNÉRÉ depuis l'email (genUsername).
-//   3. Submit : sb.auth.signUp() → join_moniteur_by_code(code)
-//      → set_eleve_signup_minimal(pseudo).
-//   4. Redirige vers l'accueil élève.
+// 4 écrans, une seule composition qui se répète (mascotte en haut dans une
+// bulle, la question juste au-dessus d'un champ « ligne ») :
+//   0. Prénom seul                      — alimente « Aujourd'hui {prénom} »
+//   1. Email + mot de passe (+ code     — le code moniteur vit ici, en second
+//      moniteur si pas solo)              plan, comme le mot de passe (mode JOIN)
+//   2. Boîte de vitesses — PASSABLE      — décide les questions de certification
+//   3. Arrivée                          — un seul bouton, pas de retour
+//
+// Compte créé à la fin de l'écran 1 (sb.auth.signUp) : la session est active
+// immédiatement (pas de confirmation email en prod), donc les écrans 2 et 3
+// écrivent directement en base via des RPC déjà existantes :
+//   · set_eleve_signup_minimal(pseudo)   — auto-généré depuis l'email
+//   · set_my_identity(prénom)            — le vrai prénom, donné à l'écran 0
+//   · join_moniteur_by_code(code)        — mode JOIN uniquement
+//   · enregistrerBoite (utils/transmission.js) — écran boîte, colonne existante
 //
 // ⚠️ Ce qu'on ne demande PLUS ici, et où ça se demande maintenant :
 //   · date de naissance → carte dans l'accueil (birthdate-card.js). Obligation
 //     légale (accord d'un parent sous 15 ans), mais elle ne vaut pas de faire
 //     fuir quelqu'un avant qu'il ait vu le produit.
-//   · prénom → à la première visite d'un classement (identity-prompt.js).
-//     En attendant, le déclencheur pose la partie de l'email avant le @.
+//   · nom de famille → jamais demandé au grand public (pseudo + prénom suffisent
+//     pour un classement).
+//   · langue → l'app devine déjà la langue du téléphone (browserLang(), utils/
+//     lang.js) et la propose dans Réglages. Lui donner un écran dédié ici allait
+//     à l'encontre de la maquette validée (4 écrans, pas 5) pour un réglage que
+//     la quasi-totalité des visiteurs n'aurait jamais changé de toute façon.
 //
-// ⚠️ Dépend de la migration 20260621120000_join_code.sql (RPC à appliquer).
+// La boîte de vitesses n'est PLUS demandée dans l'onboarding qui suit (elle l'a
+// été jusqu'au 06/08/2026, PR #725) : elle vit ici, une fois, jamais deux.
+//
+// ⚠️ Dépend de la migration 20260621120000_join_code.sql (RPC déjà en prod).
 // ═══════════════════════════════════════════════════════════════
-import { sb } from "@/auth/auth.js";
+import { sb, restoreSession } from "@/auth/auth.js";
 import { getCurUser } from "@/auth/cur-user.js";
-import { icon } from "@/utils/icons.js";
 import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
-import { getLang, applyLang } from "@/utils/lang.js";
 import { fbTrack } from "@/services/meta-pixel.js";
+import { haptic } from "@/utils/haptic.js";
+import { chargerBoite, enregistrerBoite } from "@/utils/transmission.js";
+
+const MASCOT = {
+  hello: "/art/mascotte/mascot-bonjour-remasterise.webp",
+  point: "/art/mascotte/mascot-pointe-du-doigt.webp",
+  think: "/art/mascotte/mascot-reflexion-quiz.webp",
+  cheer: "/art/mascotte/mascot-celebration.webp",
+};
 
 const STYLE = `<style>
-  /* DA « Arène 3D » (nuit-violet + plastique 3D) — cohérence avec le login */
-  .sg {
-    position: relative;
-    min-height: 100dvh;
-    padding: 32px 18px max(60px, calc(24px + env(safe-area-inset-bottom)));
-    font-family: 'Archivo', var(--fb), sans-serif;
+  .rj-app{
+    position: fixed; inset: 0; z-index: 1; overflow: hidden;
+    display: flex; flex-direction: column;
+    font-family: 'Archivo', var(--fd), sans-serif;
     -webkit-font-smoothing: antialiased;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    --in:#6c63ff;--in-lt:#8e87ff;--in-dp:#4a3fc9;--in-dk:#372fa3;
-    --gold:#ffce4d;--gold-dp:#e8a317;--go:#58cc02;--go-dp:#3a8a01;
-    --ncard:#2b2160;--sg-ink:#f4f1ff;--ink-soft:#cdc8ec;--ink-mu:#aaa2d8;
-    --field:#221a4f;--field-line:#6257a8;--focus:#ffd84d;
-    color: var(--sg-ink);
-    background:
-      radial-gradient(120% 90% at 50% -10%, rgba(255,206,77,.16), transparent 55%),
-      radial-gradient(130% 120% at 50% 110%, rgba(0,0,0,.55), transparent 60%),
-      linear-gradient(160deg, #241a4d 0%, #3a2a7a 100%);
+    background: var(--bg);
+    padding: max(10px, env(safe-area-inset-top)) 20px
+      calc(max(14px, env(safe-area-inset-bottom)) + var(--ck-h, 0px));
   }
-  .sg-card {
-    position: relative; box-sizing: border-box;
-    width: 100%; max-width: 430px;
-    background: linear-gradient(180deg, #322764 0%, var(--ncard) 60%, #261d56 100%);
-    border-radius: 26px; padding: 30px 26px 26px;
-    box-shadow:
-      inset 0 3px 0 rgba(255,255,255,.18),
-      inset 0 2px 14px rgba(255,255,255,.06),
-      inset 0 -10px 22px rgba(0,0,0,.45),
-      0 10px 0 #160f38,
-      0 22px 38px rgba(0,0,0,.5),
-      0 0 0 2px rgba(124,111,224,.35);
-    animation: sgIn .35s cubic-bezier(.34,1.56,.64,1);
-  }
-  .sg-card::before {
-    content: ""; position: absolute; inset: 0; border-radius: 26px; padding: 1.5px;
-    background: linear-gradient(180deg, rgba(255,206,77,.55), rgba(255,206,77,0) 45%);
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
-  }
-  @keyframes sgIn { from { opacity: 0; transform: translateY(12px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
-  /* Emblème vert PermiGo (image) — halo pulsant comme le login */
-  .sg-logo {
-    display: block; position: relative; z-index: 1;
-    width: 88px; height: 88px; margin: 0 auto 16px;
-    object-fit: contain;
-    filter: drop-shadow(0 5px 8px rgba(0,0,0,.5)) drop-shadow(0 0 16px rgba(88,204,2,.6));
-  }
-  .sg-title { font: 800 24px/1.15 'Archivo', var(--fb), sans-serif; color: var(--sg-ink); text-align: center; margin: 6px 0 4px; text-shadow: 0 2px 0 rgba(0,0,0,.35); }
-  .sg-sub { font: 600 14.5px/1.5 'Archivo', var(--fb), sans-serif; color: var(--ink-soft); text-align: center; margin: 0 0 22px; }
-  /* Badge rôle = pastille dorée plastique */
-  .sg-role-badge {
-    display: inline-block; margin: 0 0 18px; padding: 6px 14px;
-    background: linear-gradient(180deg, var(--gold), var(--gold-dp)); color: #3a2600;
-    border-radius: 99px; font: 800 11px/1 'Archivo', var(--fb), sans-serif; text-transform: uppercase; letter-spacing: .08em;
-    box-shadow: inset 0 1px 1px rgba(255,255,255,.6), 0 3px 8px rgba(0,0,0,.35);
-  }
-  .sg-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
-  .sg-label { font: 700 13px/1 'Archivo', var(--fb), sans-serif; color: var(--ink-soft); letter-spacing: .04em; text-transform: uppercase; margin-left: 4px; }
-  .sg-input {
-    padding: 0 16px; height: 52px; border: 0; border-radius: 15px;
-    font: 600 16px/1.3 'Archivo', var(--fb), sans-serif; color: var(--sg-ink); background: var(--field);
-    box-shadow: inset 0 2px 5px rgba(0,0,0,.5), inset 0 0 0 1.5px var(--field-line);
-    transition: box-shadow .15s ease; font-family: inherit;
-  }
-  .sg-input::placeholder { color: #9b93cf; font-weight: 500; }
-  .sg-input:focus { outline: 0; box-shadow: inset 0 2px 5px rgba(0,0,0,.4), inset 0 0 0 2px var(--focus), 0 0 0 4px rgba(255,216,77,.35); }
-  .sg-input.error { box-shadow: inset 0 2px 5px rgba(0,0,0,.5), inset 0 0 0 2px #ff8d8d; }
-  .sg-input[readonly] { color: var(--ink-mu); cursor: default; opacity: .85; }
-  .sg-input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(.85); cursor: pointer; }
-  .sg-help { font: 600 11.5px/1.4 'Archivo', var(--fb), sans-serif; color: var(--ink-mu); margin-top: 2px; margin-left: 4px; }
-  .sg-help.error { color: #ffb3b3; }
-  .sg-help.ok { color: #8fe85a; }
-  .sg-italic { font: italic 500 12px/1.45 'Archivo', var(--fb), sans-serif; color: var(--ink-mu); margin-top: 4px; margin-left: 4px; }
+  /* Ceinture et bretelles : le bandeau cookies ne doit normalement jamais
+     s'afficher pendant l'inscription (cf. cookie-banner.js, blocage par
+     route sur #/rejoindre). --ck-h vaut 0px tant qu'aucun bandeau n'est
+     ouvert (posé/retiré par cookie-banner.js) : cette réserve ne coûte donc
+     rien au cas nominal, elle garantit juste que le bouton principal ne se
+     retrouve jamais recouvert si le bandeau apparaissait quand même.
+     Colonne flex fixe : un contenu trop grand ÉCRASE en silence plutôt que
+     de défiler, d'où l'importance de réserver la place plutôt que d'espérer
+     un scroll. */
+  .rj-bgfx{ position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+  .rj-bgfx i{ position: absolute; display: block; border-radius: 50%; filter: blur(56px); opacity: .5; }
+  .rj-bgfx i:nth-child(1){ width: 340px; height: 340px; top: -110px; left: -90px;
+    background: radial-gradient(circle, var(--a) 0%, transparent 70%); }
+  .rj-bgfx i:nth-child(2){ width: 300px; height: 300px; bottom: -120px; right: -100px;
+    background: radial-gradient(circle, var(--a-lt) 0%, transparent 70%); opacity: .38; }
 
-  /* FIX autofill : garde le champ sombre */
-  .sg input:-webkit-autofill,
-  .sg input:-webkit-autofill:hover,
-  .sg input:-webkit-autofill:focus,
-  .sg input:-webkit-autofill:active {
-    -webkit-text-fill-color: var(--sg-ink) !important;
-    -webkit-box-shadow: 0 0 0 1000px var(--field) inset !important;
-    box-shadow: 0 0 0 1000px var(--field) inset !important;
-    caret-color: var(--sg-ink); transition: background-color 9999s ease-out 0s;
+  /* Barre du haut : retour + points de progression */
+  .rj-top{ flex: none; height: 44px; display: flex; align-items: center; gap: 12px; position: relative; z-index: 2; }
+  .rj-back{ width: 44px; height: 44px; margin-left: -10px; border: 0; background: transparent; cursor: pointer;
+    display: grid; place-items: center; color: var(--mu); border-radius: 14px; }
+  .rj-back svg{ width: 22px; height: 22px; }
+  .rj-back[hidden]{ display: none; }
+  .rj-back:active{ background: color-mix(in srgb, var(--ink) 7%, transparent); }
+  .rj-dots{ display: flex; gap: 7px; margin-inline: auto; }
+  .rj-dots b{ width: 7px; height: 7px; border-radius: 50%; background: var(--bo); display: block;
+    transition: width .3s cubic-bezier(.22,1,.36,1), background .3s ease; }
+  .rj-dots b.on{ width: 22px; background: var(--a); }
+  .rj-dots b.done{ background: color-mix(in srgb, var(--a) 45%, transparent); }
+  .rj-dots[hidden]{ visibility: hidden; }
+  .rj-top .rj-spacer{ width: 44px; flex: none; }
+
+  /* Les écrans se superposent le temps du fondu */
+  .rj-stage{ position: relative; flex: 1; min-height: 0; z-index: 2; }
+  .rj-scr{ position: absolute; inset: 0; display: flex; flex-direction: column; }
+  .rj-scr[hidden]{ display: none; }
+
+  /* Mascotte + bulle */
+  .rj-hero{ flex: 1; min-height: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 6px; }
+  .rj-bubble{ position: relative; max-width: 280px; text-align: center;
+    background: var(--su); border: 1.5px solid var(--bo); border-radius: 18px;
+    padding: 9px 15px; font: 700 13.5px/1.3 'Archivo', var(--fd), sans-serif; color: var(--ink);
+    box-shadow: 0 6px 20px -12px rgba(11,13,26,.4); }
+  .rj-bubble::after{ content: ""; position: absolute; left: 50%; bottom: -7px; width: 12px; height: 12px;
+    transform: translateX(-50%) rotate(45deg); background: var(--su);
+    border-right: 1.5px solid var(--bo); border-bottom: 1.5px solid var(--bo); border-bottom-right-radius: 3px; }
+  .rj-mascot{ display: block; width: auto; height: clamp(112px, 28vh, 240px);
+    object-fit: contain; filter: drop-shadow(0 18px 26px rgba(76,63,201,.28)); }
+
+  /* Question + champs */
+  .rj-body{ flex: none; }
+  .rj-h1{ margin: 0 0 14px; font: 900 clamp(22px, 6.2vw, 27px)/1.15 'Archivo', var(--fd), sans-serif;
+    color: var(--ink); letter-spacing: -.02em; text-align: center; }
+  .rj-sub{ margin: -8px 0 14px; font: 500 13.5px/1.4 'Archivo', var(--fd), sans-serif; color: var(--mu); text-align: center; }
+
+  /* Champ « ligne » façon Typeform : pas de boîte, une règle épaisse */
+  .rj-line{ position: relative; }
+  .rj-line + .rj-line{ margin-top: 10px; }
+  .rj-line input{ width: 100%; height: 52px; padding: 0 2px; border: 0; background: transparent;
+    border-bottom: 2px solid var(--bo); color: var(--ink);
+    font: 800 19px/1 'Archivo', var(--fd), sans-serif; outline: none; transition: border-color .2s ease;
+    box-sizing: border-box; }
+  .rj-line input::placeholder{ color: var(--mu); font-weight: 600; opacity: .75; }
+  .rj-line input:focus{ border-bottom-color: var(--a); }
+  .rj-line input:focus::placeholder{ opacity: .45; }
+  .rj-line input.err{ border-bottom-color: #e5484d; }
+
+  /* Champs secondaires (mot de passe, code moniteur) : volontairement en retrait */
+  .rj-minor{ margin-top: 14px; padding-top: 13px; border-top: 1px dashed var(--bo); }
+  .rj-minor label{ display: block; font: 700 11.5px/1 'Archivo', var(--fd), sans-serif; color: var(--mu);
+    text-transform: uppercase; letter-spacing: .06em; margin-bottom: 7px; }
+  .rj-minor-wrap{ position: relative; }
+  .rj-minor input{ width: 100%; height: 46px; padding: 0 13px; border-radius: 13px; box-sizing: border-box;
+    border: 1.5px solid var(--bo); background: var(--su2); color: var(--ink);
+    font: 600 15px/1 'Archivo', var(--fd), sans-serif; outline: none; }
+  .rj-minor input:focus{ border-color: var(--a); }
+  .rj-minor input::placeholder{ color: var(--mu); font-weight: 500; }
+  .rj-minor input.err{ border-color: #e5484d; }
+  .rj-minor-pwd input{ padding-right: 46px; }
+  .rj-minor-toggle{ position: absolute; right: 4px; top: 4px; width: 38px; height: 38px; border: 0;
+    background: none; cursor: pointer; color: var(--mu); display: flex; align-items: center; justify-content: center;
+    border-radius: 10px; }
+  .rj-minor-toggle:hover{ color: var(--ink); }
+  .rj-help{ font: 600 11.5px/1.4 'Archivo', var(--fd), sans-serif; color: var(--mu); margin-top: 6px; margin-left: 2px; }
+  .rj-help.error{ color: #e5484d; }
+  .rj-help.ok{ color: #2f9e44; }
+  .rj-code-input{ text-transform: uppercase; letter-spacing: .16em; font-weight: 800 !important; }
+
+  /* Les deux cartes de boîte de vitesses */
+  .rj-cards{ display: flex; flex-direction: column; gap: 10px; }
+  .rj-card{ display: flex; align-items: center; gap: 13px; width: 100%; min-height: 70px; padding: 13px 15px;
+    text-align: left; cursor: pointer; border-radius: 18px; border: 1.5px solid var(--bo);
+    background: var(--su); color: var(--ink); font-family: 'Archivo', var(--fd), sans-serif;
+    transition: border-color .18s ease, transform .18s cubic-bezier(.22,1,.36,1); }
+  .rj-card:active{ transform: scale(.985); }
+  .rj-card.sel{ border-color: var(--a); box-shadow: inset 0 0 0 1.5px var(--a); }
+  .rj-card i{ flex: none; width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center;
+    background: color-mix(in srgb, var(--a) 12%, transparent); color: var(--a-txt);
+    font: 900 13px/1 'Archivo', var(--fd), sans-serif; font-style: normal; letter-spacing: .02em; }
+  .rj-card b{ display: block; font: 800 15px/1.2 'Archivo', var(--fd), sans-serif; }
+  .rj-card span{ display: block; font: 500 12.5px/1.35 'Archivo', var(--fd), sans-serif; color: var(--mu); margin-top: 3px; }
+
+  /* Pied : bouton principal */
+  .rj-foot{ flex: none; padding-top: 16px; }
+  .rj-cta{ width: 100%; min-height: 54px; border: 0; border-radius: 17px; cursor: pointer;
+    background: linear-gradient(180deg, var(--a-lt) 0%, var(--a) 52%, var(--adk) 100%);
+    color: var(--a-ink); font: 800 16.5px/1 'Archivo', var(--fd), sans-serif;
+    box-shadow: 0 8px 18px -8px rgba(76,63,201,.75), inset 0 -3px 0 rgba(0,0,0,.16);
+    transition: transform .16s cubic-bezier(.22,1,.36,1), box-shadow .16s ease, opacity .15s; }
+  .rj-cta:active:not(:disabled){ transform: translateY(2px); box-shadow: 0 4px 12px -8px rgba(76,63,201,.75), inset 0 -1px 0 rgba(0,0,0,.16); }
+  .rj-cta:disabled{ opacity: .5; cursor: default; }
+  .rj-skip{ display: block; width: 100%; min-height: 44px; margin-top: 6px; border: 0; background: transparent;
+    cursor: pointer; color: var(--mu); font: 700 13.5px/1 'Archivo', var(--fd), sans-serif; text-decoration: underline;
+    text-underline-offset: 3px; }
+  .rj-login-row{ text-align: center; margin-top: 14px; font: 600 13px/1.4 'Archivo', var(--fd), sans-serif; color: var(--mu); }
+  .rj-login-row a{ color: var(--a-txt); font-weight: 800; text-decoration: none; }
+  .rj-login-row a:hover{ text-decoration: underline; }
+
+  /* Mouvement */
+  @keyframes rjEnt { from{ opacity: 0; transform: translate3d(0,16px,0) scale(.985); } to{ opacity: 1; transform: none; } }
+  @keyframes rjEntB{ from{ opacity: 0; transform: translate3d(0,-14px,0) scale(.985); } to{ opacity: 1; transform: none; } }
+  @keyframes rjLv  { from{ opacity: 1; transform: none; } to{ opacity: 0; transform: translate3d(0,-14px,0) scale(.985); } }
+  @keyframes rjLvB { from{ opacity: 1; transform: none; } to{ opacity: 0; transform: translate3d(0,16px,0) scale(.985); } }
+  .rj-scr.ent { animation: rjEnt  .34s cubic-bezier(.22,1,.36,1) both; }
+  .rj-scr.entB{ animation: rjEntB .34s cubic-bezier(.22,1,.36,1) both; }
+  .rj-scr.lv  { animation: rjLv   .26s cubic-bezier(.4,0,1,1) both; }
+  .rj-scr.lvB { animation: rjLvB  .26s cubic-bezier(.4,0,1,1) both; }
+
+  @keyframes rjMIn { from{ opacity: 0; transform: translate3d(0,26px,0) scale(.9); } to{ opacity: 1; transform: none; } }
+  @keyframes rjBreathe { 0%,100%{ transform: translateY(0) rotate(-.6deg); } 50%{ transform: translateY(-7px) rotate(.6deg); } }
+  .rj-mascot{ animation: rjMIn .5s cubic-bezier(.22,1,.36,1) both, rjBreathe 4.4s ease-in-out 0s infinite; }
+  .rj-scr.ent .rj-mascot, .rj-scr.entB .rj-mascot{ animation: rjMIn .5s cubic-bezier(.22,1,.36,1) .06s both, rjBreathe 4.4s ease-in-out .56s infinite; }
+  @keyframes rjBIn { from{ opacity: 0; transform: translateY(8px) scale(.94); } to{ opacity: 1; transform: none; } }
+  .rj-bubble{ animation: rjBIn .42s cubic-bezier(.22,1,.36,1) .22s both; }
+
+  @media (prefers-reduced-motion: reduce){
+    .rj-scr, .rj-mascot, .rj-bubble, .rj-dots b{ animation: none !important; transition: none !important; }
   }
 
-  /* Champ code — gros, majuscules, espacé, monospace doré */
-  .sg-code-input {
-    text-align: center; letter-spacing: .22em; text-transform: uppercase;
-    font: 800 21px/1.2 'IBM Plex Mono', var(--fn, monospace) !important;
-    color: var(--gold) !important;
-    box-shadow: inset 0 2px 5px rgba(0,0,0,.55), inset 0 0 0 1.5px rgba(255,206,77,.4) !important;
-  }
-  .sg-code-input::placeholder { color: rgba(255,206,77,.4); letter-spacing: .22em; }
-  .sg-code-input:focus { box-shadow: inset 0 2px 5px rgba(0,0,0,.45), inset 0 0 0 2px var(--focus), 0 0 0 4px rgba(255,216,77,.35) !important; }
-  /* Bandeau aperçu "tu rejoins …" */
-  .sg-join {
-    display: none; align-items: center; gap: 10px;
-    margin: 0 0 20px; padding: 12px 14px; border-radius: 14px;
-    background: rgba(88,204,2,.14);
-    box-shadow: inset 0 0 0 1.5px rgba(88,204,2,.4);
-    animation: sgIn .3s cubic-bezier(.34,1.56,.64,1);
-  }
-  .sg-join.show { display: flex; }
-  .sg-join.err { background: rgba(255,141,141,.12); box-shadow: inset 0 0 0 1.5px rgba(255,141,141,.4); }
-  .sg-join-ico { flex-shrink: 0; color: #8fe85a; display: flex; }
-  .sg-join.err .sg-join-ico { color: #ffb3b3; }
-  .sg-join-txt { font: 700 13px/1.4 'Archivo', var(--fb), sans-serif; color: var(--sg-ink); }
-  .sg-join-txt strong { color: var(--gold); }
-  .sg-join.err .sg-join-txt { color: #ffb3b3; }
-
-  /* CTA plastique 3D indigo (comme .lg-cta) */
-  .sg-btn {
-    width: 100%; margin-top: 18px; height: 58px; padding: 0; color: #fff; border: 0; border-radius: 17px;
-    font: 800 18px/1 'Archivo', var(--fb), sans-serif; letter-spacing: .2px; cursor: pointer;
-    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    background: linear-gradient(180deg, var(--in-lt) 0%, var(--in) 55%, var(--in-dp) 100%);
-    box-shadow:
-      inset 0 2px 0 rgba(255,255,255,.55), inset 0 -4px 8px rgba(0,0,0,.28),
-      0 7px 0 var(--in-dk), 0 12px 20px rgba(74,63,201,.5);
-    text-shadow: 0 2px 1px rgba(0,0,0,.3); transform: translateY(0);
-    transition: transform .08s cubic-bezier(.34,1.56,.64,1), box-shadow .08s ease, filter .15s; font-family: inherit;
-  }
-  .sg-btn:hover:not(:disabled) { filter: brightness(1.04); }
-  .sg-btn:active:not(:disabled) {
-    transform: translateY(5px);
-    box-shadow: inset 0 2px 0 rgba(255,255,255,.45), inset 0 -2px 6px rgba(0,0,0,.3),
-      0 2px 0 var(--in-dk), 0 5px 10px rgba(74,63,201,.45);
-  }
-  .sg-btn:disabled { opacity: .55; cursor: default; filter: grayscale(.1); }
-
-  .sg-pwd-wrap { position: relative; }
-  .sg-pwd-wrap .sg-input { width: 100%; box-sizing: border-box; padding-right: 50px; }
-  .sg-pwd-toggle {
-    position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
-    width: 44px; height: 44px; border: 0; background: none; cursor: pointer;
-    color: #b7afe8; display: flex; align-items: center; justify-content: center;
-    border-radius: 10px; -webkit-tap-highlight-color: transparent;
-  }
-  .sg-pwd-toggle:hover { color: var(--sg-ink); }
-  .sg-pwd-toggle:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; }
-  .sg-sep { height: 2px; border-radius: 2px; margin: 22px 0 0;
-    background: linear-gradient(90deg, transparent, rgba(124,111,224,.4), transparent); }
-  .sg-login-row { text-align: center; margin-top: 16px; font: 600 13.5px/1.4 'Archivo', var(--fb), sans-serif; color: var(--ink-soft); }
-  .sg-login-row a { color: var(--gold); font-weight: 800; text-decoration: underline; text-underline-offset: 2px; }
-  .sg-login-row a:hover { color: #ffe39a; }
-  .sg-login-row a:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 6px; }
-
-  /* Lien-bouton secondaire (J'ai compris, post-consentement) */
-  .sg-link {
-    color: var(--sg-ink); font: 800 14px/1 'Archivo', var(--fb), sans-serif; text-decoration: none;
-    padding: 13px 24px; border: 0; border-radius: 14px;
-    background: linear-gradient(180deg, #3a2f72 0%, #2c2360 100%);
-    box-shadow: inset 0 2px 0 rgba(255,255,255,.16), 0 4px 0 #1b143f, 0 7px 12px rgba(0,0,0,.35);
-    transition: transform .08s ease, filter .15s;
-  }
-  .sg-link:hover { filter: brightness(1.08); }
-  .sg-link:active { transform: translateY(3px); }
-  .sg-link:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
-
-  /* A11y : mouvement réduit / contrastes forcés */
-  @media (prefers-reduced-motion: reduce) {
-    .sg-card { animation: none; }
-  }
-  @media (forced-colors: active) {
-    .sg-card { border: 1px solid CanvasText; }
-    .sg-input { border: 1px solid CanvasText; box-shadow: none; }
-    .sg-btn, .sg-link { border: 2px solid ButtonText; box-shadow: none; }
-    .sg :focus-visible { outline: 2px solid Highlight !important; }
-    .sg-logo { filter: none; }
-  }
+  /* État « déjà connecté » — pas la maquette, un simple message centré */
+  .rj-connected{ position: relative; z-index: 2; flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 16px; text-align: center; padding: 20px; }
+  .rj-connected p{ margin: 0; font: 600 14.5px/1.5 'Archivo', var(--fd), sans-serif; color: var(--mu); max-width: 300px; }
+  .rj-connected p strong{ color: var(--ink); }
+  .rj-connected .rj-cta{ max-width: 300px; }
+  .rj-connected-link{ color: var(--a-txt); font: 700 13.5px/1 'Archivo', var(--fd), sans-serif; text-decoration: none; }
+  .rj-connected-link:hover{ text-decoration: underline; }
 </style>`;
 
-// ─── i18n (coque du formulaire) — traduction seule, repli FR. « moniteur » =
-// instructor / مدرّب, marque = PermiGo (بيرميغو en prose arabe). Le sélecteur
-// de langue pilote un re-rendu COMPLET (renderForm) : tout bascule aussitôt. ───
-const SG_I18N = {
-  en: {
-    title_solo: "Your free account",
-    title_join: "Join your instructor",
-    sub_solo:
-      "3 lessons yours for good · 3 questions and 1 scene every day. No card needed. If you bought a Pass, use the same email as your payment.",
-    sub_join:
-      "Enter the code your instructor gave you, then create your account.",
-    role_badge: "Student",
-    already_connected: "You're already signed in as {name}.",
-    already_switch: "Sign out to create an account",
-    lang_help: "Questions show in your language. French stays below.",
-    code_label: "Instructor code",
-    code_help_default: "Ask your instructor for it.",
-    code_checking: "Checking…",
-    code_notfound_help: "✗ Code not found. Double-check with your instructor.",
-    code_notfound_join: "No instructor matches this code.",
-    code_valid: "✓ Valid code",
-    code_check_failed: "Check failed. Try again.",
-    join_school: "You're joining {school}{with}.",
-    join_with: " with {name}",
-    email_label: "Your email",
-    pwd_label: "Password",
-    pwd_ph: "8 characters minimum",
-    pwd_hide_aria: "Hide password",
-    pwd_show_aria: "Show password",
-    pwd_help: "Minimum 8 characters.",
-    pwd_too_short: "Too short (minimum 8 characters).",
-    submit: "Create my account",
-    submitting: "Creating…",
-    have_account: "Already have an account? ",
-    login_link: "Log in",
-    toast_code_invalid: "Invalid instructor code. Check it again.",
-    code_notfound_short: "✗ Code not found.",
-    toast_already_school:
-      "This account is already linked to an instructor. Please log in.",
-    toast_exists: "An account already exists with this email. Log in directly.",
-    toast_generic: "Error while creating the account",
-  },
-  ar: {
-    title_solo: "حسابك المجاني",
-    title_join: "انضمّ إلى مدرّبك",
-    sub_solo:
-      "3 دروس لك إلى الأبد · 3 أسئلة وسيناريو واحد كل يوم. بدون بطاقة بنكية. إن اشتريت باقة، استعمل البريد نفسه الذي دفعت به.",
-    sub_join: "أدخِل رمز مدرّبك ثم أنشئ حسابك.",
-    role_badge: "طالب",
-    already_connected: "أنت مسجّل الدخول بالفعل باسم {name}.",
-    already_switch: "سجّل الخروج لإنشاء حساب",
-    lang_help: "تظهر الأسئلة بلغتك. وتبقى الفرنسية تحتها.",
-    code_label: "رمز المدرّب",
-    code_help_default: "اطلبه من مدرّبك.",
-    code_checking: "جارٍ التحقّق…",
-    code_notfound_help: "✗ الرمز غير موجود. تحقّق مجدّداً مع مدرّبك.",
-    code_notfound_join: "لا يوجد مدرّب يطابق هذا الرمز.",
-    code_valid: "✓ رمز صالح",
-    code_check_failed: "تعذّر التحقّق. أعد المحاولة.",
-    join_school: "أنت تنضمّ إلى {school}{with}.",
-    join_with: " مع {name}",
-    email_label: "بريدك الإلكتروني",
-    pwd_label: "كلمة المرور",
-    pwd_ph: "8 أحرف على الأقل",
-    pwd_hide_aria: "إخفاء كلمة المرور",
-    pwd_show_aria: "إظهار كلمة المرور",
-    pwd_help: "8 أحرف على الأقل.",
-    pwd_too_short: "قصيرة جداً (8 أحرف على الأقل).",
-    submit: "إنشاء حسابي",
-    submitting: "جارٍ الإنشاء…",
-    have_account: "لديك حساب بالفعل؟ ",
-    login_link: "تسجيل الدخول",
-    toast_code_invalid: "رمز المدرّب غير صالح. تحقّق منه مجدّداً.",
-    code_notfound_short: "✗ الرمز غير موجود.",
-    toast_already_school: "هذا الحساب مرتبط بمدرّب بالفعل. سجّل الدخول.",
-    toast_exists: "يوجد حساب بالفعل بهذا البريد. سجّل الدخول مباشرة.",
-    toast_generic: "خطأ أثناء إنشاء الحساب",
-  },
-};
-function sgtR(key, fr) {
-  const l = getLang();
-  return (l !== "fr" && SG_I18N[l]?.[key]) || fr;
+function eyeIcon(open) {
+  return open
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a18.7 18.7 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a18.7 18.7 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
 }
-function sgt(key, fr) {
-  return esc(sgtR(key, fr));
-}
+const BACK_ICON =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>';
 
 export async function mount(root) {
-  // Pré-remplissage éventuel du code : #/rejoindre?code=PERMIS75
-  // Mode SOLO (#/rejoindre?solo=1) : élève sans moniteur (acheteurs du Pass
-  // Permis) — le code devient inutile, on le cache et on saute le rattachement.
   const hash = location.hash;
   const qIdx = hash.indexOf("?");
   const params = new URLSearchParams(qIdx >= 0 ? hash.slice(qIdx + 1) : "");
@@ -309,213 +239,278 @@ export async function mount(root) {
 
   track("signup.viewed", { from: solo ? "pass_solo" : "join_code" });
 
-  // Session déjà active (compte test resté connecté, tél partagé…) : on
-  // prévient au lieu de laisser croire que le circuit est cassé — créer un
-  // compte par-dessus une session existante sème la confusion.
+  // Session déjà active (compte test resté connecté, téléphone partagé…) : on
+  // prévient au lieu de laisser croire que le circuit est cassé.
   const connected = getCurUser();
+  if (connected) {
+    renderConnected(root, connected);
+    return;
+  }
 
-  // État persistant à travers les re-rendus déclenchés par le changement de
-  // langue (le compte n'est créé qu'une fois ; la langue choisie tient).
-  let chosenLang = getLang();
-  let accountCreated = false; // permet de retenter sans recréer le compte
+  renderFlow(root, { solo, prefillCode, prefillEmail });
+}
 
-  // Construit (ou RECONSTRUIT) tout le formulaire dans la langue courante et
-  // rebranche les handlers. Appelé à l'init puis à chaque changement de langue
-  // (re-rendu complet : innerHTML remplace nœuds/listeners → pas de fuite). La
-  // saisie déjà tapée est préservée via `preserve` (recette page Réglages).
-  function renderForm(preserve) {
-    const connectedBanner = connected
-      ? `<div class="sg-join show" id="sg-connected" style="margin-bottom:18px">
-        <span class="sg-join-ico">${icon("alert-circle", { size: 20, strokeWidth: 2 })}</span>
-        <span class="sg-join-txt">${sgtR("already_connected", "Tu es déjà connecté en tant que {name}.").replace("{name}", `<strong>${esc(connected.prenom || connected.username || connected.email || "quelqu'un")}</strong>`)}
-          <a href="#" id="sg-switch" style="color:var(--gold);font-weight:800">${sgt("already_switch", "Se déconnecter pour créer un compte")}</a></span>
-      </div>`
-      : "";
-
-    root.innerHTML = `${STYLE}
-    <div class="sg">
-      <div class="sg-card">
-        <img class="sg-logo" src="/skins/avatars/permigo-badge-icon.png" alt="PermiGo" width="88" height="88" />
-        <h1 class="sg-title">${solo ? sgt("title_solo", "Ton compte gratuit") : sgt("title_join", "Rejoins ton moniteur")}</h1>
-        <p class="sg-sub">${solo ? sgt("sub_solo", "3 leçons à toi pour toujours · 3 questions et 1 scène chaque jour. Sans carte bancaire. Si tu as pris un Pass, utilise le même email que ton paiement.") : sgt("sub_join", "Entre le code de ton moniteur puis crée ton compte.")}</p>
-        <div style="text-align:center"><span class="sg-role-badge">${sgt("role_badge", "Élève")}</span></div>
-        ${connectedBanner}
-
-        <style>
-          .sg-lang{display:flex;gap:6px;margin-top:2px}
-          .sg-lang-b{flex:1;padding:11px 4px;border-radius:12px;border:1.5px solid var(--bo);background:var(--su);color:var(--mu);font:700 14px/1.1 inherit;cursor:pointer;transition:border-color .15s,color .15s,box-shadow .15s}
-          .sg-lang-b.active{border-color:var(--a);color:var(--a);box-shadow:inset 0 0 0 1px var(--a)}
-        </style>
-        <div class="sg-row">
-          <label class="sg-label">Langue · Language · <span lang="ar" dir="rtl">اللغة</span></label>
-          <div class="sg-lang" id="sg-lang" role="group" aria-label="Choisir ta langue / Choose your language">
-            <button type="button" class="sg-lang-b${chosenLang === "fr" ? " active" : ""}" data-lang="fr">Français</button>
-            <button type="button" class="sg-lang-b${chosenLang === "en" ? " active" : ""}" data-lang="en">English</button>
-            <button type="button" class="sg-lang-b${chosenLang === "ar" ? " active" : ""}" data-lang="ar" lang="ar">العربية</button>
-          </div>
-          <div class="sg-help">${sgt("lang_help", "Les questions du quiz s'affichent dans ta langue, le français gardé dessous.")}</div>
-        </div>
-
-        <div class="sg-row" ${solo ? 'style="display:none"' : ""}>
-          <label class="sg-label" for="sg-code">${sgt("code_label", "Code moniteur")}</label>
-          <input class="sg-input sg-code-input" id="sg-code" type="text" autocomplete="off"
-            autocorrect="off" autocapitalize="characters" spellcheck="false"
-            maxlength="16" placeholder="PERMIS75" value="${escAttr(prefillCode)}" />
-          <div class="sg-help" id="sg-code-help">${sgt("code_help_default", "Demande-le à ton moniteur.")}</div>
-        </div>
-
-        <div class="sg-join" id="sg-join">
-          <span class="sg-join-ico" id="sg-join-ico">${icon("check-circle", { size: 20, strokeWidth: 2 })}</span>
-          <span class="sg-join-txt" id="sg-join-txt"></span>
-        </div>
-
-        <div class="sg-row">
-          <label class="sg-label" for="sg-email">${sgt("email_label", "Ton email")}</label>
-          <input class="sg-input" id="sg-email" type="email" autocomplete="email" autocapitalize="off" placeholder="toi@exemple.fr" />
-        </div>
-
-        <div class="sg-row">
-          <label class="sg-label" for="sg-password">${sgt("pwd_label", "Mot de passe")}</label>
-          <div class="sg-pwd-wrap">
-            <!-- Visible par défaut (type=text) : sur iPhone, un champ
-                 type=password + new-password remplace le clavier par la
-                 suggestion « mot de passe fort » → impossible de taper le sien.
-                 L'œil permet de le masquer. -->
-            <input class="sg-input" id="sg-password" type="text" autocomplete="new-password" minlength="8" placeholder="${sgt("pwd_ph", "8 caractères minimum")}" />
-            <button class="sg-pwd-toggle" id="sg-pwd-toggle" type="button" aria-label="${sgt("pwd_hide_aria", "Masquer le mot de passe")}" aria-pressed="true">${icon("eye-off", { size: 18, strokeWidth: 2 })}</button>
-          </div>
-          <div class="sg-help" id="sg-pwd-help">${sgt("pwd_help", "Minimum 8 caractères.")}</div>
-        </div>
-
-        <button class="sg-btn" id="sg-submit" disabled>${sgt("submit", "Créer mon compte")}</button>
-        <div class="sg-sep"></div>
-        <div class="sg-login-row">${sgtR("have_account", "Déjà un compte&nbsp;? ")}<a href="/#/login">${sgt("login_link", "Se connecter")}</a></div>
+function renderConnected(root, me) {
+  const name = esc(me.prenom || me.username || me.email || "quelqu'un");
+  root.innerHTML = `${STYLE}
+    <div class="rj-bgfx" aria-hidden="true"><i></i><i></i></div>
+    <div class="rj-app">
+      <div class="rj-connected">
+        <img class="rj-mascot" src="${MASCOT.point}" alt="" style="height:140px" />
+        <p>Tu es déjà connecté en tant que <strong>${name}</strong>.</p>
+        <button class="rj-cta" id="rj-switch" type="button">Se déconnecter pour créer un compte</button>
+        <a class="rj-connected-link" href="/#/">Retourner à l'accueil</a>
       </div>
-    </div>
-  `;
-
-    const codeEl = root.querySelector("#sg-code");
-    const codeHelp = root.querySelector("#sg-code-help");
-    const joinBox = root.querySelector("#sg-join");
-    const joinIco = root.querySelector("#sg-join-ico");
-    const joinTxt = root.querySelector("#sg-join-txt");
-    const emailEl = root.querySelector("#sg-email");
-    const pwdEl = root.querySelector("#sg-password");
-    const pwdHelp = root.querySelector("#sg-pwd-help");
-    const submitBtn = root.querySelector("#sg-submit");
-
-    // Restaure la saisie déjà tapée après un re-rendu (changement de langue).
-    // Sans `preserve` (tout premier rendu), l'email du paiement Stripe
-    // (prefillEmail) prend sa place s'il y en a un.
-    if (preserve) {
-      if (codeEl && preserve.code) codeEl.value = preserve.code;
-      emailEl.value = preserve.email || "";
-      pwdEl.value = preserve.pwd || "";
-    } else if (prefillEmail) {
-      emailEl.value = prefillEmail;
+    </div>`;
+  root.querySelector("#rj-switch")?.addEventListener("click", async () => {
+    try {
+      await sb.auth.signOut();
+    } catch {
+      /* session déjà morte : on recharge quand même */
     }
-    const collectValues = () => ({
-      code: codeEl?.value || "",
-      email: emailEl.value,
-      pwd: pwdEl.value,
-    });
+    window.location.reload();
+  });
+}
 
-    // Déconnexion express depuis le bandeau « déjà connecté » : on reste sur
-    // la page (reload avec le même hash) pour reprendre l'inscription à zéro.
-    root.querySelector("#sg-switch")?.addEventListener("click", async (e) => {
-      e.preventDefault();
+function renderFlow(root, { solo, prefillCode, prefillEmail }) {
+  const RM =
+    typeof matchMedia === "function" &&
+    matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // ─── État persistant à travers les écrans ──────────────────────
+  const state = {
+    prenom: "",
+    email: prefillEmail || "",
+    pwd: "",
+    code: prefillCode || "",
+  };
+  let accountCreated = false;
+  let submitting = false;
+  let boite = null;
+
+  root.innerHTML = `${STYLE}
+    <div class="rj-bgfx" aria-hidden="true"><i></i><i></i></div>
+    <div class="rj-app">
+      <div class="rj-top">
+        <button class="rj-back" id="rj-back" hidden aria-label="Revenir">${BACK_ICON}</button>
+        <div class="rj-dots" id="rj-dots" aria-hidden="true"><b></b><b></b><b></b></div>
+        <div class="rj-spacer"></div>
+      </div>
+      <div class="rj-stage" id="rj-stage">
+
+        <section class="rj-scr live" data-i="0">
+          <div class="rj-hero">
+            <div class="rj-bubble">Salut. Moi c'est PermiGo.</div>
+            <img class="rj-mascot" src="${MASCOT.hello}" alt="" />
+          </div>
+          <div class="rj-body">
+            <h1 class="rj-h1">Comment tu t'appelles ?</h1>
+            <div class="rj-line"><input id="rj-prenom" type="text" autocomplete="given-name" placeholder="Prénom" enterkeyhint="next" maxlength="40" /></div>
+          </div>
+          <div class="rj-foot"><button class="rj-cta" id="rj-go0" type="button" disabled>Continuer</button></div>
+        </section>
+
+        <section class="rj-scr" data-i="1" hidden>
+          <div class="rj-hero">
+            <div class="rj-bubble">Ton email et un mot de passe.</div>
+            <img class="rj-mascot" src="${MASCOT.point}" alt="" />
+          </div>
+          <div class="rj-body">
+            <h1 class="rj-h1">Où je te retrouve ?</h1>
+            <div class="rj-line"><input id="rj-email" type="email" inputmode="email" autocomplete="email" placeholder="ton@email.fr" enterkeyhint="next" /></div>
+            ${
+              solo
+                ? ""
+                : `<div class="rj-minor">
+              <label for="rj-code">Code moniteur</label>
+              <input class="rj-code-input" id="rj-code" type="text" autocomplete="off" autocorrect="off"
+                autocapitalize="characters" spellcheck="false" maxlength="16" placeholder="PERMIS75"
+                value="${escAttr(prefillCode)}" enterkeyhint="next" />
+              <div class="rj-help" id="rj-code-help">Demande-le à ton moniteur.</div>
+            </div>`
+            }
+            <div class="rj-minor">
+              <label for="rj-pwd">Mot de passe</label>
+              <div class="rj-minor-wrap rj-minor-pwd">
+                <input id="rj-pwd" type="password" autocomplete="new-password" placeholder="8 caractères minimum" enterkeyhint="go" />
+                <button class="rj-minor-toggle" id="rj-pwd-toggle" type="button" aria-label="Afficher le mot de passe" aria-pressed="false">${eyeIcon(false)}</button>
+              </div>
+            </div>
+          </div>
+          <div class="rj-foot">
+            <button class="rj-cta" id="rj-go1" type="button" disabled>Continuer</button>
+            <div class="rj-login-row">Déjà un compte&nbsp;? <a href="/#/login">Se connecter</a></div>
+          </div>
+        </section>
+
+        <section class="rj-scr" data-i="2" hidden>
+          <div class="rj-hero">
+            <div class="rj-bubble">Ça change tes questions.</div>
+            <img class="rj-mascot" src="${MASCOT.think}" alt="" />
+          </div>
+          <div class="rj-body">
+            <h1 class="rj-h1">Quelle boîte de vitesses ?</h1>
+            <div class="rj-cards" id="rj-boite-cards">
+              <button class="rj-card" type="button" data-boite="auto">
+                <i aria-hidden="true">PRND</i>
+                <span><b>Boîte automatique</b><span>Deux pédales et un sélecteur P R N D</span></span>
+              </button>
+              <button class="rj-card" type="button" data-boite="manuelle">
+                <i aria-hidden="true">1-5</i>
+                <span><b>Boîte manuelle</b><span>Trois pédales et un levier de vitesses</span></span>
+              </button>
+            </div>
+          </div>
+          <div class="rj-foot"><button class="rj-skip" id="rj-skip-boite" type="button">Je ne sais pas encore</button></div>
+        </section>
+
+        <section class="rj-scr" data-i="3" hidden>
+          <div class="rj-hero">
+            <div class="rj-bubble">Bien joué.</div>
+            <img class="rj-mascot" src="${MASCOT.cheer}" alt="" />
+          </div>
+          <div class="rj-body">
+            <h1 class="rj-h1">Bienvenue <span id="rj-nm">toi</span></h1>
+            <p class="rj-sub">Ton compte est prêt. La première leçon t'attend.</p>
+          </div>
+          <div class="rj-foot"><button class="rj-cta" id="rj-enter" type="button">On y va</button></div>
+        </section>
+
+      </div>
+    </div>`;
+
+  const scrs = Array.from(root.querySelectorAll(".rj-scr"));
+  const dots = root.querySelector("#rj-dots");
+  const back = root.querySelector("#rj-back");
+  const stage = root.querySelector("#rj-stage");
+  let cur = 0;
+  let busy = false;
+  let timer = null;
+
+  function paint() {
+    const bs = dots.querySelectorAll("b");
+    bs.forEach((b, i) => {
+      b.className = i === cur ? "on" : i < cur ? "done" : "";
+    });
+    dots.hidden = cur >= 3;
+    back.hidden = cur === 0 || cur >= 3;
+    if (cur === 3) {
+      const nmEl = root.querySelector("#rj-nm");
+      if (nmEl) {
+        const p = state.prenom.trim();
+        nmEl.textContent = p ? p.charAt(0).toUpperCase() + p.slice(1) : "toi";
+      }
+    }
+  }
+
+  function focusFirst(sec) {
+    const f = sec.querySelector("input");
+    if (f) {
       try {
-        await sb.auth.signOut();
+        f.focus({ preventScroll: true });
       } catch {
-        /* session déjà morte : on recharge quand même */
+        f.focus();
       }
-      window.location.reload();
-    });
+    }
+  }
 
-    const pwdToggle = root.querySelector("#sg-pwd-toggle");
-    pwdToggle?.addEventListener("click", () => {
-      const show = pwdEl.type === "password";
-      pwdEl.type = show ? "text" : "password";
-      pwdToggle.setAttribute("aria-pressed", String(show));
-      pwdToggle.setAttribute(
-        "aria-label",
-        show
-          ? sgtR("pwd_hide_aria", "Masquer le mot de passe")
-          : sgtR("pwd_show_aria", "Afficher le mot de passe"),
-      );
-      pwdToggle.innerHTML = icon(show ? "eye-off" : "eye", {
-        size: 18,
-        strokeWidth: 2,
-      });
-      pwdEl.focus();
-    });
+  function go(n, isBack) {
+    if (busy || n === cur || n < 0 || n >= scrs.length) return;
+    busy = true;
+    const from = scrs[cur];
+    const to = scrs[n];
+    to.hidden = false;
+    to.className = "rj-scr " + (isBack ? "entB" : "ent");
+    from.className = "rj-scr " + (isBack ? "lvB" : "lv");
+    cur = n;
+    paint();
+    clearTimeout(timer);
+    timer = setTimeout(
+      () => {
+        from.hidden = true;
+        from.className = "rj-scr";
+        to.className = "rj-scr live";
+        busy = false;
+        focusFirst(to);
+      },
+      RM ? 0 : 340,
+    );
+  }
 
-    const emailValid = (v) =>
-      /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test((v || "").trim());
-    const normCode = (v) => (v || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  back.addEventListener("click", () => go(cur - 1, true));
 
-    // Pseudo auto-généré : le formulaire ne demande plus que l'email et le mot
-    // de passe, donc la base vient de l'email (avant le @), sans accents, + 4
-    // chiffres. L'élève le change quand il veut dans l'app, et son prénom lui
-    // est demandé le jour où il entre dans un classement.
-    // ⚠️ 12 caractères MAXIMUM avant les 4 chiffres : la colonne username porte
-    // une contrainte ^[A-Za-z0-9_]{3,16}$. Une adresse un peu longue faisait
-    // échouer l'inscription entière sur un 400 illisible (vu le 01/08).
-    const genUsername = (email) => {
-      const base =
-        String(email || "")
-          .split("@")[0]
-          .toLowerCase()
-          .normalize("NFD")
-          .replace(/[^a-z0-9]/g, "")
-          .slice(0, 12) || "eleve";
-      const safe = base.length >= 2 ? base : "eleve";
-      return safe + String(Math.floor(1000 + Math.random() * 9000));
-    };
+  // ─── Écran 0 · Prénom ───────────────────────────────────────────
+  const prenomEl = root.querySelector("#rj-prenom");
+  const go0Btn = root.querySelector("#rj-go0");
+  prenomEl.addEventListener("input", () => {
+    state.prenom = prenomEl.value;
+    go0Btn.disabled = prenomEl.value.trim().length < 2;
+  });
+  go0Btn.addEventListener("click", () => go(1, false));
 
-    let codeValid = false; // résolu par get_join_code_info
-    let codeChecking = false;
-    let codeTimer = null;
+  // ─── Écran 1 · Email + mot de passe (+ code moniteur) ──────────
+  const emailEl = root.querySelector("#rj-email");
+  const pwdEl = root.querySelector("#rj-pwd");
+  const pwdToggle = root.querySelector("#rj-pwd-toggle");
+  const codeEl = root.querySelector("#rj-code");
+  const codeHelp = root.querySelector("#rj-code-help");
+  const go1Btn = root.querySelector("#rj-go1");
 
-    const validate = () => {
-      const codeOk = solo || (codeValid && !codeChecking);
-      const emailOk = emailValid(emailEl.value);
-      const pwdOk = pwdEl.value.length >= 8;
-      submitBtn.disabled = !(codeOk && emailOk && pwdOk);
+  if (state.email) emailEl.value = state.email;
+  if (state.code) codeEl && (codeEl.value = state.code);
 
-      if (pwdEl.value && !pwdOk) {
-        pwdEl.classList.add("error");
-        pwdHelp.classList.add("error");
-        pwdHelp.textContent = sgtR(
-          "pwd_too_short",
-          "Trop court (minimum 8 caractères).",
-        );
-      } else {
-        pwdEl.classList.remove("error");
-        pwdHelp.classList.remove("error");
-        pwdHelp.textContent = sgtR("pwd_help", "Minimum 8 caractères.");
-      }
-    };
+  const emailValid = (v) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test((v || "").trim());
+  const normCode = (v) => (v || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
 
-    // Aperçu du code (debounce 400ms) — get_join_code_info
+  pwdToggle.addEventListener("click", () => {
+    const show = pwdEl.type === "password";
+    pwdEl.type = show ? "text" : "password";
+    pwdToggle.setAttribute("aria-pressed", String(show));
+    pwdToggle.setAttribute(
+      "aria-label",
+      show ? "Masquer le mot de passe" : "Afficher le mot de passe",
+    );
+    pwdToggle.innerHTML = eyeIcon(show);
+  });
+
+  let codeValid = solo; // en solo, pas de code à vérifier
+  let codeChecking = false;
+  let codeTimer = null;
+
+  function validateScreen1() {
+    const emailOk = emailValid(emailEl.value);
+    const pwdOk = pwdEl.value.length >= 8;
+    const codeOk = solo || (codeValid && !codeChecking);
+    go1Btn.disabled = !(emailOk && pwdOk && codeOk);
+    emailEl.classList.toggle("err", !!emailEl.value && !emailOk);
+    pwdEl.classList.toggle("err", !!pwdEl.value && !pwdOk);
+  }
+
+  emailEl.addEventListener("input", () => {
+    state.email = emailEl.value;
+    validateScreen1();
+  });
+  pwdEl.addEventListener("input", () => {
+    state.pwd = pwdEl.value;
+    validateScreen1();
+  });
+
+  if (!solo && codeEl) {
     const checkCode = () => {
       const v = normCode(codeEl.value);
+      state.code = v;
       codeValid = false;
-      joinBox.classList.remove("show", "err");
       if (v.length < 3) {
         codeChecking = false;
-        codeHelp.className = "sg-help";
-        codeHelp.textContent = sgtR(
-          "code_help_default",
-          "Demande-le à ton moniteur.",
-        );
-        validate();
+        codeHelp.className = "rj-help";
+        codeHelp.textContent = "Demande-le à ton moniteur.";
+        validateScreen1();
         return;
       }
       codeChecking = true;
-      codeHelp.className = "sg-help";
-      codeHelp.textContent = sgtR("code_checking", "Vérification…");
-      validate();
+      codeHelp.className = "rj-help";
+      codeHelp.textContent = "Vérification…";
+      validateScreen1();
       clearTimeout(codeTimer);
       codeTimer = setTimeout(async () => {
         if (normCode(codeEl.value) !== v) return;
@@ -528,227 +523,219 @@ export async function mount(root) {
           const info = Array.isArray(data) ? data[0] : data;
           if (error || !info) {
             codeValid = false;
-            codeHelp.className = "sg-help error";
-            codeHelp.textContent = sgtR(
-              "code_notfound_help",
-              "✗ Code introuvable. Revérifie auprès de ton moniteur.",
-            );
-            joinBox.classList.add("show", "err");
-            joinIco.innerHTML = icon("alert-circle", {
-              size: 20,
-              strokeWidth: 2,
-            });
-            joinTxt.textContent = sgtR(
-              "code_notfound_join",
-              "Aucun moniteur ne correspond à ce code.",
-            );
+            codeEl.classList.add("err");
+            codeHelp.className = "rj-help error";
+            codeHelp.textContent =
+              "Code introuvable. Revérifie auprès de ton moniteur.";
           } else {
             codeValid = true;
-            codeHelp.className = "sg-help ok";
-            codeHelp.textContent = sgtR("code_valid", "✓ Code valide");
-            joinBox.classList.add("show");
-            joinBox.classList.remove("err");
-            joinIco.innerHTML = icon("check-circle", {
-              size: 20,
-              strokeWidth: 2,
-            });
+            codeEl.classList.remove("err");
+            codeHelp.className = "rj-help ok";
             const ecole = info.ecole_nom || "ton auto-école";
-            // Si le nom de l'école contient déjà le prénom du moniteur
-            // (« Auto École de Rayan »), on ne rajoute pas « avec Rayan » :
-            // la répétition faisait phrase de robot.
             const dejaDansEcole =
               info.moniteur_prenom &&
               ecole.toLowerCase().includes(info.moniteur_prenom.toLowerCase());
             const withPart =
               info.moniteur_prenom && !dejaDansEcole
-                ? sgtR("join_with", " avec {name}").replace(
-                    "{name}",
-                    esc(info.moniteur_prenom),
-                  )
+                ? ` avec ${info.moniteur_prenom}`
                 : "";
-            joinTxt.innerHTML = sgtR(
-              "join_school",
-              "Tu rejoins {school}{with}.",
-            )
-              .replace("{school}", `<strong>${esc(ecole)}</strong>`)
-              .replace("{with}", withPart);
+            codeHelp.textContent = `Tu rejoins ${ecole}${withPart}.`;
           }
         } catch {
           codeChecking = false;
           codeValid = false;
-          codeHelp.className = "sg-help error";
-          codeHelp.textContent = sgtR(
-            "code_check_failed",
-            "Vérification impossible, réessaie.",
-          );
+          codeHelp.className = "rj-help error";
+          codeHelp.textContent = "Vérification impossible, réessaie.";
         }
-        validate();
+        validateScreen1();
       }, 400);
     };
-
     codeEl.addEventListener("input", checkCode);
-    emailEl.addEventListener("input", validate);
-    pwdEl.addEventListener("input", validate);
+    if (normCode(codeEl.value)) checkCode();
+  }
+  validateScreen1();
 
-    // Code pré-rempli (URL) ou restauré après changement de langue → vérifier.
-    if (codeEl && normCode(codeEl.value)) checkCode();
-    else validate();
+  const genUsername = (email) => {
+    const base =
+      String(email || "")
+        .split("@")[0]
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[^a-z0-9]/g, "")
+        .slice(0, 12) || "eleve";
+    const safe = base.length >= 2 ? base : "eleve";
+    return safe + String(Math.floor(1000 + Math.random() * 9000));
+  };
 
-    // Sélecteur de langue — pilote un RE-RENDU COMPLET du formulaire : tout le
-    // texte bascule aussitôt (recette de la page Réglages). applyLang pose le
-    // miroir localStorage + émet permigo:lang-changed (nav, etc.). La saisie déjà
-    // tapée est préservée. La préférence est persistée en base au submit.
-    root.querySelector("#sg-lang")?.addEventListener("click", (e) => {
-      const b = e.target.closest(".sg-lang-b");
-      if (!b || b.dataset.lang === chosenLang) return;
-      chosenLang = b.dataset.lang;
-      applyLang(chosenLang);
-      track("signup.language_picked", { language: chosenLang });
-      renderForm(collectValues());
-    });
+  async function submitAccount() {
+    if (submitting) return;
+    submitting = true;
+    go1Btn.disabled = true;
+    const label = go1Btn.textContent;
+    go1Btn.textContent = "Création…";
+    const { toast } = await import("@/components/common/toast.js");
 
-    submitBtn.addEventListener("click", async () => {
-      submitBtn.disabled = true;
-      submitBtn.textContent = sgtR("submitting", "Création…");
-      const { toast } = await import("@/components/common/toast.js");
-      const email = emailEl.value.trim().toLowerCase();
-      const code = normCode(codeEl.value);
+    try {
+      if (!accountCreated) {
+        const { error: authErr } = await sb.auth.signUp({
+          email: state.email.trim().toLowerCase(),
+          password: state.pwd,
+          options: { data: { role: "eleve" } },
+        });
+        if (authErr) throw authErr;
 
-      try {
-        if (!accountCreated) {
-          // 1. Sign up — le trigger handle_new_user_signup crée un profil "nu" élève
-          // Aucun prénom transmis : le déclencheur handle_new_user_signup pose
-          // la partie de l'email avant le @ comme prénom provisoire. L'élève
-          // donnera le vrai le jour où il entre dans un classement.
-          const { error: authErr } = await sb.auth.signUp({
-            email,
-            password: pwdEl.value,
-            options: { data: { role: "eleve" } },
+        if (!solo) {
+          const { error: joinErr } = await sb.rpc("join_moniteur_by_code", {
+            p_code: normCode(state.code),
           });
-          if (authErr) throw authErr;
-
-          // 2. Rattache au moniteur via son code (sauf inscription solo)
-          const { error: joinErr } = solo
-            ? { error: null }
-            : await sb.rpc("join_moniteur_by_code", { p_code: code });
           if (joinErr) {
             if (/invalid_code/i.test(joinErr.message || "")) {
-              toast(
-                sgtR(
-                  "toast_code_invalid",
-                  "Code moniteur invalide. Revérifie-le.",
-                ),
-                "error",
-                4000,
-              );
+              toast("Code moniteur invalide. Revérifie-le.", "error", 4000);
               codeValid = false;
-              codeHelp.className = "sg-help error";
-              codeHelp.textContent = sgtR(
-                "code_notfound_short",
-                "✗ Code introuvable.",
-              );
-              submitBtn.textContent = sgtR("submit", "Créer mon compte");
-              validate();
+              codeEl.classList.add("err");
+              codeHelp.className = "rj-help error";
+              codeHelp.textContent = "Code introuvable.";
+              go1Btn.textContent = label;
+              submitting = false;
+              validateScreen1();
               return;
             }
             if (/already_has_school/i.test(joinErr.message || "")) {
               toast(
-                sgtR(
-                  "toast_already_school",
-                  "Ce compte est déjà rattaché à un moniteur. Connecte-toi.",
-                ),
+                "Ce compte est déjà rattaché à un moniteur. Connecte-toi.",
                 "error",
                 4500,
               );
-              submitBtn.textContent = sgtR("submit", "Créer mon compte");
+              go1Btn.textContent = label;
+              submitting = false;
+              go1Btn.disabled = false;
               return;
             }
             throw joinErr;
           }
-          accountCreated = true;
         }
-
-        // 3. Pose le pseudo. C'est la SEULE chose écrite sur le profil ici :
-        //    la date de naissance est demandée dans l'accueil, le prénom au
-        //    premier classement. On retente avec un autre pseudo en cas de
-        //    collision (quasi impossible, mais défensif).
-        let profErr = null;
-        for (let attempt = 0; attempt < 6; attempt++) {
-          const res = await sb.rpc("set_eleve_signup_minimal", {
-            p_username: genUsername(email),
-          });
-          profErr = res.error;
-          if (!profErr || !/username_taken/i.test(profErr.message || "")) break;
-        }
-        if (profErr) throw profErr;
-
-        track("signup.completed", {
-          role: "eleve",
-          from: solo ? "pass_solo" : "join_code",
-        });
-        // Compte créé = LA conversion mesurable de la campagne pub. Avec 200 €
-        // on n'aura jamais assez d'achats pour qu'un algorithme apprenne ; les
-        // inscriptions, si.
-        fbTrack("CompleteRegistration", {
-          content_name: solo ? "compte_gratuit" : "code_moniteur",
-          status: true,
-        });
-
-        // Persiste la langue choisie sur le profil (le miroir localStorage est
-        // déjà posé au clic, donc la préférence tient même si l'RPC échoue).
-        if (chosenLang !== "fr") {
-          try {
-            await sb.rpc("set_my_preferences", {
-              p_data: { language: chosenLang },
-            });
-          } catch (_) {
-            /* localStorage tient déjà la préférence */
-          }
-        }
-
-        // Mesure « solo sans achat » : cet email a-t-il acheté le Pass ?
-        // (get_my_pass_status, migration solo_hardening). Aucun blocage —
-        // juste la donnée pour décider plus tard d'un éventuel verrou.
-        if (solo) {
-          try {
-            const { data: pass } = await sb.rpc("get_my_pass_status");
-            track("signup.solo_pass_check", { has_pass: !!pass?.has_pass });
-          } catch (_) {
-            /* best-effort */
-          }
-        }
-
-        // 4. Succès → entrée dans l'app (l'onboarding élève gère l'add-to-home)
-        window.location.href = "/#";
-        window.location.reload();
-      } catch (e) {
-        console.error("[rejoindre] failed", e);
-        const msg = /already.*registered|already.*exists/i.test(
-          e?.message || "",
-        )
-          ? sgtR(
-              "toast_exists",
-              "Un compte existe déjà avec cet email. Connecte-toi directement.",
-            )
-          : e?.message ||
-            sgtR("toast_generic", "Erreur lors de la création du compte");
-        toast(msg, "error", 4500);
-        submitBtn.disabled = false;
-        submitBtn.textContent = sgtR("submit", "Créer mon compte");
+        accountCreated = true;
       }
-    });
 
-    // Focus initial seulement au 1er rendu (pas à chaque changement de langue).
-    // Email déjà rempli (paiement Stripe) → directement le mot de passe.
-    if (!preserve) {
-      const first = prefillEmail
-        ? pwdEl
-        : solo || prefillCode
-          ? emailEl
-          : codeEl;
-      setTimeout(() => first.focus(), 100);
+      // Pseudo auto-généré depuis l'email (retente en cas de collision, rare).
+      let profErr = null;
+      for (let attempt = 0; attempt < 6; attempt++) {
+        const res = await sb.rpc("set_eleve_signup_minimal", {
+          p_username: genUsername(state.email),
+        });
+        profErr = res.error;
+        if (!profErr || !/username_taken/i.test(profErr.message || "")) break;
+      }
+      if (profErr) throw profErr;
+
+      // Le vrai prénom, donné à l'écran précédent (best effort : un raté ici
+      // ne doit pas bloquer la création du compte, juste garder le prénom
+      // provisoire posé par le trigger — identity-prompt le redemandera).
+      try {
+        await sb.rpc("set_my_identity", {
+          p_prenom: state.prenom.trim(),
+          p_nom: null,
+        });
+      } catch (e) {
+        console.warn("[rejoindre] set_my_identity a échoué", e);
+      }
+
+      // Recharge le profil en mémoire (auth.js) : sans ça getCurUser() reste
+      // vide jusqu'au reload final, et l'écran boîte (enregistrerBoite, qui
+      // lit getCurUser().id) échouerait en silence.
+      try {
+        await restoreSession();
+      } catch (e) {
+        console.warn("[rejoindre] restoreSession a échoué", e);
+      }
+
+      track("signup.completed", {
+        role: "eleve",
+        from: solo ? "pass_solo" : "join_code",
+      });
+      // Compte créé = LA conversion mesurable de la campagne pub.
+      fbTrack("CompleteRegistration", {
+        content_name: solo ? "compte_gratuit" : "code_moniteur",
+        status: true,
+      });
+
+      if (solo) {
+        try {
+          const { data: pass } = await sb.rpc("get_my_pass_status");
+          track("signup.solo_pass_check", { has_pass: !!pass?.has_pass });
+        } catch {
+          /* best-effort */
+        }
+      }
+
+      submitting = false;
+      go1Btn.disabled = false;
+      go1Btn.textContent = label;
+      go(2, false);
+    } catch (e) {
+      console.error("[rejoindre] failed", e);
+      const msg = /already.*registered|already.*exists/i.test(e?.message || "")
+        ? "Un compte existe déjà avec cet email. Connecte-toi directement."
+        : e?.message || "Erreur lors de la création du compte";
+      toast(msg, "error", 4500);
+      submitting = false;
+      go1Btn.disabled = false;
+      go1Btn.textContent = label;
     }
   }
+  go1Btn.addEventListener("click", submitAccount);
 
-  renderForm();
+  // ─── Écran 2 · Boîte de vitesses (passable) ────────────────────
+  chargerBoite()
+    .then((known) => {
+      if (known) boite = known;
+    })
+    .catch(() => {});
+  const boiteBtns = Array.from(
+    root.querySelectorAll("#rj-boite-cards .rj-card"),
+  );
+  boiteBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      haptic("select");
+      boiteBtns.forEach((b) => b.classList.remove("sel"));
+      btn.classList.add("sel");
+      boite = btn.dataset.boite;
+      track("signup.boite_choisie", { boite });
+      enregistrerBoite(boite).catch(() => {});
+      setTimeout(() => go(3, false), RM ? 0 : 220);
+    });
+  });
+  root.querySelector("#rj-skip-boite")?.addEventListener("click", () => {
+    track("signup.boite_skipped", {});
+    go(3, false);
+  });
+
+  // ─── Écran 3 · Arrivée ──────────────────────────────────────────
+  root.querySelector("#rj-enter")?.addEventListener("click", () => {
+    haptic("success");
+    window.location.href = "/#";
+    window.location.reload();
+  });
+
+  // ─── Entrée : passe au champ suivant, ou déclenche l'action ─────
+  stage.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter") return;
+    const sec = scrs[cur];
+    const ins = Array.from(sec.querySelectorAll("input"));
+    const i = ins.indexOf(document.activeElement);
+    if (i > -1 && i < ins.length - 1) {
+      ins[i + 1].focus();
+      e.preventDefault();
+      return;
+    }
+    const cta = sec.querySelector(".rj-cta:not(:disabled)");
+    if (cta) {
+      e.preventDefault();
+      cta.click();
+    }
+  });
+
+  // Le clavier monte tout seul à l'arrivée.
+  paint();
+  focusFirst(scrs[0]);
 }

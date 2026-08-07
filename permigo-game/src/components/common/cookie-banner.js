@@ -139,6 +139,31 @@ const STYLE = `<style>
   .ck-btn-refuse { background: var(--bg); color: var(--ink, #1e293b); border-color: var(--bo); }
 </style>`;
 
+// ⚠️ Le premier geste d'un nouvel élève ne doit jamais être un choix
+// juridique. Deux zones sont donc BLOQUÉES pour l'affichage (le choix reste
+// demandé, juste pas au milieu de la création de compte) :
+//  - l'inscription (#/rejoindre, 4 écrans mascotte) → détecté par hash, dispo
+//    synchrone dès le chargement de la page ;
+//  - l'onboarding qui suit (mur posé par accessGateFor pour un élève tout
+//    neuf) → connu seulement une fois `boot()` résolu (async), donc signalé
+//    depuis main.js via `setCookieBannerBlocked(true)`.
+// Dans les deux cas rien n'est tracké avant le choix de toute façon
+// (analytics/pixel attendent déjà `permigo:consent`) : différer l'AFFICHAGE
+// reste conforme, comme documenté plus haut pour le délai de 4 s.
+function isBlockedRoute() {
+  return location.hash.startsWith("#/rejoindre");
+}
+let gateBlocked = false;
+
+/** @param {boolean} v — posé par main.js pendant un mur d'accès (onboarding élève neuf) */
+export function setCookieBannerBlocked(v) {
+  gateBlocked = !!v;
+  // Dans les DEUX sens : poser le blocage replie un bandeau déjà ouvert,
+  // le lever le fait revenir.
+  _retryPendingShow();
+}
+let _retryPendingShow = () => {};
+
 export function mountCookieBanner() {
   // Choix déjà fait → rien à afficher.
   if (getConsent()) return;
@@ -190,8 +215,14 @@ export function mountCookieBanner() {
     }
   };
 
+  let closed = false;
+
   const show = () => {
-    if (shown) return;
+    if (shown || closed) return;
+    // Inscription/onboarding en cours → on retente dès que le blocage tombe
+    // (hashchange hors #/rejoindre, ou setCookieBannerBlocked(false)) au lieu
+    // d'afficher le bandeau par-dessus le formulaire de création de compte.
+    if (isBlockedRoute() || gateBlocked) return;
     shown = true;
     clearTimeout(timer);
     // La réserve d'espace bas n'est posée qu'AVEC le bandeau : sinon l'app
@@ -205,16 +236,45 @@ export function mountCookieBanner() {
     });
     window.addEventListener("resize", mesurer, { passive: true });
   };
-  timer = setTimeout(show, 4000);
-  window.addEventListener("scroll", show, { passive: true });
-  window.addEventListener("touchmove", show, { passive: true });
 
-  const close = (value) => {
-    setConsent(value);
+  // ⚠️ Le bandeau doit aussi se RÉTRACTER, pas seulement attendre pour
+  // s'ouvrir. Un visiteur peut le voir apparaître sur la page de vente PUIS
+  // cliquer sur « créer un compte » : sans ça il restait ouvert par-dessus les
+  // écrans d'inscription (mesuré le 07/08/2026 à 375×667, le bandeau collé
+  // sous le bouton Continuer, en plein premier geste du nouvel élève).
+  // Il n'est pas fermé, juste replié : il revient dès la sortie du tunnel.
+  const hide = () => {
+    if (!shown) return;
+    shown = false;
     banner.classList.remove("on");
     document.body.classList.remove("ck-open");
     document.body.style.removeProperty("--ck-h");
     window.removeEventListener("resize", mesurer);
+    // le visiteur n'a plus le bandeau sous les yeux : on réarme les deux voies
+    // d'apparition pour la suite de la visite.
+    window.addEventListener("scroll", show, { passive: true });
+    window.addEventListener("touchmove", show, { passive: true });
+    timer = setTimeout(show, 4000);
+  };
+
+  const syncRoute = () => (isBlockedRoute() || gateBlocked ? hide() : show());
+  _retryPendingShow = syncRoute;
+  timer = setTimeout(show, 4000);
+  window.addEventListener("scroll", show, { passive: true });
+  window.addEventListener("touchmove", show, { passive: true });
+  window.addEventListener("hashchange", syncRoute);
+
+  const close = (value) => {
+    setConsent(value);
+    closed = true;
+    clearTimeout(timer);
+    banner.classList.remove("on");
+    document.body.classList.remove("ck-open");
+    document.body.style.removeProperty("--ck-h");
+    window.removeEventListener("resize", mesurer);
+    window.removeEventListener("scroll", show);
+    window.removeEventListener("touchmove", show);
+    window.removeEventListener("hashchange", syncRoute);
     popIntroBlocker(); // consentement répondu → le tuto peut démarrer
     const done = () => root.remove();
     banner.addEventListener("transitionend", done, { once: true });
