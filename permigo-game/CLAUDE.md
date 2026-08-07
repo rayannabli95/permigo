@@ -122,7 +122,7 @@ Chaque rôle a son univers. **Côté moniteur : liberté totale** (aucune règle
 ## ⌨️ Commandes (depuis `permigo-game/`)
 
 - `npm run dev` · `npm run build` · `npm run preview`
-- `npm run lint` → ⚠️ **stub** (« No lint configured yet ») : ne te fie pas à sa sortie verte, ce n'est pas un vrai lint.
+- `npm run lint` → depuis le 08/08/2026, vérifie que toute clé `localStorage` liée à un compte est déclarée dans `account-cache.js` (`scripts/check-account-cache.mjs`). Ce n'est PAS un lint JS général (pas d'ESLint/Biome configuré) : sa sortie verte veut dire « pas de fuite de cache compte détectée », rien de plus.
 - `npm run test` → Playwright e2e (`tests/e2e/*.spec.js`, dont `a11y.spec.js` via axe-core) · `npm run test:ui` en mode UI.
 - Pas de `typecheck` ni `db:types`.
 - **Avant un commit** : `npm run build` (vert obligatoire) + `npm run test` si tu touches un flow critique.

@@ -74,6 +74,14 @@ export const ACCOUNT_SCOPED_KEYS = [
   "permigo_push_asked",
   "permigo_push_optout",
   "permigo_has_validated",
+  // onboarding/index.js — flag maître : si un nouveau compte en hérite, il
+  // SAUTE tout l'onboarding sans jamais l'avoir vu (trouvé à l'audit du
+  // 08/08/2026, pas repéré au premier passage).
+  "permigo_eleve_onboarding_done",
+  // enseignant/aujourdhui.js — tour guidé moniteur déjà vu
+  "pg-tour-moniteur-v1",
+  // duel-intermission.js — messages d'entracte déjà tirés (dédoublonnage)
+  "permigo.duel.entractes",
 ];
 
 // Clés dont le NOM varie (date, id...) : on ne peut pas les lister une par
@@ -81,6 +89,8 @@ export const ACCOUNT_SCOPED_KEYS = [
 export const ACCOUNT_SCOPED_PREFIXES = [
   // web-push.js — anti-spam "1 notif par jour", une clé par date calendaire
   "permigo_push_last_",
+  // coach-hint.js — un texte pédagogique "vu 1 fois" par identifiant de hint
+  "pg-hint-",
 ];
 
 /** Vide tout le cache local appartenant à un compte. Ne touche pas aux

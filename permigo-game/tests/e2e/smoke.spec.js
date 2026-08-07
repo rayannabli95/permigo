@@ -152,20 +152,30 @@ test.describe("Push notifications — gating", () => {
     await expect(page.locator("#push-soft-banner")).toHaveCount(0);
   });
 
-  // Le profil élève est le profil « Arène » (.arn) : le toggle rappels y est
-  // le bouton #arn-notif (l'ancien #prf-notif-row ne sert plus que gérant/owner).
-  test("toggle notifications visible dans profil", async ({ page }) => {
+  // Le toggle rappels élève vit dans Réglages (#/settings, #tgl-push) depuis
+  // qu'il a été retiré du profil « Arène ». #arn-notif et #prf-notif-row
+  // n'existent plus nulle part dans le code (repéré à l'audit du 08/08/2026 :
+  // ce test ciblait un sélecteur mort, échec systématique sans rapport avec
+  // l'état réel de l'API Notification — ce n'était pas le code de l'app qui
+  // avait un problème, c'était ce test qui n'avait pas suivi le déménagement).
+  test("toggle notifications visible dans réglages", async ({ page }) => {
     await loginAsEleve(page);
     await page.evaluate(() => {
-      location.hash = "#/profil";
+      location.hash = "#/settings";
     });
-    // Attendre la page profil élève (Arène)
-    await page.waitForSelector(".arn", { timeout: 10_000 });
-    // Si Notification API dispo → le bouton rappels doit être présent
-    const hasNotifAPI = await page.evaluate(() => "Notification" in window);
-    if (hasNotifAPI) {
-      await expect(page.locator("#arn-notif")).toBeVisible();
-    }
+    // Le `<input type="checkbox">` est en `display:none` PAR DESIGN (pattern
+    // "checkbox hack" : `.st-tgl-t` est le switch visuellement rendu, réagit
+    // à `:checked` par sélecteur adjacent). On attend qu'il soit ATTACHÉ au
+    // DOM, pas "visible" au sens CSS strict de Playwright — et on vérifie la
+    // visibilité sur son label, qui lui est le vrai élément à l'écran.
+    await page.waitForSelector("#tgl-push", {
+      state: "attached",
+      timeout: 10_000,
+    });
+    await expect(page.locator("#tgl-push")).toBeAttached();
+    await expect(
+      page.locator("label.st-tgl", { has: page.locator("#tgl-push") }),
+    ).toBeVisible();
   });
 
   test("toggle change l'état opted-out dans localStorage", async ({
@@ -178,9 +188,14 @@ test.describe("Push notifications — gating", () => {
       localStorage.removeItem("permigo_push_optout");
     });
     await page.evaluate(() => {
-      location.hash = "#/profil";
+      location.hash = "#/settings";
     });
-    await page.waitForSelector("#arn-notif", { timeout: 10_000 });
+    // Même chose que le test précédent : élément attaché, pas "visible"
+    // (checkbox `display:none` par design).
+    await page.waitForSelector("#tgl-push", {
+      state: "attached",
+      timeout: 10_000,
+    });
 
     // Skip si la permission push n'est pas réellement 'granted' dans ce contexte headless
     const pushAvailable = await page.evaluate(
@@ -195,18 +210,13 @@ test.describe("Push notifications — gating", () => {
     }
 
     // Toggle ON → OFF : optOutPush() pose permigo_push_optout=1.
-    // Clic en DOM direct (la page a une animation d'entrée).
-    await page.locator("#arn-notif").evaluate((el) => el.click());
+    await page.locator("#tgl-push").evaluate((el) => el.click());
     await expect
       .poll(
         () => page.evaluate(() => localStorage.getItem("permigo_push_optout")),
         { timeout: 5_000 },
       )
       .toBe("1");
-    // L'état accessible suit
-    await expect(page.locator("#arn-notif")).toHaveAttribute(
-      "aria-pressed",
-      "false",
-    );
+    await expect(page.locator("#tgl-push")).not.toBeChecked();
   });
 });
