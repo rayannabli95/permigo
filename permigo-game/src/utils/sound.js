@@ -142,16 +142,27 @@ export const playLaunchSound = (durationMs = 2800) =>
 // `fadeInMs` : monte le volume progressivement au lieu de démarrer plein pot
 // (utile quand la musique enchaîne juste après un moment silencieux, ex. la
 // mission du Mode Pilote, où le démarrage à volume fixe sonnait brutal).
+//
+// ⚠️ Instance DÉDIÉE, jamais `_get()`/`_cache` : `_get` partage UN SEUL objet
+// Audio par nom entre tous les appelants. Deux boucles simultanées sur la
+// même piste (ex. un quiz ouvert par une notif push pendant qu'un autre quiz
+// tourne déjà, cf. quiz-engine.js) partageraient alors le même élément — le
+// premier qui se ferme et appelle son stop() couperait la musique de l'autre,
+// encore ouvert, sans qu'il s'en rende compte (bug trouvé à l'audit du
+// 07/08/2026). Un `new Audio()` par appel isole chaque boucle : son propre
+// stop() ne peut plus agir que sur elle-même.
 function _loopTrack(name, vol, { fadeInMs = 0 } = {}) {
   if (!isSoundEnabled()) return () => {};
   try {
-    const a = _get(name, fadeInMs ? 0 : vol);
+    const a = new Audio(`/sounds/${name}.mp3`);
+    a.volume = fadeInMs ? 0 : vol;
     a.loop = true;
-    a.currentTime = 0;
     a.play().catch(() => {});
+    let stopped = false;
     if (fadeInMs) {
       const start = performance.now();
       const step = (t) => {
+        if (stopped) return;
         const p = Math.min(1, (t - start) / fadeInMs);
         a.volume = vol * p;
         if (p < 1) requestAnimationFrame(step);
@@ -159,6 +170,7 @@ function _loopTrack(name, vol, { fadeInMs = 0 } = {}) {
       requestAnimationFrame(step);
     }
     return () => {
+      stopped = true;
       a.loop = false;
       a.pause();
       a.currentTime = 0;
