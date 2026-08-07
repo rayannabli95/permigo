@@ -1530,3 +1530,102 @@ body.mp-open #header-bar {
   stroke-width: 5;
 }
 
+
+/* ══════════════════════════════════════════════════════════════════════
+   Décor plein cadre — les six gros plans de commande
+   ══════════════════════════════════════════════════════════════════════
+   Les vingt-deux scènes de route se regardent en large, à travers le
+   pare-brise : elles gardent leur boîte de 270 px. Les six gros plans de
+   commande (pédales, levier, sélecteur, compte-tours, tableau de bord) sont
+   des objets debout : ils prennent l'écran, et la question descend dans un
+   bloc plein posé sur le bas, sous le pouce.
+
+   `display: contents` sur l'interaction fait disparaître SA BOÎTE, pas son
+   contenu : la scène, les réponses et le titre deviennent frères dans la même
+   colonne et peuvent alors se réordonner. Sans ça, la scène reste prisonnière
+   de l'interaction, qui est déjà sous le titre dans le DOM.
+
+   ⚠️ Réservé aux décors marqués `vertical` dans pilote-scenes.js. Les zones à
+   toucher sont posées en POURCENTAGE de la scène : changer la forme de la
+   scène les déplacerait toutes. Aucune des six n'en porte, donc rien ne bouge.
+   Le jour où on passe une scène à zones en plein cadre, il faut relever ses
+   coordonnées à nouveau. */
+
+.mp-play--plein {
+  position: relative;
+  padding: 0;
+  background: #191434;
+}
+
+/* Le bandeau passe AU-DESSUS de l'image au lieu de la pousser vers le bas. */
+.mp-play--plein .mp-play-hud {
+  position: absolute;
+  z-index: 12;
+  top: calc(env(safe-area-inset-top, 0px) + 8px);
+  right: 16px;
+  left: 16px;
+}
+
+.mp-play--plein .mp-interaction {
+  display: contents;
+}
+
+.mp-play--plein .mp-scene {
+  order: 1;
+  height: auto;
+  min-height: 200px;
+  flex: 1;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.mp-play--plein .mp-decor-plein {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Le titre et les réponses forment un seul bloc : le fond est porté par
+   `.mp-play` lui-même, il n'y a donc aucune couture entre eux. */
+.mp-play--plein .mp-play-title {
+  order: 2;
+  margin: 0;
+  padding: 22px 18px 0;
+}
+
+.mp-play--plein .mp-play-title h1 {
+  font-size: 23px;
+}
+
+/* La mascotte est en surcouche du titre : dans un bloc sans marge haute, elle
+   sortirait par le haut et chevaucherait l'image. */
+.mp-play--plein .mp-mascot-badge {
+  top: 14px;
+}
+
+.mp-play--plein .mp-symptom,
+.mp-play--plein .mp-choice-list,
+.mp-play--plein .mp-reglage,
+.mp-play--plein .mp-sequence-lane,
+.mp-play--plein .mp-sequence-bank,
+.mp-play--plein .mp-scene-instruction {
+  order: 3;
+  margin-top: 12px;
+  padding-right: 18px;
+  padding-left: 18px;
+}
+
+.mp-play--plein .mp-play-bottom {
+  order: 4;
+  padding: 0 18px calc(22px + env(safe-area-inset-bottom, 0px));
+}
+
+/* Sur un grand écran la colonne est centrée et bornée à 480 px : l'image
+   suit la même largeur, sinon elle déborde du reste de la mission. */
+@media (min-width: 520px) {
+  .mp-play--plein {
+    border-radius: 24px;
+  }
+}

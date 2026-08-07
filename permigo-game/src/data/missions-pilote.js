@@ -125,7 +125,10 @@ export const MISSIONS = [
     modeLabel: "Diagnostiquer",
     title: "Alerte au tableau",
     objective: "Interpréter un témoin rouge qui reste allumé après le contact.",
-    prompt: "Le témoin reste allumé. Quelle décision répare la situation ?",
+    // « Quelle décision répare la situation » est une phrase de manuel. Le
+    // décor montre maintenant le témoin allumé en grand : le constat se voit,
+    // il ne reste qu'à demander.
+    prompt: "Le témoin reste allumé. Tu fais quoi ?",
     visual: "voyant-moteur",
     symptom:
       "Un témoin rouge reste visible après le contrôle du tableau de bord.",

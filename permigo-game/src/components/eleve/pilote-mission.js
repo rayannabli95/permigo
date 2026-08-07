@@ -19,7 +19,7 @@ import { haptic } from "@/utils/haptic.js";
 import { track } from "@/services/analytics.js";
 import { playCorrect, playWrong, playVictory } from "@/utils/sound.js";
 import { missionsPour } from "@/data/missions-pilote.js";
-import { renderArt } from "@/components/eleve/pilote-scenes.js";
+import { renderArt, estDecorPlein } from "@/components/eleve/pilote-scenes.js";
 import "@/components/eleve/pilote.css";
 
 /** Fautes tolérées sur toute la chaîne avant le retour à la fiche. */
@@ -151,8 +151,11 @@ export function monterMissions(
 
   function dessiner() {
     const m = mission();
+    // Un décor portrait prend l'écran : la scène passe au-dessus du titre et
+    // la question descend dans un bloc plein posé sur le bas, sous le pouce.
+    const plein = estDecorPlein(m.visual) ? " mp-play--plein" : "";
     hote.innerHTML = `
-      <div class="mp-game mp-play" style="--world:${clair};--world-dark:${sombre}">
+      <div class="mp-game mp-play${plein}" style="--world:${clair};--world-dark:${sombre}">
         ${enTete(m)}
         <section class="mp-play-title">
           <!-- Le rang de l'étape est DÉJÀ dans le bandeau du haut, en chiffres
