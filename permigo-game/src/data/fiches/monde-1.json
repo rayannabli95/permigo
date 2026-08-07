@@ -17,6 +17,14 @@
       "Repère les commandes au pied : à gauche l'embrayage, au milieu le frein, à droite l'accélérateur.",
       "Mets le contact (sans démarrer) et regarde les témoins : ils s'allument puis s'éteignent. S'il en reste un allumé (huile, batterie, frein), tu le signales."
     ],
+    "titres": [
+      "Fais le tour de la voiture",
+      "Installe-toi et claque la portière",
+      "Repère le tableau de bord",
+      "Repère les deux commodos",
+      "Repère tes trois pédales",
+      "Mets le contact et lis les témoins"
+    ],
     "pourquoi": "Tu dois pouvoir actionner un clignotant ou un essuie-glace sans quitter la route des yeux. Si tu cherches une commande en roulant, tu ne regardes plus devant.",
     "contexte": "Chaque fois que tu montes dans une voiture que tu ne connais pas : celle de l'auto-école, celle d'un proche, une location. Et le jour de l'examen, dans un véhicule que tu n'auras peut-être jamais conduit.",
     "risque": "Chercher une commande en roulant, c'est deux secondes les yeux ailleurs. À 50 km/h tu parcours près de trente mètres sans rien voir. L'inspecteur, lui, repère tout de suite le conducteur qui tâtonne.",
@@ -40,7 +48,9 @@
         "explication": "Un témoin qui reste allumé (huile, frein, batterie…) signale un défaut."
       }
     ],
-    "sources": ["las-de-la-route/4vKI0ny8LI8"]
+    "sources": [
+      "las-de-la-route/4vKI0ny8LI8"
+    ]
   },
   {
     "code": "C1b",
@@ -60,6 +70,15 @@
       "Volant : règle-le si besoin (poignée sous le volant) pour qu'il ne te gêne pas aux genoux et que tu voies bien le compteur par-dessus.",
       "Rétroviseurs : intérieur d'abord, de la main droite, sans décoller les épaules du siège. Tu dois voir toute la lunette arrière d'un seul coup d'œil, sans bouger la tête. Puis les extérieurs : tu n'aperçois qu'un petit bout de ta voiture en bas, le reste sur la route (objectif ~90 % de la route, ta carrosserie sert juste de repère).",
       "Ceinture : elle passe sur l'épaule (pas le cou) et sur le bassin (pas le ventre), à plat, pas vrillée."
+    ],
+    "titres": [
+      "Règle la distance du siège",
+      "Règle la hauteur du siège",
+      "Règle le dossier",
+      "Règle l'appuie-tête",
+      "Règle le volant",
+      "Règle tes trois rétroviseurs",
+      "Boucle ta ceinture à plat"
     ],
     "pourquoi": "Un siège mal réglé = tu ne peux pas débrayer à fond (risque de caler) et tu te fatigues vite. Trente secondes de réglage = toute la leçon plus confortable et plus sûre.",
     "contexte": "Avant de démarrer, à chaque fois. Surtout quand quelqu'un a conduit la voiture avant toi : un moniteur, un parent, l'élève du créneau précédent. Le siège n'est jamais resté à ta taille.",
@@ -84,7 +103,9 @@
         "explication": "À plat, pas vrillée."
       }
     ],
-    "sources": ["evry-village/s0yN0M5bzjA"]
+    "sources": [
+      "evry-village/s0yN0M5bzjA"
+    ]
   },
   {
     "code": "C1c",
@@ -104,6 +125,15 @@
       "Laisse le volant revenir en le retenant après un virage. Tu ne le lâches pas pour qu'il tourne tout seul.",
       "Repère « combien de tours fait le volant ? » : un volant fait environ un tour et demi de chaque côté (un tour complet + un demi-tour pour aller à fond). Pour savoir si tes roues sont droites après un braquage à fond, refais exactement l'inverse.",
       "Repère « tourne ton volant du côté où tu veux aller » : plutôt que de te perdre entre droite et gauche (surtout en marche arrière), tu tournes le volant vers le côté où tu veux que la voiture se rapproche, en marche avant comme en marche arrière."
+    ],
+    "titres": [
+      "Mets tes mains à 9h15",
+      "Regarde loin devant toi",
+      "Tourne sans croiser les mains",
+      "Ne croise les mains qu'au ralenti",
+      "Retiens le volant quand il revient",
+      "Compte les tours de volant",
+      "Tourne du côté où tu veux aller"
     ],
     "pourquoi": "Ton regard guide tes mains. Si tu fixes le capot ou un obstacle, tu vas dessus. Si tu regardes loin où tu veux aller, ta trajectoire devient naturellement droite.",
     "contexte": "Pendant tout le trajet, mais ça se joue surtout en virage, sur une route étroite, et quand quelque chose déboule et qu'il faut corriger vite.",
@@ -128,7 +158,9 @@
         "explication": "Les coups de volant à répétition = tu te perds."
       }
     ],
-    "sources": ["las-de-la-route/spEpsRbwVyo"]
+    "sources": [
+      "las-de-la-route/spEpsRbwVyo"
+    ]
   },
   {
     "code": "C1d",
@@ -155,6 +187,16 @@
       "Arrêt et tenue du pied. À l'arrêt : frein maintenu, puis point mort + frein à main si tu restes immobilisé.",
       "Arrêt et tenue du pied. Tenue du pied : appuie avec la pointe du pied, talon ancré au sol, et fais glisser le talon au sol pour remonter l'embrayage. Si tu décolles le talon ou si la semelle glisse, tu perds en précision et tu ne retrouves plus le patinage au même endroit."
     ],
+    "titres": [
+      "Prépare la voiture avant de démarrer",
+      "Passe la première",
+      "Trouve la zone de patinage",
+      "Donne un filet d'accélérateur",
+      "Desserre le frein à main",
+      "Freine puis débraye avant l'arrêt",
+      "Point mort et frein à main à l'arrêt",
+      "Garde le talon ancré au sol"
+    ],
     "pourquoi": "Le point de patinage (ou plutôt la zone de patinage), c'est le moment où l'embrayage commence à transmettre la force du moteur aux roues. Le relâcher trop vite à ce moment = la voiture sursaute ou cale. Le relâcher en douceur = départ propre.",
     "erreur": "Relâcher l'embrayage d'un coup au point de patinage → ça cale ou ça part en à-coups. Et débrayer trop tard au freinage → ça cale juste avant l'arrêt.",
     "bva": "Pas de point de patinage, pas d'embrayage, pas de 1ère à passer. Pour démarrer : pied sur le frein, sélecteur sur D, tu relâches le frein et la voiture avance toute seule (au ralenti), puis tu accélères doucement. Pour t'arrêter : tu freines progressivement avec le pied droit jusqu'à l'arrêt. Aucun risque de caler. À l'arrêt prolongé, tu passes sur P et tu serres le frein à main.",
@@ -175,7 +217,10 @@
         "explication": "Trop tôt = tu roules en roue libre, trop tard = tu cales."
       }
     ],
-    "sources": ["las-de-la-route/4vKI0ny8LI8", "las-de-la-route/sV8hlEY349g"]
+    "sources": [
+      "las-de-la-route/4vKI0ny8LI8",
+      "las-de-la-route/sV8hlEY349g"
+    ]
   },
   {
     "code": "C1e",
@@ -194,6 +239,14 @@
       "Pour ralentir, lâche d'abord l'accélérateur (le frein moteur fait déjà une partie du travail).",
       "Freine ensuite en deux temps (freinage dégressif) : une première pression plus forte pour ralentir, puis une pression plus légère pour retenir la voiture, qu'on relâche juste avant l'arrêt. Tu joues sur la pédale de frein (un peu plus, un peu moins).",
       "Garde le pied droit léger : un pied lourd = à-coups, sur-consommation, passagers secoués."
+    ],
+    "titres": [
+      "Accélère avec la pointe du pied",
+      "Stabilise-toi à un régime choisi",
+      "Regarde loin pour anticiper",
+      "Lâche l'accélérateur d'abord",
+      "Freine en deux temps",
+      "Garde le pied droit léger"
     ],
     "pourquoi": "Une conduite douce, c'est de l'anticipation : si tu regardes loin, tu n'as jamais à freiner brutalement. Bonus : passagers à l'aise, moins de carburant, meilleure note à l'examen.",
     "erreur": "Rouler « en accordéon » : accélérer fort puis freiner fort, en boucle, parce qu'on regarde trop près. Tu fatigues tout le monde et tu uses la voiture.",
@@ -215,7 +268,9 @@
         "explication": "Ça se fait même à l'arrêt."
       }
     ],
-    "sources": ["las-de-la-route/sV8hlEY349g"]
+    "sources": [
+      "las-de-la-route/sV8hlEY349g"
+    ]
   },
   {
     "code": "C1f",
@@ -241,6 +296,15 @@
       "Rétrograde AVANT un virage ou un freinage, jamais pendant. Et on rétrograde parce qu'on a déjà ralenti, pas pour ralentir. Tu choisis le bon rapport pour avoir de la reprise en sortie.",
       "Adapte le rapport à l'allure : trop haut à basse vitesse = le moteur « tousse » ; trop bas à haute vitesse = le moteur « hurle ». On s'arrête en 2e, pas en 1ère (puis on repasse la 1ère pour repartir)."
     ],
+    "titres": [
+      "Écoute le moteur monter",
+      "Débraye à fond pour changer",
+      "Pose la paume sur le pommeau",
+      "Sers-toi du ressort de rappel",
+      "Garde les yeux sur la route",
+      "Rétrograde avant le virage",
+      "Adapte le rapport à l'allure"
+    ],
     "pourquoi": "Le bon rapport, c'est celui qui garde le moteur à l'aise : ni en train de forcer, ni de s'emballer. Rétrograder avant le virage te laisse de la reprise pour ré-accélérer proprement en sortie.",
     "erreur": "Regarder le levier en changeant de vitesse (tu ne regardes plus la route) et caler en rétrogradant parce qu'on relâche l'embrayage trop vite à bas régime. Et se tromper de rapport par mauvaise tenue de la main (4e visée, 2e enclenchée) : une erreur de boîte est souvent éliminatoire à l'examen.",
     "bvaHorsSujet": true,
@@ -262,7 +326,10 @@
         "explication": "Rétrograder en plein virage déséquilibre la voiture."
       }
     ],
-    "sources": ["evry-village/jK_mORq5XPU", "las-de-la-route/-c6RPXS6X-A"]
+    "sources": [
+      "evry-village/jK_mORq5XPU",
+      "las-de-la-route/-c6RPXS6X-A"
+    ]
   },
   {
     "code": "C1g",
@@ -280,6 +347,13 @@
       "Vitres, rétros, plaques, optiques : propres, rien de cassé, bonne visibilité.",
       "Niveaux (si demandé) : tu sais montrer où se trouvent huile moteur, lave-glace, liquide de refroidissement.",
       "À l'examen : l'inspecteur te demande une vérification (intérieure ou extérieure) + une question de sécurité routière + une notion de premiers secours. Tu montres/expliques calmement."
+    ],
+    "titres": [
+      "Vérifie tes pneus",
+      "Vérifie tous les feux",
+      "Vérifie vitres rétros et plaques",
+      "Sache montrer les niveaux",
+      "Prépare les questions de l'examen"
     ],
     "pourquoi": "Une voiture mal vérifiée, c'est un danger qui roule : un pneu lisse freine mal, un feu mort = tu n'es pas vu. Le tour de voiture, c'est dix secondes qui évitent un accident.",
     "erreur": "Réciter une liste par cœur sans rien montrer. À l'examen comme en vrai, on attend que tu désignes l'élément (« le bouchon d'huile est ici ») et que tu fasses le geste.",
@@ -333,6 +407,26 @@
       "Bataille / épi arrière. Recule lentement, attends d'être droit AVANT de redresser les roues (un demi-tour + un tour complet).",
       "Bataille / épi arrière. Ne te fie pas aux places voisines pour t'aligner : imagine que ta ligne de place se prolonge et longe-la."
     ],
+    "titres": [
+      "Connais les 6 familles de manœuvres",
+      "Sache reculer où tu veux",
+      "Sécurise avant de t'arrêter",
+      "Roule le plus lentement possible",
+      "Garde tes distances sur les côtés",
+      "Appuie-toi au trottoir sans monter dessus",
+      "Contrôle à 360° pendant la manœuvre",
+      "Termine au point mort et frein à main",
+      "Mets-toi rétro contre rétro",
+      "Passe la marche arrière et contrôle",
+      "Braque un quart de tour à droite",
+      "Recule doucement vers le trottoir",
+      "Braque à droite pour te ranger",
+      "Compte les places jusqu'à ta cible",
+      "Braque à fond du côté de la place",
+      "Vise le premier feu de la voisine",
+      "Attends d'être droit pour redresser",
+      "Prolonge ta ligne de place"
+    ],
     "pourquoi": "La clé d'une manœuvre, ce n'est pas la force, c'est la lenteur. Plus tu roules lentement, plus tu as le temps de tourner le volant et de corriger. Vitesse lente + braquage franc.",
     "erreur": "Aller trop vite et braquer trop tard. Résultat : tu montes sur le trottoir ou tu touches la voiture. C'est l'inverse qu'il faut : ralentir à fond, braquer tôt et franchement. Autre piège : fixer sa place en se retournant trop tôt au lieu de compter ses cases et de rester droit → tu pars de travers.",
     "bva": "En marche arrière, tu mets le sélecteur sur R. Pas d'embrayage à doser : la voiture recule toute seule au ralenti dès que tu lèves le frein, donc tu règles ta lenteur avec le frein (tu freines un peu pour ralentir, tu lèves pour avancer). Tu gardes le pied droit sur le frein/accélérateur et tu peux braquer tranquillement. C'est souvent plus facile qu'en boîte manuelle (pas de risque de caler en pleine manœuvre).",
@@ -376,6 +470,13 @@
       "Annonce et sécurise : clignotant avant l'arrêt, contrôles rétros + angle mort + vision directe ; tu n'es pas prioritaire, tu laisses passer.",
       "Exécute lentement, en gérant TES repères (ceux que ton moniteur t'a appris). Et en gardant la même procédure à chaque fois pour pouvoir corriger.",
       "Si c'est raté, corrige sans paniquer : remets-toi droit (volant droit, roues droites), repère de quel côté tu as de l'espace, et ramène la voiture vers ce côté. Une correction propre vaut mieux qu'un forcing."
+    ],
+    "titres": [
+      "Analyse ce que la place demande",
+      "Choisis la manœuvre et le côté",
+      "Annonce et sécurise",
+      "Exécute lentement avec tes repères",
+      "Corrige sans paniquer"
     ],
     "pourquoi": "Au permis, l'inspecteur ne te guide pas. Cette compétence prouve que tu décides et que tu te corriges seul. C'est ça, être prêt pour le Monde 2.",
     "erreur": "Attendre le « top » du moniteur pour chaque geste. Tant que tu dépends d'un guidage, la manœuvre n'est pas acquise. L'autre piège : paniquer dès que la manœuvre n'est pas parfaite du premier coup au lieu de se replacer calmement.",

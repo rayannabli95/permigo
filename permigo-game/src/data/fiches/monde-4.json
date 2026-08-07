@@ -18,6 +18,15 @@
       "Prévois tes pauses si le trajet est long : une pause d'environ 15 min toutes les 2 heures.",
       "Règle tout AVANT de démarrer : GPS programmé, téléphone calé, siège et miroirs ok."
     ],
+    "titres": [
+      "Regarde ton itinéraire en entier",
+      "Prends deux ou trois repères visuels",
+      "Prévois un itinéraire de secours",
+      "Vérifie météo trafic et travaux",
+      "Repère les zones difficiles",
+      "Prévois tes pauses",
+      "Règle tout avant de démarrer"
+    ],
     "pourquoi": "Un trajet préparé, c'est un cerveau libre pour la route. Les moniteurs le disent à ceux qui ont peur de partir seuls : si tu as repéré tes repères et que tu sais que tu as un GPS de secours et que tu peux toujours t'arrêter, tu vois qu'en vrai tu as plein de solutions sous la main. Tu ne cherches pas ta sortie en panique au dernier moment.",
     "erreur": "Partir « au feeling » et programmer le GPS une fois en mouvement. Tu quittes la route des yeux au pire moment, et tu découvres les difficultés en pleine vitesse.",
     "bva": null,
@@ -57,6 +66,14 @@
       "Anticipe la sortie ou le changement de voie : tu prends l'info tôt (rétro intérieur, rétro extérieur, clignotant), et tu te places en douceur. Si tu dois changer plusieurs voies, tu commences le plus tôt possible.",
       "Ne perds pas ta vitesse en changeant de voie : tu glisses sur la voie d'à côté sans freiner pour rien.",
       "La route reste prioritaire sur l'écran. En cas de doute entre ce que dit le GPS et la réalité de la route, tu suis la route et la signalisation."
+    ],
+    "titres": [
+      "Programme ton GPS à l'arrêt",
+      "Écoute la voix plutôt que l'écran",
+      "Lis les panneaux de loin",
+      "Anticipe ta sortie",
+      "Change de voie sans ralentir",
+      "La route passe avant l'écran"
     ],
     "pourquoi": "Le GPS est une aide, pas un pilote. C'est toi qui conduis. Tes yeux restent dehors, sur la route et les panneaux. Lire un panneau tôt te laisse le temps de te placer sans te jeter sur ta sortie.",
     "erreur": "Rater sa sortie et vouloir « se rattraper » : freiner brusquement, faire une marche arrière, ou se rabattre en force. Sur autoroute ou voie rapide, on ne recule JAMAIS et on ne s'arrête pas pour ça.",
@@ -104,6 +121,15 @@
       "Garde une vitesse stable : les coups d'accélérateur et de frein, c'est du carburant gaspillé.",
       "Coupe le moteur si tu es arrêté longtemps (sauf en circulation, où le stop & start de la voiture s'en charge)."
     ],
+    "titres": [
+      "Démarre en douceur",
+      "Passe les rapports tôt",
+      "Roule en bas régime",
+      "Sers-toi du frein moteur",
+      "Freine en dégressif",
+      "Garde une vitesse stable",
+      "Coupe le moteur à l'arrêt long"
+    ],
     "pourquoi": "Une conduite souple, c'est jusqu'à environ 20 % de carburant économisé, une voiture qui s'use moins, et des passagers qui ne sont pas malmenés. Bonus : à l'examen, l'éco-conduite (passer les rapports au bon moment, anticiper, ne pas caler, doser le frein) fait partie des compétences notées.",
     "erreur": "Le freinage « non anticipé » : tu arrives vite sur un feu ou un giratoire, tu n'as pas levé le pied, et tu freines fort à la dernière seconde. C'est mauvais pour la conso, mauvais pour tes passagers, et pas sûr pour ceux qui te suivent. La fluidité bat la nervosité.",
     "bva": "Ce n'est plus toi qui passes les rapports, mais tu gardes la main sur la consommation. La règle tient en une phrase : accélère progressivement. Une pression douce fait monter les rapports tôt et garde le moteur bas. À l'inverse, écraser l'accélérateur est lu par la boîte comme « je veux aller vite » : elle reste sur un petit rapport et la consommation grimpe. Tu évites donc le kickdown quand tu n'en as pas besoin. Le reste est identique : anticipe, lève le pied tôt, garde une allure stable, et reste en D (ou en mode Éco s'il existe) plutôt qu'en mode Sport.",
@@ -144,6 +170,14 @@
       "Aie la « conscience du danger » : à une intersection sans visibilité (cachée par des bâtiments, des voitures garées), tu cherches activement à voir en avançant doucement, le pied prêt à freiner. Tu ne te dis pas « bon, j'ai rien vu, j'y vais ».",
       "Respire et reste posé : si quelqu'un te stresse ou te colle, tu ne réponds pas à l'agressivité. Tu laisses passer."
     ],
+    "titres": [
+      "Regarde loin devant",
+      "Balaye en continu",
+      "Garde tes distances",
+      "Imagine le pire raisonnable",
+      "Cherche le danger caché",
+      "Respire et reste posé"
+    ],
     "pourquoi": "Un conducteur qui anticipe freine rarement en urgence. Voir loin et tôt, c'est avoir le temps de décider calmement au lieu de réagir dans la panique. Les moniteurs disent que la conscience du danger « ça se ressent » : c'est exactement ce que l'inspecteur veut voir, un conducteur qui sent le risque et adapte sa vitesse au lieu de foncer.",
     "erreur": "Fixer la voiture juste devant (regard court) et se faire surprendre par tout ce qui arrive plus loin. Ou se laisser gagner par l'énervement et conduire « pour répondre » à un autre conducteur.",
     "bva": null,
@@ -183,6 +217,14 @@
       "Le piéton qui attend de traverser est déjà prioritaire : tu n'attends pas qu'il ait posé un pied sur la chaussée. S'il est devant un passage piéton et qu'il veut traverser, tu le laisses passer.",
       "Surveille tes angles morts avant chaque manœuvre : un vélo ou une trottinette s'y cache vite.",
       "Reste courtois : un regard, un geste de la main, tu cèdes le passage sans forcer. La vitesse passe après la sécurité."
+    ],
+    "titres": [
+      "Repère tôt les usagers fragiles",
+      "Laisse de l'écart au cycliste",
+      "Ralentis près des écoles",
+      "Cède au piéton qui attend",
+      "Surveille tes angles morts",
+      "Reste courtois"
     ],
     "pourquoi": "Plus l'usager est fragile, plus une erreur lui coûte cher. Tu anticipes SES erreurs à lui, parce que c'est toi qui as la carrosserie autour de toi. À l'examen, laisser passer un piéton prioritaire n'est même pas « de la courtoisie » : c'est une obligation. Ne pas le faire, c'est éliminatoire.",
     "erreur": "Dépasser un cycliste « au ras » sans changer de trajectoire, ou démarrer sec à un passage piéton dès que le feu passe au vert sans vérifier qu'il n'y a plus personne. Attention à l'inverse aussi : s'arrêter pour « laisser passer » quelqu'un qui n'est PAS prioritaire (ton feu est vert, le sien rouge) est un arrêt injustifié et dangereux. Donc une faute.",
@@ -226,6 +268,16 @@
       "Si tu fais une petite erreur, tu continues calmement. Une faute mineure ne fait pas tout rater.",
       "Manœuvre demandée : tu prends ton temps, vitesse lente, regard partout (vision directe, pas seulement les rétros). N'oublie pas le clignotant AVANT de t'arrêter pour la manœuvre, pas après."
     ],
+    "titres": [
+      "Installe ton poste comme à l'entraînement",
+      "Assure la sécurité à bord",
+      "Les vérifications valent 3 points",
+      "Écoute bien la consigne",
+      "Conduis ta conduite",
+      "Écoute ses remarques",
+      "Continue après une petite erreur",
+      "Prends ton temps sur la manœuvre"
+    ],
     "pourquoi": "L'inspecteur évalue ta sécurité et ton autonomie, pas la perfection. Il veut voir un conducteur qui se débrouille seul sans mettre personne en danger. Beaucoup d'élèves « n'entendent plus » l'inspecteur tellement ils stressent et partent perdants alors qu'ils l'avaient. Les remarques en cours d'examen sont souvent de la bienveillance pour faire mûrir ta conduite. Et certaines « fautes » que tu crois graves n'en sont pas pour lui.",
     "erreur": "Se figer ou abandonner après une petite faute (« là c'est foutu, je suis trop stressé »), alors que l'examen continue très bien. Ou conduire d'une façon inhabituelle (trop lent, trop crispé) pour « faire bien », ce qui crée justement des erreurs.",
     "bva": null,
@@ -264,6 +316,13 @@
       "Zéro alcool, ou presque : 0,2 g/l de sang max en jeune permis (en pratique, tu ne bois pas si tu conduis).",
       "Soigne ton capital de points : tu démarres à 6 points, qui montent jusqu'à 12 si tu ne perds rien pendant la période.",
       "Continue à rouler intelligemment, même après le permis. Le permis t'autorise à conduire, il ne t'oblige pas à foncer : si tu n'es pas à l'aise, fais des petits trajets tranquilles au début, prépare tes itinéraires, et garde les bons réflexes des leçons (anticipation, distances, pas de téléphone). Les premiers mois seul sont les plus risqués."
+    ],
+    "titres": [
+      "Colle ton disque A à l'arrière",
+      "Respecte les vitesses jeune conducteur",
+      "Zéro alcool au volant",
+      "Soigne ton capital de points",
+      "Continue à rouler intelligemment"
     ],
     "pourquoi": "Les premières années seul au volant sont les plus dangereuses : tu n'as plus le moniteur à côté. Le disque A et les vitesses réduites laissent une marge le temps que l'expérience vienne. Les moniteurs rassurent ceux qui ont peur de conduire seuls : le permis est un droit, pas une obligation d'aller en centre-ville un vendredi soir le lendemain. Tu prends ton rythme.",
     "erreur": "Se sentir « libéré » dès le permis en poche et lâcher les bons réflexes (vitesse, téléphone, distances). Une seule grosse infraction peut faire sauter le permis tout neuf.",
