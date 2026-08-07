@@ -1,24 +1,27 @@
 // ═══════════════════════════════════════════════════════════════
-// Onboarding élève — UNE PAGE, ZÉRO SWIPE.
+// Onboarding élève — écrans mascotte, un par un.
 //
-// Une seule page verticale qui défile (plus de carrousel à swipe, qui
-// buggait). La barre de progression se remplit au SCROLL ; le bouton
-// « C'est parti → » reste collé en bas.
+// Un tour en étapes plein écran (fini le scroll unique) : chaque écran
+// montre une pose de la mascotte, une phrase courte, une seule décision.
+// La barre de progression avance à chaque étape (plus au scroll). Le
+// bouton « Continuer »/« C'est parti » reste collé en bas, identique sur
+// toutes les étapes.
 //
-// Sections :
-//   HERO   — « Salut {prenom} ! » + mascotte + pitch coach.
-//   1 « Photo de profil »  — grille d'avatars (+ couleur d'accent, live).
+// Étapes :
+//   0 intro               — « Salut {prenom} ! » + mascotte + pitch coach.
+//   1 « Ton style »        — avatar + couleur d'accent, sur un seul écran.
 //   2 « Tes rappels du soir » — toggle (ON = demande permission notif)
 //                               + carte récompense (coffre / XP / volants).
 //   3 « Ajoute l'appli »   — A2HS, seulement si pas déjà installée.
 //
 // 2 finitions selon le thème global (html[data-theme]) :
-//   • défaut / dark  → Arène nuit-violet (Baloo 2, plastique 3D, or).
-//   • light          → Clair premium (Plus Jakarta, ombres douces).
+//   • défaut / dark  → Arène nuit-violet (Archivo, plastique 3D, or).
+//   • light          → Clair premium (Archivo, ombres douces).
 //
 // Au FINISH : patch profil (first_value_action_at, avatar, accent),
 // unlockChest("welcome", {xp:50,gemmes:25}), flag localStorage, → #/.
-// A11y : nav clavier sur les contrôles + flèches dans la grille avatars.
+// A11y : nav clavier sur les contrôles + flèches dans la grille avatars,
+// focus déplacé sur le titre de l'étape à chaque changement.
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
 import { getCurUser, setCurUser } from "@/auth/cur-user.js";
@@ -49,15 +52,18 @@ const OB_I18N = {
     prog_aria: "Progress",
     skip: "Skip",
     skip_aria: "Skip the intro",
+    bubble_intro: "Hi. I'm PermiGo.",
     hero_lead:
-      "I'm <b>PermiGo</b>. In 30 seconds we'll set up your app. Then you'll revise <b>2 min each evening</b>.",
-    sec_avatar: "Profile picture",
+      "<b>30 seconds</b> to set up your app. Then, <b>2 minutes</b> every evening.",
+    sec_avatar: "Your style",
     avatar_group_aria: "Choose your avatar",
     avatar_item_aria: "Avatar {n}",
     avatar_helper: "Choose your avatar",
     color_label: "Your colour",
     color_group_aria: "Choose your colour",
+    bubble_look: "Pick your style.",
     sec_reminders: "Your evening reminders",
+    bubble_notif: "Never spam. Promise.",
     rem_title: "Reminder every evening",
     rem_sub: "8 pm · gentle and never spam",
     rem_switch_aria: "Turn on evening reminders",
@@ -68,11 +74,12 @@ const OB_I18N = {
     reward_title: "A chest is waiting for you tonight",
     pill_vol: "25&nbsp;steering wheels",
     sec_a2hs: "Add the app",
+    bubble_a2hs: "Last step.",
     a2hs_lead:
       "<b>2 taps, 10 seconds</b>. Your reminders and rewards land right here.",
     a2hs_plat_aria: "Switch the instructions platform (iPhone / Android)",
     cta: "Let's go",
-    cue: "Scroll down to pick your colour",
+    cta_continue: "Continue",
     notif_on_note: "<b>Reminders on</b>. See you tonight!",
     notif_on_announce: "Reminders on! You'll get 3 questions tonight.",
     notif_denied_note:
@@ -92,15 +99,17 @@ const OB_I18N = {
     prog_aria: "التقدّم",
     skip: "تخطّي",
     skip_aria: "تخطّي المقدّمة",
-    hero_lead:
-      "أنا <b>بيرميغو</b>. في 30 ثانية نجهّز تطبيقك. بعدها تراجع <b>دقيقتين كل مساء</b>.",
-    sec_avatar: "صورة الملف",
+    bubble_intro: "مرحباً. أنا بيرميغو.",
+    hero_lead: "<b>30 ثانية</b> لتجهيز تطبيقك. بعدها، <b>دقيقتان</b> كل مساء.",
+    sec_avatar: "أسلوبك",
     avatar_group_aria: "اختر صورتك الرمزية",
     avatar_item_aria: "صورة رمزية {n}",
     avatar_helper: "اختر صورتك الرمزية",
     color_label: "لونك",
     color_group_aria: "اختر لونك",
+    bubble_look: "اختر أسلوبك.",
     sec_reminders: "تذكيراتك المسائية",
+    bubble_notif: "بلا إزعاج. وعد.",
     rem_title: "تذكير كل مساء",
     rem_sub: "الساعة 20 · لطيف ودون إزعاج",
     rem_switch_aria: "تفعيل التذكيرات المسائية",
@@ -110,10 +119,11 @@ const OB_I18N = {
     reward_title: "صندوق ينتظرك هذا المساء",
     pill_vol: "25&nbsp;مقوداً",
     sec_a2hs: "أضِف التطبيق",
+    bubble_a2hs: "الخطوة الأخيرة.",
     a2hs_lead: "<b>لمستان، 10 ثوانٍ</b>. تذكيراتك ومكافآتك تصل إلى هنا.",
     a2hs_plat_aria: "تغيير منصّة التعليمات (iPhone / Android)",
     cta: "لننطلق",
-    cue: "انزل لاختيار لونك",
+    cta_continue: "متابعة",
     notif_on_note: "<b>التذكيرات مفعّلة</b>. إلى اللقاء هذا المساء!",
     notif_on_announce: "التذكيرات مفعّلة! ستصلك 3 أسئلة هذا المساء.",
     notif_denied_note: "محظورة. فعّلها من الإعدادات إن غيّرت رأيك.",
@@ -147,7 +157,7 @@ export async function mount(root) {
   const me = getCurUser();
   if (!me) return;
 
-  track("onboarding.start", { role: me.role, version: "v4-onepage" });
+  track("onboarding.start", { role: me.role, version: "v5-steps" });
 
   // Opt-in notif : possible si l'API existe et que ce n'est pas déjà accordé.
   const showNotif =
@@ -155,7 +165,7 @@ export async function mount(root) {
     "serviceWorker" in navigator &&
     Notification.permission !== "granted";
 
-  // A2HS : section conditionnelle (uniquement si pas déjà installée).
+  // A2HS : étape conditionnelle (uniquement si pas déjà installée).
   const showA2HS = !isStandalone();
 
   // ⚠️ Plus AUCUNE identité demandée ici (01/08/2026). Ni prénom, ni nom, ni
@@ -164,11 +174,9 @@ export async function mount(root) {
   // posée dans l'accueil (birthdate-card.js), le prénom au premier classement
   // (identity-prompt.js). Les deux marchent quel que soit le chemin d'entrée,
   // formulaire ou « Continuer avec Google ».
-  let _secIdx = 0;
-  const secN = {};
-  secN.avatar = ++_secIdx;
-  secN.notif = ++_secIdx;
-  if (showA2HS) secN.a2hs = ++_secIdx;
+  const secN = { avatar: 1, notif: 2, a2hs: 3 };
+  const STEPS = ["intro", "avatar", "notif", ...(showA2HS ? ["a2hs"] : [])];
+
   // ─── État ──────────────────────────────────────────────────────
   const currentAvatar = optimizedAvatarUrl(me.avatar_url);
   let avatar =
@@ -192,6 +200,31 @@ export async function mount(root) {
   const arrow = getLang() === "ar" ? "←" : "→";
   const ctaHTML = () =>
     `${ob("cta", "C'est parti")} <span class="ob-arrow" aria-hidden="true">${arrow}</span>`;
+  const continueHTML = () =>
+    `${ob("cta_continue", "Continuer")} <span class="ob-arrow" aria-hidden="true">${arrow}</span>`;
+  const dockLabel = (i) =>
+    i === STEPS.length - 1 ? ctaHTML() : continueHTML();
+
+  // Poses mascotte + phrase courte par étape (même esprit que #/rejoindre :
+  // une pose, une bulle, une seule décision).
+  const STEP_META = {
+    intro: {
+      mascot: "/skins/mascot-hello.png",
+      bubble: ob("bubble_intro", "Salut. Moi c'est PermiGo."),
+    },
+    avatar: {
+      mascot: "/skins/mascot-point.png",
+      bubble: ob("bubble_look", "Choisis ton style."),
+    },
+    notif: {
+      mascot: "/skins/mascot-think.png",
+      bubble: ob("bubble_notif", "Jamais de spam. Promis."),
+    },
+    a2hs: {
+      mascot: "/skins/mascot-celebrate.png",
+      bubble: ob("bubble_a2hs", "Dernière étape."),
+    },
+  };
 
   // ─── Rendu HTML ────────────────────────────────────────────────
   root.innerHTML = `
@@ -199,7 +232,7 @@ export async function mount(root) {
     <style>${A2HS_STYLE}</style>
     <div class="ob" role="dialog" aria-modal="true" aria-label="${ob("dialog_aria", "Tour de bienvenue")}">
 
-      <!-- Barre de progression (remplie au scroll) + Passer -->
+      <!-- Barre de progression (par étape) + Passer -->
       <div class="ob-top">
         <div class="ob-prog" role="progressbar" aria-label="${ob("prog_aria", "Progression")}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
           <i id="ob-prog-fill" style="width:8%"></i>
@@ -210,24 +243,34 @@ export async function mount(root) {
       <!-- Annonces a11y -->
       <div id="ob-live" aria-live="polite" aria-atomic="true" class="sr-only"></div>
 
-      <div class="ob-scroll" id="ob-scroll">
-        <div class="ob-content">
+      <div class="ob-stage" id="ob-stage">
 
-          <!-- ─── HERO ─── -->
-          <header class="ob-hero">
-            <span class="ob-eyebrow">Permi<b>Go</b></span>
+        <!-- ─── ÉTAPE : accueil ─── -->
+        <section class="ob-scr" data-key="intro" aria-labelledby="ob-h1-intro">
+          <div class="ob-scr-hero">
+            <div class="ob-bubble">${STEP_META.intro.bubble}</div>
             <div class="ob-mascot-wrap">
-              <img class="ob-mascot" src="/skins/mascot-hello.png" alt="" />
+              <img class="ob-mascot" src="${STEP_META.intro.mascot}" alt="" />
             </div>
-            <h1 class="ob-h1" id="ob-h1">${obGreet(prenom)}</h1>
-            <p class="ob-lead">${obR("hero_lead", "Moi c'est <b>PermiGo</b>. En 30&nbsp;secondes, on prépare ton appli. Après, tu réviseras <b>2&nbsp;min par soir</b>.")}</p>
-          </header>
+          </div>
+          <div class="ob-scr-body ob-scr-body-center">
+            <h1 class="ob-h1" id="ob-h1-intro">${obGreet(prenom)}</h1>
+            <p class="ob-lead">${obR("hero_lead", "<b>30&nbsp;secondes</b> pour préparer ton appli. Ensuite, <b>2&nbsp;minutes</b> chaque soir.")}</p>
+          </div>
+        </section>
 
-          <!-- ─── SECTION : Photo de profil ─── -->
-          <section class="ob-section" aria-labelledby="ob-sec1-t">
+        <!-- ─── ÉTAPE : Ton style ─── -->
+        <section class="ob-scr" data-key="avatar" hidden aria-labelledby="ob-h1-avatar">
+          <div class="ob-scr-hero">
+            <div class="ob-bubble">${STEP_META.avatar.bubble}</div>
+            <div class="ob-mascot-wrap">
+              <img class="ob-mascot" src="${STEP_META.avatar.mascot}" alt="" />
+            </div>
+          </div>
+          <div class="ob-scr-body">
             <div class="ob-sec-head">
               <span class="ob-sec-num">${secN.avatar}</span>
-              <h2 class="ob-sec-title" id="ob-sec1-t">${ob("sec_avatar", "Photo de profil")}</h2>
+              <h2 class="ob-sec-title" id="ob-h1-avatar">${ob("sec_avatar", "Ton style")}</h2>
             </div>
             <div class="ob-av-grid" id="ob-av-grid" role="radiogroup" aria-label="${ob("avatar_group_aria", "Choix de l'avatar")}">
               ${(ASSETS.avatar || [])
@@ -268,13 +311,21 @@ export async function mount(root) {
                 </button>`,
               ).join("")}
             </div>
-          </section>
+          </div>
+        </section>
 
-          <!-- ─── SECTION : Tes rappels du soir ─── -->
-          <section class="ob-section" aria-labelledby="ob-sec2-t">
+        <!-- ─── ÉTAPE : Tes rappels du soir ─── -->
+        <section class="ob-scr" data-key="notif" hidden aria-labelledby="ob-h1-notif">
+          <div class="ob-scr-hero">
+            <div class="ob-bubble">${STEP_META.notif.bubble}</div>
+            <div class="ob-mascot-wrap">
+              <img class="ob-mascot" src="${STEP_META.notif.mascot}" alt="" />
+            </div>
+          </div>
+          <div class="ob-scr-body">
             <div class="ob-sec-head">
               <span class="ob-sec-num">${secN.notif}</span>
-              <h2 class="ob-sec-title" id="ob-sec2-t">${ob("sec_reminders", "Tes rappels du soir")}</h2>
+              <h2 class="ob-sec-title" id="ob-h1-notif">${ob("sec_reminders", "Tes rappels du soir")}</h2>
             </div>
 
             <div class="ob-card">
@@ -311,16 +362,24 @@ export async function mount(root) {
                 </div>
               </div>
             </div>
-          </section>
+          </div>
+        </section>
 
-          ${
-            showA2HS
-              ? `
-          <!-- ─── SECTION : Ajoute l'appli ─── -->
-          <section class="ob-section" aria-labelledby="ob-sec3-t">
+        ${
+          showA2HS
+            ? `
+        <!-- ─── ÉTAPE : Ajoute l'appli ─── -->
+        <section class="ob-scr" data-key="a2hs" hidden aria-labelledby="ob-h1-a2hs">
+          <div class="ob-scr-hero">
+            <div class="ob-bubble">${STEP_META.a2hs.bubble}</div>
+            <div class="ob-mascot-wrap">
+              <img class="ob-mascot" src="${STEP_META.a2hs.mascot}" alt="" />
+            </div>
+          </div>
+          <div class="ob-scr-body">
             <div class="ob-sec-head">
               <span class="ob-sec-num">${secN.a2hs}</span>
-              <h2 class="ob-sec-title" id="ob-sec3-t">${ob("sec_a2hs", "Ajoute l'appli")}</h2>
+              <h2 class="ob-sec-title" id="ob-h1-a2hs">${ob("sec_a2hs", "Ajoute l'appli")}</h2>
             </div>
             <div class="ob-install-head">
               <img class="ob-install-badge" src="/skins/avatars/permigo-badge-icon.png" alt="" />
@@ -328,88 +387,78 @@ export async function mount(root) {
             </div>
             <div class="ob-a2hs-steps" id="ob-a2hs-steps"></div>
             <button class="ob-plat-switch" id="ob-plat-switch" type="button" aria-label="${ob("a2hs_plat_aria", "Changer la plateforme des instructions (iPhone / Android)")}"></button>
-          </section>`
-              : ""
-          }
+          </div>
+        </section>`
+            : ""
+        }
 
-        </div>
       </div>
 
       <!-- Bouton sticky unique -->
       <div class="ob-dock">
         <button class="ob-cta" id="ob-cta" type="button">
-          ${ctaHTML()}
+          ${dockLabel(0)}
         </button>
-      </div>
-
-      <!-- Cue de scroll : pousse à découvrir couleur/rappels sous la grille -->
-      <div class="ob-cue" id="ob-cue" aria-hidden="true">
-        <span class="ob-cue-txt">${ob("cue", "Descends choisir ta couleur")}</span>
-        <span class="ob-cue-arr">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-        </span>
       </div>
     </div>
   `;
 
   // ─── Références DOM ────────────────────────────────────────────
-  const scrollEl = root.querySelector("#ob-scroll");
+  const stageEl = root.querySelector("#ob-stage");
   const progFill = root.querySelector("#ob-prog-fill");
   const progBar = root.querySelector(".ob-prog");
   const ctaBtn = root.querySelector("#ob-cta");
   const switchBtn = root.querySelector("#ob-switch");
   const liveEl = root.querySelector("#ob-live");
+  const panels = Array.from(stageEl.querySelectorAll(".ob-scr"));
 
   function announce(msg) {
     if (liveEl) liveEl.textContent = msg;
   }
 
-  // ─── Barre de progression au scroll ───────────────────────────
-  function updateProgress() {
-    const max = scrollEl.scrollHeight - scrollEl.clientHeight;
-    const ratio = max > 0 ? scrollEl.scrollTop / max : 1;
-    const pct = Math.round(8 + ratio * 92); // 8 % au départ → 100 % en bas
+  // ─── Navigation entre étapes (une visible à la fois) ───────────
+  let cur = 0;
+  let navBusy = false;
+  const reduceMotion = window.matchMedia?.(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
+
+  function updateProgress(i) {
+    const pct =
+      STEPS.length > 1 ? Math.round(8 + (i / (STEPS.length - 1)) * 92) : 100;
     progFill.style.width = pct + "%";
     progBar.setAttribute("aria-valuenow", String(pct));
   }
 
-  // Cue « descends choisir ta couleur » : visible tant que l'élève n'a pas
-  // scrollé (et seulement s'il y a de quoi dérouler).
-  const cueEl = root.querySelector("#ob-cue");
-  function updateCue() {
-    if (!cueEl) return;
-    const scrollable = scrollEl.scrollHeight - scrollEl.clientHeight > 24;
-    cueEl.classList.toggle("hide", !scrollable || scrollEl.scrollTop > 40);
+  function paintDock() {
+    ctaBtn.innerHTML = dockLabel(cur);
   }
 
-  scrollEl.addEventListener(
-    "scroll",
-    () => {
-      updateProgress();
-      updateCue();
-    },
-    { passive: true },
-  );
-  requestAnimationFrame(updateCue); // état initial (masqué si rien à dérouler)
+  function focusStep(panel) {
+    const h = panel?.querySelector('[id^="ob-h1-"]');
+    if (!h) return;
+    h.setAttribute("tabindex", "-1");
+    requestAnimationFrame(() => h.focus({ preventScroll: true }));
+  }
 
-  // ─── Tracking « section vue » au scroll (une fois par section) ──
-  const seen = new Set();
-  const sections = Array.from(root.querySelectorAll(".ob-section"));
-  if ("IntersectionObserver" in window && sections.length) {
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((ent) => {
-          if (!ent.isIntersecting) return;
-          const i = sections.indexOf(ent.target);
-          const key = "section_" + (i + 1);
-          if (i < 0 || seen.has(key)) return;
-          seen.add(key);
-          track("onboarding.step_viewed", { step: i + 1 });
-        });
-      },
-      { root: scrollEl, threshold: 0.5 },
-    );
-    sections.forEach((s) => io.observe(s));
+  function goStep(n) {
+    if (navBusy || n === cur || n < 0 || n >= panels.length) return;
+    navBusy = true;
+    const from = panels[cur];
+    const to = panels[n];
+    if (from) from.hidden = true;
+    to.hidden = false;
+    to.classList.remove("ob-scr-enter");
+    if (!reduceMotion) {
+      void to.offsetWidth; // relance l'animation d'entrée
+      to.classList.add("ob-scr-enter");
+    }
+    cur = n;
+    updateProgress(cur);
+    paintDock();
+    track("onboarding.step_viewed", { step: STEPS[cur] });
+    focusStep(to);
+    navBusy = false;
   }
 
   // ─── Toggle rappels (ON = demande permission notif) ────────────
@@ -473,7 +522,7 @@ export async function mount(root) {
     if (next && showNotif && !notifAsked) requestNotif();
   });
 
-  // ─── Section A2HS ──────────────────────────────────────────────
+  // ─── Étape A2HS ──────────────────────────────────────────────
   function renderA2HSSteps() {
     const stepsEl = root.querySelector("#ob-a2hs-steps");
     if (!stepsEl) return;
@@ -527,23 +576,26 @@ export async function mount(root) {
   }
 
   // ─── Skip → finish direct (sans l'accroche : il veut aller vite) ──
-  // (absent quand l'étape identité est requise — elle est obligatoire)
   root.querySelector("#ob-skip")?.addEventListener("click", () => {
     track("onboarding.skipped", {});
     finish({ intro: false });
   });
 
-  // ─── CTA principal ─────────────────────────────────────────────
-  ctaBtn.addEventListener("click", () => {
-    // Si l'utilisateur veut les rappels mais ne les a pas encore demandés
-    // (il n'a pas touché le toggle ON par défaut), on demande maintenant —
-    // reste dans le geste tactile — puis on termine.
-    if (notifWanted && showNotif && !notifAsked) {
-      requestNotif().finally(() => finish());
+  // ─── CTA principal : avance d'une étape, termine sur la dernière ──
+  async function advance() {
+    // En quittant l'étape rappels avec le toggle ON jamais sollicité (il n'a
+    // pas touché le toggle ON par défaut), on demande la permission
+    // MAINTENANT — reste dans le geste tactile — puis on avance/termine.
+    if (STEPS[cur] === "notif" && notifWanted && showNotif && !notifAsked) {
+      await requestNotif();
+    }
+    if (cur === STEPS.length - 1) {
+      finish();
       return;
     }
-    finish();
-  });
+    goStep(cur + 1);
+  }
+  ctaBtn.addEventListener("click", () => advance());
 
   // ─── Radiogroups a11y (avatar + couleur) ──────────────────────
   // Tabindex roving + navigation flèches : un seul élément focusable par
@@ -632,7 +684,7 @@ export async function mount(root) {
       accent_id: accentId,
       reminders_on: notifWanted,
       with_intro: withIntro,
-      version: "v4-onepage",
+      version: "v5-steps",
     });
 
     ctaBtn.disabled = true;
@@ -689,14 +741,10 @@ export async function mount(root) {
   }
 
   // ─── Init ─────────────────────────────────────────────────────
-  updateProgress();
-  requestAnimationFrame(() => {
-    const h1 = root.querySelector("#ob-h1");
-    if (h1) {
-      h1.setAttribute("tabindex", "-1");
-      h1.focus({ preventScroll: true });
-    }
-  });
+  updateProgress(0);
+  paintDock();
+  track("onboarding.step_viewed", { step: STEPS[0] });
+  requestAnimationFrame(() => focusStep(panels[0]));
 }
 
 // ─── Styles ───────────────────────────────────────────────────────
@@ -751,7 +799,7 @@ const STYLE = `<style>
     display: block; height: 100%; border-radius: 99px;
     background: linear-gradient(90deg, var(--ob-vio-l), var(--ob-or));
     box-shadow: 0 0 10px rgba(255,206,77,.55);
-    transition: width .18s ease-out;
+    transition: width .25s ease-out;
   }
   .ob-skip {
     flex-shrink: 0; background: none; border: 0;
@@ -761,30 +809,46 @@ const STYLE = `<style>
   }
   .ob-skip:active { color: #fff; }
 
-  /* ── Zone scrollable ── */
-  .ob-scroll {
-    flex: 1; min-height: 0;
-    overflow-y: auto; overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-    position: relative; z-index: 1;
+  /* ── Scène (une étape plein écran affichée à la fois) ── */
+  .ob-stage { flex: 1; min-height: 0; overflow: hidden; position: relative; z-index: 1; }
+  .ob-scr {
+    height: 100%; display: flex; flex-direction: column;
+    padding: 8px 22px 4px; max-width: 460px; margin: 0 auto;
   }
-  .ob-scroll::-webkit-scrollbar { width: 0; }
-  .ob-content {
-    padding: 6px 22px calc(120px + env(safe-area-inset-bottom, 0px));
-    max-width: 460px; margin: 0 auto;
+  .ob-scr[hidden] { display: none; }
+  .ob-scr-enter { animation: obScrIn .32s cubic-bezier(.22,.9,.35,1) both; }
+  @keyframes obScrIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  @media (prefers-reduced-motion: reduce) { .ob-scr-enter { animation: none; } }
+
+  .ob-scr-hero { flex: 0 0 auto; text-align: center; padding-top: 4px; }
+  .ob-scr-body {
+    flex: 1; min-height: 0; overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  }
+  .ob-scr-body::-webkit-scrollbar { width: 0; }
+  .ob-scr-body-center { display: flex; flex-direction: column; justify-content: center; text-align: center; }
+
+  /* ── Bulle de dialogue (mascotte) ── */
+  .ob-bubble {
+    position: relative; max-width: 260px; margin: 0 auto 14px;
+    text-align: center; color: var(--ob-ink);
+    font: 700 13.5px/1.3 'Archivo', sans-serif;
+    background: var(--ob-plate); border: 1.5px solid var(--ob-line);
+    border-radius: 16px; padding: 9px 15px;
+    box-shadow: 0 6px 16px -8px rgba(0,0,0,.4);
+  }
+  .ob-bubble::after {
+    content: ""; position: absolute; left: 50%; bottom: -6px; width: 11px; height: 11px;
+    transform: translateX(-50%) rotate(45deg); background: var(--ob-plate);
+    border-right: 1.5px solid var(--ob-line); border-bottom: 1.5px solid var(--ob-line);
+    border-bottom-right-radius: 3px;
   }
 
-  /* ── HERO ── */
-  .ob-hero { text-align: center; padding-top: 6px; }
-  .ob-eyebrow {
-    font: 700 14px/1 'Archivo', sans-serif;
-    letter-spacing: 2.4px; text-transform: uppercase;
-    color: var(--ob-ink-2); display: inline-block; margin-bottom: 14px;
-  }
-  .ob-eyebrow b { color: var(--ob-or); text-shadow: 0 0 14px rgba(255,206,77,.5); }
+  /* ── Mascotte ── */
   .ob-mascot-wrap {
-    position: relative; width: 148px; height: 148px;
-    margin: 2px auto 16px; display: flex;
+    position: relative; width: 112px; height: 112px;
+    margin: 2px auto 12px; display: flex;
     align-items: center; justify-content: center;
   }
   .ob-mascot-wrap::before {
@@ -793,15 +857,15 @@ const STYLE = `<style>
     filter: blur(4px);
   }
   .ob-mascot {
-    position: relative; width: 138px; height: 138px; object-fit: contain;
+    position: relative; width: 100px; height: 100px; object-fit: contain;
     filter: drop-shadow(0 10px 18px rgba(0,0,0,.45));
-    animation: obPop .55s cubic-bezier(.34,1.56,.64,1) both;
+    animation: obPop .5s cubic-bezier(.34,1.56,.64,1) both;
   }
   @keyframes obPop { 0% { transform: scale(.6); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
   @media (prefers-reduced-motion: reduce) { .ob-mascot { animation: none; } }
   .ob-h1 {
     font: 800 30px/1.1 'Archivo', sans-serif;
-    letter-spacing: -.3px; margin: 0 0 12px;
+    letter-spacing: -.3px; margin: 0 0 12px; color: var(--ob-ink);
     text-shadow: 0 2px 10px rgba(0,0,0,.3); outline: none;
   }
   .ob-lead {
@@ -810,8 +874,7 @@ const STYLE = `<style>
   }
   .ob-lead b { color: #fff; font-weight: 700; }
 
-  /* ── Section générique ── */
-  .ob-section { margin-top: 34px; }
+  /* ── En-tête d'étape numérotée ── */
   .ob-sec-head { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
   .ob-sec-num {
     flex: 0 0 auto; width: 34px; height: 34px; border-radius: 11px;
@@ -822,10 +885,9 @@ const STYLE = `<style>
   }
   .ob-sec-title {
     margin: 0; font: 700 19px/1.1 'Archivo', sans-serif;
-    letter-spacing: .1px;
+    letter-spacing: .1px; color: var(--ob-ink);
   }
 
-  /* ── Étape identité (comptes Google) ── */
   .ob-micro.ok { color: #8fe85a; }
   .ob-micro.err { color: #ffb3b3; }
   .ob-cta:disabled { opacity: .55; cursor: default; filter: grayscale(.15); }
@@ -984,7 +1046,7 @@ const STYLE = `<style>
   .ob-pill-vol { color: var(--ob-or); }
   .ob-pill-vol img { width: 18px; height: 18px; object-fit: contain; }
 
-  /* ── Section 3 : install ── */
+  /* ── Étape install ── */
   .ob-install-head { display: flex; align-items: center; gap: 13px; margin-bottom: 6px; }
   .ob-install-badge {
     flex: 0 0 auto; width: 56px; height: 56px; border-radius: 16px; object-fit: contain;
@@ -1051,37 +1113,6 @@ const STYLE = `<style>
   }
   .ob-cta:disabled { opacity: .6; cursor: default; }
 
-  /* Cue de scroll — invite à descendre vers couleur/rappels (1er passage,
-     disparaît dès que l'élève scrolle ou si l'écran n'a rien à dérouler). */
-  .ob-cue {
-    position: absolute; left: 0; right: 0;
-    bottom: calc(94px + env(safe-area-inset-bottom, 0px));
-    z-index: 20; display: flex; flex-direction: column; align-items: center; gap: 7px;
-    pointer-events: none; transition: opacity .3s ease, transform .3s ease;
-  }
-  /* Voile derrière la bulle : sans lui, la pastille se posait EN PLEIN sur la
-     grille d'avatars (elle recouvrait un visage) et faisait étiquette cassée. */
-  .ob-cue::before {
-    content: ""; position: absolute; inset: -20px 0 -14px; z-index: -1;
-    background: linear-gradient(180deg, transparent, rgba(19,12,48,.82) 55%);
-  }
-  .ob-cue.hide { opacity: 0; transform: translateY(8px); }
-  .ob-cue-txt {
-    font: 800 13px/1 'Archivo', sans-serif; color: #1a1233;
-    background: linear-gradient(180deg, #ffe39a, var(--ob-or-d));
-    padding: 8px 15px; border-radius: 99px;
-    box-shadow: 0 8px 20px -5px rgba(255,206,77,.55);
-  }
-  .ob-cue-arr {
-    width: 30px; height: 30px; border-radius: 50%;
-    background: rgba(255,206,77,.16); color: var(--ob-or);
-    display: grid; place-items: center;
-    animation: obCueBob 1.4s ease-in-out infinite;
-  }
-  .ob-cue-arr svg { width: 18px; height: 18px; }
-  @keyframes obCueBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(7px); } }
-  @media (prefers-reduced-motion: reduce) { .ob-cue-arr { animation: none; } }
-
   /* ═══════════════════════════════════════════════════════════════
      CLAIR PREMIUM — uniquement quand le thème global est clair.
      ═══════════════════════════════════════════════════════════════ */
@@ -1097,7 +1128,6 @@ const STYLE = `<style>
     background: linear-gradient(180deg, #f7f5fd 0%, #ffffff 38%);
   }
 
-  /* Étape identité — variante claire */
   html[data-theme="light"] .ob-micro.ok { color: #3a8a01; }
   html[data-theme="light"] .ob-micro.err { color: #cc3344; }
 
@@ -1114,9 +1144,12 @@ const STYLE = `<style>
   html[data-theme="light"] .ob-skip { color: var(--c-ink-3); }
   html[data-theme="light"] .ob-skip:active { color: var(--c-ink); }
 
-  /* Hero */
-  html[data-theme="light"] .ob-eyebrow { color: var(--c-ink-3); text-shadow: none; }
-  html[data-theme="light"] .ob-eyebrow b { color: var(--ob-violet); text-shadow: none; }
+  /* Bulle + mascotte + hero */
+  html[data-theme="light"] .ob-bubble {
+    background: var(--c-bg); border-color: var(--c-line); color: var(--c-ink);
+    box-shadow: var(--c-shadow-soft);
+  }
+  html[data-theme="light"] .ob-bubble::after { background: var(--c-bg); border-color: var(--c-line); }
   html[data-theme="light"] .ob-mascot-wrap::before {
     background: radial-gradient(circle, rgba(165,131,255,.30) 0%, rgba(240,235,255,0) 68%);
     filter: none; inset: -2px;
@@ -1126,7 +1159,7 @@ const STYLE = `<style>
   html[data-theme="light"] .ob-lead { color: var(--c-ink-2); }
   html[data-theme="light"] .ob-lead b { color: var(--c-ink); font-weight: 600; }
 
-  /* Section heads */
+  /* En-têtes d'étape */
   html[data-theme="light"] .ob-sec-num {
     width: 30px; height: 30px; border-radius: 10px; color: #fff;
     background: linear-gradient(135deg, var(--ob-violet), var(--ob-violet-d));
@@ -1151,7 +1184,6 @@ const STYLE = `<style>
     box-shadow: 0 2px 6px rgba(124,77,255,.45);
   }
   html[data-theme="light"] .ob-helper { color: var(--c-ink-3); }
-
   html[data-theme="light"] .ob-color-label { color: var(--c-ink-3); }
   html[data-theme="light"] .ob-color.sel { border-color: var(--ob-violet); }
   html[data-theme="light"] .ob-av:focus-visible,
@@ -1214,7 +1246,7 @@ const STYLE = `<style>
   }
   html[data-theme="light"] .ob-pill-vol { color: var(--c-ink); }
 
-  /* Section install */
+  /* Étape install */
   html[data-theme="light"] .ob-install-head {
     background: var(--c-bg); border: 1px solid var(--c-line);
     border-radius: 20px; padding: 14px; box-shadow: var(--c-shadow-soft);
