@@ -16,6 +16,13 @@
       "Reviens régulièrement dans tes rétros : un coup d'œil au rétro intérieur toutes les 5 à 7 secondes environ.",
       "Reprends le regard loin. Tu te poses deux questions en boucle : « où suis-je maintenant ? » et « où est-ce que je veux aller ? »."
     ],
+    "titres": [
+      "Vise à mi-hauteur du pare-brise",
+      "Garde l'œil qui bouge",
+      "Tourne la tête pas que les yeux",
+      "Reviens dans tes rétros",
+      "Reprends le regard loin"
+    ],
     "pourquoi": "Tu conduis avec tes yeux avant de conduire avec tes mains. Un moniteur le résume bien : le regard, c'est environ 80 % de la conduite. Si ton regard est mal placé, ta trajectoire est mauvaise quoi que tu fasses avec les mains. Et plus tu poses ton regard à des endroits différents, plus ton cerveau reconstruit une image complète et précise de la scène (distances, formes, dangers).",
     "erreur": "Fixer le capot, la voiture juste devant, ou un seul point trop longtemps. Résultat : tu découvres tout au dernier moment et tu freines en catastrophe. La parade des moniteurs, c'est la conduite commentée : tu dis à voix haute ce que tu vois (« passage piéton, arrondi de trottoir, panneau 50 »). Ça force l'œil à aller chercher les indices et à anticiper.",
     "bva": null,
@@ -55,6 +62,13 @@
       "Double cette distance par temps de pluie ou de nuit (au moins 4 secondes).",
       "Adapte en continu, dans les deux sens : quand c'est dégagé et autorisé, tu roules à une allure souple, légèrement sous le maximum plutôt qu'au ras de la limite ; quand un risque apparaît, tu ralentis sans attendre."
     ],
+    "titres": [
+      "Cherche la signalisation de loin",
+      "Lève le pied avant la zone",
+      "Compte tes deux secondes",
+      "Double la distance sous la pluie",
+      "Adapte ton allure en continu"
+    ],
     "pourquoi": "La bonne vitesse n'est pas « la limite autorisée », c'est celle qui te laisse t'arrêter à temps si quelque chose surgit. Les moniteurs insistent sur les deux sens : rouler trop lentement n'est pas plus prudent, ça gêne le flux et ça t'empêche d'apprendre à gérer l'info à allure réelle. Sur une descente, tu lâches l'accélérateur pour ne pas accélérer tout seul ; sur une côte, tu anticipes un peu de gaz pour ne pas t'écrouler. La vitesse se pilote autant à l'accélérateur qu'avec le relief.",
     "erreur": "Garder la même vitesse partout « parce qu'on est dans la limite ». Une zone scolaire à 50 reste dangereuse à 50 si des enfants traversent. À l'inverse, ramper bien sous la limite sur une route dégagée n'est pas un gage de sécurité : on adapte, on ne se fige pas.",
     "bva": null,
@@ -93,6 +107,13 @@
       "Garde une distance latérale d'au moins une portière avec les voitures garées (risque d'ouverture de porte ou de piéton qui surgit).",
       "Sur route étroite ou avec cyclistes, décale-toi légèrement vers la gauche, après avoir vérifié que c'est libre, pour laisser l'écart de sécurité quand tu croises ou dépasses.",
       "Reste centré et constant dans une file ou une voie balisée : pas de zigzag."
+    ],
+    "titres": [
+      "Roule au milieu de ta voie",
+      "Prends des repères dans tes rétros",
+      "Laisse une portière aux voitures garées",
+      "Décale-toi pour croiser un cycliste",
+      "Reste centré sans zigzaguer"
     ],
     "pourquoi": "Une voiture bien placée est lisible : les autres comprennent où tu vas. Et surtout, un débutant a presque toujours l'impression que sa voiture est trop large, qu'« ça ne passe pas » : c'est une illusion d'optique. Une voiture fait environ 1,80 m (≈ 2 m rétros compris) ; une voie fait au moins 3 m. Même en croisant un bus sur une route étroite, l'espace existe. Tu te fies à tes repères, pas à ta sensation.",
     "erreur": "Se coller à droite « pour être prudent » et frôler les voitures garées, la bordure ou les cyclistes. Trop à droite est aussi dangereux que trop au centre. Autre piège : fixer le rétroviseur en virage pour se guider. Il ment (l'arrière de ta voiture est plus loin de la bordure que l'avant), tu corriges à tort et tu tapes le trottoir.",
@@ -134,6 +155,14 @@
       "Accélère doucement une fois la sortie en vue.",
       "Trajectoire de sécurité : tu restes sur ta voie (sans couper ni mordre la ligne). La trajectoire « extérieur → intérieur → extérieur » est une ligne de course, hors-sujet au permis."
     ],
+    "titres": [
+      "Vise la sortie du virage",
+      "Ralentis avant d'entrer",
+      "Reste bien sur ta voie",
+      "Tire le volant d'une seule main",
+      "Accélère à la sortie",
+      "Garde ta trajectoire de sécurité"
+    ],
     "pourquoi": "On freine en ligne droite, là où la voiture est stable. Freiner en plein virage la déséquilibre et fait perdre l'adhérence. La vitesse se règle AVANT, le volant se gère PENDANT. Et la trajectoire suit le regard : un moniteur le dit cash. « ma tête va à gauche et ma main suit en même temps ». Si tu regardes le bord, tu vas vers le bord.",
     "erreur": "Entrer trop vite et freiner au milieu du virage. Signe que tu as mal anticipé : la prochaine fois, ralentis plus tôt. Autre erreur fréquente : aborder le virage en sous-régime (rapport trop haut). La voiture peine, broute, et tu risques de caler en pleine courbe. Tu rétrogrades AVANT pour avoir de la force.",
     "bva": "Il n'y a pas de rapport à choisir avant le virage : tu restes en D et la boîte s'en occupe. Le geste qui compte, lui, ne change pas : tu ralentis au frein AVANT d'entrer, sur la portion encore droite. Tu ne peux ni te retrouver en sous-régime ni caler en pleine courbe. À la sortie, ré-accélère progressivement : si tu écrases l'accélérateur, la boîte rétrograde d'un coup (c'est le kickdown) alors que tu cherches justement de la douceur.",
@@ -173,6 +202,14 @@
       "Déboîte, dépasse franchement en laissant l'écart latéral (au moins 1 m en ville, 1,50 m hors agglomération pour un cycliste ou deux-roues).",
       "Clignotant à droite, et reviens quand tu vois le véhicule dépassé entier dans ton rétro intérieur (jamais en lui « rabattant » dessus).",
       "Pour CROISER sur route étroite : ralentis, serre à droite (sans frôler le bas-côté), puis reprends ta place une fois croisé."
+    ],
+    "titres": [
+      "Vérifie que c'est autorisé",
+      "Assure-toi de voir loin devant",
+      "Enchaîne tes contrôles",
+      "Déboîte et dépasse franchement",
+      "Reviens quand tu le vois entier",
+      "Serre à droite pour croiser"
     ],
     "pourquoi": "Un dépassement, c'est un moment où tu roules dans la voie d'en face : tout doit être sûr AVANT, car une fois lancé tu ne peux plus reculer. Un moniteur insiste sur l'intérêt du clignotant même en dépassant un cycliste : il prévient ceux de derrière ET montre à l'inspecteur que tu as analysé la situation. Et la décision doit être nette : on choisit franchement de doubler ou de renoncer, on ne reste pas à hésiter au milieu.",
     "erreur": "Dépasser « parce que ça va passer » sans visibilité complète (virage, côte), ou céder à la pression d'une voiture qui te colle. Le bon réflexe quand le doute s'installe : tu lèves le pied, tu rétrogrades, tu renonces. Et si l'inspecteur te demande pourquoi tu as ralenti, tu te justifies (« j'avais un doute sur le comportement du cycliste, je ne voyais pas assez loin »).",
@@ -222,6 +259,22 @@
       "Au giratoire. Avant de sortir : contrôle de l'angle mort gauche (au cas où quelqu'un te coupe la route), un œil à droite pour vélos / bande cyclable, puis tu sors et coupes le clignotant. Attention au passage piéton en sortie : tu n'accélères pas tant que tu n'as pas vérifié.",
       "Au giratoire. « Rond-point » ≠ « carrefour à sens giratoire » : la différence se lit à l'entrée. Giratoire = « Cédez le passage » à l'entrée → celui qui entre n'est PAS prioritaire, il laisse passer ceux déjà sur l'anneau. Rond-point (rare, sans panneau à l'entrée) → priorité à droite → celui qui entre est prioritaire sur ceux déjà dedans."
     ],
+    "titres": [
+      "Repère l'intersection de loin",
+      "Identifie le type en arrivant",
+      "Sans panneau c'est la priorité à droite",
+      "Adapte l'allure à la visibilité",
+      "Ne freine jamais brusquement dessus",
+      "Ne t'engage que si tu peux dégager",
+      "Sache ce qu'est un refus de priorité",
+      "Reconnais les fausses priorités à droite",
+      "Ralentis en approchant du giratoire",
+      "Cède le passage à ceux sur l'anneau",
+      "Engage-toi dans un trou suffisant",
+      "Clignotant à droite avant ta sortie",
+      "Contrôle ton angle mort avant de sortir",
+      "Distingue giratoire et rond-point"
+    ],
     "pourquoi": "Une intersection est l'endroit où les trajectoires se croisent : 99 % du travail, c'est savoir QUI PASSE EN PREMIER avant d'y être. Le clignotant droit en sortie de giratoire prévient les autres que tu quittes l'anneau, ce qui débloque ceux qui attendent d'entrer.",
     "erreur": "Deux grands classiques : oublier le clignotant à droite avant de sortir du giratoire (les usagers en attente restent bloqués ou s'engagent en pensant que tu continues) ; et ne pas détecter l'intersection à temps, d'où le refus de priorité à droite parce qu'on « pensait avoir le temps de passer ».",
     "bva": "Tu restes en D partout, à l'approche de l'intersection comme sur l'anneau. Les repères « tu reviens en 2e » et « ralentis et rétrograde » ne te concernent pas : c'est la boîte qui choisit le rapport. Ce qui compte reste identique : ralentir au frein assez tôt pour avoir le temps de bien regarder. Tu peux même rouler au pas sans aucun risque de caler, et en D la voiture avance toute seule au ralenti dès que tu lèves le frein, ce qui aide à se présenter tout doucement devant un « Cédez le passage ».",
@@ -262,6 +315,14 @@
       "Coupe ton clignotant une fois la manœuvre finie (s'il ne se coupe pas seul. En giratoire il s'efface souvent trop tôt, remets-le).",
       "Réserve le klaxon à l'avertissement d'un danger, jamais à l'énervement."
     ],
+    "titres": [
+      "Anticipe ton action avant de la faire",
+      "Mets ton clignotant tôt",
+      "Place-toi dès que c'est possible",
+      "Cherche le contact visuel",
+      "Coupe ton clignotant après",
+      "Garde le klaxon pour le danger"
+    ],
     "pourquoi": "La route est un dialogue. Les autres ne devinent pas tes intentions : si tu préviens tôt et clairement, tout le monde s'adapte sans à-coup. Un moniteur le montre bien : un clignotant adverse mis trop tard crée le doute (« il fait quoi ? un demi-tour ? »). À l'inverse, un clignotant en évidence quand tu attends de t'engager rassure et fait avancer la situation. Prévenir trop tard ne sert plus à rien.",
     "erreur": "Mettre le clignotant en même temps qu'on tourne (ou pas du tout). Il doit prévenir AVANT, pas accompagner le geste. Et son cousin : signaler son intention puis se déporter beaucoup trop tard, ce qui surprend ceux de derrière.",
     "bva": null,
@@ -300,6 +361,13 @@
       "Structure chaque manœuvre, ne la bâcle pas : « on prend le temps de bien faire ». Exécuter les gestes dans l'ordre (contrôle → clignotant → angle mort → action), c'est justement ce qui rend la conduite fluide et sûre.",
       "Annonce tes intentions tôt (clignotants, C2g) et gère les priorités (C2f) sans hésiter.",
       "Reste calme sur l'imprévu : si tu te trompes de voie ou de rue, tu continues, quitte à refaire un tour de giratoire, et tu reprends plus loin. Jamais de manœuvre dangereuse pour « rattraper »."
+    ],
+    "titres": [
+      "Visualise ton itinéraire avant de partir",
+      "Remets en boucle les réflexes du monde 2",
+      "Structure chaque manœuvre",
+      "Annonce tôt et gère les priorités",
+      "Reste calme sur l'imprévu"
     ],
     "pourquoi": "Le monde 2 est validé quand tous les gestes deviennent automatiques et que ta tête est libre pour décider, plus pour piloter. Un repère parlant : les bons élèves contrôlent leurs rétros « sans même s'en rendre compte », par habitude. Tu enchaînes une longue séquence sans intervention du moniteur. Y compris dans les zones piégeuses (commerçantes, parkings encombrés) où tu ne te laisses pas presser par les autres.",
     "erreur": "Paniquer sur un imprévu (rue barrée, mauvaise voie au giratoire, erreur d'itinéraire) et faire un geste dangereux pour « corriger » (demi-tour brusque, marche arrière, changement de voie en force). On reste calme, on continue dans la voie où on est, on reprend après en sécurité.",

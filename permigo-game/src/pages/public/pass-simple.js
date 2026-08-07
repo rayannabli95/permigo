@@ -40,6 +40,8 @@
 import { getLang, applyLang } from "@/utils/lang.js";
 import { esc } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
+import { startPassCheckout } from "@/services/billing.js";
+import { fbTrack } from "@/services/meta-pixel.js";
 import { AVIS } from "@/data/avis-eleves.js";
 import { mountDemoSituation } from "@/components/public/demo-situation.js";
 import {
@@ -94,6 +96,8 @@ const STR = {
     priceOnly: "seulement",
     priceSub: "Par mois. Sans engagement.",
     priceBtn: "Tout débloquer",
+    btnWait: "Ouverture du paiement…",
+    err: "Le paiement n'a pas pu démarrer. Réessaie.",
     foot: "Paiement sécurisé par Stripe · Remboursé sous 3 jours",
     legal: "Mentions légales",
   },
@@ -117,6 +121,8 @@ const STR = {
     priceOnly: "only",
     priceSub: "Per month. No commitment.",
     priceBtn: "Unlock everything",
+    btnWait: "Opening payment…",
+    err: "Payment could not start. Please try again.",
     foot: "Secure payment by Stripe · Money back within 3 days",
     legal: "Legal notice",
   },
@@ -140,6 +146,8 @@ const STR = {
     priceOnly: "فقط",
     priceSub: "شهرياً. بلا التزام.",
     priceBtn: "افتح كل شيء",
+    btnWait: "جارٍ فتح الدفع…",
+    err: "تعذّر بدء الدفع. حاول مرة أخرى.",
     foot: "دفع آمن عبر Stripe · استرداد خلال 3 أيام",
     legal: "الإشعارات القانونية",
   },
@@ -319,16 +327,18 @@ const STYLE = `<style>
   }
   .ps-price-btn:active { transform: translateY(3px); box-shadow: inset 0 2.5px 0 rgba(255,255,255,.35), 0 1px 0 var(--in-dk); }
 
-  /* La scène jouable, juste sous le titre. Le bouton qui la suit est celui
-     qui compte : on le propose au moment où le visiteur vient de réussir. */
+  /* La scène jouable, juste sous le titre. ⚠️ PAS de bouton en dessous : il
+     répétait mot pour mot celui du premier écran, à un demi-écran d'écart.
+     Le même mot deux fois ne se lit pas comme deux occasions, ça se lit comme
+     un doublon. La porte gratuite reste celle du hero, et la scène referme
+     elle-même la boucle par sa ligne de renfort. */
   .ps-demo { margin-top: 4px; }
-  .ps-demo-cta { margin-top: 16px; }
-  .ps-demo-cta.ps-pulse { animation: psPulse 1.7s ease-out; }
-  @keyframes psPulse {
-    0%, 100% { box-shadow: 0 6px 0 #b85e00, 0 14px 30px -8px rgba(255,155,30,.5); }
-    30% { box-shadow: 0 6px 0 #b85e00, 0 0 0 10px rgba(255,203,61,.28), 0 14px 30px -8px rgba(255,155,30,.6); }
+
+  .ps-err {
+    font: 700 13px/1.4 'Archivo', sans-serif; color: #ffb4a8;
+    text-align: center; margin: 10px 0 0; display: none;
   }
-  @media (prefers-reduced-motion: reduce) { .ps-demo-cta.ps-pulse { animation: none; } }
+  .ps-err.on { display: block; }
 
   .ps-foot {
     text-align: center; padding: 34px 0 6px;
@@ -375,8 +385,6 @@ export async function mount(root) {
 
       <section class="ps-sec" style="padding-top:22px">
         <div class="ps-demo" id="ps-demo"></div>
-        <button class="ps-cta ps-demo-cta" id="ps-cta2" type="button">${L.cta}</button>
-        <p class="ps-cta-note">${L.ctaNote}</p>
       </section>
 
       <section class="ps-sec">
@@ -416,6 +424,7 @@ export async function mount(root) {
           <span class="ps-price-only">${L.priceOnly}</span>
           <p class="ps-price-sub">${L.priceSub}</p>
           <button class="ps-price-btn" id="ps-buy" type="button">${L.priceBtn}</button>
+          <p class="ps-err" id="ps-err">${L.err}</p>
         </div>
       </section>
 
@@ -429,35 +438,51 @@ export async function mount(root) {
     track("simple.free_click", { lang });
     location.hash = "#/rejoindre?solo=1";
   });
-  // Le circuit Stripe vit dans #/pass tant que cette page est en comparaison :
-  // on ne duplique pas un paiement qui marche.
-  root.querySelector("#ps-buy")?.addEventListener("click", () => {
-    track("simple.buy_click", { lang });
-    location.hash = "#/pass";
+  // ── Le paiement ──
+  // ⚠️ Stripe REVIENT sur #/pass?checkout=success : c'est écrit en dur dans
+  // l'edge function pass-checkout (success_url/cancel_url), donc côté serveur
+  // et déjà déployé. On ne le change pas d'ici, et #/pass reste routée pour
+  // afficher l'écran de retour. Le jour où on veut le retour sur cette page,
+  // c'est l'edge function qu'il faut redéployer, pas ce fichier.
+  // Un clic = une session. On fige le bouton le temps de la redirection,
+  // sinon un double-tap sur mobile ouvre deux sessions de paiement.
+  const buy = root.querySelector("#ps-buy");
+  const err = root.querySelector("#ps-err");
+  buy?.addEventListener("click", async () => {
+    track("simple.checkout_click", { lang });
+    fbTrack("InitiateCheckout", {
+      content_name: "mensuel",
+      currency: "EUR",
+      value: 4.99,
+    });
+    err?.classList.remove("on");
+    buy.disabled = true;
+    const avant = buy.textContent;
+    buy.textContent = L.btnWait;
+    try {
+      await startPassCheckout("mensuel");
+      // Succès = redirection vers Stripe : on ne repasse jamais ici.
+    } catch (e) {
+      console.error("[simple] checkout", e);
+      track("simple.checkout_error", { lang });
+      buy.disabled = false;
+      buy.textContent = avant;
+      err?.classList.add("on");
+      err?.scrollIntoView({ block: "center", behavior: "smooth" });
+    }
   });
   root.querySelector("#ps-login")?.addEventListener("click", () => {
     location.hash = "#/login";
   });
 
-  // La scène jouable. onCorrect : la motivation est à son maximum juste après
-  // la bonne réponse. On ne fabrique pas un deuxième bouton, on met en valeur
-  // celui qui est déjà juste en dessous.
+  // La scène jouable. Elle referme elle-même la boucle après une bonne
+  // réponse (« C'est exactement comme ça que PermiGo te prépare avant de
+  // conduire »), sans deuxième bouton : voir le commentaire de .ps-demo.
   const demo = root.querySelector("#ps-demo");
-  const cta2 = root.querySelector("#ps-cta2");
   if (demo)
     mountDemoSituation(demo, lang, {
-      onCorrect: () => {
-        track("simple.demo_success", { lang });
-        if (!cta2) return;
-        cta2.classList.remove("ps-pulse");
-        void cta2.offsetWidth; // force le rejeu si l'élève relance la démo
-        cta2.classList.add("ps-pulse");
-      },
+      onCorrect: () => track("simple.demo_success", { lang }),
     });
-  cta2?.addEventListener("click", () => {
-    track("simple.free_click", { lang, from: "demo" });
-    location.hash = "#/rejoindre?solo=1";
-  });
 
   wireBackdrop(root);
 }
