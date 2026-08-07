@@ -2,32 +2,39 @@
 // Le décor de la page de vente : la route de montagne, derrière TOUTE la page
 //
 // Ce que ça fait : l'illustration « Prépare ta leçon » (celle du hero élève)
-// tient le fond du premier au dernier écran, et le défilement de la page
-// PILOTE la vidéo. On descend, la voiture monte vers le col ; on remonte,
-// elle redescend. Le décor recule et s'assombrit au passage pour laisser le
-// texte lisible.
+// tient le fond du premier au dernier écran. La vidéo tourne en boucle toute
+// seule, et le DÉFILEMENT fait reculer le décor et monter un voile sombre pour
+// laisser le texte lisible.
 //
-// ── Les trois pièges, et comment on les évite ──
+// ⚠️⚠️ POURQUOI LA VIDÉO NE SE PILOTE PLUS AU DOIGT (07/08/2026)
+// Elle l'a fait : la position dans la page donnait la position dans le film.
+// C'était joli, et ça coûtait très cher en image. Pour pouvoir se déplacer
+// dedans sans saccade il faut une image-clé sur CHAQUE image (ffmpeg -g 1),
+// or une image-clé ne compresse rien : tout le budget partait là-dedans et il
+// ne restait plus rien pour la qualité. Résultat, du 720p baveux en 2,8 Mo.
+// Rayan : « la vidéo est en qualité merdique, au pire laisse-la se jouer
+// seule ». En lecture normale, le même extrait tient en 1080p propre pour
+// 963 Ko. Meilleure image, trois fois plus léger. Le mouvement au défilement
+// reste, il est fait en CSS et ne coûte rien.
+// ⛔ Ne pas re-brancher le pilotage au doigt sans refaire ce calcul.
 //
-// 1. LE POIDS. La vidéo fait 2,8 Mo. On ne la met JAMAIS dans le chemin du
-//    premier affichage : le fond est d'abord l'image fixe (38 Ko, déjà servie
-//    par l'app), et la vidéo n'est demandée qu'une fois la page posée. Si le
-//    réseau est lent, coupé, ou si l'appareil demande moins d'animations, on
-//    reste sur l'image et personne ne voit de trou.
+// ── Les deux pièges qui restent ──
 //
-// 2. LE DÉPLACEMENT DANS LA VIDÉO. Une vidéo normale n'a une image-clé que
-//    toutes les N images : se déplacer dedans oblige le navigateur à repartir
-//    de la dernière clé, et ça saccade. Le fichier servi ici est réencodé
-//    avec une image-clé sur CHAQUE image (ffmpeg -g 1 -keyint_min 1). C'est
-//    ce qui rend le pilotage au doigt fluide sur mobile.
+// 1. LE POIDS. La vidéo n'est JAMAIS dans le chemin du premier affichage : le
+//    fond est d'abord l'image fixe (38 Ko, déjà servie par l'app), et la vidéo
+//    n'est demandée qu'une fois la page posée. Réseau lent, mode économie de
+//    données, ou appareil qui demande moins d'animations : on reste sur
+//    l'image et personne ne voit de trou.
 //
-// 3. `animation-timeline: view()` NE MARCHE PAS ICI. Le décor est en position
+// 2. `animation-timeline: view()` NE MARCHE PAS ICI. Le décor est en position
 //    fixe : il ne défile jamais lui-même, sa progression resterait bloquée à
 //    zéro sans la moindre erreur. On se branche donc explicitement sur le
 //    défilement du document, avec `scroll(root block)`.
 // ═══════════════════════════════════════════════════════════════
 
-const VIDEO = "/video/route-pass-scrub.mp4";
+// ⚠️ NOM DE FICHIER NEUF à chaque réencodage : un même nom, et les caches
+// (navigateur, service worker, CDN) resservent l'ancienne vidéo à vie.
+const VIDEO = "/video/route-pass-1080.mp4";
 // L'image de repli est celle du hero élève « Prépare ta leçon » : même route,
 // même heure. Elle est déjà dans l'app, elle ne coûte rien de plus.
 const POSTER = "/skins/prepare-lecon/midi.webp";
@@ -118,16 +125,17 @@ export const backdropHTML = ({ texte = "haut" } = {}) => `
   </div>`;
 
 /**
- * Charge la vidéo une fois la page posée, puis lui fait suivre le doigt.
+ * Charge la vidéo une fois la page posée et la laisse tourner en boucle.
  * Ne renvoie rien : si quoi que ce soit manque à l'appel, on garde l'image
- * fixe et la page reste exactement telle qu'elle est.
+ * fixe et la page reste exactement telle qu'elle est. Le mouvement au
+ * défilement (recul + voile) est en CSS et vit sa vie dans les deux cas.
  * @param {HTMLElement} root
  */
 export function wireBackdrop(root) {
   const media = root.querySelector(".pv-bg-media");
   if (!media) return;
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  // Une vidéo de 2,8 Mo n'a rien à faire sur un forfait compté. Le navigateur
+  // Un mégaoctet de vidéo n'a rien à faire sur un forfait compté. Le navigateur
   // dit quand il est en mode économie de données ou sur un réseau lent.
   const net = navigator.connection;
   if (net && (net.saveData || /(^|-)2g$/.test(net.effectiveType || ""))) return;
@@ -140,60 +148,29 @@ export function wireBackdrop(root) {
     v.setAttribute("muted", "");
     v.setAttribute("playsinline", "");
     v.setAttribute("webkit-playsinline", ""); // vieux iOS
+    v.loop = true;
+    v.setAttribute("loop", "");
     v.preload = "auto";
     v.setAttribute("aria-hidden", "true");
     v.src = VIDEO;
 
-    // ⚠️⚠️ LE PIÈGE QUI A FAIT « la vidéo ne se joue pas » SUR TÉLÉPHONE.
-    // On ne montre la vidéo QUE lorsqu'une vraie image a été peinte. Sur iOS,
-    // une vidéo qui n'a jamais été LUE ne dessine rien quand on se contente de
-    // déplacer `currentTime` : l'élément restait posé par-dessus l'image fixe,
-    // vide, et le décor semblait mort. Tant qu'aucune image n'est peinte, on
-    // garde l'illustration, qui est belle et qui suit déjà le défilement.
+    // ⚠️ On ne MONTRE la vidéo qu'une fois une vraie image peinte. Sinon, sur
+    // un appareil où la lecture est refusée, un rectangle vide se posait
+    // par-dessus l'illustration et le décor semblait mort (le bug « la vidéo
+    // ne se joue pas », #743). Tant qu'aucune image n'arrive, on garde
+    // l'illustration : elle est belle et elle suit déjà le défilement.
     const montrer = () => v.classList.add("on");
     if ("requestVideoFrameCallback" in v) v.requestVideoFrameCallback(montrer);
-    else v.addEventListener("seeked", montrer, { once: true });
+    else v.addEventListener("playing", montrer, { once: true });
 
+    // Muette et `playsinline`, la lecture automatique est autorisée sans geste
+    // de l'utilisateur. Si un navigateur la refuse quand même, on ne force
+    // rien et on ne montre rien : l'illustration reste, sans trou ni erreur.
     v.addEventListener(
-      "loadedmetadata",
+      "canplay",
       () => {
-        const duree = v.duration;
-        if (!isFinite(duree) || duree <= 0) return; // illisible → on garde l'image
-
-        // L'amorçage : un play() suivi d'un pause() immédiat réveille le
-        // décodeur. Muette et `playsinline`, la lecture est autorisée sans
-        // geste de l'utilisateur. Si elle est refusée quand même, on continue :
-        // sur les navigateurs de bureau le déplacement suffit.
-        const amorce = v.play();
-        if (amorce && typeof amorce.then === "function")
-          amorce.then(() => v.pause()).catch(() => {});
-
-        let visee = 0;
-        let pos = 0;
-        let raf = 0;
-
-        const avancement = () => {
-          const max =
-            document.documentElement.scrollHeight - window.innerHeight;
-          return max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
-        };
-        const tick = () => {
-          pos += (visee - pos) * 0.14; // lissage
-          if (Math.abs(visee - pos) < 0.0006) pos = visee;
-          v.currentTime = pos * (duree - 0.06);
-          raf = pos === visee ? 0 : requestAnimationFrame(tick);
-        };
-        const onScroll = () => {
-          visee = avancement();
-          if (!raf) raf = requestAnimationFrame(tick);
-        };
-
-        visee = pos = avancement();
-        v.currentTime = pos * (duree - 0.06);
-        // `passive` : l'écoute ne fait QUE relever une valeur, le déplacement
-        // réel se joue dans la boucle rAF, qui s'arrête d'elle-même.
-        addEventListener("scroll", onScroll, { passive: true });
-        addEventListener("resize", onScroll);
+        const p = v.play();
+        if (p && typeof p.catch === "function") p.catch(() => {});
       },
       { once: true },
     );
