@@ -139,13 +139,25 @@ export const playLaunchSound = (durationMs = 2800) =>
   _playIntro("launch", 0.45, durationMs);
 
 // Mélodie de fond bouclée, faible volume. Retourne stop().
-function _loopTrack(name, vol) {
+// `fadeInMs` : monte le volume progressivement au lieu de démarrer plein pot
+// (utile quand la musique enchaîne juste après un moment silencieux, ex. la
+// mission du Mode Pilote, où le démarrage à volume fixe sonnait brutal).
+function _loopTrack(name, vol, { fadeInMs = 0 } = {}) {
   if (!isSoundEnabled()) return () => {};
   try {
-    const a = _get(name, vol);
+    const a = _get(name, fadeInMs ? 0 : vol);
     a.loop = true;
     a.currentTime = 0;
     a.play().catch(() => {});
+    if (fadeInMs) {
+      const start = performance.now();
+      const step = (t) => {
+        const p = Math.min(1, (t - start) / fadeInMs);
+        a.volume = vol * p;
+        if (p < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }
     return () => {
       a.loop = false;
       a.pause();
@@ -156,8 +168,9 @@ function _loopTrack(name, vol) {
   }
 }
 
-// Quizz : mélodie douce de fond (sons/tuto.mp3).
-export const playQuizMusic = (vol = 0.12) => _loopTrack("tuto", vol);
+// Quizz : mélodie douce de fond (sons/tuto.mp3), fondu d'entrée sur 700 ms.
+export const playQuizMusic = (vol = 0.12) =>
+  _loopTrack("tuto", vol, { fadeInMs: 700 });
 
 // Joué une seule fois par session, après le 1er geste user (autoplay safe)
 // Durée limitée à 2 secondes

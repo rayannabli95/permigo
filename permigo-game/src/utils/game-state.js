@@ -147,29 +147,48 @@ function _scheduleSave() {
 }
 
 /**
+ * Vide tout le cache local de progression (série, gemmes, coffres, objets,
+ * équipement). À appeler à la déconnexion et avant toute inscription, pour
+ * qu'un nouveau compte ne parte jamais avec les données du précédent.
+ */
+export function clearLocalGameState() {
+  [
+    LS_STREAK_DATE,
+    LS_STREAK_COUNT,
+    LS_CHESTS_OPENED,
+    LS_CHESTS_DB_CACHE,
+    LS_GEMMES,
+    LS_OWNED,
+    LS_EQUIPPED,
+    LS_EQUIPPED_ASSETS,
+    LS_LAST_USER,
+  ].forEach((k) => {
+    try {
+      localStorage.removeItem(k);
+    } catch {}
+  });
+  _userId = null;
+}
+
+/**
  * À appeler une fois au boot après auth.
  * Charge user_preferences.custom depuis la DB et hydrate localStorage.
  * DB est source de vérité si un enregistrement existe.
  */
 export async function initGameState(userId) {
+  // Garde-fou : un autre compte s'est connecté sur cet appareil depuis la
+  // dernière fois (déconnexion qui n'a pas purgé, appareil partagé...) : la
+  // mémoire locale (skins équipés, gemmes, série) lui appartient, pas au
+  // compte courant. On la vide pour ne rien lui faire hériter par erreur
+  // (ex : un skin premium jamais acheté qui semblait "déjà débloqué").
+  try {
+    const lastUser = localStorage.getItem(LS_LAST_USER);
+    if (lastUser && lastUser !== userId) clearLocalGameState();
+    localStorage.setItem(LS_LAST_USER, userId);
+  } catch {}
+
   _userId = userId;
   try {
-    // Un autre compte s'est connecté sur cet appareil depuis la dernière fois :
-    // la mémoire locale (skins équipés, gemmes, série) lui appartient, pas au
-    // compte courant. On la vide pour ne rien lui faire hériter par erreur
-    // (ex : un skin premium jamais acheté qui semblait "déjà débloqué").
-    const lastUser = localStorage.getItem(LS_LAST_USER);
-    if (lastUser && lastUser !== userId) {
-      localStorage.removeItem(LS_STREAK_DATE);
-      localStorage.removeItem(LS_STREAK_COUNT);
-      localStorage.removeItem(LS_CHESTS_OPENED);
-      localStorage.removeItem(LS_CHESTS_DB_CACHE);
-      localStorage.removeItem(LS_GEMMES);
-      localStorage.removeItem(LS_OWNED);
-      localStorage.removeItem(LS_EQUIPPED);
-      localStorage.removeItem(LS_EQUIPPED_ASSETS);
-    }
-    localStorage.setItem(LS_LAST_USER, userId);
     // Pull en parallèle : user_preferences (custom) + streaks (table dédiée) + profiles.gemmes
     const [prefsRes, streakRes, profileRes] = await Promise.allSettled([
       sb
