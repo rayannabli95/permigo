@@ -91,8 +91,6 @@ const VS_I18N = {
       "You already certified this skill. The driving scene stays open for as much practice as you want.",
     blocked_cta: "Replay the driving scene",
     blocked_quiz: "Retake the quiz",
-    blocked_hint:
-      "This practice changes nothing in your journey. It's just for the hand.",
     ent_kick: "Practice",
     ent_title: "The move is still there",
     ent_p: "“{n}” stays done in your journey. This practice changes nothing.",
@@ -173,7 +171,6 @@ const VS_I18N = {
       "لقد صادقت سلفًا على هذه المهارة. ويبقى المشهد العملي مفتوحًا للتدرّب كما تشاء.",
     blocked_cta: "أعد المشهد العملي",
     blocked_quiz: "أعد الاختبار",
-    blocked_hint: "هذا التمرين لا يغيّر شيئًا في مسارك. إنه لليد فقط.",
     ent_kick: "تمرين",
     ent_title: "الحركة ما زالت حاضرة",
     ent_p: "«{n}» تبقى مكتسبة في مسارك. وهذا التمرين لا يغيّر شيئًا.",
@@ -298,13 +295,6 @@ const STYLE = `<style>
 .vs-cta:disabled { opacity:.55; cursor:not-allowed; }
 .vs-cta:not(:disabled):active { transform: scale(.98); }
 a.vs-cta { text-decoration:none; }
-/* Deuxième porte d'un écran d'entraînement : présente, jamais dominante. */
-.vs-second { width:100%; margin-top:11px; padding:15px; border-radius:15px; cursor:pointer; text-decoration:none;
-  border:1.5px solid var(--bo); background:var(--su); color:var(--ink);
-  font:800 14.5px/1 'Archivo',sans-serif;
-  display:flex; align-items:center; justify-content:center; gap:8px;
-  transition: transform .15s; }
-.vs-second:active { transform: scale(.98); }
 .vs-hint { text-align:center; margin:10px 0 0; font:600 12px/1.5 'Archivo',sans-serif; color:var(--mu2); }
 
 /* ── Écran résultat : DA Arène nuit-violet + or (célébration) ── */
@@ -315,6 +305,11 @@ a.vs-cta { text-decoration:none; }
     radial-gradient(120% 60% at 50% 22%, rgba(110,70,220,.24) 0%, transparent 62%),
     linear-gradient(180deg,#181241 0%,#0f0d24 58%,#0b0a1c 100%); }
 .vsr-med { width:96px; height:96px; margin-bottom:16px; animation: vsrPop .5s cubic-bezier(.34,1.56,.64,1) both; }
+/* Logo Permigo (au lieu d'un médaillon générique) en tête de l'écran « déjà
+   acquise » : demande Rayan (07/08), la monnaie du header n'a pas bougé. */
+.vsr-med-logo { display:flex; align-items:center; justify-content:center; }
+.vsr-logo-img { width:88px; height:88px; object-fit:contain;
+  filter: drop-shadow(0 10px 22px rgba(0,0,0,.5)) drop-shadow(0 0 20px rgba(255,205,110,.3)); }
 @keyframes vsrPop { from { opacity:0; transform:scale(.7); } to { opacity:1; transform:scale(1); } }
 .vsr-kick { display:inline-flex; align-items:center; gap:6px; font:800 11px/1 'Archivo',sans-serif; letter-spacing:.12em; text-transform:uppercase;
   color:#ffd76e; background:rgba(255,210,74,.12); border:1px solid rgba(255,210,74,.3); padding:6px 14px; border-radius:99px; margin-bottom:14px; }
@@ -333,8 +328,16 @@ a.vs-cta { text-decoration:none; }
 .vsr-ghost { width:100%; max-width:340px; margin-top:10px; padding:14px; border:1.5px solid rgba(255,255,255,.35); background:transparent; color:#fff;
   border-radius:14px; cursor:pointer; font:700 13.5px/1 'Archivo',sans-serif; }
 .vsr-ghost:active { transform: scale(.98); }
+a.vsr-cta, a.vsr-ghost { display:block; text-decoration:none; text-align:center; }
 .vsr.fail .vsr-kick { color:#ffb0b0; background:rgba(255,120,120,.1); border-color:rgba(255,120,120,.28); }
 .vsr.fail .vsr-ttl { background:linear-gradient(180deg,#ffd0d0,#ff9c9c); -webkit-background-clip:text; background-clip:text; color:transparent; }
+/* Écran « déjà acquise » : même Arène, mais on y ENTRE (pas un résultat de
+   fin de quiz) → il lui faut un retour. Rond translucide sur fond nuit,
+   posé en absolu pour ne pas pousser le contenu centré du dessous. */
+.vsr-back { position:absolute; top:16px; left:16px; z-index:2;
+  background:rgba(255,255,255,.14); color:#fff; box-shadow:none;
+  transition: transform 160ms cubic-bezier(0.23,1,0.32,1), background .15s; }
+.vsr-back:active { background:rgba(255,255,255,.22); }
 
 @media (prefers-reduced-motion: reduce) { .vsr-med { animation:none; } }
 </style>`;
@@ -410,21 +413,26 @@ function blockedScreen(sub, avecMission, parMoi = false, cat = null) {
         )
       : vsD("blocked_q", "Le quiz reste ouvert pour entretenir le geste.");
 
-  return `${STYLE}<div class="vs anim-slide-up">
-    ${topBar(sub?.n || vsTR("comp_fallback", "Compétence"))}
-    <div class="vs-card vs-hero">
-      <div class="vs-hero-med">${catMedallion(cat?.ico, 56)}</div>
-      <p class="vs-hero-cat">${vsD("blocked_kick", "Déjà acquise")}</p>
-      <h2 class="vs-hero-ttl">${esc(sub?.n || "")}</h2>
-      <p class="vs-hero-p">${phrase}</p>
-    </div>
+  // 07/08 : cet écran vivait dans la coque claire « utilitaire » (carte
+  // blanche plate, topBar) réservée aux pages qui expliquent quelque chose
+  // avant d'agir. Il n'a plus rien à expliquer : il montre un TROPHÉE déjà
+  // gagné. Il rejoint donc la coque Arène nuit-violet + or des écrans de
+  // résultat (successScreen etc.) — mêmes classes `.vsr-*`, même vocabulaire
+  // visuel que tout le reste du parcours de certification. Le nom de la
+  // compétence n'apparaît plus qu'une fois (dans le titre doré), plus dans
+  // une topBar en double.
+  return `${STYLE}<div class="vsr anim-slide-up">
+    <button class="vs-back vsr-back" aria-label="${vsT("back", "Retour")}">←</button>
+    <div class="vsr-med vsr-med-logo"><img class="vsr-logo-img" src="/skins/avatars/permigo-badge-icon.png" alt="" width="88" height="88"></div>
+    <span class="vsr-kick">${icon("check", { size: 13 })} ${vsD("blocked_kick", "Déjà acquise")}</span>
+    <h1 class="vsr-ttl">${esc(sub?.n || vsTR("comp_fallback", "Compétence"))}</h1>
+    <p class="vsr-p">${phrase}</p>
     ${
       avecMission
-        ? `<button class="vs-cta" id="vs-rejouer" type="button">${icon("zap", { size: 18 })} ${vsD("blocked_cta", "Refaire la mise en situation")}</button>
-           <a class="vs-second" href="${escAttr(quizHref)}">${vsD("blocked_quiz", "Refaire le quiz")}</a>`
-        : `<a class="vs-cta" href="${escAttr(quizHref)}">${icon("zap", { size: 18 })} ${vsD("blocked_quiz", "Refaire le quiz")}</a>`
+        ? `<button class="vsr-cta" id="vs-rejouer" type="button">${vsD("blocked_cta", "Refaire la mise en situation")}</button>
+           <a class="vsr-ghost" href="${escAttr(quizHref)}">${vsD("blocked_quiz", "Refaire le quiz")}</a>`
+        : `<a class="vsr-cta" href="${escAttr(quizHref)}">${vsD("blocked_quiz", "Refaire le quiz")}</a>`
     }
-    <p class="vs-hint">${vsD("blocked_hint", "Cet entraînement ne change rien à ton parcours. Il est juste là pour la main.")}</p>
   </div>`;
 }
 
