@@ -21,10 +21,11 @@
 // ── Les deux pièges qui restent ──
 //
 // 1. LE POIDS. La vidéo n'est JAMAIS dans le chemin du premier affichage : le
-//    fond est d'abord l'image fixe (38 Ko, déjà servie par l'app), et la vidéo
-//    n'est demandée qu'une fois la page posée. Réseau lent, mode économie de
+//    fond est d'abord l'image fixe (92 Ko sur téléphone), et la vidéo n'est
+//    demandée qu'une fois la page posée. Réseau lent, mode économie de
 //    données, ou appareil qui demande moins d'animations : on reste sur
-//    l'image et personne ne voit de trou.
+//    l'image et personne ne voit de trou. Cette image se voit donc pendant
+//    plusieurs secondes chez tout le monde : elle mérite sa définition.
 //
 // 2. `animation-timeline: view()` NE MARCHE PAS ICI. Le décor est en position
 //    fixe : il ne défile jamais lui-même, sa progression resterait bloquée à
@@ -32,31 +33,64 @@
 //    défilement du document, avec `scroll(root block)`.
 // ═══════════════════════════════════════════════════════════════
 
+// ⚠️⚠️ POURQUOI DEUX JEUX D'IMAGES, UN PAR FORMAT D'ÉCRAN (07/08/2026)
+// Le décor était servi en un seul fichier paysage. Sur un téléphone tenu à la
+// verticale, un fichier 16/9 posé en `cover` déborde énormément sur les côtés :
+// on n'en montrait qu'une bande de 499 px de large, étirée sur les 1170 pixels
+// réels de l'écran. Trois fois trop peu. Rayan, à raison : « on dirait du
+// 360p ». Le fond fixe était pire encore, 312 px étirés sur 1170.
+// On découpe donc la bande réellement visible à la source, en pleine
+// résolution, et tout le poids part dans ce qui se voit.
+// ⛔ Ne pas revenir à un fichier unique : un décor plein cadre en portrait,
+//    c'est 74 % des pixels téléchargés puis jetés hors de l'écran.
+//
 // ⚠️ NOM DE FICHIER NEUF à chaque réencodage : un même nom, et les caches
 // (navigateur, service worker, CDN) resservent l'ancienne vidéo à vie.
-const VIDEO = "/video/route-pass-1080.mp4";
-// L'image de repli est celle du hero élève « Prépare ta leçon » : même route,
-// même heure. Elle est déjà dans l'app, elle ne coûte rien de plus.
-const POSTER = "/skins/prepare-lecon/midi.webp";
+const DECORS = {
+  // Téléphone à la verticale : la bande découpée, aux pixels de l'écran.
+  portrait: {
+    video: "/video/route-pass-portrait.mp4",
+    poster: "/video/route-pass-portrait.webp",
+    cadrage: "50% 50%",
+  },
+  // Tablette et ordinateur : l'illustration entière. La route, la voiture et
+  // le drapeau vivent sur la DROITE ; un cadrage centré ne montrerait que du
+  // ciel et du désert.
+  large: {
+    video: "/video/route-pass-large.mp4",
+    poster: "/video/route-pass-large.webp",
+    cadrage: "85% 50%",
+  },
+};
 
-// La route, la voiture et le drapeau vivent sur la DROITE de l'illustration.
-// Un cadrage centré ne montre que du ciel et du désert : sur un téléphone en
-// portrait, on ne voit pas la route du tout.
-const CADRAGE = "85% 50%";
+// Le seuil : plus haut que large, donc un téléphone tenu normalement. C'est le
+// seul cas où le fichier paysage gaspille vraiment ses pixels.
+const PORTRAIT = "(max-aspect-ratio: 3/4)";
 
 export const BACKDROP_STYLE = `
   /* ══════════ Le décor de route ══════════ */
   .pv-bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
   .pv-bg-media {
     position: absolute; inset: 0;
-    background: url("${POSTER}") ${CADRAGE} / cover no-repeat;
-    transform-origin: ${CADRAGE};
+    background: url("${DECORS.large.poster}") ${DECORS.large.cadrage} / cover no-repeat;
+    transform-origin: ${DECORS.large.cadrage};
   }
   .pv-bg-media video {
-    width: 100%; height: 100%; object-fit: cover; object-position: ${CADRAGE};
+    width: 100%; height: 100%; object-fit: cover; object-position: ${DECORS.large.cadrage};
     display: block; opacity: 0; transition: opacity .5s ease;
   }
   .pv-bg-media video.on { opacity: 1; }
+  /* Téléphone à la verticale : la bande déjà découpée. Elle est cadrée au
+     centre, et le point de fuite du zoom suit, sinon le décor dériverait sur
+     le côté en reculant. */
+  @media ${PORTRAIT} {
+    .pv-bg-media {
+      background-image: url("${DECORS.portrait.poster}");
+      background-position: ${DECORS.portrait.cadrage};
+      transform-origin: ${DECORS.portrait.cadrage};
+    }
+    .pv-bg-media video { object-position: ${DECORS.portrait.cadrage}; }
+  }
   /* Le voile : c'est SON opacity qui monte au défilement. Jamais un
      filter: brightness, qui repasse par le processeur à chaque image. */
   .pv-bg-veil { position: absolute; inset: 0; background: #170f38; opacity: 0; }
@@ -152,7 +186,13 @@ export function wireBackdrop(root) {
     v.setAttribute("loop", "");
     v.preload = "auto";
     v.setAttribute("aria-hidden", "true");
-    v.src = VIDEO;
+    // Le fichier suit le format de l'écran, comme l'image de fond juste
+    // au-dessus dans la feuille de style. On choisit une fois : si l'écran
+    // tourne en cours de route, l'autre fichier n'a rien de mieux à offrir et
+    // il coûterait un second téléchargement.
+    v.src = matchMedia(PORTRAIT).matches
+      ? DECORS.portrait.video
+      : DECORS.large.video;
 
     // ⚠️ On ne MONTRE la vidéo qu'une fois une vraie image peinte. Sinon, sur
     // un appareil où la lecture est refusée, un rectangle vide se posait
