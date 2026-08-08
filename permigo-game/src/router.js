@@ -136,7 +136,6 @@ const ROUTES = {
     // #/profil si aucun id valide n'est fourni, cf. commentaire du fichier).
     cartes: () => import("@/pages/eleve/collection.js"),
     classement: () => import("@/pages/eleve/classement.js"),
-    galerie: () => import("@/pages/eleve/galerie.js"),
     recompenses: () => import("@/pages/eleve/recompenses.js"),
     // ⛔ Deux pages supprimées le 02/08/2026 (décision Rayan) : le hub
     // condensé « mon-permis » (il redisait les compétences que `parcours`
@@ -266,12 +265,18 @@ const ROUTES_RETIREES = {
   // dans la voiture le lendemain, et le score quiz parlait du code alors
   // qu'on prépare la conduite.
   examen: "#/parcours",
-  // #/trophees retirée le 06/08/2026 : c'était déjà un alias de la même page
-  // que #/cartes (collection.js) depuis le 30/07. Le paquet vit maintenant
-  // dans le profil élève, et #/trophees n'a jamais porté d'id de compétence
-  // dans aucun flux du code (contrairement à #/cartes/{compId}) — un simple
-  // renvoi vers le profil ne perd donc aucun lien direct existant.
+  // #/trophees retirée le 06/08/2026, puis les trophées eux-mêmes le
+  // 07/08/2026 (décision Rayan : « salle des trophées inutile »). Les 31
+  // cartes du profil racontent déjà la progression. Le renvoi reste pour les
+  // vieilles notifications « trophée débloqué » déjà reçues.
   trophees: "#/profil",
+  // #/galerie (« Ma collection ») retirée le 07/08/2026 : ses 2 onglets
+  // avaient perdu leur raison d'être. « Trophées » a disparu avec les
+  // trophées, et « Fonds carte permis » n'a jamais eu de bouton pour
+  // ÉQUIPER un fond (juste un état verrouillé/acquis) : le fond de la carte
+  // permis est choisi automatiquement selon la progression (getPermisBg).
+  // Rien à migrer, donc renvoi vers le profil (là où vit la carte permis).
+  galerie: "#/profil",
 };
 
 // Libellés de titre de page (a11y lecteur d'écran, onglet, historique, SEO).
@@ -293,7 +298,6 @@ const ROUTE_TITLES = {
   quiz: "Quiz",
   cartes: "Cartes",
   classement: "Classement",
-  galerie: "Ma collection",
   recompenses: "Récompenses",
   roue: "La Roue",
   "valider-seul": "Certifier une compétence",
@@ -462,7 +466,15 @@ async function routePublic(app) {
     m = await import("@/pages/public/ecole.js");
   } else if (hash.startsWith("#/avis-depart")) {
     m = await import("@/pages/public/avis-depart.js");
+  } else if (hash.startsWith("#/simple")) {
+    m = await import("@/pages/public/pass-simple.js");
   } else if (hash.startsWith("#/pass")) {
+    // ⚠️ #/pass N'EST PLUS la page de vente par défaut (Rayan a tranché pour
+    // la version épurée, 07/08/2026), mais elle reste routée et elle DOIT le
+    // rester : Stripe renvoie l'acheteur sur #/pass?checkout=success, écrit
+    // en dur dans l'edge function pass-checkout, côté serveur et déjà
+    // déployée. Supprimer cette branche = l'écran de retour de paiement
+    // disparaît et l'acheteur atterrit nulle part.
     m = await import("@/pages/public/pass.js");
   } else if (
     hash === "#/pro" ||
@@ -482,9 +494,10 @@ async function routePublic(app) {
     // "#/?utm=…", fragments d'auth "#access_token=…") restent sur la landing.
     m = await import("@/pages/common/introuvable.js");
   } else {
-    // Défaut visiteur = page de vente Pass Permis (l'ancienne landing
-    // moniteur est supprimée — décision Rayan 16/07/2026).
-    m = await import("@/pages/public/pass.js");
+    // Défaut visiteur = la page de vente épurée (décision Rayan 07/08/2026,
+    // après comparaison des deux en vrai). L'ancienne, #/pass, reste
+    // joignable par son adresse et sert l'écran de retour de paiement.
+    m = await import("@/pages/public/pass-simple.js");
   }
   // Démonte la page précédente (ex: rAF d'animation du fond de login) avant de
   // monter la nouvelle page publique.

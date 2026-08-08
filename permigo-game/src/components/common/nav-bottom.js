@@ -90,7 +90,7 @@ const TABS = {
       id: "recompenses",
       label: "Récompenses",
       ico: "gift",
-      match: ["boutique", "galerie", "mes-coffres", "classement", "roue"],
+      match: ["boutique", "mes-coffres", "classement", "roue"],
     },
     // match: "cartes" — écran de révélation posé par valider-seul.js après
     // une certification (#/cartes/{compId}, 06/08/2026, cf. FLOWS.md) : le
@@ -282,8 +282,8 @@ export function mountBottomNav(role) {
   }
 
   // Idempotent : main.js appelle mountBottomNav() à CHAQUE navigation.
-  // Reconstruire à chaque fois (a) détruirait le limelight → plus de glissé
-  // entre onglets, (b) relancerait des RPC inutiles (pastille trophées). Si la
+  // Reconstruire à chaque fois détruirait le limelight → plus de glissé
+  // entre onglets. Si la
   // nav du même rôle est déjà là, on rafraîchit juste l'onglet actif (le
   // limelight glisse via _updateActive) et on s'arrête.
   const existing = document.querySelector("#bottom-nav");
@@ -320,13 +320,6 @@ export function mountBottomNav(role) {
   document.body.appendChild(nav);
   _updateActive();
 
-  // Pastille rouge sur « Trophées » (élève) si un trophée débloqué n'a pas
-  // encore été vu sur la page trophées (set localStorage pg-troph-seen).
-  if (role === "eleve") _checkTropheesDot(nav);
-  window.addEventListener("pg-trophees-seen", () => {
-    nav.querySelector('.bn-tab[data-id="recompenses"] .bn-dot')?.remove();
-  });
-
   // Intro : petit rebond en cascade des onglets, UNE fois par session —
   // fait comprendre qu'il y a plusieurs interfaces (découvrabilité).
   try {
@@ -361,30 +354,6 @@ export function unmountBottomNav() {
   document.querySelector("#bottom-nav")?.remove();
   window.removeEventListener("hashchange", _updateActive);
   window.removeEventListener("resize", _onResize);
-}
-
-// Vérifie s'il existe des trophées débloqués jamais vus → pastille rouge.
-// Import dynamique du client (nav = composant léger, pas de dépendance dure).
-async function _checkTropheesDot(nav) {
-  try {
-    const seen = new Set(
-      JSON.parse(localStorage.getItem("pg-troph-seen") || "[]"),
-    );
-    const { sb } = await import("@/auth/auth.js");
-    const { data } = await sb.rpc("get_my_achievements");
-    const hasNew = (data || []).some((a) => !seen.has(a.achievement_key));
-    if (!hasNew) return;
-    // Les trophées vivent derrière la porte « Récompenses »
-    const tab = nav.querySelector('.bn-tab[data-id="recompenses"]');
-    if (tab && !tab.querySelector(".bn-dot")) {
-      const dot = document.createElement("span");
-      dot.className = "bn-dot";
-      dot.setAttribute("aria-label", "Nouveau trophée débloqué");
-      tab.appendChild(dot);
-    }
-  } catch {
-    /* best-effort : pas de pastille si l'appel échoue */
-  }
 }
 
 function _updateActive() {

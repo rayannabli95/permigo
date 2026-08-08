@@ -13,10 +13,6 @@
 // ═══════════════════════════════════════════════════════════════
 import { sb, logout } from "@/auth/auth.js";
 import { yesterdayKey } from "@/services/daily-quiz.js";
-// Source unique de la série (cf. src/services/streak.js) : même calcul que
-// accueil.js et reviser.js, pour ne plus jamais afficher un chiffre différent
-// sur cette page (bug des 3 séries incohérentes corrigé le 06/08/2026).
-import { getStreak } from "@/services/streak.js";
 import { getCurUser, setCurUser } from "@/auth/cur-user.js";
 import { esc, escAttr } from "@/utils/escape.js";
 import { track } from "@/services/analytics.js";
@@ -25,7 +21,6 @@ import { mountProfileCard } from "@/components/common/profile-card.js";
 import { changeAvatar } from "@/components/common/avatar-edit.js";
 import { getEquippedAsset, getEquipped } from "@/utils/game-state.js";
 import { REMC, REMC_TOTAL } from "@/data/remc.js";
-import { CATALOG, STREAK_SEUIL } from "@/data/achievements.js";
 // « Mes cartes » (profil variante B, 06/08/2026) : la liste des 31 cartes
 // vient de la MÊME source que #/cartes (src/data/cartes.js), le paquet
 // lui-même (mécanique + CSS) vient d'un import dynamique de collection.js
@@ -155,7 +150,7 @@ const STYLE = `<style>
   text-overflow: ellipsis;
 }
 
-/* ── Lien-ligne (galerie / boutique) — discret, intentionnel ── */
+/* ── Lien-ligne (boutique) — discret, intentionnel ── */
 .prf-linkrow {
   display: flex;
   align-items: center;
@@ -889,18 +884,10 @@ export async function mount(root) {
   <!-- 2. Les 3 stats clés sont déjà DANS le héro (ProfileCard) — source unique.
        On a retiré le bandeau bento qui les répétait à l'identique. -->
 
-  <!-- Carte permis (objet de collection) + lien galerie (élève) -->
+  <!-- Carte permis (objet de collection). Le lien « Voir ma galerie » vers
+       #/galerie a été retiré le 07/08/2026 : cette page est supprimée
+       (doublon du profil), et la carte de permis vit déjà juste au dessus. -->
   ${permisData ? `<div id="prf-permis-card" style="padding:0 16px;margin-top:6px"></div>` : ""}
-  ${
-    me.role === "eleve"
-      ? `
-  <a class="prf-linkrow" href="#/galerie" aria-label="${ptA("view_gallery", "Voir ma galerie")}">
-    <span class="prf-linkrow-ico" aria-hidden="true">${icon("image", { size: 17 })}</span>
-    <span class="prf-linkrow-lbl">${pt("view_gallery", "Voir ma galerie")}</span>
-    <span class="prf-linkrow-chev" aria-hidden="true">›</span>
-  </a>`
-      : ""
-  }
 
   <!-- Retrait de la gamification moniteur (30/07/2026) : le classement des
        moniteurs (points = validations données) vivait ici. -->
@@ -1467,31 +1454,12 @@ function _wireNotifToggle(root) {
 //   • héros = le paquet de cartes REMC (mécanique PARTAGÉE avec #/cartes,
 //     cf. le commentaire CARD_DECK_STYLE dans src/pages/eleve/collection.js
 //     : jamais dupliquée, importée dynamiquement dans mountEleveArene)
-//   • trophées : 13 → 2 (seuls comp_28/comp_31 marquent un vrai moment de
-//     la conduite, les autres comptent ce que les cartes montrent déjà ou
-//     mesurent l'usage de l'app, pas la conduite)
+//   • trophées : 13 → 2 le 06/08, puis 0 le 07/08 (décision Rayan, « salle
+//     des trophées inutile »). Les 31 cartes racontent déjà la progression
+//     de conduite : plus aucun trophée nulle part côté élève.
 //   • monnaie = volants (profiles.gemmes), affichés dans l'en-tête de la
 //     vitrine (grille skins façon Duolingo), là où ils servent vraiment
 // ═══════════════════════════════════════════════════════════════
-// Les 2 seuls trophées qui restent sur le profil : ils marquent un vrai
-// jalon de la conduite (prêt pour l'examen blanc, permis virtuel complet),
-// contrairement aux comp_5/10/15/20/25 (déjà montrés par les 31 cartes),
-// aux streak_* (mesurent l'usage de l'app, pas la conduite) et aux quiz_*
-// (idem). Le CATALOG complet (13 trophées) reste la source unique pour
-// tout autre écran qui en aurait besoin : on FILTRE à l'affichage ici,
-// on ne retire rien du catalogue partagé.
-const PROFIL_TROPHIES = ["comp_28", "comp_31"];
-
-// Repli quand get_my_achievements est indisponible : on déduit ce qu'on peut
-// des compteurs locaux (compétences + série). Les succès quiz restent
-// verrouillés faute de compteur ici — c'est le mode dégradé, pas la norme.
-function _fallbackUnlocked(key, validated, streak) {
-  if (key.startsWith("comp_")) return validated >= parseInt(key.slice(5), 10);
-  if (key.startsWith("streak_"))
-    return streak >= (STREAK_SEUIL[key] ?? parseInt(key.slice(7), 10));
-  return false;
-}
-
 const STYLE_ARENE = `<style>
 ${chromeNight("#2a1a5e", "#08071a")}
 .arn{
@@ -1525,7 +1493,7 @@ ${chromeNight("#2a1a5e", "#08071a")}
    où donner de la tête. Mets à la place des succès mes cartes, ça
    s'ouvre comme les applis de rencontre. » Le profil élève DEVIENT la
    maison des cartes : l'identité tient dans une barre de 44px, « Mes
-   cartes » domine, les trophées tombent de 13 à 2, la vitrine se lit
+   cartes » domine, les trophées ont disparu, la vitrine se lit
    d'un regard. Maquette : mockups/profil-refonte/profil-B-paquet.html
    ═══════════════════════════════════════════════════════════════ */
 .arn{ --csu:#1c1548; --csu2:#221a54; --cbo2:rgba(255,255,255,.07); }
@@ -1545,10 +1513,10 @@ ${chromeNight("#2a1a5e", "#08071a")}
 .arn2-cards-hd{display:flex;align-items:baseline;justify-content:space-between;padding:22px 20px 0}
 .arn2-cards-ttl{margin:0;font:800 26px/1 'Archivo',sans-serif;color:#fff;letter-spacing:-.03em}
 
-/* ── Prochaine carte + trophées de conduite, une seule bande ── */
+/* ── Prochaine carte (les trophées de conduite ont été retirés 07/08/2026) ── */
 .arn2-strip{margin:22px 16px 0;border-radius:20px;overflow:hidden;
   background:linear-gradient(180deg,var(--csu),var(--csu2));box-shadow:0 7px 0 var(--cedge),inset 0 1px 0 rgba(255,255,255,.08),inset 0 0 0 1px var(--gl2)}
-.arn2-strip-a{display:flex;align-items:center;gap:13px;padding:14px 16px;border-bottom:1px solid var(--cbo2)}
+.arn2-strip-a{display:flex;align-items:center;gap:13px;padding:14px 16px}
 .arn2-strip-img{width:42px;height:58px;flex:0 0 auto;border-radius:10px;overflow:hidden;position:relative;background:#0a0a10;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.12)}
 .arn2-strip-img img{width:100%;height:100%;object-fit:cover;filter:grayscale(1) brightness(.36) blur(1px)}
 .arn2-strip-img i{position:absolute;inset:0;display:grid;place-items:center;color:rgba(255,255,255,.65)}
@@ -1557,13 +1525,6 @@ ${chromeNight("#2a1a5e", "#08071a")}
 .arn2-strip-n{margin-top:5px;font:700 14.5px/1.2 'Archivo',sans-serif;color:#fff;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .arn2-strip-go{height:44px;padding:0 16px;flex:0 0 auto;border:0;border-radius:13px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;color:#1c1140;font:800 13px/1 'Archivo',sans-serif;
   background:linear-gradient(180deg,var(--gd-pale),var(--gd) 55%,var(--gd-2));box-shadow:0 3px 0 var(--gd-deep)}
-.arn2-strip-b2{display:flex;align-items:center;gap:11px;padding:13px 16px}
-.arn2-medal{width:40px;height:40px;flex:0 0 auto;border-radius:12px;display:grid;place-items:center;overflow:hidden;
-  background:linear-gradient(180deg,#221a52,#171038);box-shadow:inset 0 0 0 1px rgba(255,255,255,.07)}
-.arn2-medal img{width:32px;height:32px;object-fit:contain}
-.arn2-medal.locked img{filter:grayscale(1) brightness(.6);opacity:.55}
-.arn2-strip-t{flex:1;font:700 12.5px/1.3 'Archivo',sans-serif;color:var(--tx-dim)}
-.arn2-strip-t small{display:block;font:600 11px/1.3 'Archivo',sans-serif;color:var(--tx-mu);margin-top:3px}
 
 /* ── Ma vitrine ── */
 .arn2-sec{margin:28px 16px 0}
@@ -1703,7 +1664,6 @@ const PROF_I18N = {
     instructor_bio: "{count} student(s) supported · this year",
     stat_students: "Students",
     share_instructor: "{count} validations on PermiGo this year",
-    view_gallery: "View my gallery",
     my_year: "My year {year}",
     skills_validated: "Skills validated",
     students_supported: "Students supported",
@@ -1839,7 +1799,6 @@ const PROF_I18N = {
     instructor_bio: "متابعة {count} طالب · هذا العام",
     stat_students: "الطلاب",
     share_instructor: "{count} اعتمادًا على بيرميغو هذا العام",
-    view_gallery: "عرض معرضي",
     my_year: "عامي {year}",
     skills_validated: "المهارات المعتمدة",
     students_supported: "الطلاب المتابَعون",
@@ -1943,59 +1902,15 @@ function profileRoleLabel(role) {
   }[role];
 }
 
-// Noms des succès (« Tes succès ») — même métaphore automobile que le FR, une
-// entrée par clé de trophée (CATALOG). Traduits avec soin, pas de « gems ».
-const PROF_ACH_I18N = {
-  en: {
-    comp_5: "First adjustments",
-    comp_10: "Chassis set",
-    comp_15: "Engine fitted",
-    comp_20: "Body mounted",
-    comp_25: "Headlights on",
-    comp_28: "Mock exam ready",
-    comp_31: "Open road",
-    streak_3: "Engine started",
-    streak_14: "Full tank",
-    streak_60: "Streak driver",
-    quiz_10: "Brakes tested",
-    quiz_50: "Steering calibrated",
-    quiz_perfect_5: "Retro rim",
-  },
-  ar: {
-    comp_5: "الضبط الأول",
-    comp_10: "الهيكل جاهز",
-    comp_15: "المحرك مثبّت",
-    comp_20: "البدن مركّب",
-    comp_25: "الأضواء مشتعلة",
-    comp_28: "جاهز للامتحان التجريبي",
-    comp_31: "الطريق مفتوح",
-    streak_3: "المحرك يعمل",
-    streak_14: "خزان ممتلئ",
-    streak_60: "سائق مثابر",
-    quiz_10: "الفرامل مُختبرة",
-    quiz_50: "المقود مُعاير",
-    quiz_perfect_5: "جنط كلاسيكي",
-  },
-};
-function ptAch(key, fr) {
-  const l = getLang();
-  return (l !== "fr" && PROF_ACH_I18N[l]?.[key]) || fr;
-}
-
 async function mountEleveArene(root, me) {
   root.innerHTML = `${STYLE_ARENE}<div class="arn"${profileDir()}><div class="skel skel-card" style="height:44px;margin:0 16px 20px;border-radius:14px"></div><div class="skel skel-card" style="height:420px;margin:0 16px;border-radius:26px"></div></div>`;
 
   // ── Fetch réel ─────────────────────────────────────────────
-  // get_my_achievements = MÊME source que la salle des trophées → les 2
-  // trophées qui restent ici sont EXACTEMENT dans le même état débloqué/pas.
   // get_items_catalog + le module collection.js (le paquet, importé
   // dynamiquement pour ne pas alourdir CE chunk pour le moniteur/gérant qui
   // ne le verront jamais) sont chargés dans le même lot.
-  const [
-    [profileRes, valRes, achRes, selfValRes, itemsRes, deckRes],
-    streakData,
-  ] = await Promise.all([
-    Promise.allSettled([
+  const [profileRes, valRes, selfValRes, itemsRes, deckRes] =
+    await Promise.allSettled([
       sb
         .from("profiles")
         .select("email, prenom, nom, username, gemmes, created_at, avatar_url")
@@ -2006,7 +1921,6 @@ async function mountEleveArene(root, me) {
         .select("competence_id")
         .eq("eleve_id", me.id)
         .eq("statut", "acquis"),
-      sb.rpc("get_my_achievements"),
       // Validation autonome (élève solo, valider-seul.js) : table séparée de
       // `validations`, fusionnée en lecture pour que le paquet et la carte
       // « prochaine » élève solo ne restent pas figés à 0/31.
@@ -2018,16 +1932,13 @@ async function mountEleveArene(root, me) {
       // vitrine ici, l'achat/l'équipement complet reste sur #/boutique.
       sb.rpc("get_items_catalog"),
       import("@/pages/eleve/collection.js"),
-    ]),
-    getStreak(),
-  ]);
+    ]);
 
   _reportQueryErrors(
     "carte élève",
     [
       ["profil", profileRes],
       ["validations", valRes],
-      ["trophées", achRes],
       ["auto-validations", selfValRes],
       ["boutique", itemsRes],
     ],
@@ -2036,7 +1947,6 @@ async function mountEleveArene(root, me) {
   const profile = _queryData(profileRes);
   const valData = _queryData(valRes);
   const selfValData = _queryData(selfValRes);
-  const achData = _queryData(achRes);
   const catalogData = _queryData(itemsRes) || [];
   // Le paquet est un import dynamique (pas un appel Supabase) : géré à part.
   const deck = deckRes.status === "fulfilled" ? deckRes.value : null;
@@ -2052,10 +1962,6 @@ async function mountEleveArene(root, me) {
   for (const v of valData || [])
     if (!unlockedMap.has(v.competence_id))
       unlockedMap.set(v.competence_id, null);
-  const validated = unlockedMap.size;
-  // Série : déjà à 0 si cassée, déjà bumpée si un quiz a été fait aujourd'hui
-  // (même règle que l'accueil et Réviser, cf. src/services/streak.js).
-  const streak = streakData.current;
   const volants = typeof profile?.gemmes === "number" ? profile.gemmes : 0;
   // Photo de profil : même source que le header (avatar équipé de la boutique,
   // sinon la photo persistée). Repli sur les initiales si aucune image.
@@ -2072,19 +1978,6 @@ async function mountEleveArene(root, me) {
     pseudo.slice(0, 2) ||
     "?"
   ).toUpperCase();
-
-  // ── Les 2 seuls trophées : même source que la salle des trophées ──
-  const achOk = Array.isArray(achData);
-  const unlockedKeys = new Set((achData || []).map((u) => u.achievement_key));
-  const trophies = CATALOG.filter((d) => PROFIL_TROPHIES.includes(d.key)).map(
-    (def) => ({
-      image: def.image,
-      name: ptAch(def.key, def.title),
-      need: achOk
-        ? unlockedKeys.has(def.key)
-        : _fallbackUnlocked(def.key, validated, streak),
-    }),
-  );
 
   // ── La prochaine carte à préparer (première non débloquée) ──
   const nextCarte = CARTES.find((c) => !unlockedMap.has(c.id)) || null;
@@ -2157,11 +2050,12 @@ async function mountEleveArene(root, me) {
       : `<div style="margin:16px 20px 0;padding:22px;border-radius:20px;background:var(--csu);color:var(--tx-mu);font:600 13px/1.5 'Archivo',sans-serif;text-align:center">Tes cartes ne se chargent pas. Vérifie ta connexion puis réessaie.</div>`
   }
 
-  <!-- Prochaine carte + les 2 trophées de conduite, une seule bande -->
+  <!-- Prochaine carte. Les 31 débloquées : plus de bande du tout, sinon on
+       laisse une boîte vide entre le paquet et la vitrine. -->
+  ${
+    nextCarte
+      ? `
   <div class="arn2-strip">
-    ${
-      nextCarte
-        ? `
     <div class="arn2-strip-a">
       <span class="arn2-strip-img">
         <img src="${esc(nextCarte.img)}" alt="" loading="lazy" />
@@ -2172,19 +2066,10 @@ async function mountEleveArene(root, me) {
         <div class="arn2-strip-n">${esc(nextCarte.n)}</div>
       </div>
       <a class="arn2-strip-go" href="#/revision-conduite/${escAttr(nextCarte.id)}">Préparer</a>
-    </div>`
-        : ""
-    }
-    <div class="arn2-strip-b2">
-      ${trophies
-        .map(
-          (t) =>
-            `<span class="arn2-medal${t.need ? "" : " locked"}"><img src="${t.image}" alt="" loading="lazy" /></span>`,
-        )
-        .join("")}
-      <div class="arn2-strip-t">${trophies.length} trophée${trophies.length > 1 ? "s" : ""} de conduite<small>Prêt examen blanc à 28 cartes · Route ouverte à 31</small></div>
     </div>
-  </div>
+  </div>`
+      : ""
+  }
 
   <!-- Ma vitrine : un aperçu lisible, l'achat complet vit sur #/boutique -->
   <div class="arn2-sec">

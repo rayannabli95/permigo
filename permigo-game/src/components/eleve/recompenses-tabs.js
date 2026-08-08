@@ -1,18 +1,19 @@
 // ═══════════════════════════════════════════════════════════════
-// Bandeau « Récompenses » — 1 porte, 3 salles (nav 5 portes)
-// Inséré en tête de boutique / galerie / ligue pour que ces pages se
+// Bandeau « Récompenses » — 1 porte, 2 salles (nav 5 portes)
+// Inséré en tête de boutique / ligue pour que ces pages se
 // vivent comme UN hub. Theme-aware via tokens, avec une variante
 // sombre pour l'Arène (classement).
 // ⚠️ La 4e salle « Cartes » a été retirée le 06/08/2026 : le paquet de
 // cartes REMC vit désormais sur #/profil (refonte « Le paquet »,
 // décision Rayan, cf. FLOWS.md), plus comme un onglet de ce hub.
+// ⚠️ La 3e salle « Ma collection » a été retirée le 07/08/2026 : #/galerie
+// est supprimée (doublon du profil), cf. FLOWS.md.
 // ═══════════════════════════════════════════════════════════════
 import { navigate } from "@/router.js";
 import { getLang } from "@/utils/lang.js";
 
 const ROOMS = [
   { id: "boutique", label: "Boutique", route: "/boutique" },
-  { id: "galerie", label: "Ma collection", route: "/galerie" },
   { id: "classement", label: "Classement", route: "/classement" },
 ];
 
@@ -23,13 +24,11 @@ const ROOMS = [
 const RCT_I18N = {
   en: {
     boutique: "Shop",
-    galerie: "Collection",
     classement: "Leaderboard",
     aria: "Rewards rooms",
   },
   ar: {
     boutique: "المتجر",
-    galerie: "المجموعة",
     classement: "الترتيب",
     aria: "غرف المكافآت",
   },
