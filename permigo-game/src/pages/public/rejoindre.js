@@ -114,7 +114,7 @@ const RJ_I18N = {
     ref_toggle: "I have a referral code",
     ref_label: "Referral code",
     ref_ph: "Ex: X7K2P9",
-    ref_help: "Optional. A free month for both of you.",
+    ref_help: "Optional. Your 1st subscription will be at a lower price.",
   },
   ar: {
     bubble0: "أهلاً. أنا بيرميغو.",
@@ -163,7 +163,7 @@ const RJ_I18N = {
     ref_toggle: "لدي رمز إحالة",
     ref_label: "رمز الإحالة",
     ref_ph: "مثال: X7K2P9",
-    ref_help: "اختياري. شهر مجاني لكما.",
+    ref_help: "اختياري. اشتراكك الأول سيكون بسعر مخفّض.",
   },
 };
 function isAr() {
@@ -459,7 +459,7 @@ function renderFlow(root, { solo, prefillCode, prefillEmail }) {
                 <label for="rj-ref-code">${esc(rt("ref_label", "Code de parrainage"))}</label>
                 <input class="rj-code-input" id="rj-ref-code" type="text" autocomplete="off" autocorrect="off"
                   autocapitalize="characters" spellcheck="false" maxlength="12" placeholder="${escAttr(rt("ref_ph", "Ex : X7K2P9"))}" enterkeyhint="next" />
-                <div class="rj-help">${esc(rt("ref_help", "Optionnel. Un mois offert pour toi et pour lui."))}</div>
+                <div class="rj-help">${esc(rt("ref_help", "Optionnel. Ton 1er abonnement sera à tarif réduit."))}</div>
               </div>`
                 : `<div class="rj-minor">
               <label for="rj-code">${esc(rt("code_label", "Code moniteur"))}</label>

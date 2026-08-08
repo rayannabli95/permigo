@@ -31,6 +31,35 @@ import Stripe from "npm:stripe@^17";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
+const SERVICE_KEY =
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ??
+  Deno.env.get("SERVICE_ROLE_KEY") ??
+  "";
+
+// Coupon partagé parrainage/parrainé (cf. migration 20260808150000) : -1 €
+// pour toujours, posé automatiquement à la 1re session de paiement d'un
+// filleul. Id fixe → idempotent, jamais recréé en double.
+const REFERRAL_COUPON_ID = "permigo-parrainage-1e";
+// deno-lint-ignore no-explicit-any
+async function ensureReferralCoupon(stripe: any) {
+  try {
+    await stripe.coupons.retrieve(REFERRAL_COUPON_ID);
+  } catch {
+    try {
+      await stripe.coupons.create({
+        id: REFERRAL_COUPON_ID,
+        amount_off: 100,
+        currency: "eur",
+        duration: "forever",
+        name: "Parrainage PermiGo",
+      });
+    } catch (e) {
+      // Course possible (2 requêtes concurrentes créent le coupon en même
+      // temps) : Stripe renvoie "resource_already_exists", pas grave.
+      console.warn("[pass-checkout] ensureReferralCoupon", e);
+    }
+  }
+}
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -110,6 +139,27 @@ Deno.serve(async (req) => {
       httpClient: Stripe.createFetchHttpClient(),
     });
 
+    // Filleul connecté (a appliqué un code de parrainage) → remise -1 €
+    // permanente sur sa 1re session de paiement. Best-effort : un souci ici
+    // ne doit jamais empêcher quelqu'un de payer au prix normal.
+    let hasReferralDiscount = false;
+    if (userId) {
+      try {
+        const admin = createClient(SUPABASE_URL, SERVICE_KEY);
+        const { data: profile } = await admin
+          .from("profiles")
+          .select("referred_by")
+          .eq("auth_id", userId)
+          .maybeSingle();
+        if (profile?.referred_by) {
+          await ensureReferralCoupon(stripe);
+          hasReferralDiscount = true;
+        }
+      } catch (e) {
+        console.warn("[pass-checkout] referral discount check failed", e);
+      }
+    }
+
     const origin =
       req.headers.get("origin") ??
       Deno.env.get("APP_URL") ??
@@ -138,7 +188,12 @@ Deno.serve(async (req) => {
         },
       ],
       metadata,
-      allow_promotion_codes: true,
+      // Stripe interdit `discounts` + `allow_promotion_codes` en même temps :
+      // un filleul a sa remise posée automatiquement, tout le monde d'autre
+      // garde la possibilité de taper un code promo à la main.
+      ...(hasReferralDiscount
+        ? { discounts: [{ coupon: REFERRAL_COUPON_ID }] }
+        : { allow_promotion_codes: true }),
       // {CHECKOUT_SESSION_ID} est un placeholder Stripe : substitué au
       // vrai id à la redirection. Sert UNIQUEMENT à pré-remplir l'email
       // d'inscription d'un invité (cf. pass-session-email) — un compte déjà

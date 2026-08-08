@@ -1225,7 +1225,7 @@ function _renderReferral(stats) {
       ${volantImg(14, { drop: true })} ${pt("referral_reward", `+50 ${volantLabel(50)} par filleul`)}
     </div>
   </div>
-  <p class="prf-ref-sub">${pt("referral_bonus_pitch", "Et si ton filleul s'abonne, +1 mois offert sur ton compte.")}</p>
+  <p class="prf-ref-sub">${pt("referral_bonus_pitch", "Et si ton filleul s'abonne, ton abonnement passe à tarif réduit. Pour toujours.")}</p>
 
   ${
     code
@@ -1393,7 +1393,10 @@ function _wireReferral(root, me) {
       } else {
         haptic("success");
         toast(
-          ptR("referral_applied", "Code appliqué ! +50 volants"),
+          ptR(
+            "referral_applied",
+            "Code appliqué ! +50 volants. Ton 1er abonnement sera à tarif réduit.",
+          ),
           "success",
           4000,
         );
@@ -1725,7 +1728,7 @@ const PROF_I18N = {
     referral: "Referrals",
     referral_reward: "+50 steering wheels per referral",
     referral_bonus_pitch:
-      "And if your referral subscribes, +1 month free on your account.",
+      "And if your referral subscribes, your subscription drops to a lower price. For good.",
     referral_code_aria: "My referral code: {code}",
     referral_copy_title: "Copy code",
     referral_copy_aria: "Copy my referral code",
@@ -1745,7 +1748,8 @@ const PROF_I18N = {
     generating: "Generating…",
     generate_failed: "Unable to generate the code",
     referral_invalid: "Invalid or already used code",
-    referral_applied: "Code applied! +50 steering wheels",
+    referral_applied:
+      "Code applied! +50 steering wheels. Your 1st subscription will be at a lower price.",
     notifications: "Notifications",
     notifications_enabled: "enabled",
     notifications_disabled: "disabled",
@@ -1863,7 +1867,7 @@ const PROF_I18N = {
     pseudo_invalid: "تنسيق غير صالح.",
     referral: "الإحالات",
     referral_reward: "+50 مقودًا لكل إحالة",
-    referral_bonus_pitch: "وإذا اشترك صديقك، تحصل على شهر مجاني إضافي.",
+    referral_bonus_pitch: "وإذا اشترك صديقك، يصبح اشتراكك بسعر مخفّض. للأبد.",
     referral_code_aria: "رمز إحالتي: {code}",
     referral_copy_title: "نسخ الرمز",
     referral_copy_aria: "نسخ رمز إحالتي",
@@ -1882,7 +1886,8 @@ const PROF_I18N = {
     generating: "جارٍ الإنشاء…",
     generate_failed: "تعذّر إنشاء الرمز",
     referral_invalid: "الرمز غير صالح أو مستخدم من قبل",
-    referral_applied: "تم تطبيق الرمز! +50 مقودًا",
+    referral_applied:
+      "تم تطبيق الرمز! +50 مقودًا. اشتراكك الأول سيكون بسعر مخفّض.",
     notifications: "الإشعارات",
     notifications_enabled: "مفعّلة",
     notifications_disabled: "معطّلة",
@@ -2580,8 +2585,9 @@ async function mountEnseignantArene(root, me) {
         .eq("role", "eleve")
         .eq("enseignant_id", me.id)
         .is("deleted_at", null),
-      // Parrainage : chaque élève solo apporté et devenu payant offre 1 mois
-      // gratuit sur l'abonnement moniteur (même moteur que côté élève).
+      // Parrainage : chaque élève solo apporté et devenu payant fait passer
+      // l'abonnement moniteur à tarif réduit, pour toujours (même moteur que
+      // côté élève, coupon Stripe posé par stripe-webhook).
       sb.rpc("get_my_referral_stats"),
     ]);
   _reportQueryErrors(
