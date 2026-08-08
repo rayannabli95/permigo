@@ -9,7 +9,6 @@ const uri = (f) =>
   `data:image/webp;base64,${fs.readFileSync(path.join(ART, f)).toString("base64")}`;
 
 const A = {
-  bitume: uri("bitume.webp"),
   horizon: uri("horizon.webp"),
   joueur: uri("c-joueur.webp"),
   gris: uri("c-gris.webp"),
@@ -19,11 +18,16 @@ const A = {
   pieton: uri("c-pieton.webp"),
 };
 
-let css = fs.readFileSync(path.join(ART, "jeu.css"), "utf8");
-css = css.replace('url("/art/course/bitume.webp")', `url("${A.bitume}")`);
+const css = fs.readFileSync(path.join(ART, "jeu.css"), "utf8");
 
-let js = fs.readFileSync(path.join(ART, "jeu.js"), "utf8");
-js = js
+// Les deux modules sont recollés en un seul script : l'import relatif ne
+// résout rien dans une page sans fichiers à côté d'elle.
+const route = fs
+  .readFileSync(path.join(ART, "route.js"), "utf8")
+  .replace(/^export /gm, "");
+const jeu = fs
+  .readFileSync(path.join(ART, "jeu.js"), "utf8")
+  .replace(/^import .*$/gm, "")
   .replace("${sur}/horizon.webp", "${A.horizon}")
   .replace("${sur}/c-joueur.webp", "${A.joueur}")
   .replace("${sur}/c-${a.piece}.webp", "${A[a.piece]}")
@@ -48,18 +52,19 @@ body{margin:0;background:radial-gradient(80% 50% at 50% 0%,rgba(124,92,255,.16),
 
 <div class="pg">
   <h1>Tu ne regardes plus une carte. <em>Tu conduis.</em></h1>
-  <p>La route vient vers toi, une situation arrive, le temps ralentit le temps que tu choisisses. Bonne réponse, le combo monte et ça enchaîne. Mauvaise réponse, tu freines et tu prends la leçon dans la figure. Aucun écran de résultat entre deux.</p>
+  <p>La route vient vers toi, une situation arrive, le temps ralentit le temps que tu choisisses. Bonne réponse, le combo monte et ça enchaîne. Mauvaise réponse, tu freines et tu prends la leçon. Aucun écran de résultat entre deux.</p>
 
   <div id="jeu"></div>
   <button class="rejouer" type="button">Rejouer</button>
 
-  <p class="note"><b>Ce qui est vrai à l'écran</b>Une voie fait 3,20 m et le sol est un plan basculé, donc un véhicule à 40 m se place et se dimensionne tout seul. Rien n'est calé à l'œil.</p>
-  <p class="note"><b>Ce que ça pèse</b>Tout le décor et les six véhicules tiennent en 240 Ko. C'est du CSS et deux images, pas un moteur 3D.</p>
+  <p class="note"><b>L'écran ne clignote plus</b>Le décor était une image posée sur un plan basculé en 3D. Le navigateur repeignait des dizaines de millions de pixels à chaque image. La route est maintenant tracée au trait, 60 images par seconde sans une seule perdue.</p>
+  <p class="note"><b>Ce qui est vrai à l'écran</b>Une voie fait 3,20 m et la route et les véhicules passent par le même calcul de perspective. Un véhicule à 40 m se place et se dimensionne tout seul.</p>
 </div>
 
 <script type="module">
 const A = ${JSON.stringify(A)};
-${js}
+${route}
+${jeu}
 const hote = document.getElementById("jeu");
 let partie = creerJeu(hote);
 document.querySelector(".rejouer").addEventListener("click", () => {
