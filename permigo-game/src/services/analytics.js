@@ -55,17 +55,11 @@ async function flush() {
   // get_my_id() retourne null côté RLS et un user_id non-null casse la policy.
   const me = getCurUser();
 
-  // Pas de mesure pour les invités : events_analytics n'autorise l'INSERT
-  // qu'aux utilisateurs authentifiés (anon = SELECT only, aucune policy INSERT).
-  // Tenter un INSERT sans session échouait en boucle ("permission denied for
-  // table events_analytics") et polluait les logs. On droppe la file (un replay
-  // donnerait le même refus) — l'utilisateur qui se connecte ensuite repart
-  // proprement avec ses events authentifiés.
-  if (!me) {
-    queue.length = 0;
-    return;
-  }
-
+  // Les invités SONT mesurés : la policy RLS `events_insert_anon_public`
+  // (migration 20260808200000) autorise l'INSERT anonyme des events publics de la
+  // landing (préfixe simple.*/landing.*, user_id NULL, role 'guest'). C'est ce qui
+  // fait remonter les clics de pub. Un event non-public émis hors session sera
+  // refusé (42501) puis droppé plus bas — comportement voulu.
   const batch = queue.splice(0, queue.length).map((evt) => ({
     ...evt,
     user_id: me?.id || null,
