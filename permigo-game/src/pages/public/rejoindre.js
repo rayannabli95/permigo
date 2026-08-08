@@ -111,6 +111,10 @@ const RJ_I18N = {
     already_switch: "Sign out to create an account",
     back_home: "Back to home",
     back_aria: "Go back",
+    ref_toggle: "I have a referral code",
+    ref_label: "Referral code",
+    ref_ph: "Ex: X7K2P9",
+    ref_help: "Optional. A free month for both of you.",
   },
   ar: {
     bubble0: "أهلاً. أنا بيرميغو.",
@@ -156,6 +160,10 @@ const RJ_I18N = {
     already_switch: "سجّل الخروج لإنشاء حساب",
     back_home: "الرجوع إلى الصفحة الرئيسية",
     back_aria: "رجوع",
+    ref_toggle: "لدي رمز إحالة",
+    ref_label: "رمز الإحالة",
+    ref_ph: "مثال: X7K2P9",
+    ref_help: "اختياري. شهر مجاني لكما.",
   },
 };
 function isAr() {
@@ -269,6 +277,12 @@ const STYLE = `<style>
   .rj-help{ font: 600 11.5px/1.4 'Archivo', var(--fd), sans-serif; color: var(--mu); margin-top: 6px; margin-inline-start: 4px; }
   .rj-help.error{ color: #e5484d; }
   .rj-help.ok{ color: #2f9e44; }
+  /* Lien discret, replié par défaut (le code de parrainage ne doit pas
+     alourdir l'écran solo qui n'en a normalement aucun) */
+  .rj-ref-toggle{ display: block; margin-top: 14px; padding: 0; border: 0; background: none; cursor: pointer;
+    font: 700 12.5px/1 'Archivo', var(--fd), sans-serif; color: var(--a); text-decoration: underline;
+    text-underline-offset: 2px; text-align: start; }
+  .rj-ref-toggle[hidden]{ display: none; }
   .rj-code-input{ text-transform: uppercase; letter-spacing: .16em; font-weight: 800 !important; }
 
   /* Les deux cartes de boîte de vitesses */
@@ -402,6 +416,7 @@ function renderFlow(root, { solo, prefillCode, prefillEmail }) {
     email: prefillEmail || "",
     pwd: "",
     code: prefillCode || "",
+    refCode: "",
   };
   let accountCreated = false;
   let submitting = false;
@@ -439,7 +454,13 @@ function renderFlow(root, { solo, prefillCode, prefillEmail }) {
             <div class="rj-line"><input id="rj-email" type="email" inputmode="email" autocomplete="email" placeholder="${escAttr(rt("ph_email", "ton@email.fr"))}" enterkeyhint="next" /></div>
             ${
               solo
-                ? ""
+                ? `<button type="button" class="rj-ref-toggle" id="rj-ref-toggle">${esc(rt("ref_toggle", "J'ai un code de parrainage"))}</button>
+              <div class="rj-minor" id="rj-ref-block" hidden>
+                <label for="rj-ref-code">${esc(rt("ref_label", "Code de parrainage"))}</label>
+                <input class="rj-code-input" id="rj-ref-code" type="text" autocomplete="off" autocorrect="off"
+                  autocapitalize="characters" spellcheck="false" maxlength="12" placeholder="${escAttr(rt("ref_ph", "Ex : X7K2P9"))}" enterkeyhint="next" />
+                <div class="rj-help">${esc(rt("ref_help", "Optionnel. Un mois offert pour toi et pour lui."))}</div>
+              </div>`
                 : `<div class="rj-minor">
               <label for="rj-code">${esc(rt("code_label", "Code moniteur"))}</label>
               <input class="rj-code-input" id="rj-code" type="text" autocomplete="off" autocorrect="off"
@@ -600,6 +621,24 @@ function renderFlow(root, { solo, prefillCode, prefillEmail }) {
   let codeValid = solo; // en solo, pas de code à vérifier
   let codeChecking = false;
   let codeTimer = null;
+
+  // Solo : code de parrainage optionnel, replié par défaut (maquette validée
+  // à 4 écrans, pas 5 → on ne l'ajoute pas comme un champ de plus, juste un
+  // lien discret qui déplie une ligne, exactement comme le code moniteur en
+  // mode JOIN mais sans jamais bloquer le passage à l'écran suivant).
+  if (solo) {
+    const refToggle = root.querySelector("#rj-ref-toggle");
+    const refBlock = root.querySelector("#rj-ref-block");
+    const refInput = root.querySelector("#rj-ref-code");
+    refToggle?.addEventListener("click", () => {
+      refBlock.hidden = false;
+      refToggle.hidden = true;
+      refInput?.focus();
+    });
+    refInput?.addEventListener("input", () => {
+      state.refCode = normCode(refInput.value);
+    });
+  }
 
   function validateScreen1() {
     const emailOk = emailValid(emailEl.value);
@@ -779,6 +818,17 @@ function renderFlow(root, { solo, prefillCode, prefillEmail }) {
         if (!profErr || !/username_taken/i.test(profErr.message || "")) break;
       }
       if (profErr) throw profErr;
+
+      // Code de parrainage optionnel (solo uniquement) : best effort, un code
+      // invalide ou déjà utilisé ne doit jamais bloquer la création du compte,
+      // juste rester silencieux (pas de récompense, c'est tout).
+      if (solo && state.refCode && state.refCode.length >= 4) {
+        try {
+          await sb.rpc("apply_referral", { p_code: state.refCode });
+        } catch (e) {
+          console.warn("[rejoindre] apply_referral a échoué", e);
+        }
+      }
 
       // Le vrai prénom, donné à l'écran précédent (best effort : un raté ici
       // ne doit pas bloquer la création du compte, juste garder le prénom

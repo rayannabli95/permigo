@@ -311,6 +311,21 @@ const STYLE = `<style>
   border-radius: 99px;
   padding: 4px 10px;
 }
+.prf-ref-sub {
+  font: 600 12px/1.4 'Archivo', sans-serif;
+  color: var(--mu2);
+  margin: -8px 0 14px;
+}
+.prf-ref-bonus-active {
+  font: 700 11.5px/1.3 'Archivo', sans-serif;
+  color: var(--go-txt, #2f9e44);
+  background: var(--go-bg, rgba(47,158,68,.09));
+  border: 1px solid var(--go-bo, rgba(47,158,68,.3));
+  border-radius: 99px;
+  padding: 6px 12px;
+  text-align: center;
+  margin-bottom: 12px;
+}
 .prf-ref-code-wrap {
   display: flex;
   align-items: center;
@@ -1188,11 +1203,18 @@ function _wirePseudo(root, me) {
   });
 }
 
-// ─── Referral (élève) ─────────────────────────────────────────
+// ─── Referral (élève + moniteur) ───────────────────────────────
 function _renderReferral(stats) {
   const code = stats?.code;
-  const nRefs = stats?.n_referrals ?? 0;
+  // Bug corrigé (08/08) : la RPC renvoie `referrals_count`, pas `n_referrals`
+  // — le compteur affichait toujours 0 depuis le lancement du parrainage.
+  const nRefs = stats?.referrals_count ?? 0;
   const volantsEarned = nRefs * 50;
+  const paidRefs = stats?.paid_referrals_count ?? 0;
+  const bonusUntil = stats?.bonus_access_until
+    ? new Date(stats.bonus_access_until)
+    : null;
+  const bonusActive = bonusUntil && bonusUntil > new Date();
 
   return `
 <div class="prf-ref">
@@ -1203,6 +1225,7 @@ function _renderReferral(stats) {
       ${volantImg(14, { drop: true })} ${pt("referral_reward", `+50 ${volantLabel(50)} par filleul`)}
     </div>
   </div>
+  <p class="prf-ref-sub">${pt("referral_bonus_pitch", "Et si ton filleul s'abonne, +1 mois offert sur ton compte.")}</p>
 
   ${
     code
@@ -1220,10 +1243,19 @@ function _renderReferral(stats) {
       <div class="prf-ref-stat-lbl">${pt("referrals_count", `filleul${nRefs !== 1 ? "s" : ""}`)}</div>
     </div>
     <div class="prf-ref-stat">
+      <span class="prf-ref-stat-n">${paidRefs}</span>
+      <div class="prf-ref-stat-lbl">${pt("paid_referrals_count", `filleul${paidRefs !== 1 ? "s" : ""} abonné${paidRefs !== 1 ? "s" : ""}`)}</div>
+    </div>
+    <div class="prf-ref-stat">
       <span class="prf-ref-stat-n">${volantImg(16, { drop: true })} ${volantsEarned}</span>
       <div class="prf-ref-stat-lbl">${pt("steering_wheels_earned", `${volantLabel(volantsEarned)} gagnés`)}</div>
     </div>
   </div>
+  ${
+    bonusActive
+      ? `<div class="prf-ref-bonus-active">${pt("bonus_active_until", "Accès offert jusqu'au {date}").replace("{date}", bonusUntil.toLocaleDateString(getLang() === "fr" ? "fr-FR" : getLang()))}</div>`
+      : ""
+  }
   <button class="prf-ref-share-btn" id="prf-ref-share">
     ${icon("share", { size: 15 })} ${pt("share_code", "Partager mon code")}
   </button>
@@ -1692,10 +1724,14 @@ const PROF_I18N = {
     pseudo_invalid: "Invalid format.",
     referral: "Referrals",
     referral_reward: "+50 steering wheels per referral",
+    referral_bonus_pitch:
+      "And if your referral subscribes, +1 month free on your account.",
     referral_code_aria: "My referral code: {code}",
     referral_copy_title: "Copy code",
     referral_copy_aria: "Copy my referral code",
     referrals_count: "referral(s)",
+    paid_referrals_count: "subscribed referral(s)",
+    bonus_active_until: "Free access until {date}",
     steering_wheels_earned: "steering wheels earned",
     share_code: "Share my code",
     generate_code: "Generate my referral code",
@@ -1827,10 +1863,13 @@ const PROF_I18N = {
     pseudo_invalid: "تنسيق غير صالح.",
     referral: "الإحالات",
     referral_reward: "+50 مقودًا لكل إحالة",
+    referral_bonus_pitch: "وإذا اشترك صديقك، تحصل على شهر مجاني إضافي.",
     referral_code_aria: "رمز إحالتي: {code}",
     referral_copy_title: "نسخ الرمز",
     referral_copy_aria: "نسخ رمز إحالتي",
     referrals_count: "إحالة",
+    paid_referrals_count: "إحالة مشتركة",
+    bonus_active_until: "وصول مجاني حتى {date}",
     steering_wheels_earned: "مقودًا مكتسبًا",
     share_code: "مشاركة رمزي",
     generate_code: "إنشاء رمز الإحالة",
@@ -2485,6 +2524,35 @@ const STYLE_ENS = `<style>
 .enp-logout:active{transform:translateY(2px)}
 .enp-logout svg{width:18px;height:18px}
 .enp-since{text-align:center;margin:18px 0 4px;font-size:11px;font-weight:700;color:var(--enfa);letter-spacing:.6px;text-transform:uppercase}
+
+/* ── Parrainage (carte partagée avec le profil élève, cf. _renderReferral) ──
+   Copiée telle quelle : les tokens (--a, --su, --bo, --ink, --mu2…) sont
+   globaux (base.css), donc déjà disponibles ici sans rien redéfinir. */
+.prf-ref{background:var(--su);border:1px solid var(--bo);border-radius:var(--r-xl, 20px);padding:20px;margin:24px 16px 0;box-shadow:var(--s0)}
+.prf-ref-header{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.prf-ref-ico{display:inline-flex;flex-shrink:0;line-height:0}
+.prf-ref-ttl{font:800 15px/1.2 'Archivo',sans-serif;letter-spacing:-.01em;color:var(--ink);margin:0;flex:1}
+.prf-ref-volant-badge{display:flex;align-items:center;gap:4px;font:700 12px/1 'Archivo',sans-serif;color:var(--am-txt, #935e06);background:var(--amp, rgba(245,158,11,.09));border:1px solid var(--aml2, #fbbf24);border-radius:99px;padding:4px 10px}
+.prf-ref-sub{font:600 12px/1.4 'Archivo',sans-serif;color:var(--mu2);margin:-8px 0 14px}
+.prf-ref-bonus-active{font:700 11.5px/1.3 'Archivo',sans-serif;color:var(--go-txt, #2f9e44);background:var(--go-bg, rgba(47,158,68,.09));border:1px solid var(--go-bo, rgba(47,158,68,.3));border-radius:99px;padding:6px 12px;text-align:center;margin-bottom:12px}
+.prf-ref-code-wrap{display:flex;align-items:center;gap:10px;background:var(--bg);border:1.5px solid var(--bo);border-radius:var(--r, 12px);padding:12px 14px;margin-bottom:12px}
+.prf-ref-code{flex:1;font:700 18px/1 'IBM Plex Mono',monospace;color:var(--a-txt);letter-spacing:.1em}
+.prf-ref-copy-btn{background:color-mix(in srgb, var(--a) 8%, transparent);border:1.5px solid color-mix(in srgb, var(--a) 20%, transparent);color:var(--a-txt);font-size:18px;cursor:pointer;width:44px;height:44px;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:var(--r, 12px);flex-shrink:0;transition:background .12s}
+.prf-ref-copy-btn:active{background:color-mix(in srgb, var(--a) 16%, transparent);transform:scale(.95)}
+.prf-ref-stats{display:flex;gap:8px;margin-bottom:14px}
+.prf-ref-stat{flex:1;background:var(--bg);border:1px solid var(--bo);border-radius:var(--r, 12px);padding:12px;text-align:center}
+.prf-ref-stat-n{font:700 22px/1 'Archivo',sans-serif;color:var(--ink);display:flex;align-items:center;justify-content:center;gap:4px;margin-bottom:4px}
+.prf-ref-stat-lbl{font:500 10px/1.3 'Archivo',sans-serif;color:var(--mu2)}
+.prf-ref-share-btn{width:100%;padding:13px;background:var(--a);border:none;border-radius:var(--r, 12px);color:var(--a-ink);font:700 14px/1 'Archivo',sans-serif;cursor:pointer;transition:transform 120ms var(--ease-snap), opacity 120ms;min-height:46px;display:flex;align-items:center;justify-content:center;gap:6px}
+.prf-ref-share-btn:active{transform:scale(.97)}
+.prf-ref-gen-btn{width:100%;padding:13px;background:color-mix(in srgb, var(--a) 8%, transparent);border:1.5px solid color-mix(in srgb, var(--a) 20%, transparent);border-radius:var(--r, 12px);color:var(--a-txt);font:700 14px/1 'Archivo',sans-serif;cursor:pointer;transition:background .15s;min-height:46px}
+.prf-ref-gen-btn:active{background:color-mix(in srgb, var(--a) 15%, transparent)}
+.prf-ref-apply{margin-top:14px;display:flex;gap:8px}
+.prf-ref-apply-input{flex:1;padding:12px 14px;background:var(--bg);border:1.5px solid var(--bo);border-radius:var(--r, 12px);font:600 14px/1 'IBM Plex Mono',monospace;color:var(--ink);letter-spacing:.08em;text-transform:uppercase;outline:none;transition:border-color .14s;min-height:44px}
+.prf-ref-apply-input:focus{border-color:var(--a)}
+.prf-ref-apply-btn{padding:0 16px;background:var(--ink);border:none;border-radius:var(--r, 12px);color:var(--bg);font:700 13px/1 'Archivo',sans-serif;cursor:pointer;min-height:44px;white-space:nowrap;transition:background .12s}
+.prf-ref-apply-btn:active{background:var(--ink2)}
+.prf-ref-apply-btn:disabled{opacity:.5;cursor:not-allowed}
 </style>`;
 
 async function mountEnseignantArene(root, me) {
@@ -2494,36 +2562,44 @@ async function mountEnseignantArene(root, me) {
 
   // Retrait de la gamification moniteur (30/07/2026) : plus de classement
   // mensuel (get_moniteur_ranking) ni de série de validations (streak_pro_days).
-  const [profileRes, validationsRes, elevesRes] = await Promise.all([
-    sb
-      .from("profiles")
-      .select("email, prenom, nom, created_at, avatar_url")
-      .eq("id", me.id)
-      .single(),
-    sb
-      .from("validations")
-      .select("competence_id, eleve_id, validated_at")
-      .eq("validated_by", me.id)
-      .gte("validated_at", yearStart),
-    sb
-      .from("profiles")
-      .select("id, last_active_at")
-      .eq("role", "eleve")
-      .eq("enseignant_id", me.id)
-      .is("deleted_at", null),
-  ]);
+  const [profileRes, validationsRes, elevesRes, referralRes] =
+    await Promise.all([
+      sb
+        .from("profiles")
+        .select("email, prenom, nom, created_at, avatar_url")
+        .eq("id", me.id)
+        .single(),
+      sb
+        .from("validations")
+        .select("competence_id, eleve_id, validated_at")
+        .eq("validated_by", me.id)
+        .gte("validated_at", yearStart),
+      sb
+        .from("profiles")
+        .select("id, last_active_at")
+        .eq("role", "eleve")
+        .eq("enseignant_id", me.id)
+        .is("deleted_at", null),
+      // Parrainage : chaque élève solo apporté et devenu payant offre 1 mois
+      // gratuit sur l'abonnement moniteur (même moteur que côté élève).
+      sb.rpc("get_my_referral_stats"),
+    ]);
   _reportQueryErrors(
     "carte enseignant",
     [
       ["profil", profileRes],
       ["validations", validationsRes],
       ["élèves", elevesRes],
+      ["parrainage", referralRes],
     ],
     "Certaines données du profil sont indisponibles.",
   );
   const profile = _queryData(profileRes);
   const valData = _queryData(validationsRes);
   const elevesData = _queryData(elevesRes);
+  const referralStatsData = _queryData(referralRes);
+  const referralStats =
+    referralStatsData && !referralStatsData.error ? referralStatsData : null;
 
   // ── Stats Mon Année ───────────────────────────────────────
   const vals = valData || [];
@@ -2632,6 +2708,8 @@ async function mountEnseignantArene(root, me) {
     </div>
   </div>
 
+  <div id="prf-ref-section">${_renderReferral(referralStats)}</div>
+
   <div class="enp-set">
     <p class="enp-set-title">${pt("settings", "Réglages")}</p>
     <div class="enp-set-list">
@@ -2667,6 +2745,8 @@ async function mountEnseignantArene(root, me) {
 </div>`;
 
   // ── Wire ──────────────────────────────────────────────────
+  _wireReferral(root, me);
+
   root.querySelector("#enp-logout")?.addEventListener("click", async () => {
     haptic("tap");
     track("auth.logout", { user_role: me.role });

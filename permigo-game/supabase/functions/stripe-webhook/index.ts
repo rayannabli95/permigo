@@ -22,6 +22,33 @@ const stripe = new Stripe((Deno.env.get("STRIPE_SECRET_KEY") ?? "").trim(), {
   httpClient: Stripe.createFetchHttpClient(),
 });
 
+// Best-effort : crédite le PARRAIN (si le payeur a été parrainé) au 1er
+// paiement confirmé. Idempotent côté DB (contrainte unique sur referred_id),
+// donc sans risque à appeler plusieurs fois pour le même utilisateur (retries
+// Stripe, renouvellements). Ne doit JAMAIS faire échouer le webhook : une
+// erreur ici est loguée, pas propagée (le paiement lui-même reste valide).
+// deno-lint-ignore no-explicit-any
+async function grantReferralReward(admin: any, authUserId: string | null) {
+  if (!authUserId) return;
+  try {
+    const { data, error } = await admin.rpc(
+      "grant_referral_conversion_reward",
+      {
+        p_auth_user_id: authUserId,
+      },
+    );
+    if (error) {
+      console.error("[stripe-webhook] grant_referral_conversion_reward", error);
+      return;
+    }
+    if (data?.ok && data?.already_granted === false) {
+      console.log("[stripe-webhook] referral reward granted", authUserId);
+    }
+  } catch (e) {
+    console.error("[stripe-webhook] grant_referral_conversion_reward threw", e);
+  }
+}
+
 // deno-lint-ignore no-explicit-any
 async function upsertFromSubscription(admin: any, sub: any) {
   const userId = sub?.metadata?.user_id;
@@ -39,7 +66,7 @@ async function upsertFromSubscription(admin: any, sub: any) {
   }
   if (!resolvedUserId) {
     console.warn("[stripe-webhook] no user_id for subscription", sub.id);
-    return;
+    return null;
   }
 
   const item = sub.items?.data?.[0];
@@ -84,6 +111,8 @@ async function upsertFromSubscription(admin: any, sub: any) {
       throw new Error(`mensuel expire failed: ${exErr.message}`);
     }
   }
+
+  return resolvedUserId;
 }
 
 Deno.serve(async (req) => {
@@ -144,6 +173,12 @@ Deno.serve(async (req) => {
             // throw → 500 → Stripe re-tente (même auto-healing que subscriptions).
             throw new Error(`pass upsert failed: ${error.message}`);
           }
+          // Paiement Pass Permis confirmé + acheteur connecté (pas invité) →
+          // crédite un éventuel parrain. Un achat invité (user_id null) ne
+          // peut pas être rattaché à un referred_by : hors scope pour l'instant.
+          if (row.status === "paid" && row.user_id) {
+            await grantReferralReward(admin, row.user_id);
+          }
         }
         if (session.subscription) {
           const sub = await stripe.subscriptions.retrieve(
@@ -155,14 +190,21 @@ Deno.serve(async (req) => {
               user_id: session.client_reference_id,
             };
           }
-          await upsertFromSubscription(admin, sub);
+          const resolvedUserId = await upsertFromSubscription(admin, sub);
+          if (["active", "trialing"].includes(sub.status)) {
+            await grantReferralReward(admin, resolvedUserId);
+          }
         }
         break;
       }
       case "customer.subscription.created":
       case "customer.subscription.updated":
       case "customer.subscription.deleted": {
-        await upsertFromSubscription(admin, event.data.object);
+        const sub = event.data.object as Stripe.Subscription;
+        const resolvedUserId = await upsertFromSubscription(admin, sub);
+        if (["active", "trialing"].includes(sub.status)) {
+          await grantReferralReward(admin, resolvedUserId);
+        }
         break;
       }
       // Pré-vente remboursable : un remboursement (dashboard Stripe) marque la
