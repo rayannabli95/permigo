@@ -41,6 +41,7 @@ import {
   monterMissions,
   missionsPour,
 } from "@/components/eleve/pilote-mission.js";
+import { ouvrirSasCertification } from "@/components/eleve/sas-certification.js";
 
 // ⚠️ Le routeur RÉUTILISE le même nœud `root` d'une page à l'autre (il fait
 // `root.innerHTML = ...`, jamais un nouveau conteneur). Toute écriture posée
@@ -105,7 +106,6 @@ const VS_I18N = {
     step2_m_t: "The driving scene",
     step2_m_s:
       "You get in the car and you make the move. A few questions then close the certification.",
-    cta_m_start: "Get in the car",
     hint_m:
       "Be honest with yourself. None of this replaces a real driving lesson.",
     mr_kick: "Not yet",
@@ -113,7 +113,7 @@ const VS_I18N = {
     mr_p: "The move isn't in place yet on “{n}”. Re-read the sheet calmly, then come back and do it again.",
     mr_retry: "Re-read the sheet and retry",
     mr_back: "Back to the journey",
-    cta_start: "Start the quiz",
+    cta_start: "Enter certification mode",
     hint: "Be honest with yourself. This quiz never replaces a real driving lesson.",
     toast_noq: "No questions on this skill yet. Try again later.",
     toast_nopressure: "No pressure. Come back when you feel it.",
@@ -184,14 +184,13 @@ const VS_I18N = {
     step2_m_t: "المشهد العملي",
     step2_m_s:
       "تركب السيارة وتؤدّي الحركة. ثم تُغلق بضعة أسئلة عملية المصادقة.",
-    cta_m_start: "اركب السيارة",
     hint_m: "كن صادقًا مع نفسك. لا شيء من هذا يعوّض درس قيادة حقيقيًا.",
     mr_kick: "ليس بعد",
     mr_title: "نعود إلى البطاقة",
     mr_p: "الحركة لم تستقرّ بعد في «{n}». أعد قراءة البطاقة بهدوء ثم عد لتؤدّيها من جديد.",
     mr_retry: "أعد قراءة البطاقة وحاول مجددًا",
     mr_back: "العودة إلى المسار",
-    cta_start: "ابدأ الاختبار",
+    cta_start: "الدخول إلى وضع المصادقة",
     hint: "كن صادقًا مع نفسك. هذا الاختبار لا يعوّض درس قيادة حقيقيًا.",
     toast_noq: "لا أسئلة على هذه المهارة بعد. أعد المحاولة لاحقًا.",
     toast_nopressure: "لا ضغط. عد متى شعرت بالجاهزية.",
@@ -539,11 +538,7 @@ function introScreen(sub, cat, fiche, avecMission) {
     <!-- La phrase honnête passe AVANT le bouton : sous le bouton, personne
          ne la lisait (audit 01/08). -->
     <p class="vs-hint">${avecMission ? vsD("hint_m", "Sois honnête avec toi-même. Rien de tout ça ne remplace une vraie leçon de conduite.") : vsD("hint", "Sois honnête avec toi-même. Ce quiz ne remplace pas une vraie leçon de conduite.")}</p>
-    <button class="vs-cta" id="vs-start-quiz" type="button">${icon("zap", { size: 18 })} ${
-      avecMission
-        ? vsD("cta_m_start", "Monter dans la voiture")
-        : vsD("cta_start", "Commencer le quiz")
-    }</button>
+    <button class="vs-cta" id="vs-start-quiz" type="button">${icon("zap", { size: 18 })} ${vsD("cta_start", "Entrer en mode certification")}</button>
   </div>`;
 }
 
@@ -790,6 +785,11 @@ function wireBoite(root, me, compId, sub, cat) {
  */
 async function lancerLaCertification(root, me, compId, sub, cat, btn) {
   const gen = _gen;
+  // Le sas (regard de la mascotte, ~3,5s, jamais bloquant) avant TOUTE
+  // certification, mission ou quiz seul : c'est le rituel qui marque le
+  // passage entraînement → épreuve (demandé par Rayan, 08/08/2026).
+  await ouvrirSasCertification();
+  if (gen !== _gen) return; // parti pendant le sas
   const boite = await chargerBoite();
   if (gen !== _gen) return; // parti pendant la lecture de la boîte
   if (!missionsPour(compId, boite).length) {
