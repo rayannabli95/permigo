@@ -578,11 +578,47 @@ const STYLE = `<style>
 ${BACKDROP_STYLE}
 </style>`;
 
+// Provenance du visiteur (pub, referrer) — lue une fois à l'arrivée sur la
+// landing. Sert à répondre à « combien de clics viennent de Facebook ». On ne
+// stocke aucune donnée perso : présence du fbclid (pas l'ID) et hostname du
+// referrer (pas l'URL complète, qui peut porter des paramètres sensibles).
+function adSource() {
+  try {
+    const src = {};
+    const hash = location.hash || "";
+    const qs =
+      location.search.slice(1) +
+      (hash.includes("?") ? "&" + hash.slice(hash.indexOf("?") + 1) : "");
+    const q = new URLSearchParams(qs);
+    for (const k of [
+      "utm_source",
+      "utm_medium",
+      "utm_campaign",
+      "utm_content",
+      "utm_term",
+    ]) {
+      const v = q.get(k);
+      if (v) src[k] = v.slice(0, 100);
+    }
+    if (q.get("fbclid")) src.fbclid = true; // présence seule, jamais l'identifiant
+    if (document.referrer) {
+      try {
+        src.referrer = new URL(document.referrer).hostname;
+      } catch {
+        /* referrer non parsable : on ignore */
+      }
+    }
+    return src;
+  } catch {
+    return {};
+  }
+}
+
 export async function mount(root) {
   const lang = getLang();
   const L = STR[lang] || STR.fr;
   applyLang(lang);
-  track("landing.view", { lang });
+  track("landing.view", { lang, ...adSource() });
 
   const cartes = (cls, rep) => `
     <div class="pg-rail ${cls}"><div class="pg-bande">
