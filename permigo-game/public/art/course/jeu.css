@@ -1,0 +1,455 @@
+/* ═══════════════════════════════════════════════════════════════
+   Mise en situation, caméra derrière la voiture.
+
+   Le principe tient en une phrase : le sol est un plan basculé en 3D, et
+   chaque véhicule est un panneau posé DESSUS puis redressé. Du coup c'est
+   le navigateur qui calcule la perspective, et un véhicule à 40 m est
+   automatiquement à la bonne taille et à la bonne hauteur d'écran. Aucune
+   projection à écrire à la main, donc rien à re-régler quand la caméra bouge.
+
+   Une seule unité partout : 80 px du plan = 1 mètre de route.
+   ═══════════════════════════════════════════════════════════════ */
+
+.jeu {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  max-height: 88vh;
+  margin-inline: auto;
+  border-radius: 22px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #0a0720 0%, #1a1038 44%, #241539 58%);
+  border: 1px solid rgba(148, 132, 255, 0.17);
+  box-shadow:
+    inset 0 1px 0 rgba(196, 182, 255, 0.24),
+    0 18px 44px -20px rgba(0, 0, 0, 0.85);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+/* ─── Le décor lointain ─────────────────────────────────────── */
+.jeu-ciel {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 58%;
+  background:
+    radial-gradient(120% 70% at 50% 100%, rgba(212, 151, 109, 0.3), transparent 62%),
+    linear-gradient(180deg, #0a0720 0%, #191038 62%, #2a1a42 100%);
+}
+/* ⚠️ Il vit DANS la caméra, au-dessus de la brume. Posé avant, la brume le
+   recouvrait entièrement et il n'y avait plus d'horizon du tout. */
+.jeu-horizon {
+  position: absolute;
+  z-index: 2;
+  left: -6%;
+  width: 112%;
+  bottom: 57%;
+  height: 10%;
+  object-fit: cover;
+  object-position: 50% 88%;
+  opacity: 0.85;
+  /* Sans le fondu, la bande se voit comme un rectangle collé sur le ciel. */
+  -webkit-mask-image: linear-gradient(
+    180deg,
+    transparent 0%,
+    #000 34%,
+    #000 78%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    180deg,
+    transparent 0%,
+    #000 34%,
+    #000 78%,
+    transparent 100%
+  );
+  /* Le décor défile beaucoup plus lentement que la route : c'est ce
+     décalage qui donne la profondeur, pas le décor lui-même. */
+  animation: horizonGlisse 60s linear infinite;
+}
+@keyframes horizonGlisse {
+  to {
+    transform: translateX(-6%);
+  }
+}
+
+/* ─── Le sol ────────────────────────────────────────────────── */
+.jeu-camera {
+  position: absolute;
+  inset: 0;
+  /* ⚠️ Une perspective courte est un grand-angle : à 50 m un piéton tombe à
+     5 px de haut. C'est juste optiquement et illisible en jeu. Les jeux de
+     conduite trichent avec une focale longue, on fait pareil. */
+  perspective: 1000px;
+  perspective-origin: 50% 40%;
+  overflow: hidden;
+}
+.jeu-sol {
+  position: absolute;
+  left: 50%;
+  bottom: -8%;
+  width: 2600px; /* 32 m de large, largement de quoi couvrir les bas-côtés */
+  height: 9000px; /* 112 m de route devant la voiture */
+  margin-left: -1300px;
+  transform-origin: 50% 100%;
+  transform: rotateX(80deg);
+  transform-style: preserve-3d;
+  /* ⚠️ La tuile ne se répète QUE vers le fond. Répétée aussi en largeur,
+     elle peindrait trois routes côte à côte. Les côtés sont une couleur.
+     Échelle : la chaussée occupe 787 px des 1024 px de la tuile, on veut
+     qu'elle fasse 7 m soit 560 px, donc la tuile est posée à 729 px.
+     Et on la décale de 1,75 m à gauche pour que l'élève soit dans SA voie,
+     pas à cheval sur la ligne. */
+  background-image: url("/art/course/bitume.webp");
+  background-repeat: repeat-y;
+  background-size: 729px auto;
+  background-position-x: calc(50% - 158px);
+  background-color: #191134;
+  will-change: background-position;
+}
+/* Le voile qui mange le fond du plan : sans lui, la texture reste nette
+   jusqu'à l'horizon et l'œil voit tout de suite que c'est une image plate. */
+/* ⚠️ Elle s'arrête PILE à la ligne d'horizon. Descendue plus bas, elle
+   avalait les véhicules à 40 m : ils n'apparaissaient qu'une seconde avant
+   le choc, et la question tombait sur une route vide. */
+.jeu-brume {
+  position: absolute;
+  inset: 0 0 57% 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    #1a1038 0%,
+    rgba(26, 16, 56, 0.9) 40%,
+    rgba(26, 16, 56, 0.45) 78%,
+    transparent 100%
+  );
+}
+/* Un voile violet sur le bitume : la texture seule vire au noir et sort du
+   monde nuit-violet de l'app. */
+.jeu-teinte {
+  position: absolute;
+  inset: 0 0 26% 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(124, 92, 255, 0.16) 0%,
+    rgba(124, 92, 255, 0.07) 55%,
+    transparent 100%
+  );
+  mix-blend-mode: screen;
+}
+
+/* ─── Une pièce posée sur le sol ────────────────────────────── */
+.pion {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform-origin: 50% 100%;
+  /* --x : mètres à droite de l'axe · --z : mètres devant la voiture */
+  transform: translate3d(calc(var(--x) * 80px), calc(var(--z) * -80px), 0)
+    rotateX(-80deg);
+}
+.pion img {
+  display: block;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.6));
+}
+/* La flaque au sol : elle reste couchée, elle, donc pas de contre-rotation. */
+.pion::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  width: var(--ombre, 150px);
+  height: calc(var(--ombre, 150px) * 0.42);
+  transform: translateX(-50%) rotateX(80deg);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 0, 0, 0.55), transparent 70%);
+}
+
+/* La voiture de l'élève ne vit pas sur le plan : elle est collée à la
+   caméra. C'est ce qui la garde parfaitement stable pendant que tout le
+   reste défile. */
+/* Elle monte au-dessus de la carte : sinon la question recouvre la voiture et
+   on ne voit plus qui on conduit. Une caméra de poursuite pose toujours la
+   voiture au tiers bas, pas au ras du bord. */
+.jeu-joueur {
+  position: absolute;
+  left: 50%;
+  bottom: 31%;
+  width: 38%;
+  transform: translateX(-50%);
+  z-index: 5;
+  filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.7));
+  transition: transform 0.5s cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+.jeu.gauche .jeu-joueur {
+  transform: translateX(-50%) translateX(-16%) rotate(-3deg);
+}
+.jeu.droite .jeu-joueur {
+  transform: translateX(-50%) translateX(16%) rotate(3deg);
+}
+/* Les deux cônes de phares, posés au sol devant la voiture. */
+.jeu-phares {
+  position: absolute;
+  left: 50%;
+  bottom: 29%;
+  width: 170%;
+  aspect-ratio: 2 / 1;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 4;
+  background: radial-gradient(
+    ellipse 34% 60% at 50% 100%,
+    rgba(255, 226, 190, 0.3),
+    rgba(255, 214, 170, 0.1) 42%,
+    transparent 68%
+  );
+  mix-blend-mode: screen;
+  opacity: 0.9;
+}
+
+/* ─── Le tableau de bord ────────────────────────────────────── */
+.jeu-hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 14px;
+  font-family: "Archivo", system-ui, sans-serif;
+}
+.hud-haut {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.hud-score {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.hud-score span {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  margin-top: 4px;
+}
+.hud-combo {
+  font-size: 15px;
+  font-weight: 800;
+  color: #120d28;
+  background: linear-gradient(180deg, #ffd9a8, #f0b98a);
+  padding: 5px 11px;
+  border-radius: 999px;
+  box-shadow: 0 6px 16px -6px rgba(240, 185, 138, 0.9);
+  transition:
+    transform 0.18s cubic-bezier(0.34, 1.8, 0.64, 1),
+    opacity 0.2s;
+}
+.hud-combo.off {
+  opacity: 0;
+  transform: scale(0.6);
+}
+.hud-combo.pop {
+  transform: scale(1.28);
+}
+.hud-vitesse {
+  text-align: right;
+  color: #fff;
+  font-size: 26px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+  line-height: 1;
+}
+.hud-vitesse span {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: rgba(255, 255, 255, 0.55);
+  margin-top: 4px;
+}
+
+/* ─── La question ──────────────────────────────────────────── */
+.jeu-carte {
+  pointer-events: auto;
+  background: linear-gradient(180deg, rgba(36, 28, 74, 0.97), rgba(18, 13, 40, 0.97));
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(148, 132, 255, 0.28);
+  border-radius: 18px;
+  padding: 14px;
+  box-shadow: 0 20px 40px -18px rgba(0, 0, 0, 0.9);
+  transform: translateY(140%);
+  transition: transform 0.36s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+.jeu-carte.on {
+  transform: translateY(0);
+}
+.carte-q {
+  color: #f4f1ff;
+  font-size: 15.5px;
+  font-weight: 700;
+  line-height: 1.22;
+  margin: 0 0 9px;
+  text-wrap: balance;
+}
+.carte-choix {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.carte-choix button {
+  appearance: none;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: #efeaff;
+  background: rgba(124, 92, 255, 0.16);
+  border: 1px solid rgba(148, 132, 255, 0.3);
+  border-radius: 11px;
+  padding: 9px 12px;
+  cursor: pointer;
+  transition:
+    transform 0.12s,
+    background 0.15s,
+    border-color 0.15s;
+}
+.carte-choix button:active {
+  transform: scale(0.98);
+}
+.carte-choix button.bon {
+  background: rgba(74, 222, 128, 0.24);
+  border-color: rgba(74, 222, 128, 0.7);
+}
+.carte-choix button.faux {
+  background: rgba(248, 113, 113, 0.24);
+  border-color: rgba(248, 113, 113, 0.7);
+}
+.carte-jauge {
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  overflow: hidden;
+  margin-bottom: 11px;
+}
+.carte-jauge i {
+  display: block;
+  height: 100%;
+  width: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #f0b98a, #ff8b6b);
+  transform-origin: left;
+}
+
+/* ─── Les retours ──────────────────────────────────────────── */
+.jeu-flash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9;
+  opacity: 0;
+}
+.jeu-flash.bon {
+  animation: flashBon 0.5s ease-out;
+}
+.jeu-flash.faux {
+  animation: flashFaux 0.5s ease-out;
+}
+@keyframes flashBon {
+  0% {
+    opacity: 0.5;
+    box-shadow: inset 0 0 90px 20px rgba(74, 222, 128, 0.8);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes flashFaux {
+  0% {
+    opacity: 0.7;
+    box-shadow: inset 0 0 90px 24px rgba(248, 113, 113, 0.9);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.jeu-points {
+  position: absolute;
+  left: 50%;
+  top: 34%;
+  z-index: 11;
+  transform: translateX(-50%);
+  font-family: "Archivo", system-ui, sans-serif;
+  font-size: 34px;
+  font-weight: 800;
+  color: #ffe4bd;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.8);
+  opacity: 0;
+  pointer-events: none;
+}
+.jeu-points.on {
+  animation: pointsMonte 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes pointsMonte {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(16px) scale(0.7);
+  }
+  22% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-46px) scale(1);
+  }
+}
+/* Le coup de frein : toute l'image plonge, comme un vrai transfert de masse. */
+.jeu.freine .jeu-camera,
+.jeu.freine .jeu-joueur {
+  animation: plonge 0.55s cubic-bezier(0.3, 1.4, 0.5, 1);
+}
+@keyframes plonge {
+  0%,
+  100% {
+    transform: none;
+  }
+  35% {
+    transform: translateY(10px) scale(1.02);
+  }
+}
+.jeu.freine .jeu-joueur {
+  animation-name: plongeJoueur;
+}
+@keyframes plongeJoueur {
+  0%,
+  100% {
+    transform: translateX(-50%);
+  }
+  35% {
+    transform: translateX(-50%) translateY(12px) scale(1.04);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jeu-horizon,
+  .jeu-points,
+  .jeu-flash {
+    animation: none !important;
+  }
+}
