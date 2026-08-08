@@ -53,12 +53,16 @@ create index if not exists referral_rewards_referrer_idx
 
 alter table public.referral_rewards enable row level security;
 
+-- drop + create (pas de CREATE POLICY IF NOT EXISTS en Postgres) : rend ce
+-- fichier rejouable sans erreur si un essai précédent a déjà posé les policies.
+drop policy if exists "owner reads all referral rewards" on public.referral_rewards;
 create policy "owner reads all referral rewards"
   on public.referral_rewards
   for select
   to authenticated
   using (public.is_owner());
 
+drop policy if exists "user reads own referral rewards" on public.referral_rewards;
 create policy "user reads own referral rewards"
   on public.referral_rewards
   for select
