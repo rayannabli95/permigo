@@ -14,14 +14,26 @@
  *   toast('Erreur réseau', 'error');
  */
 
-import { esc, safeCssColor } from '@/utils/escape.js';
+import { esc, safeCssColor } from "@/utils/escape.js";
+import { getLang } from "@/utils/lang.js";
 
-const ROOT_ID = 'toast-root';
+const ROOT_ID = "toast-root";
+
+// Le conteneur vit sur document.body, hors de portée du dir="rtl" que chaque
+// page pose sur SA propre racine (ex : rejoindre.js) : sans ce dir explicite,
+// un toast arabe s'affichait toujours de gauche à droite, croix de fermeture
+// du mauvais côté (trouvé en vérifiant l'inscription arabe, 08/08/2026).
+function dirAttrs(el) {
+  if (getLang() === "ar") {
+    el.setAttribute("dir", "rtl");
+    el.setAttribute("lang", "ar");
+  }
+}
 
 function ensureRoot() {
   let root = document.getElementById(ROOT_ID);
   if (!root) {
-    root = document.createElement('div');
+    root = document.createElement("div");
     root.id = ROOT_ID;
     // Conteneur transparent — chaque toast a son propre live region
     document.body.appendChild(root);
@@ -29,20 +41,21 @@ function ensureRoot() {
   return root;
 }
 
-export function toast(msg, type = 'info', duration = 3000) {
+export function toast(msg, type = "info", duration = 3000) {
   const root = ensureRoot();
-  const el = document.createElement('div');
+  const el = document.createElement("div");
   el.className = `toast toast-${type}`;
+  dirAttrs(el);
 
   // Sémantique ARIA selon la gravité
-  if (type === 'error') {
-    el.setAttribute('role', 'alert');
-    el.setAttribute('aria-live', 'assertive');
+  if (type === "error") {
+    el.setAttribute("role", "alert");
+    el.setAttribute("aria-live", "assertive");
   } else {
-    el.setAttribute('role', 'status');
-    el.setAttribute('aria-live', 'polite');
+    el.setAttribute("role", "status");
+    el.setAttribute("aria-live", "polite");
   }
-  el.setAttribute('aria-atomic', 'true');
+  el.setAttribute("aria-atomic", "true");
 
   el.innerHTML = `
     <span class="toast-msg">${esc(msg)}</span>
@@ -51,19 +64,24 @@ export function toast(msg, type = 'info', duration = 3000) {
   root.appendChild(el);
 
   let removed = false;
-  const remove = () => { if (!removed) { removed = true; el.remove(); } };
+  const remove = () => {
+    if (!removed) {
+      removed = true;
+      el.remove();
+    }
+  };
   const dismiss = () => {
-    el.classList.remove('on');
-    el.addEventListener('transitionend', remove, { once: true });
+    el.classList.remove("on");
+    el.addEventListener("transitionend", remove, { once: true });
     // Fallback : si transitionend ne se déclenche jamais (reduced-motion,
     // élément déjà hors transition), on force la suppression.
     setTimeout(remove, 400);
   };
 
-  el.querySelector('.toast-close')?.addEventListener('click', dismiss);
+  el.querySelector(".toast-close")?.addEventListener("click", dismiss);
 
   // Force layout puis trigger anim
-  requestAnimationFrame(() => el.classList.add('on'));
+  requestAnimationFrame(() => el.classList.add("on"));
 
   setTimeout(dismiss, duration);
 }
@@ -72,14 +90,22 @@ export function toast(msg, type = 'info', duration = 3000) {
  * Toast riche avec avatar (initiales) — pour validations enseignant.
  * @param {{title: string, sub?: string, initials?: string, color?: string, type?: 'success'|'info'|'error', duration?: number}} opts
  */
-export function toastAvatar({ title, sub = '', initials = '?', color = 'var(--a)', type = 'success', duration = 3500 }) {
+export function toastAvatar({
+  title,
+  sub = "",
+  initials = "?",
+  color = "var(--a)",
+  type = "success",
+  duration = 3500,
+}) {
   const root = ensureRoot();
-  const el = document.createElement('div');
-  const safeType = ['success', 'info', 'error'].includes(type) ? type : 'info';
+  const el = document.createElement("div");
+  const safeType = ["success", "info", "error"].includes(type) ? type : "info";
   el.className = `toast toast-${safeType} toast-rich`;
-  el.setAttribute('role', 'status');
-  el.setAttribute('aria-live', 'polite');
-  el.setAttribute('aria-atomic', 'true');
+  dirAttrs(el);
+  el.setAttribute("role", "status");
+  el.setAttribute("aria-live", "polite");
+  el.setAttribute("aria-atomic", "true");
 
   el.innerHTML = `
     <style>
@@ -126,23 +152,31 @@ export function toastAvatar({ title, sub = '', initials = '?', color = 'var(--a)
     <div class="ta-av">${esc(initials)}</div>
     <div class="ta-body">
       <div class="ta-title">${esc(title)}</div>
-      ${sub ? `<div class="ta-sub">${esc(sub)}</div>` : ''}
+      ${sub ? `<div class="ta-sub">${esc(sub)}</div>` : ""}
     </div>
-    ${safeType === 'success' ? `<div class="ta-check">✓</div>` : ''}
+    ${safeType === "success" ? `<div class="ta-check">✓</div>` : ""}
   `;
-  el.querySelector('.ta-av').style.backgroundColor = safeCssColor(color, 'var(--a)');
+  el.querySelector(".ta-av").style.backgroundColor = safeCssColor(
+    color,
+    "var(--a)",
+  );
   root.appendChild(el);
 
   let removed = false;
-  const remove = () => { if (!removed) { removed = true; el.remove(); } };
+  const remove = () => {
+    if (!removed) {
+      removed = true;
+      el.remove();
+    }
+  };
   const dismiss = () => {
-    el.classList.remove('on');
-    el.addEventListener('transitionend', remove, { once: true });
+    el.classList.remove("on");
+    el.addEventListener("transitionend", remove, { once: true });
     setTimeout(remove, 400);
   };
 
-  el.addEventListener('click', dismiss);
+  el.addEventListener("click", dismiss);
 
-  requestAnimationFrame(() => el.classList.add('on'));
+  requestAnimationFrame(() => el.classList.add("on"));
   setTimeout(dismiss, duration);
 }
