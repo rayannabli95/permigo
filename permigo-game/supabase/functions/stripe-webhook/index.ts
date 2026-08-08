@@ -22,6 +22,75 @@ const stripe = new Stripe((Deno.env.get("STRIPE_SECRET_KEY") ?? "").trim(), {
   httpClient: Stripe.createFetchHttpClient(),
 });
 
+// Coupon partagé parrainage/parrainé (cf. migration 20260808150000) : -1 €
+// pour toujours. Id fixe → idempotent, jamais recréé en double.
+const REFERRAL_COUPON_ID = "permigo-parrainage-1e";
+async function ensureReferralCoupon() {
+  try {
+    await stripe.coupons.retrieve(REFERRAL_COUPON_ID);
+  } catch {
+    try {
+      await stripe.coupons.create({
+        id: REFERRAL_COUPON_ID,
+        amount_off: 100,
+        currency: "eur",
+        duration: "forever",
+        name: "Parrainage PermiGo",
+      });
+    } catch (e) {
+      console.warn("[stripe-webhook] ensureReferralCoupon", e);
+    }
+  }
+}
+
+// Applique la remise -1 € en direct sur l'abonnement Stripe ACTUEL du
+// parrain (élève ou moniteur, peu importe la table où vit son abonnement).
+// Best-effort : si on ne retrouve aucun abonnement actif chez lui (il n'a
+// peut-être pas encore payé lui-même), on ne fait rien — pas d'erreur, la
+// remise ne peut simplement pas encore s'appliquer, rien à rattraper de force.
+// deno-lint-ignore no-explicit-any
+async function applyReferrerDiscount(admin: any, referrerAuthId: string) {
+  try {
+    let subId: string | null = null;
+
+    const { data: sub } = await admin
+      .from("subscriptions")
+      .select("stripe_subscription_id, status")
+      .eq("user_id", referrerAuthId)
+      .in("status", ["active", "trialing"])
+      .maybeSingle();
+    if (sub?.stripe_subscription_id) subId = sub.stripe_subscription_id;
+
+    if (!subId) {
+      const { data: pass } = await admin
+        .from("pass_purchases")
+        .select("stripe_subscription_id")
+        .eq("user_id", referrerAuthId)
+        .eq("plan", "mensuel")
+        .eq("status", "paid")
+        .not("stripe_subscription_id", "is", null)
+        .maybeSingle();
+      if (pass?.stripe_subscription_id) subId = pass.stripe_subscription_id;
+    }
+
+    if (!subId) {
+      console.log(
+        "[stripe-webhook] parrain sans abonnement actif trouvé, remise en attente",
+        referrerAuthId,
+      );
+      return;
+    }
+
+    await ensureReferralCoupon();
+    await stripe.subscriptions.update(subId, {
+      discounts: [{ coupon: REFERRAL_COUPON_ID }],
+    });
+    console.log("[stripe-webhook] remise parrain appliquée", subId);
+  } catch (e) {
+    console.error("[stripe-webhook] applyReferrerDiscount threw", e);
+  }
+}
+
 // Best-effort : crédite le PARRAIN (si le payeur a été parrainé) au 1er
 // paiement confirmé. Idempotent côté DB (contrainte unique sur referred_id),
 // donc sans risque à appeler plusieurs fois pour le même utilisateur (retries
@@ -43,6 +112,9 @@ async function grantReferralReward(admin: any, authUserId: string | null) {
     }
     if (data?.ok && data?.already_granted === false) {
       console.log("[stripe-webhook] referral reward granted", authUserId);
+      if (data?.referrer_auth_id) {
+        await applyReferrerDiscount(admin, data.referrer_auth_id);
+      }
     }
   } catch (e) {
     console.error("[stripe-webhook] grant_referral_conversion_reward threw", e);

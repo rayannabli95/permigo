@@ -31,6 +31,29 @@ function json(body: unknown, status = 200) {
   });
 }
 
+// Coupon partagé parrainage/parrainé (cf. migration 20260808150000) : -1 €
+// pour toujours, posé automatiquement à la 1re session de paiement d'un
+// filleul. Id fixe → idempotent, jamais recréé en double.
+const REFERRAL_COUPON_ID = "permigo-parrainage-1e";
+// deno-lint-ignore no-explicit-any
+async function ensureReferralCoupon(stripe: any) {
+  try {
+    await stripe.coupons.retrieve(REFERRAL_COUPON_ID);
+  } catch {
+    try {
+      await stripe.coupons.create({
+        id: REFERRAL_COUPON_ID,
+        amount_off: 100,
+        currency: "eur",
+        duration: "forever",
+        name: "Parrainage PermiGo",
+      });
+    } catch (e) {
+      console.warn("[stripe-checkout] ensureReferralCoupon", e);
+    }
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
@@ -113,13 +136,33 @@ Deno.serve(async (req) => {
       Deno.env.get("APP_URL") ??
       "https://www.permigo.fr";
 
+    // Moniteur connecté ayant appliqué un code de parrainage → remise -1 €
+    // permanente sur sa 1re session de paiement. Best-effort.
+    let hasReferralDiscount = false;
+    try {
+      const { data: profile } = await admin
+        .from("profiles")
+        .select("referred_by")
+        .eq("auth_id", user.id)
+        .maybeSingle();
+      if (profile?.referred_by) {
+        await ensureReferralCoupon(stripe);
+        hasReferralDiscount = true;
+      }
+    } catch (e) {
+      console.warn("[stripe-checkout] referral discount check failed", e);
+    }
+
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       customer: customerId,
       line_items: [{ price: priceId, quantity: 1 }],
       client_reference_id: user.id,
       subscription_data: { metadata: { user_id: user.id } },
-      allow_promotion_codes: true,
+      // Stripe interdit `discounts` + `allow_promotion_codes` ensemble.
+      ...(hasReferralDiscount
+        ? { discounts: [{ coupon: REFERRAL_COUPON_ID }] }
+        : { allow_promotion_codes: true }),
       success_url: `${origin}/#/settings?checkout=success`,
       cancel_url: `${origin}/#/settings?checkout=cancel`,
     });
