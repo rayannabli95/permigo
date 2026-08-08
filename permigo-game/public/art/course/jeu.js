@@ -161,6 +161,9 @@ export function creerJeu(hote, { sur = "/art/course", onFin } = {}) {
   const elVitesse = $(".hud-vitesse");
   const flash = $(".jeu-flash");
   const points = $(".jeu-points");
+  const joueur = { style: { set transform(v) {
+    for (const el of hote.querySelectorAll(".jeu-joueur")) el.style.transform = v;
+  } } };
   const horizon = $(".jeu-horizon");
 
   // Le décor de bord de route. On le charge sans attendre : le canvas saute
@@ -196,6 +199,9 @@ export function creerJeu(hote, { sur = "/art/course", onFin } = {}) {
     vitesse: 0, // m/s
     cible: 14,
     avance: 0, // mètres parcourus
+    x: 0, // position latérale de l'élève, en mètres (0 = milieu de sa voie)
+    xCible: 0,
+    vLat: 0,
     score: 0,
     combo: 0,
     acteurs: [],
@@ -250,7 +256,7 @@ export function creerJeu(hote, { sur = "/art/course", onFin } = {}) {
     etat.acteurs.forEach(placer);
     etat.attente = false;
     etat.depuis = 0;
-    jeu.classList.remove("gauche", "droite");
+    etat.xCible = 0;
   }
 
   function poserQuestion() {
@@ -310,9 +316,13 @@ export function creerJeu(hote, { sur = "/art/course", onFin } = {}) {
       jeu.classList.add("freine");
       setTimeout(() => jeu.classList.remove("freine"), 600);
       setTimeout(() => (etat.cible = 14), 1500);
-    } else if (suite === "gauche" || suite === "droite") {
-      jeu.classList.add(suite);
-      setTimeout(() => jeu.classList.remove(suite), 1700);
+    } else if (suite === "gauche") {
+      // On va CHERCHER l'autre voie, on ne penche pas sur place.
+      etat.xCible = -3.4;
+      setTimeout(() => (etat.xCible = 0), 2600);
+    } else if (suite === "droite") {
+      etat.xCible = 1.1;
+      setTimeout(() => (etat.xCible = 0), 2400);
     }
   }
 
@@ -353,7 +363,33 @@ export function creerJeu(hote, { sur = "/art/course", onFin } = {}) {
 
     etat.vitesse += (etat.cible - etat.vitesse) * Math.min(1, vrai * 2.2);
     etat.avance += etat.vitesse * dt;
-    route.dessiner(etat.avance);
+
+    // Le déport. La caméra suit à 80 % : le reste, c'est la voiture qui
+    // dérive à l'écran. Suivre à 100 % collerait la voiture au centre et on
+    // ne verrait plus qu'elle change de voie.
+    const avant = etat.x;
+    // La force centrifuge. Dans un virage à droite, la voiture est poussée
+    // vers la GAUCHE : c'est ce qui oblige à tenir le volant, et c'est ce qui
+    // fait qu'une courbe se ressent au lieu de se regarder.
+    const derive = route.courbe * etat.vitesse * 2.4;
+    etat.x += (etat.xCible - etat.x) * Math.min(1, vrai * 1.7) - derive * dt;
+    etat.vLat = vrai > 0 ? (etat.x - avant) / vrai : 0;
+    route.dessiner(etat.avance, { camera: etat.x * 0.8 });
+
+    // Le braquage additionne deux choses : le déport qu'on vient de décider,
+    // et la courbe qu'on est en train de suivre. Il n'y a pas de minuteur, la
+    // voiture se remet droite exactement quand la route se remet droite.
+    const volant = route.courbe * etat.vitesse * 22 + etat.vLat;
+    jeu.classList.toggle("gauche", volant < -0.35);
+    jeu.classList.toggle("droite", volant > 0.35);
+    // Le décor lointain glisse avec la courbe : sans ça, la ville reste
+    // plantée pendant que la route tourne, et la profondeur s'effondre.
+    horizon.style.transform = `translateX(${(
+      -route.decalage(90) * route.parMetre(90) * 0.4
+    ).toFixed(1)}px)`;
+    joueur.style.transform = `translateX(-50%) translateX(${(
+      (etat.x - route.camera) * route.parMetre(9)
+    ).toFixed(1)}px)`;
 
     // Le rétroviseur. On regarde vers l'arrière, donc la route y défile à
     // l'envers : d'où l'avance négative.

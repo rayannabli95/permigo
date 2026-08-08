@@ -132,9 +132,10 @@
   transform: translateX(-50%);
   z-index: 5;
   filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.7));
-  transition:
-    transform 0.45s cubic-bezier(0.34, 1.3, 0.64, 1),
-    opacity 0.22s ease;
+  /* ⚠️ Pas de transition sur `transform` : c'est le script qui le pose à
+     chaque image, en mètres. Une transition par-dessus ferait traîner la
+     voiture derrière sa propre position. */
+  transition: opacity 0.22s ease;
 }
 /* Les vues braquées montrent la LONGUEUR de la voiture : à hauteur de
    carrosserie égale, leur image est bien plus large. */
@@ -147,13 +148,9 @@
 .jeu.droite .j-face {
   opacity: 0;
 }
-.jeu.gauche .j-g {
-  opacity: 1;
-  transform: translateX(-50%) translateX(-13%);
-}
+.jeu.gauche .j-g,
 .jeu.droite .j-d {
   opacity: 1;
-  transform: translateX(-50%) translateX(13%);
 }
 
 /* ─── Le tableau de bord ────────────────────────────────────── */
@@ -365,17 +362,20 @@
     transform: translateX(-50%) translateY(-46px) scale(1);
   }
 }
-/* Le coup de frein : la voiture plonge, comme un vrai transfert de masse. */
-.jeu.freine .j-face {
+/* Le coup de frein : la voiture plonge, comme un vrai transfert de masse.
+   ⚠️ On anime `bottom`, PAS `transform` : le script écrit déjà le transform
+   à chaque image pour le déport, une animation le lui arracherait et la
+   voiture sauterait au centre pendant le freinage. */
+.jeu.freine .jeu-joueur {
   animation: plonge 0.55s cubic-bezier(0.3, 1.4, 0.5, 1);
 }
 @keyframes plonge {
   0%,
   100% {
-    transform: translateX(-50%);
+    bottom: 24%;
   }
   35% {
-    transform: translateX(-50%) translateY(12px) scale(1.04);
+    bottom: 22.2%;
   }
 }
 

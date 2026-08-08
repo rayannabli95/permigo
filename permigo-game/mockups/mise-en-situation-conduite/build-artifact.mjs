@@ -67,7 +67,9 @@ body{margin:0;background:radial-gradient(80% 50% at 50% 0%,rgba(124,92,255,.16),
   <button class="rejouer" type="button">Rejouer</button>
 
   <p class="note"><b>Neuf secondes pour choisir</b>Et le monde tourne à un cinquième de sa vitesse pendant que la carte est levée. Avant, la scène était passée avant qu'on ait fini de lire.</p>
-  <p class="note"><b>Trois voitures, pas une inclinée</b>Quand elle se déporte, tu vois son flanc et ses roues braquées. Une seule image qu'on ferait pivoter glisserait en crabe.</p>
+  <p class="note"><b>La route tourne</b>Elle est peinte en tranches de 4 m, chacune avec sa courbure, comme dans OutRun ou Horizon Chase. Une route qui tourne n'est pas un trapèze, elle ne peut pas se peindre d'un seul tenant. Les lampadaires, les arbres et les autres véhicules suivent la courbe sans une ligne de code en plus.</p>
+  <p class="note"><b>Tu changes vraiment de voie</b>Quand tu doubles, ce n'est pas l'image qui penche : la voiture se déplace en mètres et toute la route glisse sous elle. La caméra la suit à 80 %, le reste c'est elle qui dérive à l'écran.</p>
+  <p class="note"><b>La force centrifuge</b>Dans un virage à droite tu es poussé vers la gauche, et la voiture montre ses roues braquées. C'est ce qui fait qu'une courbe se ressent au lieu de se regarder.</p>
   <p class="note"><b>Le rétroviseur, le seul autre angle</b>Il rejoue la même projection en marche arrière. Il occupe le haut de l'écran qui était vide, et il rend jouables les situations qui se passent derrière. La quatrième question en est une.</p>
   <p class="note"><b>Ce qui est vrai à l'écran</b>Une voie fait 3,20 m, et la route, les lampadaires, les arbres et les véhicules passent tous par le même calcul de perspective. Rien n'est calé à l'œil.</p>
 </div>
