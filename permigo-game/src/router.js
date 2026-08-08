@@ -155,6 +155,9 @@ const ROUTES = {
     "exam-conduite": () => import("@/pages/eleve/exam-conduite.js"),
     "jeu-faute": () => import("@/pages/eleve/jeu-faute.js"),
     "en-situation": () => import("@/pages/eleve/en-situation.js"),
+    // Mise en situation en 3D — vrai moteur (src/game/), Three.js chargé à la
+    // demande. ?debug=1 pour le HUD développeur.
+    "situation-3d": () => import("@/pages/eleve/situation-3d.js"),
     roue: () => import("@/pages/eleve/roue.js"),
     "mes-coffres": () => import("@/pages/eleve/mes-coffres.js"),
     messages: () => import("@/pages/common/messages.js"),
@@ -306,6 +309,7 @@ const ROUTE_TITLES = {
   "exam-conduite": "Examen blanc de conduite",
   "jeu-faute": "Trouve la faute",
   "en-situation": "En situation",
+  "situation-3d": "En situation 3D",
   boutique: "Boutique",
   "mes-coffres": "Mes coffres",
   messages: "Messages",

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <title>Banc d'essai — la page élève</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #14102e; font-family: Archivo, system-ui, sans-serif; }
+    </style>
+  </head>
+  <body>
+    <!--
+      La VRAIE page élève (src/pages/eleve/situation-3d.js), montée hors du
+      routeur pour pouvoir la regarder sans être connecté. Sert à vérifier la
+      coque : compteur, commandes tactiles, carte de fin.
+    -->
+    <div id="root"></div>
+    <script type="module">
+      const { mount } = await import("/src/pages/eleve/situation-3d.js");
+      await mount(document.getElementById("root"));
+    </script>
+  </body>
+</html>

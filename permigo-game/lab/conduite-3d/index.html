@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <title>Banc d'essai — moteur de conduite 3D</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #14102e; }
+      #app { position: fixed; inset: 0; }
+    </style>
+  </head>
+  <body>
+    <!--
+      Banc d'essai du moteur (src/game/). Hors de l'app : pas de connexion,
+      pas de routeur, pas de progression. Il sert à construire et à régler
+      les situations, et c'est lui qu'on ouvre pour vérifier une trajectoire.
+      Ouvrir : npm run dev puis /lab/conduite-3d/
+    -->
+    <div id="app"></div>
+    <script type="module">
+      import { lancerScenario } from "/src/game/runner.js";
+      import SCENARIO from "/src/game/scenarios/priorite-droite.js";
+
+      const partie = await lancerScenario(document.getElementById("app"), SCENARIO, {
+        debug: true,
+        sur: (type, data) => {
+          if (type !== "image") console.log("[scenario]", type, data);
+        },
+      });
+      // Une poignée pour piloter le banc depuis la console ou un script.
+      window.__g3 = partie;
+    </script>
+  </body>
+</html>
