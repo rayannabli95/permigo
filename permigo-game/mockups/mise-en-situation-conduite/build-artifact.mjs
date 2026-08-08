@@ -11,6 +11,8 @@ const uri = (f) =>
 const A = {
   horizon: uri("horizon.webp"),
   joueur: uri("c-joueur.webp"),
+  joueurG: uri("c-joueur-g.webp"),
+  joueurD: uri("c-joueur-d.webp"),
   gris: uri("c-gris.webp"),
   rouge: uri("c-rouge.webp"),
   camion: uri("c-camion.webp"),
@@ -32,6 +34,8 @@ const jeu = fs
   .readFileSync(path.join(ART, "jeu.js"), "utf8")
   .replace(/^import .*$/gm, "")
   .replace("${sur}/horizon.webp", "${A.horizon}")
+  .replace("${sur}/c-joueur-g.webp", "${A.joueurG}")
+  .replace("${sur}/c-joueur-d.webp", "${A.joueurD}")
   .replace("${sur}/c-joueur.webp", "${A.joueur}")
   .replace("${sur}/c-suiveur.webp", "${A.suiveur}")
   .replace("${sur}/d-${n}.webp", "${A[n]}")
@@ -63,6 +67,7 @@ body{margin:0;background:radial-gradient(80% 50% at 50% 0%,rgba(124,92,255,.16),
   <button class="rejouer" type="button">Rejouer</button>
 
   <p class="note"><b>Neuf secondes pour choisir</b>Et le monde tourne à un cinquième de sa vitesse pendant que la carte est levée. Avant, la scène était passée avant qu'on ait fini de lire.</p>
+  <p class="note"><b>Trois voitures, pas une inclinée</b>Quand elle se déporte, tu vois son flanc et ses roues braquées. Une seule image qu'on ferait pivoter glisserait en crabe.</p>
   <p class="note"><b>Le rétroviseur, le seul autre angle</b>Il rejoue la même projection en marche arrière. Il occupe le haut de l'écran qui était vide, et il rend jouables les situations qui se passent derrière. La quatrième question en est une.</p>
   <p class="note"><b>Ce qui est vrai à l'écran</b>Une voie fait 3,20 m, et la route, les lampadaires, les arbres et les véhicules passent tous par le même calcul de perspective. Rien n'est calé à l'œil.</p>
 </div>

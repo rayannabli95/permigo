@@ -114,26 +114,46 @@
 }
 
 /* La voiture de l'élève est collée à la caméra : c'est ce qui la garde
-   parfaitement stable pendant que tout le reste défile. Elle monte au-dessus
-   de la carte, sinon la question la recouvre et on ne voit plus qui on
-   conduit. */
+   parfaitement stable pendant que tout le reste défile.
+
+   ⚠️ Deux contraintes qui se battent : trop haute elle a l'air cabrée et
+   elle cache la route, trop basse la carte de question l'avale. 24 % est le
+   point d'équilibre.
+
+   Il y a TROIS images de la même voiture, pas une seule qu'on incline : une
+   voiture qui tourne montre son flanc et ses roues braquées, une image
+   pivotée glisse en crabe. Elles sont posées l'une sur l'autre et on ne fait
+   qu'échanger l'opacité, donc aucun clignotement au changement. */
 .jeu-joueur {
   position: absolute;
   left: 50%;
-  /* ⚠️ Plus la voiture est grosse et haute, plus elle cache la route. Un
-     cycliste juste devant disparaissait derrière elle. */
-  bottom: 27%;
+  bottom: 24%;
   width: 34%;
   transform: translateX(-50%);
   z-index: 5;
   filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.7));
-  transition: transform 0.5s cubic-bezier(0.34, 1.3, 0.64, 1);
+  transition:
+    transform 0.45s cubic-bezier(0.34, 1.3, 0.64, 1),
+    opacity 0.22s ease;
 }
-.jeu.gauche .jeu-joueur {
-  transform: translateX(-50%) translateX(-18%) rotate(-3deg);
+/* Les vues braquées montrent la LONGUEUR de la voiture : à hauteur de
+   carrosserie égale, leur image est bien plus large. */
+.j-g,
+.j-d {
+  width: 50%;
+  opacity: 0;
 }
-.jeu.droite .jeu-joueur {
-  transform: translateX(-50%) translateX(18%) rotate(3deg);
+.jeu.gauche .j-face,
+.jeu.droite .j-face {
+  opacity: 0;
+}
+.jeu.gauche .j-g {
+  opacity: 1;
+  transform: translateX(-50%) translateX(-13%);
+}
+.jeu.droite .j-d {
+  opacity: 1;
+  transform: translateX(-50%) translateX(13%);
 }
 
 /* ─── Le tableau de bord ────────────────────────────────────── */
@@ -346,7 +366,7 @@
   }
 }
 /* Le coup de frein : la voiture plonge, comme un vrai transfert de masse. */
-.jeu.freine .jeu-joueur {
+.jeu.freine .j-face {
   animation: plonge 0.55s cubic-bezier(0.3, 1.4, 0.5, 1);
 }
 @keyframes plonge {

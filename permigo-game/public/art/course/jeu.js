@@ -129,7 +129,9 @@ export function creerJeu(hote, { sur = "/art/course", onFin } = {}) {
       </div>
       <img class="jeu-horizon" src="${sur}/horizon.webp" alt="">
       <div class="jeu-monde"></div>
-      <img class="jeu-joueur" src="${sur}/c-joueur.webp" alt="">
+      <img class="jeu-joueur j-face" src="${sur}/c-joueur.webp" alt="">
+      <img class="jeu-joueur j-g" src="${sur}/c-joueur-g.webp" alt="">
+      <img class="jeu-joueur j-d" src="${sur}/c-joueur-d.webp" alt="">
       <div class="jeu-flash"></div>
       <div class="jeu-points"></div>
       <div class="jeu-hud">
