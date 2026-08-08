@@ -85,6 +85,24 @@ export const SITUATIONS = [
       "Elle voit quelque chose que tu ne vois pas encore. On reprend de la distance.",
   },
   {
+    // ⭐ La seule situation qui se joue DERRIÈRE. Sans le rétroviseur, elle
+    // est impossible à raconter : c'est ça, le besoin d'un deuxième angle.
+    id: "colle",
+    acteurs: [],
+    suiveur: 5,
+    zQ: 999, // rien devant : la question part tout de suite
+    question: "Une voiture te colle depuis deux kilomètres",
+    choix: [
+      "Je freine un coup pour la calmer",
+      "J'augmente ma distance avec celle de devant",
+      "J'accélère pour la semer",
+    ],
+    bonne: 1,
+    suite: "droite",
+    lecon:
+      "On ne se venge pas au frein. On s'offre de la marge devant, pour n'avoir jamais à freiner fort.",
+  },
+  {
     id: "rouge",
     acteurs: [{ piece: "rouge", x: -3.5, z: 120, vx: 0, vz: -17 }],
     zQ: 70,
@@ -105,6 +123,10 @@ export function creerJeu(hote, { sur = "/art/course", onFin } = {}) {
   hote.innerHTML = `
     <div class="jeu">
       <canvas class="jeu-route"></canvas>
+      <div class="jeu-miroir">
+        <canvas class="miroir-vue"></canvas>
+        <img class="miroir-auto" src="${sur}/c-suiveur.webp" alt="">
+      </div>
       <img class="jeu-horizon" src="${sur}/horizon.webp" alt="">
       <div class="jeu-monde"></div>
       <img class="jeu-joueur" src="${sur}/c-joueur.webp" alt="">
@@ -139,9 +161,32 @@ export function creerJeu(hote, { sur = "/art/course", onFin } = {}) {
   const points = $(".jeu-points");
   const horizon = $(".jeu-horizon");
 
+  // Le décor de bord de route. On le charge sans attendre : le canvas saute
+  // simplement ce qui n'est pas encore prêt, et la route démarre tout de suite.
+  const images = {};
+  for (const n of ["lampe", "arbre"]) {
+    const im = new Image();
+    im.src = `${sur}/d-${n}.webp`;
+    images[n] = im;
+  }
+
   const boite = () => jeu.getBoundingClientRect();
   const r0 = boite();
-  const route = creerRoute(canvas, { largeur: r0.width, hauteur: r0.height });
+  const route = creerRoute(canvas, {
+    largeur: r0.width,
+    hauteur: r0.height,
+    images,
+  });
+  // Le rétroviseur : la SEULE autre caméra dont l'app a besoin. Elle rejoue la
+  // même projection en marche arrière, et elle ouvre toute une famille de
+  // situations (on te colle, on te double) qu'une vue vers l'avant ne peut pas
+  // raconter.
+  const miroir = creerRoute($(".miroir-vue"), {
+    largeur: r0.width * 0.46,
+    hauteur: r0.height * 0.1,
+  });
+  const suiveur = $(".miroir-auto");
+  let zSuiveur = 26;
   const calerHorizon = (h) => (horizon.style.top = route.hy - h * 0.055 + "px");
   calerHorizon(r0.height);
 
@@ -202,6 +247,7 @@ export function creerJeu(hote, { sur = "/art/course", onFin } = {}) {
     etat.acteurs = s.acteurs.map(poser);
     etat.acteurs.forEach(placer);
     etat.attente = false;
+    etat.depuis = 0;
     jeu.classList.remove("gauche", "droite");
   }
 
@@ -215,7 +261,7 @@ export function creerJeu(hote, { sur = "/art/course", onFin } = {}) {
     jauge.style.transition = "none";
     jauge.style.transform = "scaleX(1)";
     requestAnimationFrame(() => {
-      jauge.style.transition = "transform 6s linear";
+      jauge.style.transition = "transform 9s linear";
       jauge.style.transform = "scaleX(0)";
     });
     carte.classList.add("on");
@@ -293,16 +339,30 @@ export function creerJeu(hote, { sur = "/art/course", onFin } = {}) {
     const vrai = Math.min(0.05, (t - dernier) / 1000);
     dernier = t;
 
-    // Le RALENTI. Pendant la question le monde tourne au tiers de sa vitesse :
+    // Le RALENTI. Pendant la question le monde tourne à un cinquième de sa
+    // vitesse, et la barre laisse neuf secondes. Rayan sur la version d'avant :
+    // « y'a pas assez de temps ». Six secondes à trois dixièmes, la scène
+    // était sur nous avant qu'on ait fini de lire les trois réponses.
     // sans lui, la scène est derrière nous avant qu'on ait fini de lire. C'est
     // aussi ce qui fait qu'un choix « se joue », au lieu d'être un formulaire.
     etat.lenteur +=
-      ((etat.attente ? 0.3 : 1) - etat.lenteur) * Math.min(1, vrai * 5);
+      ((etat.attente ? 0.18 : 1) - etat.lenteur) * Math.min(1, vrai * 5);
     const dt = vrai * etat.lenteur;
 
     etat.vitesse += (etat.cible - etat.vitesse) * Math.min(1, vrai * 2.2);
     etat.avance += etat.vitesse * dt;
     route.dessiner(etat.avance);
+
+    // Le rétroviseur. On regarde vers l'arrière, donc la route y défile à
+    // l'envers : d'où l'avance négative.
+    miroir.dessiner(-etat.avance, { decor: false });
+    // La voiture derrière se rapproche ou s'éloigne doucement selon la scène.
+    const cible = etat.scene?.suiveur ?? 26;
+    zSuiveur += (cible - zSuiveur) * Math.min(1, vrai * 0.6);
+    const ls = miroir.parMetre(zSuiveur) * 2.1;
+    suiveur.style.width = ls + "px";
+    suiveur.style.left = miroir.xDe(0, zSuiveur) + "px";
+    suiveur.style.top = miroir.yDe(zSuiveur) + "px";
 
     const kmh = Math.round(etat.vitesse * 3.6);
     if (kmh !== vu) {
@@ -321,9 +381,16 @@ export function creerJeu(hote, { sur = "/art/course", onFin } = {}) {
     // camion se voit de loin, un cycliste non : une distance unique pour
     // toutes donnait soit une question posée sur une route vide, soit une
     // scène déjà passée. C'est un réglage de mise en scène, pas une formule.
-    if (etat.scene && !etat.attente && etat.acteurs.length) {
-      const proche = Math.min(...etat.acteurs.map((a) => a.z));
-      if (proche < (etat.scene.zQ || 34) && proche > 3) poserQuestion();
+    if (etat.scene && !etat.attente) {
+      if (!etat.acteurs.length) {
+        // Une scène qui se joue derrière n'a personne devant : on laisse
+        // juste le temps de voir le rétroviseur se remplir.
+        etat.depuis = (etat.depuis || 0) + vrai;
+        if (etat.depuis > 2.2) poserQuestion();
+      } else {
+        const proche = Math.min(...etat.acteurs.map((a) => a.z));
+        if (proche < (etat.scene.zQ || 34) && proche > 3) poserQuestion();
+      }
     }
 
     brut = requestAnimationFrame(image);
