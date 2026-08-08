@@ -142,7 +142,10 @@ function _loopTrack(name, vol, { fadeInMs = 0 } = {}) {
     if (fadeInMs) {
       const start = performance.now();
       const step = (t) => {
-        const p = Math.min(1, (t - start) / fadeInMs);
+        // 🔴 L'horodatage de la première frame peut PRÉCÉDER `start` : il vaut
+        // le début du frame, pas l'instant de l'appel. Sans le plancher à 0,
+        // `volume` recevait -0.0006 et levait une exception à chaque quiz.
+        const p = Math.max(0, Math.min(1, (t - start) / fadeInMs));
         a.volume = vol * p;
         if (p < 1) requestAnimationFrame(step);
       };
