@@ -31,10 +31,14 @@
 //     fuir quelqu'un avant qu'il ait vu le produit.
 //   · nom de famille → jamais demandé au grand public (pseudo + prénom suffisent
 //     pour un classement).
-//   · langue → l'app devine déjà la langue du téléphone (browserLang(), utils/
-//     lang.js) et la propose dans Réglages. Lui donner un écran dédié ici allait
-//     à l'encontre de la maquette validée (4 écrans, pas 5) pour un réglage que
-//     la quasi-totalité des visiteurs n'aurait jamais changé de toute façon.
+//
+// ⚠️ Langue : la page ne propose PAS de sélecteur (maquette validée à 4 écrans,
+// pas 5). Elle LIT la langue déjà choisie sur la landing (getLang(), utils/
+// lang.js) — un visiteur qui arrive de la pub arabe/anglaise via ?lang=ar ou
+// ?lang=en doit lire son inscription dans SA langue, pas retomber en français
+// juste parce que cet écran n'a jamais eu de dictionnaire (régression #730 du
+// 08/08/2026 : les 4 écrans mascotte avaient perdu toute trace d'i18n, un
+// arabophone qui cliquait la pub tombait sur un formulaire 100% français).
 //
 // La boîte de vitesses n'est PLUS demandée dans l'onboarding qui suit (elle l'a
 // été jusqu'au 06/08/2026, PR #725) : elle vit ici, une fois, jamais deux.
@@ -48,6 +52,7 @@ import { track } from "@/services/analytics.js";
 import { fbTrack } from "@/services/meta-pixel.js";
 import { haptic } from "@/utils/haptic.js";
 import { chargerBoite, enregistrerBoite } from "@/utils/transmission.js";
+import { getLang } from "@/utils/lang.js";
 
 const MASCOT = {
   hello: "/art/mascotte/mascot-bonjour-remasterise.webp",
@@ -55,6 +60,113 @@ const MASCOT = {
   think: "/art/mascotte/mascot-reflexion-quiz.webp",
   cheer: "/art/mascotte/mascot-celebration.webp",
 };
+
+// ─── i18n — repli FR partout. Clés textContent (jamais innerHTML côté
+// dictionnaire : le HTML des écrans reste dans le template, seul le texte
+// affiché change) ; { name } est remplacé après coup, comme ailleurs (cf.
+// free-tier-wall.js). ───────────────────────────────────────────────────
+const RJ_I18N = {
+  en: {
+    bubble0: "Hi. I'm PermiGo.",
+    h1_0: "What's your name?",
+    ph_prenom: "First name",
+    cta_continue: "Continue",
+    bubble1: "Your email and a password.",
+    h1_1: "Where do I reach you?",
+    ph_email: "you@email.com",
+    code_label: "Instructor code",
+    ph_code: "PERMIS75",
+    code_help_default: "Ask your instructor for it.",
+    code_checking: "Checking…",
+    code_notfound: "Code not found. Double-check with your instructor.",
+    code_check_failed: "Check failed. Try again.",
+    join_school: "You're joining {school}{with}.",
+    join_with: " with {name}",
+    pwd_label: "Password",
+    ph_pwd: "8 characters minimum",
+    pwd_show_aria: "Show password",
+    pwd_hide_aria: "Hide password",
+    have_account: "Already have an account? ",
+    login_link: "Log in",
+    bubble2: "This changes your questions.",
+    h1_2: "Which gearbox?",
+    boite_auto_t: "Automatic",
+    boite_auto_d: "Two pedals and a P R N D selector",
+    boite_man_t: "Manual",
+    boite_man_d: "Three pedals and a gear stick",
+    skip_boite: "I don't know yet",
+    bubble3: "Nice one.",
+    h1_3: "Welcome ",
+    h1_3_you: "you",
+    sub_3: "Your account is ready. Your first lesson is waiting.",
+    cta_enter: "Let's go",
+    creating: "Creating…",
+    toast_code_invalid: "Invalid instructor code. Check it again.",
+    toast_code_notfound: "Code not found.",
+    toast_already_school:
+      "This account is already linked to an instructor. Please log in.",
+    toast_exists: "An account already exists with this email. Log in directly.",
+    toast_generic: "Error while creating the account",
+    already_connected: "You're already signed in as {name}.",
+    already_switch: "Sign out to create an account",
+    back_home: "Back to home",
+    back_aria: "Go back",
+  },
+  ar: {
+    bubble0: "أهلاً. أنا بيرميغو.",
+    h1_0: "شنو اسمك؟",
+    ph_prenom: "الاسم الأول",
+    cta_continue: "التالي",
+    bubble1: "بريدك الإلكتروني وكلمة مرور.",
+    h1_1: "وين نلقاك؟",
+    ph_email: "you@email.com",
+    code_label: "رمز المدرّب",
+    ph_code: "PERMIS75",
+    code_help_default: "اطلبه من مدرّبك.",
+    code_checking: "جارٍ التحقّق…",
+    code_notfound: "الرمز غير موجود. تحقّق مجدّداً مع مدرّبك.",
+    code_check_failed: "تعذّر التحقّق. أعد المحاولة.",
+    join_school: "أنت تنضمّ إلى {school}{with}.",
+    join_with: " مع {name}",
+    pwd_label: "كلمة المرور",
+    ph_pwd: "8 أحرف على الأقل",
+    pwd_show_aria: "إظهار كلمة المرور",
+    pwd_hide_aria: "إخفاء كلمة المرور",
+    have_account: "لديك حساب بالفعل؟ ",
+    login_link: "تسجيل الدخول",
+    bubble2: "هذا يغيّر أسئلتك.",
+    h1_2: "شنو صندوق السرعات؟",
+    boite_auto_t: "أوتوماتيك",
+    boite_auto_d: "دواستان ومقبض P R N D",
+    boite_man_t: "يدوي",
+    boite_man_d: "ثلاث دواسات وعصا سرعات",
+    skip_boite: "ما نعرفش بعد",
+    bubble3: "زين.",
+    h1_3: "مرحباً ",
+    h1_3_you: "بيك",
+    sub_3: "حسابك جاهز. أول درس ينتظرك.",
+    cta_enter: "يلا نبدأ",
+    creating: "جارٍ الإنشاء…",
+    toast_code_invalid: "رمز المدرّب غير صالح. تحقّق منه مجدّداً.",
+    toast_code_notfound: "الرمز غير موجود.",
+    toast_already_school: "هذا الحساب مرتبط بمدرّب بالفعل. سجّل الدخول.",
+    toast_exists: "يوجد حساب بالفعل بهذا البريد. سجّل الدخول مباشرة.",
+    toast_generic: "خطأ أثناء إنشاء الحساب",
+    already_connected: "أنت مسجّل الدخول بالفعل باسم {name}.",
+    already_switch: "سجّل الخروج لإنشاء حساب",
+    back_home: "الرجوع إلى الصفحة الرئيسية",
+    back_aria: "رجوع",
+  },
+};
+function isAr() {
+  return getLang() === "ar";
+}
+/** Texte brut (pour textContent / attributs) — jamais d'innerHTML direct sur
+ *  une clé i18n, echapper au point d'usage si injecté en HTML. */
+function rt(key, fr) {
+  const l = getLang();
+  return (l !== "fr" && RJ_I18N[l]?.[key]) || fr;
+}
 
 const STYLE = `<style>
   .rj-app{
@@ -82,10 +194,15 @@ const STYLE = `<style>
   .rj-bgfx i:nth-child(2){ width: 300px; height: 300px; bottom: -120px; right: -100px;
     background: radial-gradient(circle, var(--a-lt) 0%, transparent 70%); opacity: .38; }
 
-  /* Barre du haut : retour + points de progression */
+  /* Barre du haut : retour + points de progression. Propriétés physiques →
+     logiques (inline-start/end) : le flex "row" se retourne déjà tout seul
+     avec dir="rtl", mais une marge négative en "left" resterait physique. */
   .rj-top{ flex: none; height: 44px; display: flex; align-items: center; gap: 12px; position: relative; z-index: 2; }
-  .rj-back{ width: 44px; height: 44px; margin-left: -10px; border: 0; background: transparent; cursor: pointer;
+  .rj-back{ width: 44px; height: 44px; margin-inline-start: -10px; border: 0; background: transparent; cursor: pointer;
     display: grid; place-items: center; color: var(--mu); border-radius: 14px; }
+  /* La flèche pointe visuellement vers « avant » (là où on revient), donc
+     miroir en RTL, comme les chevrons de navigation ailleurs dans l'app. */
+  [dir="rtl"] .rj-back svg{ transform: scaleX(-1); }
   .rj-back svg{ width: 22px; height: 22px; }
   .rj-back[hidden]{ display: none; }
   .rj-back:active{ background: color-mix(in srgb, var(--ink) 7%, transparent); }
@@ -125,7 +242,7 @@ const STYLE = `<style>
   .rj-line{ position: relative; }
   .rj-line + .rj-line{ margin-top: 10px; }
   .rj-line input{ width: 100%; height: 52px; padding: 0 2px; border: 0; background: transparent;
-    border-bottom: 2px solid var(--bo); color: var(--ink);
+    border-bottom: 2px solid var(--bo); color: var(--ink); text-align: start;
     font: 800 19px/1 'Archivo', var(--fd), sans-serif; outline: none; transition: border-color .2s ease;
     box-sizing: border-box; }
   .rj-line input::placeholder{ color: var(--mu); font-weight: 600; opacity: .75; }
@@ -139,17 +256,17 @@ const STYLE = `<style>
     text-transform: uppercase; letter-spacing: .06em; margin-bottom: 7px; }
   .rj-minor-wrap{ position: relative; }
   .rj-minor input{ width: 100%; height: 46px; padding: 0 13px; border-radius: 13px; box-sizing: border-box;
-    border: 1.5px solid var(--bo); background: var(--su2); color: var(--ink);
+    border: 1.5px solid var(--bo); background: var(--su2); color: var(--ink); text-align: start;
     font: 600 15px/1 'Archivo', var(--fd), sans-serif; outline: none; }
   .rj-minor input:focus{ border-color: var(--a); }
   .rj-minor input::placeholder{ color: var(--mu); font-weight: 500; }
   .rj-minor input.err{ border-color: #e5484d; }
-  .rj-minor-pwd input{ padding-right: 46px; }
-  .rj-minor-toggle{ position: absolute; right: 4px; top: 4px; width: 38px; height: 38px; border: 0;
+  .rj-minor-pwd input{ padding-inline-end: 46px; }
+  .rj-minor-toggle{ position: absolute; inset-inline-end: 4px; top: 4px; width: 38px; height: 38px; border: 0;
     background: none; cursor: pointer; color: var(--mu); display: flex; align-items: center; justify-content: center;
     border-radius: 10px; }
   .rj-minor-toggle:hover{ color: var(--ink); }
-  .rj-help{ font: 600 11.5px/1.4 'Archivo', var(--fd), sans-serif; color: var(--mu); margin-top: 6px; margin-left: 2px; }
+  .rj-help{ font: 600 11.5px/1.4 'Archivo', var(--fd), sans-serif; color: var(--mu); margin-top: 6px; margin-inline-start: 4px; }
   .rj-help.error{ color: #e5484d; }
   .rj-help.ok{ color: #2f9e44; }
   .rj-code-input{ text-transform: uppercase; letter-spacing: .16em; font-weight: 800 !important; }
@@ -157,7 +274,7 @@ const STYLE = `<style>
   /* Les deux cartes de boîte de vitesses */
   .rj-cards{ display: flex; flex-direction: column; gap: 10px; }
   .rj-card{ display: flex; align-items: center; gap: 13px; width: 100%; min-height: 70px; padding: 13px 15px;
-    text-align: left; cursor: pointer; border-radius: 18px; border: 1.5px solid var(--bo);
+    text-align: start; cursor: pointer; border-radius: 18px; border: 1.5px solid var(--bo);
     background: var(--su); color: var(--ink); font-family: 'Archivo', var(--fd), sans-serif;
     transition: border-color .18s ease, transform .18s cubic-bezier(.22,1,.36,1); }
   .rj-card:active{ transform: scale(.985); }
@@ -252,14 +369,15 @@ export async function mount(root) {
 
 function renderConnected(root, me) {
   const name = esc(me.prenom || me.username || me.email || "quelqu'un");
+  const dirAttr = isAr() ? ' dir="rtl" lang="ar"' : "";
   root.innerHTML = `${STYLE}
     <div class="rj-bgfx" aria-hidden="true"><i></i><i></i></div>
-    <div class="rj-app">
+    <div class="rj-app"${dirAttr}>
       <div class="rj-connected">
         <img class="rj-mascot" src="${MASCOT.point}" alt="" style="height:140px" />
-        <p>Tu es déjà connecté en tant que <strong>${name}</strong>.</p>
-        <button class="rj-cta" id="rj-switch" type="button">Se déconnecter pour créer un compte</button>
-        <a class="rj-connected-link" href="/#/">Retourner à l'accueil</a>
+        <p>${esc(rt("already_connected", "Tu es déjà connecté en tant que {name}.")).replace("{name}", `<strong>${name}</strong>`)}</p>
+        <button class="rj-cta" id="rj-switch" type="button">${esc(rt("already_switch", "Se déconnecter pour créer un compte"))}</button>
+        <a class="rj-connected-link" href="/#/">${esc(rt("back_home", "Retourner à l'accueil"))}</a>
       </div>
     </div>`;
   root.querySelector("#rj-switch")?.addEventListener("click", async () => {
@@ -276,6 +394,7 @@ function renderFlow(root, { solo, prefillCode, prefillEmail }) {
   const RM =
     typeof matchMedia === "function" &&
     matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const dirAttr = isAr() ? ' dir="rtl" lang="ar"' : "";
 
   // ─── État persistant à travers les écrans ──────────────────────
   const state = {
@@ -290,9 +409,9 @@ function renderFlow(root, { solo, prefillCode, prefillEmail }) {
 
   root.innerHTML = `${STYLE}
     <div class="rj-bgfx" aria-hidden="true"><i></i><i></i></div>
-    <div class="rj-app">
+    <div class="rj-app"${dirAttr}>
       <div class="rj-top">
-        <button class="rj-back" id="rj-back" hidden aria-label="Revenir">${BACK_ICON}</button>
+        <button class="rj-back" id="rj-back" hidden aria-label="${esc(rt("back_aria", "Revenir"))}">${BACK_ICON}</button>
         <div class="rj-dots" id="rj-dots" aria-hidden="true"><b></b><b></b><b></b></div>
         <div class="rj-spacer"></div>
       </div>
@@ -300,80 +419,80 @@ function renderFlow(root, { solo, prefillCode, prefillEmail }) {
 
         <section class="rj-scr live" data-i="0">
           <div class="rj-hero">
-            <div class="rj-bubble">Salut. Moi c'est PermiGo.</div>
+            <div class="rj-bubble">${esc(rt("bubble0", "Salut. Moi c'est PermiGo."))}</div>
             <img class="rj-mascot" src="${MASCOT.hello}" alt="" />
           </div>
           <div class="rj-body">
-            <h1 class="rj-h1">Comment tu t'appelles ?</h1>
-            <div class="rj-line"><input id="rj-prenom" type="text" autocomplete="given-name" placeholder="Prénom" enterkeyhint="next" maxlength="40" /></div>
+            <h1 class="rj-h1">${esc(rt("h1_0", "Comment tu t'appelles ?"))}</h1>
+            <div class="rj-line"><input id="rj-prenom" type="text" autocomplete="given-name" placeholder="${escAttr(rt("ph_prenom", "Prénom"))}" enterkeyhint="next" maxlength="40" /></div>
           </div>
-          <div class="rj-foot"><button class="rj-cta" id="rj-go0" type="button" disabled>Continuer</button></div>
+          <div class="rj-foot"><button class="rj-cta" id="rj-go0" type="button" disabled>${esc(rt("cta_continue", "Continuer"))}</button></div>
         </section>
 
         <section class="rj-scr" data-i="1" hidden>
           <div class="rj-hero">
-            <div class="rj-bubble">Ton email et un mot de passe.</div>
+            <div class="rj-bubble">${esc(rt("bubble1", "Ton email et un mot de passe."))}</div>
             <img class="rj-mascot" src="${MASCOT.point}" alt="" />
           </div>
           <div class="rj-body">
-            <h1 class="rj-h1">Où je te retrouve ?</h1>
-            <div class="rj-line"><input id="rj-email" type="email" inputmode="email" autocomplete="email" placeholder="ton@email.fr" enterkeyhint="next" /></div>
+            <h1 class="rj-h1">${esc(rt("h1_1", "Où je te retrouve ?"))}</h1>
+            <div class="rj-line"><input id="rj-email" type="email" inputmode="email" autocomplete="email" placeholder="${escAttr(rt("ph_email", "ton@email.fr"))}" enterkeyhint="next" /></div>
             ${
               solo
                 ? ""
                 : `<div class="rj-minor">
-              <label for="rj-code">Code moniteur</label>
+              <label for="rj-code">${esc(rt("code_label", "Code moniteur"))}</label>
               <input class="rj-code-input" id="rj-code" type="text" autocomplete="off" autocorrect="off"
-                autocapitalize="characters" spellcheck="false" maxlength="16" placeholder="PERMIS75"
+                autocapitalize="characters" spellcheck="false" maxlength="16" placeholder="${escAttr(rt("ph_code", "PERMIS75"))}"
                 value="${escAttr(prefillCode)}" enterkeyhint="next" />
-              <div class="rj-help" id="rj-code-help">Demande-le à ton moniteur.</div>
+              <div class="rj-help" id="rj-code-help">${esc(rt("code_help_default", "Demande-le à ton moniteur."))}</div>
             </div>`
             }
             <div class="rj-minor">
-              <label for="rj-pwd">Mot de passe</label>
+              <label for="rj-pwd">${esc(rt("pwd_label", "Mot de passe"))}</label>
               <div class="rj-minor-wrap rj-minor-pwd">
-                <input id="rj-pwd" type="password" autocomplete="new-password" placeholder="8 caractères minimum" enterkeyhint="go" />
-                <button class="rj-minor-toggle" id="rj-pwd-toggle" type="button" aria-label="Afficher le mot de passe" aria-pressed="false">${eyeIcon(false)}</button>
+                <input id="rj-pwd" type="password" autocomplete="new-password" placeholder="${escAttr(rt("ph_pwd", "8 caractères minimum"))}" enterkeyhint="go" />
+                <button class="rj-minor-toggle" id="rj-pwd-toggle" type="button" aria-label="${escAttr(rt("pwd_show_aria", "Afficher le mot de passe"))}" aria-pressed="false">${eyeIcon(false)}</button>
               </div>
             </div>
           </div>
           <div class="rj-foot">
-            <button class="rj-cta" id="rj-go1" type="button" disabled>Continuer</button>
-            <div class="rj-login-row">Déjà un compte&nbsp;? <a href="/#/login">Se connecter</a></div>
+            <button class="rj-cta" id="rj-go1" type="button" disabled>${esc(rt("cta_continue", "Continuer"))}</button>
+            <div class="rj-login-row">${esc(rt("have_account", "Déjà un compte ? "))}<a href="/#/login">${esc(rt("login_link", "Se connecter"))}</a></div>
           </div>
         </section>
 
         <section class="rj-scr" data-i="2" hidden>
           <div class="rj-hero">
-            <div class="rj-bubble">Ça change tes questions.</div>
+            <div class="rj-bubble">${esc(rt("bubble2", "Ça change tes questions."))}</div>
             <img class="rj-mascot" src="${MASCOT.think}" alt="" />
           </div>
           <div class="rj-body">
-            <h1 class="rj-h1">Quelle boîte de vitesses ?</h1>
+            <h1 class="rj-h1">${esc(rt("h1_2", "Quelle boîte de vitesses ?"))}</h1>
             <div class="rj-cards" id="rj-boite-cards">
               <button class="rj-card" type="button" data-boite="auto">
                 <i aria-hidden="true">PRND</i>
-                <span><b>Boîte automatique</b><span>Deux pédales et un sélecteur P R N D</span></span>
+                <span><b>${esc(rt("boite_auto_t", "Boîte automatique"))}</b><span>${esc(rt("boite_auto_d", "Deux pédales et un sélecteur P R N D"))}</span></span>
               </button>
               <button class="rj-card" type="button" data-boite="manuelle">
                 <i aria-hidden="true">1-5</i>
-                <span><b>Boîte manuelle</b><span>Trois pédales et un levier de vitesses</span></span>
+                <span><b>${esc(rt("boite_man_t", "Boîte manuelle"))}</b><span>${esc(rt("boite_man_d", "Trois pédales et un levier de vitesses"))}</span></span>
               </button>
             </div>
           </div>
-          <div class="rj-foot"><button class="rj-skip" id="rj-skip-boite" type="button">Je ne sais pas encore</button></div>
+          <div class="rj-foot"><button class="rj-skip" id="rj-skip-boite" type="button">${esc(rt("skip_boite", "Je ne sais pas encore"))}</button></div>
         </section>
 
         <section class="rj-scr" data-i="3" hidden>
           <div class="rj-hero">
-            <div class="rj-bubble">Bien joué.</div>
+            <div class="rj-bubble">${esc(rt("bubble3", "Bien joué."))}</div>
             <img class="rj-mascot" src="${MASCOT.cheer}" alt="" />
           </div>
           <div class="rj-body">
-            <h1 class="rj-h1">Bienvenue <span id="rj-nm">toi</span></h1>
-            <p class="rj-sub">Ton compte est prêt. La première leçon t'attend.</p>
+            <h1 class="rj-h1">${esc(rt("h1_3", "Bienvenue "))}<span id="rj-nm">${esc(rt("h1_3_you", "toi"))}</span></h1>
+            <p class="rj-sub">${esc(rt("sub_3", "Ton compte est prêt. La première leçon t'attend."))}</p>
           </div>
-          <div class="rj-foot"><button class="rj-cta" id="rj-enter" type="button">On y va</button></div>
+          <div class="rj-foot"><button class="rj-cta" id="rj-enter" type="button">${esc(rt("cta_enter", "On y va"))}</button></div>
         </section>
 
       </div>
@@ -398,7 +517,9 @@ function renderFlow(root, { solo, prefillCode, prefillEmail }) {
       const nmEl = root.querySelector("#rj-nm");
       if (nmEl) {
         const p = state.prenom.trim();
-        nmEl.textContent = p ? p.charAt(0).toUpperCase() + p.slice(1) : "toi";
+        nmEl.textContent = p
+          ? p.charAt(0).toUpperCase() + p.slice(1)
+          : rt("h1_3_you", "toi");
       }
     }
   }
@@ -455,6 +576,7 @@ function renderFlow(root, { solo, prefillCode, prefillEmail }) {
   const codeEl = root.querySelector("#rj-code");
   const codeHelp = root.querySelector("#rj-code-help");
   const go1Btn = root.querySelector("#rj-go1");
+  const go1Label = go1Btn.textContent;
 
   if (state.email) emailEl.value = state.email;
   if (state.code) codeEl && (codeEl.value = state.code);
@@ -468,7 +590,9 @@ function renderFlow(root, { solo, prefillCode, prefillEmail }) {
     pwdToggle.setAttribute("aria-pressed", String(show));
     pwdToggle.setAttribute(
       "aria-label",
-      show ? "Masquer le mot de passe" : "Afficher le mot de passe",
+      show
+        ? rt("pwd_hide_aria", "Masquer le mot de passe")
+        : rt("pwd_show_aria", "Afficher le mot de passe"),
     );
     pwdToggle.innerHTML = eyeIcon(show);
   });
@@ -503,13 +627,16 @@ function renderFlow(root, { solo, prefillCode, prefillEmail }) {
       if (v.length < 3) {
         codeChecking = false;
         codeHelp.className = "rj-help";
-        codeHelp.textContent = "Demande-le à ton moniteur.";
+        codeHelp.textContent = rt(
+          "code_help_default",
+          "Demande-le à ton moniteur.",
+        );
         validateScreen1();
         return;
       }
       codeChecking = true;
       codeHelp.className = "rj-help";
-      codeHelp.textContent = "Vérification…";
+      codeHelp.textContent = rt("code_checking", "Vérification…");
       validateScreen1();
       clearTimeout(codeTimer);
       codeTimer = setTimeout(async () => {
@@ -525,8 +652,10 @@ function renderFlow(root, { solo, prefillCode, prefillEmail }) {
             codeValid = false;
             codeEl.classList.add("err");
             codeHelp.className = "rj-help error";
-            codeHelp.textContent =
-              "Code introuvable. Revérifie auprès de ton moniteur.";
+            codeHelp.textContent = rt(
+              "code_notfound",
+              "Code introuvable. Revérifie auprès de ton moniteur.",
+            );
           } else {
             codeValid = true;
             codeEl.classList.remove("err");
@@ -537,15 +666,26 @@ function renderFlow(root, { solo, prefillCode, prefillEmail }) {
               ecole.toLowerCase().includes(info.moniteur_prenom.toLowerCase());
             const withPart =
               info.moniteur_prenom && !dejaDansEcole
-                ? ` avec ${info.moniteur_prenom}`
+                ? rt("join_with", " avec {name}").replace(
+                    "{name}",
+                    info.moniteur_prenom,
+                  )
                 : "";
-            codeHelp.textContent = `Tu rejoins ${ecole}${withPart}.`;
+            codeHelp.textContent = rt(
+              "join_school",
+              "Tu rejoins {school}{with}.",
+            )
+              .replace("{school}", ecole)
+              .replace("{with}", withPart);
           }
         } catch {
           codeChecking = false;
           codeValid = false;
           codeHelp.className = "rj-help error";
-          codeHelp.textContent = "Vérification impossible, réessaie.";
+          codeHelp.textContent = rt(
+            "code_check_failed",
+            "Vérification impossible, réessaie.",
+          );
         }
         validateScreen1();
       }, 400);
@@ -571,8 +711,7 @@ function renderFlow(root, { solo, prefillCode, prefillEmail }) {
     if (submitting) return;
     submitting = true;
     go1Btn.disabled = true;
-    const label = go1Btn.textContent;
-    go1Btn.textContent = "Création…";
+    go1Btn.textContent = rt("creating", "Création…");
     const { toast } = await import("@/components/common/toast.js");
 
     try {
@@ -590,23 +729,36 @@ function renderFlow(root, { solo, prefillCode, prefillEmail }) {
           });
           if (joinErr) {
             if (/invalid_code/i.test(joinErr.message || "")) {
-              toast("Code moniteur invalide. Revérifie-le.", "error", 4000);
+              toast(
+                rt(
+                  "toast_code_invalid",
+                  "Code moniteur invalide. Revérifie-le.",
+                ),
+                "error",
+                4000,
+              );
               codeValid = false;
               codeEl.classList.add("err");
               codeHelp.className = "rj-help error";
-              codeHelp.textContent = "Code introuvable.";
-              go1Btn.textContent = label;
+              codeHelp.textContent = rt(
+                "toast_code_notfound",
+                "Code introuvable.",
+              );
+              go1Btn.textContent = go1Label;
               submitting = false;
               validateScreen1();
               return;
             }
             if (/already_has_school/i.test(joinErr.message || "")) {
               toast(
-                "Ce compte est déjà rattaché à un moniteur. Connecte-toi.",
+                rt(
+                  "toast_already_school",
+                  "Ce compte est déjà rattaché à un moniteur. Connecte-toi.",
+                ),
                 "error",
                 4500,
               );
-              go1Btn.textContent = label;
+              go1Btn.textContent = go1Label;
               submitting = false;
               go1Btn.disabled = false;
               return;
@@ -670,17 +822,21 @@ function renderFlow(root, { solo, prefillCode, prefillEmail }) {
 
       submitting = false;
       go1Btn.disabled = false;
-      go1Btn.textContent = label;
+      go1Btn.textContent = go1Label;
       go(2, false);
     } catch (e) {
       console.error("[rejoindre] failed", e);
       const msg = /already.*registered|already.*exists/i.test(e?.message || "")
-        ? "Un compte existe déjà avec cet email. Connecte-toi directement."
-        : e?.message || "Erreur lors de la création du compte";
+        ? rt(
+            "toast_exists",
+            "Un compte existe déjà avec cet email. Connecte-toi directement.",
+          )
+        : e?.message ||
+          rt("toast_generic", "Erreur lors de la création du compte");
       toast(msg, "error", 4500);
       submitting = false;
       go1Btn.disabled = false;
-      go1Btn.textContent = label;
+      go1Btn.textContent = go1Label;
     }
   }
   go1Btn.addEventListener("click", submitAccount);
