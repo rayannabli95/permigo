@@ -688,7 +688,10 @@ ${chromeNight("#5a4fc0", "#423a96")}
 .fd-gal::-webkit-scrollbar{ display:none; }
 .fd-shot{ margin:0; flex:0 0 84%; max-width:340px; scroll-snap-align:center; background:#f6f4ff; border:1px solid #e6e2fb;
   border-radius:16px; overflow:hidden; box-shadow:0 3px 0 rgba(20,12,60,.28), inset 0 1px 0 rgba(255,255,255,.8); }
-.fd-shot img{ display:block; width:100%; aspect-ratio:1/1; object-fit:cover; background:#dfe3ea; }
+/* 2:3 = le format natif des vues de briefing, donc zéro recadrage. Les plans
+   vectoriels (dépassement, giratoires) gardent leur carré : .fd-gal.plan. */
+.fd-shot img, .fd-shot video{ display:block; width:100%; aspect-ratio:2/3; object-fit:cover; background:#100a24; }
+.fd-gal.plan .fd-shot img{ aspect-ratio:1/1; background:#dfe3ea; }
 .fd-shot figcaption{ padding:9px 12px 11px; font-size:11.5px; line-height:1.35; color:#3d2f7a; font-weight:600; }
 
 .fd-coach-wrap{ margin-top:6px; }
@@ -1695,10 +1698,22 @@ export async function mount(root, param) {
     // Un résumé écrit pour la boîte manuelle ne s'affiche pas à un élève que
     // la fiche ne concerne pas : trois lignes fausses en tête de page seraient
     // pires que pas de résumé du tout.
+    // Quand un geste n'a PAS le même sens dans les deux boîtes (le point de
+    // patinage, le passage des rapports), la fiche porte un second jeu de trois
+    // lignes, `resume10sBva`, écrit pour l'automatique. Il prend la place du
+    // premier, et il vaut MÊME sur une fiche hors sujet en auto : c'est
+    // justement là que l'élève n'avait rien à lire (C1f, où l'app lui annonçait
+    // que la fiche ne le concerne pas et le laissait sans résumé).
+    // Boîte inconnue → version manuelle, comme le reste de la page.
+    const resumeAuto =
+      enAuto && Array.isArray(f.resume10sBva) && f.resume10sBva.length
+        ? f.resume10sBva
+        : null;
     const quick =
-      lang === "fr" && !bvaHorsSujet && Array.isArray(f.resume10s)
-        ? f.resume10s
-        : [];
+      lang !== "fr"
+        ? []
+        : resumeAuto ||
+          (!bvaHorsSujet && Array.isArray(f.resume10s) ? f.resume10s : []);
     const quickHtml = quick.length
       ? `<div class="fd-quick">
           <p class="fd-quick-k">${esc(ui("quick_h", "En 10 secondes"))}</p>
@@ -1711,21 +1726,33 @@ export async function mount(root, param) {
     const competenceTxt =
       lang !== "fr" && tr?.competence ? tr.competence : f.competence;
 
-    // ── Galerie « En images » : schémas de trajectoire + photos de gestes.
-    // Images sans texte (public/art/fiches/*.webp) ; légendes traduites ici.
-    const shots = ficheSchemas(f.code);
+    // ── Galerie « En images » : le briefing de la fiche.
+    // Images sans texte (public/art/fiches/*) ; légendes traduites ici.
+    // Les six écarts qu'aucune photo ne montre sont des mp4 de 3 s en boucle
+    // (~40 Ko, soit moins lourd que l'image fixe équivalente) : c'est la LIGNE
+    // qui se dessine qui porte le message, une image figée ne le dit pas.
+    // La boîte auto change deux vues sur seize (pédalier, sélecteur).
+    const shots = ficheSchemas(f.code, enAuto);
     const legOf = (s) => esc(s[lang] || s.fr);
+    // Un plan vectoriel se cadre en carré, une vue de briefing en 2:3. Le
+    // format est décidé pour TOUTE la galerie, sinon les cartes d'une même
+    // rangée n'ont pas la même hauteur et la bande devient bancale.
+    const galPlan = shots.some((s) => s.plan);
+    const media = (s) =>
+      s.video
+        ? `<video src="/art/fiches/${escAttr(s.src)}.mp4" autoplay loop muted playsinline preload="metadata"></video>`
+        : `<img src="/art/fiches/${escAttr(s.src)}.webp" alt="" loading="lazy" decoding="async">`;
     const schemasHtml = shots.length
       ? `<div class="fd-schemas">
           ${seclab(
             "En images",
             lang === "en" ? "In pictures" : lang === "ar" ? "بالصور" : null,
           )}
-          <div class="fd-gal">
+          <div class="fd-gal${galPlan ? " plan" : ""}">
             ${shots
               .map(
                 (s) => `<figure class="fd-shot">
-              <img src="/art/fiches/${escAttr(s.src)}.webp" alt="" loading="lazy" decoding="async">
+              ${media(s)}
               <figcaption${rtl && s[lang] ? ' dir="rtl" lang="ar"' : ""}>${legOf(s)}</figcaption>
             </figure>`,
               )
