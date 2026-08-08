@@ -299,176 +299,6 @@ function levierSVG(opts = {}) {
   </svg>`;
 }
 
-// ── Brique 6 : l'objet ──────────────────────────────────────────
-// Le troisième registre. Ni un geste au volant, ni une géométrie sur la
-// route : une vérification, un chiffre, une règle. Un seul objet, posé sur
-// le même bitume, sous la même lampe. Zéro texte : ces images traversent le
-// FR, l'EN et l'AR sans être retouchées.
-//
-// ⚠️ Un objet ne dit JAMAIS la réponse. Il dit de quoi on parle.
-function objetSVG(kind) {
-  // Le sol commun : la flaque de lumière chaude et l'ombre portée. C'est ce
-  // socle répété qui fait que six objets dessinés séparément font une série.
-  const sol = `
-    <ellipse cx="180" cy="168" rx="132" ry="26" fill="rgba(212,151,109,.13)"/>
-    <ellipse cx="180" cy="170" rx="74" ry="14" fill="rgba(6,4,20,.6)"/>`;
-
-  const OBJETS = {
-    // Le tour de voiture : un pneu de trois-quarts, ses rainures, son témoin.
-    pneu: `
-      <g class="qzv-float">
-        <ellipse cx="180" cy="96" rx="62" ry="62" fill="#171426"/>
-        <ellipse cx="180" cy="96" rx="62" ry="62" fill="none" stroke="#241f3a" stroke-width="3"/>
-        <ellipse cx="180" cy="96" rx="33" ry="33" fill="#2b2545" stroke="#443a68" stroke-width="2.5"/>
-        <ellipse cx="180" cy="96" rx="12" ry="12" fill="#1b1730"/>
-        ${[0, 60, 120, 180, 240, 300]
-          .map(
-            (a) =>
-              `<rect x="178" y="42" width="4.5" height="17" rx="2.2" fill="#3a3358" transform="rotate(${a} 180 96)"/>`,
-          )
-          .join("")}
-        ${[18, 54, 90, 126, 162, 198, 234, 270, 306, 342]
-          .map(
-            (a) =>
-              `<rect x="177.5" y="34.5" width="5" height="11" rx="2" fill="#0f0d1c" transform="rotate(${a} 180 96)"/>`,
-          )
-          .join("")}
-        <path d="M 128 62 A 62 62 0 0 1 214 44" fill="none" stroke="rgba(196,182,255,.5)" stroke-width="3" stroke-linecap="round"/>
-      </g>`,
-
-    // Préparer son trajet : un écran de navigation, un tracé, aucun texte.
-    gps: `
-      <g class="qzv-float">
-        <rect x="112" y="30" width="136" height="112" rx="14" fill="#12102a" stroke="#3a3266" stroke-width="2.5"/>
-        <rect x="120" y="38" width="120" height="96" rx="9" fill="#1c1740"/>
-        <path d="M 136 126 L 152 96 L 186 100 L 200 62 L 228 50" fill="none"
-          stroke="#8e87ff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle class="qzv-dot" cx="136" cy="126" r="7" fill="#cbb9d6"/>
-        <circle cx="228" cy="50" r="6.5" fill="#f6c85f"/>
-        <rect x="160" y="146" width="40" height="9" rx="4.5" fill="#2a2450"/>
-      </g>`,
-
-    // Les pauses : une horloge, ses aiguilles, rien d'écrit.
-    horloge: `
-      <g class="qzv-float">
-        <circle cx="180" cy="94" r="60" fill="#15122c" stroke="#443a68" stroke-width="3"/>
-        <circle cx="180" cy="94" r="50" fill="#1d1840"/>
-        ${[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]
-          .map(
-            (a, i) =>
-              `<rect x="179" y="${i % 3 === 0 ? 50 : 53}" width="${i % 3 === 0 ? 3.4 : 2.2}" height="${i % 3 === 0 ? 11 : 6}" rx="1.4" fill="${i % 3 === 0 ? "#cbb9d6" : "#5b4f88"}" transform="rotate(${a} 180 94)"/>`,
-          )
-          .join("")}
-        <rect x="178.4" y="62" width="3.2" height="34" rx="1.6" fill="#e6dcf2" transform="rotate(28 180 94)"/>
-        <rect x="178.8" y="52" width="2.4" height="44" rx="1.2" fill="#f6c85f" transform="rotate(148 180 94)"/>
-        <circle cx="180" cy="94" r="4.5" fill="#f6c85f"/>
-      </g>`,
-
-    // La panne : le triangle et le gilet, côte à côte.
-    secours: `
-      <g class="qzv-float">
-        <path d="M 118 140 L 168 46 L 218 140 Z" fill="#1a1430" stroke="#e8654f" stroke-width="7" stroke-linejoin="round"/>
-        <rect x="164" y="80" width="8" height="32" rx="4" fill="#e8654f"/>
-        <circle cx="168" cy="124" r="5" fill="#e8654f"/>
-        <g transform="translate(258,96)">
-          <path d="M -26 -26 h 52 v 62 h -52 Z" fill="#c9a83a"/>
-          <path d="M -26 -26 h 16 l 10 12 l 10 -12 h 16 v 14 h -52 Z" fill="#1a1430" opacity=".35"/>
-          <rect x="-26" y="-2" width="52" height="7" fill="#e9e3d2" opacity=".85"/>
-          <rect x="-26" y="14" width="52" height="7" fill="#e9e3d2" opacity=".85"/>
-        </g>
-      </g>`,
-
-    // L'éco-conduite : une aiguille au bas du cadran, dans le vert.
-    jauge: `
-      <g class="qzv-float">
-        <circle cx="180" cy="100" r="66" fill="#14112a" stroke="#3a3266" stroke-width="3"/>
-        <path d="M 128 138 A 66 66 0 1 1 232 138" fill="none" stroke="#2e2752" stroke-width="9" stroke-linecap="round"/>
-        <path d="M 128 138 A 66 66 0 0 1 138 62" fill="none" stroke="#7fe0b0" stroke-width="9" stroke-linecap="round"/>
-        <path d="M 222 62 A 66 66 0 0 1 232 138" fill="none" stroke="#e8654f" stroke-width="9" stroke-linecap="round"/>
-        <g class="qzv-knob" style="--tx:0">
-          <rect x="178.6" y="56" width="2.8" height="48" rx="1.4" fill="#f0ecff" transform="rotate(-52 180 100)"/>
-        </g>
-        <circle cx="180" cy="100" r="7" fill="#cbb9d6"/>
-      </g>`,
-
-    // Préparer : la carte pliée, ses plis, son tracé et son détour.
-    carte: `
-      <g class="qzv-float">
-        <path d="M 92 52 L 152 72 L 210 52 L 268 72 L 268 148 L 210 128 L 152 148 L 92 128 Z"
-          fill="#1f1a42" stroke="#4a4173" stroke-width="2.5" stroke-linejoin="round"/>
-        <path d="M 152 72 V 148 M 210 52 V 128" stroke="#332c5e" stroke-width="2"/>
-        <path d="M 108 122 Q 140 96 168 108 Q 200 122 246 74" fill="none"
-          stroke="#8e87ff" stroke-width="5.5" stroke-linecap="round"/>
-        <path d="M 168 108 Q 196 84 232 100" fill="none" stroke="#f6c85f"
-          stroke-width="4.5" stroke-linecap="round" stroke-dasharray="7 8"/>
-        <circle class="qzv-dot" cx="108" cy="122" r="6.5" fill="#cbb9d6"/>
-      </g>`,
-
-    // Le jeune permis : le disque, sa lettre, sa colle au hayon.
-    disqueA: `
-      <g class="qzv-float">
-        <circle cx="180" cy="98" r="60" fill="#eae6f2" stroke="#b9b2cc" stroke-width="3"/>
-        <circle cx="180" cy="98" r="52" fill="#f4f1fa"/>
-        <path d="M 158 126 L 180 62 L 202 126 M 166.5 106 h 27" fill="none"
-          stroke="#c8302a" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
-      </g>`,
-
-    // La période probatoire : le permis, sa photo, ses lignes. Zéro chiffre :
-    // le nombre de points EST la réponse de la question.
-    permis: `
-      <g class="qzv-float">
-        <rect x="88" y="42" width="184" height="116" rx="12" fill="#2a2450" stroke="#5b4f88" stroke-width="2.5"/>
-        <rect x="88" y="42" width="184" height="26" rx="12" fill="#3a3168"/>
-        <rect x="102" y="82" width="52" height="62" rx="7" fill="#181433" stroke="#4a4173" stroke-width="1.8"/>
-        <circle cx="128" cy="102" r="13" fill="#4a4173"/>
-        <path d="M 108 140 q 20 -22 40 0 Z" fill="#4a4173"/>
-        ${[0, 1, 2, 3]
-          .map(
-            (i) =>
-              `<rect x="168" y="${86 + i * 15}" width="${i === 3 ? 52 : 86}" height="7" rx="3.5" fill="#4a4173"/>`,
-          )
-          .join("")}
-        <circle cx="246" cy="56" r="7" fill="#f6c85f"/>
-      </g>`,
-
-    // L'alcool : l'éthylotest, son embout, son tube.
-    ethylo: `
-      <g class="qzv-float">
-        <rect x="120" y="76" width="150" height="42" rx="21" fill="#1d1840" stroke="#4a4173" stroke-width="2.5"/>
-        <rect x="96" y="84" width="34" height="26" rx="13" fill="#3a3168" stroke="#5b4f88" stroke-width="2"/>
-        <rect x="152" y="88" width="94" height="18" rx="9" fill="#0f0d22"/>
-        ${[0, 1, 2, 3, 4, 5]
-          .map(
-            (i) =>
-              `<rect x="${158 + i * 14}" y="92" width="9" height="10" rx="2" fill="${i === 0 ? "#7fe0b0" : "#2c2652"}"/>`,
-          )
-          .join("")}
-        <circle class="qzv-dot" cx="258" cy="97" r="5" fill="#7fe0b0"/>
-      </g>`,
-
-    // L'examen : le combiné, ses deux cadrans et sa réglette de chiffres.
-    compteur: `
-      <g class="qzv-float">
-        <rect x="76" y="38" width="208" height="118" rx="22" fill="#14112a" stroke="#3a3266" stroke-width="2.5"/>
-        <circle cx="130" cy="96" r="38" fill="#1c1740" stroke="#443a68" stroke-width="2.5"/>
-        <circle cx="230" cy="96" r="38" fill="#1c1740" stroke="#443a68" stroke-width="2.5"/>
-        <rect x="128.6" y="66" width="2.8" height="32" rx="1.4" fill="#f6c85f" transform="rotate(-46 130 96)"/>
-        <rect x="228.6" y="66" width="2.8" height="32" rx="1.4" fill="#cbb9d6" transform="rotate(34 230 96)"/>
-        <rect x="146" y="128" width="68" height="17" rx="4" fill="#0e0c1e" stroke="#3a3266" stroke-width="1.6"/>
-        ${[0, 1, 2, 3, 4]
-          .map(
-            (i) =>
-              `<rect x="${151 + i * 13}" y="132" width="9" height="9" rx="1.8" fill="${i > 2 ? "#f6c85f" : "#4a4173"}"/>`,
-          )
-          .join("")}
-      </g>`,
-  };
-
-  return `<svg class="qzv-svg" viewBox="0 0 360 200" preserveAspectRatio="xMidYMid meet" focusable="false">
-    ${sol}${OBJETS[kind] || ""}
-  </svg>`;
-}
-
 // ── Brique 4 : feu tricolore vedette ────────────────────────────
 // etat: rouge | orange | vert | orange-clign | rouge-clign
 function feuSVG(etat = "orange") {
@@ -937,7 +767,23 @@ const pedalePhoto = (cible) => {
   return c ? photoPointe(k.photo, "50% 45%", [c]) : photo(k.photo, "50% 45%");
 };
 
-const objet = (k) => wrap("objet", objetSVG(k));
+// L'objet n'est plus dessiné : ce sont dix images générées, chacune EN
+// SITUATION dans la même voiture et la même rue. Un objet posé sur un socle
+// redevient une planche technique, et c'est exactement ce qu'on fuit.
+// (Décision Rayan, 08/08 : « ça c'est pas design, on fait tout avec Higgsfield ».)
+const OBJET_POS = {
+  pneu: "50% 55%",
+  horloge: "50% 45%",
+  disqueA: "50% 45%",
+  carte: "50% 50%",
+  secours: "50% 55%",
+  ethylo: "50% 52%",
+  gps: "50% 45%",
+  jauge: "50% 48%",
+  compteur: "50% 52%",
+  permis: "50% 50%",
+};
+const objet = (k) => photo(`obj-${k}`, OBJET_POS[k] || "50% 50%");
 
 const sc = (k, o) => sceneHTML(SCENES[k], o);
 const cockpit = (o) => wrap("cockpit", cockpitSVG(o));
