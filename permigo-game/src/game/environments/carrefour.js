@@ -132,9 +132,14 @@ export function construire(
   }
 
   // ── Panneaux et feux, au bord droit de la voie d'arrivée ─────────────
+  const MODELE_PANNEAU = { stop: "panneauStop", cede: "panneauCede" };
   for (const { branche, type } of panneaux) {
     const [x, z] = bordDroit(branche);
-    g.add(kit.panneau(type, x, z, CAP_ENTREE[branche] + Math.PI));
+    // Le panneau REGARDE le conducteur qui arrive : il fait donc face au sens
+    // inverse de sa marche.
+    const cap = CAP_ENTREE[branche] + Math.PI;
+    const m = modeles[MODELE_PANNEAU[type]];
+    g.add(m ? poser(m, x, z, cap) : kit.panneau(type, x, z, cap));
   }
   const feuxPoses = {};
   for (const { branche, etat = "rouge" } of feux) {
@@ -236,6 +241,10 @@ export function zonesCarrefour(brancheJoueur = "S") {
   };
   return [
     boite("approche", "approche", DEMI + 34, DEMI + 14),
+    // Le passage piéton se juge AVANT le carrefour : il est à 1,9 m de la
+    // ligne d'entrée, et un piéton engagé s'y trouve bien avant qu'on soit
+    // dans l'intersection.
+    boite("passage", "passage", DEMI + 3.4, DEMI + 0.4),
     boite("observation", "observation", DEMI + 16, DEMI + 2),
     boite("decision", "decision", DEMI + 6, DEMI - 0.5),
     {

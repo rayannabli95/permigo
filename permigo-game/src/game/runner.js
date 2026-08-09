@@ -9,7 +9,7 @@
 // ⚠️ Three.js est importé DYNAMIQUEMENT. Il ne doit jamais entrer dans le
 // bundle principal : personne ne paie 600 Ko pour ouvrir son accueil.
 
-import { creerMonde } from "./engine/world.js";
+import { creerMonde, AVANT } from "./engine/world.js";
 import { creerVehicule, seTouchent } from "./engine/vehicle.js";
 import { creerRig, VUES } from "./engine/camera-rig.js";
 import { creerCommandes } from "./engine/controls.js";
@@ -29,7 +29,10 @@ const REGARD_MIN = 0.52;
 // « tu arrives trop vite » sonne creux quand il y a eu un choc juste après.
 const GRAVITE = [
   "collision",
+  "pas_cede_pieton",
+  "feu_rouge",
   "refus_priorite",
+  "trop_pres",
   "pas_arrete",
   "pas_regarde_droite",
   "pas_regarde_gauche",
@@ -62,6 +65,20 @@ const MODELES = {
     poser: false,
     eclairer: 0.5,
   },
+  // Les usagers fragiles. Ils se calent sur leur HAUTEUR : un piéton fait
+  // 1,72 m, et son emprise au sol ne veut rien dire.
+  pieton: { fichier: "pieton.glb", hauteur: 1.72, capOffset: Math.PI },
+  // Un cycliste se cale sur sa HAUTEUR lui aussi : posé sur sa longueur, le
+  // modèle inclut le buste du cycliste et on obtient un géant de trois mètres.
+  velo: { fichier: "velo.glb", hauteur: 1.75, capOffset: Math.PI },
+  // La signalisation. Elle est POSÉE par l'environnement, jamais par un
+  // scénario : c'est lui qui sait où est le bord droit de chaque branche.
+  panneauStop: { fichier: "stop.glb", hauteur: 2.6 },
+  panneauCede: { fichier: "cede.glb", hauteur: 2.6 },
+  // ⚠️ PAS de modèle pour le feu tricolore. Un feu doit CHANGER de couleur ;
+  // un modèle importé est une pièce figée, et rien ne dit où ses trois lampes
+  // se trouvent dans le maillage. Celui du kit est trois disques qu'on
+  // allume, et c'est tout ce qu'on lui demande.
   immeuble: { fichier: "immeuble.glb", longueur: 13 },
   maison: { fichier: "maison.glb", longueur: 11 },
   arbre: { fichier: "arbre.glb", hauteur: 7.2 },
@@ -125,7 +142,11 @@ export async function lancerScenario(
   const modeles = await chargerModeles(THREE, MODELES, {
     base: `${import.meta.env.BASE_URL || "/"}art/course3d/`,
   });
-  const { kit, groupe } = env.construire(THREE, scenario.decor || {}, modeles);
+  const {
+    kit,
+    groupe,
+    feux: feuxPoses,
+  } = env.construire(THREE, scenario.decor || {}, modeles);
   monde.scene.add(groupe);
 
   // ── Le joueur ────────────────────────────────────────────────────────
@@ -223,6 +244,21 @@ export async function lancerScenario(
   const OBSERVE_A = 38;
   const observe = { droite: false, gauche: false };
 
+  // ── Les feux tricolores ──────────────────────────────────────────────
+  // Un feu est une machine d'états qui tourne sur un cycle donné en
+  // secondes. Le scénario dit `feux: [{ branche, cycle: [['rouge',6],
+  // ['vert',8], ['orange',2]] }]` et le moteur s'occupe du reste.
+  const cyclesFeux = (scenario.decor?.feux || [])
+    .filter((f) => f.cycle)
+    .map((f) => ({
+      branche: f.branche,
+      cycle: f.cycle,
+      objet: feuxPoses[f.branche] || null,
+      duree: f.cycle.reduce((s, [, d]) => s + d, 0),
+      etat: f.cycle[0][0],
+    }));
+  const etatFeu = (b) => cyclesFeux.find((f) => f.branche === b)?.etat || null;
+
   const assiste = scenario.assiste !== false;
   const croisiere = scenario.croisiere ?? 11; // ~40 km/h en ville
 
@@ -238,6 +274,31 @@ export async function lancerScenario(
       const d = Math.hypot(a.x, a.z);
       return d < 16 && a.v.vitesse > 0.8;
     });
+  }
+
+  // Un usager engagé sur la chaussée : piéton sur le passage, cycliste sur
+  // la voie. On ne lui coupe pas la route, même si on a la priorité.
+  const fragiles = acteurs.filter(
+    (a) => a.type === "pieton" || a.type === "velo",
+  );
+  // Distance latérale la plus courte à laquelle on est passé de chacun.
+  const ecarts = new Map(fragiles.map((a) => [a.id, Infinity]));
+  const ecartMin = scenario.ecartMin ?? 1; // mètre, la loi en demande 1 en ville
+
+  // Sur la chaussée = pas sur un trottoir. `surRoute` de l'environnement le
+  // sait déjà, on ne recalcule rien.
+  const surLaChaussee = (a) => !env.surRoute || env.surRoute(a.x, a.z);
+
+  // ⚠️ L'arrêt au stop se constate sur les DOUZE derniers mètres, pas dans la
+  // seule boîte « décision ». Un élève prudent s'immobilise souvent un peu
+  // trop tôt : la première version le comptait comme n'ayant pas marqué
+  // l'arrêt, ce qui est exactement le contraire de ce qu'il a fait.
+  let arreteAvant = false;
+  // Devant nous, à moins de 14 m : ce qui est derrière ne nous concerne plus.
+  function devantMoi(a) {
+    const [ax, az] = AVANT(v.cap);
+    const d = (a.x - v.x) * ax + (a.z - v.z) * az;
+    return d > -1 && d < 14;
   }
 
   function terminer(ok, code) {
@@ -256,6 +317,8 @@ export async function lancerScenario(
       chrono: etat.chrono,
       vitesseCarrefour: (zones.get("carrefour")?.vitesseEntree ?? 0) * 3.6,
       regarde: { ...observe },
+      arret: arreteAvant,
+      ecart: Math.min(...ecarts.values(), Infinity),
       journal: etat.journal.slice(),
     };
     noter(etat.verdict.ok ? "réussi" : "échoué");
@@ -269,6 +332,24 @@ export async function lancerScenario(
 
     const e = cmd.lire(dt);
     rig.regarder(fige ? "centre" : e.regard);
+
+    // Les feux avancent sur leur cycle et changent de couleur à l'écran.
+    for (const f of cyclesFeux) {
+      let t = etat.chrono % f.duree;
+      let etatFeu = f.cycle[0][0];
+      for (const [couleur, duree] of f.cycle) {
+        if (t < duree) {
+          etatFeu = couleur;
+          break;
+        }
+        t -= duree;
+      }
+      if (etatFeu !== f.etat) {
+        f.etat = etatFeu;
+        f.objet?.userData.mettre(etatFeu);
+        if (f.branche === bJ) sur("feu", etatFeu);
+      }
+    }
 
     // ⭐ La voiture roule toute seule tant qu'on ne freine pas. PermiGo n'est
     // pas un simulateur : un élève doit comprendre la SITUATION tout de
@@ -331,6 +412,7 @@ export async function lancerScenario(
     rig.maj(dt, v);
 
     if (!fige) {
+      if (Math.hypot(v.x, v.z) < 15 && v.vitesse < 0.35) arreteAvant = true;
       if (Math.hypot(v.x, v.z) < OBSERVE_A) {
         if (rig.regardDroite > REGARD_MIN) observe.droite = true;
         if (rig.regardGauche > REGARD_MIN) observe.gauche = true;
@@ -341,6 +423,11 @@ export async function lancerScenario(
         noter(`entre dans ${zone.id} à ${(v.vitesse * 3.6).toFixed(0)} km/h`);
         sur("zone", { id: zone.id, role: zone.role, kmh: v.vitesse * 3.6 });
 
+        // Le passage piéton, franchi alors que quelqu'un est engagé dessus.
+        if (zone.id === "passage") {
+          if (fragiles.some((a) => a.type === "pieton" && surLaChaussee(a)))
+            fauter("pas_cede_pieton");
+        }
         if (zone.id === "carrefour") {
           // La vitesse qui compte est celle à laquelle on ENTRE dans le
           // carrefour, pas celle de la zone d'avant : freiner au dernier
@@ -349,13 +436,33 @@ export async function lancerScenario(
           if (observation && !observe[observation])
             fauter(`pas_regarde_${observation}`);
           if (attendu === "ceder" && conflit()) fauter("refus_priorite");
-          if (
-            attendu === "arret" &&
-            (zones.get("decision")?.vitesseMin ?? 9) > 0.4
-          )
-            fauter("pas_arrete");
+          if (attendu === "arret" && !arreteAvant) fauter("pas_arrete");
+          // Le feu se juge à l'entrée du carrefour, comme la vitesse. Orange
+          // compte comme rouge : on ne s'engage pas sur un orange qu'on
+          // pouvait s'arrêter de respecter.
+          const feu = etatFeu(bJ);
+          if (feu === "rouge" || feu === "orange") fauter("feu_rouge");
+          // Un piéton déjà engagé sur la chaussée passe avant tout le monde.
+          if (fragiles.some((a) => surLaChaussee(a) && devantMoi(a)))
+            fauter("pas_cede_pieton");
         }
         if (zone.id === "degage") terminer(true);
+      }
+
+      // L'écart au moment où l'on DÉPASSE, pas la distance à tout instant :
+      // on ne retient le plus petit écart latéral que quand l'usager fragile
+      // est à notre hauteur.
+      for (const a of fragiles) {
+        if (a.fini) continue;
+        const dz = Math.hypot(a.x - v.x, a.z - v.z);
+        if (dz > 6) continue;
+        const [ax, az] = AVANT(v.cap);
+        const long = (a.x - v.x) * ax + (a.z - v.z) * az; // devant / derrière
+        if (Math.abs(long) > 1.4) continue; // il n'est pas à notre hauteur
+        const lat = Math.abs((a.x - v.x) * -az + (a.z - v.z) * ax);
+        const libre = Math.max(0, lat - (v.largeur + a.v.largeur) / 2);
+        if (libre < ecarts.get(a.id)) ecarts.set(a.id, libre);
+        if (libre < ecartMin) fauter("trop_pres");
       }
 
       // Le choc : c'est la seule chose qui arrête tout net.

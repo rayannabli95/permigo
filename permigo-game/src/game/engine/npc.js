@@ -31,6 +31,10 @@ export function creerActeur({
   depart = 0, // secondes d'attente avant de partir
   evite = false, // freine-t-il si le joueur lui coupe la route ?
   boucle = false,
+  // ⚠️ À déclarer ici, sinon il se perd. Un piéton n'est pas un « conflit de
+  // véhicules » : sans ce champ, le moteur reprochait un refus de priorité à
+  // l'élève au lieu de lui dire qu'il n'avait pas laissé passer le piéton.
+  prioritaire = true,
 }) {
   const g = GABARITS[type] || GABARITS.voiture;
   const [p0, p1] = [chemin[0] || [0, 0], chemin[1] || chemin[0] || [0, 1]];
@@ -49,6 +53,7 @@ export function creerActeur({
     chemin,
     evite,
     boucle,
+    prioritaire,
     v,
     cible: 1, // index du point visé
     attente: depart,

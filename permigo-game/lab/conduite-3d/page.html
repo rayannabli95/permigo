@@ -18,6 +18,9 @@
     <script type="module">
       const { mount } = await import("/src/pages/eleve/situation-3d.js");
       await mount(document.getElementById("root"));
+      // Poignée de banc d'essai : les scripts de test lisent l'état du
+      // moteur ici. La vraie page, elle, n'expose rien.
+      window.__partie = () => document.querySelector(".g3-verdict")?.textContent || null;
     </script>
   </body>
 </html>
