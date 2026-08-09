@@ -137,6 +137,7 @@ const STR = {
     err: "Le paiement n'a pas pu démarrer. Réessaie.",
     foot: "Paiement sécurisé par Stripe · Remboursé sous 3 jours",
     legal: "Mentions légales",
+    privacy: "Politique de confidentialité",
   },
   en: {
     login: "Log in",
@@ -191,6 +192,7 @@ const STR = {
     err: "Payment could not start. Please try again.",
     foot: "Secure payment by Stripe · Money back within 3 days",
     legal: "Legal notice",
+    privacy: "Privacy policy",
   },
   ar: {
     login: "تسجيل الدخول",
@@ -245,6 +247,7 @@ const STR = {
     err: "تعذّر بدء الدفع. حاول مرة أخرى.",
     foot: "دفع آمن عبر Stripe · استرداد خلال 3 أيام",
     legal: "الإشعارات القانونية",
+    privacy: "سياسة الخصوصية",
   },
 };
 
@@ -748,7 +751,8 @@ export async function mount(root) {
       </section>
 
       <footer class="pg-foot">
-        ${L.foot}<br><a href="#/legal">${L.legal}</a>
+        ${L.foot}<br><a href="#/legal">${L.legal}</a> ·
+        <a href="/privacy.html" rel="privacy-policy">${L.privacy}</a>
       </footer>
     </div>
   </div>`;
