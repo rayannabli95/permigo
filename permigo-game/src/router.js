@@ -158,6 +158,10 @@ const ROUTES = {
     // Mise en situation en 3D — vrai moteur (src/game/), Three.js chargé à la
     // demande. ?debug=1 pour le HUD développeur.
     "situation-3d": () => import("@/pages/eleve/situation-3d.js"),
+    // Banc d'essai du regard — 3 scènes, aucune progression, tout est mesuré
+    // en local. ?regard=gyro&action=designer&retour=minimal pour changer de
+    // version testée. Volontairement hors du parcours élève.
+    slice: () => import("@/pages/eleve/slice-regard.js"),
     roue: () => import("@/pages/eleve/roue.js"),
     "mes-coffres": () => import("@/pages/eleve/mes-coffres.js"),
     messages: () => import("@/pages/common/messages.js"),
@@ -310,6 +314,7 @@ const ROUTE_TITLES = {
   "jeu-faute": "Trouve la faute",
   "en-situation": "En situation",
   "situation-3d": "En situation 3D",
+  slice: "Banc d'essai du regard",
   boutique: "Boutique",
   "mes-coffres": "Mes coffres",
   messages: "Messages",
@@ -488,6 +493,11 @@ async function routePublic(app) {
     hash.startsWith("#/auto-ecole")
   ) {
     m = await import("@/pages/public/pro.js");
+  } else if (hash.startsWith("#/slice")) {
+    // 🔴 Le test terrain se fait SANS COMPTE : on tend un téléphone à un
+    // élève dans un couloir d'auto-école. Sans cette branche il tomberait sur
+    // la page de vente, et le test n'existerait pas.
+    m = await import("@/pages/eleve/slice-regard.js");
   } else if (hash.startsWith("#/legal")) {
     m = await import("@/pages/common/legal.js");
   } else if (hash.startsWith("#/login")) {

@@ -109,7 +109,26 @@ async function boot() {
         const { mount } = await import("@/pages/public/ecole.js");
         return mount(app, slug);
       }
-      // Pré-vente Pass Permis élève (lien partageable : /#/pass)
+      // ⚠️ AVANT la branche #/pass, et surtout présente ICI : router.js ne
+      // sert que les changements de hash, cette fonction sert les ARRIVÉES
+      // directes sur l'adresse. Une route déclarée d'un seul côté s'affiche
+      // quand on navigue et jamais quand on ouvre le lien.
+      if (location.hash.startsWith("#/simple")) {
+        const { mount } = await import("@/pages/public/pass-simple.js");
+        return mount(app);
+      }
+      // Banc d'essai du regard. Sans compte : on tend un téléphone à un élève
+      // dans un couloir d'auto-école, et c'est une ARRIVÉE DIRECTE sur un
+      // lien, donc c'est ici que ça se joue, pas seulement dans router.js.
+      if (location.hash.startsWith("#/slice")) {
+        const { mount } = await import("@/pages/eleve/slice-regard.js");
+        return mount(app);
+      }
+      // ⚠️ #/pass n'est plus la page par défaut, mais elle DOIT rester ici :
+      // Stripe renvoie l'acheteur sur #/pass?checkout=success, écrit en dur
+      // dans l'edge function pass-checkout, déjà déployée côté serveur. Un
+      // retour de paiement est une arrivée DIRECTE sur l'adresse, donc c'est
+      // exactement cette branche-ci qui le sert.
       if (location.hash.startsWith("#/pass")) {
         const { mount } = await import("@/pages/public/pass.js");
         return mount(app);
@@ -139,9 +158,9 @@ async function boot() {
         const { mount } = await import("@/pages/auth/login.js");
         return mount(app);
       }
-      // Défaut visiteur = page de vente Pass Permis (ancienne landing
-      // moniteur supprimée — décision Rayan 16/07/2026).
-      const { mount } = await import("@/pages/public/pass.js");
+      // Défaut visiteur = la page de vente épurée (décision Rayan 07/08/2026,
+      // après comparaison des deux en vrai).
+      const { mount } = await import("@/pages/public/pass-simple.js");
       return mount(app);
     }
 

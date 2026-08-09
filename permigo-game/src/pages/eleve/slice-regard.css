@@ -1,0 +1,272 @@
+/* Le banc d'essai du regard. Volontairement nu.
+   Tout ce qu'on ajoute ici est une chose de plus entre l'élève et la rue,
+   et une variable de plus dans la mesure. */
+
+.sl {
+  position: fixed;
+  inset: 0;
+  /* ⚠️ Au-dessus du bandeau du haut et de la barre du bas de l'app : le banc
+     d'essai occupe l'écran entier, sinon un élève tape la navigation en
+     croyant regarder à droite. */
+  z-index: 60;
+  background: #0d0a22;
+  color: #fff;
+  overflow: hidden;
+  touch-action: none; /* le pouce sert à regarder, pas à faire défiler */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.sl-vue {
+  position: absolute;
+  inset: 0;
+}
+
+.sl-charge {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 2rem;
+  opacity: 0.4;
+}
+
+/* ── Le départ ────────────────────────────────────────────────────────── */
+
+.sl-accueil {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.6rem;
+  padding: 2rem;
+  background:
+    radial-gradient(120% 70% at 50% 12%, #3a2470 0%, transparent 62%), #0d0a22;
+}
+
+.sl-marque {
+  margin: 0;
+  font-size: 0.78rem;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  opacity: 0.5;
+}
+
+.sl-accueil h1 {
+  margin: 0;
+  font-size: clamp(2rem, 9vw, 2.9rem);
+  font-weight: 800;
+  text-align: center;
+  text-wrap: balance;
+  line-height: 1.08;
+}
+
+.sl-go {
+  margin-top: 0.6rem;
+  min-height: 56px;
+  padding: 0 2.4rem;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  color: #17123a;
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.sl-reglages {
+  position: absolute;
+  right: max(14px, env(safe-area-inset-right));
+  bottom: max(14px, env(safe-area-inset-bottom));
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.08);
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+/* ── La phrase, et rien qu'elle ───────────────────────────────────────── */
+
+.sl-carte {
+  position: absolute;
+  inset: auto 0 0;
+  padding: 1.5rem 1.4rem calc(2rem + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, rgb(9 6 26 / 0.94), rgb(9 6 26 / 0));
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 0.24s ease,
+    transform 0.24s ease;
+  pointer-events: none;
+}
+
+.sl-carte.on {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.sl-carte p {
+  margin: 0 auto;
+  max-width: 22ch;
+  font-size: clamp(1.15rem, 5.4vw, 1.5rem);
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+  text-wrap: balance;
+}
+
+/* Les quatre cases de la matrice. La couleur est le SEUL signal de sévérité :
+   pas de titre, pas d'icône, pas de « bien joué ». */
+.sl-carte.vu_juste p {
+  color: #8ef0c0;
+}
+.sl-carte.aveugle_juste p,
+.sl-carte.vu_faux p {
+  color: #ffcf7a;
+}
+.sl-carte.aveugle_faux p {
+  color: #ff9b8f;
+}
+.sl-carte.tard p {
+  color: #ffcf7a;
+}
+
+/* ── La fin de manche ─────────────────────────────────────────────────── */
+
+.sl-fin {
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgb(9 6 26 / 0.82);
+}
+
+.sl-encore {
+  min-height: 60px;
+  padding: 0 3rem;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  color: #17123a;
+  font: inherit;
+  font-size: 1.1rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.sl-alerte {
+  position: absolute;
+  top: max(12px, env(safe-area-inset-top));
+  left: 12px;
+  right: 12px;
+  padding: 0.7rem 0.9rem;
+  border-radius: 12px;
+  background: #b3372c;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* ── Le panneau de l'observateur ──────────────────────────────────────── */
+
+.sl-panneau {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: end center;
+  background: rgb(0 0 0 / 0.55);
+}
+
+.sl-feuille {
+  width: 100%;
+  max-width: 480px;
+  max-height: 88vh;
+  overflow: auto;
+  padding: 1.2rem 1.1rem calc(1.2rem + env(safe-area-inset-bottom));
+  border-radius: 20px 20px 0 0;
+  background: #17123a;
+  color: #fff;
+}
+
+.sl-feuille h2 {
+  margin: 0 0 0.9rem;
+  font-size: 1.05rem;
+}
+
+.sl-feuille fieldset {
+  margin: 0 0 0.9rem;
+  padding: 0;
+  border: 0;
+}
+
+.sl-feuille legend {
+  padding: 0 0 0.4rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+
+.sl-feuille label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 44px;
+  padding: 0 0.8rem;
+  margin-bottom: 0.35rem;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  border-radius: 12px;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.sl-feuille label.on {
+  border-color: #a78bfa;
+  background: rgb(167 139 250 / 0.16);
+  font-weight: 700;
+}
+
+.sl-lien {
+  margin: 0.2rem 0 1rem;
+  font-size: 0.72rem;
+  opacity: 0.6;
+  word-break: break-all;
+}
+
+.sl-boutons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.sl-boutons button {
+  flex: 1 1 auto;
+  min-height: 44px;
+  padding: 0 1rem;
+  border: 1px solid rgb(255 255 255 / 0.16);
+  border-radius: 12px;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.sl-boutons .sl-fermer {
+  background: #fff;
+  color: #17123a;
+  font-weight: 700;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sl-carte {
+    transition: none;
+  }
+}
