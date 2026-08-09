@@ -23,7 +23,12 @@ export default {
   // Aucun panneau : c'est ce qui définit la priorité à droite.
   decor: { passages: ["S"], batiments: true, arbres: true },
 
-  joueur: { branche: "S", recul: 46, vitesse: 11, vitesseMax: 16 },
+  // ⚠️ 58 m d'approche à 32 km/h, pas 46 m à 40 km/h. La voiture roule seule
+  // (voir `assiste`) : il faut à l'élève le temps de VOIR, de tourner la tête
+  // et de freiner. Avec la version rapide, le carrefour arrivait en 3,9 s et
+  // la situation était finie avant d'avoir été comprise.
+  joueur: { branche: "S", recul: 58, vitesse: 9, vitesseMax: 16 },
+  croisiere: 8, // 29 km/h, la vitesse que la voiture tient toute seule
 
   acteurs: [
     {
@@ -32,7 +37,7 @@ export default {
       couleur: "gris",
       de: "E", // la droite du joueur
       vers: "W",
-      recul: 34,
+      recul: 44,
       vitesse: 9,
       evite: false, // il a la priorité, il ne s'efface pas
     },
@@ -40,7 +45,10 @@ export default {
 
   attendu: "ceder",
   observation: "droite",
-  vitesseSure: 8, // 29 km/h à l'entrée du carrefour
+  // ⚠️ Le seuil doit rester AU-DESSUS de la vitesse de croisière. Réglé en
+  // dessous, un élève qui fait tout juste était fautif quand même : la
+  // voiture reprend sa vitesse toute seule après le freinage.
+  vitesseSure: 9.5, // 34 km/h à l'entrée du carrefour
   duree: 75,
 
   // Ce que l'élève lit à la fin, selon ce que le moteur a vu.

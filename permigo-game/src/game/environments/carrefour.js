@@ -45,9 +45,21 @@ export function construire(
     batiments = true,
     arbres = true,
   } = {},
+  modeles = {},
 ) {
   const kit = creerKit(THREE);
   const g = new THREE.Group();
+
+  // Chaque pièce prend son modèle s'il existe et retombe sur la primitive du
+  // kit sinon, pièce par pièce. Un modèle manquant enlève du beau, jamais du
+  // jouable.
+  const poser = (modele, x, z, capY = 0, echelle = 1) => {
+    const m = modele.clone(true);
+    m.position.set(x, 0, z);
+    m.rotation.y = capY;
+    if (echelle !== 1) m.scale.multiplyScalar(echelle);
+    return m;
+  };
 
   // Sol : un grand plan sombre, la brume du monde en avale le bord.
   const sol = kit.dalle(400, 400, COULEURS.sol, 0, 0, 0);
@@ -139,29 +151,61 @@ export function construire(
   const bord = DEMI + TROTTOIR;
   if (batiments) {
     let t = 0;
+    // Le cap tourne les façades vers le carrefour : un immeuble présenté de
+    // dos montre un mur nu et le coin de rue perd son épaisseur.
     for (const sx of [-1, 1])
       for (const sz of [-1, 1]) {
-        g.add(kit.batiment(sx * (bord + 7), sz * (bord + 6.5), 11, 10, 3, t++));
-        g.add(kit.batiment(sx * (bord + 8), sz * (bord + 24), 12, 14, 4, t++));
-        g.add(kit.batiment(sx * (bord + 26), sz * (bord + 8), 16, 11, 2, t++));
+        const versRue = Math.atan2(-sx, -sz);
+        const rangee = [
+          [sx * (bord + 7), sz * (bord + 6.5), "immeuble", 11],
+          [sx * (bord + 9), sz * (bord + 26), "maison", 12],
+          [sx * (bord + 28), sz * (bord + 9), "immeuble", 15],
+        ];
+        for (const [bx, bz, quoi, large] of rangee) {
+          const m = modeles[quoi];
+          if (m) g.add(poser(m, bx, bz, versRue + (t % 2 ? 0.06 : -0.05)));
+          else g.add(kit.batiment(bx, bz, large, large - 1, 3 + (t % 2), t));
+          t++;
+        }
       }
   }
   if (arbres) {
+    const unArbre = (x, z, e, tour) =>
+      modeles.arbre ? poser(modeles.arbre, x, z, tour, e) : kit.arbre(x, z, e);
     for (const s of [-1, 1])
       for (let i = 0; i < 6; i++) {
         const d = bord + 1.2;
         const l = 15 + i * 11;
-        g.add(kit.arbre(s * d, -l, 0.9 + (i % 3) * 0.12));
-        g.add(kit.arbre(s * d, l, 0.9 + ((i + 1) % 3) * 0.12));
-        g.add(kit.arbre(-l, s * d, 0.95));
-        g.add(kit.arbre(l, s * d, 0.95));
+        // Les arbres tournent d'un multiple d'un tiers de tour : sans ça, la
+        // rangée entière est le MÊME arbre vu sous le même angle, et l'œil le
+        // voit tout de suite.
+        const e = 0.88 + ((i * 5) % 4) * 0.09;
+        g.add(unArbre(s * d, -l, e, i * 1.9));
+        g.add(unArbre(s * d, l, e + 0.06, i * 2.7));
+        g.add(unArbre(-l, s * d, 0.95, i * 1.3));
+        g.add(unArbre(l, s * d, 0.95, i * 3.1));
       }
   }
   for (const s of [-1, 1])
     for (let i = 0; i < 4; i++) {
       const d = bord + 0.9;
-      g.add(kit.lampadaire(s * d, -(9 + i * 22), -s));
-      g.add(kit.lampadaire(s * d, 9 + i * 22, -s));
+      for (const z of [-(9 + i * 22), 9 + i * 22]) {
+        if (modeles.lampe) {
+          // Le modèle a son bras d'un côté : on le fait pivoter pour que la
+          // lampe surplombe toujours la chaussée.
+          g.add(
+            poser(modeles.lampe, s * d, z, s > 0 ? Math.PI / 2 : -Math.PI / 2),
+          );
+          g.add(
+            kit
+              .halo(4.6, 0.6)
+              .translateX(s * d - s * 1.6)
+              .translateZ(z),
+          );
+        } else {
+          g.add(kit.lampadaire(s * d, z, -s));
+        }
+      }
     }
 
   function bordDroit(branche) {

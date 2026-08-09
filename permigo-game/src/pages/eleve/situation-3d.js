@@ -26,6 +26,9 @@ export async function mount(root) {
       <div class="g3-chargement">Chargement de la scène</div>
 
       <button class="g3-quitter" type="button" aria-label="Quitter">✕</button>
+      <button class="g3-oeil" type="button" aria-pressed="false">
+        <span class="g3-oeil-i" aria-hidden="true">◨</span> Vue extérieure
+      </button>
 
       <div class="g3-consigne">
         <b>${esc(SCENARIO.titre)}</b>
@@ -43,7 +46,7 @@ export async function mount(root) {
         </div>
       </div>
 
-      <p class="g3-clavier">W accélérer · S freiner · A D tourner<br>Q E regarder · C changer de vue · H debug</p>
+      <p class="g3-clavier">La voiture avance seule<br>S freiner · A D tourner · Q E regarder · H debug</p>
 
       <div class="g3-fin"><div class="g3-carte"></div></div>
     </div>`;
@@ -80,6 +83,21 @@ export async function mount(root) {
 
   $(".g3-quitter").addEventListener("click", () => {
     location.hash = "#/accueil";
+  });
+
+  // La vue extérieure n'est pas un gadget de développeur : on se voit
+  // manœuvrer, et c'est le seul moyen de comprendre où on s'est placé sur la
+  // chaussée. La caméra libre, elle, reste au mode debug (touche C).
+  const oeil = $(".g3-oeil");
+  oeil.addEventListener("click", () => {
+    const v = partie.changerVue(
+      partie.rig.vue === "conduite" ? "exterieur" : "conduite",
+    );
+    const dehors = v === "exterieur";
+    oeil.setAttribute("aria-pressed", String(dehors));
+    oeil.classList.toggle("on", dehors);
+    oeil.lastChild.textContent = dehors ? " Vue conducteur" : " Vue extérieure";
+    haptic("select");
   });
 
   let minuteurFlash = 0;

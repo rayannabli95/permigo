@@ -44,6 +44,40 @@
   backdrop-filter: blur(6px);
 }
 
+/* Bascule conducteur / extérieur */
+.g3-oeil {
+  position: absolute;
+  top: calc(10px + env(safe-area-inset-top));
+  left: 12px;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 38px;
+  padding: 0 14px;
+  border: 1px solid rgba(160, 142, 255, 0.24);
+  border-radius: 999px;
+  background: rgba(12, 9, 30, 0.62);
+  color: #efeaff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+}
+.g3-oeil.on {
+  background: rgba(124, 92, 255, 0.62);
+  border-color: rgba(190, 176, 255, 0.5);
+}
+.g3-oeil-i {
+  font-size: 15px;
+  line-height: 1;
+  color: #b6a6ff;
+}
+.g3-oeil.on .g3-oeil-i {
+  color: #fff;
+}
+
 /* Compteur */
 /* Le compteur se pose AU-DESSUS des commandes : au ras du bas, il tombait
    pile sur le manche et les deux se marchaient dessus. */
@@ -186,6 +220,50 @@
   }
   .g3-vitesse {
     bottom: calc(18px + env(safe-area-inset-bottom));
+  }
+}
+
+/* Téléphone couché : les commandes ne prennent plus une bande sur toute la
+   largeur, elles se rangent dans les deux coins. Sinon 30 % de la hauteur
+   d'un écran couché, c'est la moitié de la route. */
+@media (orientation: landscape) and (pointer: coarse) {
+  .g3-cmd {
+    height: auto;
+    min-height: 0;
+    grid-template-columns: minmax(140px, 32%) auto;
+    justify-content: space-between;
+    align-items: end;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
+  }
+  .g3-regard {
+    inset: 0 0 96px 0;
+  }
+  .g3-vitesse {
+    bottom: calc(14px + env(safe-area-inset-bottom));
+  }
+  .g3-manche {
+    height: 62px;
+  }
+  .g3-pedale {
+    width: 62px;
+    height: 62px;
+  }
+}
+
+/* Écran court : on rend de la place à la route. */
+@media (max-height: 620px) and (pointer: coarse) {
+  .g3-cmd {
+    height: 24%;
+    min-height: 104px;
+  }
+  .g3-regard {
+    inset: 0 0 24% 0;
+  }
+  .g3-vitesse {
+    bottom: calc(24% + 8px);
+  }
+  .g3-vitesse b {
+    font-size: 30px;
   }
 }
 

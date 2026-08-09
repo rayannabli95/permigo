@@ -1,0 +1,59 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>Aperçu d'un modèle</title>
+<style>
+  html, body { margin: 0; background: #2a1d5c; }
+  canvas { display: block; }
+</style>
+<!--
+  Regarder un modèle avant de l'intégrer, avec EXACTEMENT le chargeur du jeu
+  (découpe et éclaircissement compris). Sans ce banc, on règle une pièce à
+  l'aveugle dans une scène où dix autres choses peuvent la cacher.
+  /lab/apercu/?m=interieur.glb&couper=0.5&eclairer=2&a=0&e=20
+-->
+<div id="a"></div>
+<script type="module">
+  import * as THREE from "/node_modules/three/build/three.module.js";
+  import { chargerModeles } from "/src/game/engine/modeles.js";
+
+  const q = new URLSearchParams(location.search);
+  const sc = new THREE.Scene();
+  sc.background = new THREE.Color(0x2a1d5c);
+  sc.add(new THREE.HemisphereLight(0xb9a9ff, 0x40336b, 0.9));
+  const d = new THREE.DirectionalLight(0xffc98a, 1);
+  d.position.set(-3, 5, 4);
+  sc.add(d);
+
+  const cam = new THREE.PerspectiveCamera(40, 1, 0.05, 200);
+  const r = new THREE.WebGLRenderer({ antialias: true });
+  r.setSize(560, 560);
+  r.outputColorSpace = THREE.SRGBColorSpace;
+  document.getElementById("a").appendChild(r.domElement);
+
+  const spec = { fichier: q.get("m") };
+  if (q.get("couper")) spec.couper = +q.get("couper");
+  if (q.get("eclairer")) spec.eclairer = +q.get("eclairer");
+  if (q.get("longueur")) spec.longueur = +q.get("longueur");
+  if (q.get("hauteur")) spec.hauteur = +q.get("hauteur");
+
+  const { o } = await chargerModeles(THREE, { o: spec }, { base: "/art/course3d/" });
+  const b = new THREE.Box3().setFromObject(o);
+  const s = b.getSize(new THREE.Vector3());
+  const c = b.getCenter(new THREE.Vector3());
+  o.position.sub(c);
+  sc.add(o);
+
+  const R = Math.max(s.x, s.y, s.z);
+  const az = (+(q.get("a") || 35) * Math.PI) / 180;
+  const el = (+(q.get("e") || 18) * Math.PI) / 180;
+  cam.position.set(
+    Math.sin(az) * Math.cos(el) * R * 2.1,
+    Math.sin(el) * R * 2.1,
+    Math.cos(az) * Math.cos(el) * R * 2.1,
+  );
+  cam.lookAt(0, 0, 0);
+  r.render(sc, cam);
+
+  window.__taille = { x: +s.x.toFixed(3), y: +s.y.toFixed(3), z: +s.z.toFixed(3) };
+  window.__pret = true;
+</script>

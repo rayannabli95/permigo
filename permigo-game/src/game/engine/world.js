@@ -54,14 +54,22 @@ export function creerMonde(THREE, hote, { qualite = "auto" } = {}) {
   );
   scene.add(dome);
 
-  // ⚠️ 0,75 + 0,85, pas 1,15 + 1,35. Une surface tournée vers le ciel reçoit
-  // les DEUX lumières : au-delà de 1 au total, tout ce qui est à plat part en
-  // blanc. C'est ce qui transformait le capot en aplat fluo.
-  const ambiante = new THREE.HemisphereLight(0x9c8cff, 0x241a44, 0.75);
+  // La lumière d'un crépuscule, pas d'une nuit noire. Deux sources et un
+  // contre-jour : le ciel violet remplit les ombres, le soleil rasant chaud
+  // détache les volumes, et une troisième lumière froide et faible vient de
+  // derrière pour dessiner les arêtes. Sans ce contre-jour, une voiture
+  // sombre sur une route sombre n'a plus de silhouette.
+  // ⚠️ Le total reçu par une surface à plat doit rester sous 1,4, sinon tout
+  // l'horizontal part en blanc (c'est ce qui cramait le capot).
+  const ambiante = new THREE.HemisphereLight(0xb9a9ff, 0x40336b, 0.9);
   scene.add(ambiante);
 
-  const soleil = new THREE.DirectionalLight(0xffd9b0, 0.85);
-  soleil.position.set(-26, 34, 18);
+  const rebond = new THREE.DirectionalLight(0x8fa8ff, 0.3);
+  rebond.position.set(18, 12, -30);
+  scene.add(rebond);
+
+  const soleil = new THREE.DirectionalLight(0xffc98a, 1);
+  soleil.position.set(-26, 20, 18); // rasant : les ombres s'allongent
   scene.add(soleil);
   scene.add(soleil.target);
 
@@ -92,9 +100,24 @@ export function creerMonde(THREE, hote, { qualite = "auto" } = {}) {
   rendu.shadowMap.type = THREE.PCFShadowMap;
   rendu.outputColorSpace = THREE.SRGBColorSpace;
   rendu.toneMapping = THREE.ACESFilmicToneMapping;
-  rendu.toneMappingExposure = 1.05;
+  rendu.toneMappingExposure = 1.28;
   rendu.domElement.style.cssText = "display:block;width:100%;height:100%";
   hote.appendChild(rendu.domElement);
+
+  // ⭐ La carte d'environnement. C'est LE réglage qui sépare « des formes
+  // colorées » d'un rendu de jeu : sans elle, une carrosserie ne reflète rien
+  // et reste un aplat, quel que soit l'éclairage. On cuit le dégradé de ciel
+  // une seule fois au démarrage — le coût est nul ensuite.
+  const equi = texCiel.clone();
+  equi.mapping = THREE.EquirectangularReflectionMapping;
+  equi.needsUpdate = true;
+  const pmrem = new THREE.PMREMGenerator(rendu);
+  pmrem.compileEquirectangularShader();
+  const cible = pmrem.fromEquirectangular(equi);
+  scene.environment = cible.texture;
+  scene.environmentIntensity = 0.85;
+  pmrem.dispose();
+  equi.dispose();
 
   // 55° de champ vertical. Plus large, c'est un grand-angle : une voiture à
   // 60 m tombe à quelques pixels, on ne la voit littéralement pas arriver.
@@ -120,7 +143,7 @@ export function creerMonde(THREE, hote, { qualite = "auto" } = {}) {
     // s'approcher de sa paroi et l'horizon se met à pencher.
     dome.position.set(x, 0, z);
     if (!ombres) return;
-    soleil.position.set(x - 26, 34, z + 18);
+    soleil.position.set(x - 26, 20, z + 18);
     soleil.target.position.set(x, 0, z);
     soleil.target.updateMatrixWorld();
   }

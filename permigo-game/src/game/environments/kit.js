@@ -11,18 +11,24 @@ export const VOIE = 3.2; // largeur d'une voie, en mètres
 export const TROTTOIR = 2.4;
 export const HAUT_TROTTOIR = 0.16;
 
+// ⚠️ Ces valeurs ont été REMONTÉES : la première palette donnait une scène
+// que Rayan a trouvée trop sombre, à juste titre. Un bitume à 0x2b2745 sous
+// un ciel crépusculaire tombe presque au noir, et une voiture sombre posée
+// dessus n'a plus de silhouette. Le sol reste le plus foncé de l'image, mais
+// il doit rester LISIBLE.
 export const COULEURS = {
-  bitume: 0x2b2745,
-  bitumeUse: 0x322d4f,
-  trottoir: 0x4a4468,
-  bordure: 0x60578a,
-  marquage: 0xf2e6cf,
-  sol: 0x1d1938,
-  toit: 0x322a55,
-  vitre: 0xffcf94,
+  bitume: 0x453e6b,
+  bitumeUse: 0x4e4677,
+  trottoir: 0x6f668f,
+  bordure: 0x8a7fae,
+  marquage: 0xfff4e2,
+  sol: 0x2e2752,
+  toit: 0x453a70,
+  vitre: 0xffd9a0,
+  halo: 0xffcf94, // la flaque d'un lampadaire au sol
 };
 
-const FACADES = [0x6d5f9e, 0x8a6f97, 0x55639b, 0x9a7b86, 0x5f5288, 0x7d6a99];
+const FACADES = [0x8f7fc4, 0xa889b4, 0x6f80bd, 0xbb96a1, 0x7c6bb0, 0x9b87bd];
 
 export const PEINTURE = {
   violet: 0x7c5cff,
@@ -35,12 +41,22 @@ export const PEINTURE = {
 
 export function creerKit(THREE) {
   const cache = new Map();
+  // ⚠️ Matériau PBR, pas Lambert. `scene.environment` n'est appliqué qu'aux
+  // matériaux standard : en Lambert, le décor ne reflète rien et se détache
+  // des modèles importés, qui eux réfléchissent. Le décor tient en quelques
+  // milliers de triangles, le surcoût ne se mesure pas.
   const mat = (couleur, opts = {}) => {
     const cle = couleur + JSON.stringify(opts);
     if (!cache.has(cle))
       cache.set(
         cle,
-        new THREE.MeshLambertMaterial({ color: couleur, ...opts }),
+        new THREE.MeshStandardMaterial({
+          color: couleur,
+          roughness: 0.82,
+          metalness: 0,
+          envMapIntensity: 0.9,
+          ...opts,
+        }),
       );
     return cache.get(cle);
   };
@@ -122,34 +138,111 @@ export function creerKit(THREE) {
     g.add(bloc(l, HAUT_TROTTOIR, p, COULEURS.trottoir, x, 0, z));
   }
 
+  // Une flaque de lumière au sol : un dégradé radial en additif. C'est ce qui
+  // fait qu'un lampadaire ÉCLAIRE au lieu d'être un poteau avec une ampoule.
+  // Une vraie lumière ponctuelle par lampadaire coûterait une passe de rendu
+  // chacune ; ici c'est un quad et rien d'autre.
+  let texHalo = null;
+  function halo(rayon, opacite = 0.5) {
+    if (!texHalo) {
+      const cv = document.createElement("canvas");
+      cv.width = cv.height = 64;
+      const c2 = cv.getContext("2d");
+      const rg = c2.createRadialGradient(32, 32, 0, 32, 32, 32);
+      rg.addColorStop(0, "rgba(255,207,148,1)");
+      rg.addColorStop(0.45, "rgba(255,190,130,.36)");
+      rg.addColorStop(1, "rgba(255,180,120,0)");
+      c2.fillStyle = rg;
+      c2.fillRect(0, 0, 64, 64);
+      texHalo = new THREE.CanvasTexture(cv);
+      texHalo.colorSpace = THREE.SRGBColorSpace;
+    }
+    const m = new THREE.Mesh(
+      PLAN,
+      new THREE.MeshBasicMaterial({
+        map: texHalo,
+        transparent: true,
+        opacity: opacite,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        fog: true,
+      }),
+    );
+    m.rotation.x = -Math.PI / 2;
+    m.scale.set(rayon * 2, rayon * 2, 1);
+    m.position.y = 0.03;
+    m.renderOrder = 2;
+    return m;
+  }
+
+  // Les feux d'un véhicule : deux phares devant, deux stops derrière, et
+  // surtout la NAPPE de lumière que les phares posent sur la chaussée. Au
+  // crépuscule, c'est elle qui fait exister la voiture — sans elle, un
+  // véhicule sombre sur un bitume sombre n'a pas de présence.
+  function feuxVehicule(largeur = 1.85, longueur = 4.2, hauteur = 0.72) {
+    const g = new THREE.Group();
+    const avant = new THREE.MeshBasicMaterial({ color: 0xfff4dd });
+    const arriere = new THREE.MeshBasicMaterial({ color: 0xff5a4a });
+    const stops = [];
+    for (const sx of [-1, 1]) {
+      const a = new THREE.Mesh(CUBE, avant);
+      a.scale.set(0.36, 0.15, 0.06);
+      a.position.set((sx * largeur) / 2.7, hauteur, -longueur / 2 - 0.02);
+      g.add(a);
+      const b = new THREE.Mesh(CUBE, arriere);
+      b.scale.set(0.32, 0.13, 0.06);
+      b.position.set((sx * largeur) / 2.7, hauteur + 0.06, longueur / 2 + 0.02);
+      g.add(b);
+      stops.push(b);
+    }
+    const nappe = halo(5.2, 0.42);
+    nappe.position.set(0, 0.04, -longueur / 2 - 3.4);
+    nappe.scale.set(4.6, 12, 1); // allongée devant, comme un vrai faisceau
+    g.add(nappe);
+    const lueurStop = halo(2.4, 0.16);
+    lueurStop.position.set(0, 0.04, longueur / 2 + 1.2);
+    lueurStop.material = lueurStop.material.clone();
+    lueurStop.material.color.set(0xff6a55);
+    lueurStop.visible = false;
+    g.add(lueurStop);
+    g.userData.freiner = (oui) => {
+      lueurStop.visible = oui;
+      arriere.color.set(oui ? 0xff2a18 : 0xff5a4a);
+    };
+    return g;
+  }
+
   function lampadaire(x, z, versX = 1) {
     const g = new THREE.Group();
     g.add(bloc(0.16, 6.2, 0.16, COULEURS.bordure, 0, 0, 0));
     g.add(bloc(1.7, 0.14, 0.14, COULEURS.bordure, versX * 0.85, 6.1, 0));
     const tete = new THREE.Mesh(
       CUBE,
-      new THREE.MeshBasicMaterial({ color: 0xffd9a0 }),
+      new THREE.MeshBasicMaterial({ color: 0xfff0cf }),
     );
     tete.scale.set(0.7, 0.12, 0.34);
     tete.position.set(versX * 1.6, 6.05, 0);
     g.add(tete);
+    const flaque = halo(4.6, 0.62);
+    flaque.position.x = versX * 1.6;
+    g.add(flaque);
     g.position.set(x, 0, z);
     return g;
   }
 
   function arbre(x, z, echelle = 1) {
     const g = new THREE.Group();
-    g.add(bloc(0.34, 2.2, 0.34, 0x3d3160, 0, 0, 0));
+    g.add(bloc(0.34, 2.2, 0.34, 0x5a4a86, 0, 0, 0));
     const f = new THREE.Mesh(
       new THREE.IcosahedronGeometry(1.5, 0),
-      mat(0x3f6a5c, { flatShading: true }),
+      mat(0x527f6b, { flatShading: true }),
     );
     f.position.y = 3.3;
     f.castShadow = true;
     g.add(f);
     const f2 = new THREE.Mesh(
       new THREE.IcosahedronGeometry(1.05, 0),
-      mat(0x4b7a66, { flatShading: true }),
+      mat(0x62957c, { flatShading: true }),
     );
     f2.position.set(0.35, 4.4, -0.2);
     f2.castShadow = true;
@@ -395,7 +488,6 @@ export function creerKit(THREE) {
   }
 
   return {
-    poste,
     mat,
     dalle,
     bloc,
@@ -408,7 +500,9 @@ export function creerKit(THREE) {
     panneau,
     feu,
     vehicule,
+    feuxVehicule,
     poste,
+    halo,
     CUBE,
     PLAN,
   };

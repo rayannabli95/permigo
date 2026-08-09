@@ -21,6 +21,9 @@ export function creerRig(THREE, camera) {
   let regard = 0; // angle de tête réel, lissé
   let roulis = 0;
   const libre = { az: 0.6, el: 0.42, dist: 14 };
+  const cible = new THREE.Vector3();
+  const viseCam = new THREE.Vector3();
+  let amorce = true;
 
   return {
     get vue() {
@@ -42,6 +45,7 @@ export function creerRig(THREE, camera) {
     },
     changerVue(v) {
       vue = v || VUES[(VUES.indexOf(vue) + 1) % VUES.length];
+      amorce = true;
       return vue;
     },
     orbiter(daz, del, dd = 0) {
@@ -69,22 +73,39 @@ export function creerRig(THREE, camera) {
         dz = ax; // vecteur « droite » de la voiture
 
       if (vue === "exterieur") {
-        camera.position.set(v.x - ax * 8.5, 3.6, v.z - az * 8.5);
-        camera.lookAt(v.x + ax * 6, 1.1, v.z + az * 6);
+        // Caméra de poursuite : elle vise la place idéale mais s'y rend
+        // MOLLEMENT. Collée au véhicule, elle tourne à la même vitesse que
+        // lui et on ne voit plus la voiture pivoter — c'est ce ressort qui
+        // donne le poids d'un jeu de course.
+        const recul = 7.4 + Math.min(3.2, v.vitesse * 0.2);
+        cible.set(v.x - ax * recul, 3.2, v.z - az * recul);
+        // ⚠️ Au premier passage on se pose d'un coup : sinon la caméra part
+        // de la place du conducteur et traverse la voiture en glissant.
+        if (amorce) {
+          camera.position.copy(cible);
+          viseCam.set(v.x + ax * 7, 1.15, v.z + az * 7);
+          amorce = false;
+        }
+        camera.position.lerp(cible, Math.min(1, dt * 3.4));
+        viseCam.lerp(
+          { x: v.x + ax * 7, y: 1.15, z: v.z + az * 7 },
+          Math.min(1, dt * 6),
+        );
+        camera.lookAt(viseCam);
         return;
       }
 
       // Place du conducteur : 0,36 m à gauche de l'axe, un peu en arrière du
       // milieu de la voiture.
-      // ⚠️ HAUTEUR = 1,45 m, pas les 1,21 m d'une berline. C'est le seul
-      // réglage qui règle vraiment le cadrage en portrait : la part d'écran
-      // prise par le capot ne dépend que de l'angle entre son bord avant et
-      // le bas de l'image. Piquer la caméra ne sert à rien (le capot descend
-      // avec l'horizon), rallonger le capot empire. Monter l'œil de 24 cm
-      // fait passer le capot de 37 % à 21 % de l'image.
+      // ⚠️ 1,24 m : la hauteur d'œil d'un conducteur, et elle se règle avec
+      // ce qu'on met devant. Une première version montait à 1,45 m pour
+      // qu'un capot dessiné à la main cesse d'avaler l'écran — mais de là on
+      // regarde le DESSUS de la planche de bord, qui est une surface plate
+      // sans rien à voir. Sans capot, l'œil redescend et on retrouve la
+      // planche, le combiné et le volant, comme dans une vraie voiture.
       camera.position.set(
         v.x - dx * 0.36 - ax * 0.15,
-        1.45,
+        1.24,
         v.z - dz * 0.36 - az * 0.15,
       );
       // Le corps s'incline vers l'extérieur du virage. Discret : trop de

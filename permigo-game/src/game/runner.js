@@ -16,6 +16,7 @@ import { creerCommandes } from "./engine/controls.js";
 import { creerZones } from "./engine/zones.js";
 import { creerActeur } from "./engine/npc.js";
 import { creerDebug } from "./engine/debug.js";
+import { chargerModeles, copier } from "./engine/modeles.js";
 import * as CARREFOUR from "./environments/carrefour.js";
 
 const ENVIRONNEMENTS = { carrefour: CARREFOUR };
@@ -36,6 +37,70 @@ const GRAVITE = [
   "hors_route",
   "trop_long",
 ];
+// Les modèles 3D. `capOffset` remet l'avant du véhicule sur -Z : un modèle
+// arrive orienté comme il veut, et c'est la seule chose qu'on ne peut pas
+// deviner sans le regarder.
+const MODELES = {
+  // L'avant du modèle pointe vers +X ; +90° l'amène sur -Z, l'avant du jeu.
+  voiture: { fichier: "voiture.glb", longueur: 4.2, capOffset: Math.PI / 2 },
+  gris: { fichier: "gris.glb", longueur: 4.25, capOffset: Math.PI / 2 },
+  camion: { fichier: "camion.glb", longueur: 7.6, capOffset: Math.PI / 2 },
+  // 🔴 Le buck d'habitacle complet a été ABANDONNÉ. La reconstruction bouche
+  // le pare-brise d'une surface pleine ; découpé sous ce panneau, il ne reste
+  // qu'une masse grise sans détail, parce qu'on n'en voit plus que le dessus.
+  // Un OBJET ISOLÉ se reconstruit bien, une pièce concave non. On repart donc
+  // des pièces : une planche de bord, un volant.
+  planche: {
+    fichier: "planche.glb",
+    longueur: 1.78,
+    poser: false,
+    eclairer: 0.42,
+  },
+  volant: {
+    fichier: "volant.glb",
+    longueur: 0.37,
+    poser: false,
+    eclairer: 0.5,
+  },
+  immeuble: { fichier: "immeuble.glb", longueur: 13 },
+  maison: { fichier: "maison.glb", longueur: 11 },
+  arbre: { fichier: "arbre.glb", hauteur: 7.2 },
+  lampe: { fichier: "lampe.glb", hauteur: 6.4 },
+};
+
+// L'habitacle : un capot, une planche de bord, un volant.
+//
+// ⚠️ Ces trois hauteurs ne se règlent PAS au réalisme, elles se règlent au
+// CADRAGE. L'œil est à 1,45 m (imposé par le format portrait, cf. camera-rig)
+// et le champ vertical fait 55° : tout ce qui est à plus de 31° sous
+// l'horizontale sort de l'image. Une planche de bord posée à sa vraie hauteur
+// de 0,78 m est donc simplement invisible. On remonte la composition.
+function habitacle(THREE, kit, modeles) {
+  const g = new THREE.Group();
+
+  // ⚠️ PAS de capot dessiné à la main. La version précédente en posait un, et
+  // à 0,45 m sous l'œil il mangeait 38 % de l'écran à lui seul en cachant
+  // l'habitacle derrière. Le bas de l'image appartient à la planche de bord :
+  // c'est elle qui dit qu'on est dans une voiture.
+
+  // La planche de bord et le volant, deux pièces distinctes. Le volant DOIT
+  // rester séparé : c'est la seule qui tourne avec les roues.
+  // ⚠️ Les hauteurs se lisent depuis l'œil du conducteur, à 1,24 m. La
+  // planche a 0,63 m de haut, son dessus arrive donc à 1,03 m : vingt
+  // centimètres sous le regard, comme dans une voiture.
+  const planche = copier(modeles.planche);
+  if (!planche) return kit.poste("violet");
+  planche.position.set(0, 0.5, -1.5);
+  g.add(planche);
+
+  const volant = copier(modeles.volant) || kit.poste("violet").userData.volant;
+  volant.position.set(-0.38, 0.8, -0.95);
+  volant.rotation.x = -0.42; // l'inclinaison d'une colonne de direction
+  g.add(volant);
+  g.userData.volant = volant;
+  return g;
+}
+
 const gravite = (f) => {
   const i = GRAVITE.indexOf(f);
   return i === -1 ? GRAVITE.length : i;
@@ -51,7 +116,16 @@ export async function lancerScenario(
     qualite: scenario.qualite || "auto",
   });
   const env = ENVIRONNEMENTS[scenario.environnement] || CARREFOUR;
-  const { kit, groupe } = env.construire(THREE, scenario.decor || {});
+
+  // ── Les modèles, AVANT le décor ──────────────────────────────────────
+  // L'environnement construit ses bâtiments, ses arbres et ses lampadaires
+  // à partir d'eux : il faut donc qu'ils soient là quand on le monte.
+  // Si un fichier manque, `chargerModeles` rend null et cette pièce-là
+  // retombe sur la primitive du kit. La situation s'ouvre toujours.
+  const modeles = await chargerModeles(THREE, MODELES, {
+    base: `${import.meta.env.BASE_URL || "/"}art/course3d/`,
+  });
+  const { kit, groupe } = env.construire(THREE, scenario.decor || {}, modeles);
   monde.scene.add(groupe);
 
   // ── Le joueur ────────────────────────────────────────────────────────
@@ -65,13 +139,25 @@ export async function lancerScenario(
     vitesse: scenario.joueur?.vitesse ?? 11,
     vitesseMax: scenario.joueur?.vitesseMax ?? 16,
   });
+  // Une carrosserie se choisit d'abord par la COULEUR demandée (chaque
+  // couleur est un modèle à part : une peinture ne se change pas en teintant
+  // une texture, on obtiendrait du violet sale au lieu du gris).
+  const carrosserie = (type, couleur) => {
+    const cle = modeles[couleur] ? couleur : modeles[type] ? type : "voiture";
+    return copier(modeles[cle]) || kit.vehicule(type, couleur);
+  };
+
   // Deux corps pour la même voiture : la carrosserie (vue de dehors) et le
-  // poste de conduite (vu de dedans). On n'affiche jamais les deux : à la
-  // place du conducteur, la caméra est À L'INTÉRIEUR du bloc de carrosserie
-  // et l'écran devient un aplat violet.
-  const mailleJoueur = kit.vehicule("voiture", "violet");
-  const posteJoueur = kit.poste("violet");
-  monde.scene.add(mailleJoueur, posteJoueur);
+  // poste de conduite (vu de dedans). On n'affiche jamais les deux.
+  const mailleJoueur = carrosserie("voiture", "violet");
+  const feuxJoueur = kit.feuxVehicule(v.largeur, v.longueur);
+  mailleJoueur.add(feuxJoueur);
+  const posteJoueur = habitacle(THREE, kit, modeles);
+  // Le faisceau du joueur reste allumé même en vue conducteur : c'est lui
+  // qui éclaire le bitume devant, et on le voit à travers le pare-brise.
+  const faisceauJoueur = kit.feuxVehicule(v.largeur, v.longueur);
+  faisceauJoueur.visible = false;
+  monde.scene.add(mailleJoueur, posteJoueur, faisceauJoueur);
 
   // ── Le trafic ────────────────────────────────────────────────────────
   const acteurs = (scenario.acteurs || []).map((a) => {
@@ -79,7 +165,11 @@ export async function lancerScenario(
       ? a.chemin
       : cheminBranche(env, a.de, a.vers || env.oppose(a.de), a.recul ?? 60);
     const ac = creerActeur({ ...a, chemin });
-    ac.maille = kit.vehicule(a.type || "voiture", a.couleur || "gris");
+    ac.maille = carrosserie(a.type || "voiture", a.couleur || "gris");
+    if ((a.type || "voiture") !== "pieton") {
+      ac.feux = kit.feuxVehicule(ac.v.largeur, ac.v.longueur);
+      ac.maille.add(ac.feux);
+    }
     monde.scene.add(ac.maille);
     return ac;
   });
@@ -127,8 +217,14 @@ export async function lancerScenario(
   // mètres trop tôt et qui tourne la tête a fait exactement ce qu'il fallait ;
   // la première version le comptait comme « n'a pas regardé ». On retient
   // donc le regard partout sur les 26 derniers mètres avant le carrefour.
-  const OBSERVE_A = 26;
+  // 38 m : la distance à laquelle la zone d'approche commence. Un conducteur
+  // balaie un carrefour masqué bien avant d'y être ; à 26 m, un élève qui
+  // regardait tôt et bien n'était pas crédité.
+  const OBSERVE_A = 38;
   const observe = { droite: false, gauche: false };
+
+  const assiste = scenario.assiste !== false;
+  const croisiere = scenario.croisiere ?? 11; // ~40 km/h en ville
 
   const attendu = scenario.attendu || "ceder";
   const observation = scenario.observation || null; // 'droite' | 'gauche' | null
@@ -174,6 +270,22 @@ export async function lancerScenario(
     const e = cmd.lire(dt);
     rig.regarder(fige ? "centre" : e.regard);
 
+    // ⭐ La voiture roule toute seule tant qu'on ne freine pas. PermiGo n'est
+    // pas un simulateur : un élève doit comprendre la SITUATION tout de
+    // suite, pas apprendre à doser une pédale. Il ne lui reste que deux
+    // gestes à faire, freiner et regarder, et c'est exactement ce que la
+    // situation lui demande d'apprendre. Le gaz reste disponible pour qui
+    // veut accélérer.
+    // ⚠️ C'est un RÉGULATEUR, pas un interrupteur. Une première version mettait
+    // les gaz à fond sous la vitesse de croisière et les coupait au-dessus :
+    // le frein moteur reprenait la main et la voiture faisait le yo-yo entre
+    // 11 et 44 km/h toute seule.
+    if (assiste && !fige && !e.gaz && !e.freinage) {
+      const ecart = croisiere - v.vitesse;
+      if (ecart > 0) e.gaz = Math.min(1, ecart / 1.5);
+      else if (ecart < -0.4) e.freinage = 0.12;
+    }
+
     if (!fige) {
       // Hors chaussée, ça freine tout seul : un trottoir n'est pas un raccourci.
       const dehors = env.surRoute && !env.surRoute(v.x, v.z);
@@ -196,15 +308,21 @@ export async function lancerScenario(
       }
       a.maille.position.set(a.x, 0, a.z);
       a.maille.rotation.y = a.cap;
+      a.feux?.userData.freiner(a.v.freine || (a.arrete && a.v.vitesse > 0.3));
     }
 
-    for (const m of [mailleJoueur, posteJoueur]) {
+    for (const m of [mailleJoueur, posteJoueur, faisceauJoueur]) {
       m.position.set(v.x, 0, v.z);
       m.rotation.y = v.cap;
     }
+    feuxJoueur.userData.freiner(v.freine && v.vitesse > 0.2);
+    // ⚠️ On n'affiche jamais les deux. Compter sur le tri des faces pour que
+    // la carrosserie « s'ouvre » vue de l'intérieur ne marche pas : il reste
+    // des morceaux de montants et de rétroviseurs en travers de l'image.
     const dedans = rig.vue === "conduite";
     mailleJoueur.visible = !dedans;
     posteJoueur.visible = dedans;
+    faisceauJoueur.visible = dedans; // le faisceau, lui, éclaire toujours
     // Le volant suit le braquage réel des roues, multiplié par la démultipli-
     // cation d'une direction de série (un tour et demi de butée à butée).
     posteJoueur.userData.volant.rotation.z = v.braquage * 2.6;
