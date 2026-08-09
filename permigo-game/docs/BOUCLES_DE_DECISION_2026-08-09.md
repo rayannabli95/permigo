@@ -150,16 +150,20 @@ nécessaire, et le sujet est chargé émotionnellement d'avance.
 Alors on en fait la barre de vie de la manche. **Et on utilise les VRAIS
 retraits de points du code de la route :**
 
+> 🔴 **Ce tableau contenait deux erreurs, corrigées le 09/08 après vérification
+> sur les sources officielles. Le barème vérifié fait foi et se trouve dans
+> [`PROTOTYPE_PAPIER_2026-08-09.md`](PROTOTYPE_PAPIER_2026-08-09.md).**
+> ⚠️ Ne jamais écrire un barème de mémoire : le dépassement dangereux coûte
+> **3** points et non 4, et l'excès de 30 à 40 km/h **3** et non 4.
+
 | Faute | Coût réel | Ce que ça enseigne sans une leçon |
 |---|---|---|
-| Excès de moins de 20 km/h | **1 point** | ce n'est pas si grave |
-| Chevauchement de ligne continue | **1 point** | |
-| Franchissement de ligne continue | **3 points** | trois fois pire, et on ne le savait pas |
-| Refus de priorité | **4 points** | |
-| Feu rouge, stop non marqué | **4 points** | aussi grave qu'un refus de priorité |
-| Dépassement dangereux | **4 points** | |
-| Téléphone en main | **3 points** | |
-| Alcool, délit de fuite | **6 points** | la moitié d'un permis d'un coup |
+| Excès de moins de 20 km/h · chevauchement de ligne continue | **1 point** | ce n'est pas si grave |
+| Excès de 20 à moins de 30 km/h | **2 points** | |
+| Franchissement de ligne continue · distances de sécurité · dépassement dangereux · téléphone en main | **3 points** | trois fois le chevauchement, et on ne le savait pas |
+| Refus de priorité · stop · feu rouge · sens interdit | **4 points** | un feu rouge vaut un refus de priorité |
+| 🔴 **Refus de priorité à un piéton** | **6 points** | **autant que l'alcool.** Presque personne ne le sait |
+| Alcool, stupéfiants, excès de 50 km/h et plus | **6 points** | la moitié d'un permis d'un coup |
 
 ⭐⭐⭐ **La hiérarchie de gravité s'apprend parce qu'elle fait mal, pas parce
 qu'on l'a lue.** Un élève qui perd 4 points d'un coup sur un feu orange
