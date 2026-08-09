@@ -75,11 +75,13 @@ export function creerMonde(THREE, hote, { qualite = "auto" } = {}) {
 
   const dpr = window.devicePixelRatio || 1;
   const petit = Math.min(window.innerWidth, window.innerHeight) < 500;
-  const ombres = qualite === "haute" || (qualite === "auto" && !petit);
-  if (ombres) {
-    soleil.castShadow = true;
-    soleil.shadow.mapSize.set(1024, 1024);
-    // Le cadre d'ombre suit la voiture (voir majOmbres) : serré = net.
+
+  // 🔴 Les ombres ne se coupent PLUS sur téléphone. C'était le réglage le plus
+  // coûteux de l'audit : sans ombre portée, rien ne touche le sol, tout a
+  // l'air posé en autocollant sur le décor. Le cadre est serré autour de la
+  // voiture (voir majOmbres) : une carte de 1024 sur 60 m reste nette.
+  soleil.shadow.mapSize.set(1024, 1024);
+  {
     const c = soleil.shadow.camera;
     c.left = -30;
     c.right = 30;
@@ -88,15 +90,22 @@ export function creerMonde(THREE, hote, { qualite = "auto" } = {}) {
     c.near = 1;
     c.far = 110;
     soleil.shadow.bias = -0.0012;
+    soleil.shadow.normalBias = 0.02; // évite l'ombre qui grimpe sur les faces
+    soleil.shadow.radius = 3; // le bord ne doit pas être une lame de rasoir
+    // ⚠️ Une ombre à 1 tombe au NOIR : dans une rue au crépuscule, le ciel
+    // violet remplit toujours les ombres. À 0,68 elle pèse sans trouer l'image.
+    if ("intensity" in soleil.shadow) soleil.shadow.intensity = 0.68;
   }
 
   const rendu = new THREE.WebGLRenderer({
-    antialias: !petit,
+    // ⚠️ Ne sert QUE lorsque la chaîne d'effets est absente : dès qu'on
+    // dessine dans une cible intermédiaire, c'est elle qui porte
+    // l'anticrénelage (cf. post.js et son échantillonnage multiple).
+    antialias: true,
     powerPreference: "high-performance",
   });
-  // Au-delà de 2, on paie un million de pixels pour rien.
-  rendu.setPixelRatio(Math.min(dpr, petit ? 1.5 : 2));
-  rendu.shadowMap.enabled = ombres;
+  rendu.setPixelRatio(Math.min(dpr, 2));
+  rendu.shadowMap.enabled = true;
   rendu.shadowMap.type = THREE.PCFShadowMap;
   rendu.outputColorSpace = THREE.SRGBColorSpace;
   rendu.toneMapping = THREE.ACESFilmicToneMapping;
@@ -149,10 +158,40 @@ export function creerMonde(THREE, hote, { qualite = "auto" } = {}) {
     // Le dôme de ciel suit la voiture, sinon en s'éloignant on finit par
     // s'approcher de sa paroi et l'horizon se met à pencher.
     dome.position.set(x, 0, z);
-    if (!ombres) return;
+    if (!soleil.castShadow) return;
     soleil.position.set(x - 26, 20, z + 18);
     soleil.target.position.set(x, 0, z);
     soleil.target.updateMatrixWorld();
+  }
+
+  // ── Ce que le gouverneur de qualité peut changer à chaud ──────────────
+  function reglerDensite(d) {
+    const v = Math.max(1, Math.min(3, d));
+    if (Math.abs(rendu.getPixelRatio() - v) < 0.01) return;
+    rendu.setPixelRatio(v);
+    taille(); // les cibles de rendu de la chaîne d'effets suivent
+  }
+
+  // Les ombres portées : on ou off, et rien d'autre.
+  //
+  // 🔴🔴 `PCFSoftShadowMap` est DÉPRÉCIÉ dans cette version de Three.js. Le
+  // moteur le remplace lui-même par `PCFShadowMap` À CHAQUE IMAGE, dans
+  // `WebGLShadowMap.render` :
+  //
+  //     if (this.type === PCFSoftShadowMap) { warn(...); this.type = PCFShadowMap; }
+  //
+  // On demandait donc des ombres douces, on en obtenait des dures, et le seul
+  // indice était un avertissement noyé dans la console. Trouvé en piégeant
+  // l'écriture de la propriété, pas en relisant le code.
+  //
+  // La douceur vient maintenant de deux réglages qui, eux, fonctionnent :
+  // le rayon de flou et surtout l'INTENSITÉ, qui empêche l'ombre de tomber au
+  // noir pur (« jamais du noir pur », cf. la grille de qualité).
+  function reglerOmbres(actives) {
+    if (soleil.castShadow === !!actives) return;
+    soleil.castShadow = !!actives;
+    rendu.shadowMap.enabled = !!actives;
+    rendu.shadowMap.needsUpdate = true;
   }
 
   // La boucle. `sur` reçoit le pas de temps borné, en secondes.
@@ -195,10 +234,17 @@ export function creerMonde(THREE, hote, { qualite = "auto" } = {}) {
     rendu,
     soleil,
     ambiante,
-    ombres,
     petit,
     taille,
     majOmbres,
+    reglerDensite,
+    reglerOmbres,
+    get densite() {
+      return rendu.getPixelRatio();
+    },
+    get ombres() {
+      return soleil.castShadow;
+    },
     // La chaîne d'effets s'installe ici, et peut se retirer d'elle-même si la
     // machine ne suit pas (voir post.js).
     brancherRendu(fn) {

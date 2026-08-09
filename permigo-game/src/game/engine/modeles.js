@@ -165,3 +165,62 @@ export async function chargerModeles(THREE, liste, { base = "" } = {}) {
 export function copier(modele) {
   return modele ? modele.clone(true) : null;
 }
+
+// ⭐ Poser le MÊME modèle des dizaines de fois en un seul appel de dessin.
+//
+// Un arbre cloné quarante fois, c'est quarante maillages, donc quarante
+// appels au pilote graphique et quarante changements d'état. Une
+// `InstancedMesh` n'en fait qu'un : le GPU reçoit la géométrie une fois et une
+// liste de matrices. C'est le gain le moins cher du moteur, et il ne coûte
+// AUCUNE qualité — c'est exactement la même image.
+//
+// `poses` : [{ x, z, cap, echelle }]. Le cap et l'échelle varient librement,
+// c'est ce qui empêche la rangée d'arbres d'être quarante fois la même image.
+//
+// ⚠️ Rend `null` si le modèle manque : l'appelant retombe sur ses primitives.
+export function instancier(THREE, modele, poses, { projette = true } = {}) {
+  if (!modele || !poses.length) return null;
+  const groupe = new THREE.Group();
+  const m4 = new THREE.Matrix4();
+  const q = new THREE.Quaternion();
+  const pos = new THREE.Vector3();
+  const ech = new THREE.Vector3();
+  const axe = new THREE.Vector3(0, 1, 0);
+
+  // ⚠️ On lit la matrice MONDE de chaque maillage du modèle, pas sa matrice
+  // locale : `normaliser()` a placé le modèle dans un groupe parent qui porte
+  // l'échelle, la rotation d'origine et la mise au sol. Ignorer ce parent
+  // remettrait chaque instance à sa taille et son orientation brutes.
+  modele.updateWorldMatrix(true, true);
+
+  modele.traverse((o) => {
+    if (!o.isMesh) return;
+    const inst = new THREE.InstancedMesh(o.geometry, o.material, poses.length);
+    // ⚠️ `projette` coûte cher : tout ce qui projette une ombre est dessiné
+    // une SECONDE fois, dans la carte d'ombre. Un bâtiment de trente mètres
+    // paie donc ses onze mille triangles deux fois pour une ombre qui tombe
+    // sur le trottoir d'en face, hors du champ.
+    inst.castShadow = projette && o.castShadow;
+    inst.receiveShadow = o.receiveShadow;
+    for (let i = 0; i < poses.length; i++) {
+      const p = poses[i];
+      q.setFromAxisAngle(axe, p.cap || 0);
+      pos.set(p.x, 0, p.z);
+      ech.setScalar(p.echelle || 1);
+      m4.compose(pos, q, ech).multiply(o.matrixWorld);
+      inst.setMatrixAt(i, m4);
+    }
+    inst.instanceMatrix.needsUpdate = true;
+    // 🔴 On GARDE l'élagage par le champ de vision, et on lui donne la bonne
+    // sphère. `InstancedMesh.computeBoundingSphere()` tient compte des
+    // matrices d'instances : sans cet appel elle se calcule à la première
+    // occasion, mais la déclarer tout de suite évite un à-coup.
+    // ⚠️ Le couper « pour éviter qu'une rangée disparaisse » double le nombre
+    // de triangles dessinés : tout le décor est alors rendu à chaque image,
+    // même derrière soi. La bonne réponse est de GROUPER les instances par
+    // zone (une rue = un groupe) pour que l'élagage ait prise.
+    inst.computeBoundingSphere();
+    groupe.add(inst);
+  });
+  return groupe.children.length ? groupe : null;
+}

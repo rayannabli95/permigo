@@ -8,6 +8,7 @@
 //   par défaut). Nord = -Z, est = +X.
 
 import { creerKit, VOIE, TROTTOIR, HAUT_TROTTOIR, COULEURS } from "./kit.js";
+import { instancier } from "../engine/modeles.js";
 
 const DEMI = VOIE; // demi-largeur de chaussée : 2 voies
 const LONG = 90; // longueur d'une branche
@@ -154,10 +155,15 @@ export function construire(
   // Il n'est pas ornemental : sans lui, on ne voit pas qu'on avance, et
   // surtout un bâtiment d'angle est ce qui MASQUE la voiture qui arrive.
   const bord = DEMI + TROTTOIR;
+  // ⭐ Tout ce qui se répète passe par `instancier` : un seul appel de dessin
+  // par famille au lieu d'un par objet. Le décor du carrefour est passé de
+  // ~84 appels à une poignée, sans changer une seule ligne de l'image.
   if (batiments) {
     let t = 0;
     // Le cap tourne les façades vers le carrefour : un immeuble présenté de
     // dos montre un mur nu et le coin de rue perd son épaisseur.
+    // Un groupe par COIN de rue : trois bâtiments serrés, donc une sphère
+    // compacte, donc un élagage qui sert vraiment.
     for (const sx of [-1, 1])
       for (const sz of [-1, 1]) {
         const versRue = Math.atan2(-sx, -sz);
@@ -166,41 +172,63 @@ export function construire(
           [sx * (bord + 9), sz * (bord + 26), "maison", 12],
           [sx * (bord + 28), sz * (bord + 9), "immeuble", 15],
         ];
+        const parModele = {};
         for (const [bx, bz, quoi, large] of rangee) {
-          const m = modeles[quoi];
-          if (m) g.add(poser(m, bx, bz, versRue + (t % 2 ? 0.06 : -0.05)));
+          const cap = versRue + (t % 2 ? 0.06 : -0.05);
+          if (modeles[quoi])
+            (parModele[quoi] ||= []).push({ x: bx, z: bz, cap });
           else g.add(kit.batiment(bx, bz, large, large - 1, 3 + (t % 2), t));
           t++;
         }
+        for (const [quoi, poses] of Object.entries(parModele))
+          // Les bâtiments ne projettent PAS : ils sont derrière le trottoir,
+          // leur ombre tombe sur la façade d'en face et personne ne la voit.
+          // Ils REÇOIVENT toujours, donc le coin de rue reste dans l'ombre.
+          ajouter(instancier(THREE, modeles[quoi], poses, { projette: false }));
       }
   }
+
   if (arbres) {
-    const unArbre = (x, z, e, tour) =>
-      modeles.arbre ? poser(modeles.arbre, x, z, tour, e) : kit.arbre(x, z, e);
+    // ⚠️ Un groupe d'instances par DEMI-RUE, pas un seul pour tout le
+    // carrefour. Un groupe étalé sur 180 m est toujours au moins en partie
+    // visible : il ne se fait jamais élaguer, et on paie ses triangles même
+    // quand on regarde ailleurs. Huit groupes compacts, et regarder une rue
+    // n'en dessine que deux ou trois.
     for (const s of [-1, 1])
-      for (let i = 0; i < 6; i++) {
-        const d = bord + 1.2;
-        const l = 15 + i * 11;
-        // Les arbres tournent d'un multiple d'un tiers de tour : sans ça, la
-        // rangée entière est le MÊME arbre vu sous le même angle, et l'œil le
-        // voit tout de suite.
-        const e = 0.88 + ((i * 5) % 4) * 0.09;
-        g.add(unArbre(s * d, -l, e, i * 1.9));
-        g.add(unArbre(s * d, l, e + 0.06, i * 2.7));
-        g.add(unArbre(-l, s * d, 0.95, i * 1.3));
-        g.add(unArbre(l, s * d, 0.95, i * 3.1));
+      for (const sens of [-1, 1]) {
+        const versZ = [];
+        const versX = [];
+        // ⚠️ QUATRE arbres par demi-rue, plus six. Six, c'est une haie : on
+        // paie 13 900 triangles par arbre pour un feuillage qui se confond
+        // avec celui d'à côté. Quatre, mieux espacés, couvrent la même
+        // longueur de rue et se lisent mieux.
+        for (let i = 0; i < 4; i++) {
+          const d = bord + 1.2;
+          const l = sens * (15 + i * 16);
+          // Les arbres tournent d'un multiple d'un tiers de tour : sans ça, la
+          // rangée entière est le MÊME arbre vu sous le même angle, et l'œil
+          // le voit tout de suite.
+          const e = 0.88 + ((i * 5) % 4) * 0.09;
+          versZ.push({ x: s * d, z: l, cap: i * 1.9 + sens, echelle: e });
+          versX.push({ x: l, z: s * d, cap: i * 1.3 + sens, echelle: 0.95 });
+        }
+        for (const poses of [versZ, versX]) {
+          const inst = instancier(THREE, modeles.arbre, poses);
+          if (inst) g.add(inst);
+          else for (const p of poses) g.add(kit.arbre(p.x, p.z, p.echelle));
+        }
       }
   }
-  for (const s of [-1, 1])
+
+  for (const s of [-1, 1]) {
+    const poses = [];
     for (let i = 0; i < 4; i++) {
       const d = bord + 0.9;
       for (const z of [-(9 + i * 22), 9 + i * 22]) {
         if (modeles.lampe) {
           // Le modèle a son bras d'un côté : on le fait pivoter pour que la
           // lampe surplombe toujours la chaussée.
-          g.add(
-            poser(modeles.lampe, s * d, z, s > 0 ? Math.PI / 2 : -Math.PI / 2),
-          );
+          poses.push({ x: s * d, z, cap: s > 0 ? Math.PI / 2 : -Math.PI / 2 });
           g.add(
             kit
               .halo(4.6, 0.6)
@@ -212,6 +240,12 @@ export function construire(
         }
       }
     }
+    ajouter(instancier(THREE, modeles.lampe, poses));
+  }
+
+  function ajouter(o) {
+    if (o) g.add(o);
+  }
 
   function bordDroit(branche) {
     // 1,3 m après la bordure, 6 m avant l'entrée du carrefour.

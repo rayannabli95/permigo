@@ -143,6 +143,43 @@ export function creerKit(THREE) {
   // Une vraie lumière ponctuelle par lampadaire coûterait une passe de rendu
   // chacune ; ici c'est un quad et rien d'autre.
   let texHalo = null;
+  // ⭐ La tache de contact. Un disque sombre posé sous un objet, et il cesse
+  // de flotter. Ce n'est PAS un remplacement de l'ombre portée : c'est le
+  // filet de sécurité qui tient même quand la carte d'ombre est coupée sur une
+  // machine faible, et l'assombrissement rapproché que la carte d'ombre, elle,
+  // n'a pas la résolution de donner sous une voiture.
+  let texTache = null;
+  function tache(largeur, longueur, opacite = 0.55) {
+    if (!texTache) {
+      const cv = document.createElement("canvas");
+      cv.width = cv.height = 64;
+      const c2 = cv.getContext("2d");
+      const rg = c2.createRadialGradient(32, 32, 0, 32, 32, 32);
+      rg.addColorStop(0, "rgba(6,3,20,1)");
+      rg.addColorStop(0.5, "rgba(6,3,20,.55)");
+      rg.addColorStop(1, "rgba(6,3,20,0)");
+      c2.fillStyle = rg;
+      c2.fillRect(0, 0, 64, 64);
+      texTache = new THREE.CanvasTexture(cv);
+    }
+    const m = new THREE.Mesh(
+      PLAN,
+      new THREE.MeshBasicMaterial({
+        map: texTache,
+        transparent: true,
+        opacity: opacite,
+        depthWrite: false,
+        fog: true,
+      }),
+    );
+    m.rotation.x = -Math.PI / 2;
+    // Un peu plus large que l'objet : une ombre de contact déborde toujours.
+    m.scale.set(largeur * 1.5, longueur * 1.25, 1);
+    m.position.y = 0.015; // juste au-dessus du bitume, sans le percer
+    m.renderOrder = 1;
+    return m;
+  }
+
   function halo(rayon, opacite = 0.5) {
     if (!texHalo) {
       const cv = document.createElement("canvas");
@@ -511,6 +548,7 @@ export function creerKit(THREE) {
     feuxVehicule,
     poste,
     halo,
+    tache,
     CUBE,
     PLAN,
   };

@@ -18,6 +18,7 @@ import { creerActeur } from "./engine/npc.js";
 import { creerDebug } from "./engine/debug.js";
 import { creerSon } from "./engine/audio.js";
 import { creerPost } from "./engine/post.js";
+import { creerQualite } from "./engine/qualite.js";
 import { creerCinema } from "./engine/cinema.js";
 import { chargerModeles, copier } from "./engine/modeles.js";
 import * as CARREFOUR from "./environments/carrefour.js";
@@ -274,7 +275,11 @@ export async function lancerScenario(
   // ce que c'était.
   faisceauJoueur.userData.lentilles.forEach((m) => (m.visible = false));
   faisceauJoueur.visible = false;
-  monde.scene.add(mailleJoueur, posteJoueur, faisceauJoueur);
+  // La tache de contact reste dans la scène, pas dans la carrosserie : on la
+  // voit depuis la vue extérieure ET pendant le plan d'ouverture, alors que la
+  // carrosserie, elle, se cache dès qu'on est au volant.
+  const tacheJoueur = kit.tache(v.largeur, v.longueur);
+  monde.scene.add(mailleJoueur, posteJoueur, faisceauJoueur, tacheJoueur);
 
   // ── Le trafic ────────────────────────────────────────────────────────
   const acteurs = (scenario.acteurs || []).map((a) => {
@@ -287,7 +292,8 @@ export async function lancerScenario(
       ac.feux = kit.feuxVehicule(ac.v.largeur, ac.v.longueur);
       ac.maille.add(ac.feux);
     }
-    monde.scene.add(ac.maille);
+    ac.tache = kit.tache(ac.v.largeur, ac.v.longueur, 0.5);
+    monde.scene.add(ac.maille, ac.tache);
     return ac;
   });
 
@@ -305,9 +311,11 @@ export async function lancerScenario(
   const boitesNpc = acteurs.map((a) => dbg.dessinerBoite(a.v, 0xff9a4d));
   if (debug) dbg.basculer(true);
 
-  // L'image. La chaîne d'effets se pose par-dessus le monde et se dégrade
-  // seule si la machine ne suit pas.
-  const post = creerPost(THREE, monde, { qualite: scenario.qualite || "auto" });
+  // L'image. La chaîne d'effets se pose par-dessus le monde ; c'est le
+  // gouverneur qui décide de ce qu'elle allume, et de la densité de pixels.
+  const post = creerPost(THREE, monde);
+  const qualite = creerQualite(monde, { qualite: scenario.qualite || "auto" });
+  qualite.brancherPost(post);
 
   // Le son. Il se construit toujours ; c'est le navigateur qui décide quand
   // il a le droit de sortir (au premier appui), et `creerSon` gère ça seul.
@@ -462,6 +470,7 @@ export async function lancerScenario(
     // Le réalisateur passe en premier : c'est lui qui décide s'il tient la
     // caméra, et à quelle vitesse le temps s'écoule.
     const priseCamera = cinema.maj(dtReel, v);
+    qualite.maj(dtReel);
     const dt = dtReel * cinema.tempo;
     const fige = etat.phase !== "roule";
     etat.chrono += fige ? 0 : dt;
@@ -533,6 +542,8 @@ export async function lancerScenario(
       }
       a.maille.position.set(a.x, 0, a.z);
       a.maille.rotation.y = a.cap;
+      a.tache.position.set(a.x, 0.015, a.z);
+      a.tache.rotation.z = -a.cap; // le plan est couché : c'est z qui tourne
       a.feux?.userData.freiner(a.v.freine || (a.arrete && a.v.vitesse > 0.3));
     }
 
@@ -540,6 +551,8 @@ export async function lancerScenario(
       m.position.set(v.x, 0, v.z);
       m.rotation.y = v.cap;
     }
+    tacheJoueur.position.set(v.x, 0.015, v.z);
+    tacheJoueur.rotation.z = -v.cap;
     feuxJoueur.userData.freiner(v.freine && v.vitesse > 0.2);
     // ⚠️ On n'affiche jamais les deux. Compter sur le tri des faces pour que
     // la carrosserie « s'ouvre » vue de l'intérieur ne marche pas : il reste
@@ -681,6 +694,7 @@ export async function lancerScenario(
     etat,
     son,
     post,
+    qualite,
     cinema,
     VUES,
     changerVue: (x) => rig.changerVue(x),

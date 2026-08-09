@@ -30,7 +30,10 @@ const OBJECTIF = {
     uTemps: { value: 0 },
     uGrain: { value: 0.045 },
     uVignette: { value: 0.62 },
-    uAberration: { value: 0.0022 },
+    // ⚠️ 0,0022 se VOYAIT : franges vertes et violettes sur les arêtes des
+    // façades. Une aberration qu'on remarque n'est plus un objectif, c'est un
+    // défaut. Elle doit se sentir sans se voir.
+    uAberration: { value: 0.0011 },
     uFlou: { value: 1.0 }, // 0 = net partout, 1 = bords ouverts, >1 = rack focus
     uPixel: { value: [1 / 1080, 1 / 1920] },
     uFroid: { value: 0.16 }, // les ombres tirent vers le bleu-violet
@@ -116,18 +119,24 @@ const OBJECTIF = {
 // Les trois crans de qualité. On DESCEND en cours de partie, jamais on ne
 // remonte : une machine qui rame ne se remet pas à respirer, et remonter
 // ferait clignoter l'image entre deux réglages.
-const CRANS = ["cinema", "propre", "brut"];
+//
+// ⚠️ Ce module ne DÉCIDE plus de rien : c'est `qualite.js` qui tient l'échelle
+// et appelle `regler()`. Deux régulateurs qui se surveillaient finissaient par
+// se battre, et personne ne savait plus quel réglage était actif.
 
-export function creerPost(THREE, monde, { qualite = "auto" } = {}) {
+export function creerPost(THREE, monde) {
   const { rendu, scene, camera } = monde;
 
-  // Le point de départ : un téléphone commence en « propre » (pas de halo
-  // multi-passes), une machine de bureau en « cinéma ».
-  let cran =
-    qualite === "auto" ? (monde.petit ? 1 : 0) : CRANS.indexOf(qualite);
-  if (cran < 0) cran = 0;
-
-  const composer = new EffectComposer(rendu);
+  // 🔴 L'ANTICRÉNELAGE VIT ICI, et nulle part ailleurs. Dès qu'on dessine dans
+  // une cible intermédiaire, l'option `antialias` du rendu ne sert plus à
+  // rien : c'est cette cible qui doit être multi-échantillonnée. C'est la
+  // raison pour laquelle l'image avait des bords en escalier alors que le
+  // rendu était censé être anticrénelé.
+  const cible = new THREE.WebGLRenderTarget(1, 1, {
+    type: THREE.HalfFloatType,
+    samples: 4,
+  });
+  const composer = new EffectComposer(rendu, cible);
   composer.addPass(new RenderPass(scene, camera));
 
   // Le halo. ⚠️ Seuil HAUT et force basse. Un halo généreux ne fait pas
@@ -159,86 +168,40 @@ export function creerPost(THREE, monde, { qualite = "auto" } = {}) {
     u.uPixel.value = [1 / (l * dpr), 1 / (h * dpr)];
   });
 
-  // ── La sécurité : on mesure, et on dégrade ────────────────────────────
-  // ⚠️ Les deux premières secondes ne comptent PAS. Elles contiennent la
-  // compilation des shaders, la mise en cache des textures et la première
-  // image d'ombres : mesurées, elles font croire à n'importe quelle machine
-  // qu'elle est trop lente, et la chaîne se coupait avant d'avoir servi.
-  const ECHAUFFEMENT = 2;
-  let echauffe = 0;
-  let fenetre = 0;
-  let images = 0;
-  let mauvaises = 0; // il en faut DEUX de suite : un ramasse-miettes ne compte pas
-  let installe = true;
-
-  function appliquerCran() {
-    halo.enabled = cran === 0;
-    // En « brut », on ne garde que le vignettage et le grain : les lectures
-    // multiples du flou et de l'aberration sont ce qui coûte le plus cher.
-    u.uFlou.value = cran === 2 ? 0 : reglages.flou;
-    u.uAberration.value = cran === 2 ? 0 : reglages.aberration;
-  }
-
-  const reglages = { flou: 1, aberration: 0.0022 };
-  appliquerCran();
+  // Ce que le gouverneur peut couper, et ce que la caméra pilote.
+  const reglages = { flou: 1, aberration: u.uAberration.value, objectif: 1 };
 
   const dessiner = (dt) => {
     u.uTemps.value = (u.uTemps.value + dt) % 100;
     if (u.uSecousse.value > 0)
       u.uSecousse.value = Math.max(0, u.uSecousse.value - dt * 3.2);
     composer.render(dt);
-
-    // La mesure, sur des fenêtres d'une seconde. Une seule image lente ne
-    // veut rien dire (un chargement, un ramasse-miettes) ; une seconde entière
-    // sous 45 images, si.
-    if (echauffe < ECHAUFFEMENT) {
-      echauffe += dt;
-      return;
-    }
-    fenetre += dt;
-    images++;
-    if (fenetre < 1) return;
-    const fps = images / fenetre;
-    fenetre = 0;
-    images = 0;
-    // 🔴 Le seuil ne peut PAS être 45. Beaucoup d'écrans sont bloqués à 30 Hz
-    // (économie de batterie, écran externe, onglet en arrière-plan) : à 45, la
-    // chaîne se dégradait sur des machines qui tournaient parfaitement, sans
-    // que rien ne le signale. 30 images/s stables est un rendu acceptable ;
-    // ce qu'on chasse, c'est ce qui tombe SOUS le pas d'un écran 30 Hz.
-    if (fps >= 26) {
-      mauvaises = 0;
-      return;
-    }
-    if (++mauvaises < 2) return;
-    mauvaises = 0;
-    if (cran < CRANS.length - 1) {
-      cran++;
-      appliquerCran();
-    } else if (fps < 20) {
-      // Même dépouillée, la chaîne coûte trop cher : on la retire. Le jeu
-      // reste jouable, c'est la seule chose qui n'est pas négociable.
-      installe = false;
-      monde.brancherRendu(null);
-    }
   };
   monde.brancherRendu(dessiner);
 
   return {
-    get cran() {
-      return CRANS[cran];
-    },
-    get installe() {
-      return installe;
-    },
     uniforms: u,
     composer, // pour le banc d'essai : mesurer le coût d'une image au cran voulu
+
+    // Appelé par le gouverneur de qualité à chaque changement de cran.
+    // `objectif` : 1 = tous les effets, 0,5 = sans aberration, 0 = seulement
+    // le vignettage et le grain (les lectures multiples du flou sont ce qui
+    // coûte le plus cher).
+    regler({ halo: avecHalo = true, msaa = 4, objectif: niveau = 1 }) {
+      halo.enabled = avecHalo;
+      reglages.objectif = niveau;
+      if (cible.samples !== msaa) {
+        cible.samples = msaa;
+        cible.dispose(); // la cible se recrée au prochain rendu
+      }
+      appliquerObjectif();
+    },
 
     // Le rack focus : la caméra « fait le point ». 0 = tout net (on regarde
     // au loin), 2,5 = tout se ferme sauf le centre (on regarde tout près).
     point(valeur) {
       reglages.flou = valeur;
-      if (cran !== 2) u.uFlou.value = valeur;
+      appliquerObjectif();
     },
 
     // Le choc. L'image se déchire, puis se recolle en un tiers de seconde.
@@ -246,19 +209,15 @@ export function creerPost(THREE, monde, { qualite = "auto" } = {}) {
       u.uSecousse.value = Math.min(1, force);
     },
 
-    // Forcer un cran (banc d'essai, et bascule du mode debug).
-    forcer(nom) {
-      const i = CRANS.indexOf(nom);
-      if (i < 0) return CRANS[cran];
-      cran = i;
-      echauffe = 0; // on laisse à la machine le temps de se refaire un avis
-      mauvaises = 0;
-      appliquerCran();
-      return CRANS[cran];
-    },
-
     detruire() {
       composer.dispose?.();
+      cible.dispose();
     },
   };
+
+  function appliquerObjectif() {
+    const n = reglages.objectif;
+    u.uFlou.value = n > 0 ? reglages.flou : 0;
+    u.uAberration.value = n >= 1 ? reglages.aberration : 0;
+  }
 }
