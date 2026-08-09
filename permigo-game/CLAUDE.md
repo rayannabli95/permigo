@@ -187,4 +187,5 @@ export async function mount(root, param) {
 ## ⚠️ Erreurs récurrentes (compléter quand Claude se trompe 2×)
 
 - N'invente pas de tokens CSS (`--surface` / `--border` / `--muted`) → bug dark mode. Utilise `--su` / `--bo` / `--mu`.
+- 🔴 **Le déploiement se configure à la RACINE du dépôt, pas dans `permigo-game/`.** Le projet Vercel pointe sur `permigo-v7/` : il lit `/vercel.json` (en-têtes, rewrites, crons) et ne cherche les fonctions serverless que dans `/api/`. Un `permigo-game/vercel.json` est **inerte** : il a existé des mois, aucun de ses en-têtes de sécurité n'a jamais été servi et son cron `push-daily` n'a jamais tourné. La PR #760 a même « corrigé » une CSP dans ce fichier mort. **Vérifie toujours en prod** : `curl -sI https://www.permigo.fr/`.
 - Tests e2e : le login attend **`body.has-chrome`** (et **non** `.acc2-hero-hi`, périmé). Les `.prc-node` du parcours animent → cliquer en DOM direct `locator.evaluate(el => el.click())`.
