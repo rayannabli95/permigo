@@ -124,6 +124,12 @@ export function creerMonde(THREE, hote, { qualite = "auto" } = {}) {
   const camera = new THREE.PerspectiveCamera(55, 1, 0.25, 220);
   scene.add(camera);
 
+  // Ce qui dessine réellement l'image. Par défaut c'est le rendu direct ; la
+  // chaîne d'effets (post.js) vient prendre sa place quand elle s'installe.
+  // Le reste du moteur n'a pas à savoir laquelle des deux tourne.
+  let dessiner = () => rendu.render(scene, camera);
+  const auxRedimensions = [];
+
   function taille() {
     const r = hote.getBoundingClientRect();
     const l = Math.max(1, Math.round(r.width));
@@ -131,6 +137,7 @@ export function creerMonde(THREE, hote, { qualite = "auto" } = {}) {
     rendu.setSize(l, h, false);
     camera.aspect = l / h;
     camera.updateProjectionMatrix();
+    auxRedimensions.forEach((f) => f(l, h));
   }
   taille();
   const ro = new ResizeObserver(taille);
@@ -162,7 +169,7 @@ export function creerMonde(THREE, hote, { qualite = "auto" } = {}) {
       if (mesures.length < 400) mesures.push(t - dernier);
       dernier = t;
       sur(dt, t / 1000);
-      rendu.render(scene, camera);
+      dessiner(dt);
     };
     brut = requestAnimationFrame(image);
   }
@@ -189,8 +196,19 @@ export function creerMonde(THREE, hote, { qualite = "auto" } = {}) {
     soleil,
     ambiante,
     ombres,
+    petit,
     taille,
     majOmbres,
+    // La chaîne d'effets s'installe ici, et peut se retirer d'elle-même si la
+    // machine ne suit pas (voir post.js).
+    brancherRendu(fn) {
+      dessiner = fn || ((_dt) => rendu.render(scene, camera));
+    },
+    surRedimension(fn) {
+      auxRedimensions.push(fn);
+      const r = hote.getBoundingClientRect();
+      fn(Math.max(1, Math.round(r.width)), Math.max(1, Math.round(r.height)));
+    },
     demarrer,
     detruire,
     get mesures() {

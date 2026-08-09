@@ -184,17 +184,25 @@ export function creerKit(THREE) {
     const avant = new THREE.MeshBasicMaterial({ color: 0xfff4dd });
     const arriere = new THREE.MeshBasicMaterial({ color: 0xff5a4a });
     const stops = [];
+    // Les optiques elles-mêmes. On les tient à part : vue du poste de
+    // conduite, il n'y a PLUS de capot devant l'œil, et un phare crème posé à
+    // deux mètres devient un rectangle blanc en plein cadre (le halo le
+    // transforme même en tache). Le faisceau au sol, lui, reste.
+    const lentilles = [];
     for (const sx of [-1, 1]) {
       const a = new THREE.Mesh(CUBE, avant);
       a.scale.set(0.36, 0.15, 0.06);
       a.position.set((sx * largeur) / 2.7, hauteur, -longueur / 2 - 0.02);
       g.add(a);
+      lentilles.push(a);
       const b = new THREE.Mesh(CUBE, arriere);
       b.scale.set(0.32, 0.13, 0.06);
       b.position.set((sx * largeur) / 2.7, hauteur + 0.06, longueur / 2 + 0.02);
       g.add(b);
       stops.push(b);
+      lentilles.push(b);
     }
+    g.userData.lentilles = lentilles;
     const nappe = halo(5.2, 0.42);
     nappe.position.set(0, 0.04, -longueur / 2 - 3.4);
     nappe.scale.set(4.6, 12, 1); // allongée devant, comme un vrai faisceau

@@ -44,6 +44,29 @@
   backdrop-filter: blur(6px);
 }
 
+/* Couper le son. Même pastille que « quitter », juste à côté : une situation
+   se joue souvent en cours ou dans le bus, et le son doit se couper d'un
+   pouce sans chercher. */
+.g3-son {
+  position: absolute;
+  top: calc(10px + env(safe-area-inset-top));
+  right: 58px;
+  z-index: 8;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(12, 9, 30, 0.62);
+  color: #efeaff;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+}
+.g3-son.off {
+  color: #8f83b8;
+}
+
 /* Bascule conducteur / extérieur */
 .g3-oeil {
   position: absolute;

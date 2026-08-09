@@ -16,6 +16,9 @@ import { creerCommandes } from "./engine/controls.js";
 import { creerZones } from "./engine/zones.js";
 import { creerActeur } from "./engine/npc.js";
 import { creerDebug } from "./engine/debug.js";
+import { creerSon } from "./engine/audio.js";
+import { creerPost } from "./engine/post.js";
+import { creerCinema } from "./engine/cinema.js";
 import { chargerModeles, copier } from "./engine/modeles.js";
 import * as CARREFOUR from "./environments/carrefour.js";
 
@@ -44,10 +47,29 @@ const GRAVITE = [
 // arrive orienté comme il veut, et c'est la seule chose qu'on ne peut pas
 // deviner sans le regarder.
 const MODELES = {
-  // L'avant du modèle pointe vers +X ; +90° l'amène sur -Z, l'avant du jeu.
-  voiture: { fichier: "voiture.glb", longueur: 4.2, capOffset: Math.PI / 2 },
-  gris: { fichier: "gris.glb", longueur: 4.25, capOffset: Math.PI / 2 },
-  camion: { fichier: "camion.glb", longueur: 7.6, capOffset: Math.PI / 2 },
+  // ⭐ LA voiture du joueur : le Cupra violet dessiné le 05/08, celui de la DA
+  // PermiGo (carrosserie anthracite laquée, filet violet, jantes violettes,
+  // badge P). C'est la seule voiture que l'élève voit de dehors, dans le plan
+  // d'ouverture et dans la vue extérieure : elle doit être LA nôtre, pas un
+  // véhicule générique. Passée en 3D depuis l'image d'origine.
+  // 🔴 PAS de `eclairer` ici, et c'est une leçon générale : sur un modèle
+  // TEXTURÉ, `material.color` n'est pas la couleur de l'objet, c'est un blanc
+  // neutre qui multiplie la texture. Le monter au-dessus de 1 ne « rend pas
+  // plus clair », ça brûle la texture : le Cupra anthracite ressortait blanc.
+  // Pour faire ressortir une carrosserie sombre la nuit, on éclaire la SCÈNE
+  // (contre-jour, reflet), jamais l'albédo.
+  cupra: { fichier: "cupra.glb", longueur: 4.3, capOffset: -Math.PI / 2 },
+  // 🔴 L'avant de ces modèles pointe vers -X, et l'avant du jeu est -Z : il
+  // faut donc -90°, pas +90°. Avec +90° l'avant se retrouve sur +Z et TOUTES
+  // les voitures roulent en marche arrière. Le bug a tenu parce qu'on ne le
+  // voit pas sur une voiture qui vient de face, et parce que les phares et les
+  // feux arrière, eux, sont posés par le code au bon endroit : la voiture
+  // avait donc ses feux rouges du bon côté et sa carrosserie à l'envers.
+  // ⚠️ La vérification qui tranche : dans /lab/apercu/?a=0 la caméra est en
+  // +Z et regarde vers -Z, donc la GAUCHE de l'image est -X.
+  voiture: { fichier: "voiture.glb", longueur: 4.2, capOffset: -Math.PI / 2 },
+  gris: { fichier: "gris.glb", longueur: 4.25, capOffset: -Math.PI / 2 },
+  camion: { fichier: "camion.glb", longueur: 7.6, capOffset: -Math.PI / 2 },
   // 🔴 Le buck d'habitacle complet a été ABANDONNÉ. La reconstruction bouche
   // le pare-brise d'une surface pleine ; découpé sous ce panneau, il ne reste
   // qu'une masse grise sans détail, parce qu'on n'en voit plus que le dessus.
@@ -109,13 +131,81 @@ function habitacle(THREE, kit, modeles) {
   if (!planche) return kit.poste("violet");
   planche.position.set(0, 0.5, -1.5);
   g.add(planche);
-
   const volant = copier(modeles.volant) || kit.poste("violet").userData.volant;
   volant.position.set(-0.38, 0.8, -0.95);
   volant.rotation.x = -0.42; // l'inclinaison d'une colonne de direction
   g.add(volant);
   g.userData.volant = volant;
+
+  // 🔴 Un habitacle est SOMBRE. Sans ce réglage, la planche de bord prend la
+  // lumière du ciel et le reflet de l'environnement comme si elle était
+  // dehors : elle rend un gris moyen, occupe un tiers du cadre en portrait,
+  // et c'est la surface la plus fade de l'image. Dans une vraie voiture, la
+  // seule lumière qui l'atteint vient du combiné.
+  interieurSombre(g);
+
+  // Le combiné. Ce n'est pas un cadran lisible (à cette distance, personne ne
+  // le lirait) : c'est la LUEUR ambre qui monte sur la planche. Un habitacle
+  // sans elle n'est qu'une forme sombre ; avec elle, on est assis dedans.
+  // ⚠️ Petite et COUCHÉE. Dressée face à l'œil, elle devient un soleil orange
+  // derrière le volant : on ne voit plus qu'elle. Ce qu'on veut, c'est la
+  // lumière qui se pose SUR la planche, pas la source elle-même.
+  const lueur = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.66, 0.17),
+    new THREE.MeshBasicMaterial({
+      map: degradeCombine(THREE),
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      fog: false,
+    }),
+  );
+  lueur.position.set(-0.38, 0.87, -1.24);
+  lueur.rotation.x = -1.16; // presque à plat : elle éclaire, elle ne se montre pas
+  g.add(lueur);
   return g;
+}
+
+// Ce qui est DANS la voiture ne reçoit ni le ciel ni le décor. On coupe donc
+// le reflet d'environnement et on écrase la couleur : le reste de l'éclairage
+// vient du combiné, juste en dessous.
+function interieurSombre(racine) {
+  racine.traverse((o) => {
+    if (!o.material) return;
+    // ⚠️ On CLONE avant de toucher : un modèle copié partage ses matériaux
+    // avec l'original, et écraser la couleur en place assombrirait aussi
+    // toutes les autres copies (et deux fois plus à la deuxième situation).
+    // ⚠️ Et on se souvient si c'était un tableau : rendre un tableau à un
+    // maillage sans groupes le fait disparaître, sans une erreur.
+    const etaitTableau = Array.isArray(o.material);
+    const mats = (etaitTableau ? o.material : [o.material]).map((m) => {
+      const c = m.clone();
+      if (c.envMapIntensity !== undefined) c.envMapIntensity = 0.12;
+      c.color?.multiplyScalar(0.34);
+      c.emissive?.multiplyScalar(0.3);
+      if (c.roughness !== undefined) c.roughness = 0.92;
+      return c;
+    });
+    o.material = etaitTableau ? mats : mats[0];
+  });
+}
+
+// La lueur du combiné : un dégradé ambre qui s'éteint sur les bords. Dessiné
+// une fois dans un canvas de 64 px, il ne coûte rien.
+function degradeCombine(THREE) {
+  const c = document.createElement("canvas");
+  c.width = 64;
+  c.height = 32;
+  const g = c.getContext("2d");
+  const rad = g.createRadialGradient(32, 26, 2, 32, 26, 30);
+  rad.addColorStop(0, "rgba(255,196,120,0.26)");
+  rad.addColorStop(0.45, "rgba(255,150,80,0.1)");
+  rad.addColorStop(1, "rgba(255,120,60,0)");
+  g.fillStyle = rad;
+  g.fillRect(0, 0, 64, 32);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
 }
 
 const gravite = (f) => {
@@ -170,13 +260,19 @@ export async function lancerScenario(
 
   // Deux corps pour la même voiture : la carrosserie (vue de dehors) et le
   // poste de conduite (vu de dedans). On n'affiche jamais les deux.
-  const mailleJoueur = carrosserie("voiture", "violet");
+  const mailleJoueur = carrosserie("voiture", "cupra");
   const feuxJoueur = kit.feuxVehicule(v.largeur, v.longueur);
   mailleJoueur.add(feuxJoueur);
   const posteJoueur = habitacle(THREE, kit, modeles);
   // Le faisceau du joueur reste allumé même en vue conducteur : c'est lui
   // qui éclaire le bitume devant, et on le voit à travers le pare-brise.
   const faisceauJoueur = kit.feuxVehicule(v.largeur, v.longueur);
+  // 🔴 De cette copie-là on ne garde QUE la lumière au sol. Ses optiques
+  // seraient à deux mètres devant l'œil, sans capot pour les cacher : un
+  // rectangle crème en plein milieu du pare-brise, que le halo transforme en
+  // tache. Le bug se voyait sur toutes les captures et personne ne savait
+  // ce que c'était.
+  faisceauJoueur.userData.lentilles.forEach((m) => (m.visible = false));
   faisceauJoueur.visible = false;
   monde.scene.add(mailleJoueur, posteJoueur, faisceauJoueur);
 
@@ -209,16 +305,37 @@ export async function lancerScenario(
   const boitesNpc = acteurs.map((a) => dbg.dessinerBoite(a.v, 0xff9a4d));
   if (debug) dbg.basculer(true);
 
+  // L'image. La chaîne d'effets se pose par-dessus le monde et se dégrade
+  // seule si la machine ne suit pas.
+  const post = creerPost(THREE, monde, { qualite: scenario.qualite || "auto" });
+
+  // Le son. Il se construit toujours ; c'est le navigateur qui décide quand
+  // il a le droit de sortir (au premier appui), et `creerSon` gère ça seul.
+  const son = creerSon();
+
+  // Le réalisateur : le plan d'ouverture et le ralenti d'impact.
+  const cinema = creerCinema(THREE, monde, rig);
+  cinema.brancherPost(post);
+
   const cmd = creerCommandes(hote, {
     surTouche: (code) => {
       if (code === "KeyH") dbg.basculer();
       if (code === "KeyC") sur("vue", rig.changerVue());
+      if (code === "KeyM") sur("son", !son.basculer());
+      // N'importe quelle autre touche coupe le plan d'ouverture.
+      cinema.sauter();
     },
   });
+  // ⚠️ Le doigt aussi, pas seulement le clavier : sur téléphone il n'y a pas
+  // de touche à presser, et un plan qu'on ne peut pas sauter devient une
+  // punition dès la troisième fois qu'on refait la situation.
+  const sauterAuDoigt = () => cinema.sauter();
+  hote.addEventListener("pointerdown", sauterAuDoigt);
 
   // ── L'état du scénario ───────────────────────────────────────────────
   const etat = {
-    phase: "roule", // roule → fini
+    // plan (le plan d'ouverture) → roule → choc (le ralenti) → fini
+    phase: "plan",
     fautes: [], // dans l'ordre où elles arrivent
     chrono: 0,
     journal: [],
@@ -231,6 +348,9 @@ export async function lancerScenario(
     if (etat.fautes.includes(code)) return;
     etat.fautes.push(code);
     noter(`faute ${code}`);
+    // Le choc a son propre bruit, et il arrive dans la même image : deux sons
+    // superposés donneraient une bouillie au moment le plus important.
+    if (code !== "collision") son.jouer("alerte");
     sur("faute", code);
   };
 
@@ -325,10 +445,31 @@ export async function lancerScenario(
     sur("fin", etat.verdict);
   }
 
+  // Le plan d'ouverture. Tant qu'il tourne, la simulation est GELÉE : les
+  // chiffres du verdict doivent être exactement les mêmes qu'avant, et une
+  // situation qui commence pendant que la caméra vole serait injouable.
+  cinema.ouvrir(() => {
+    etat.phase = "roule";
+    noter("départ");
+    sur("depart");
+  });
+
+  // Le ralenti d'impact tient la main une seconde avant le verdict.
+  let chocRestant = 0;
+
   // ── La boucle ────────────────────────────────────────────────────────
-  monde.demarrer((dt) => {
-    const fige = etat.phase === "fini";
+  monde.demarrer((dtReel) => {
+    // Le réalisateur passe en premier : c'est lui qui décide s'il tient la
+    // caméra, et à quelle vitesse le temps s'écoule.
+    const priseCamera = cinema.maj(dtReel, v);
+    const dt = dtReel * cinema.tempo;
+    const fige = etat.phase !== "roule";
     etat.chrono += fige ? 0 : dt;
+
+    if (etat.phase === "choc") {
+      chocRestant -= dtReel;
+      if (chocRestant <= 0) terminer(false);
+    }
 
     const e = cmd.lire(dt);
     rig.regarder(fige ? "centre" : e.regard);
@@ -347,7 +488,10 @@ export async function lancerScenario(
       if (etatFeu !== f.etat) {
         f.etat = etatFeu;
         f.objet?.userData.mettre(etatFeu);
-        if (f.branche === bJ) sur("feu", etatFeu);
+        if (f.branche === bJ) {
+          son.jouer("clic"); // le feu change : on lève les yeux
+          sur("feu", etatFeu);
+        }
       }
     }
 
@@ -400,7 +544,10 @@ export async function lancerScenario(
     // ⚠️ On n'affiche jamais les deux. Compter sur le tri des faces pour que
     // la carrosserie « s'ouvre » vue de l'intérieur ne marche pas : il reste
     // des morceaux de montants et de rétroviseurs en travers de l'image.
-    const dedans = rig.vue === "conduite";
+    // Pendant le plan d'ouverture, c'est le réalisateur qui sait où est la
+    // caméra, pas le rig : la vue reste « conduite » alors qu'on filme la
+    // voiture de dehors.
+    const dedans = cinema.actif ? cinema.dedans : rig.vue === "conduite";
     mailleJoueur.visible = !dedans;
     posteJoueur.visible = dedans;
     faisceauJoueur.visible = dedans; // le faisceau, lui, éclaire toujours
@@ -409,7 +556,16 @@ export async function lancerScenario(
     posteJoueur.userData.volant.rotation.z = v.braquage * 2.6;
 
     monde.majOmbres(v.x, v.z);
-    rig.maj(dt, v);
+    // Le rig ne reprend la caméra que si le réalisateur l'a lâchée.
+    if (!priseCamera) rig.maj(dt, v);
+    // ⚠️ Le son lit le freinage RÉEL, celui qui sort de l'assistance : sinon
+    // les freins crissent quand le régulateur lève le pied tout seul.
+    son.maj(dt, {
+      vitesse: v.vitesse,
+      gaz: e.gaz,
+      freinage: v.freine ? e.freinage : 0,
+      fige,
+    });
 
     if (!fige) {
       if (Math.hypot(v.x, v.z) < 15 && v.vitesse < 0.35) arreteAvant = true;
@@ -471,7 +627,17 @@ export async function lancerScenario(
         if (seTouchent(v, a.v)) {
           v.vitesse = 0;
           a.v.vitesse = 0;
-          terminer(false, "collision");
+          son.jouer("choc");
+          // ⭐ Le choc n'ouvre PAS le verdict tout de suite. Le temps se
+          // dilate, la caméra sort de la voiture et on VOIT ce qui vient
+          // d'arriver. Un carton d'échec qui tombe dans la seconde ne dit à
+          // personne ce qu'il a percuté.
+          fauter("collision");
+          cinema.impact(1.1);
+          rig.changerVue("exterieur");
+          sur("vue", "exterieur");
+          etat.phase = "choc";
+          chocRestant = 1.25;
           break;
         }
       }
@@ -513,11 +679,18 @@ export async function lancerScenario(
     acteurs,
     v,
     etat,
+    son,
+    post,
+    cinema,
     VUES,
     changerVue: (x) => rig.changerVue(x),
     detruire() {
+      hote.removeEventListener("pointerdown", sauterAuDoigt);
+      cinema.detruire();
       cmd.detruire();
       dbg.detruire();
+      son.detruire();
+      post.detruire();
       monde.detruire();
     },
   };

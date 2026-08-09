@@ -32,7 +32,8 @@ export async function mount(root) {
 
 async function jouer(root) {
   const scenario = SITUATIONS[manche.i];
-  const debug = /(?:\?|&)debug=1/.test(location.hash);
+  // `#/situation-3d?debug=1` dans l'app, `?debug=1` sur un banc d'essai.
+  const debug = /(?:\?|&)debug=1/.test(location.hash + location.search);
 
   root.innerHTML = `
     <div class="g3">
@@ -41,6 +42,7 @@ async function jouer(root) {
       <div class="g3-chargement">Chargement de la scène</div>
 
       <button class="g3-quitter" type="button" aria-label="Quitter">✕</button>
+      <button class="g3-son" type="button" aria-label="Couper le son" aria-pressed="false">🔊</button>
       <button class="g3-oeil" type="button" aria-pressed="false">
         <span class="g3-oeil-i" aria-hidden="true">◨</span> Vue extérieure
       </button>
@@ -50,6 +52,7 @@ async function jouer(root) {
       <div class="g3-consigne">
         <b>${esc(scenario.titre)}</b>
         <small>${esc(scenario.consigne)}</small>
+        <em>Touche l'écran pour passer</em>
       </div>
       <div class="g3-flash" role="status"></div>
 
@@ -63,7 +66,7 @@ async function jouer(root) {
         </div>
       </div>
 
-      <p class="g3-clavier">La voiture avance seule<br>S freiner · A D tourner · Q E regarder · H debug</p>
+      <p class="g3-clavier">La voiture avance seule<br>S freiner · A D tourner · Q E regarder · M son · H debug</p>
 
       <div class="g3-fin"><div class="g3-carte"></div></div>
     </div>`;
@@ -75,6 +78,20 @@ async function jouer(root) {
 
   track("situation3d.started", { scenario: scenario.id, etape: manche.i + 1 });
 
+  // ⚠️ Déclaré AVANT le moteur : le moteur peut renvoyer un évènement dès sa
+  // première image, et une fonction rangée plus bas n'existerait pas encore.
+  const bouton = $(".g3-son");
+  const refletSon = () => {
+    const off = partie?.son.coupe ?? false;
+    bouton.textContent = off ? "🔇" : "🔊";
+    bouton.classList.toggle("off", off);
+    bouton.setAttribute("aria-pressed", String(off));
+    bouton.setAttribute(
+      "aria-label",
+      off ? "Remettre le son" : "Couper le son",
+    );
+  };
+
   const { lancerScenario } = await import("@/game/runner.js");
   partie = await lancerScenario($(".g3-vue"), scenario, {
     debug,
@@ -82,9 +99,18 @@ async function jouer(root) {
       if (type === "image") compteur.textContent = Math.round(data.kmh);
       else if (type === "faute") montrerFlash(MSG_FLASH[data]);
       else if (type === "feu") montrerFlash(MSG_FEU[data]);
+      else if (type === "son") refletSon();
+      // Le plan d'ouverture est fini : le carton de situation s'efface et la
+      // main revient au joueur. Il ne se retire pas sur un minuteur, il se
+      // retire quand la caméra a fini de se poser.
+      else if (type === "depart") $(".g3-consigne")?.classList.add("off");
       else if (type === "fin") terminer(data);
     },
   });
+
+  // En mode développeur seulement : une poignée pour inspecter et régler le
+  // moteur depuis la console ou un banc d'essai. La vraie page n'expose rien.
+  if (debug) window.__jeu = partie;
 
   partie.cmd.brancherManche($(".g3-manche"));
   partie.cmd.brancherPedale($(".g3-pedale.gaz"), "gaz");
@@ -95,6 +121,15 @@ async function jouer(root) {
   setTimeout(() => $(".g3-consigne")?.classList.add("off"), 2800);
 
   $(".g3-quitter").addEventListener("click", quitter);
+
+  // Le son se souvient de son état d'une situation à l'autre : c'est le
+  // moteur qui le range, la coque ne fait que refléter ce qu'il dit.
+  refletSon();
+  bouton.addEventListener("click", () => {
+    partie.son.basculer();
+    refletSon();
+    haptic("select");
+  });
 
   // La vue extérieure n'est pas un gadget de développeur : on se voit
   // manœuvrer, et c'est le seul moyen de comprendre où on s'est placé sur la
