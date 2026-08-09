@@ -23,8 +23,14 @@ Dashboard Vercel → projet → Settings → Environment Variables :
 | `CRON_SECRET` | une chaîne aléatoire longue (ex: `openssl rand -hex 32`) | Production |
 
 > `CRON_SECRET` sert double : Vercel signe automatiquement ses requêtes cron
-> avec `Authorization: Bearer $CRON_SECRET`, et `api/push-daily.js` relaie ce
+> avec `Authorization: Bearer $CRON_SECRET`, et `/api/push-daily.js` relaie ce
 > même secret vers Supabase en `x-cron-secret`.
+
+> ⚠️ `/api/push-daily.js` et la déclaration du cron vivent **à la racine du
+> dépôt**, pas dans `permigo-game/`. Le projet Vercel est configuré sur la
+> racine : il ne lit que `/vercel.json` et ne cherche les fonctions que dans
+> `/api/`. Tant que les deux ont vécu dans `permigo-game/`, le cron n'a jamais
+> tourné et personne ne l'a vu.
 
 Ajoute aussi `VITE_VAPID_PUBLIC_KEY` dans ton `.env` local (permigo-game/.env).
 

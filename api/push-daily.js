@@ -3,7 +3,14 @@
 // (Vercel ne peut cron que ses propres routes ; Supabase héberge la
 // logique d'envoi. Ce fichier ne fait QUE le pont, avec secret.)
 //
-// Planifié dans vercel.json : "0 17 * * *" UTC ≈ 18h (hiver) / 19h (été) Paris.
+// ⚠️ CE FICHIER DOIT RESTER À LA RACINE DU DÉPÔT, dans /api/.
+// Le projet Vercel est configuré sur la racine de permigo-v7 (il y lit
+// /vercel.json, qui build permigo-game). Vercel ne cherche les fonctions
+// serverless que dans le /api/ de SA racine. Tant qu'il a vécu dans
+// permigo-game/api/, il n'a jamais été déployé : /api/push-daily renvoyait
+// la page d'accueil (le rewrite l'attrapait) et le cron n'a jamais tourné.
+//
+// Planifié dans /vercel.json : "0 17 * * *" UTC ≈ 18h (hiver) / 19h (été) Paris.
 // Env Vercel requis : CRON_SECRET (même valeur que le secret Supabase).
 // Vercel ajoute automatiquement `Authorization: Bearer ${CRON_SECRET}`
 // aux requêtes cron quand la variable CRON_SECRET existe.
