@@ -162,6 +162,9 @@ const ROUTES = {
     // en local. ?regard=gyro&action=designer&retour=minimal pour changer de
     // version testée. Volontairement hors du parcours élève.
     slice: () => import("@/pages/eleve/slice-regard.js"),
+    // « Secondes d'avance » — 30 s, une rue, cinq événements. Un seul geste :
+    // toucher ce qui va poser problème.
+    avance: () => import("@/pages/eleve/avance.js"),
     roue: () => import("@/pages/eleve/roue.js"),
     "mes-coffres": () => import("@/pages/eleve/mes-coffres.js"),
     messages: () => import("@/pages/common/messages.js"),
@@ -315,6 +318,7 @@ const ROUTE_TITLES = {
   "en-situation": "En situation",
   "situation-3d": "En situation 3D",
   slice: "Banc d'essai du regard",
+  avance: "Secondes d'avance",
   boutique: "Boutique",
   "mes-coffres": "Mes coffres",
   messages: "Messages",
@@ -493,6 +497,8 @@ async function routePublic(app) {
     hash.startsWith("#/auto-ecole")
   ) {
     m = await import("@/pages/public/pro.js");
+  } else if (hash.startsWith("#/avance")) {
+    m = await import("@/pages/eleve/avance.js");
   } else if (hash.startsWith("#/slice")) {
     // 🔴 Le test terrain se fait SANS COMPTE : on tend un téléphone à un
     // élève dans un couloir d'auto-école. Sans cette branche il tomberait sur

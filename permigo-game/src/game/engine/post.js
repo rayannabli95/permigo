@@ -40,6 +40,13 @@ const OBJECTIF = {
     uChaud: { value: 0.1 }, // les hautes lumières vers l'ambre
     uSaturation: { value: 1.14 },
     uSecousse: { value: 0 }, // l'impact : l'image se déchire une fraction de s
+    // ⭐ LE MOMENT DE DÉCOUVERTE. Tout l'écran perd sa couleur et son
+    // contraste SAUF un disque autour de ce qu'on vient de trouver. C'est ça
+    // qui transforme « j'ai tapé un truc » en « JE L'AI VU ».
+    uFocus: { value: 0 }, // 0 = rien, 1 = le reste du monde s'efface
+    uCible: { value: [0.5, 0.5] }, // position à l'écran, en 0..1
+    uRayonFocus: { value: 0.1 },
+    uAspect: { value: 0.46 }, // largeur / hauteur, pour un disque rond
   },
   vertexShader: `
     varying vec2 vUv;
@@ -51,6 +58,8 @@ const OBJECTIF = {
     uniform sampler2D tDiffuse;
     uniform float uTemps, uGrain, uVignette, uAberration, uFlou;
     uniform float uFroid, uChaud, uSaturation, uSecousse;
+    uniform float uFocus, uRayonFocus, uAspect;
+    uniform vec2 uCible;
     uniform vec2 uPixel;
     varying vec2 vUv;
 
@@ -97,6 +106,20 @@ const OBJECTIF = {
       col += uFroid * (1.0 - lum) * vec3(-0.06, -0.02, 0.16);
       col += uChaud * lum * vec3(0.16, 0.06, -0.05);
       col = mix(vec3(lum), col, uSaturation);
+
+      // ⭐ La focalisation. Le monde entier tombe en gris sombre, sauf un
+      // disque autour de ce qu'on vient de trouver, qui garde sa couleur et
+      // gagne même un peu d'éclat. Aucun texte, aucune icône : c'est l'image
+      // elle-même qui dit « c'est ÇA ».
+      if (uFocus > 0.001) {
+        float d = length((uv - uCible) * vec2(uAspect, 1.0));
+        float dehors = smoothstep(uRayonFocus, uRayonFocus * 2.4, d);
+        float k = uFocus * dehors;
+        float gris = dot(col, vec3(0.299, 0.587, 0.114));
+        col = mix(col, vec3(gris) * 0.42, k);
+        // Et l'intérieur du disque respire : +12 % de lumière au centre.
+        col *= 1.0 + uFocus * (1.0 - dehors) * 0.12;
+      }
 
       // Le vignettage referme le cadre sur la route.
       col *= 1.0 - uVignette * r2 * 1.35;
@@ -166,6 +189,7 @@ export function creerPost(THREE, monde) {
     composer.setSize(l, h);
     const dpr = rendu.getPixelRatio();
     u.uPixel.value = [1 / (l * dpr), 1 / (h * dpr)];
+    u.uAspect.value = l / h;
   });
 
   // Ce que le gouverneur peut couper, et ce que la caméra pilote.
@@ -202,6 +226,13 @@ export function creerPost(THREE, monde) {
     point(valeur) {
       reglages.flou = valeur;
       appliquerObjectif();
+    },
+
+    // Le moment de découverte. `cible` est en coordonnées d'écran 0..1.
+    focaliser(force, cible, rayon = 0.1) {
+      u.uFocus.value = force;
+      if (cible) u.uCible.value = cible;
+      u.uRayonFocus.value = rayon;
     },
 
     // Le choc. L'image se déchire, puis se recolle en un tiers de seconde.

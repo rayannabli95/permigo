@@ -14,13 +14,19 @@ export const AVANT = (cap) => [-Math.sin(cap), -Math.cos(cap)];
 // la voiture au bout du monde (et à travers les murs).
 export const PAS_MAX = 0.05;
 
-export function creerMonde(THREE, hote, { qualite = "auto" } = {}) {
+export function creerMonde(
+  THREE,
+  hote,
+  { qualite = "auto", jour = false } = {},
+) {
   const scene = new THREE.Scene();
 
-  // Crépuscule violet : c'est la DA PermiGo, et une scène de nuit franche
-  // rend une intersection illisible.
-  const CIEL = 0x2a1d5c;
-  scene.fog = new THREE.Fog(CIEL, 55, 160);
+  // Deux ambiances. Le crépuscule violet est la DA PermiGo. Le PLEIN JOUR
+  // existe pour une seule raison, et elle prime sur la DA : sur un banc
+  // d'essai d'observation, il faut VOIR. Une voiture grise sur du bitume
+  // sombre à quarante mètres n'est lisible par personne.
+  const CIEL = jour ? 0xc8ddf2 : 0x2a1d5c;
+  scene.fog = new THREE.Fog(CIEL, jour ? 120 : 55, jour ? 340 : 160);
 
   // Le ciel est un dégradé, pas un aplat. Une couleur unique donne un fond de
   // studio : il n'y a plus d'horizon, donc plus de profondeur. Un dôme et une
@@ -34,12 +40,20 @@ export function creerMonde(THREE, hote, { qualite = "auto" } = {}) {
   // pose donc vers 0,48, juste AU-DESSUS de la ligne d'horizon. Placée en bas
   // de l'image, elle se retrouve sous le sol et on ne la voit jamais.
   const grad = g2.createLinearGradient(0, 0, 0, 64);
-  grad.addColorStop(0, "#120d33"); // zénith
-  grad.addColorStop(0.35, "#241a4e");
-  grad.addColorStop(0.44, "#43285f");
-  grad.addColorStop(0.48, "#8a5570"); // la dernière lueur du jour
-  grad.addColorStop(0.5, "#6b4468"); // l'horizon
-  grad.addColorStop(1, "#201840");
+  if (jour) {
+    grad.addColorStop(0, "#2f74c8"); // zénith
+    grad.addColorStop(0.34, "#69a4de");
+    grad.addColorStop(0.47, "#a8cbea");
+    grad.addColorStop(0.5, "#d6e6f4"); // l'horizon, presque blanc
+    grad.addColorStop(1, "#9fb0bd");
+  } else {
+    grad.addColorStop(0, "#120d33"); // zénith
+    grad.addColorStop(0.35, "#241a4e");
+    grad.addColorStop(0.44, "#43285f");
+    grad.addColorStop(0.48, "#8a5570"); // la dernière lueur du jour
+    grad.addColorStop(0.5, "#6b4468"); // l'horizon
+    grad.addColorStop(1, "#201840");
+  }
   g2.fillStyle = grad;
   g2.fillRect(0, 0, 2, 64);
   const texCiel = new THREE.CanvasTexture(bandeau);
@@ -61,15 +75,27 @@ export function creerMonde(THREE, hote, { qualite = "auto" } = {}) {
   // sombre sur une route sombre n'a plus de silhouette.
   // ⚠️ Le total reçu par une surface à plat doit rester sous 1,4, sinon tout
   // l'horizontal part en blanc (c'est ce qui cramait le capot).
-  const ambiante = new THREE.HemisphereLight(0xb9a9ff, 0x40336b, 0.9);
+  const ambiante = jour
+    ? new THREE.HemisphereLight(0xcfe2f7, 0x9a8f7e, 1.05)
+    : new THREE.HemisphereLight(0xb9a9ff, 0x40336b, 0.9);
   scene.add(ambiante);
 
-  const rebond = new THREE.DirectionalLight(0x8fa8ff, 0.3);
+  const rebond = new THREE.DirectionalLight(
+    jour ? 0xbdd6ff : 0x8fa8ff,
+    jour ? 0.24 : 0.3,
+  );
   rebond.position.set(18, 12, -30);
   scene.add(rebond);
 
-  const soleil = new THREE.DirectionalLight(0xffc98a, 1);
-  soleil.position.set(-26, 20, 18); // rasant : les ombres s'allongent
+  const soleil = new THREE.DirectionalLight(
+    jour ? 0xfff4e2 : 0xffc98a,
+    jour ? 2.1 : 1,
+  );
+  // ⚠️ En plein jour le soleil est HAUT (≈ 60°) : les ombres sont courtes et
+  // dures, et c'est exactement ce qu'on veut. Une ombre longue et molle rend
+  // le sol sale et noie les petits indices au ras du bitume.
+  if (jour) soleil.position.set(34, 52, 26);
+  else soleil.position.set(-26, 20, 18); // rasant : les ombres s'allongent
   scene.add(soleil);
   scene.add(soleil.target);
 
@@ -91,10 +117,11 @@ export function creerMonde(THREE, hote, { qualite = "auto" } = {}) {
     c.far = 110;
     soleil.shadow.bias = -0.0012;
     soleil.shadow.normalBias = 0.02; // évite l'ombre qui grimpe sur les faces
-    soleil.shadow.radius = 3; // le bord ne doit pas être une lame de rasoir
-    // ⚠️ Une ombre à 1 tombe au NOIR : dans une rue au crépuscule, le ciel
-    // violet remplit toujours les ombres. À 0,68 elle pèse sans trouer l'image.
-    if ("intensity" in soleil.shadow) soleil.shadow.intensity = 0.68;
+    soleil.shadow.radius = jour ? 1.6 : 3;
+    // ⚠️ Une ombre à 1 tombe au NOIR : le ciel remplit toujours les ombres.
+    // En plein jour elle peut être plus franche, c'est elle qui pose les
+    // objets au sol et qui rend une portière entrouverte lisible de loin.
+    if ("intensity" in soleil.shadow) soleil.shadow.intensity = jour ? 0.8 : 0.68;
   }
 
   const rendu = new THREE.WebGLRenderer({
@@ -109,7 +136,7 @@ export function creerMonde(THREE, hote, { qualite = "auto" } = {}) {
   rendu.shadowMap.type = THREE.PCFShadowMap;
   rendu.outputColorSpace = THREE.SRGBColorSpace;
   rendu.toneMapping = THREE.ACESFilmicToneMapping;
-  rendu.toneMappingExposure = 1.28;
+  rendu.toneMappingExposure = jour ? 0.98 : 1.28;
   rendu.domElement.style.cssText = "display:block;width:100%;height:100%";
   hote.appendChild(rendu.domElement);
 
@@ -124,7 +151,7 @@ export function creerMonde(THREE, hote, { qualite = "auto" } = {}) {
   pmrem.compileEquirectangularShader();
   const cible = pmrem.fromEquirectangular(equi);
   scene.environment = cible.texture;
-  scene.environmentIntensity = 0.85;
+  scene.environmentIntensity = jour ? 1.05 : 0.85;
   pmrem.dispose();
   equi.dispose();
 
@@ -152,6 +179,8 @@ export function creerMonde(THREE, hote, { qualite = "auto" } = {}) {
   const ro = new ResizeObserver(taille);
   ro.observe(hote);
 
+  const soleilDecalage = jour ? [34, 52, 26] : [-26, 20, 18];
+
   // L'ombre ne couvre que 60 m : sans ça, une carte d'ombre de 1024 px étalée
   // sur toute la scène ne montre plus rien.
   function majOmbres(x, z) {
@@ -159,7 +188,7 @@ export function creerMonde(THREE, hote, { qualite = "auto" } = {}) {
     // s'approcher de sa paroi et l'horizon se met à pencher.
     dome.position.set(x, 0, z);
     if (!soleil.castShadow) return;
-    soleil.position.set(x - 26, 20, z + 18);
+    soleil.position.set(x + soleilDecalage[0], soleilDecalage[1], z + soleilDecalage[2]);
     soleil.target.position.set(x, 0, z);
     soleil.target.updateMatrixWorld();
   }
