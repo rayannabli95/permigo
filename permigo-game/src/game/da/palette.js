@@ -66,13 +66,17 @@ export const VITRE = 0x6f8aa0;
 // ⚠️ L'écart de VALEUR compte plus que l'écart de teinte : cinq neutres tous
 // à la même luminosité font une file de briques identiques. On étale donc du
 // crème à l'ardoise.
+// ⚠️ ASSOMBRIES APRÈS RENDU. Sous un soleil à 2,2, une carrosserie claire et
+// lisse renvoie tellement de ciel que ses faces horizontales partent au blanc :
+// six voitures de six teintes différentes ressortaient toutes blanches. Le
+// nuancier doit viser la valeur qu'on veut À L'ÉCRAN, pas dans un aplat.
 export const VEHICULES_NEUTRES = [
-  0xd2ccbe, // crème
-  0xb8b3a8, // pierre
-  0x9aa6ae, // brume
-  0xc3b8a4, // sable
-  0x8e97a2, // ardoise
-  0xa89ba6, // lilas gris
+  0xb9b2a2, // crème
+  0x9e988c, // pierre
+  0x848f98, // brume
+  0xa89d8a, // sable
+  0x76808c, // ardoise
+  0x8f8391, // lilas gris
 ];
 
 // Saturation ≥ 55 % : un porteur de scène est TOUJOURS dans cette famille.

@@ -26,6 +26,7 @@ import { creerKit } from "../environments/kit.js";
 import { construireRue, X_STATIONNE } from "./rue.js";
 import { EVENEMENTS, TROUS, DUREE, VITESSE, DEPART } from "./scenario.js";
 import { VEHICULES_PORTEURS, VETEMENTS, lisere } from "../da/palette.js";
+import { vehicule } from "../da/vehicules.js";
 
 // ⚠️ Ni `voiture.glb` ni `gris.glb` : plus personne ne s'en sert depuis que
 // les voitures sont peintes par le kit, et c'étaient deux téléchargements
@@ -224,25 +225,24 @@ export async function creerPartie(
       g.add(v);
       return g;
     }
-    // 🔴 UNE VOITURE DE SCÈNE NE PREND PAS LE MODÈLE 3D. C'est le même piège
-    // que pour les voitures garées (cf. rue.js) et il m'a échappé une
-    // deuxième fois : les GLB sont texturés pour la DA de NUIT, donc en plein
-    // jour ils rendent tous le même bleu marine. La voiture qui hésite était
-    // censée être rouge et vue à soixante-dix mètres : elle sortait bleu
-    // sombre, au milieu d'une file de voitures garées bleu sombre. « Regarde
-    // loin » demandait donc de distinguer un objet de sa propre couleur.
-    // Le camion, lui, rend clair et garde son modèle.
-    const m =
-      a.type === "camion"
-        ? copier(modeles.camion) || kit.vehicule("camion", a.couleur)
-        : kit.vehicule("voiture", a.couleur);
+    // 🔴 AUCUN MODÈLE 3D POUR UN VÉHICULE DE SCÈNE, et c'est un piège tombé
+    // deux fois : les GLB sont texturés pour la DA de NUIT, donc en plein jour
+    // ils rendent tous le même bleu marine. La voiture qui hésite est censée
+    // être rouge et se repérer à soixante-dix mètres ; elle sortait bleu
+    // sombre au milieu d'une file de voitures garées bleu sombre.
+    //
+    // ⭐ Un PORTEUR de scène est toujours laqué : son reflet le détache des
+    // figurants, qui sont mats. La couleur et la finition font le travail
+    // qu'un contour ou une flèche feraient dans un jeu moins soigné.
+    const m = vehicule(
+      THREE,
+      a.type === "camion" ? "utilitaire" : "berline",
+      a.couleur,
+      { laque: true },
+    );
     const g = new THREE.Group();
     g.add(m);
-    if (a.feux) {
-      const f = kit.feuxVehicule(1.85, 4.2);
-      g.add(f);
-      g.userData.feux = f;
-    }
+    g.userData.freiner = m.userData.freiner;
     return g;
   }
 
@@ -685,7 +685,7 @@ export async function creerPartie(
         o.children[0].rotation.y = q.buste * 1.5;
       if (q.court !== undefined && o.children[0])
         o.children[0].rotation.z = q.court ? Math.sin(e.te * 18) * 0.14 : 0;
-      o.userData.feux?.userData.freiner(!!q.stop);
+      o.userData.freiner?.(!!q.stop);
       const t = o.userData.tache;
       if (t) {
         t.visible = o.visible;

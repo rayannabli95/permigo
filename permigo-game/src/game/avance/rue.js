@@ -31,6 +31,7 @@ import {
   piocher,
 } from "../da/palette.js";
 import { bitume, trottoir, facade } from "../da/textures.js";
+import { vehicule, FLOTTE } from "../da/vehicules.js";
 
 export const VOIE = 3.4;
 export const X_JOUEUR = 1.7;
@@ -318,20 +319,21 @@ export function construireRue(THREE, modeles, kit, { trous = [] } = {}) {
     for (let z = Z_DEBUT - 6; z > Z_FIN + 10; z -= 6.4 + r() * 2.6) {
       if (r() < (s > 0 ? 0.18 : 0.42)) continue; // des places vides
       if (s > 0 && !libre(z)) continue;
-      // ⚠️ Les modèles 3D sont texturés pour la DA de NUIT : en plein jour ils
-      // rendent tous le même bleu marine, et une file de voitures garées
-      // devient un mur sombre illisible. Les primitives du kit, elles,
-      // prennent une vraie peinture — et ici une peinture NEUTRE : une
-      // voiture garée fait la masse, jamais l'événement (bible §3).
-      const m = kit.vehicule(
-        "voiture",
-        jitter(piocher(VEHICULES_NEUTRES, r), r),
-      );
+      // ⭐ Des SILHOUETTES variées, pas une seule répétée soixante fois :
+      // citadines, berlines, un SUV, un utilitaire. Une file de stationnement
+      // faite d'un seul gabarit redevient un mur, quelle que soit sa couleur.
+      // Et une peinture NEUTRE et mate : une voiture garée fait la masse,
+      // jamais l'événement (bible §3).
+      const type = piocher(FLOTTE, r);
+      const m = vehicule(THREE, type, piocher(VEHICULES_NEUTRES, r), {
+        alea: r,
+      });
       m.position.set(s * X_STATIONNE, 0, z);
       m.rotation.y = s > 0 ? 0 : Math.PI;
       m.traverse((o) => (o.castShadow = true));
       g.add(m);
-      const t = kit.tache(1.9, 4.3, 0.42);
+      const gab = m.userData.gabarit;
+      const t = kit.tache(gab.larg, gab.l, 0.42);
       t.position.set(s * X_STATIONNE, 0.014, z);
       g.add(t);
       gares.push(m);

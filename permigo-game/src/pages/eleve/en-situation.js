@@ -317,6 +317,33 @@ export async function mount(root, param) {
     renderStep();
   }
 
+  // Fait réagir la mascotte du coin (bonne/mauvaise réponse). matchMedia,
+  // pas juste une classe CSS : animation:none n'arrête PAS une vidéo
+  // (piège relevé sur #719/#722).
+  function reactMascot(ok) {
+    const badge = stage.querySelector(".sit-mascot-badge");
+    const vid = stage.querySelector(".sit-mascot");
+    if (!badge || !vid) return;
+    const reduced = window.matchMedia?.(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    if (reduced) {
+      vid.poster = ok
+        ? "/skins/mascot-celebrate.png"
+        : "/skins/mascot-coach.png";
+    } else {
+      vid.style.mixBlendMode = "lighten";
+      vid.src = ok
+        ? "/video/mascotte-quiz-bonne-reponse.mp4"
+        : "/video/mascotte-quiz-mauvaise-reponse.mp4";
+      vid.currentTime = 0;
+      vid.play().catch(() => {});
+    }
+    badge.classList.remove("sit-mascot--pop");
+    void badge.offsetWidth;
+    badge.classList.add("sit-mascot--pop");
+  }
+
   function renderStep() {
     clearTimers();
     answered = false;
@@ -335,6 +362,7 @@ export async function mount(root, param) {
       </div>
       <div class="sit-scene">${renderSituationScene(s.scene, { alt: s.alt, tappable })}</div>
       <div class="sit-qwrap">
+        <div class="sit-mascot-badge"><video class="sit-mascot" poster="/skins/mascot-think.png" muted playsinline aria-hidden="true"></video></div>
         <div class="sit-kicker">${sT1(THEME_LABELS[s.theme] || "Code de la route", sTheme(s.theme))}</div>
         <h2 class="sit-q" tabindex="-1">${sBi(s.question, sScene(s.id)?.q)}</h2>
       </div>
@@ -395,6 +423,7 @@ export async function mount(root, param) {
       bonnes++;
       playCorrect();
       haptic("success");
+      reactMascot(true);
       const chip = stage.querySelector(".sit-coin");
       if (chip) {
         chip.innerHTML = `${volantImg(14)} +${bonnes * VOLANTS_PAR_BONNE}`;
@@ -432,6 +461,7 @@ export async function mount(root, param) {
       manquees.push(s);
       playWrong();
       haptic("warning");
+      reactMascot(false);
       // montrer visuellement QUI est prioritaire
       const fx = svg?.querySelector(".sit-fx");
       if (fx && s.focus) fx.innerHTML = buildFocusFX(s.scene, s.focus);
@@ -727,6 +757,29 @@ body.sit-immersive #app { padding-top: 0 !important; padding-bottom: 0 !importan
   font: 800 13.5px/1 'Archivo',sans-serif; color: var(--sit-gold);
   background: rgba(255,203,61,.12); border: 1px solid rgba(255,203,61,.3);
 }
+
+/* Mascotte réactive (bonne/mauvaise réponse), coin de la question. Même
+   coussinet sombre que exam-blanc/quiz : mix-blend-mode:lighten efface le
+   fond noir pur du mp4. Ici le fond de page est déjà sombre, le coussinet
+   sert surtout d'avatar cohérent avec les autres écrans. */
+.sit-qwrap { position: relative; padding-right: 68px; }
+.sit-mascot-badge {
+  position: absolute; top: -6px; right: 0; width: 56px; height: 56px; border-radius: 50%;
+  display: grid; place-items: center; overflow: hidden;
+  background: radial-gradient(75% 75% at 50% 38%, #2e2768, #14102e);
+  box-shadow: 0 5px 12px rgba(10,13,26,.35), inset 0 1px 0 rgba(255,255,255,.08);
+  animation: sitMascotIn .4s cubic-bezier(.34,1.56,.64,1) both;
+}
+.sit-mascot { display: block; width: 100%; height: 100%; object-fit: contain; }
+@keyframes sitMascotIn { from { opacity: 0; transform: scale(.6) } to { opacity: 1; transform: scale(1) } }
+.sit-mascot-badge.sit-mascot--pop { animation: sitMascotPop .38s cubic-bezier(.34,1.56,.64,1) both }
+@keyframes sitMascotPop {
+  0%  { transform: scale(1) }
+  30% { transform: scale(1.2) }
+  70% { transform: scale(.96) }
+  100%{ transform: scale(1) }
+}
+@media (prefers-reduced-motion: reduce) { .sit-mascot-badge, .sit-mascot-badge.sit-mascot--pop { animation: none !important } }
 
 /* scène */
 .sit-scene, .sit-hero { margin: 4px -8px 0; }
