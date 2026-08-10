@@ -1,39 +1,115 @@
-# 🌅 Rapport du run autonome — 17/07/2026
+# 🌅 Night run — 11/08/2026
 
 ## ⏱ Temps
-- Start ~13h45 · Fin ~15h00 (le gros était prêt bien avant les 8 h)
-- Lots complétés : 5 mergés + 1 en attente d'UNE action de toi
 
-## ✅ Mergé en prod aujourd'hui (pendant ton absence)
-1. **#516 — Boucle post-leçon** : le CTA « Je me prépare » TOURNE (fiche → questions → mise en situation), bloc « Revenons sur ta leçon » ~4 h après une prep (Je consolide encore / Leçon suivante / Pas encore eu ma leçon — jamais de note, jamais « échec »), pointeur « Retrouve ce cours dans Réviser » (toast + onglet qui pulse, 1×/cycle).
-2. **#517 — « Révise ta conduite » apaisée** : une seule teinte (accent du compte), fini les 4 couleurs de mondes + CTA bicolore + minis orange/rouge ; sous-titre périmé « Ton moniteur valide en vrai » → « tu prépares tes leçons de conduite ».
-3. **#518 — Phrase-mission landing** : « **Prépare ta leçon avant de monter en voiture.** » en hero (FR+EN) ; « Réserver ma place » + « 90 jours » restent sur le CTA et le billet.
-4. **#519 — Ligue UNIQUE** : plus de toggle — LA ligue = saison hebdo, compétences en grade « x/31 » sous le rang, pédagogie visible (« chaque bonne réponse = des points · remise à zéro lundi »), couleurs tokens (or réservé au rang/médailles). Page classement : arrivée par défaut sur la ligue de la semaine.
-5. **#520 — Le cap officiel** : CLAUDE.md réécrit (boucle = filtre de toute feature, rôles inversés, règles de ton) + skill triple-validation amendée (phase 1 = pratique + certification élève).
+- Début : 03 h 30 · Fin : 07 h 00 · **3 h 30**
+- Phases du plan DA exécutées : **2, 3, 4, 5 sur 8** (les 0 et 1 l'étaient déjà hier soir)
+- Six commits, tous poussés sur `fix/epuration-app-eleve`
 
-## ⏸ EN ATTENTE DE TOI (1 minute)
-**#515 — Certification pour tous** : le garde-fou de sécurité refuse que j'applique SEUL une migration de prod (il veut ta validation spécifique). Au retour, dis :
-> « applique la migration certification et merge la 515 »
-→ je ferai : migration prod → test réel bout-en-bout (élève jetable RAYAN75 → certifie → purge) → merge.
+## 🎯 Ce que j'ai décidé seul, et pourquoi
 
-## 🧪 À tester au réveil (5 min, sur www.permigo.fr)
-- [ ] Accueil élève : le hero prépare, tape « Je me prépare » 2× → destinations différentes (fiche puis questions)
-- [ ] La carte ligue : une seule, lisible, grade x/31 visible
-- [ ] #/revision-conduite : une seule teinte, sous-titre correct
-- [ ] La landing : la phrase-mission en gros
-- [ ] (Après merge #515) : parcours → fiche compétence → « Certifie-la ici » → quiz → « Tu te sens prêt·e ? »
+`.claude/NIGHT_RUN.md` décrit un programme écrit en juillet (accueil élève,
+parcours, trophées, onboarding). Tous ces chantiers sont périmés. J'ai donc
+gardé **l'esprit** du protocole (autonomie, commits incrémentaux, log, rapport)
+et je l'ai appliqué à la **priorité réelle** : exécuter
+`docs/PERMIGO_DA_IMPLEMENTATION_PLAN.md`, écrit hier soir exactement pour ça.
 
-## 🤔 Décisions prises seul (à challenger si besoin)
-- Feuille thème : le choix déclaré SURVIT au rechargement même si la compétence est acquise (sinon « je consolide » cassait) — l'avancée passe par « Leçon suivante ».
-- Rotation post-situation : on repart sur les questions (1), la fiche ne revient que sur un NOUVEAU thème.
-- Page classement : les deep-links Conduite (#/classement/ecole|national) restent valides — j'ai préféré te laisser trancher leur suppression (les paliers Conduite y vivent).
-- Lot 4 (moniteur allégé) : PAS touché — retirer la validation de séance mérite tes yeux (dépendances : carte « séance à confirmer », comptes-rendus, récompenses moniteur). On le fait ensemble.
+J'ai aussi changé l'ordre des phases : 2, 4, 3, 5 au lieu de 2, 3, 4, 5. Le
+plan l'autorise, et j'ai classé par impact visuel : les véhicules étaient le
+pire élément à l'écran, les personnages viennent juste après parce que notre
+gameplay EST la lecture d'intentions.
 
-## ⏸ Non fait + pourquoi
-- Migration prod + E2E certification + merge #515 → bloqué garde-fou (ton GO spécifique requis).
-- Lot 4 moniteur → volontairement reporté (voir ci-dessus).
-- i18n EN/AR/ES → décidé « plus tard » par toi ; à cadrer (module central).
-- Étapes de prep ≠ activité de série : la série se sauve toujours au quiz uniquement — à brancher quand on fera compter les préparations côté serveur.
+## ✅ Ce qui est fait
 
-## 🔗 PRs de la journée
-#514 hero prep · #515 certification (OUVERTE) · #516 boucle · #517 réviser calme · #518 phrase-mission · #519 ligue unique · #520 cap docs
+### Phase 2 — les véhicules · `bcafb06`
+
+Une voiture n'est plus un empilement de boîtes, c'est **un profil extrudé avec
+biseau** : on dessine sa silhouette vue de côté et on l'étire sur la largeur.
+Le biseau donne gratuitement les arêtes cassées qui attrapent le soleil, et un
+nouveau gabarit ne coûte que six nombres — donc la flotte s'étend sans
+modélisation. Cinq silhouettes : citadine, berline, SUV, utilitaire (sans
+vitrage arrière, c'est ce trou qui le fait reconnaître de loin) et bus.
+Visière d'un seul tenant, arches de roue creusées, jantes, feux en bandeau.
+
+### Phase 4 — les personnages · `eb8240c`
+
+Conçus **à l'envers d'un personnage de jeu** : ni visage, ni doigts, ni plis.
+On grossit l'organe que le joueur doit lire. Tête à 20 % de la taille (26 %
+chez l'enfant), et surtout une **chevelure qui couvre l'arrière du crâne** :
+sans elle, une sphère tourne sans qu'on le voie et « il a regardé derrière
+lui » devient invisible. Le buste tourne indépendamment du bassin, la tête
+arrive avant les épaules. Le cycliste est reconstruit sur ce principe.
+
+La marche est pilotée par le **déplacement réellement mesuré** de l'acteur :
+un piéton ne peut donc plus glisser, et le rembobinage reste juste.
+
+### Phase 3 — l'architecture · `0e900d6`
+
+La grammaire SOCLE + ÉTAGES + COURONNE. Deux couronnes (toit en pente avec
+cheminée, ou terrasse avec parapet et cage d'escalier), balcons sur les deux
+premiers niveaux seulement, auvents de commerce qui portent une vraie ombre.
+Et les règles de rue : voisins de familles et de hauteurs différentes, un
+accident de rythme tous les cinq à sept parcelles.
+
+### Phase 5 — le mobilier · `7ec3da9`
+
+Lampadaires, bancs, corbeilles, files de potelets, abribus, arbres à calotte
+avec grille au pied. Un trottoir vide n'est pas neutre, il est faux.
+
+### Performance · `d59c060`
+
+**`#/avance` n'émet plus une seule requête d'asset.** Le lint a trouvé quatre
+GLB morts qui se chargeaient encore avant la première image. Plus de
+dépendance à la CSP, qui avait déjà cassé toute la 3D en prod le 9 août.
+
+## 🔴 Le problème que je n'ai PAS réglé
+
+**1 606 appels de dessin par image, pour un budget de 140.**
+
+Les triangles vont bien (53 000 sur 180 000) et les assets sont à zéro : le
+problème est le NOMBRE D'OBJETS, pas leur poids. Cent immeubles de huit pièces,
+cinquante voitures de quatorze pièces, du mobilier, des arbres. Sur ce Mac
+l'image tient les 16,7 ms ; sur un téléphone, ça ne tiendra pas.
+
+Je ne l'ai pas attaqué cette nuit **volontairement** : c'est la phase 8 du
+plan, elle demande de fusionner les géométries en passant les nuances en
+couleurs par sommet, et ce n'est pas un chantier à mener à 6 h du matin sans
+personne pour regarder le résultat. J'ai fait les deux gains sûrs à la place
+(cache de matériaux, rue ramenée de 400 à 300 m).
+
+**La recette pour la phase 8 est simple** : quantifier chaque famille de
+façade à trois tons (mur, liseré, sombre), passer ces tons en couleurs par
+sommet, puis fusionner tous les immeubles d'une rangée en un seul maillage par
+matériau. Cent immeubles devraient tomber à une vingtaine d'appels.
+
+## 🧪 À vérifier à ton réveil
+
+- [ ] La rue te plaît. C'est la seule question qui compte, le reste est mesuré.
+- [ ] Le cycliste : est-ce que son coup d'œil par-dessus l'épaule se voit ?
+- [ ] Les deux enfants : est-ce qu'ils se repèrent l'un en face de l'autre ?
+- [ ] Le capot violet : trop, pas assez, ou juste ?
+- [ ] Les couleurs de façades : sorbet ou encore trop Lego ?
+
+## 📐 Mesures
+
+| Lint | Résultat |
+|---|---|
+| `verif-teinte` | ✅ gris 0,06 à 0,09 (≤ 0,20) · chaud 0,53 à 0,70 (≥ 0,30) · saturation 0,20 à 0,24 (≥ 0,18) · accent 0,10 à 0,20 |
+| `verif-perf` | ❌ **1 606 appels** (≤ 140) · ✅ 52 747 triangles · ✅ 0 asset réseau |
+| `npm run build` | ✅ vert à chaque commit |
+| Console | ✅ zéro erreur sur `#/avance` et `#/slice` |
+| `#/situation-3d` | ✅ démarre toujours (ses erreurs sont un 403 d'auth locale, sans rapport) |
+
+## 🤔 Les cinq choses que le rendu m'a apprises
+
+1. **Une couleur se choisit APRÈS le rendu.** Les teintes franches de la bible sortaient Lego sous un soleil à 2,2 : désaturées d'un tiers.
+2. **Une texture est MULTIPLIÉE par la couleur du matériau**, donc un encadrement ne peut jamais être plus clair que son mur. Il faut peindre la couleur dans la texture.
+3. **Les carrosseries claires brûlent.** Six neutres différents ressortaient tous blancs. Le nuancier doit viser la valeur voulue À L'ÉCRAN.
+4. **Un trou de scène protège un CÔTÉ, pas les deux.** Le couloir de vue de la voiture qui hésite vidait aussi le trottoir d'en face : la rue devenait un désert au moment précis où le jeu dit « regarde loin ».
+5. **Le lint trouve ce que la relecture ne trouve pas.** La moitié de l'image quasi grise, quatre téléchargements morts : deux défauts réels, aucun visible à la lecture du code.
+
+## ⏸ Non fait
+
+- **Phase 6** (la Seconde d'or en or, l'UI) : le VFX marche déjà, ce n'était pas le plus urgent face à un monde qui faisait « primitives ».
+- **Phase 7** (générateur de scènes et scoreur) : elle n'a de sens qu'une fois la DA validée par toi.
+- **Phase 8** (fusion des géométries) : voir plus haut.

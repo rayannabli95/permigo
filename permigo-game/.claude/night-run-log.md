@@ -68,3 +68,9 @@ autorise explicitement de permuter les phases 2 à 5) :
   donc le couloir de vue de la voiture qui hésite (54 m) vidait aussi le
   trottoir d'en face. La rue devenait un désert au moment exact où le jeu dit
   « regarde loin ». La marge ne vaut désormais que du côté qui porte la scène.
+- 06 h 50 — QA. Le lint de performance a trouvé quatre GLB morts (supprimés) et
+  1 606 appels de dessin pour un budget de 140 : problème réel, laissé à la
+  phase 8 avec sa recette, parce que fusionner des géométries à six heures du
+  matin sans personne pour regarder n'est pas une bonne idée. Les autres routes
+  3D (`#/situation-3d`, `#/slice`) démarrent toujours.
+- 07 h 00 — rapport écrit, tout poussé. Fin du run.
