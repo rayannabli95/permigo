@@ -33,6 +33,7 @@ import {
 import { bitume, trottoir, facade } from "../da/textures.js";
 import { vehicule, FLOTTE } from "../da/vehicules.js";
 import { personnage } from "../da/personnages.js";
+import { rangee } from "../da/batiments.js";
 
 export const VOIE = 3.4;
 export const X_JOUEUR = 1.7;
@@ -176,96 +177,18 @@ export function construireRue(THREE, modeles, kit, { trous = [] } = {}) {
   }
 
   // ── LES FAÇADES ──────────────────────────────────────────────────────
-  // 🔴 LES FENÊTRES SONT PEINTES DANS LA TEXTURE, pas construites en
-  // géométrie. La version précédente posait des centaines de plans-fenêtres :
-  // coût énorme et rendu d'autocollant. Ici, un immeuble = un volume + UN plan
-  // de façade texturé, où l'encadrement, la vitre, son reflet et l'appui sont
-  // dessinés. Bible §5.
-  //
-  // 🔴 UNE TEXTURE PAR FAMILLE DE COULEUR, et la couleur est peinte DEDANS.
-  // Le réflexe naturel (une texture grise teintée par `material.color`) ne
-  // marche pas ici : une carte est MULTIPLIÉE par la couleur, donc rien ne
-  // peut être plus clair que le mur. L'encadrement crème disparaîtrait, et la
-  // vitre bleu-ardoise deviendrait une version sombre du corail. Or ce sont
-  // exactement les deux détails qui font qu'une façade est dessinée.
-  // Six familles + trois devantures = neuf textures, dans le budget (§12).
-  const texFacade = FACADES.map((c, i) => facade(THREE, c, 20260901 + i * 17));
-  const texCommerce = COMMERCES.map((c, i) =>
-    facade(THREE, c, 20260950 + i * 23, { commerce: true }),
-  );
-
-  for (const s of [-1, 1]) {
-    let familleAvant = -1;
-    let hauteurAvant = -1;
-    for (let z = Z_DEBUT; z > Z_FIN; z -= 13 + r() * 5) {
-      const larg = 9 + r() * 5;
-      const prof = 11;
-      // Règle de rue : ni la même famille de couleur ni la même hauteur que
-      // le voisin. C'est ce qui empêche la façade-ruban.
-      let famille = Math.floor(r() * FACADES.length);
-      if (famille === familleAvant) famille = (famille + 1) % FACADES.length;
-      familleAvant = famille;
-      let etages = 2 + Math.floor(r() * 3);
-      if (etages === hauteurAvant) etages = 2 + ((etages - 1) % 3);
-      hauteurAvant = etages;
-
-      const couleur = jitter(FACADES[famille], r);
-      const h = 3.1 * etages + 3.2; // le socle fait 3,2 m
-      const x = s * (BORD + 2.8 + prof / 2 + 0.6);
-      const corps = bloc(prof, h, larg, assombrir(couleur, 0.06), x, 0, z, 0.9);
-      corps.castShadow = true;
-
-      // Le plan de façade, plaqué sur la face qui donne sur la rue.
-      // Un clone par immeuble : il partage l'image sur le GPU (coût nul) et
-      // ne porte que son propre nombre de travées et d'étages.
-      const travees = Math.max(2, Math.round(larg / 3));
-      const carte = texFacade[famille].clone();
-      carte.needsUpdate = true;
-      carte.repeat.set(travees, etages);
-      const mur = new THREE.Mesh(
-        new THREE.PlaneGeometry(larg, 3.1 * etages),
-        matTex(carte, 0xffffff, 0.86),
-      );
-      mur.position.set(x - s * (prof / 2 + 0.03), 3.2 + (3.1 * etages) / 2, z);
-      mur.rotation.y = s > 0 ? -Math.PI / 2 : Math.PI / 2;
-      g.add(mur);
-
-      // Le socle : habitation ou commerce. Un commerce tous les trois ou
-      // quatre immeubles, et c'est le rez-de-chaussée qui fait « ville
-      // vivante » bien plus que les étages.
-      const estCommerce = r() < 0.32;
-      let matSocle;
-      if (estCommerce) {
-        const carteC = piocher(texCommerce, r).clone();
-        carteC.needsUpdate = true;
-        carteC.repeat.set(travees, 1);
-        matSocle = matTex(carteC, 0xffffff, 0.7);
-      } else {
-        matSocle = mat(assombrir(couleur, 0.12), 0.88);
-      }
-      const socle = new THREE.Mesh(
-        new THREE.PlaneGeometry(larg, 3.2),
-        matSocle,
-      );
-      socle.position.set(x - s * (prof / 2 + 0.04), 1.6, z);
-      socle.rotation.y = s > 0 ? -Math.PI / 2 : Math.PI / 2;
-      g.add(socle);
-
-      // La corniche : le liseré qui sépare le corps du ciel. Une bande de
-      // vingt centimètres, et l'immeuble a une couronne.
-      const corniche = bloc(
-        prof + 0.5,
-        0.26,
-        larg + 0.5,
-        lisere(couleur, 0.2),
-        x,
-        h,
-        z,
-        0.85,
-      );
-      corniche.castShadow = true;
-    }
-  }
+  // 📖 La grammaire vit dans `da/batiments.js` : socle + étages + couronne,
+  // avec ses règles de voisinage et ses accidents de rythme. Ici on ne fait
+  // que poser deux rangées.
+  for (const s of [-1, 1])
+    for (const b of rangee(THREE, {
+      cote: s,
+      zDebut: Z_DEBUT,
+      zFin: Z_FIN,
+      alea: r,
+      x: s * (BORD + 2.8 + 11 / 2 + 0.6),
+    }))
+      g.add(b);
 
   // ── LES ARBRES ───────────────────────────────────────────────────────
   // ⭐ Chaque arbre porte sa CALOTTE : une seconde masse de feuillage, plus
