@@ -42,3 +42,17 @@ autorise explicitement de permuter les phases 2 à 5) :
   Deux corrections après rendu : les neutres partaient au blanc sous le soleil
   de seize heures (assombris d'environ 15 %), et un figurant doit être MAT
   (rugosité 0,55, reflet 0,5) pendant qu'un porteur de scène est laqué.
+- 05 h 00 — **Phase 4 livrée.** `src/game/da/personnages.js`. Le parti pris :
+  on ne modélise pas un humain, on grossit l'organe que le joueur doit LIRE.
+  Tête à 20 % de la taille (26 % chez l'enfant), chevelure qui couvre
+  l'arrière du crâne — sans elle une sphère tourne sans qu'on le voie, et
+  « il a regardé derrière lui » devient invisible. Devant de torse plus clair
+  pour distinguer un dos d'une face. Buste séparé du bassin, donc la tête
+  tourne pendant que le corps continue tout droit.
+  Le cycliste est reconstruit (vélo + quille) : c'est la meilleure leçon du
+  jeu et elle était portée par un modèle qu'on ne pouvait tourner qu'entier.
+  ⭐ La marche est pilotée par le DÉPLACEMENT MESURÉ de l'acteur, pas par un
+  drapeau : un piéton ne peut donc plus glisser, et le rembobinage reste juste.
+  Deux corrections après rendu : l'enfant à 1,15 m violait la loi de
+  lisibilité (porté à 1,28 m), et le copain d'en face était caché derrière la
+  file de stationnement opposée (les trous protègent désormais les DEUX côtés).

@@ -27,6 +27,7 @@ import { construireRue, X_STATIONNE } from "./rue.js";
 import { EVENEMENTS, TROUS, DUREE, VITESSE, DEPART } from "./scenario.js";
 import { VEHICULES_PORTEURS, VETEMENTS, lisere } from "../da/palette.js";
 import { vehicule } from "../da/vehicules.js";
+import { personnage, cycliste } from "../da/personnages.js";
 
 // ⚠️ Ni `voiture.glb` ni `gris.glb` : plus personne ne s'en sert depuis que
 // les voitures sont peintes par le kit, et c'étaient deux téléchargements
@@ -199,30 +200,25 @@ export async function creerPartie(
       return g;
     }
     if (a.type === "enfant" || a.type === "pieton") {
-      const p = copier(modeles.pieton) || kit.vehicule("pieton", "bleu");
-      if (a.type === "enfant") {
-        // 0,78 et pas 0,62 : un enfant de dix ans plutôt qu'un bambin. À
-        // trente mètres, vingt centimètres de plus, c'est cinq pixels — et
-        // cinq pixels décident si la scène est difficile ou invisible.
-        p.scale.multiplyScalar(0.78);
-        // ⚠️ Le modèle est texturé sombre. Un enfant sombre sur un trottoir
-        // gris n'existe pas à trente mètres. On lui repeint un vêtement franc.
-        p.traverse((o) => {
-          if (!o.isMesh) return;
-          o.material = new THREE.MeshStandardMaterial({
-            color: a.couleur ?? 0xf4c116,
-            roughness: 0.72,
-          });
-        });
-      }
+      // ⭐ Plus de modèle importé : une quille dessinée, dont la tête tourne
+      // indépendamment du corps. C'est la condition pour que « il a regardé
+      // derrière lui » et « il regarde l'autre trottoir » soient LISIBLES.
+      const p = personnage(THREE, {
+        enfant: a.type === "enfant",
+        couleur: a.couleur ?? null,
+      });
       const g = new THREE.Group();
       g.add(p);
+      g.userData.buste = p.userData.buste;
+      g.userData.pas = p.userData.pas;
       return g;
     }
     if (a.type === "velo") {
-      const v = copier(modeles.velo) || kit.vehicule("velo", a.couleur);
+      const v = cycliste(THREE, { couleur: a.couleur ?? null });
       const g = new THREE.Group();
       g.add(v);
+      g.userData.buste = v.userData.buste;
+      g.userData.pas = v.userData.pas;
       return g;
     }
     // 🔴 AUCUN MODÈLE 3D POUR UN VÉHICULE DE SCÈNE, et c'est un piège tombé
@@ -681,8 +677,19 @@ export async function creerPartie(
       if (q.visible !== undefined) o.visible = q.visible && e.actif;
       // Le buste d'un cycliste qui regarde derrière lui : c'est le premier
       // enfant du groupe qui tourne, pas le vélo entier.
-      if (q.buste !== undefined && o.children[0])
-        o.children[0].rotation.y = q.buste * 1.5;
+      const buste = o.userData.buste ?? o.children[0];
+      if (q.buste !== undefined && buste) buste.rotation.y = q.buste * 1.5;
+      // ⭐ La marche est pilotée par le DÉPLACEMENT MESURÉ, jamais par un
+      // drapeau posé à la main dans le scénario. Conséquence : un piéton ne
+      // peut pas glisser, un enfant qui s'élance court forcément, et le
+      // rembobinage reste cohérent puisque la vitesse redevient nulle.
+      if (o.userData.pas) {
+        const av = o.userData.dernier;
+        const dt = av ? Math.abs(e.te - av.te) : 0;
+        const d = av ? Math.hypot(q.x - av.x, q.z - av.z) : 0;
+        o.userData.pas(e.te, dt > 1e-4 ? Math.min(1, d / dt / 1.3) : 0);
+        o.userData.dernier = { x: q.x, z: q.z, te: e.te };
+      }
       if (q.court !== undefined && o.children[0])
         o.children[0].rotation.z = q.court ? Math.sin(e.te * 18) * 0.14 : 0;
       o.userData.freiner?.(!!q.stop);

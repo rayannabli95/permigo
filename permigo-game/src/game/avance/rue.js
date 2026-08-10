@@ -32,6 +32,7 @@ import {
 } from "../da/palette.js";
 import { bitume, trottoir, facade } from "../da/textures.js";
 import { vehicule, FLOTTE } from "../da/vehicules.js";
+import { personnage } from "../da/personnages.js";
 
 export const VOIE = 3.4;
 export const X_JOUEUR = 1.7;
@@ -318,7 +319,11 @@ export function construireRue(THREE, modeles, kit, { trous = [] } = {}) {
   for (const s of [1, -1]) {
     for (let z = Z_DEBUT - 6; z > Z_FIN + 10; z -= 6.4 + r() * 2.6) {
       if (r() < (s > 0 ? 0.18 : 0.42)) continue; // des places vides
-      if (s > 0 && !libre(z)) continue;
+      // 🔴 LES DEUX CÔTÉS, pas seulement celui du joueur. Le copain de
+      // l'enfant attend sur le trottoir d'EN FACE : c'est lui le signe de la
+      // scène, et il se retrouvait caché derrière la file de stationnement
+      // opposée. Un trou protège une scène, pas une voie.
+      if (!libre(z)) continue;
       // ⭐ Des SILHOUETTES variées, pas une seule répétée soixante fois :
       // citadines, berlines, un SUV, un utilitaire. Une file de stationnement
       // faite d'un seul gabarit redevient un mur, quelle que soit sa couleur.
@@ -363,13 +368,11 @@ export function construireRue(THREE, modeles, kit, { trous = [] } = {}) {
       if (loinDesScenes(z)) break;
     }
     if (!loinDesScenes(z)) continue;
-    const p =
-      (modelePieton && modelePieton.clone(true)) ||
-      kit.vehicule("pieton", "bleu");
-    p.traverse((o) => (o.castShadow = true));
+    const p = personnage(THREE, { alea: r });
     const grp = new THREE.Group();
     grp.add(p);
     grp.position.y = 0.16;
+    p.userData.sol = 0;
     g.add(grp);
     passants.push({
       objet: grp,
@@ -378,6 +381,7 @@ export function construireRue(THREE, modeles, kit, { trous = [] } = {}) {
       sens: r() < 0.5 ? 1 : -1,
       vitesse: 0.9 + r() * 0.6,
       bord: s,
+      corps: p,
     });
   }
 
@@ -387,11 +391,11 @@ export function construireRue(THREE, modeles, kit, { trous = [] } = {}) {
     for (const p of passants) {
       const va = Math.sin((t * p.vitesse) / 9 + p.z) > 0 ? 1 : -1;
       const dz = Math.sin((t * p.vitesse) / 9 + p.z) * 7;
-      // Le rebond du pas : trois centimètres, à la fréquence de la marche.
-      // Sans lui un piéton glisse comme un pion sur un plateau.
-      const rebond = Math.abs(Math.sin(t * p.vitesse * 2.6 + p.z)) * 0.03;
-      p.objet.position.set(p.x, 0.16 + rebond, p.z + dz);
+      p.objet.position.set(p.x, 0.16, p.z + dz);
       p.objet.rotation.y = va * p.sens > 0 ? Math.PI : 0;
+      // Le balancier des jambes et le rebond du pas vivent dans le
+      // personnage : ici on ne fait que dire « il marche ».
+      p.corps.userData.pas(t * p.vitesse, 1);
     }
   }
 

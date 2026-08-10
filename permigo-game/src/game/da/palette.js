@@ -92,6 +92,9 @@ export const PEAU = [0xe8c39e, 0xc68e5f, 0x8a5a3b];
 export const VETEMENTS = {
   adulte: [0xa9968a, 0x8c93a0, 0xb0a08c, 0x97a08f, 0xa3919c],
   adulteBas: 0x3a3654,
+  // Un acteur de SCÈNE (l'homme qui descend de voiture) a le droit d'être
+  // saturé : il fait partie de l'incident, pas du décor.
+  acteur: 0xd5453c,
   // ⭐ Les enfants sont les êtres les plus saturés de la rue. C'est de la
   // pédagogie déguisée en direction artistique.
   enfant: [0xf0b02f, 0xd5453c, 0x38b6c9],
