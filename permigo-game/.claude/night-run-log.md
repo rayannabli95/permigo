@@ -56,3 +56,15 @@ autorise explicitement de permuter les phases 2 à 5) :
   Deux corrections après rendu : l'enfant à 1,15 m violait la loi de
   lisibilité (porté à 1,28 m), et le copain d'en face était caché derrière la
   file de stationnement opposée (les trous protègent désormais les DEUX côtés).
+- 05 h 40 — **Phase 3 livrée.** `src/game/da/batiments.js` : la grammaire
+  SOCLE + ÉTAGES + COURONNE, avec deux couronnes (toit en pente + cheminée, ou
+  terrasse + parapet + cage d'escalier), balcons sur les deux premiers niveaux
+  seulement, auvents de commerce. Et les règles de rue : voisins de familles et
+  de hauteurs différentes, accident de rythme tous les 5 à 7 parcelles.
+- 06 h 05 — **Phase 5 livrée.** `src/game/da/mobilier.js` : lampadaires, bancs,
+  corbeilles, files de potelets, abribus, et l'arbre à calotte avec sa grille
+  au pied. Un trottoir vide n'est pas neutre, il est FAUX.
+  Correction après rendu : la marge des scènes s'appliquait aux DEUX trottoirs,
+  donc le couloir de vue de la voiture qui hésite (54 m) vidait aussi le
+  trottoir d'en face. La rue devenait un désert au moment exact où le jeu dit
+  « regarde loin ». La marge ne vaut désormais que du côté qui porte la scène.

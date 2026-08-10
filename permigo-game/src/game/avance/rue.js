@@ -34,6 +34,14 @@ import { bitume, trottoir, facade } from "../da/textures.js";
 import { vehicule, FLOTTE } from "../da/vehicules.js";
 import { personnage } from "../da/personnages.js";
 import { rangee } from "../da/batiments.js";
+import {
+  arbre,
+  lampadaire,
+  banc,
+  corbeille,
+  potelet,
+  abribus,
+} from "../da/mobilier.js";
 
 export const VOIE = 3.4;
 export const X_JOUEUR = 1.7;
@@ -190,44 +198,67 @@ export function construireRue(THREE, modeles, kit, { trous = [] } = {}) {
     }))
       g.add(b);
 
-  // ── LES ARBRES ───────────────────────────────────────────────────────
-  // ⭐ Chaque arbre porte sa CALOTTE : une seconde masse de feuillage, plus
-  // claire, décalée du côté du soleil. La lumière n'est pas seulement
-  // calculée, elle est DESSINÉE. C'est une des signatures de la bible, et
-  // c'est ce qui sépare un arbre-jouet d'une tache verte.
+  // ── LES ARBRES ET LE MOBILIER URBAIN ─────────────────────────────────
+  // ⚠️ Rien de tout ceci ne se pose près d'une scène : un potelet devant
+  // l'enfant ou un abribus devant la voiture qui hésite rend une leçon
+  // injouable. Même règle de trous que le stationnement, marge de 12 m.
   const SOLEIL = new THREE.Vector3(-28, 34, 16).normalize();
-  const geoMasse = new THREE.IcosahedronGeometry(1, 1);
-  const geoTronc = new THREE.CylinderGeometry(0.16, 0.24, 1, 7);
-  const matMasse = mat(VEGETATION.ombre, 0.85);
-  const matCalotte = mat(VEGETATION.calotte, 0.8);
-  const matTronc = mat(VEGETATION.tronc, 0.92);
+  // 🔴 LA MARGE NE VAUT QUE DU CÔTÉ OÙ SE JOUE LA SCÈNE. Toutes nos scènes
+  // sauf une vivent sur le trottoir de DROITE ; appliquer les trous aux deux
+  // côtés vidait cinquante mètres de trottoir gauche pour protéger une
+  // voiture située à droite, et la rue devenait un désert au moment précis où
+  // le joueur doit regarder loin. Seule la scène des deux enfants concerne
+  // les deux trottoirs, puisque le copain attend en face.
+  const CONCERNE_LA_GAUCHE = trous.length - 1;
+  const loinDeToutEvenement = (z, cote) =>
+    trous.every(([a, b], i) => {
+      if (cote < 0 && i !== CONCERNE_LA_GAUCHE) return true;
+      return z > b + 12 || z < a - 12;
+    });
 
   for (let z = Z_DEBUT - 8; z > Z_FIN; z -= 19) {
     for (const s of [-1, 1]) {
-      if (r() < 0.35) continue;
-      const ech = 0.85 + r() * 0.35;
-      const a = new THREE.Group();
-      const tr = new THREE.Mesh(geoTronc, matTronc);
-      tr.scale.set(1, 2.6, 1);
-      tr.position.y = 1.3;
-      tr.castShadow = true;
-      a.add(tr);
-      const masse = new THREE.Mesh(geoMasse, matMasse);
-      masse.scale.set(1.5, 1.25, 1.5);
-      masse.position.y = 3.5;
-      masse.castShadow = true;
-      a.add(masse);
-      const calotte = new THREE.Mesh(geoMasse, matCalotte);
-      calotte.scale.set(1.12, 0.95, 1.12);
-      calotte.position.set(
-        SOLEIL.x * 0.55,
-        3.5 + SOLEIL.y * 0.5,
-        SOLEIL.z * 0.55,
-      );
-      a.add(calotte);
-      a.position.set(s * (BORD + 1.5), 0.16, z + s * 4);
-      a.scale.multiplyScalar(ech);
+      if (r() < 0.2) continue;
+      const zz = z + s * 4;
+      if (!loinDeToutEvenement(zz, s)) continue;
+      const a = arbre(THREE, SOLEIL, 0.85 + r() * 0.35);
+      a.position.set(s * (BORD + 1.5), 0.16, zz);
       g.add(a);
+    }
+  }
+
+  // Les lampadaires donnent la verticale qui rythme la fuite de la rue.
+  for (let z = Z_DEBUT - 16; z > Z_FIN; z -= 26 + r() * 8) {
+    const s = r() < 0.5 ? -1 : 1;
+    if (!loinDeToutEvenement(z, s)) continue;
+    const l = lampadaire(THREE, -s);
+    l.position.set(s * (BORD + 0.75), 0.16, z);
+    g.add(l);
+  }
+
+  // Bancs, corbeilles, potelets, un abribus de temps en temps.
+  for (let z = Z_DEBUT - 22; z > Z_FIN; z -= 15 + r() * 16) {
+    const s = r() < 0.5 ? -1 : 1;
+    if (!loinDeToutEvenement(z, s)) continue;
+    const d = r();
+    let piece = null;
+    let ecart = BORD + 1.9;
+    if (d < 0.3) piece = banc(THREE);
+    else if (d < 0.55) piece = corbeille(THREE), (ecart = BORD + 0.9);
+    else if (d < 0.68) piece = abribus(THREE, -s), (ecart = BORD + 2.0);
+    else {
+      // Une file de potelets : le plus petit objet du jeu, et celui qui dit
+      // le plus fort « ceci est un vrai trottoir ».
+      for (let k = 0; k < 4; k++) {
+        const p = potelet(THREE);
+        p.position.set(s * (BORD + 0.62), 0.16, z + k * 1.6);
+        g.add(p);
+      }
+    }
+    if (piece) {
+      piece.position.set(s * ecart, 0.16, z);
+      piece.rotation.y = s > 0 ? 0 : Math.PI;
+      g.add(piece);
     }
   }
 
