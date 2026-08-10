@@ -64,8 +64,8 @@ const VOYANT_GLYPHS = {
   batterie: `<rect x="-6" y="-3.6" width="12" height="8" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M -4 -3.6 v -2 M 4 -3.6 v -2" stroke="currentColor" stroke-width="1.7"/><path d="M -3.6 0 h 3 M 1 0 h 3 M 2.5 -1.5 v 3" stroke="currentColor" stroke-width="1.2"/>`,
   huile: `<path d="M -5.5 1.5 q 0 -4.5 5 -4.5 l 2 -2 h 2.5 M -0.5 -3 l 5 2.5 2.5 -1.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M -5.5 1.5 h 10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>`,
   moteur: `<path d="M -5.5 -1 h 2 v -2.5 h 4 l 1.5 2 h 3.5 v 5 h -2 l -1.5 1.5 h -5 l -1.5 -2 h -1 z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>`,
-  esp: `<text x="0" y="2.6" text-anchor="middle" font-family="Inter,sans-serif" font-size="7.5" font-weight="800" fill="currentColor">ESP</text>`,
-  abs: `<text x="0" y="2.6" text-anchor="middle" font-family="Inter,sans-serif" font-size="7.5" font-weight="800" fill="currentColor">ABS</text>`,
+  esp: `<text x="0" y="2.6" text-anchor="middle" font-family="'Archivo',sans-serif" font-size="7.5" font-weight="800" fill="currentColor">ESP</text>`,
+  abs: `<text x="0" y="2.6" text-anchor="middle" font-family="'Archivo',sans-serif" font-size="7.5" font-weight="800" fill="currentColor">ABS</text>`,
   pneu: `<path d="M -4.5 -4 q -2.5 4 0 8 M 4.5 -4 q 2.5 4 0 8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M 0 -3 v 3.6 M 0 3 v .01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>`,
   frein: `<circle cx="0" cy="0" r="4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M 0 -2.2 v 2.8 M 0 2 v .01 M -6.5 -3.5 q -2 3.5 0 7 M 6.5 -3.5 q 2 3.5 0 7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>`,
 };
@@ -80,15 +80,15 @@ function cockpitSVG(opts = {}) {
       <linearGradient id="qzvSky" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0" stop-color="${C.night1}"/><stop offset="1" stop-color="${C.night2}"/>
       </linearGradient>
-      <clipPath id="qzvWs"><rect x="10" y="10" width="340" height="116" rx="16"/></clipPath>
+      <clipPath id="qzvWs"><rect x="0" y="0" width="360" height="128"/></clipPath>
     </defs>
-    <rect x="10" y="10" width="340" height="116" rx="16" fill="url(#qzvSky)"/>
+    <rect x="0" y="0" width="360" height="128" fill="url(#qzvSky)"/>
     <g clip-path="url(#qzvWs)">
       <circle cx="60" cy="30" r="1.4" fill="rgba(255,255,255,.5)"/>
       <circle cx="300" cy="24" r="1.2" fill="rgba(255,220,140,.55)"/>
       <circle cx="255" cy="44" r="1.1" fill="rgba(255,255,255,.35)"/>
       <circle cx="105" cy="52" r="1.2" fill="rgba(190,170,255,.45)"/>
-      <rect x="10" y="72" width="340" height="54" fill="#2c3050"/>
+      <rect x="0" y="72" width="360" height="56" fill="#2c3050"/>
       <polygon points="140,126 220,126 191,74 169,74" fill="${C.road}"/>
       <g class="qzv-roll">
         <rect x="178" y="80" width="4" height="9" rx="2" fill="${C.line}" opacity=".8"/>
@@ -107,7 +107,7 @@ function cockpitSVG(opts = {}) {
       }
       ${opts.pluie ? `<g class="qzv-ws-rain">${[26, 68, 112, 152, 198, 244, 288, 322].map((x, i) => `<line x1="${x}" y1="${14 + (i % 3) * 8}" x2="${x - 7}" y2="${34 + (i % 3) * 8}" stroke="rgba(170,200,255,.55)" stroke-width="2" stroke-linecap="round"/>`).join("")}</g>` : ""}
     </g>
-    <rect x="10" y="10" width="340" height="116" rx="16" fill="none" stroke="${C.dashHi}" stroke-width="2"/>`;
+    <!-- Pas de liseré ici : le cadre du quiz, c'est le hublot, et lui seul. -->`;
 
   // rétroviseur intérieur
   const retro = `
@@ -192,7 +192,7 @@ function cockpitSVG(opts = {}) {
       </g>`;
   };
 
-  return `<svg class="qzv-svg" viewBox="0 0 360 232" focusable="false">
+  return `<svg class="qzv-svg" viewBox="0 0 360 232" preserveAspectRatio="xMidYMid slice" focusable="false">
     ${windshield}${retro}${dashboard}${comodo("g")}${comodo("d")}${cluster}${wheel}
   </svg>`;
 }
@@ -214,7 +214,7 @@ export function setBoiteVisuels(v) {
 // En boîte automatique : deux pédales, et le frein passe à gauche.
 function pedalesSVG(opts = {}) {
   const auto = _boite === "auto";
-  const pedal = (key, x, w, h, label) => {
+  const pedal = (key, x, w, h) => {
     const isHl = opts.hl === key;
     const isPress = opts.press === key;
     const cls = [
@@ -234,20 +234,20 @@ function pedalesSVG(opts = {}) {
         <rect x="${x - 3.5}" y="${118 - h - 26}" width="7" height="30" rx="3.5" fill="#2a2f45"/>
         <rect x="${x - w / 2}" y="${118 - h}" width="${w}" height="${h}" rx="9" fill="${C.metal}" stroke="${isHl || isPress ? C.gold : "#232838"}" stroke-width="${isHl || isPress ? 2.5 : 1.5}"/>
         ${pads}
-      </g>
-      <text x="${x}" y="146" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="${isHl || isPress ? C.gold : C.steel}">${label}</text>`;
+      </g>`;
   };
+  // Le plancher : une ombre douce sous les pédales, pas un caisson. Le cadre,
+  // c'est le hublot.
   return `<svg class="qzv-svg" viewBox="0 0 360 160" focusable="false">
-    <rect x="14" y="8" width="332" height="144" rx="18" fill="#141830"/>
-    <path d="M 14 96 Q 180 78 346 96 L 346 134 Q 180 152 14 134 Z" fill="#1c2140" opacity=".8"/>
-    <rect x="14" y="8" width="332" height="144" rx="18" fill="none" stroke="${C.dashHi}" stroke-width="2"/>
+    <ellipse cx="180" cy="128" rx="150" ry="26" fill="rgba(6,4,20,.55)"/>
+    <path d="M 14 100 Q 180 82 346 100 L 346 152 L 14 152 Z" fill="#1b1638" opacity=".85"/>
     ${
       auto
-        ? `${pedal("frein", 140, 58, 62, "Frein")}
-    ${pedal("accel", 232, 40, 76, "Accélérateur")}`
-        : `${pedal("embrayage", 94, 48, 62, "Embrayage")}
-    ${pedal("frein", 180, 58, 62, "Frein")}
-    ${pedal("accel", 264, 40, 76, "Accélérateur")}`
+        ? `${pedal("frein", 140, 58, 62)}
+    ${pedal("accel", 232, 40, 76)}`
+        : `${pedal("embrayage", 94, 48, 62)}
+    ${pedal("frein", 180, 58, 62)}
+    ${pedal("accel", 264, 40, 76)}`
     }
   </svg>`;
 }
@@ -294,7 +294,7 @@ function levierSVG(opts = {}) {
       <circle cx="-5" cy="-37" r="4" fill="rgba(255,255,255,.18)"/>
     </g></g>`;
   return `<svg class="qzv-svg" viewBox="0 0 360 170" focusable="false">
-    <rect x="52" y="14" width="256" height="142" rx="20" fill="#141830" stroke="${C.dashHi}" stroke-width="2"/>
+    <ellipse cx="180" cy="150" rx="118" ry="16" fill="rgba(6,4,20,.5)"/>
     ${grid}${gears}${arrow}${knob}
   </svg>`;
 }
@@ -313,7 +313,8 @@ function feuSVG(etat = "orange") {
     }/>`;
   };
   return `<svg class="qzv-svg" viewBox="0 0 360 190" focusable="false">
-    <ellipse cx="180" cy="172" rx="42" ry="9" fill="rgba(0,0,0,.35)"/>
+    <ellipse cx="180" cy="170" rx="118" ry="22" fill="rgba(212,151,109,.13)"/>
+    <ellipse cx="180" cy="172" rx="42" ry="10" fill="rgba(6,4,20,.6)"/>
     <rect x="174" y="118" width="12" height="54" rx="5" fill="#5b6270"/>
     <rect x="150" y="10" width="60" height="112" rx="16" fill="#262b38" stroke="#3a4152" stroke-width="2.5"/>
     <g transform="translate(180,0)">
@@ -339,7 +340,7 @@ const SIGN_HEADS = {
       );
     }
     return `<polygon points="${pts.join(" ")}" fill="${C.redSign}" stroke="#fff" stroke-width="5"/>
-      <text x="0" y="7" text-anchor="middle" font-family="Inter,sans-serif" font-size="21" font-weight="800" fill="#fff">STOP</text>`;
+      <text x="0" y="7" text-anchor="middle" font-family="'Archivo',sans-serif" font-size="21" font-weight="800" fill="#fff">STOP</text>`;
   })(),
   "rond-rouge": `<circle cx="0" cy="-6" r="40" fill="#fff" stroke="${C.redSign}" stroke-width="12"/>`,
   "sens-interdit": `<circle cx="0" cy="-6" r="42" fill="${C.redSign}" stroke="#fff" stroke-width="4"/><rect x="-26" y="-11" width="52" height="10" rx="4" fill="#fff"/>`,
@@ -352,14 +353,14 @@ const SIGN_HEADS = {
   parking: `<rect x="-40" y="-46" width="80" height="80" rx="14" fill="${C.blue}" stroke="#fff" stroke-width="4"/>
     <text x="0" y="16" text-anchor="middle" font-family="'Archivo',sans-serif" font-size="52" font-weight="800" fill="#fff">P</text>`,
   zone30: `<rect x="-44" y="-50" width="88" height="88" rx="10" fill="#fff" stroke="#3d4450" stroke-width="3"/>
-    <text x="0" y="-28" text-anchor="middle" font-family="Inter,sans-serif" font-size="14" font-weight="800" fill="#3d4450">ZONE</text>
+    <text x="0" y="-28" text-anchor="middle" font-family="'Archivo',sans-serif" font-size="14" font-weight="800" fill="#3d4450">ZONE</text>
     <circle cx="0" cy="6" r="26" fill="#fff" stroke="${C.redSign}" stroke-width="7"/>
-    <text x="0" y="14" text-anchor="middle" font-family="Inter,sans-serif" font-size="24" font-weight="800" fill="#1a1d2e">30</text>`,
+    <text x="0" y="14" text-anchor="middle" font-family="'Archivo',sans-serif" font-size="24" font-weight="800" fill="#1a1d2e">30</text>`,
   agglo: `<rect x="-62" y="-30" width="124" height="48" rx="7" fill="#fff" stroke="${C.redSign}" stroke-width="5"/>
-    <text x="0" y="1" text-anchor="middle" font-family="Inter,sans-serif" font-size="17" font-weight="800" fill="#1a1d2e">VILLENEUVE</text>
-    <text x="0" y="-40" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="${C.steel}">Entrée d'agglomération</text>`,
+    <text x="0" y="1" text-anchor="middle" font-family="'Archivo',sans-serif" font-size="17" font-weight="800" fill="#1a1d2e">VILLENEUVE</text>
+`,
   "agglo-fin": `<rect x="-62" y="-30" width="124" height="48" rx="7" fill="#fff" stroke="#3d4450" stroke-width="4"/>
-    <text x="0" y="1" text-anchor="middle" font-family="Inter,sans-serif" font-size="17" font-weight="800" fill="#1a1d2e">VILLENEUVE</text>
+    <text x="0" y="1" text-anchor="middle" font-family="'Archivo',sans-serif" font-size="17" font-weight="800" fill="#1a1d2e">VILLENEUVE</text>
     <line x1="-56" y1="14" x2="56" y2="-26" stroke="${C.redSign}" stroke-width="7" stroke-linecap="round"/>`,
   autoroute: `<rect x="-42" y="-48" width="84" height="84" rx="12" fill="${C.blue}" stroke="#fff" stroke-width="4"/>
     <g stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round">
@@ -718,6 +719,72 @@ const SCENES = {
 // vis: null = bloqueur (le visuel générique contredirait l'énoncé)
 // ═══════════════════════════════════════════════════════════════
 
+// ── Registre « la vue » : les images du briefing ────────────────
+// Les mêmes fichiers que les fiches de révision (public/art/fiches/br-*).
+// Une seule nuit, une seule voiture : la question se passe exactement là où
+// la fiche l'a enseignée. Elles sont en 2:3 et le hublot est en 16:10, donc
+// chaque usage choisit SON point de mire — c'est aussi l'anti-fuite : sur la
+// question « quel commodo ? » on cadre haut, la rue, jamais la manette.
+const photo = (nom, pos = "50% 45%") =>
+  `<div class="qzv qzv-photo" aria-hidden="true"><img src="/art/fiches/br-${nom}.webp" alt="" loading="lazy" decoding="async" style="object-position:${pos}"></div>`;
+
+// Les six écarts qu'aucune image fixe ne dit : la ligne se dessine.
+const vue = (nom) =>
+  `<div class="qzv qzv-photo qzv-vue" aria-hidden="true"><video class="fond" src="/art/fiches/br-${nom}.mp4" autoplay loop muted playsinline preload="metadata"></video><video class="net" src="/art/fiches/br-${nom}.mp4" autoplay loop muted playsinline preload="metadata"></video></div>`;
+
+// La photo QUI MONTRE. Le décor vient de l'image, le doigt vient du tracé :
+// c'est la même recette que les vues du ciel des fiches (un fond réel, une
+// ligne dessinée par-dessus). Ça évite le grand écart entre des vignettes
+// photo somptueuses et des schémas gris à côté.
+// Repères relevés sur la photo cadrée en 16:10, en % du hublot.
+const PEDALE_XY = {
+  manuelle: {
+    photo: "pedales",
+    embrayage: { x: 27, y: 40, rx: 15, ry: 22 },
+    frein: { x: 53, y: 30, rx: 13, ry: 20 },
+    accel: { x: 76, y: 33, rx: 10, ry: 27 },
+  },
+  auto: {
+    photo: "pedales-auto",
+    frein: { x: 41, y: 38, rx: 15, ry: 20 },
+    accel: { x: 67, y: 35, rx: 9, ry: 28 },
+  },
+};
+
+const photoPointe = (nom, pos, cibles) =>
+  `<div class="qzv qzv-photo" aria-hidden="true"><img src="/art/fiches/br-${nom}.webp" alt="" loading="lazy" decoding="async" style="object-position:${pos}"><svg class="qzv-pointe" viewBox="0 0 100 100" preserveAspectRatio="none" focusable="false">${cibles
+    .map(
+      (c) =>
+        `<ellipse class="qzv-halo" cx="${c.x}" cy="${c.y}" rx="${c.rx}" ry="${c.ry}" fill="rgba(246,200,95,.1)" stroke="#f6c85f" stroke-width="2" vector-effect="non-scaling-stroke"/>`,
+    )
+    .join("")}</svg></div>`;
+
+/** Une pédale montrée sur la vraie photo, dans la bonne boîte de vitesses. */
+const pedalePhoto = (cible) => {
+  const k = PEDALE_XY[_boite === "auto" ? "auto" : "manuelle"];
+  const c = k[cible];
+  // L'embrayage n'existe pas en automatique : sans cible, la photo seule.
+  return c ? photoPointe(k.photo, "50% 45%", [c]) : photo(k.photo, "50% 45%");
+};
+
+// L'objet n'est plus dessiné : ce sont dix images générées, chacune EN
+// SITUATION dans la même voiture et la même rue. Un objet posé sur un socle
+// redevient une planche technique, et c'est exactement ce qu'on fuit.
+// (Décision Rayan, 08/08 : « ça c'est pas design, on fait tout avec Higgsfield ».)
+const OBJET_POS = {
+  pneu: "50% 55%",
+  horloge: "50% 45%",
+  disqueA: "50% 45%",
+  carte: "50% 50%",
+  secours: "50% 55%",
+  ethylo: "50% 52%",
+  gps: "50% 45%",
+  jauge: "50% 48%",
+  compteur: "50% 52%",
+  permis: "50% 50%",
+};
+const objet = (k) => photo(`obj-${k}`, OBJET_POS[k] || "50% 50%");
+
 const sc = (k, o) => sceneHTML(SCENES[k], o);
 const cockpit = (o) => wrap("cockpit", cockpitSVG(o));
 const pedales = (o) => wrap("pedales", pedalesSVG(o));
@@ -728,6 +795,152 @@ const feu = (e) => wrap("feu", feuSVG(e));
 const panneau = (t) => wrap("panneau", panneauSVG(t));
 
 const RULES = [
+  // ═══════════════════════════════════════════════════════════════
+  // LE BRIEFING — passe AVANT tout le reste, bloqueurs compris.
+  //
+  // Ces règles-là ne sont pas génériques : chacune vise une question et
+  // choisit sa vue et son cadrage. C'est le travail de direction, pas du
+  // remplissage : une photo qui montrerait la manette répondrait à
+  // « quel commodo ? », donc sur celle-là on cadre la rue et rien d'autre.
+  // Elles couvrent les énoncés qu'aucune brique dessinée ne savait servir.
+  // ═══════════════════════════════════════════════════════════════
+
+  // — Deux questions d'une même fiche, deux images différentes.
+  //   Une session de certification ne pose que 3 questions, toutes tirées de
+  //   la MÊME fiche. Deux fois la même vignette d'affilée et tout le système
+  //   passe pour du remplissage : ces règles-là n'existent que pour ça, et
+  //   elles passent avant les règles génériques qui les confondaient.
+  {
+    re: /changes de vitesse\. tu regardes/,
+    vis: () => photo("regard-loin", "50% 40%"),
+  },
+  { re: /tour de voiture, c'est quoi/, vis: () => photo("phares", "50% 62%") },
+  {
+    re: /voiture à abs\. ton premier geste/,
+    vis: () => photo("pedales", "50% 55%"),
+  },
+  {
+    re: /route trop étroite pour laisser 1 m/,
+    vis: () => sc("cyclisteCroise"),
+  },
+  { re: /règle d'or de toute manœuvre/, vis: () => sc("creneau") },
+  { re: /bataille arrière/, vis: () => photo("marche-arriere", "50% 50%") },
+  { re: /rates le début d'un créneau/, vis: () => sc("creneau") },
+  { re: /créneau à gauche/, vis: () => sc("stationnementRue") },
+  { re: /photographier la scène/, vis: () => photo("retro-gauche", "50% 45%") },
+  { re: /une balle traverse/, vis: () => sc("pietonBord") },
+  {
+    re: /trop étroite pour ta voiture|appuyer sur le trottoir/,
+    vis: () => photo("retro-gauche", "50% 55%"),
+  },
+  {
+    re: /ré-accélères-tu dans un virage|freinage avant un virage/,
+    vis: () => photo("pedales", "50% 45%"),
+  },
+  { re: /hésites à dépasser/, vis: () => sc("ligneContinue") },
+  {
+    re: /avant de déboîter pour dépasser|clignotant pour changer de voie/,
+    vis: () => photo("angle-mort", "50% 45%"),
+  },
+  { re: /venant de ta droite ralentit/, vis: () => sc("croisementNuit") },
+  {
+    re: /voiture à abs|peux-tu diriger la voiture/,
+    vis: () => photo("volant", "50% 45%"),
+  },
+  { re: /dans le tunnel, tu repères/, vis: () => photo("phares", "50% 28%") },
+  { re: /le gps, tu le règles/, vis: () => photo("contact", "50% 45%") },
+  { re: /long trajet inconnu/, vis: () => objet("carte") },
+  { re: /route trop étroite pour laisser/, vis: () => sc("cyclisteDevant") },
+  { re: /3 questions de l'examen/, vis: () => objet("pneu") },
+
+  // — Le poste de conduite
+  {
+    re: /tout premier réflexe|tour de voiture, c'est quoi|sur un pneu/,
+    vis: () => objet("pneu"),
+  },
+  {
+    re: /jambe gauche un peu pliée|talon décollé|semelle qui glisse/,
+    vis: () => photo("pedales", "50% 45%"),
+  },
+  { re: /ceinture doit passer/, vis: () => photo("ceinture", "50% 35%") },
+  { re: /hauteur de siège est bonne/, vis: () => photo("cligno", "50% 18%") },
+  {
+    re: /vérifier ses feux avant|lueur de phares|avant l'entrée.*tunnel|tunnel en plein jour/,
+    vis: () => photo("phares", "50% 40%"),
+  },
+  {
+    re: /tunnel, ta voiture tombe en panne|dans le tunnel, tu repères/,
+    vis: () => objet("secours"),
+  },
+  { re: /pont exposé|jour de vent/, vis: () => photo("volant", "50% 45%") },
+
+  // — Le regard
+  {
+    re: /où poses-tu ton regard|photographier la scène|où porte ton regard/,
+    vis: () => photo("regard-loin", "50% 42%"),
+  },
+  {
+    re: /fréquence reviens-tu au rétro|te colle et klaxonne/,
+    vis: () => photo("retro-interieur", "50% 45%"),
+  },
+  {
+    re: /en plus du rétro gauche|premier geste de sécurité/,
+    vis: () => photo("angle-mort", "50% 50%"),
+  },
+
+  // — Les écarts : la ligne se dessine, une image fixe ne les dit pas
+  {
+    re: /trop étroite pour ta voiture|où te places-tu sur ta voie/,
+    vis: () => vue("position"),
+  },
+  {
+    re: /dans le virage, où regardes-tu|ré-accélères-tu dans un virage/,
+    vis: () => vue("virage"),
+  },
+  { re: /tourner à droite en ville/, vis: () => vue("cycliste") },
+  { re: /plusieurs voies pour ta sortie/, vis: () => vue("insertion") },
+  { re: /manœuvre est vraiment acquise/, vis: () => vue("creneau") },
+
+  // — Préparer et conduire seul
+  {
+    re: /long trajet inconnu|route est annoncée coupée|gps, tu le règles/,
+    vis: () => objet("gps"),
+  },
+  { re: /4 heures de route|tes pauses/, vis: () => objet("horloge") },
+  { re: /économise combien de carburant/, vis: () => objet("jauge") },
+  { re: /totaliseur|3 questions de l'examen/, vis: () => objet("compteur") },
+  { re: /ligne droite dégagée/, vis: () => photo("levier", "50% 45%") },
+  {
+    re: /trajet seul en ville, que fais-tu/,
+    vis: () => photo("ceinture", "50% 40%"),
+  },
+
+  // — Les derniers énoncés, un par un. Deux questions d'une MÊME fiche ne
+  //   reçoivent jamais la même vue : une session ne montre que 3 questions,
+  //   deux fois la même image et la série a l'air d'un remplissage.
+  {
+    re: /part doucement de travers|manœuvre demandée à l'examen/,
+    vis: () => vue("creneau"),
+  },
+  { re: /rouler en accordéon/, vis: () => vue("distance") },
+  {
+    re: /appuyer sur le trottoir/,
+    vis: () => photo("marche-arriere", "50% 45%"),
+  },
+  { re: /es-tu prioritaire sur les autres/, vis: () => vue("creneau") },
+  {
+    re: /une balle traverse|approches d'une école/,
+    vis: () => photo("regard-loin", "50% 52%"),
+  },
+  { re: /descends une pente/, vis: () => photo("levier", "50% 40%") },
+  { re: /klaxonnes pour montrer/, vis: () => photo("volant", "50% 50%") },
+  { re: /maîtrises la conduite en ville/, vis: () => vue("position") },
+  { re: /feuilles mortes mouillées/, vis: () => vue("virage") },
+  { re: /plaque luisante/, vis: () => photo("phares", "50% 55%") },
+  { re: /disque a à l'arrière/, vis: () => objet("disqueA") },
+  { re: /permis probatoire avec combien/, vis: () => objet("permis") },
+  { re: /taux d'alcool max/, vis: () => objet("ethylo") },
+
   // ── Bloqueurs : pas d'acteur/décor fidèle → repli texte ────────
   { re: /cyclable|trottinette|interfile|trottoir/, vis: null },
   { re: /sens unique|contresens/, vis: null },
@@ -877,7 +1090,14 @@ const RULES = [
   { re: /es dépassé|te faire dépasser|te dépasse/, vis: () => sc("depasse") },
   {
     re: /dépass|doubler|double une|viens de doubler/,
-    vis: () => sc("depassement"),
+    vis: (t) =>
+      choix(t, [
+        () => sc("depassement"),
+        () => sc("depasse"),
+        () => sc("rabattement"),
+        () => photo("angle-mort", "50% 46%"),
+        () => photo("retro-gauche", "50% 44%"),
+      ]),
   },
   {
     re: /distance de sécurité|distances? de sécurité|distance.*(gardes|laisses|devant|min(imum)?)|(gardes|laisses).*distance|règle des (2|deux) secondes|deux secondes|intervalle de sécurité/,
@@ -917,7 +1137,13 @@ const RULES = [
   },
   {
     re: /insertion|bretelle|t'insères|s'insérer|voie d'accélération/,
-    vis: () => sc("autorouteInsertion"),
+    vis: (t) =>
+      choix(t, [
+        () => sc("autorouteInsertion"),
+        () => vue("insertion"),
+        () => photo("angle-mort", "50% 42%"),
+        () => photo("levier", "50% 38%"),
+      ]),
   },
   {
     re: /\bbau\b|bande d'arrêt|crevaison.*autoroute|malaise.*autoroute|panne.*autoroute|triangle.*autoroute/,
@@ -960,7 +1186,14 @@ const RULES = [
   },
   {
     re: /pleins phares|feux de route|la nuit|de nuit|conduite de nuit/,
-    vis: () => sc("route", { fx: "nuit" }),
+    vis: (t) =>
+      choix(t, [
+        () => sc("route", { fx: "nuit" }),
+        () => photo("phares", "50% 40%"),
+        () => photo("regard-loin", "50% 34%"),
+        () => photo("essuie-glaces", "50% 26%"),
+        () => photo("cligno", "50% 14%"),
+      ]),
   },
   {
     re: /il pleut|sous la pluie|temps de pluie|pluie/,
@@ -1082,18 +1315,18 @@ const RULES = [
   },
   {
     re: /freinage dégressif|freinage normal|freinage d'urgence|freinage fort|freines-tu|comment freiner|freines\b/,
-    vis: () => pedales({ press: "frein" }),
+    vis: () => pedalePhoto("frein"),
   },
-  { re: /embrayage|débraye|patinage/, vis: () => pedales({ hl: "embrayage" }) },
+  { re: /embrayage|débraye|patinage/, vis: () => pedalePhoto("embrayage") },
   {
     re: /filet d'accélérateur|dosage de l'accélérateur|accélérateur/,
-    vis: () => pedales({ hl: "accel" }),
+    vis: () => pedalePhoto("accel"),
   },
   {
     re: /démarr.*(côte|montée)|montée sans frein à main|côte sans frein à main/,
-    vis: () => pedales({}),
+    vis: () => pedalePhoto("frein"),
   },
-  { re: /\bcales?\b|caler/, vis: () => pedales({}) },
+  { re: /\bcales?\b|caler/, vis: () => pedalePhoto("embrayage") },
   { re: /voiture-école/, vis: () => sc("distance") },
   {
     re: /rétrograd.*5|5.*rétrograd/,
@@ -1116,17 +1349,267 @@ const RULES = [
  * si aucune brique ne colle (repli = affichage texte actuel).
  * @param {string} text énoncé brut (les ** de gras sont ignorés)
  */
+// ═══════════════════════════════════════════════════════════════
+// LES FAMILLES — la deuxième passe.
+//
+// La banque de certification compte 415 questions et elle bouge : un
+// tableau écrit question par question serait faux au premier ajout. Les
+// règles ci-dessus visent les énoncés qui méritent un cadrage choisi ;
+// celles-ci rattrapent TOUT le reste par sujet.
+//
+// Elles ne servent QUE de la vue et de l'objet, jamais un plan : un plan
+// dessiné affirme une géométrie précise, et sur un énoncé qu'on n'a pas lu
+// un par un, il aurait une chance de dire le contraire de la question.
+// Une vue du poste de conduite, elle, est toujours vraie : c'est là que
+// l'élève est assis quoi qu'on lui demande.
+// ═══════════════════════════════════════════════════════════════
+// Tirage STABLE dans le jeu d'une famille : la même question donne toujours
+// la même vue, mais deux questions voisines n'ont pas la même. Sans ça, une
+// compétence de 14 questions sur le virage servait 9 fois la même photo, et
+// une session de 3 questions montrait deux fois la même image.
+// 🔴 Le hash doit BRASSER. Une somme classique (h*31 + code) laisse les bits
+// de poids faible dépendre des derniers caractères : toutes les questions
+// finissent par « ? », donc six énoncés sur le virage tombaient sur la même
+// vue. On mélange (xorshift + multiplication) et on lit les bits de poids
+// FORT, qui eux dépendent de la phrase entière.
+const choix = (t, jeu) => {
+  let h = 2166136261;
+  for (let i = 0; i < t.length; i++) {
+    h ^= t.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  h ^= h >>> 15;
+  h = Math.imul(h, 2246822507);
+  h ^= h >>> 13;
+  return jeu[(h >>> 0) % jeu.length]();
+};
+
+const FAMILLES = [
+  // — Ce que l'élève REGARDE
+  {
+    re: /rétro (intérieur|central)|lunette arrière|derrière toi|te suit|te colle|klaxonne/,
+    vis: (t) => choix(t, [
+      () => photo("retro-interieur", "50% 45%"),
+      () => photo("retro-gauche", "50% 45%"),
+      () => photo("angle-mort", "50% 50%"),
+    ]),
+  },
+  {
+    re: /rétros? extérieur|carrosserie doit occuper|angle mort|déboît|changement de voie|changer de voie|dépass|doubl/,
+    vis: (t) => choix(t, [
+      () => photo("angle-mort", "50% 48%"),
+      () => photo("angle-mort", "50% 26%"),
+      () => photo("retro-gauche", "50% 50%"),
+      () => photo("retro-gauche", "50% 30%"),
+      () => vue("position"),
+      () => photo("retro-interieur", "50% 40%"),
+      () => photo("cligno", "50% 24%"),
+      () => photo("regard-loin", "50% 38%"),
+    ]),
+  },
+  {
+    re: /regard|regardes|fixes|yeux|voir loin|au loin|monotone|paupières|fatigue|somnol|balaye|panneaux?\b|annonce|à voix haute|questions? tournent/,
+    vis: (t) => choix(t, [
+      () => photo("regard-loin", "50% 42%"),
+      () => photo("regard-loin", "50% 60%"),
+      () => photo("regard-loin", "50% 26%"),
+      () => photo("cligno", "50% 16%"),
+      () => photo("marche-arriere", "50% 38%"),
+      () => photo("phares", "50% 34%"),
+      () => photo("volant", "50% 34%"),
+      () => photo("retro-interieur", "50% 52%"),
+    ]),
+  },
+
+  // — Ce qu'il TOUCHE
+  {
+    re: /clignotant|cligno|appel de phare|commodo|annonces? comment|avance donnes-tu/,
+    vis: (t) => choix(t, [
+      () => photo("cligno", "50% 18%"),
+      () => photo("cligno", "50% 34%"),
+      () => photo("volant", "50% 40%"),
+    ]),
+  },
+  { re: /essuie-glace|lave-glace|balais|pare-brise (sale|couvert|poussière)/, vis: () => photo("essuie-glaces", "50% 38%") },
+  {
+    re: /feux|phare|optiques|éclairage|croisement|veilleuse|brouillard|tunnel|nuit\b/,
+    vis: (t) => choix(t, [
+      () => photo("phares", "50% 42%"),
+      () => photo("phares", "50% 28%"),
+      () => photo("phares", "50% 62%"),
+      () => objet("secours"),
+      () => photo("essuie-glaces", "50% 30%"),
+      () => photo("cligno", "50% 12%"),
+      () => photo("regard-loin", "50% 36%"),
+      () => photo("marche-arriere", "50% 30%"),
+    ]),
+  },
+  { re: /frein à main|serrer le frein/, vis: () => photo("frein-main", "50% 50%") },
+  {
+    re: /contact|démarr|témoin|voyant|clé\b/,
+    vis: (t) => choix(t, [
+      () => photo("contact", "50% 45%"),
+      () => photo("frein-main", "50% 48%"),
+      () => photo("levier", "50% 45%"),
+    ]),
+  },
+  { re: /ceinture|boucl/, vis: () => photo("ceinture", "50% 38%") },
+  {
+    re: /siège|dossier|assise|appuie-tête|poste de conduite|installé au poste/,
+    vis: (t) => choix(t, [
+      () => photo("pedales", "50% 45%"),
+      () => photo("ceinture", "50% 30%"),
+      () => photo("retro-interieur", "50% 42%"),
+      () => photo("cligno", "50% 22%"),
+      () => photo("volant", "50% 55%"),
+    ]),
+  },
+  {
+    re: /volant|braqu|tenir|mains|trajectoire|virage|courbe|montant du pare-brise|extérieur-intérieur/,
+    vis: (t) => choix(t, [
+      () => photo("volant", "50% 45%"),
+      () => photo("volant", "50% 28%"),
+      () => vue("virage"),
+      () => photo("regard-loin", "50% 48%"),
+      () => pedalePhoto("frein"),
+      () => photo("cligno", "50% 30%"),
+      () => photo("levier", "50% 40%"),
+      () => photo("retro-gauche", "50% 42%"),
+    ]),
+  },
+  {
+    re: /pédale|frein|accélérat|embray|débray|pied lourd|tr\/min|régime|pil[ée]|freinage|ralentisseur/,
+    vis: (t) => choix(t, [
+      () => pedalePhoto("frein"),
+      () => pedalePhoto("accel"),
+      () => pedalePhoto("embrayage"),
+      () => photo("regard-loin", "50% 55%"),
+      () => vue("distance"),
+      () => photo("pedales", "50% 22%"),
+      () => photo("volant", "50% 58%"),
+      () => photo("levier", "50% 55%"),
+    ]),
+  },
+  {
+    re: /vitesse|rapport|levier|boîte|rétrograd|consomm|carburant|éco/,
+    vis: (t) => choix(t, [
+      () => photo("levier", "50% 45%"),
+      () => objet("jauge"),
+      () => pedalePhoto("accel"),
+      () => photo("levier", "50% 25%"),
+      () => photo("contact", "50% 30%"),
+      () => photo("regard-loin", "50% 50%"),
+    ]),
+  },
+  { re: /marche arrière|reculer|te retourn/, vis: () => photo("marche-arriere", "50% 45%") },
+
+  // — Les écarts : la ligne se dessine
+  {
+    re: /centré|bien placé|bordure|te places|ta voie|voie normale|rouler bien droit|serrer à droite/,
+    vis: (t) => choix(t, [
+      () => vue("position"),
+      () => photo("retro-gauche", "50% 52%"),
+      () => photo("regard-loin", "50% 46%"),
+      () => photo("volant", "50% 36%"),
+      () => photo("cligno", "50% 26%"),
+    ]),
+  },
+  { re: /distance|accordéon|deux secondes|intervalle/, vis: () => vue("distance") },
+  {
+    re: /créneau|manœuvre|trottoir|ranger|garer|stationner/,
+    vis: (t) => choix(t, [
+      () => vue("creneau"),
+      () => photo("marche-arriere", "50% 50%"),
+      () => photo("marche-arriere", "50% 24%"),
+      () => photo("retro-gauche", "50% 58%"),
+      () => photo("frein-main", "50% 45%"),
+      () => photo("levier", "50% 50%"),
+      () => photo("volant", "50% 62%"),
+    ]),
+  },
+  { re: /cycliste|vélo|deux-roues|piéton|fragile/, vis: () => vue("cycliste") },
+  {
+    re: /insér|insertion|voie rapide|autoroute|échangeur|bretelle|sortie\b/,
+    vis: (t) => choix(t, [
+      () => vue("insertion"),
+      () => photo("angle-mort", "50% 45%"),
+      () => photo("retro-gauche", "50% 45%"),
+      () => photo("levier", "50% 35%"),
+      () => photo("regard-loin", "50% 44%"),
+      () => photo("cligno", "50% 28%"),
+    ]),
+  },
+
+  // — Les règles et les chiffres
+  {
+    re: /gps|itinéraire|trajet|travaux|barrée|coupée|détour|la veille/,
+    vis: (t) => choix(t, [() => objet("gps"), () => objet("carte")]),
+  },
+  { re: /pause|heures? de route|repos|horaire/, vis: () => objet("horloge") },
+  {
+    re: /pneu|tour de voiture|vérification|niveau|boue/,
+    vis: (t) =>
+      choix(t, [
+        () => objet("pneu"),
+        () => photo("phares", "50% 66%"),
+        () => objet("compteur"),
+        () => photo("contact", "50% 38%"),
+      ]),
+  },
+  { re: /alcool|verre|boire|stupéfiant|cannabis/, vis: () => objet("ethylo") },
+  { re: /disque a|probatoire|jeune (conducteur|permis)/, vis: () => objet("disqueA") },
+  { re: /point|permis en poche|permis depuis|infraction|retrait/, vis: () => objet("permis") },
+  { re: /panne|triangle|gilet|secours|urgence|accident/, vis: () => objet("secours") },
+  { re: /inspecteur|examen|jour j|totaliseur|consigne/, vis: () => objet("compteur") },
+
+  // — Le dernier recours. Ce n'est pas un bouche-trou : quelle que soit la
+  //   question, l'élève est assis là, la route devant lui. C'est vrai pour
+  //   les 415, et c'est la seule image dont on puisse le dire.
+  {
+    re: /./,
+    vis: (t) => choix(t, [
+      () => photo("regard-loin", "50% 50%"),
+      () => photo("cligno", "50% 20%"),
+      () => photo("marche-arriere", "50% 40%"),
+      () => photo("volant", "50% 50%"),
+    ]),
+  },
+];
+
 export function quizVisualHTML(text) {
   if (!text) return "";
   const t = String(text).replace(/\*\*/g, "").toLowerCase();
+  let bloque = false;
   for (const rule of RULES) {
     if (rule.and && !rule.and.test(t)) continue;
     if (rule.re.test(t)) {
-      if (!rule.vis) return ""; // bloqueur explicite
+      // Un bloqueur ne dit pas « pas d'image » : il dit « pas de PLAN ».
+      // La question a quand même droit à une vue, et les familles la lui
+      // donnent juste en dessous.
+      if (!rule.vis) {
+        bloque = true;
+        break;
+      }
       try {
-        return rule.vis(t);
+        // Une brique peut refuser de dessiner : la grille en H n'existe pas
+        // en boîte automatique. Refus = on passe aux familles, pas au vide.
+        const html = rule.vis(t);
+        if (html) return html;
+        bloque = true;
+        break;
       } catch {
-        return ""; // un visuel qui casse ne doit jamais casser le quiz
+        bloque = true; // un visuel qui casse ne doit jamais casser le quiz
+        break;
+      }
+    }
+  }
+  void bloque;
+  for (const f of FAMILLES) {
+    if (f.re.test(t)) {
+      try {
+        return f.vis(t);
+      } catch {
+        return "";
       }
     }
   }
@@ -1163,10 +1646,38 @@ export const _RULES = RULES;
 // ═══════════════════════════════════════════════════════════════
 
 export const QUIZ_VISUAL_CSS = `
-  .qzv{position:relative;margin:-6px 0 18px;border-radius:18px;overflow:hidden;animation:qzvIn .5s cubic-bezier(.34,1.56,.64,1) both}
-  .qzv-svg{display:block;width:100%;height:auto;max-height:200px;margin:0 auto}
-  .qzv-scene .sit-svg{display:block;width:100%;height:auto;max-height:215px}
-  .qzv-cockpit,.qzv-pedales,.qzv-levier{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07)}
+  /* ── LE HUBLOT ────────────────────────────────────────────────
+     Le seul cadre du quiz. Quel que soit le registre (une photo du
+     poste, un plan vu du ciel, une commande, un objet), l'image
+     arrive TOUJOURS dans la même fenêtre, au même format, sous la
+     même lumière : une source chaude en haut à droite, un liseré
+     violet en haut, une vignette qui referme les bords.
+     C'est ce cadre unique qui fait que 124 écrans sont un produit
+     et pas une collection. Aucune brique ne porte plus son propre
+     fond : elles se posent dans celui-ci. */
+  .qzv{position:relative;width:100%;margin:-2px 0 18px;border-radius:20px;overflow:hidden;
+    aspect-ratio:16/10;display:grid;place-items:center;
+    background:
+      radial-gradient(74% 92% at 78% 12%, rgba(212,151,109,.22), transparent 62%),
+      linear-gradient(180deg,#241c4a 0%,#1a1436 54%,#120d28 100%);
+    border:1px solid rgba(148,132,255,.17);
+    box-shadow:inset 0 1px 0 rgba(196,182,255,.24),
+      inset 0 -30px 46px -28px rgba(0,0,0,.8),
+      0 10px 26px -16px rgba(0,0,0,.75);
+    animation:qzvIn .5s cubic-bezier(.34,1.56,.64,1) both}
+  .qzv::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+    background:radial-gradient(122% 122% at 50% 44%,transparent 50%,rgba(8,6,22,.55) 100%)}
+  .qzv-svg,.qzv-scene .sit-svg{display:block;width:100%;height:100%;margin:0}
+  /* ⚠️ C'est l'IMAGE qu'on cale sur le hublot, jamais le conteneur : .qzv-photo
+     EST le .qzv, le passer en absolute le sort du flux et il recouvre la page. */
+  .qzv-photo img,.qzv-photo video{position:absolute;inset:0;display:block;
+    width:100%;height:100%;object-fit:cover}
+  .qzv-pointe{position:absolute;inset:0;width:100%;height:100%}
+  /* Une vue du ciel est un plan VERTICAL : on la montre en entier et on
+     remplit les côtés avec elle-même, floutée. La couper en paysage
+     supprimait les deux voitures et ne laissait qu'une barre abstraite. */
+  .qzv-vue .fond{filter:blur(22px) saturate(1.25) brightness(.62);transform:scale(1.15)}
+  .qzv-vue .net{object-fit:contain}
   @keyframes qzvIn{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
 
   /* animations des briques (transform/opacity uniquement) */

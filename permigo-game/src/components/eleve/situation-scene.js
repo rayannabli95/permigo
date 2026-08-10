@@ -42,22 +42,38 @@ const BRANCH_IN = { S: [0, 1], N: [0, -1], E: [-1, 0], W: [1, 0] };
 
 const CAR_COLORS = {
   joueur: { hi: "#b39dff", mid: "#7c5cff", lo: "#5236c9" },
-  rouge: { hi: "#ff8a7e", mid: "#ef5350", lo: "#b03530" },
-  bleu: { hi: "#8fd0ff", mid: "#42a5f5", lo: "#1e6cb8" },
-  jaune: { hi: "#ffe082", mid: "#ffca28", lo: "#cf9500" },
-  gris: { hi: "#cfd8dc", mid: "#9aa7b0", lo: "#66737c" },
-  moto: { hi: "#8c9aa8", mid: "#546e7a", lo: "#33454f" },
+  // Les autres voitures sont éteintes par la nuit : elles restent lisibles
+  // mais aucune ne dispute la vedette à la violette du joueur.
+  rouge: { hi: "#c9645c", mid: "#973a35", lo: "#63221f" },
+  bleu: { hi: "#5f93c4", mid: "#36618f", lo: "#1f3d5c" },
+  jaune: { hi: "#cfa752", mid: "#9c7a2b", lo: "#654d17" },
+  gris: { hi: "#8d97a0", mid: "#626c76", lo: "#3e464e" },
+  moto: { hi: "#6a757f", mid: "#414d56", lo: "#252e35" },
 };
 // vitres : verre foncé commun (les tons clairs faisaient « gâteau à étages »)
 const GLASS = { mid: "#55648e", lo: "#3f4c70" };
 // gabarits spéciaux (bus urbain, poids lourd) — couleur fixe par type
+// Les gabarits de nuit : un bus bleu ciel de plein jour aspirait tout le
+// regard alors que la star de l'image est TOUJOURS la voiture violette.
 const VEH_COLORS = {
-  bus: { hi: "#a7cbec", mid: "#5b8fc9", lo: "#3a6395" },
-  camion: { hi: "#e8e4da", mid: "#b9b2a4", lo: "#8a8171" },
+  bus: { hi: "#6f89b4", mid: "#455d87", lo: "#2b3c5c" },
+  camion: { hi: "#a09a90", mid: "#736d64", lo: "#4c4842" },
 };
 
-const GROUND = { top: "#79c453", edge: "#4a8a31", edge2: "#3c7027" };
-const ROAD = { fill: "#4b4e66", line: "#f3f4f8", edge: "#3b3e52" };
+// ── La nuit de PermiGo ──────────────────────────────────────────
+// Les couleurs sont RELEVÉES sur les vues du ciel des fiches (08/08/2026,
+// permigo-video/public/ciel/*.jpg) : bitume violet, talus presque noir,
+// marquage éteint sauf sous la lampe. Les trois surfaces qui affichent ces
+// scènes (quiz, En situation, démo de la landing) sont déjà en nuit violette
+// et recevaient un plateau vert en plein jour : c'était le seul endroit de
+// l'app qui parlait une autre langue.
+const GROUND = { top: "#18211d", edge: "#101815", edge2: "#0a100e" };
+const ROAD = { fill: "#342b5d", line: "#cbb9d6", edge: "#221c40" };
+// La lampe à sodium : UNE seule source par scène, toujours au même endroit.
+// C'est elle qui signe l'image. On ne pose pas de mât (il entrerait en
+// collision avec les véhicules et les panneaux selon le type de scène), on
+// pose la lumière : le halo au sol suffit à donner l'heure.
+const LAMPE = { chaud: "#d4976d", coeur: "#f0b98a" };
 
 // ── projection & helpers géométrie ─────────────────────────────
 
@@ -454,10 +470,10 @@ function tree(x, y, big = false) {
   const s = big ? 1.25 : 1;
   return `<g transform="translate(${f1(b.x)},${f1(b.y)})">
     <ellipse cx="0" cy="2" rx="${13 * s}" ry="${6 * s}" fill="rgba(20,30,15,.28)"/>
-    <rect x="${-2.4 * s}" y="${-14 * s}" width="${4.8 * s}" height="${15 * s}" rx="2" fill="#7a5236"/>
-    <circle cx="0" cy="${-24 * s}" r="${13.5 * s}" fill="#3e9e4f"/>
-    <circle cx="${-7 * s}" cy="${-17 * s}" r="${9 * s}" fill="#4cb85e"/>
-    <circle cx="${7.5 * s}" cy="${-18 * s}" r="${8.5 * s}" fill="#369147"/>
+    <rect x="${-2.4 * s}" y="${-14 * s}" width="${4.8 * s}" height="${15 * s}" rx="2" fill="#2a2018"/>
+    <circle cx="0" cy="${-24 * s}" r="${13.5 * s}" fill="#22392b"/>
+    <circle cx="${-7 * s}" cy="${-17 * s}" r="${9 * s}" fill="#2c4735"/>
+    <circle cx="${7.5 * s}" cy="${-18 * s}" r="${8.5 * s}" fill="#1a2c21"/>
   </g>`;
 }
 
@@ -476,7 +492,7 @@ function signAt(branch, type, d = 1.35, val) {
       o.push(`${f1(Math.cos(a) * 12)},${f1(-37 + Math.sin(a) * 12)}`);
     }
     head = `<polygon points="${o.join(" ")}" fill="#e02b2b" stroke="#fff" stroke-width="1.6"/>
-      <text x="0" y="-34.4" text-anchor="middle" font-family="Inter,sans-serif" font-size="6.6" font-weight="800" fill="#fff">STOP</text>`;
+      <text x="0" y="-34.4" text-anchor="middle" font-family="'Archivo',sans-serif" font-size="6.6" font-weight="800" fill="#fff">STOP</text>`;
   } else if (type === "cede") {
     head = `<polygon points="-12,-46 12,-46 0,-27" fill="#fff" stroke="#e02b2b" stroke-width="4" stroke-linejoin="round"/>`;
   } else if (type === "prio") {
@@ -495,7 +511,7 @@ function signAt(branch, type, d = 1.35, val) {
     const n = val != null ? String(val) : "";
     const fs = n.length >= 3 ? 8.4 : 10.6;
     head = `<circle cx="0" cy="-37" r="12.5" fill="#fff" stroke="#e02b2b" stroke-width="3.2"/>
-      <text x="0" y="${(-37 + fs * 0.35).toFixed(1)}" text-anchor="middle" font-family="Inter,sans-serif" font-size="${fs}" font-weight="800" fill="#1a1d2e">${n}</text>`;
+      <text x="0" y="${(-37 + fs * 0.35).toFixed(1)}" text-anchor="middle" font-family="'Archivo',sans-serif" font-size="${fs}" font-weight="800" fill="#1a1d2e">${n}</text>`;
   }
   return {
     sy: base.y,
@@ -545,7 +561,10 @@ function nightMarkup() {
     )
     .join("");
   return `<g class="sit-night" pointer-events="none">
-    <rect x="-352" y="-248" width="704" height="452" fill="#0a1030" opacity=".44"/>
+    <!-- Le plateau est DÉJÀ de nuit : ce calque ne fait plus que refroidir
+         un peu la scène quand elle est explicitement nocturne. À .44 il
+         écrasait tout et le bitume redevenait un aplat. -->
+    <rect x="-352" y="-248" width="704" height="452" fill="#0a1030" opacity=".16"/>
     ${stars}
     <circle cx="252" cy="-192" r="30" fill="#f2f0d4" opacity=".12"/>
     <circle cx="252" cy="-192" r="20" fill="#f4f1d8" opacity=".92"/>
@@ -607,7 +626,13 @@ function vehicleMarkup(v, opts) {
     const c = rectCorners(x, y, ux, uy, L * 1.1, W * 1.5).map(([a, b]) =>
       P(a, b),
     );
-    return poly(c, "rgba(20,25,45,.32)");
+    const ombre = poly(c, "rgba(8,10,24,.5)");
+    // La voiture du joueur pose une flaque violette sur le bitume. C'est ce
+    // qui la fait exister comme « toi » sans avoir besoin d'une étiquette :
+    // aucune autre voiture de la scène n'éclaire le sol.
+    if (v.couleur !== "joueur") return ombre;
+    const b = P(x, y);
+    return `<ellipse cx="${f1(b.x)}" cy="${f1(b.y + 4)}" rx="${f1(60 * (L + 0.35))}" ry="${f1(34 * (L + 0.35))}" fill="rgba(124,92,255,.2)"/>${ombre}`;
   })();
 
   // roues : 4 coins rentrés
@@ -901,7 +926,7 @@ export function renderSituationScene(scene, opts = {}) {
     roads += `<path d="${circlePath(0, 0, RING_OUT)}" fill="${ROAD.fill}"/>`;
     roads += `<path d="${circlePath(0, 0, RING_LANE)}" fill="none" stroke="${ROAD.line}" stroke-width="2" stroke-dasharray="9 11" opacity=".45"/>`;
     // îlot central
-    roads += `<path d="${circlePath(0, 0, RING_ISLE)}" fill="${GROUND.top}" stroke="#e8e2d0" stroke-width="3"/>`;
+    roads += `<path d="${circlePath(0, 0, RING_ISLE)}" fill="${GROUND.top}" stroke="${ROAD.line}" stroke-width="3" stroke-opacity=".85"/>`;
     // cédez à chaque entrée (sauf la branche large : les flèches y sont la star)
     for (const b of ["N", "S", "E", "W"]) {
       if (b !== wide) roads += ringYield(b);
@@ -999,11 +1024,28 @@ export function renderSituationScene(scene, opts = {}) {
 
   objects.sort((a, b) => a.sy - b.sy);
 
-  return `<svg class="sit-svg" viewBox="-352 -248 704 452" role="img" aria-label="${escAttr(o.alt)}" focusable="false">
-    <defs><clipPath id="sit-ground-clip"><polygon points="${pts([P(R, R), P(R, -R), P(-R, -R), P(-R, R)])}"/></clipPath></defs>
+  return `<svg class="sit-svg" viewBox="-352 -248 704 452" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${escAttr(o.alt)}" focusable="false">
+    <defs>
+      <clipPath id="sit-ground-clip"><polygon points="${pts([P(R, R), P(R, -R), P(-R, -R), P(-R, R)])}"/></clipPath>
+      <radialGradient id="sit-lampe">
+        <stop offset="0" stop-color="${LAMPE.coeur}" stop-opacity=".34"/>
+        <stop offset=".45" stop-color="${LAMPE.chaud}" stop-opacity=".17"/>
+        <stop offset="1" stop-color="${LAMPE.chaud}" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="sit-vignette">
+        <stop offset=".52" stop-color="#0b0a18" stop-opacity="0"/>
+        <stop offset="1" stop-color="#0b0a18" stop-opacity=".5"/>
+      </radialGradient>
+    </defs>
     ${ground}
-    <g clip-path="url(#sit-ground-clip)">${roads}</g>
+    <g clip-path="url(#sit-ground-clip)">
+      ${roads}
+      <ellipse cx="118" cy="-92" rx="268" ry="176" fill="url(#sit-lampe)" pointer-events="none"/>
+    </g>
     ${objects.map((x) => x.svg).join("")}
+    <!-- La vignette est CLIPÉE sur le plateau : posée librement, elle peignait
+         un ovale sombre sur le fond de la page autour du diamant. -->
+    <g clip-path="url(#sit-ground-clip)"><ellipse cx="0" cy="-22" rx="392" ry="268" fill="url(#sit-vignette)" pointer-events="none"/></g>
     ${scene.meteo === "pluie" ? rainMarkup() : ""}
     ${scene.nuit ? nightMarkup() : ""}
     <g class="sit-fx"></g>

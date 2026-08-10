@@ -35,6 +35,8 @@ import {
   fichesMetaByMonde as fichesByMonde,
 } from "@/data/conduite-meta.js";
 import { loadFiche } from "@/data/fiches-loader.js";
+import { ficheSchemas } from "@/data/fiches-schemas.js";
+import { ouvrirStoryFiche } from "@/components/eleve/fiche-story.js";
 import { chromeNight } from "@/utils/chrome-night.js";
 import { chargerBoite, boiteConnue } from "@/utils/transmission.js";
 import {
@@ -691,13 +693,14 @@ ${chromeNight("#5a4fc0", "#423a96")}
 .fd-line.done .fd-aside{ background:rgba(240,169,63,.10); border-color:rgba(240,169,63,.22); }
 .fd-line.done .fd-aside p{ color:#8a6a1c; }
 
-.fd-schemas{ margin-top:2px; }
-.fd-gal{ display:flex; gap:12px; overflow-x:auto; scroll-snap-type:x mandatory; padding:2px 18px 8px; scrollbar-width:none; }
-.fd-gal::-webkit-scrollbar{ display:none; }
-.fd-shot{ margin:0; flex:0 0 84%; max-width:340px; scroll-snap-align:center; background:#f6f4ff; border:1px solid #e6e2fb;
-  border-radius:16px; overflow:hidden; box-shadow:0 3px 0 rgba(20,12,60,.28), inset 0 1px 0 rgba(255,255,255,.8); }
-.fd-shot img{ display:block; width:100%; aspect-ratio:1/1; object-fit:cover; background:#dfe3ea; }
-.fd-shot figcaption{ padding:9px 12px 11px; font-size:11.5px; line-height:1.35; color:#3d2f7a; font-weight:600; }
+/* Les images ne vivent plus dans la page : elles passent en story plein écran
+   à l'ouverture (fiche-story.js). Il ne reste que ce rappel d'une ligne. */
+.fd-revoir{ display:flex; align-items:center; justify-content:center; gap:9px; cursor:pointer;
+  width:calc(100% - 36px); margin:2px 18px 0; padding:12px 14px; border-radius:14px;
+  background:rgba(255,255,255,.09); border:1px solid rgba(255,255,255,.16); color:#ded4ff;
+  font:800 13.5px/1 'Archivo',sans-serif; }
+.fd-revoir:active{ transform:scale(.985); }
+.fd-revoir svg{ color:#c3b6f0; flex:0 0 auto; }
 
 .fd-coach-wrap{ margin-top:6px; }
 /* Le crochet qui donne envie d'ouvrir une carte : la mascotte pointe la
@@ -1100,6 +1103,7 @@ export async function mount(root, param) {
   const estAcquise = (c) => CERT_CACHE.get(c) === true;
   let mondeN = null;
   let lastFicheTracked = null; // évite de re-tracker/markRead à chaque coche de geste
+  let storyVue = null; // la story ne s'ouvre qu'à l'ENTRÉE dans une fiche
 
   if (deep) {
     const loaders = [ensureFiche(deep), ensureFichesI18n()];
@@ -1144,6 +1148,10 @@ export async function mount(root, param) {
       rendreLeBandeau();
       rendreLeBandeau = null;
     }
+    // Repartir du hub et rouvrir une fiche rejoue sa story : c'est une entrée
+    // dans la fiche, comme la première. Le quiz est le seul aller-retour qui
+    // ne la rejoue pas — on en revient au milieu d'une lecture commencée.
+    if (view !== "fiche" && view !== "quiz") storyVue = null;
     if (view === "fiche") return renderFicheDeck();
     if (view === "quiz") return renderQuiz();
     if (view === "monde") return renderMonde();
@@ -1723,9 +1731,24 @@ export async function mount(root, param) {
     // rien n'est perdu si on veut les ré-afficher ailleurs.
 
     const BACK = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="#3d2f7a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    const IMG_IC = `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="10" r="1.6" fill="currentColor"/><path d="M4.5 17l4.2-4.2 3 3 3.3-3.3 4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
     const competenceTxt =
       lang !== "fr" && tr?.competence ? tr.competence : f.competence;
+
+    // ── Les images de la fiche ─────────────────────────────────────────────
+    // Elles ne sont PLUS posées dans la page : elles passent en story plein
+    // écran à l'ouverture de la fiche (demande Rayan 10/08, fiche-story.js).
+    // Une vignette de 154 px de large ne montre pas un geste ; en grand, si.
+    // Il ne reste ici qu'un rappel d'une ligne, pour celui qui a passé la
+    // story ou qui veut revoir une vue en cours de lecture.
+    // La boîte auto change deux vues sur seize (pédalier, sélecteur).
+    const shots = ficheSchemas(f.code, enAuto);
+    const schemasHtml = shots.length
+      ? `<button type="button" class="fd-revoir" data-revoir>
+          ${IMG_IC}<span>${esc(ui("revoir", "Revoir les images"))}</span>
+        </button>`
+      : "";
 
     // Une seule pose : renderFicheDeck() est rappelée à chaque coche.
     if (!rendreLeBandeau) rendreLeBandeau = hideHeader();
@@ -1742,6 +1765,7 @@ export async function mount(root, param) {
       ${briefHtml}
       ${autoNoteHtml}
       ${deckHtml}
+      ${schemasHtml}
       ${piegeHtml}
 
       <div class="fd-actions">
@@ -1786,6 +1810,28 @@ export async function mount(root, param) {
         .catch(() => {
           /* pas de glossaire plutôt qu'une fiche cassée */
         });
+    }
+
+    // ── Les images d'abord, la méthode ensuite ─────────────────────────────
+    // La story s'ouvre à l'ENTRÉE dans la fiche et une seule fois :
+    // renderFicheDeck() est rappelée à chaque geste coché, et une story qui
+    // repart à chaque coche serait un piège, pas un décor.
+    const revoirStory = () =>
+      ouvrirStoryFiche({
+        shots,
+        lang,
+        rtl,
+        kicker: `${f.code} · ${competenceTxt}`,
+        onFin: () => track("revision_conduite_story_fin", { code: f.code }),
+      });
+    root.querySelector("[data-revoir]")?.addEventListener("click", () => {
+      haptic("select");
+      revoirStory();
+    });
+    if (shots.length && storyVue !== f.code) {
+      storyVue = f.code;
+      track("revision_conduite_story_open", { code: f.code });
+      revoirStory();
     }
   }
 
