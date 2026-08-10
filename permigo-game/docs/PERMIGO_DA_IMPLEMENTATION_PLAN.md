@@ -203,3 +203,39 @@ La refonte complète du véhicule reste la phase 2.
 **Mesures d'acceptation** : `verif-teinte` ✅ sur les trois instants (gris 0,06
 à 0,09 pour un plafond de 0,20 · chaud 0,53 à 0,65 · saturation 0,20 à 0,24 ·
 accent 0,10 à 0,20) · zéro erreur console · build vert.
+
+### Phases 2, 4, 3 et 5 — faites dans la nuit du 10 au 11/08/2026
+
+Livré : `da/vehicules.js`, `da/personnages.js`, `da/batiments.js`,
+`da/mobilier.js`, `outils/da/verif-perf.mjs`. Détail dans
+`.claude/night-run-report.md`. Ordre changé (2, 4, 3, 5) : classé par impact
+visuel, ce que le plan autorise.
+
+**Trois décisions techniques à ne pas re-débattre** :
+
+1. **Un véhicule est un PROFIL EXTRUDÉ**, pas un assemblage de boîtes. Le
+   biseau de l'extrusion donne les arêtes cassées, et un gabarit ne coûte que
+   six nombres — c'est ce qui rend la flotte extensible par un agent.
+2. **Un personnage se conçoit à l'envers** : on grossit l'organe que le joueur
+   doit lire (la tête, 20 à 26 % de la taille) et on jette le reste. La
+   chevelure qui couvre l'arrière du crâne n'est pas décorative : sans elle,
+   une tête qui tourne ne se voit pas, et notre meilleure leçon disparaît.
+3. **La marche est pilotée par le déplacement mesuré**, jamais par un drapeau
+   posé dans le scénario. Un piéton ne peut donc pas glisser, et le
+   rembobinage reste cohérent gratuitement.
+
+**Deux pièges de rendu**, tombés cette nuit et valables pour toutes les phases
+suivantes :
+
+- Une couleur se choisit **après** le rendu. La chaîne (ACES + exposition +
+  étalonnage) sature et éclaircit toujours plus que le nuancier : les façades
+  ont dû être désaturées d'un tiers et les carrosseries assombries de 15 %.
+- Un trou de scène protège **un côté**, pas les deux. Le couloir de vue de la
+  voiture qui hésite vidait le trottoir d'en face et transformait la rue en
+  désert au moment exact où le jeu dit « regarde loin ».
+
+**État de la phase 8** : `verif-perf` mesure **1 606 appels de dessin** pour un
+budget de 140. Les triangles (53 k) et les assets (0) sont bons : le problème
+est le NOMBRE d'objets. La recette est écrite dans le rapport de nuit —
+quantifier chaque famille de façade à trois tons, les passer en couleurs par
+sommet, puis fusionner chaque rangée en un maillage par matériau.
