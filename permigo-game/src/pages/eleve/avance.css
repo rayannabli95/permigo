@@ -1,7 +1,23 @@
-/* « Secondes d'avance ». L'écran ne porte que deux choses : le compteur et
-   la route. Tout le reste du jeu se raconte dans l'image. */
+/* « Secondes d'avance ».
+ *
+ * 🔴 LE CADRAGE EST LE SUJET DE CE FICHIER. « Je ne me sens pas au volant,
+ * j'ai l'impression de regarder une scène 3D de loin » : la cause n'était pas
+ * la 3D, c'était que l'image occupait tout l'écran d'un téléphone en portrait.
+ * Un cadre haut et étroit oblige à un champ horizontal minuscule, donc à un
+ * téléobjectif, donc à une image sans profondeur.
+ *
+ * On rend donc le bas de l'écran au POSTE DE CONDUITE. Le pare-brise devient
+ * un cadre presque carré, le moteur peut ouvrir le champ horizontal (36°, cf.
+ * moteur.js), et la profondeur revient. Le poste n'est pas de la décoration :
+ * c'est lui qui rend le champ de vision jouable. */
 
 .av {
+  --poste: 38%;
+  --capot: 11%;
+  --nuit: #12151c;
+  --planche: #212734;
+  --arete: rgb(255 255 255 / 0.1);
+
   position: fixed;
   inset: 0;
   z-index: 60;
@@ -14,9 +30,46 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Sur un écran large, le pare-brise est déjà un rectangle couché : le poste
+   n'a plus besoin de reprendre autant de place. */
+@media (min-aspect-ratio: 4 / 5) {
+  .av {
+    --poste: 24%;
+    --capot: 9%;
+  }
+}
+
+/* ⭐ LE CAPOT. Le dernier défaut du cadrage, et le plus bête : le bas du
+   pare-brise montrait dix mètres de bitume nu, soit un tiers de l'image
+   occupé par la seule zone de la route où il n'y a jamais rien à voir. Dans
+   une vraie voiture, le capot la cache — donc on met un capot. Il coûte huit
+   lignes de dégradé, il rend un tiers de l'image utile, et il fait
+   davantage pour le sentiment d'être au volant que n'importe quel réglage
+   de caméra. */
+.av-capot {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--poste) - 1px);
+  width: 168%;
+  height: var(--capot);
+  transform: translateX(-50%);
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  background: linear-gradient(
+    180deg,
+    #cfdcea 0%,
+    #a8bbcf 16%,
+    #7d90a6 48%,
+    #5d6d80 100%
+  );
+  box-shadow:
+    inset 0 2px 0 rgb(255 255 255 / 0.38),
+    0 -10px 22px rgb(0 0 0 / 0.2);
+  pointer-events: none;
+}
+
 .av-vue {
   position: absolute;
-  inset: 0;
+  inset: 0 0 var(--poste);
 }
 
 .av-charge {
@@ -28,54 +81,178 @@
   color: #24405c;
 }
 
-/* La planche de bord, en CSS : ça dit « tu es dans une voiture » et ça ne
-   coûte pas un triangle. ⚠️ 15 % et pas 8 : le bas du cadre est du bitume à
-   trois mètres, c'est-à-dire la seule zone de l'écran où il n'y a jamais rien
-   à voir. Dans une vraie voiture, le capot la cache. */
-.av-bord {
+/* ── Le poste de conduite ─────────────────────────────────────────────── */
+
+.av-poste {
   position: absolute;
   inset: auto 0 0;
-  height: 15%;
-  background: linear-gradient(to top, #14161c, #23262f 62%, #2c303a);
-  box-shadow: 0 -1px 0 rgb(255 255 255 / 0.09);
+  height: var(--poste);
+  background: linear-gradient(
+    180deg,
+    #2b323f 0%,
+    var(--planche) 18%,
+    var(--nuit) 78%,
+    #0b0d12 100%
+  );
+  /* L'arête basse du pare-brise. Une ligne claire d'un pixel : c'est elle qui
+     dit « ceci est une vitre », et elle ne coûte rien. */
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.16),
+    0 -14px 26px rgb(0 0 0 / 0.32);
+  overflow: hidden;
 }
 
-/* ── Le compteur ─────────────────────────────────────────────────────── */
+/* Le haut du volant, qui dépasse. Un arc, rien de plus : ça suffit pour que
+   le cerveau place le corps derrière. */
+.av-volant {
+  position: absolute;
+  left: 50%;
+  bottom: -30%;
+  width: 132%;
+  height: 82%;
+  transform: translateX(-50%);
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  background: linear-gradient(180deg, #2f3644 0%, #1a1f29 40%, #14181f 100%);
+  box-shadow:
+    inset 0 2px 0 rgb(255 255 255 / 0.12),
+    0 -6px 18px rgb(0 0 0 / 0.4);
+}
+
+/* ── Le compteur, posé sur la planche comme un instrument ──────────────── */
 
 .av-compteur {
   position: absolute;
-  top: max(14px, env(safe-area-inset-top));
-  left: 16px;
+  top: 11%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  text-align: center;
   line-height: 1;
-  text-shadow: 0 2px 12px rgb(0 0 0 / 0.55);
   transition: transform 0.18s ease;
 }
 
 .av-compteur.on {
-  transform: scale(1.12);
-}
-
-.av-compteur span {
-  display: block;
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.19em;
-  text-transform: uppercase;
-  opacity: 0.85;
+  transform: translateX(-50%) scale(1.12);
 }
 
 .av-compteur b {
   display: block;
-  margin-top: 0.15rem;
-  font-size: 2.6rem;
+  font-size: clamp(2.2rem, 12vw, 3.1rem);
   font-weight: 900;
+  letter-spacing: -0.02em;
+  text-shadow: 0 0 26px rgb(167 139 250 / 0.4);
+}
+
+.av-compteur span {
+  display: block;
+  margin-top: 0.42rem;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #b9a6ff;
+}
+
+/* ── Ce qu'on dit à l'élève ────────────────────────────────────────────── */
+
+/* ⭐ UN SEUL EMPLACEMENT pour tout ce qui s'adresse à l'élève : la phrase qui
+   dit où regarder, la relance du tutoriel, le « pas encore ». Deux messages ne
+   doivent jamais s'empiler, sinon on retombe dans le bruit qu'on vient de
+   retirer. Il se pose juste au-dessus de l'arête du pare-brise, là où l'œil
+   revient naturellement. */
+.av-dire {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--poste) + var(--capot) + 12px);
+  z-index: 3;
+  margin: 0;
+  max-width: min(86%, 30rem);
+  padding: 0.5rem 0.95rem;
+  border-radius: 999px;
+  transform: translate(-50%, 8px);
+  background: rgb(10 16 24 / 0.62);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  text-align: center;
+  text-wrap: balance;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: rgb(255 255 255 / 0.95);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.av-dire.on {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* La relance du tutoriel se distingue : c'est la seule phrase du jeu qui
+   demande explicitement une action. */
+.av-relance {
+  background: rgb(124 58 237 / 0.86);
+  box-shadow: 0 6px 24px rgb(76 29 149 / 0.5);
+}
+
+.av-note {
+  background: rgb(10 16 24 / 0.74);
+  color: rgb(255 255 255 / 0.86);
+}
+
+/* ── Les deux phrases du lancement ────────────────────────────────────── */
+
+.av-intro {
+  position: absolute;
+  inset: 0 0 var(--poste);
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: linear-gradient(
+    180deg,
+    rgb(8 14 24 / 0.62),
+    rgb(8 14 24 / 0.28) 62%,
+    rgb(8 14 24 / 0)
+  );
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.45s ease;
+}
+
+.av-intro.on {
+  opacity: 1;
+}
+
+.av-intro strong {
+  display: block;
+  font-size: clamp(1.45rem, 7.4vw, 2.1rem);
+  font-weight: 900;
+  line-height: 1.06;
+  text-align: center;
+  text-wrap: balance;
+  text-shadow: 0 3px 22px rgb(0 0 0 / 0.6);
+}
+
+.av-intro em {
+  display: block;
+  margin-top: 0.7rem;
+  font-style: normal;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: center;
+  text-wrap: balance;
+  color: rgb(255 255 255 / 0.86);
+  text-shadow: 0 2px 14px rgb(0 0 0 / 0.7);
 }
 
 /* ── Le nombre qui monte, là où le doigt s'est posé ───────────────────── */
 
 .av-gains {
   position: absolute;
-  inset: 0;
+  inset: 0 0 var(--poste);
   pointer-events: none;
 }
 
@@ -109,11 +286,9 @@
   }
 }
 
-/* Le souffle : un cercle blanc qui s'ouvre depuis le centre au moment de la
-   découverte. Une seule image, quatre dixièmes, et c'est tout. */
 .av-souffle {
   position: absolute;
-  inset: 0;
+  inset: 0 0 var(--poste);
   pointer-events: none;
   opacity: 0;
   background: radial-gradient(
@@ -142,33 +317,60 @@
   }
 }
 
-/* ── « Pas encore » ──────────────────────────────────────────────────── */
+/* ── L'explication du compteur, une seule fois ────────────────────────── */
 
-.av-note {
+/* ⚠️ En bas, jamais au centre. La carte explique ce qu'on vient de trouver :
+   si elle se pose dessus, elle cache exactement la chose qu'on célèbre. */
+.av-lecon {
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 15%;
-  margin: 0;
-  text-align: center;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: rgb(255 255 255 / 0.92);
-  text-shadow: 0 2px 10px rgb(0 0 0 / 0.6);
+  inset: 0 0 var(--poste);
+  z-index: 5;
+  display: grid;
+  place-items: end center;
+  padding: 1.5rem 1.5rem calc(var(--capot) + 14px);
   opacity: 0;
-  transform: translateY(6px);
-  transition:
-    opacity 0.16s ease,
-    transform 0.16s ease;
   pointer-events: none;
+  transition: opacity 0.28s ease;
 }
 
-.av-note.on {
+.av-lecon.on {
   opacity: 1;
-  transform: none;
 }
 
-/* ── Le blanc, puis le chiffre perdu ─────────────────────────────────── */
+.av-lecon-carte {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 22rem;
+  padding: 1.05rem 1.3rem;
+  border-radius: 1.1rem;
+  background: rgb(10 16 26 / 0.9);
+  box-shadow: 0 18px 48px rgb(0 0 0 / 0.45);
+  text-align: center;
+  text-wrap: balance;
+  animation: av-lecon 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.av-lecon-carte b {
+  font-size: 1.55rem;
+  font-weight: 900;
+}
+
+.av-lecon-carte span {
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: rgb(255 255 255 / 0.82);
+}
+
+@keyframes av-lecon {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.94);
+  }
+}
+
+/* ── Le blanc, puis ce qu'on n'a pas vu ───────────────────────────────── */
 
 .av-flash {
   position: absolute;
@@ -193,9 +395,18 @@
 
 .av-perdu {
   position: absolute;
-  inset: 0;
+  inset: 0 0 var(--poste);
+  z-index: 5;
   display: grid;
+  /* ⚠️ `align-content` et pas seulement `place-items` : sans lui, les lignes
+     d'une grille automatique s'étirent sur toute la hauteur et le chiffre se
+     retrouve à cent cinquante pixels de sa légende. */
+  /* Même règle que la carte d'explication : le chiffre se pose EN BAS. Au
+     centre, il masquait la portière qu'on est précisément en train de
+     remontrer. */
+  place-content: end center;
   place-items: center;
+  padding: 0 1.4rem calc(var(--capot) + 10px);
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.22s ease;
@@ -206,10 +417,23 @@
 }
 
 .av-perdu b {
-  font-size: 4rem;
+  display: block;
+  font-size: clamp(2.6rem, 15vw, 4rem);
   font-weight: 900;
   color: #fff;
+  text-align: center;
   text-shadow: 0 4px 26px rgb(0 0 0 / 0.7);
+}
+
+.av-perdu span {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.98rem;
+  font-weight: 700;
+  text-align: center;
+  text-wrap: balance;
+  color: rgb(255 255 255 / 0.9);
+  text-shadow: 0 2px 14px rgb(0 0 0 / 0.75);
 }
 
 /* ── L'écran de départ et celui de fin ───────────────────────────────── */
@@ -219,12 +443,12 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1.8rem;
+  gap: 2.4rem;
   padding: 2rem;
   background: linear-gradient(180deg, #2f74c8 0%, #8fc0e6 58%, #d8e6f0 100%);
 }
 
-.av-accueil h1 {
+.av-marque h1 {
   margin: 0;
   font-size: clamp(2.2rem, 11vw, 3.4rem);
   font-weight: 900;
@@ -232,6 +456,16 @@
   text-align: center;
   text-wrap: balance;
   text-shadow: 0 3px 20px rgb(0 0 0 / 0.28);
+}
+
+.av-marque p {
+  margin: 0.8rem 0 0;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  text-wrap: balance;
+  color: rgb(255 255 255 / 0.92);
+  text-shadow: 0 2px 12px rgb(0 0 0 / 0.3);
 }
 
 .av-go,
@@ -251,9 +485,10 @@
 .av-fin {
   position: absolute;
   inset: 0;
+  z-index: 6;
   display: grid;
   place-items: center;
-  background: rgb(12 22 34 / 0.72);
+  background: rgb(12 22 34 / 0.76);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
@@ -268,7 +503,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.6rem;
+  gap: 1.5rem;
   text-align: center;
 }
 
@@ -293,10 +528,18 @@
   opacity: 0.8;
 }
 
+.av-bilan {
+  margin: -0.5rem 0 0;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: rgb(255 255 255 / 0.78);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .av-gain,
   .av-souffle.on,
-  .av-flash.on {
+  .av-flash.on,
+  .av-lecon-carte {
     animation-duration: 0.01s;
   }
 }

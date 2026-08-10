@@ -8,10 +8,16 @@
 // lecture est juste, la voiture se comporte comme quelqu'un qui a vu.
 //
 // La récompense n'est pas un score, c'est `incident − instant du doigt`, en
-// secondes. Le même nombre sert de plaisir au joueur et de mesure au produit,
-// et une seconde d'avance en jeu est une seconde d'avance en voiture.
+// secondes. Le même nombre sert de plaisir au joueur et de mesure au produit.
+//
+// 🔴 CE QUI A CHANGÉ LE 10/08 — le retour de Rayan, en une phrase :
+// « minimaliste ≠ incompréhensible ». Le moteur était bon, l'expérience
+// autour était muette. Donc : le champ de vision est refait (voir plus bas),
+// chaque scène porte une phrase qui dit où regarder, la première scène est un
+// tutoriel qui se relance tout seul si rien n'est touché, et l'aide diminue
+// au fil des parties.
 
-import { creerMonde, AVANT } from "../engine/world.js";
+import { creerMonde } from "../engine/world.js";
 import { creerSon } from "../engine/audio.js";
 import { creerPost } from "../engine/post.js";
 import { creerQualite } from "../engine/qualite.js";
@@ -20,9 +26,10 @@ import { creerKit } from "../environments/kit.js";
 import { construireRue, X_STATIONNE } from "./rue.js";
 import { EVENEMENTS, TROUS, DUREE, VITESSE, DEPART } from "./scenario.js";
 
+// ⚠️ Ni `voiture.glb` ni `gris.glb` : plus personne ne s'en sert depuis que
+// les voitures sont peintes par le kit, et c'étaient deux téléchargements
+// pour rien avant la première image.
 const MODELES = {
-  voiture: { fichier: "voiture.glb", longueur: 4.2, capOffset: -Math.PI / 2 },
-  gris: { fichier: "gris.glb", longueur: 4.25, capOffset: -Math.PI / 2 },
   camion: { fichier: "camion.glb", longueur: 7.6, capOffset: -Math.PI / 2 },
   pieton: { fichier: "pieton.glb", hauteur: 1.72, capOffset: Math.PI },
   velo: { fichier: "velo.glb", hauteur: 1.75, capOffset: Math.PI },
@@ -30,10 +37,35 @@ const MODELES = {
 };
 
 // Le moment de découverte, au centième. Court, sinon il casse le rythme ;
-// trop court, il ne claque pas. 0,42 s en tout.
+// trop court, il ne claque pas. 0,42 s en tout — sauf la toute première fois,
+// où il dure le temps d'expliquer ce qu'est une seconde d'avance.
 const SUSPENSION = { creux: 0.3, sortie: 0.12, tempo: 0.08 };
+const SUSPENSION_PREMIERE = 2.4;
 
-export async function creerPartie(hote, { sur = () => {} } = {}) {
+// 🔴 LE CHAMP HORIZONTAL, PAS LE VERTICAL. C'est le réglage qui a fait dire
+// « j'ai l'impression de regarder une scène 3D de loin ».
+//
+// Un téléphone en portrait est haut et étroit. Three.js prend un champ
+// VERTICAL : en fixer 44° sur un écran de rapport 0,46 donne 21° horizontaux,
+// c'est-à-dire un téléobjectif. Un téléobjectif écrase la profondeur, et une
+// image sans profondeur ressemble exactement à ce que Rayan a décrit : une
+// scène regardée de loin, pas une route vue du siège conducteur.
+//
+// On fixe donc l'horizontal à 36° et on DÉDUIT le vertical du format réel de
+// la fenêtre. Le pare-brise n'occupe plus tout l'écran (le poste de conduite
+// prend le bas), donc le rapport de la zone 3D est bien plus proche du carré
+// et le vertical reste raisonnable.
+const FOV_H = 36;
+
+// Le doigt n'est pas un rayon laser. Un enfant à trente mètres fait trente
+// pixels de haut : exiger de le toucher au pixel près, c'est transformer un
+// jeu de lecture en jeu d'adresse.
+const TOLERANCE = 46;
+
+export async function creerPartie(
+  hote,
+  { sur = () => {}, niveau = "guide", expliquer = false } = {},
+) {
   const THREE = await import("three");
   const monde = creerMonde(THREE, hote, { jour: true });
   const modeles = await chargerModeles(THREE, MODELES, {
@@ -46,24 +78,38 @@ export async function creerPartie(hote, { sur = () => {} } = {}) {
   });
   monde.scene.add(groupe);
 
-  // 🔴 44° de champ vertical, pas 55°. Ce n'est pas un réglage de confort :
-  // à 55° une portière qui s'entrouvre à soixante mètres fait quatre pixels
-  // et le jeu est injouable. Resserrer le champ, c'est mettre des pixels sur
-  // le lointain, et le lointain est tout le sujet.
-  monde.camera.fov = 44;
-  monde.camera.updateProjectionMatrix();
+  // 🔴 L'ombre ne couvrait que trente mètres autour de la voiture, et les
+  // immeubles projettent en travers de toute la chaussée : leur ombre
+  // s'arrêtait donc NET au milieu de la route, sur une arête bien droite qui
+  // ressemble à une tache sale. Le champ passe à cinquante-cinq mètres, et la
+  // carte double pour garder la même finesse par mètre.
+  {
+    const c = monde.soleil.shadow.camera;
+    c.left = -55;
+    c.right = 55;
+    c.top = 55;
+    c.bottom = -55;
+    c.far = 170;
+    c.updateProjectionMatrix();
+    monde.soleil.shadow.mapSize.set(2048, 2048);
+  }
+
+  monde.surRedimension((l, h) => {
+    const v = 2 * Math.atan((Math.tan((FOV_H * Math.PI) / 360) * h) / l);
+    monde.camera.fov = Math.max(26, Math.min(64, (v * 180) / Math.PI));
+    monde.camera.updateProjectionMatrix();
+  });
 
   const post = creerPost(THREE, monde);
   // 🔴 L'étalonnage par défaut est celui du CRÉPUSCULE : les ombres tirent
   // vers le violet, les hautes lumières vers l'ambre, et le vignettage est
   // lourd. Appliqué à une rue de plein jour, il rend une image sale et
-  // bleuâtre — exactement ce qu'on cherche à fuir. Ici : neutre, contrasté,
-  // propre. La DA reviendra, la lisibilité passe d'abord.
+  // bleuâtre. Ici : neutre, contrasté, propre.
   Object.assign(post.uniforms.uFroid, { value: 0.02 });
   Object.assign(post.uniforms.uChaud, { value: 0.05 });
-  Object.assign(post.uniforms.uSaturation, { value: 1.08 });
-  Object.assign(post.uniforms.uVignette, { value: 0.3 });
-  Object.assign(post.uniforms.uGrain, { value: 0.018 });
+  Object.assign(post.uniforms.uSaturation, { value: 1.1 });
+  Object.assign(post.uniforms.uVignette, { value: 0.26 });
+  Object.assign(post.uniforms.uGrain, { value: 0.016 });
   Object.assign(post.uniforms.uAberration, { value: 0.0005 });
   const qualite = creerQualite(monde, {});
   qualite.brancherPost(post);
@@ -85,9 +131,28 @@ export async function creerPartie(hote, { sur = () => {} } = {}) {
   anneau.visible = false;
   monde.scene.add(anneau);
 
+  // ⭐ Le halo du tutoriel. Il n'existe QU'AU premier niveau d'aide, et il
+  // n'apparaît que si l'élève n'a rien touché alors que le signe est déjà là.
+  // Son rôle n'est pas de désigner le danger : c'est d'apprendre qu'on a le
+  // droit de toucher l'image.
+  const halo = new THREE.Mesh(
+    new THREE.RingGeometry(1.05, 1.22, 40),
+    new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0,
+      side: THREE.DoubleSide,
+      depthTest: false,
+      fog: false,
+    }),
+  );
+  halo.renderOrder = 49;
+  halo.visible = false;
+  monde.scene.add(halo);
+  let cibleHalo = null;
+
   // ── Les acteurs des cinq événements ────────────────────────────────────
   const touchables = [];
-  const corps = new Map(); // "evt.acteur" → objet 3D
 
   function fabriquer(a) {
     if (a.type === "porte") {
@@ -96,8 +161,15 @@ export async function creerPartie(hote, { sur = () => {} } = {}) {
       // hélice et personne ne comprend ce qu'il regarde.
       const pivot = new THREE.Group();
       const m = new THREE.Mesh(
-        new THREE.BoxGeometry(0.06, 1.0, 1.05),
-        new THREE.MeshStandardMaterial({ color: 0x2f4f86, roughness: 0.4 }),
+        new THREE.BoxGeometry(0.07, 1.02, 1.05),
+        // Un bleu plus clair que la carrosserie : en s'ouvrant, la face
+        // extérieure se tourne vers nous et prend le soleil. C'est ce qui la
+        // rend lisible à trente mètres, où elle ne fait que douze pixels.
+        new THREE.MeshStandardMaterial({
+          color: 0x9ab6e2,
+          roughness: 0.34,
+          metalness: 0.1,
+        }),
       );
       m.position.set(0, 0, 0.52);
       m.castShadow = true;
@@ -117,8 +189,22 @@ export async function creerPartie(hote, { sur = () => {} } = {}) {
       return g;
     }
     if (a.type === "enfant" || a.type === "pieton") {
-      const p = copier(modeles.pieton) || kit.vehicule("pieton", a.couleur);
-      if (a.type === "enfant") p.scale.multiplyScalar(0.62);
+      const p = copier(modeles.pieton) || kit.vehicule("pieton", "bleu");
+      if (a.type === "enfant") {
+        // 0,78 et pas 0,62 : un enfant de dix ans plutôt qu'un bambin. À
+        // trente mètres, vingt centimètres de plus, c'est cinq pixels — et
+        // cinq pixels décident si la scène est difficile ou invisible.
+        p.scale.multiplyScalar(0.78);
+        // ⚠️ Le modèle est texturé sombre. Un enfant sombre sur un trottoir
+        // gris n'existe pas à trente mètres. On lui repeint un vêtement franc.
+        p.traverse((o) => {
+          if (!o.isMesh) return;
+          o.material = new THREE.MeshStandardMaterial({
+            color: a.couleur ?? 0xf4c116,
+            roughness: 0.72,
+          });
+        });
+      }
       const g = new THREE.Group();
       g.add(p);
       return g;
@@ -129,8 +215,18 @@ export async function creerPartie(hote, { sur = () => {} } = {}) {
       g.add(v);
       return g;
     }
-    const cle = a.type === "camion" ? "camion" : "voiture";
-    const m = copier(modeles[cle]) || kit.vehicule(a.type, a.couleur);
+    // 🔴 UNE VOITURE DE SCÈNE NE PREND PAS LE MODÈLE 3D. C'est le même piège
+    // que pour les voitures garées (cf. rue.js) et il m'a échappé une
+    // deuxième fois : les GLB sont texturés pour la DA de NUIT, donc en plein
+    // jour ils rendent tous le même bleu marine. La voiture qui hésite était
+    // censée être rouge et vue à soixante-dix mètres : elle sortait bleu
+    // sombre, au milieu d'une file de voitures garées bleu sombre. « Regarde
+    // loin » demandait donc de distinguer un objet de sa propre couleur.
+    // Le camion, lui, rend clair et garde son modèle.
+    const m =
+      a.type === "camion"
+        ? copier(modeles.camion) || kit.vehicule("camion", a.couleur)
+        : kit.vehicule("voiture", a.couleur);
     const g = new THREE.Group();
     g.add(m);
     if (a.feux) {
@@ -152,7 +248,6 @@ export async function creerPartie(hote, { sur = () => {} } = {}) {
       o.userData.evenement = e.id;
       monde.scene.add(o);
       objets[a.id] = o;
-      corps.set(`${e.id}.${a.id}`, o);
       touchables.push(o);
       // Une tache de contact sous ce qui roule : sans elle un véhicule flotte.
       if (a.type === "voiture" || a.type === "camion") {
@@ -170,6 +265,9 @@ export async function creerPartie(hote, { sur = () => {} } = {}) {
       te: 0,
       trouve: false,
       rate: false,
+      amorceDite: false,
+      relanceDite: false,
+      zLisible: undefined, // où était la voiture quand le signe est apparu
     };
   });
 
@@ -183,43 +281,82 @@ export async function creerPartie(hote, { sur = () => {} } = {}) {
 
   // ── L'état de la partie ────────────────────────────────────────────────
   const etat = {
-    phase: "roule", // roule · decouverte · consequence · rembobine · fini
+    phase: "roule", // roule · consequence · rembobine · fini
     t: 0,
-    avance: 0, // le total, en secondes gagnées
+    avance: 0,
     fauxPositifs: 0,
     trouves: 0,
     manques: 0,
+    dangers: EVENEMENTS.filter((e) => e.danger).length,
     journal: [],
   };
   const v = { x: DEPART.x, z: DEPART.z, vitesse: VITESSE, ecart: 0 };
   let securiteJusqu = -1; // « voir suffit » : la voiture lève le pied
   let freinUrgence = 0;
-  let suspension = 0; // temps restant du moment de découverte
+  let suspension = 0;
   let cibleFocus = null;
   let rembobine = null;
+  let premierTrouve = true;
 
   const camera = monde.camera;
   const rayon = new THREE.Raycaster();
   const ndc = new THREE.Vector2();
   const projete = new THREE.Vector3();
 
+  function versEcran(objet, hauteur = 0.9) {
+    if (!objet) return [0.5, 0.5];
+    objet.getWorldPosition(projete);
+    projete.y += hauteur;
+    projete.project(camera);
+    return [projete.x * 0.5 + 0.5, projete.y * 0.5 + 0.5];
+  }
+
   // ── Le doigt ───────────────────────────────────────────────────────────
-  function toucher(px, py) {
-    if (etat.phase !== "roule") return;
+  //
+  // `undefined` = le ciel, ça ne coûte rien. `null` = quelque chose d'inerte.
+  // Sinon, l'événement visé.
+  function viser(px, py) {
     const r = hote.getBoundingClientRect();
+    // 1. Le porteur actif le plus proche, en pixels d'écran. C'est cette
+    //    tolérance qui rend le jeu jouable au pouce.
+    let meilleur = null;
+    let dMin = Infinity;
+    for (const e of evts) {
+      if (!e.actif || e.fini || e.trouve || e.rate) continue;
+      const o = e.objets[e.def.porteur];
+      if (!o || !o.visible) continue;
+      o.getWorldPosition(projete);
+      projete.y += 0.6;
+      projete.project(camera);
+      if (projete.z > 1) continue; // derrière nous
+      const ex = r.left + (projete.x * 0.5 + 0.5) * r.width;
+      const ey = r.top + (-projete.y * 0.5 + 0.5) * r.height;
+      const d = Math.hypot(px - ex, py - ey);
+      if (d < dMin) {
+        dMin = d;
+        meilleur = e;
+      }
+    }
+    if (meilleur && dMin <= TOLERANCE) return meilleur;
+
+    // 2. Sinon le rayon, sur le décor.
     ndc.set(
       ((px - r.left) / r.width) * 2 - 1,
       -((py - r.top) / r.height) * 2 + 1,
     );
     rayon.setFromCamera(ndc, camera);
     const touches = rayon.intersectObjects(touchables, true);
-    if (!touches.length) return; // le ciel ne coûte rien
-
-    // On remonte au groupe qui porte l'événement.
+    if (!touches.length) return undefined;
     let o = touches[0].object;
     while (o && !o.userData.evenement && o.parent) o = o.parent;
     const id = o?.userData?.evenement;
-    const e = evts.find((x) => x.def.id === id);
+    return evts.find((x) => x.def.id === id) || null;
+  }
+
+  function toucher(px, py) {
+    if (etat.phase !== "roule") return;
+    const e = viser(px, py);
+    if (e === undefined) return; // le ciel ne coûte rien
 
     // Rien de vivant, ou pas encore lisible : « pas encore ». C'est une
     // hypothèse, pas une faute. ⭐ La punition monte doucement, sinon on
@@ -251,28 +388,29 @@ export async function creerPartie(hote, { sur = () => {} } = {}) {
       gain: +gain.toFixed(2),
     });
 
-    // Le monde suspend, le son se coupe, l'image se focalise sur lui.
-    suspension = SUSPENSION.creux + SUSPENSION.sortie;
+    // La toute première réussite de l'élève, une seule fois dans sa vie : le
+    // monde reste suspendu le temps de dire ce que le nombre veut dire.
+    const premier = expliquer && premierTrouve;
+    premierTrouve = false;
+
+    suspension = premier
+      ? SUSPENSION_PREMIERE
+      : SUSPENSION.creux + SUSPENSION.sortie;
     cibleFocus = e.objets[e.def.porteur];
     anneau.visible = true;
     anneau.material.opacity = 0;
+    cibleHalo = null;
+    halo.visible = false;
     son.jouer("clic");
     // « Voir suffit » : la voiture lève le pied et s'écarte, toute seule.
-    securiteJusqu = etat.t + 4.2;
+    securiteJusqu = etat.t + 2.6;
     sur("trouve", {
       gain,
       total: etat.avance,
       ecran: versEcran(cibleFocus),
       indice: e.def.indice,
+      premier,
     });
-  }
-
-  function versEcran(objet) {
-    if (!objet) return [0.5, 0.5];
-    objet.getWorldPosition(projete);
-    projete.y += 0.9;
-    projete.project(camera);
-    return [projete.x * 0.5 + 0.5, projete.y * 0.5 + 0.5];
   }
 
   const surAppui = (e) => toucher(e.clientX, e.clientY);
@@ -282,8 +420,6 @@ export async function creerPartie(hote, { sur = () => {} } = {}) {
   monde.demarrer((dtReel) => {
     qualite.maj(dtReel);
 
-    // Le temps du monde. Il se suspend pendant la découverte, il ralentit
-    // pendant la conséquence, il repart en arrière pendant le rembobinage.
     let tempo = 1;
     if (suspension > 0) {
       suspension -= dtReel;
@@ -299,29 +435,47 @@ export async function creerPartie(hote, { sur = () => {} } = {}) {
     if (etat.phase === "rembobine") tempo = 0;
     const dt = dtReel * tempo;
 
-    // Le focus suit sa cible : l'objet bouge encore un peu pendant les trois
-    // dixièmes de suspension, et un halo figé à côté de lui trahirait tout.
+    // Le focus suit sa cible : l'objet bouge encore un peu pendant la
+    // suspension, et un halo figé à côté de lui trahirait tout.
     if (cibleFocus) {
-      const force = Math.min(
-        1,
-        (SUSPENSION.creux + SUSPENSION.sortie - suspension) * 9,
-      );
-      post.focaliser(force, versEcran(cibleFocus), 0.11);
+      const total =
+        suspension > SUSPENSION.creux + SUSPENSION.sortie
+          ? SUSPENSION_PREMIERE
+          : SUSPENSION.creux + SUSPENSION.sortie;
+      const force = Math.min(1, (total - suspension) * 9);
+      // ⚠️ 0,86 et pas 1 : à pleine force le hors-champ tombe au gris sombre
+      // et on ne reconnaît plus la rue autour de ce qu'on vient de trouver.
+      // Et un rayon de 0,16 : c'est la LARGEUR de la zone épargnée, donc la
+      // taille de ce que l'élève lit comme « ça, c'est ce que j'ai vu ».
+      post.focaliser(force * 0.86, versEcran(cibleFocus), 0.16);
       cibleFocus.getWorldPosition(anneau.position);
       anneau.position.y += 0.9;
       anneau.lookAt(camera.position);
       anneau.material.opacity = force * 0.9;
-      const k = 1.9 - force * 0.9;
-      anneau.scale.setScalar(k);
+      anneau.scale.setScalar(1.9 - force * 0.9);
+    }
+
+    // Le halo d'apprentissage, qui respire doucement.
+    if (cibleHalo) {
+      cibleHalo.getWorldPosition(halo.position);
+      halo.position.y += 0.7;
+      halo.lookAt(camera.position);
+      halo.material.opacity = 0.26 + 0.2 * Math.sin(etat.t * 4.4);
+      halo.scale.setScalar(1 + 0.09 * Math.sin(etat.t * 4.4));
     }
 
     if (etat.phase === "roule" || etat.phase === "consequence") {
       etat.t += dt;
-      // La voiture. Elle roule seule. Quand on a VU, elle lève le pied et
-      // elle s'écarte : c'est la seule conséquence du geste, et il n'y en a
-      // pas besoin d'une autre.
+      // 🔴 CE QUE COÛTENT LES RALENTISSEMENTS. Chaque scène ratée freinait à
+      // 1,2 m/s pendant 1,4 s, et chaque scène trouvée levait le pied pendant
+      // 4,2 s : vingt mètres perdus à chaque fois. Au bout de deux scènes, la
+      // voiture avait vingt-cinq mètres de retard sur la chorégraphie, et les
+      // deux dernières scènes ne se jouaient tout simplement jamais dans les
+      // trente secondes. Le remède tient en deux endroits : on freine moins
+      // fort ici, et la partie ne se termine plus à l'heure mais quand les
+      // cinq scènes ont été jouées (voir la fin de la boucle).
       const vise =
-        freinUrgence > 0 ? 1.2 : etat.t < securiteJusqu ? 5.4 : VITESSE;
+        freinUrgence > 0 ? 3.4 : etat.t < securiteJusqu ? 6.4 : VITESSE;
       const ecartVise = etat.t < securiteJusqu ? -0.55 : 0;
       v.vitesse +=
         (vise - v.vitesse) * Math.min(1, dt * (vise < v.vitesse ? 2.6 : 1.1));
@@ -348,6 +502,47 @@ export async function creerPartie(hote, { sur = () => {} } = {}) {
       }
       poser(e);
 
+      // 🔴 On note OÙ ÉTAIT LA VOITURE au moment où le signe est devenu
+      // lisible. Sans ça, le rembobinage remettait la scène en arrière mais
+      // pas la caméra : on se retrouvait à montrer une portière située
+      // trente mètres DERRIÈRE le joueur, donc un écran gris. Le seul moment
+      // du jeu censé faire comprendre ce qu'on a raté ne montrait rien.
+      if (
+        e.zLisible === undefined &&
+        e.def.lisible !== null &&
+        e.te >= e.def.lisible
+      )
+        e.zLisible = v.z;
+
+      // ⭐ L'amorce : la phrase qui donne une raison de regarder CET élément.
+      // C'est elle qui remplace le tutoriel qu'on ne fera pas.
+      const a = e.def.amorce;
+      if (a && !e.amorceDite && e.te >= a.te && etat.phase === "roule") {
+        e.amorceDite = true;
+        const texte =
+          niveau === "guide" ? a.guide : niveau === "vague" ? a.vague : null;
+        if (texte) sur("amorce", { texte, evenement: e.def.id });
+      }
+      // La relance du tutoriel, au premier niveau d'aide seulement.
+      const r = e.def.relance;
+      if (
+        r &&
+        niveau === "guide" &&
+        !e.relanceDite &&
+        !e.trouve &&
+        e.te >= r.te &&
+        etat.phase === "roule"
+      ) {
+        e.relanceDite = true;
+        cibleHalo = e.objets[e.def.porteur];
+        halo.visible = true;
+        sur("relance", { texte: r.texte });
+      }
+      if ((e.trouve || e.rate) && cibleHalo === e.objets[e.def.porteur]) {
+        cibleHalo = null;
+        halo.visible = false;
+      }
+
       // L'incident se produit sans qu'on l'ait vu : la conséquence se joue.
       if (
         !e.trouve &&
@@ -358,10 +553,12 @@ export async function creerPartie(hote, { sur = () => {} } = {}) {
       ) {
         e.rate = true;
         etat.manques++;
-        freinUrgence = 1.4;
+        freinUrgence = 1.0;
+        cibleHalo = null;
+        halo.visible = false;
         son.jouer("alerte");
         etat.phase = "consequence";
-        rembobine = { e, te: e.te, cible: e.def.incident, attente: 1.1 };
+        rembobine = { e, te: e.te, attente: 1.1 };
         sur("consequence", {});
       }
       if (e.te > e.def.fin) {
@@ -378,22 +575,37 @@ export async function creerPartie(hote, { sur = () => {} } = {}) {
     if (etat.phase === "consequence" && rembobine) {
       rembobine.attente -= dtReel;
       if (rembobine.attente <= 0) {
+        const e = rembobine.e;
         etat.phase = "rembobine";
-        rembobine.te = rembobine.e.te;
+        rembobine.te = e.te;
+        rembobine.depart = e.te;
+        rembobine.but = e.def.lisible ?? 0;
+        // La caméra rembobine avec la scène. On revient exactement là où on
+        // était quand le signe est apparu — et on repartira d'ici, sans
+        // rejouer les trente mètres : le rembobinage est un REPLAY, il ne
+        // doit rien coûter de plus que les secondes déjà perdues.
+        rembobine.zDepart = v.z;
+        rembobine.zBut =
+          e.zLisible ?? v.z + VITESSE * (rembobine.depart - rembobine.but);
         sur("flash", {});
       }
     }
     if (etat.phase === "rembobine" && rembobine) {
       const e = rembobine.e;
-      const but = e.def.lisible ?? 0;
+      const but = rembobine.but;
       if (rembobine.te > but) {
         // 🔴 On rembobine à 2,6× : plus lent, on s'ennuie ; plus rapide, on
         // ne voit pas ce qu'on nous montre, et c'est tout l'intérêt.
         rembobine.te = Math.max(but, rembobine.te - dtReel * 2.6);
+        const k =
+          rembobine.depart > but
+            ? (rembobine.te - but) / (rembobine.depart - but)
+            : 0;
+        v.z = rembobine.zBut + (rembobine.zDepart - rembobine.zBut) * k;
         if (rembobine.te <= but) {
           cibleFocus = e.objets[e.def.porteur];
           anneau.visible = true;
-          suspension = 1.5;
+          suspension = 1.6;
           sur("rate", {
             indice: e.def.indice,
             secondes: +(e.def.incident - e.def.lisible).toFixed(1),
@@ -403,15 +615,19 @@ export async function creerPartie(hote, { sur = () => {} } = {}) {
       } else if (suspension <= 0) {
         e.fini = true;
         for (const id in e.objets) e.objets[id].visible = false;
+        v.z = rembobine.zDepart; // on reprend la route où on l'avait laissée
         rembobine = null;
         etat.phase = "roule";
       }
     }
 
-    // La caméra : le siège du conducteur, cadrée large, et RIEN à manipuler.
-    camera.position.set(v.x - 0.34, 1.3, v.z);
+    // La caméra : le siège du conducteur, et RIEN à manipuler.
+    // ⚠️ 1,22 m et non 1,30 : c'est la hauteur d'œil réelle dans une berline,
+    // et elle change tout — plus haut on survole la route comme une caméra de
+    // drone, plus bas on ne voit plus par-dessus les voitures garées.
+    camera.position.set(v.x - 0.32, 1.22, v.z);
     camera.rotation.order = "YXZ";
-    camera.rotation.set(-0.035, 0, 0);
+    camera.rotation.set(-0.05, 0, 0);
     animer(etat.t);
     monde.majOmbres(v.x, v.z);
     son.maj(dtReel, {
@@ -421,11 +637,21 @@ export async function creerPartie(hote, { sur = () => {} } = {}) {
       fige: suspension > 0 || etat.phase === "rembobine",
     });
 
-    if (etat.phase !== "fini" && etat.t >= DUREE && suspension <= 0) {
+    // ⭐ La partie ne s'arrête pas au chronomètre : elle s'arrête quand les
+    // cinq scènes ont été jouées. Trente secondes est une CIBLE, pas une
+    // guillotine — un élève qui rate tout roule moins vite, et il a le droit
+    // de voir l'enfant lui aussi.
+    if (
+      etat.phase !== "fini" &&
+      etat.t >= DUREE &&
+      evts.every((e) => e.fini) &&
+      suspension <= 0
+    ) {
       etat.phase = "fini";
       sur("fin", {
         avance: +etat.avance.toFixed(1),
         trouves: etat.trouves,
+        dangers: etat.dangers,
         manques: etat.manques,
         fauxPositifs: etat.fauxPositifs,
         journal: etat.journal,

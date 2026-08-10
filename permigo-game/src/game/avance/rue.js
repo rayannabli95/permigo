@@ -185,11 +185,31 @@ export function construireRue(THREE, modeles, kit, { trous = [] } = {}) {
   // rôle : sans eux, la seule chose qui bouge est l'événement, on le trouve
   // par élimination et il n'y a plus de jeu. Ils marchent sur les trottoirs,
   // font demi-tour au bout, et ne descendent jamais du trottoir.
+  //
+  // 🔴 NEUF, PLUS SEIZE (10/08). Le bruit visuel doit rendre la rue crédible,
+  // pas empêcher de lire la compétence. Et surtout : aucun passant dans les
+  // mètres réservés à un événement, marge de vingt mètres. Un badaud qui
+  // marche à côté de l'enfant au moment où l'enfant est le sujet de la scène
+  // détruit la scène.
   const passants = [];
   const modelePieton = modeles?.pieton;
-  for (let i = 0; i < 16; i++) {
+  // ⚠️ 26 m de marge, et pas 20 : un passant fait des allers-retours de sept
+  // mètres (voir `animer`), donc la marge doit couvrir sa PROMENADE, pas sa
+  // position de départ. Avec 20, un adulte finissait par marcher sur le
+  // trottoir de l'enfant et cassait le « un de chaque côté ».
+  const loinDesScenes = (z) =>
+    trous.every(([a, b]) => z > b + 26 || z < a - 26);
+  for (let i = 0; i < 9; i++) {
     const s = r() < 0.62 ? 1 : -1;
-    const p = (modelePieton && modelePieton.clone(true)) || kit.vehicule("pieton", "bleu");
+    let z = 0;
+    for (let essai = 0; essai < 40; essai++) {
+      z = Z_DEBUT - 25 - r() * (long - 45);
+      if (loinDesScenes(z)) break;
+    }
+    if (!loinDesScenes(z)) continue;
+    const p =
+      (modelePieton && modelePieton.clone(true)) ||
+      kit.vehicule("pieton", "bleu");
     p.traverse((o) => (o.castShadow = true));
     const grp = new THREE.Group();
     grp.add(p);
@@ -198,7 +218,7 @@ export function construireRue(THREE, modeles, kit, { trous = [] } = {}) {
     passants.push({
       objet: grp,
       x: s * (BORD + 0.9 + r() * 1.7),
-      z: Z_DEBUT - 25 - r() * (long - 40),
+      z,
       sens: r() < 0.5 ? 1 : -1,
       vitesse: 0.9 + r() * 0.6,
       bord: s,
@@ -210,7 +230,7 @@ export function construireRue(THREE, modeles, kit, { trous = [] } = {}) {
   function animer(t) {
     for (const p of passants) {
       const va = Math.sin((t * p.vitesse) / 9 + p.z) > 0 ? 1 : -1;
-      const dz = Math.sin((t * p.vitesse) / 9 + p.z) * 11;
+      const dz = Math.sin((t * p.vitesse) / 9 + p.z) * 7;
       p.objet.position.set(p.x, 0.15, p.z + dz);
       p.objet.rotation.y = va * p.sens > 0 ? Math.PI : 0;
     }
