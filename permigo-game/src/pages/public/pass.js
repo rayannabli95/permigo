@@ -39,7 +39,14 @@ import { applyLang, browserLang, explicitLang } from "@/utils/lang.js";
 // les noms de fichiers changent et l'ancien renvoie 404 — le bloc s'effaçait
 // tout seul, sans un mot. Le visiteur arrivait sur la page de vente sans la
 // seule chose qui lui montre le produit. 10 Ko contre ça, c'est donné.
+import { AVIS } from "@/data/avis-eleves.js";
 import { mountDemoSituation } from "@/components/public/demo-situation.js";
+// La route de montagne en fond de page, pilotée par le défilement.
+import {
+  BACKDROP_STYLE,
+  backdropHTML,
+  wireBackdrop,
+} from "@/components/public/route-backdrop.js";
 
 const LOGO = "/p-badge.webp"; // 8 Ko au lieu de 64 : le PNG reste pour le reste de l'app
 
@@ -130,9 +137,14 @@ const STR = {
     // juste au-dessus démontre tout seul.
     mathsNote: "PermiGo coûte moins qu'un dixième d'heure de conduite.",
     mathsSrc: "Sources : UFC-Que Choisir (budget permis) · Sécurité routière",
-    secPass: "Un seul prix. Tout est dedans.",
+    // Le mot « seulement » est EXIGÉ à l'écran, pas seulement le chiffre
+    // (demande Rayan, 07/08/2026) : « 4,99 € » seul se lit comme un tarif,
+    // « 4,99 € seulement » se lit comme un argument. Il vit donc dans le
+    // titre de section, en grand, juste au-dessus de la carte d'offre.
+    // ⚠️ Points et non virgules dans ce titre : règle maison.
+    secPass: "4,99 € seulement. Tout est dedans.",
     secPassSub:
-      "Pas de formule à choisir, pas d'engagement. Tu commences gratuitement, et le jour où tu veux la suite, c'est 4,99 € par mois. Moins de 6 minutes de conduite.",
+      "Pas de formule à choisir, pas d'engagement. Tu commences gratuitement, et le jour où tu veux la suite, c'est 4,99 € seulement par mois. Moins de 6 minutes de conduite.",
     passes: {
       mensuel: {
         name: "Pass PermiGo",
@@ -260,9 +272,9 @@ const STR = {
     ],
     mathsNote: "PermiGo costs less than a tenth of one driving hour.",
     mathsSrc: "Sources: UFC-Que Choisir (licence budget) · Sécurité routière",
-    secPass: "One price. Everything is in it.",
+    secPass: "Only €4.99. Everything is in it.",
     secPassSub:
-      "No plan to pick, no commitment. You start for free, and the day you want the rest, it is €4.99 a month. Less than 6 minutes of driving lessons.",
+      "No plan to pick, no commitment. You start for free, and the day you want the rest, it is only €4.99 a month. Less than 6 minutes of driving lessons.",
     passes: {
       mensuel: {
         name: "PermiGo Pass",
@@ -378,9 +390,9 @@ const STR = {
     ],
     mathsNote: "يكلّف PermiGo أقلّ من عُشر ساعة قيادة واحدة.",
     mathsSrc: "المصادر: UFC-Que Choisir (ميزانية الرخصة) · Sécurité routière",
-    secPass: "سعر واحد. كل شيء بداخله.",
+    secPass: "€4.99 فقط. كل شيء بداخله.",
     secPassSub:
-      "لا صيغ تختار بينها ولا التزام. تبدأ مجاناً، وفي اليوم الذي تريد فيه البقية، السعر €4.99 شهرياً. أقل من 6 دقائق قيادة.",
+      "لا صيغ تختار بينها ولا التزام. تبدأ مجاناً، وفي اليوم الذي تريد فيه البقية، السعر €4.99 فقط شهرياً. أقل من 6 دقائق قيادة.",
     passes: {
       mensuel: {
         name: "باقة PermiGo",
@@ -461,78 +473,6 @@ const STR = {
 //     cassent l'idée d'une app pour ados, première objection d'un visiteur de
 //     40 ans. Ils restent tous les deux au-dessus du pli, l'objection tombe
 //     aussi vite qu'avant.
-const AVIS = [
-  {
-    n: "Leo C.",
-    age: 32,
-    fr: "Avant j'arrivais à ma leçon sans savoir ce qu'on allait faire. Maintenant je sais et je stresse beaucoup moins.",
-    en: "I used to turn up to my lesson with no idea what we'd be doing. Now I know, and I stress far less.",
-    ar: "كنتُ أصل إلى الحصة دون أن أعرف ماذا سنفعل. الآن أعرف، وتوتّري أقلّ بكثير.",
-  },
-  {
-    n: "Salah S.",
-    age: 56,
-    fr: "Je croyais que c'était un truc pour les jeunes. en fait sa m'a remis dedans",
-    en: "I thought this was a thing for kids. turns out it got me back into it",
-    ar: "ظننتُ أنه شيء للشباب. لكنه في الحقيقة أعادني إلى الأجواء",
-  },
-  {
-    n: "Lassaad S.",
-    age: 43,
-    fr: "Je révise en arabe et le mot francais est juste en dessous. c'est sa qui m'a débloqué",
-    en: "I revise in Arabic and the French word sits right underneath. that's what unlocked it for me",
-    ar: "أراجع بالعربية والكلمة الفرنسية تحتها مباشرة. هذا ما فكّ عقدتي",
-  },
-  {
-    n: "Regis T.",
-    age: 30,
-    fr: "La priorité à droite je la ratais à chaque fois. La façon dont c'est expliqué m'est resté.",
-    en: "I got priority to the right wrong every single time. The way it's explained here stuck with me.",
-    ar: "كنتُ أخطئ في أولوية اليمين في كل مرة. طريقة الشرح هنا رسخت عندي.",
-  },
-  {
-    n: "Ismael S.",
-    age: 21,
-    fr: "5 min le soir dans mon lit et le lendemain en voiture je m'en souviens. franchement ça marche",
-    en: "5 min in bed at night and the next day in the car I remember it. honestly it works",
-    ar: "5 دقائق في السرير مساءً، وفي اليوم التالي داخل السيارة أتذكّرها. صدقاً إنها تنفع",
-  },
-  {
-    n: "Setu P.",
-    age: 37,
-    fr: "mon probleme c'est le français des questions. ici le mot est expliqué simplement, merci beaucoup",
-    en: "my problem is the French in the questions. here the word is explained simply, thank you very much",
-    ar: "مشكلتي هي الفرنسية في الأسئلة. هنا تُشرح الكلمة ببساطة، شكراً جزيلاً",
-  },
-  {
-    n: "Benoît M.",
-    age: 23,
-    fr: "mon moniteur repete moins les memes choses, on conduit au lieu de reexpliquer 👍",
-    en: "my instructor repeats himself less, we drive instead of going over it again 👍",
-    ar: "مدرّبي صار يكرّر أقل، صرنا نقود بدل إعادة الشرح 👍",
-  },
-  {
-    n: "Aimé A.",
-    age: 26,
-    fr: "l'examen blanc m'a fait mal 😅 mais au moins j'ai su quoi travailler avant le vrai",
-    en: "the mock test hurt 😅 but at least I knew what to work on before the real one",
-    ar: "الامتحان التجريبي كان قاسياً 😅 لكنني عرفتُ على الأقل ما عليّ العمل عليه قبل الحقيقي",
-  },
-  {
-    n: "Sumbal K.",
-    age: 29,
-    fr: "Une heure de conduite ça coute cher. arriver en sachant quoi faire c'est de l'argent que je jette pas",
-    en: "An hour behind the wheel is expensive. turning up knowing what to do is money I'm not throwing away",
-    ar: "ساعة القيادة مكلفة. أن تصل وأنت تعرف ماذا تفعل يعني مالاً لا ترميه",
-  },
-  {
-    n: "Sherif N.",
-    age: 26,
-    fr: "Je vois enfin ou j'en suis. avant j'avançais sans savoir si je progressais",
-    en: "I can finally see where I stand. before, I was moving along with no idea if I was improving",
-    ar: "أخيراً أرى أين وصلت. من قبل كنتُ أتقدّم دون أن أعرف إن كنتُ أتحسّن",
-  },
-];
 
 // ⚠️ <bdi> autour du nom : dans la page en arabe (conteneur dir="rtl"), le
 // point final d'un nom latin saute à gauche et « Regis T. » s'affiche
@@ -1080,6 +1020,7 @@ const STYLE = `<style>
     background: rgba(255,206,77,.1); border: 1.5px solid rgba(255,206,77,.35); border-radius: 14px;
     font: 700 13.5px/1.5 'Archivo', sans-serif; color: var(--ink-soft); text-align: center;
   }
+${BACKDROP_STYLE}
 </style>`;
 
 /** Query params du hash (#/pass?checkout=success&plan=pass3&lang=en). */
@@ -1251,8 +1192,11 @@ export async function mount(root) {
   }
 
   const P = L.passes;
+  // Le décor de route est un FRÈRE de .pv, jamais un enfant : .pv a un
+  // overflow-x: clip, qui rognerait un enfant en position fixe.
   root.innerHTML = `${STYLE}
-  <div class="pv" dir="${lang === "ar" ? "rtl" : "ltr"}">
+  ${backdropHTML()}
+  <div class="pv pv-onbg" dir="${lang === "ar" ? "rtl" : "ltr"}">
 
     <header class="pv-nav">
       <a class="pv-logo" href="#/" aria-label="PermiGo"><img src="${LOGO}" alt="PermiGo"></a>
@@ -1320,7 +1264,12 @@ export async function mount(root) {
       <!-- v5 (03/08/2026) : UNE seule famille de carte, UNE seule famille
            d'icône (icon(), même trait que le reste de l'app). Avant : une
            capture qui rejouait en photo la démo qu'on venait de faire jouer
-           plus haut, et deux médailles 3D à côté d'un trait fin. -->
+           plus haut, et deux médailles 3D à côté d'un trait fin.
+           07/08/2026 : ces cartes ont failli sauter au profit d'un carrousel
+           de démos JOUABLES en bas de page. Rayan a tranché l'inverse, et il
+           a raison sur le fond : faire passer un test à quelqu'un qui vient
+           de lire le prix, ça refroidit. Le jouable de cette page vit là où
+           il doit vivre, dans le premier écran (#pv-demo). -->
       <div class="pv-feats pv-rev pv-stag">
         ${L.feats
           .map(
@@ -1415,6 +1364,9 @@ export async function mount(root) {
   wire(root, me, lang, L);
   wireReveal(root);
   wireStickyReveal(root);
+  // En dernier : le décor va chercher ses 2,8 Mo de vidéo une fois la page
+  // posée, jamais avant. Tant qu'elle n'est pas là, le fond est l'image fixe.
+  wireBackdrop(root);
 }
 
 /** La barre collante s'efface tant que le bouton « Commencer gratuitement »

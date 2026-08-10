@@ -28,13 +28,23 @@ const geoDe = (cle, f) => {
   return cache.get(cle);
 };
 
-const mat = (THREE, c, rug = 0.8, met = 0) =>
-  new THREE.MeshStandardMaterial({
-    color: c,
-    roughness: rug,
-    metalness: met,
-    envMapIntensity: 0.45,
-  });
+// Même cache que pour les immeubles : le mobilier n'a qu'une poignée de
+// matières, il ne doit pas en fabriquer une par objet posé.
+const MATS = new Map();
+const mat = (THREE, c, rug = 0.8, met = 0) => {
+  const cle = `${c}|${rug}|${met}`;
+  if (!MATS.has(cle))
+    MATS.set(
+      cle,
+      new THREE.MeshStandardMaterial({
+        color: c,
+        roughness: rug,
+        metalness: met,
+        envMapIntensity: 0.45,
+      }),
+    );
+  return MATS.get(cle);
+};
 
 // Un lampadaire : un mât, une crosse, une lanterne. Sa VALEUR pour nous n'est
 // pas d'éclairer (on est en plein jour) mais de donner une verticale régulière

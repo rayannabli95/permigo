@@ -151,6 +151,7 @@ export function monterMissions(
           <!-- Le rang de l'étape est DÉJÀ dans le bandeau du haut, en chiffres
                et en barre. L'écrire une troisième fois poussait le titre de la
                mission sur deux lignes pour ne rien apprendre. -->
+          <div class="mp-mascot-badge"><video class="mp-mascot" poster="/skins/mascot-think.png" muted playsinline aria-hidden="true"></video></div>
           <p>${esc(m.title)}</p>
           <h1>${esc(m.prompt)}</h1>
         </section>
@@ -514,12 +515,40 @@ export function monterMissions(
     </div>`;
   }
 
+  // Fait réagir la mascotte du coin (bonne/mauvaise réponse). matchMedia,
+  // pas juste une classe CSS : animation:none n'arrête PAS une vidéo
+  // (piège relevé sur #719/#722).
+  function reactMascot(ok) {
+    const badge = hote.querySelector(".mp-mascot-badge");
+    const vid = hote.querySelector(".mp-mascot");
+    if (!badge || !vid) return;
+    const reduced = window.matchMedia?.(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    if (reduced) {
+      vid.poster = ok
+        ? "/skins/mascot-celebrate.png"
+        : "/skins/mascot-coach.png";
+    } else {
+      vid.style.mixBlendMode = "lighten";
+      vid.src = ok
+        ? "/video/mascotte-quiz-bonne-reponse.mp4"
+        : "/video/mascotte-quiz-mauvaise-reponse.mp4";
+      vid.currentTime = 0;
+      vid.play().catch(() => {});
+    }
+    badge.classList.remove("mp-mascot--pop");
+    void badge.offsetWidth;
+    badge.classList.add("mp-mascot--pop");
+  }
+
   function faute(m) {
     fautes += 1;
     etat.essais += 1;
     const indiceAvant = etat.indice;
     etat.indice = etat.essais >= m.attemptsBeforeHint;
     playWrong();
+    reactMascot(false);
     haptic("error"); // deux coups secs : on a touché la mauvaise chose
     // Le coup de pouce qui apparaît a sa propre secousse, sinon il arrive en
     // silence au milieu d'un écran que l'élève relit déjà.
@@ -536,6 +565,7 @@ export function monterMissions(
     etat.resolu = true;
     etat.retour = { ton: "success", titre: m.success, texte: m.why };
     playCorrect();
+    reactMascot(true);
     haptic("validate"); // la montée, la même que pour une compétence validée
     track("pilote_mission_reussie", {
       code,

@@ -21,6 +21,10 @@
 import { FACADES, COMMERCES, jitter, lisere, assombrir } from "./palette.js";
 import { facade } from "./textures.js";
 
+const MATS = new Map();
+let BOITE = null;
+const geoBoite = (THREE) =>
+  (BOITE ||= new THREE.BoxGeometry(1, 1, 1));
 const ETAGE = 3.1;
 const SOCLE = 3.2;
 
@@ -56,14 +60,24 @@ export function batiment(
   const couleur = jitter(FACADES[famille], alea);
   const prof = 11;
   const hCorps = SOCLE + ETAGE * etages;
-  const boite = new THREE.BoxGeometry(1, 1, 1);
-  const mat = (c, rug = 0.9) =>
-    new THREE.MeshStandardMaterial({
-      color: c,
-      roughness: rug,
-      metalness: 0,
-      envMapIntensity: 0.35,
-    });
+  const boite = geoBoite(THREE);
+  // ⚠️ Un CACHE, pas une fabrique. Cent immeubles × huit pièces créaient huit
+  // cents matériaux distincts pour une vingtaine de couleurs réelles : autant
+  // de changements d'état inutiles à chaque image.
+  const mat = (c, rug = 0.9) => {
+    const cle = `${c}|${rug}`;
+    if (!MATS.has(cle))
+      MATS.set(
+        cle,
+        new THREE.MeshStandardMaterial({
+          color: c,
+          roughness: rug,
+          metalness: 0,
+          envMapIntensity: 0.35,
+        }),
+      );
+    return MATS.get(cle);
+  };
   const bloc = (l, h, p, c, x, y, z, rug) => {
     const m = new THREE.Mesh(boite, mat(c, rug));
     m.scale.set(l, h, p);

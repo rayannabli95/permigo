@@ -137,8 +137,13 @@
     "competence": "Maniement",
     "resume10s": [
       "Je prépare la voiture à l'arrêt avant de mettre le contact.",
-      "Je fais avancer la voiture tout en douceur.",
-      "Je lâche l'accélérateur tôt puis je freine progressivement."
+      "Je relève l'embrayage jusqu'au point de patinage puis j'avance.",
+      "Je lâche l'accélérateur tôt et je débraye juste avant l'arrêt."
+    ],
+    "resume10sBva": [
+      "Je prépare la voiture à l'arrêt avant de mettre le contact.",
+      "Pied sur le frein je passe en D et je relâche doucement.",
+      "Je freine progressivement jusqu'à l'arrêt puis je passe en P."
     ],
     "methode": [
       "Avant de rouler. Avant de démarrer : frein à main serré, levier au point mort, embrayage enfoncé à fond, contact.",
@@ -221,6 +226,11 @@
       "Je change de rapport quand j'entends le moteur monter.",
       "Je tiens le levier paume posée sans quitter la route des yeux.",
       "Je rétrograde avant le virage ou le freinage jamais pendant."
+    ],
+    "resume10sBva": [
+      "Je n'ai aucun rapport à passer la boîte le fait pour moi.",
+      "Je reste en D et je gère tout avec l'accélérateur.",
+      "Aucune erreur de boîte possible c'est un souci en moins."
     ],
     "methode": [
       "Écoute / regarde le régime moteur. Repère sonore d'abord (« le moteur monte ») ; chiffres indicatifs : ~2000 tr/min en diesel, ~2500 en essence.",

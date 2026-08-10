@@ -49,7 +49,9 @@ export const X_OPPOSE = -1.7;
 export const X_STATIONNE = 4.6; // le centre d'une place de stationnement
 export const BORD = 5.7; // le bord de la chaussée
 export const Z_DEBUT = 60;
-export const Z_FIN = -400;
+// ⚠️ -300 et pas -400 : le joueur ne dépasse jamais z = -270. Cent mètres de
+// ville étaient construits, éclairés et dessinés pour personne.
+export const Z_FIN = -300;
 
 // Un générateur reproductible. 🔴 Jamais Math.random ici : une rue qui change
 // à chaque partie rend impossible de comparer deux essais, et c'est tout
@@ -62,7 +64,7 @@ function des(graine) {
   };
 }
 
-export function construireRue(THREE, modeles, kit, { trous = [] } = {}) {
+export function construireRue(THREE, kit, { trous = [] } = {}) {
   const g = new THREE.Group();
   const r = des(20260810);
 
@@ -307,7 +309,6 @@ export function construireRue(THREE, modeles, kit, { trous = [] } = {}) {
   // 🔴 NEUF, PLUS SEIZE (10/08). Le bruit visuel doit rendre la rue crédible,
   // pas empêcher de lire la compétence.
   const passants = [];
-  const modelePieton = modeles?.pieton;
   // ⚠️ 26 m de marge, et pas 20 : un passant fait des allers-retours de sept
   // mètres (voir `animer`), donc la marge doit couvrir sa PROMENADE, pas sa
   // position de départ. Avec 20, un adulte finissait par marcher sur le

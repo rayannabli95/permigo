@@ -21,7 +21,6 @@ import { creerMonde } from "../engine/world.js";
 import { creerSon } from "../engine/audio.js";
 import { creerPost } from "../engine/post.js";
 import { creerQualite } from "../engine/qualite.js";
-import { chargerModeles, copier } from "../engine/modeles.js";
 import { creerKit } from "../environments/kit.js";
 import { construireRue, X_STATIONNE } from "./rue.js";
 import { EVENEMENTS, TROUS, DUREE, VITESSE, DEPART } from "./scenario.js";
@@ -29,16 +28,12 @@ import { VEHICULES_PORTEURS, VETEMENTS, lisere } from "../da/palette.js";
 import { vehicule } from "../da/vehicules.js";
 import { personnage, cycliste } from "../da/personnages.js";
 
-// ⚠️ Ni `voiture.glb` ni `gris.glb` : plus personne ne s'en sert depuis que
-// les voitures sont peintes par le kit, et c'étaient deux téléchargements
-// pour rien avant la première image.
-const MODELES = {
-  camion: { fichier: "camion.glb", longueur: 7.6, capOffset: -Math.PI / 2 },
-  pieton: { fichier: "pieton.glb", hauteur: 1.72, capOffset: Math.PI },
-  velo: { fichier: "velo.glb", hauteur: 1.75, capOffset: Math.PI },
-  arbre: { fichier: "arbre.glb", hauteur: 7.2 },
-};
-
+// 🔴 PLUS AUCUN FICHIER À TÉLÉCHARGER. Les quatre modèles restants (camion,
+// piéton, vélo, arbre) sont devenus morts avec les phases 2, 4 et 5 : tout est
+// procédural. C'est le lint de performance qui les a trouvés, pas une
+// relecture — ils continuaient d'être chargés avant la première image sans que
+// rien ne s'en serve. Conséquence : `#/avance` n'émet plus une seule requête
+// d'asset, donc plus de dépendance à la CSP et un démarrage instantané.
 // Le moment de découverte, au centième. Court, sinon il casse le rythme ;
 // trop court, il ne claque pas. 0,42 s en tout — sauf la toute première fois,
 // où il dure le temps d'expliquer ce qu'est une seconde d'avance.
@@ -74,12 +69,9 @@ export async function creerPartie(
   // donne du volume à un monde fait de primitives, et les ombres violettes
   // qui font qu'une capture est reconnaissable.
   const monde = creerMonde(THREE, hote, { heure: "seize" });
-  const modeles = await chargerModeles(THREE, MODELES, {
-    base: `${import.meta.env.BASE_URL || "/"}art/course3d/`,
-  });
   const kit = creerKit(THREE);
 
-  const { groupe, animer } = construireRue(THREE, modeles, kit, {
+  const { groupe, animer } = construireRue(THREE, kit, {
     trous: TROUS,
   });
   monde.scene.add(groupe);
