@@ -25,7 +25,7 @@
 
 import { SOL, VEHICULES_NEUTRES, assombrir, piocher } from "../da/palette.js";
 import { bitume, trottoir } from "../da/textures.js";
-import { vehiculeAuBanc, FLOTTE } from "../da/vehicules.js";
+import { vehiculeAuBanc, FLOTTE, GABARITS } from "../da/vehicules.js";
 import { personnage } from "../da/personnages.js";
 import { rangee } from "../da/batiments.js";
 import { poserMobilier } from "../da/mobilier.js";
@@ -38,7 +38,18 @@ export const X_STATIONNE = 4.6; // le centre d'une place de stationnement
 export const BORD = 5.7; // le bord de la chaussée
 export const TROTTOIR = 2.8;
 export const Z_DEBUT = 60;
-export const Z_FIN = -300;
+export const Z_FIN = -293;
+
+// ⭐ LE FOND DE RUE. Ajouté le 10/08 : « à la fin il y a un écran blanc après
+// les piétons ». La rue s'arrêtait dans le vide, et comme la brume ne
+// commence qu'à 165 m elle ne le cachait pas : on voyait la chaussée mourir
+// sur un aplat de ciel. Une rue de ville ne finit JAMAIS en pointe, elle
+// tombe sur une autre rue.
+//
+// On ferme donc la perspective par un T : une transversale et un mur
+// d'immeubles en face, à trente mètres après la dernière scène. Ça coûte une
+// matrice, ça se cadre tout seul, et ça donne enfin une fin à la partie.
+export const FOND = { z: -298, largeur: 11 };
 
 // ⭐ LE CARREFOUR. Ajouté le 10/08 pour une raison de crédibilité, pas de
 // décor : la voiture qui hésite (scène 4) SORTAIT D'UN IMMEUBLE. Elle
@@ -90,8 +101,13 @@ function morceaux(zA, zB, coupures) {
 
 export function construireRue(THREE, kit, { trous = [] } = {}) {
   const r = des(20260810);
-  const banc = creerBanc(THREE, { segment: 90 });
-  const bancVehicules = creerBanc(THREE, { segment: 90 });
+  // ⚠️ 150 m et non 90. Segmenter permet au hors-champ de se couper, mais
+  // chaque segment MULTIPLIE le nombre d'ordres de dessin : à 90 m la rue en
+  // comptait cinq, donc cinq fois chaque famille de pièce. Les triangles sont
+  // à 18 000 pour un budget de 180 000, on a donc tout intérêt à dessiner un
+  // peu plus de géométrie invisible pour donner beaucoup moins d'ordres.
+  const banc = creerBanc(THREE, { segment: 150 });
+  const bancVehicules = creerBanc(THREE, { segment: 150 });
   const cube = CUBE(THREE);
   const plan = PLAN(THREE);
 
@@ -181,10 +197,15 @@ export function construireRue(THREE, kit, { trous = [] } = {}) {
   // centrée sur x = 0. La rue principale l'appelle telle quelle ; la rue
   // transversale l'appelle sous un repère pivoté d'un quart de tour. C'est ce
   // qui rend un carrefour crédible pour le prix d'une matrice.
-  function poserChaussee(zA, zB, demi, { coupures = [], axe = true } = {}) {
+  function poserChaussee(
+    zA,
+    zB,
+    demi,
+    { coupures = [], axe = true, y = 0 } = {},
+  ) {
     const long = zA - zB;
     const milieu = (zA + zB) / 2;
-    nappe(M.route, demi * 2, long, 0, 0, milieu, TUILE_ROUTE);
+    nappe(M.route, demi * 2, long, 0, y, milieu, TUILE_ROUTE);
 
     // Les traces de roulement, là où passent les pneus. C'est de la
     // GÉOMÉTRIE et pas de la texture : elles suivent les voies, une texture
@@ -532,6 +553,37 @@ export function construireRue(THREE, kit, { trous = [] } = {}) {
     });
   }
 
+  // ── LE FOND DE RUE ───────────────────────────────────────────────────
+  // ⚠️ La chaussée transversale est posée QUATRE MILLIMÈTRES sous la
+  // principale : elles se chevauchent d'un demi-mètre, et deux plans
+  // exactement coplanaires clignotent. Personne ne verra la marche.
+  {
+    const repere = new THREE.Matrix4()
+      .makeRotationY(-Math.PI / 2)
+      .setPosition(0, 0, FOND.z);
+    const demi = FOND.largeur / 2;
+    sousRepere(repere, () => {
+      poserChaussee(30, -30, demi, { axe: false, y: -0.004 });
+      // Le mur d'en face : une rangée entière, façades tournées vers le
+      // joueur. C'est elle qui remplace le vide.
+      rangee(THREE, banc, {
+        cote: -1,
+        zDebut: 30,
+        zFin: -30,
+        alea: r,
+        xFacade: -(demi + TROTTOIR),
+        vides: [],
+      });
+      for (const z of [16, -14])
+        poserMobilier(THREE, banc, "arbre", {
+          x: -demi - 1.5,
+          z,
+          echelle: 0.9,
+          soleil: { x: -0.6, y: 0.7, z: 0.35 },
+        });
+    });
+  }
+
   // ── ARBRES ET MOBILIER ───────────────────────────────────────────────
   // ⚠️ Rien de tout ceci ne se pose près d'une scène : un potelet devant
   // l'enfant ou un abribus devant la voiture qui hésite rend une leçon
@@ -615,22 +667,46 @@ export function construireRue(THREE, kit, { trous = [] } = {}) {
     horsCarrefour(z) && trous.every(([a, b]) => z > b + 3 || z < a - 3);
   const taches = new THREE.Group();
   for (const s of [1, -1]) {
-    for (let z = Z_DEBUT - 6; z > Z_FIN + 10; z -= 6.4 + r() * 2.6) {
-      if (r() < (s > 0 ? 0.18 : 0.42)) continue;
-      if (!libre(z)) continue;
-      // ⭐ Des SILHOUETTES variées, pas une seule répétée soixante fois. Une
-      // file de stationnement faite d'un seul gabarit redevient un mur.
+    let z = Z_DEBUT - 6;
+    while (z > Z_FIN + 10) {
       const type = piocher(FLOTTE, r);
-      const G = vehiculeAuBanc(
-        THREE,
-        bancVehicules,
-        type,
-        piocher(VEHICULES_NEUTRES, r),
-        { x: s * X_STATIONNE, z, cap: s > 0 ? 0 : Math.PI, alea: r },
-      );
-      const t = kit.tache(G.larg, G.l, 0.42);
-      t.position.set(s * X_STATIONNE, 0.014, z);
-      taches.add(t);
+      const G = GABARITS[type];
+      // 🔴 L'ESPACEMENT SE CALCULE SUR LA LONGUEUR RÉELLE, pas sur un pas
+      // fixe. Un pas de 6,4 m laissait 1,2 m derrière un utilitaire de 5,2 m
+      // et 2,7 m derrière une citadine : la file était irrégulière sans
+      // raison, et par endroits les voitures se touchaient presque. C'est ça
+      // que Rayan a vu comme « garées bizarrement » sur le trottoir de
+      // gauche, là où la densité est la plus forte.
+      const creneau = G.l + 1.5 + r() * 1.6;
+      // 🔴 LES DEUX BOUTS, PAS SEULEMENT LE DÉBUT DE LA PLACE. On ne
+      // vérifiait que `z`, alors que la voiture occupe `z` à `z − longueur` :
+      // un utilitaire de 5,2 m dont la place commençait juste en dehors d'un
+      // trou débordait de deux mètres DEDANS, et venait se planter en plein
+      // dans la ligne de vue de la portière. Sur l'image, un pavé sombre
+      // occupait le tiers du cadre au moment exact où le jeu dit « regarde la
+      // voiture garée sur ta droite ».
+      if (r() > (s > 0 ? 0.18 : 0.42) && libre(z) && libre(z - G.l)) {
+        // ⭐ Chaque voiture se range à VINGT-CINQ CENTIMÈTRES DE LA BORDURE,
+        // et pas toutes sur le même axe : un utilitaire de deux mètres de
+        // large et une citadine d'1,75 m centrés au même endroit ne
+        // s'alignent ni côté trottoir ni côté route. C'est le flanc côté
+        // chaussée qui doit s'aligner, c'est le seul que l'on voie.
+        const x = s * (BORD - 0.25 - G.larg / 2);
+        vehiculeAuBanc(
+          THREE,
+          bancVehicules,
+          type,
+          piocher(VEHICULES_NEUTRES, r),
+          { x, z: z - G.l / 2, cap: s > 0 ? 0 : Math.PI, alea: r },
+        );
+        // 🔴 PLUS DE TACHE DE CONTACT SOUS LES VOITURES GARÉES. Elles
+        // dataient d'avant les instances, quand la flotte ne portait pas
+        // d'ombre portée : c'était une ombre PEINTE, un mesh par voiture,
+        // cinquante ordres de dessin pour un effet que le soleil calcule
+        // maintenant tout seul. Les véhicules de scène, eux, la gardent : ils
+        // bougent et leur ombre douce aide à les poser.
+      }
+      z -= creneau;
     }
   }
 

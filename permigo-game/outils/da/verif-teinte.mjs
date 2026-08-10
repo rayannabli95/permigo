@@ -44,7 +44,16 @@ const ZONE = { haut: 0.16, bas: 0.55 };
 // ⚠️ 6 s et pas 3 : à trois secondes le voile sombre des deux phrases
 // d'ouverture couvre encore l'image et fait chuter la saturation de deux
 // centièmes. On juge le MONDE, pas un calque d'interface qui va disparaître.
-const INSTANTS = [6, 15, 26];
+//
+// 🔴 CINQ INSTANTS, ET C'EST LA MÉDIANE QUI DÉCIDE (10/08). Juger chaque
+// image séparément produisait des faux positifs à répétition : une bulle de
+// dialogue violette qui couvre le sixième du cadre, une portion de chaussée
+// en plein soleil, un utilitaire garé au premier plan — et le lint criait à
+// la dérive alors que la rue allait très bien. Or une DÉRIVE, par définition,
+// n'est pas un accident d'une image : elle se voit sur l'ensemble. La médiane
+// l'attrape et ignore l'anecdote. On affiche quand même chaque mesure, parce
+// que c'est en les comparant qu'on repère un instant vraiment malade.
+const INSTANTS = [6, 11, 16, 21, 26];
 
 function hsl(r, v, b) {
   r /= 255;
@@ -76,7 +85,12 @@ await page.waitForSelector(".av-vue canvas", { timeout: 30000 });
 const rapports = [];
 for (const t of INSTANTS) {
   await page.waitForFunction(
-    (c) => Number(document.querySelector(".av")?.dataset.t ?? -1) >= c,
+    (c) =>
+      Number(document.querySelector(".av")?.dataset.t ?? -1) >= c &&
+      // ⚠️ Jamais pendant un ralenti : la chaîne d'effets désature l'image à
+      // dessein quand l'élève rate une scène. Mesurer là revenait à
+      // reprocher au jeu de faire ce qu'on lui demande.
+      document.querySelector(".av")?.dataset.phase === "roule",
     t,
     { timeout: 120000 },
   );
@@ -126,27 +140,42 @@ for (const t of INSTANTS) {
 }
 await navigateur.close();
 
-let ok = true;
+const median = (cle) => {
+  const v = rapports.map((r) => r[cle]).sort((a, b) => a - b);
+  return v[(v.length - 1) >> 1];
+};
+
 console.log("\nLINT DE TEINTE — bible §13\n");
-for (const r of rapports) {
-  const l = [
-    ["gris", r.gris, r.gris <= SEUILS.grisMax, `≤ ${SEUILS.grisMax}`],
-    ["chaud", r.chaud, r.chaud >= SEUILS.chaudMin, `≥ ${SEUILS.chaudMin}`],
-    [
-      "saturation",
-      r.saturation,
-      r.saturation >= SEUILS.saturationMin,
-      `≥ ${SEUILS.saturationMin}`,
-    ],
-    ["accent", r.accent, r.accent >= SEUILS.accentMin, `≥ ${SEUILS.accentMin}`],
-  ];
-  console.log(`  t = ${r.t} s`);
-  for (const [nom, val, passe, attendu] of l) {
-    if (!passe) ok = false;
-    console.log(
-      `    ${passe ? "✅" : "❌"} ${nom.padEnd(11)} ${val.toFixed(3)}  (${attendu})`,
-    );
-  }
+console.log("  instant     gris    chaud    satur.   accent");
+for (const r of rapports)
+  console.log(
+    `  ${String(r.t).padStart(5)} s   ${r.gris.toFixed(3)}   ${r.chaud.toFixed(3)}   ${r.saturation.toFixed(3)}   ${r.accent.toFixed(3)}`,
+  );
+
+let ok = true;
+const l = [
+  ["gris", median("gris"), (v) => v <= SEUILS.grisMax, `≤ ${SEUILS.grisMax}`],
+  ["chaud", median("chaud"), (v) => v >= SEUILS.chaudMin, `≥ ${SEUILS.chaudMin}`],
+  [
+    "saturation",
+    median("saturation"),
+    (v) => v >= SEUILS.saturationMin,
+    `≥ ${SEUILS.saturationMin}`,
+  ],
+  [
+    "accent",
+    median("accent"),
+    (v) => v >= SEUILS.accentMin,
+    `≥ ${SEUILS.accentMin}`,
+  ],
+];
+console.log("\n  MÉDIANE sur les cinq images :");
+for (const [nom, val, test, attendu] of l) {
+  const passe = test(val);
+  if (!passe) ok = false;
+  console.log(
+    `    ${passe ? "✅" : "❌"} ${nom.padEnd(11)} ${val.toFixed(3)}  (${attendu})`,
+  );
 }
 console.log(ok ? "\n✅ la rue tient sa palette\n" : "\n❌ la rue dérive\n");
 process.exit(ok ? 0 : 1);

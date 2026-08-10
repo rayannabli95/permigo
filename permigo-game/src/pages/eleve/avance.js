@@ -117,6 +117,12 @@ async function jouer() {
           demiSeconde = s;
           cadre.dataset.t = String(s);
         }
+        // ⚠️ La PHASE, pour les vérifications automatiques. Le lint de teinte
+        // mesurait à un instant fixe et tombait parfois sur le ralenti d'un
+        // incident, qui désature l'image EXPRÈS : il annonçait une dérive de
+        // couleur là où le jeu faisait exactement son travail. Un banc d'essai
+        // doit pouvoir savoir si la partie roule.
+        cadre.dataset.phase = partie?.etat?.phase || "roule";
         return;
       }
       if (type === "amorce") return souffler(d.texte, "amorce", 2900);

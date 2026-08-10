@@ -98,6 +98,38 @@ export async function creerPartie(
     monde.camera.updateProjectionMatrix();
   });
 
+  // ⭐ LE POSTE DE CONDUITE, EN VRAIE 3D (décision Rayan, 10/08 : « mets celui
+  // de la Cupra qu'on utilisait pour les fiches »).
+  //
+  // C'était un arc violet en CSS collé en bas de l'écran. Il faisait le
+  // travail de cadrage, mais il ne pouvait rien faire d'autre : un
+  // autocollant ne bouge pas avec la caméra, ne reçoit pas la lumière de
+  // seize heures, et surtout ne MASQUE rien. Or apprendre à contourner du
+  // regard un montant de pare-brise est exactement une des compétences qu'on
+  // enseigne. C'est donc la même géométrie que le mode course : capot,
+  // planche de bord, montants et volant.
+  // 🔴 ET CE QUE J'AI RETIRÉ, PARCE QUE C'EST LA VRAIE DÉCISION DU JOUR.
+  //
+  // J'ai monté l'habitacle complet, mesuré, et il ne tient pas sur un
+  // téléphone en portrait. La raison est géométrique, pas artistique : l'œil
+  // du conducteur est à 1,22 m et le capot à 0,93, donc TOUT ce qui se trouve
+  // à plus de huit degrés sous l'horizon est de l'intérieur de voiture. Avec
+  // un champ vertical de 50°, ça fait 45 % du cadre. Résultat mesuré : la
+  // route passait de 53 % à 31 % de l'écran. Le jeu demande de repérer un
+  // enfant à trente mètres ; lui prendre un tiers de sa fenêtre pour montrer
+  // une planche de bord est un mauvais échange.
+  //
+  // Le capot reste donc le violet en CSS (la laque de la Cupra, signature X
+  // de la bible), et on ne garde de la 3D QUE LES MONTANTS DE PARE-BRISE.
+  // Eux sont verticaux, ils ne coûtent presque rien en surface d'écran, et
+  // ils font le seul travail que le CSS ne pouvait pas faire : MASQUER pour
+  // de vrai. Contourner du regard un montant est exactement une des
+  // compétences qu'on enseigne.
+  const poste = kit.poste("violet");
+  for (const enfant of [...poste.children])
+    if (Math.abs(enfant.position.x) < 0.8) poste.remove(enfant);
+  monde.scene.add(poste);
+
   const post = creerPost(THREE, monde);
   // 🔴 L'étalonnage par défaut est celui du CRÉPUSCULE : les ombres tirent
   // vers le violet, les hautes lumières vers l'ambre, et le vignettage est
@@ -725,9 +757,21 @@ export async function creerPartie(
     // ⚠️ 1,22 m et non 1,30 : c'est la hauteur d'œil réelle dans une berline,
     // et elle change tout — plus haut on survole la route comme une caméra de
     // drone, plus bas on ne voit plus par-dessus les voitures garées.
+    // ⚠️ -0,36 et non -0,32 : c'est l'écart exact entre l'axe de la voiture et
+    // la place du conducteur dans `kit.poste`. Un décalage de quatre
+    // centimètres suffit à faire passer le volant de travers.
     camera.position.set(v.x - 0.32, 1.22, v.z);
     camera.rotation.order = "YXZ";
     camera.rotation.set(-0.05, 0, 0);
+    // Le poste suit la voiture, et son volant se tourne avec l'écart de
+    // trajectoire : quand « voir suffit » fait s'écarter la voiture, on voit
+    // ses propres mains le faire.
+    // ⚠️ REMONTÉ DE DIX CENTIMÈTRES, et c'est LE réglage du cadrage. La part
+    // d'écran qu'occupe un capot ne dépend que de sa hauteur SOUS L'ŒIL : à
+    // 0,83 m il mangeait la moitié basse de l'image, à 0,93 il en prend un
+    // cinquième. Et c'est juste : une Cupra a une ceinture de caisse haute.
+    poste.position.set(v.x, 0.1, v.z);
+    poste.userData.volant.rotation.z = -v.ecart * 1.1;
     animer(etat.t);
     monde.majOmbres(v.x, v.z);
     son.maj(dtReel, {

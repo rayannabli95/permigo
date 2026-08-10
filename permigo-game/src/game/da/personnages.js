@@ -375,6 +375,7 @@ export function personnage(
 
   g.userData.buste = buste;
   g.userData.tete = col;
+  g.userData.jambes = jambes;
   g.userData.pas = pas;
   g.userData.regarder = regarder;
   g.userData.sol = 0;
@@ -453,11 +454,28 @@ export function cycliste(THREE, { couleur = null, alea = null } = {}) {
   homme.userData.buste.rotation.x = 0.34; // penché vers l'avant
   g.add(homme);
 
-  const pasHomme = homme.userData.pas;
+  // 🔴 IL MARCHAIT AU LIEU DE PÉDALER (10/08). On réutilisait l'animation de
+  // marche : les jambes balançaient d'avant en arrière autour de la hanche,
+  // ce qui, sur un vélo, donne quelqu'un qui court assis. Un pédalage n'est
+  // pas un balancement, c'est un CERCLE — les deux cuisses tournent en
+  // opposition de phase autour du pédalier, et les pieds ne repassent jamais
+  // derrière l'axe du corps.
+  const jambes = homme.userData.jambes;
   g.userData.buste = homme.userData.buste;
   g.userData.tete = homme.userData.tete;
   g.userData.regarder = homme.userData.regarder;
-  g.userData.pas = (t, k) => pasHomme(t, Math.max(0.35, k));
+  g.userData.pas = (t) => {
+    // Le pédalier tourne à peu près une fois et demie par seconde en ville.
+    const phase = t * 5.2;
+    for (let i = 0; i < 2; i++) {
+      const a = phase + i * Math.PI;
+      // 0,62 rad d'ouverture moyenne : la cuisse reste toujours en avant du
+      // bassin, elle ne repart jamais vers l'arrière comme à la marche.
+      jambes[i].rotation.x = 0.62 + Math.sin(a) * 0.46;
+    }
+    // Le buste monte de deux centimètres à chaque coup de pédale.
+    homme.position.y = 0.5 + Math.abs(Math.sin(phase)) * 0.02;
+  };
   // ⚠️ Le braquage est amplifié : à quinze mètres, la roue avant d'un vélo
   // fait quelques pixels. On exagère le geste de trois, sinon il n'existe pas.
   g.userData.braquer = (angle) => {

@@ -61,11 +61,16 @@ const apaise = (vu, te) => (vu == null ? 0 : entre(vu, vu + 0.9, te));
 
 // La trajectoire du cycliste, isolée pour qu'on puisse la DÉRIVER. C'est ce
 // qui donne son cap : voir la scène 2.
-const VELO = { x0: 3.6, v: 6.5 };
+// 🔴 x0 RAMENÉ DE 3,6 À 2,95 LE 10/08 : « il est trop proche des voitures ».
+// Une voiture garée déborde jusqu'à 3,7 m de l'axe ; à 3,6 le cycliste roulait
+// donc à DIX CENTIMÈTRES des rétroviseurs, ce qu'aucun cycliste ne fait et ce
+// qu'aucun élève ne doit voir comme normal. À 2,95 il tient sa place : trois
+// quarts de mètre de marge, exactement ce qu'on lui apprend à laisser.
+const VELO = { x0: 2.95, v: 6.5 };
 const xVelo = (te, vu) =>
   VELO.x0 -
-  entre(3.4, 4.8, te) * 0.45 -
-  entre(5.6, 6.7, te) * 1.35 * (1 - apaise(vu, te) * 0.75);
+  entre(3.4, 4.8, te) * 0.35 -
+  entre(5.6, 6.7, te) * 1.0 * (1 - apaise(vu, te) * 0.75);
 
 export const EVENEMENTS = [
   // ───────────────────────────────────────────────────────────────────────
