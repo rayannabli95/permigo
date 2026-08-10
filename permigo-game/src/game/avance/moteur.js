@@ -25,6 +25,7 @@ import { chargerModeles, copier } from "../engine/modeles.js";
 import { creerKit } from "../environments/kit.js";
 import { construireRue, X_STATIONNE } from "./rue.js";
 import { EVENEMENTS, TROUS, DUREE, VITESSE, DEPART } from "./scenario.js";
+import { VEHICULES_PORTEURS, VETEMENTS, lisere } from "../da/palette.js";
 
 // ⚠️ Ni `voiture.glb` ni `gris.glb` : plus personne ne s'en sert depuis que
 // les voitures sont peintes par le kit, et c'étaient deux téléchargements
@@ -67,7 +68,10 @@ export async function creerPartie(
   { sur = () => {}, niveau = "guide", expliquer = false } = {},
 ) {
   const THREE = await import("three");
-  const monde = creerMonde(THREE, hote, { jour: true });
+  // 📖 « Seize heures », la recette de lumière de la bible §4. C'est elle qui
+  // donne du volume à un monde fait de primitives, et les ombres violettes
+  // qui font qu'une capture est reconnaissable.
+  const monde = creerMonde(THREE, hote, { heure: "seize" });
   const modeles = await chargerModeles(THREE, MODELES, {
     base: `${import.meta.env.BASE_URL || "/"}art/course3d/`,
   });
@@ -105,10 +109,15 @@ export async function creerPartie(
   // vers le violet, les hautes lumières vers l'ambre, et le vignettage est
   // lourd. Appliqué à une rue de plein jour, il rend une image sale et
   // bleuâtre. Ici : neutre, contrasté, propre.
-  Object.assign(post.uniforms.uFroid, { value: 0.02 });
-  Object.assign(post.uniforms.uChaud, { value: 0.05 });
-  Object.assign(post.uniforms.uSaturation, { value: 1.1 });
-  Object.assign(post.uniforms.uVignette, { value: 0.26 });
+  // L'étalonnage « Seize heures » (bible §4) : CHAUD dans les hautes lumières,
+  // VIOLET dans les ombres. C'est ce contraste de température qui fait le
+  // « cinéma », et il ne coûte rien puisque la chaîne d'effets tourne déjà.
+  Object.assign(post.uniforms.uFroid, { value: 0.05 });
+  Object.assign(post.uniforms.uChaud, { value: 0.1 });
+  // ⚠️ 1,05 et pas 1,12 : au-dessus, les façades sorbet virent au Lego. La
+  // chaîne ACES sature déjà d'elle-même, l'étalonnage ne doit pas en rajouter.
+  Object.assign(post.uniforms.uSaturation, { value: 1.05 });
+  Object.assign(post.uniforms.uVignette, { value: 0.3 });
   Object.assign(post.uniforms.uGrain, { value: 0.016 });
   Object.assign(post.uniforms.uAberration, { value: 0.0005 });
   const qualite = creerQualite(monde, {});
@@ -166,7 +175,7 @@ export async function creerPartie(
         // extérieure se tourne vers nous et prend le soleil. C'est ce qui la
         // rend lisible à trente mètres, où elle ne fait que douze pixels.
         new THREE.MeshStandardMaterial({
-          color: 0x9ab6e2,
+          color: lisere(VEHICULES_PORTEURS.bleu, 0.22),
           roughness: 0.34,
           metalness: 0.1,
         }),

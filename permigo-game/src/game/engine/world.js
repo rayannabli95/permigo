@@ -17,16 +17,38 @@ export const PAS_MAX = 0.05;
 export function creerMonde(
   THREE,
   hote,
-  { qualite = "auto", jour = false } = {},
+  { qualite = "auto", jour = false, heure = null } = {},
 ) {
   const scene = new THREE.Scene();
+
+  // ⭐ « SEIZE HEURES » — la recette de lumière de la direction artistique.
+  // 📖 docs/PERMIGO_GAME_ART_BIBLE.md §4.
+  //
+  // Ce n'est pas un préréglage de confort, c'est LA décision qui donne du
+  // volume à un monde fait de primitives : un soleil à 46° venant de
+  // l'avant-gauche donne à chaque façade une face éclairée et une face à
+  // l'ombre. Le « plein jour neutre » précédent éclairait tout pareil, donc
+  // tout était plat, et c'est ça qu'on voyait comme « des primitives ».
+  //
+  // 🔴 Le sol de l'hémisphère est VIOLET (`0x8a76a8`) : c'est lui qui teinte
+  // toutes les ombres du jeu. Une ligne, et c'est la signature visuelle la
+  // plus reconnaissable de PermiGo.
+  const seize = heure === "seize";
+  if (seize) jour = true;
 
   // Deux ambiances. Le crépuscule violet est la DA PermiGo. Le PLEIN JOUR
   // existe pour une seule raison, et elle prime sur la DA : sur un banc
   // d'essai d'observation, il faut VOIR. Une voiture grise sur du bitume
   // sombre à quarante mètres n'est lisible par personne.
-  const CIEL = jour ? 0xc8ddf2 : 0x2a1d5c;
-  scene.fog = new THREE.Fog(CIEL, jour ? 120 : 55, jour ? 340 : 160);
+  const CIEL = seize ? 0xe8ddc9 : jour ? 0xc8ddf2 : 0x2a1d5c;
+  // La brume de « seize heures » est CRÈME, pas bleue : c'est elle qui pose
+  // l'heure. Elle commence plus loin (130 m) pour ne pas laver les scènes
+  // détectables de loin, qui se jouent à 70 m.
+  scene.fog = new THREE.Fog(
+    CIEL,
+    seize ? 165 : jour ? 120 : 55,
+    seize ? 380 : jour ? 340 : 160,
+  );
 
   // Le ciel est un dégradé, pas un aplat. Une couleur unique donne un fond de
   // studio : il n'y a plus d'horizon, donc plus de profondeur. Un dôme et une
@@ -40,7 +62,13 @@ export function creerMonde(
   // pose donc vers 0,48, juste AU-DESSUS de la ligne d'horizon. Placée en bas
   // de l'image, elle se retrouve sous le sol et on ne la voit jamais.
   const grad = g2.createLinearGradient(0, 0, 0, 64);
-  if (jour) {
+  if (seize) {
+    grad.addColorStop(0, "#6fa8e6"); // zénith
+    grad.addColorStop(0.34, "#8fbde9");
+    grad.addColorStop(0.47, "#cfe0ee");
+    grad.addColorStop(0.5, "#f3e7cf"); // ⭐ l'horizon crème : il teinte tous
+    grad.addColorStop(1, "#b9a894"); //    les reflets de carrosserie
+  } else if (jour) {
     grad.addColorStop(0, "#2f74c8"); // zénith
     grad.addColorStop(0.34, "#69a4de");
     grad.addColorStop(0.47, "#a8cbea");
@@ -75,26 +103,37 @@ export function creerMonde(
   // sombre sur une route sombre n'a plus de silhouette.
   // ⚠️ Le total reçu par une surface à plat doit rester sous 1,4, sinon tout
   // l'horizontal part en blanc (c'est ce qui cramait le capot).
-  const ambiante = jour
-    ? new THREE.HemisphereLight(0xcfe2f7, 0x9a8f7e, 1.05)
-    : new THREE.HemisphereLight(0xb9a9ff, 0x40336b, 0.9);
+  // 🔴🔴 LE SOL DE L'HÉMISPHÈRE EST VIOLET EN « SEIZE HEURES ». C'est la
+  // signature Y de la bible : toute ombre du jeu tire vers le violet de la
+  // marque au lieu du gris. Une seule valeur, et une capture devient
+  // reconnaissable. Ne pas la « corriger » vers un gris neutre.
+  const ambiante = seize
+    ? new THREE.HemisphereLight(0xcfe0f6, 0x8a76a8, 0.9)
+    : jour
+      ? new THREE.HemisphereLight(0xcfe2f7, 0x9a8f7e, 1.05)
+      : new THREE.HemisphereLight(0xb9a9ff, 0x40336b, 0.9);
   scene.add(ambiante);
 
   const rebond = new THREE.DirectionalLight(
     jour ? 0xbdd6ff : 0x8fa8ff,
-    jour ? 0.24 : 0.3,
+    seize ? 0.2 : jour ? 0.24 : 0.3,
   );
   rebond.position.set(18, 12, -30);
   scene.add(rebond);
 
   const soleil = new THREE.DirectionalLight(
-    jour ? 0xfff4e2 : 0xffc98a,
-    jour ? 2.1 : 1,
+    seize ? 0xfff0d8 : jour ? 0xfff4e2 : 0xffc98a,
+    seize ? 2.2 : jour ? 2.1 : 1,
   );
   // ⚠️ En plein jour le soleil est HAUT (≈ 60°) : les ombres sont courtes et
   // dures, et c'est exactement ce qu'on veut. Une ombre longue et molle rend
   // le sol sale et noie les petits indices au ras du bitume.
-  if (jour) soleil.position.set(34, 52, 26);
+  // ⭐ À seize heures il vient de l'AVANT-GAUCHE, à 46° : les façades et les
+  // véhicules de DROITE (là où vivent tous nos événements) prennent la
+  // lumière, et l'ombre des immeubles de gauche barre la chaussée en
+  // diagonale. Cette diagonale est notre bande de profondeur, gratuite.
+  if (seize) soleil.position.set(-28, 34, 16);
+  else if (jour) soleil.position.set(34, 52, 26);
   else soleil.position.set(-26, 20, 18); // rasant : les ombres s'allongent
   scene.add(soleil);
   scene.add(soleil.target);
@@ -117,11 +156,12 @@ export function creerMonde(
     c.far = 110;
     soleil.shadow.bias = -0.0012;
     soleil.shadow.normalBias = 0.02; // évite l'ombre qui grimpe sur les faces
-    soleil.shadow.radius = jour ? 1.6 : 3;
+    soleil.shadow.radius = seize ? 2 : jour ? 1.6 : 3;
     // ⚠️ Une ombre à 1 tombe au NOIR : le ciel remplit toujours les ombres.
     // En plein jour elle peut être plus franche, c'est elle qui pose les
     // objets au sol et qui rend une portière entrouverte lisible de loin.
-    if ("intensity" in soleil.shadow) soleil.shadow.intensity = jour ? 0.8 : 0.68;
+    if ("intensity" in soleil.shadow)
+      soleil.shadow.intensity = seize ? 0.72 : jour ? 0.8 : 0.68;
   }
 
   const rendu = new THREE.WebGLRenderer({
@@ -136,7 +176,7 @@ export function creerMonde(
   rendu.shadowMap.type = THREE.PCFShadowMap;
   rendu.outputColorSpace = THREE.SRGBColorSpace;
   rendu.toneMapping = THREE.ACESFilmicToneMapping;
-  rendu.toneMappingExposure = jour ? 0.98 : 1.28;
+  rendu.toneMappingExposure = seize ? 1.0 : jour ? 0.98 : 1.28;
   rendu.domElement.style.cssText = "display:block;width:100%;height:100%";
   hote.appendChild(rendu.domElement);
 
@@ -151,7 +191,10 @@ export function creerMonde(
   pmrem.compileEquirectangularShader();
   const cible = pmrem.fromEquirectangular(equi);
   scene.environment = cible.texture;
-  scene.environmentIntensity = jour ? 1.05 : 0.85;
+  // ⭐ C'est CETTE valeur qui fait le glossy des carrosseries laquées : le
+  // ciel cuit en carte d'environnement se reflète dessus. C'est la qualité
+  // perçue la moins chère de tout le moteur, elle est déjà payée.
+  scene.environmentIntensity = seize ? 1.15 : jour ? 1.05 : 0.85;
   pmrem.dispose();
   equi.dispose();
 
@@ -179,7 +222,11 @@ export function creerMonde(
   const ro = new ResizeObserver(taille);
   ro.observe(hote);
 
-  const soleilDecalage = jour ? [34, 52, 26] : [-26, 20, 18];
+  const soleilDecalage = seize
+    ? [-28, 34, 16]
+    : jour
+      ? [34, 52, 26]
+      : [-26, 20, 18];
 
   // L'ombre ne couvre que 60 m : sans ça, une carte d'ombre de 1024 px étalée
   // sur toute la scène ne montre plus rien.
@@ -188,7 +235,11 @@ export function creerMonde(
     // s'approcher de sa paroi et l'horizon se met à pencher.
     dome.position.set(x, 0, z);
     if (!soleil.castShadow) return;
-    soleil.position.set(x + soleilDecalage[0], soleilDecalage[1], z + soleilDecalage[2]);
+    soleil.position.set(
+      x + soleilDecalage[0],
+      soleilDecalage[1],
+      z + soleilDecalage[2],
+    );
     soleil.target.position.set(x, 0, z);
     soleil.target.updateMatrixWorld();
   }

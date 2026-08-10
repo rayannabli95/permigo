@@ -21,6 +21,10 @@
 // pas difficile, elle est invisible.
 
 import { X_STATIONNE } from "./rue.js";
+// 📖 Les couleurs viennent de la palette, jamais d'un hexadécimal écrit ici.
+// Règle de la bible §3 : un PORTEUR de scène est toujours très saturé, un
+// figurant est toujours désaturé. C'est la couleur qui dit « ceci compte ».
+import { VEHICULES_PORTEURS, VETEMENTS } from "../da/palette.js";
 
 const lisser = (a, b, t) => Math.max(0, Math.min(1, (t - a) / (b - a)));
 // Une accélération douce puis un arrêt net : un mouvement humain, jamais
@@ -67,7 +71,7 @@ export const EVENEMENTS = [
       texte: "Tu l'as vue ? Touche-la avant qu'elle s'ouvre.",
     },
     acteurs: [
-      { id: "gare", type: "voiture", couleur: "bleu" },
+      { id: "gare", type: "voiture", couleur: VEHICULES_PORTEURS.bleu },
       { id: "porte", type: "porte" },
       { id: "homme", type: "pieton", couleur: "rouge" },
     ],
@@ -123,8 +127,8 @@ export const EVENEMENTS = [
       vague: "Qu'est-ce qui te paraît bizarre ?",
     },
     acteurs: [
-      { id: "velo", type: "velo", couleur: "jaune" },
-      { id: "camionnette", type: "camion", couleur: "blanc" },
+      { id: "velo", type: "velo", couleur: VEHICULES_PORTEURS.jaune },
+      { id: "camionnette", type: "camion", couleur: 0xd9d2c4 },
     ],
     porteur: "velo",
     pose(te) {
@@ -226,7 +230,7 @@ export const EVENEMENTS = [
       vague: "Regarde loin.",
     },
     acteurs: [
-      { id: "sortante", type: "voiture", couleur: "rouge", feux: true },
+      { id: "sortante", type: "voiture", couleur: VEHICULES_PORTEURS.rouge, feux: true },
     ],
     porteur: "sortante",
     pose(te) {
@@ -282,8 +286,8 @@ export const EVENEMENTS = [
       vague: "Regarde les trottoirs.",
     },
     acteurs: [
-      { id: "gamin", type: "enfant", couleur: 0xf4c116 },
-      { id: "copain", type: "enfant", couleur: 0xe0453a },
+      { id: "gamin", type: "enfant", couleur: VETEMENTS.enfant[0] },
+      { id: "copain", type: "enfant", couleur: VETEMENTS.enfant[1] },
     ],
     porteur: "gamin",
     pose(te) {

@@ -161,3 +161,45 @@ Chaque phase est UNE session de travail d'un modèle léger. Le prompt type :
 > d'abord les sections de la bible citées. Ne prends aucune décision
 > artistique : tout est dans la bible. Termine par les scripts de
 > vérification et les captures d'acceptation. »
+
+---
+
+## Journal d'exécution
+
+### Phases 0 et 1 — faites le 10/08/2026
+
+Livré : `src/game/da/palette.js`, `src/game/da/textures.js`,
+`outils/da/verif-teinte.mjs`, la recette « seize heures » dans `world.js`
+(option `heure: "seize"`), la route texturée et le capot Cupra.
+
+**Écart assumé au plan** : la texture de façade (prévue phase 3) a été tirée en
+avant. Raison : une phase 1 qui ne change que la lumière produit une capture
+que Rayan ne peut pas juger, puisque les centaines de plans-fenêtres restaient
+à l'écran. Seule la TEXTURE a été avancée ; la grammaire modulaire
+(socle/étages/couronne paramétriques, balcons, accidents de rythme) reste
+entièrement à faire en phase 3.
+
+**Trois choses apprises, à ne pas réapprendre** :
+
+1. **Une couleur de façade se choisit APRÈS le rendu, pas sur le nuancier.** Le
+   premier tirage utilisait les teintes franches de la bible (corail `#e2795a`,
+   sauge `#93a883`) : à l'écran, sous un soleil à 2,2 avec ACES et une
+   saturation de 1,12, la rue faisait Lego. Les valeurs de `palette.js` sont
+   maintenant désaturées d'un tiers et c'est ELLES qui font foi.
+2. **Une carte de texture est MULTIPLIÉE par `material.color`.** Une façade
+   grise teintée par la couleur ne peut donc jamais avoir un encadrement plus
+   clair que son mur, ni une vitre bleue sur un mur corail. Il faut peindre la
+   couleur DANS la texture : une texture par famille, six au total.
+3. **Le lint de teinte a trouvé un vrai défaut au premier essai** : 50 % de
+   l'image quasi grise, à cause d'un bitume trop neutre (`#8d8878`). Réchauffé
+   en `#948b74`, la mesure est tombée à 8 %. Le script vaut mieux qu'un avis.
+
+**Bug corrigé au passage** (hors périmètre de la phase, mais il crevait l'œil) :
+`kit.vehicule` donnait aux voitures un habitacle de **treize centimètres**
+(`toit: 1.25` moins 0,78 de caisse moins 0,34 de garde au sol), donc toutes les
+voitures garées sortaient en plateaux sans vitres. Gabarit corrigé à 1,55.
+La refonte complète du véhicule reste la phase 2.
+
+**Mesures d'acceptation** : `verif-teinte` ✅ sur les trois instants (gris 0,06
+à 0,09 pour un plafond de 0,20 · chaud 0,53 à 0,65 · saturation 0,20 à 0,24 ·
+accent 0,10 à 0,20) · zéro erreur console · build vert.

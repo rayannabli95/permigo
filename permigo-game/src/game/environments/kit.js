@@ -405,7 +405,15 @@ export function creerKit(THREE) {
   // demande à une voiture dans une situation pédagogique.
   function vehicule(type = "voiture", couleur = "gris") {
     const g = new THREE.Group();
-    const c = PEINTURE[couleur] ?? PEINTURE.gris;
+    // ⚠️ `couleur` accepte désormais un HEXADÉCIMAL en plus des noms du kit :
+    // la direction artistique tire ses teintes de `da/palette.js` (jitter
+    // compris), et un nombre passé dans l'ancienne table retombait
+    // silencieusement sur le gris — toutes les voitures garées sortaient de
+    // la même couleur.
+    const c =
+      typeof couleur === "number"
+        ? couleur
+        : (PEINTURE[couleur] ?? PEINTURE.gris);
     if (type === "pieton") {
       g.add(bloc(0.42, 0.9, 0.28, c, 0, 0.72, 0));
       g.add(bloc(0.2, 0.62, 0.2, 0xe8c9a8, 0, 1.6, 0));
@@ -426,7 +434,11 @@ export function creerKit(THREE) {
         ? { l: 2.45, h: 1.4, p: 8.6, toit: 2.4 }
         : type === "bus"
           ? { l: 2.5, h: 2.5, p: 10.5, toit: 0 }
-          : { l: 1.85, h: 0.78, p: 4.2, toit: 1.25 };
+          : // 🔴 `toit: 1.25` donnait un habitacle de TREIZE CENTIMÈTRES
+          // (1,25 − 0,78 de caisse − 0,34 de garde au sol) : toutes les
+          // voitures garées sortaient en plateaux sans vitres. Une voiture
+          // fait 1,52 m, sa visière vaut 30 % de sa hauteur (bible §6).
+          { l: 1.85, h: 0.72, p: 4.2, toit: 1.55 };
 
     g.add(bloc(gab.l, gab.h, gab.p, c, 0, 0.34, 0));
     if (gab.toit) {
