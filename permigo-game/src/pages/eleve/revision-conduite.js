@@ -28,7 +28,6 @@ import {
   resetIfNewDay,
 } from "@/utils/free-tier.js";
 import { mountFreeTierWall } from "@/components/eleve/free-tier-wall.js";
-import { ficheSchemas } from "@/data/fiches-schemas.js";
 import {
   FICHE_META as FICHES,
   MONDES_CONDUITE as MONDES,
@@ -40,7 +39,6 @@ import { chromeNight } from "@/utils/chrome-night.js";
 import { chargerBoite, boiteConnue } from "@/utils/transmission.js";
 import {
   marquerTermes,
-  poserLexique,
   brancherGlossaire,
 } from "@/components/eleve/glossaire.js";
 
@@ -586,16 +584,23 @@ ${chromeNight("#5a4fc0", "#423a96")}
    .off = la fiche ne concerne pas l'automatique : on passe en orange, la même
    teinte que l'avertissement du bas de page, pour que ça se lise comme un
    « passe ton chemin » et pas comme un conseil de plus. */
-.fd-auto{ display:flex; align-items:flex-start; gap:11px; margin:0 18px 14px; padding:14px 15px;
+/* Bandeau « En boîte auto » : le titre seul, le texte sous le pli. */
+.fd-auto{ margin:0 18px 12px; padding:4px 14px 4px;
   border-radius:18px; background:rgba(63,130,214,.16); border:1px solid rgba(63,130,214,.42); }
+.fd-auto-head{ display:flex; align-items:center; gap:11px; width:100%; margin:0; padding:11px 1px;
+  border:0; background:none; font-family:inherit; text-align:left; cursor:pointer;
+  -webkit-tap-highlight-color:transparent; }
 .fd-auto-ic{ flex:0 0 22px; display:flex; }
 .fd-auto-ic svg{ display:block; }
-.fd-auto-body{ min-width:0; }
-.fd-auto-h{ margin:0 0 5px; font:800 11.5px/1.2 'Archivo',sans-serif; letter-spacing:.14em;
+.fd-auto-head svg:last-child{ flex:0 0 18px; margin-left:auto; color:#8ebbe8; transition:transform .18s ease; }
+.fd-auto-head[aria-expanded="true"] svg:last-child{ transform:rotate(90deg); }
+.fd-auto-body{ min-width:0; padding:0 1px 10px 33px; }
+.fd-auto-h{ flex:1; min-width:0; font:800 11.5px/1.2 'Archivo',sans-serif; letter-spacing:.14em;
   text-transform:uppercase; color:#bcdcff; }
 .fd-auto-p{ margin:0; font:600 14px/1.5 'Archivo',sans-serif; color:#e7f1ff; }
 .fd-auto-p .fd-fr{ display:block; margin-top:6px; color:#b9cfe8; opacity:.85; }
 .fd-auto.off{ background:rgba(239,106,58,.15); border-color:rgba(239,106,58,.45); }
+.fd-auto.off .fd-auto-head svg:last-child{ color:#e8a98e; }
 .fd-auto.off .fd-auto-h{ color:#ffc7ad; }
 .fd-auto.off .fd-auto-p{ color:#ffe6da; }
 .fd-auto.off .fd-auto-p .fd-fr{ color:#e0b6a4; }
@@ -1637,42 +1642,49 @@ export async function mount(root, param) {
           <p${rtl && tr?.erreur ? ' dir="rtl" lang="ar"' : ""}>${bi(f.erreur, tr?.erreur)}</p>
         </div>`
       : "";
-    const coachHtml = coach.length
-      ? `<div class="fd-coach-wrap">
-          ${seclab("Cartes coach", lang !== "fr" ? ui("coach", "Cartes coach") : null)}
-          <div class="fd-coach-hook">
-            <span class="fd-hook-av" aria-hidden="true"><img src="/skins/mascot-point.png" alt="" /></span>
-            <p>${esc(ui("coach_hook", "Deux minutes ici t'évitent une leçon de plus"))}</p>
-          </div>
-          <div class="fd-coach" data-cdeck></div>
-          ${
-            coach.length > 1
-              ? `<div class="fd-cd-ctrls">
-              <button type="button" class="fd-cd-arrow" data-cd="prev" aria-label="${escAttr(ui("cd_prev", "Carte précédente"))}">${CD_LEFT}</button>
-              <span class="fd-cd-count" data-cd-count aria-live="polite">1 / ${coach.length}</span>
-              <button type="button" class="fd-cd-arrow" data-cd="next" aria-label="${escAttr(ui("cd_next", "Carte suivante"))}">${CD_RIGHT}</button>
-            </div>
-            <p class="fd-cd-tip">${esc(ui("cd_tip", "Glisse pour passer à la suivante"))}</p>`
-              : ""
-          }
-        </div>`
-      : "";
+    // ── Les cartes coach ne sont plus dans la fiche ───────────────────────
+    // Le deck empilé (pourquoi ça compte · quand ça arrive · ce que tu risques
+    // · l'effet sur les autres) coûtait 353 à 436 px et jusqu'à 125 mots,
+    // placés APRÈS le bouton : personne ne descendait jusque-là.
+    // Aucune des quatre ne dit à l'élève quoi faire de ses mains demain — la
+    // seule qui changeait sa leçon, « l'erreur à éviter », est remontée en
+    // clair sous les gestes (le piège).
+    // Le tableau `coach` reste construit plus haut : il alimente encore la
+    // lecture en grand (openCoachSheet) et se rebranche en une ligne.
 
     // ── « En boîte auto », remontée en tête de fiche ───────────────────────
     // Même texte que la carte coach d'avant (f.bva), mot pour mot. Il ne
     // change pas, il change de PLACE : l'élève en automatique le lit avant les
     // gestes, pas quatorze gestes plus bas. Variante « off » quand le champ
     // bva dit lui-même que la fiche ne le concerne pas.
+    // La boîte auto remonte SOUS le briefing, là où l'élève la lit.
+    // Elle était sous le bouton, donc invisible : c'est pourtant le seul bloc
+    // qui change ce qu'il fait de ses pieds demain.
+    // ⚠️ Condition STRICTE : `enAuto`, jamais « tout sauf la manuelle ».
+    // Mesuré le 07/08 : 99 profils élèves sur 106 n'ont AUCUNE boîte
+    // renseignée. Élargir aux boîtes inconnues aurait collé 259 px de texte
+    // sur l'automatique en tête de fiche à 93 % des élèves, dont tous ceux qui
+    // apprennent en manuelle. On n'affiche que si l'app SAIT.
     const autoNoteHtml =
       enAuto && f.bva
-        ? `<div class="fd-auto${bvaHorsSujet ? " off" : ""}">
-            <span class="fd-auto-ic" aria-hidden="true">${AUTO_IC}</span>
-            <div class="fd-auto-body">
-              <p class="fd-auto-h">${esc(
+        ? // Replié comme les gestes : 55 à 83 mots de prose posés entre le
+          // briefing et la liste repoussaient les gestes de 260 px. Le titre
+          // suffit à dire à l'élève que la fiche tient compte de sa boîte ;
+          // il ouvre s'il veut le détail.
+          // Exception : quand la fiche ne le concerne pas (bvaHorsSujet), le
+          // texte reste ouvert — c'est un avertissement, pas un complément.
+          `<div class="fd-auto${bvaHorsSujet ? " off" : ""}">
+            <button type="button" class="fd-auto-head" data-ouvre="auto"
+              aria-expanded="${bvaHorsSujet}" aria-controls="fd-plus-auto">
+              <span class="fd-auto-ic" aria-hidden="true">${AUTO_IC}</span>
+              <span class="fd-auto-h">${esc(
                 bvaHorsSujet
                   ? ui("bva_off_h", "Cette fiche ne te concerne pas")
                   : ui("bva_h", "En boîte auto"),
-              )}</p>
+              )}</span>
+              ${CHEV}
+            </button>
+            <div class="fd-auto-body" id="fd-plus-auto"${bvaHorsSujet ? "" : " hidden"}>
               <p class="fd-auto-p">${bi(f.bva, tr?.bva)}</p>
             </div>
           </div>`
@@ -1715,43 +1727,6 @@ export async function mount(root, param) {
     const competenceTxt =
       lang !== "fr" && tr?.competence ? tr.competence : f.competence;
 
-    // ── Galerie « En images » : schémas de trajectoire + photos de gestes.
-    // Images sans texte (public/art/fiches/*.webp) ; légendes traduites ici.
-    const shots = ficheSchemas(f.code);
-    const legOf = (s) => esc(s[lang] || s.fr);
-    const schemasHtml = shots.length
-      ? `<div class="fd-schemas">
-          ${seclab(
-            "En images",
-            lang === "en" ? "In pictures" : lang === "ar" ? "بالصور" : null,
-          )}
-          <!-- tabindex : la galerie défile horizontalement, sans lui on ne peut
-               pas la parcourir au clavier (axe, « scrollable-region-focusable »). -->
-          <div class="fd-gal" tabindex="0" role="group"
-            aria-label="${escAttr(ui("gal_a11y", "Les images de la fiche, défilement horizontal"))}">
-            ${shots
-              .map(
-                (s) => `<figure class="fd-shot">
-              <img src="/art/fiches/${escAttr(s.src)}.webp" alt="" loading="lazy" decoding="async">
-              <figcaption${rtl && s[lang] ? ' dir="rtl" lang="ar"' : ""}>${legOf(s)}</figcaption>
-            </figure>`,
-              )
-              .join("")}
-          </div>
-        </div>`
-      : "";
-
-    // Séparateur du bas de page : ce qui suit est optionnel, il faut que ça se
-    // voie. Sans lui, l'élève croit que la fiche continue vraiment et il scrolle.
-    // (Défini ici, après schemasHtml/coachHtml/autoNoteHtml dont il dépend.)
-    const plusLoinHtml =
-      schemasHtml || coachHtml || autoNoteHtml
-        ? seclab(
-            "Pour aller plus loin",
-            lang !== "fr" ? ui("plus_loin", "Pour aller plus loin") : null,
-          )
-        : "";
-
     // Une seule pose : renderFicheDeck() est rappelée à chaque coche.
     if (!rendreLeBandeau) rendreLeBandeau = hideHeader();
 
@@ -1765,6 +1740,7 @@ export async function mount(root, param) {
       </div>
 
       ${briefHtml}
+      ${autoNoteHtml}
       ${deckHtml}
       ${piegeHtml}
 
@@ -1786,13 +1762,6 @@ export async function mount(root, param) {
         )}</span></button>
       </div>
 
-      <!-- Sous le bouton : la profondeur. Rien n'a été supprimé, tout ce qui
-           doublonnait avec la liste des gestes est simplement descendu ici,
-           après le chemin principal (lire → se tester). -->
-      ${plusLoinHtml}
-      ${autoNoteHtml}
-      ${schemasHtml}
-      ${coachHtml}
       ${srcHtml}
     </div>`;
 
@@ -1809,12 +1778,10 @@ export async function mount(root, param) {
       chargerBoite()
         .then((boite) => {
           if (root.querySelector(".fd") !== zoneFiche) return; // fiche changée
+          // marquerTermes seul : les mots sont soulignés dans le texte et
+          // se tapent. Le bloc récapitulatif du bas (poserLexique) est retiré,
+          // il redisait la même liste 85 px plus bas, après le bouton.
           marquerTermes(zoneFiche, boite);
-          poserLexique(
-            zoneFiche,
-            boite,
-            ui("glossaire_h", "Les mots de la fiche"),
-          );
         })
         .catch(() => {
           /* pas de glossaire plutôt qu'une fiche cassée */
