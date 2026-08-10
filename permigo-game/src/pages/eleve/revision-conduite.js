@@ -36,6 +36,7 @@ import {
 } from "@/data/conduite-meta.js";
 import { loadFiche } from "@/data/fiches-loader.js";
 import { ficheSchemas } from "@/data/fiches-schemas.js";
+import { ouvrirStoryFiche } from "@/components/eleve/fiche-story.js";
 import { chromeNight } from "@/utils/chrome-night.js";
 import { chargerBoite, boiteConnue } from "@/utils/transmission.js";
 import {
@@ -692,19 +693,14 @@ ${chromeNight("#5a4fc0", "#423a96")}
 .fd-line.done .fd-aside{ background:rgba(240,169,63,.10); border-color:rgba(240,169,63,.22); }
 .fd-line.done .fd-aside p{ color:#8a6a1c; }
 
-.fd-schemas{ margin-top:2px; }
-.fd-gal{ display:flex; gap:10px; overflow-x:auto; scroll-snap-type:x mandatory; padding:2px 18px 8px; scrollbar-width:none; }
-.fd-gal::-webkit-scrollbar{ display:none; }
-/* Deux cartes à l'écran en même temps, la 3e qui dépasse dit qu'on peut
-   pousser. Une carte pleine largeur (l'ancienne bande, 84 %) mangeait un demi
-   écran pour une seule vue, et une série ne se juge pas une image à la fois. */
-.fd-shot{ margin:0; flex:0 0 44%; max-width:200px; scroll-snap-align:center; background:#f6f4ff; border:1px solid #e6e2fb;
-  border-radius:14px; overflow:hidden; box-shadow:0 3px 0 rgba(20,12,60,.28), inset 0 1px 0 rgba(255,255,255,.8); }
-/* 2:3 = le format natif des vues de briefing, donc zéro recadrage. Les plans
-   vectoriels (dépassement, giratoires) gardent leur carré : .fd-gal.plan. */
-.fd-shot img, .fd-shot video{ display:block; width:100%; aspect-ratio:2/3; object-fit:cover; background:#100a24; }
-.fd-gal.plan .fd-shot img{ aspect-ratio:1/1; background:#dfe3ea; }
-.fd-shot figcaption{ padding:8px 10px 10px; font-size:11px; line-height:1.35; color:#3d2f7a; font-weight:600; }
+/* Les images ne vivent plus dans la page : elles passent en story plein écran
+   à l'ouverture (fiche-story.js). Il ne reste que ce rappel d'une ligne. */
+.fd-revoir{ display:flex; align-items:center; justify-content:center; gap:9px; cursor:pointer;
+  width:calc(100% - 36px); margin:2px 18px 0; padding:12px 14px; border-radius:14px;
+  background:rgba(255,255,255,.09); border:1px solid rgba(255,255,255,.16); color:#ded4ff;
+  font:800 13.5px/1 'Archivo',sans-serif; }
+.fd-revoir:active{ transform:scale(.985); }
+.fd-revoir svg{ color:#c3b6f0; flex:0 0 auto; }
 
 .fd-coach-wrap{ margin-top:6px; }
 /* Le crochet qui donne envie d'ouvrir une carte : la mascotte pointe la
@@ -1107,6 +1103,7 @@ export async function mount(root, param) {
   const estAcquise = (c) => CERT_CACHE.get(c) === true;
   let mondeN = null;
   let lastFicheTracked = null; // évite de re-tracker/markRead à chaque coche de geste
+  let storyVue = null; // la story ne s'ouvre qu'à l'ENTRÉE dans une fiche
 
   if (deep) {
     const loaders = [ensureFiche(deep), ensureFichesI18n()];
@@ -1151,6 +1148,10 @@ export async function mount(root, param) {
       rendreLeBandeau();
       rendreLeBandeau = null;
     }
+    // Repartir du hub et rouvrir une fiche rejoue sa story : c'est une entrée
+    // dans la fiche, comme la première. Le quiz est le seul aller-retour qui
+    // ne la rejoue pas — on en revient au milieu d'une lecture commencée.
+    if (view !== "fiche" && view !== "quiz") storyVue = null;
     if (view === "fiche") return renderFicheDeck();
     if (view === "quiz") return renderQuiz();
     if (view === "monde") return renderMonde();
@@ -1730,52 +1731,23 @@ export async function mount(root, param) {
     // rien n'est perdu si on veut les ré-afficher ailleurs.
 
     const BACK = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="#3d2f7a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    const IMG_IC = `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="10" r="1.6" fill="currentColor"/><path d="M4.5 17l4.2-4.2 3 3 3.3-3.3 4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
     const competenceTxt =
       lang !== "fr" && tr?.competence ? tr.competence : f.competence;
 
-    // ── Galerie « En images » : le briefing en images de la fiche.
-    // Images sans texte (public/art/fiches/*) ; légendes traduites ici.
-    // Les six écarts qu'aucune photo ne montre sont des mp4 de 3 s en boucle
-    // (~40 Ko, soit moins lourd que l'image fixe équivalente) : c'est la LIGNE
-    // qui se dessine qui porte le message, une image figée ne le dit pas.
+    // ── Les images de la fiche ─────────────────────────────────────────────
+    // Elles ne sont PLUS posées dans la page : elles passent en story plein
+    // écran à l'ouverture de la fiche (demande Rayan 10/08, fiche-story.js).
+    // Une vignette de 154 px de large ne montre pas un geste ; en grand, si.
+    // Il ne reste ici qu'un rappel d'une ligne, pour celui qui a passé la
+    // story ou qui veut revoir une vue en cours de lecture.
     // La boîte auto change deux vues sur seize (pédalier, sélecteur).
-    //
-    // ⚠️ PLACEMENT : la bande est posée sous les gestes et AVANT le bouton.
-    // Sa version d'avant vivait sous le bouton (#750) et personne n'y allait :
-    // 370 px pour une photo que l'élève ne voyait jamais. Deux cartes tiennent
-    // maintenant à l'écran en même temps — une série se juge au pluriel, une
-    // vignette seule ne dit rien du monde qu'elle raconte.
     const shots = ficheSchemas(f.code, enAuto);
-    const legOf = (s) => esc(s[lang] || s.fr);
-    // Un plan vectoriel se cadre en carré, une vue de briefing en 2:3. Le
-    // format est décidé pour TOUTE la galerie, sinon les cartes d'une même
-    // rangée n'ont pas la même hauteur et la bande devient bancale.
-    const galPlan = shots.some((s) => s.plan);
-    const media = (s) =>
-      s.video
-        ? `<video src="/art/fiches/${escAttr(s.src)}.mp4" autoplay loop muted playsinline preload="metadata"></video>`
-        : `<img src="/art/fiches/${escAttr(s.src)}.webp" alt="" loading="lazy" decoding="async">`;
     const schemasHtml = shots.length
-      ? `<div class="fd-schemas">
-          ${seclab(
-            "En images",
-            lang === "en" ? "In pictures" : lang === "ar" ? "بالصور" : null,
-          )}
-          <!-- tabindex : la galerie défile horizontalement, sans lui on ne peut
-               pas la parcourir au clavier (axe, « scrollable-region-focusable »). -->
-          <div class="fd-gal${galPlan ? " plan" : ""}" tabindex="0" role="group"
-            aria-label="${escAttr(ui("gal_a11y", "Les images de la fiche, défilement horizontal"))}">
-            ${shots
-              .map(
-                (s) => `<figure class="fd-shot">
-              ${media(s)}
-              <figcaption${rtl && s[lang] ? ' dir="rtl" lang="ar"' : ""}>${legOf(s)}</figcaption>
-            </figure>`,
-              )
-              .join("")}
-          </div>
-        </div>`
+      ? `<button type="button" class="fd-revoir" data-revoir>
+          ${IMG_IC}<span>${esc(ui("revoir", "Revoir les images"))}</span>
+        </button>`
       : "";
 
     // Une seule pose : renderFicheDeck() est rappelée à chaque coche.
@@ -1838,6 +1810,28 @@ export async function mount(root, param) {
         .catch(() => {
           /* pas de glossaire plutôt qu'une fiche cassée */
         });
+    }
+
+    // ── Les images d'abord, la méthode ensuite ─────────────────────────────
+    // La story s'ouvre à l'ENTRÉE dans la fiche et une seule fois :
+    // renderFicheDeck() est rappelée à chaque geste coché, et une story qui
+    // repart à chaque coche serait un piège, pas un décor.
+    const revoirStory = () =>
+      ouvrirStoryFiche({
+        shots,
+        lang,
+        rtl,
+        kicker: `${f.code} · ${competenceTxt}`,
+        onFin: () => track("revision_conduite_story_fin", { code: f.code }),
+      });
+    root.querySelector("[data-revoir]")?.addEventListener("click", () => {
+      haptic("select");
+      revoirStory();
+    });
+    if (shots.length && storyVue !== f.code) {
+      storyVue = f.code;
+      track("revision_conduite_story_open", { code: f.code });
+      revoirStory();
     }
   }
 
