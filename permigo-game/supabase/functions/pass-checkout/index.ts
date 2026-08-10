@@ -22,7 +22,7 @@
 // hébergé par Stripe. L'enregistrement de l'achat se fait dans le webhook
 // (metadata.permigo_plan) → table public.pass_purchases.
 //
-// Appelée via supabase.functions.invoke('pass-checkout', { body: { plan } }).
+// Appelée via supabase.functions.invoke('pass-checkout', { body: { plan, lang } }).
 // Secrets : STRIPE_SECRET_KEY, APP_URL (optionnel).
 // Deploy  : supabase functions deploy pass-checkout
 // ═══════════════════════════════════════════════════════════════
@@ -95,6 +95,17 @@ const PLANS: Record<
   },
 };
 
+// Langue de la page de paiement. Sans ça Stripe suit les réglages de
+// l'APPAREIL, pas la langue choisie dans l'app.
+// ⚠️ Stripe ne propose PAS l'arabe (40 locales, pas de `ar`) : un arabophone
+// paie en français. Décision Rayan du 10/08/2026 : ils vivent en France, le
+// vocabulaire bancaire français leur parle plus que l'anglais.
+const LOCALES: Record<string, Stripe.Checkout.SessionCreateParams.Locale> = {
+  fr: "fr",
+  en: "en",
+  ar: "fr",
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
@@ -104,9 +115,11 @@ Deno.serve(async (req) => {
   if (!stripeKey) return json({ error: "stripe_not_configured" }, 500);
 
   let plan = "";
+  let lang = "";
   try {
     const body = await req.json();
     plan = String(body?.plan ?? "");
+    lang = String(body?.lang ?? "");
   } catch {
     /* body absent/malformé → rejeté juste en dessous */
   }
@@ -188,6 +201,9 @@ Deno.serve(async (req) => {
         },
       ],
       metadata,
+      // Langue inconnue ou absente (vieux client en cache) → `auto`, le
+      // comportement d'avant : Stripe devine depuis l'appareil.
+      locale: LOCALES[lang] ?? "auto",
       // Stripe interdit `discounts` + `allow_promotion_codes` en même temps :
       // un filleul a sa remise posée automatiquement, tout le monde d'autre
       // garde la possibilité de taper un code promo à la main.

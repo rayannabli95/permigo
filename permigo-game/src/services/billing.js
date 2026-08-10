@@ -4,8 +4,32 @@
 // statut. Toute l'écriture d'état passe par le webhook Stripe (service role).
 // ═══════════════════════════════════════════════════════════════
 import { sb } from "@/auth/auth.js";
+import { getLang } from "@/utils/lang.js";
 
 const ACTIVE_STATUSES = ["active", "trialing"];
+
+/**
+ * Langue à envoyer à Stripe. Deux mémoires cohabitent : `permigo_lang` pour
+ * l'app (via getLang) et `pv_lang`, propre à l'ancienne page `#/pass` qui a
+ * son propre sélecteur. Un visiteur venu par une pub arabe n'a que la seconde :
+ * si on ne lisait que la première, il repartait en français.
+ * @returns {'fr'|'en'|'ar'}
+ */
+function langueDePaiement() {
+  const ok = (v) => v === "fr" || v === "en" || v === "ar";
+  try {
+    // Le choix fait DANS l'app gagne : c'est la langue du mur de vente que
+    // l'élève vient de lire. `pv_lang` ne sert que s'il n'a jamais ouvert
+    // l'app (visiteur arrivé par une pub, resté sur `#/pass`).
+    const app = localStorage.getItem("permigo_lang");
+    if (ok(app)) return app;
+    const pass = localStorage.getItem("pv_lang");
+    if (ok(pass)) return pass;
+  } catch {
+    /* mode privé */
+  }
+  return getLang();
+}
 
 /**
  * Démarre le paiement : appelle l'edge function stripe-checkout (qui crée la
@@ -29,12 +53,16 @@ export async function startCheckout() {
  * (supabase-js envoie l'anon key → Stripe collecte l'email).
  * Un seul palier depuis le 05/08/2026 : tout le reste est refusé par le
  * serveur (`unknown_plan`, 400).
+ *
+ * `lang` : la langue CHOISIE dans l'app, pas celle du téléphone. Sans elle,
+ * Stripe se cale sur les réglages de l'appareil : un élève qui a fait tout le
+ * parcours en anglais tombait sur une page de paiement en français.
  * @param {'mensuel'} plan
  * @returns {Promise<void>} redirige la page si succès ; throw sinon.
  */
 export async function startPassCheckout(plan) {
   const { data, error } = await sb.functions.invoke("pass-checkout", {
-    body: { plan },
+    body: { plan, lang: langueDePaiement() },
   });
   if (error) throw error;
   const url = data?.url;

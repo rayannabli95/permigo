@@ -68,10 +68,16 @@ const MASCOT = {
 const RJ_I18N = {
   en: {
     bubble0: "Hi. I'm PermiGo.",
+    bubble0_ok: "Nice to meet you {name}",
     h1_0: "What's your name?",
     ph_prenom: "First name",
     cta_continue: "Continue",
     bubble1: "Your email and a password.",
+    bubble1_ok: "Perfect. Let's go.",
+    pwd_strength_aria: "Password strength",
+    pwd_weak: "Too short",
+    pwd_ok: "Good enough",
+    pwd_strong: "Strong",
     h1_1: "Where do I reach you?",
     ph_email: "you@email.com",
     code_label: "Instructor code",
@@ -118,10 +124,16 @@ const RJ_I18N = {
   },
   ar: {
     bubble0: "أهلاً. أنا بيرميغو.",
+    bubble0_ok: "تشرّفنا {name}",
     h1_0: "شنو اسمك؟",
     ph_prenom: "الاسم الأول",
     cta_continue: "التالي",
     bubble1: "بريدك الإلكتروني وكلمة مرور.",
+    bubble1_ok: "ممتاز. هيا بنا.",
+    pwd_strength_aria: "قوة كلمة المرور",
+    pwd_weak: "قصيرة جداً",
+    pwd_ok: "مقبولة",
+    pwd_strong: "قوية",
     h1_1: "وين نلقاك؟",
     ph_email: "you@email.com",
     code_label: "رمز المدرّب",
@@ -257,6 +269,27 @@ const STYLE = `<style>
   .rj-line input:focus{ border-bottom-color: var(--a); }
   .rj-line input:focus::placeholder{ opacity: .45; }
   .rj-line input.err{ border-bottom-color: #e5484d; }
+  /* Le trait se REMPLIT quand la réponse est bonne : la récompense arrive
+     pendant la frappe, pas trois écrans plus loin. Il se pose par-dessus la
+     bordure grise, d'où le décalage de 0 et le même arrondi. */
+  .rj-line::after{ content: ""; position: absolute; inset-inline: 0; bottom: 0; height: 2px;
+    background: linear-gradient(90deg, var(--a-lt), var(--a)); border-radius: 2px;
+    transform: scaleX(0); transform-origin: left;
+    transition: transform .4s cubic-bezier(.22,1,.36,1); pointer-events: none; }
+  [dir="rtl"] .rj-line::after{ transform-origin: right; }
+  .rj-line.ok::after{ transform: scaleX(1); }
+
+  /* Jauge de mot de passe : trois segments, un objectif visible */
+  .rj-gauge{ display: flex; align-items: center; gap: 7px; margin-top: 9px; }
+  .rj-gauge i{ flex: 1; height: 4px; border-radius: 99px; background: var(--bo); display: block;
+    transform-origin: left; transition: background .25s ease, transform .25s cubic-bezier(.22,1,.36,1); }
+  [dir="rtl"] .rj-gauge i{ transform-origin: right; }
+  .rj-gauge i.on{ background: var(--a); transform: scaleY(1.6); }
+  .rj-gauge i.on.full{ background: #2f9e44; }
+  .rj-gauge em{ flex: none; font: 700 11px/1 'Archivo', var(--fd), sans-serif; font-style: normal;
+    color: var(--mu); min-width: 62px; text-align: end; }
+  .rj-gauge em.full{ color: #2f9e44; }
+  .rj-gauge[hidden]{ display: none; }
 
   /* Champs secondaires (mot de passe, code moniteur) : volontairement en retrait */
   .rj-minor{ margin-top: 14px; padding-top: 13px; border-top: 1px dashed var(--bo); }
@@ -332,8 +365,42 @@ const STYLE = `<style>
   @keyframes rjBIn { from{ opacity: 0; transform: translateY(8px) scale(.94); } to{ opacity: 1; transform: none; } }
   .rj-bubble{ animation: rjBIn .42s cubic-bezier(.22,1,.36,1) .22s both; }
 
+  /* La mascotte RÉPOND : la bulle change de phrase pendant la frappe. Le
+     rebond signale que c'est une nouvelle réplique et pas un scintillement. */
+  @keyframes rjSay { 0%{ transform: scale(1); } 35%{ transform: scale(1.09) translateY(-3px); } 100%{ transform: scale(1); } }
+  .rj-bubble.say{ animation: rjSay .42s cubic-bezier(.34,1.56,.64,1) both; }
+  /* La mascotte fait un bond en même temps (elle coupe sa respiration le temps
+     du saut, sinon les deux animations se marchent dessus). */
+  @keyframes rjHop { 0%{ transform: translateY(0) scale(1); } 30%{ transform: translateY(-14px) scale(1.05); } 60%{ transform: translateY(0) scale(.97); } 100%{ transform: translateY(0) scale(1); } }
+  .rj-mascot.hop{ animation: rjHop .5s cubic-bezier(.34,1.56,.64,1) both,
+    rjBreathe 4.4s ease-in-out .5s infinite !important; }
+
+  /* Le bouton s'ALLUME au moment où la réponse devient valable */
+  @keyframes rjWake { 0%{ transform: scale(1); } 40%{ transform: scale(1.035); } 100%{ transform: scale(1); } }
+  .rj-cta.wake{ animation: rjWake .45s cubic-bezier(.34,1.56,.64,1) both; }
+
+  /* Point de progression franchi */
+  @keyframes rjDot { 0%{ transform: scale(1); } 45%{ transform: scale(1.5); } 100%{ transform: scale(1); } }
+  .rj-dots b.on{ animation: rjDot .4s cubic-bezier(.34,1.56,.64,1) both; }
+
+  /* Prénom de l'écran d'arrivée */
+  @keyframes rjName { from{ opacity: 0; transform: scale(.6) rotate(-6deg); } to{ opacity: 1; transform: none; } }
+  #rj-nm{ display: inline-block; color: var(--a-txt); }
+  #rj-nm.pop{ animation: rjName .55s cubic-bezier(.34,1.56,.64,1) .12s both; }
+
+  /* Confettis d'arrivée — que du CSS, aucune image */
+  .rj-confetti{ position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 3; }
+  .rj-confetti i{ position: absolute; top: -14px; width: 8px; height: 13px; border-radius: 2px;
+    opacity: 0; animation: rjFall 2.4s linear both; }
+  @keyframes rjFall {
+    0%{ opacity: 0; transform: translateY(-20px) rotate(0deg); }
+    12%{ opacity: 1; }
+    100%{ opacity: 0; transform: translateY(96vh) rotate(680deg); }
+  }
+
   @media (prefers-reduced-motion: reduce){
-    .rj-scr, .rj-mascot, .rj-bubble, .rj-dots b{ animation: none !important; transition: none !important; }
+    .rj-scr, .rj-mascot, .rj-bubble, .rj-dots b, .rj-cta, #rj-nm{ animation: none !important; transition: none !important; }
+    .rj-confetti{ display: none; }
   }
 
   /* État « déjà connecté » — pas la maquette, un simple message centré */
@@ -434,7 +501,7 @@ function renderFlow(root, { solo, prefillCode, prefillEmail }) {
 
         <section class="rj-scr live" data-i="0">
           <div class="rj-hero">
-            <div class="rj-bubble">${esc(rt("bubble0", "Salut. Moi c'est PermiGo."))}</div>
+            <div class="rj-bubble" id="rj-b0">${esc(rt("bubble0", "Salut. Moi c'est PermiGo."))}</div>
             <img class="rj-mascot" src="${MASCOT.hello}" alt="" />
           </div>
           <div class="rj-body">
@@ -446,7 +513,7 @@ function renderFlow(root, { solo, prefillCode, prefillEmail }) {
 
         <section class="rj-scr" data-i="1" hidden>
           <div class="rj-hero">
-            <div class="rj-bubble">${esc(rt("bubble1", "Ton email et un mot de passe."))}</div>
+            <div class="rj-bubble" id="rj-b1">${esc(rt("bubble1", "Ton email et un mot de passe."))}</div>
             <img class="rj-mascot" src="${MASCOT.point}" alt="" />
           </div>
           <div class="rj-body">
@@ -474,6 +541,9 @@ function renderFlow(root, { solo, prefillCode, prefillEmail }) {
               <div class="rj-minor-wrap rj-minor-pwd">
                 <input id="rj-pwd" type="password" autocomplete="new-password" placeholder="${escAttr(rt("ph_pwd", "8 caractères minimum"))}" enterkeyhint="go" />
                 <button class="rj-minor-toggle" id="rj-pwd-toggle" type="button" aria-label="${escAttr(rt("pwd_show_aria", "Afficher le mot de passe"))}" aria-pressed="false">${eyeIcon(false)}</button>
+              </div>
+              <div class="rj-gauge" id="rj-gauge" hidden role="img" aria-label="${escAttr(rt("pwd_strength_aria", "Force du mot de passe"))}">
+                <i></i><i></i><i></i><em id="rj-gauge-txt"></em>
               </div>
             </div>
           </div>
@@ -505,6 +575,7 @@ function renderFlow(root, { solo, prefillCode, prefillEmail }) {
         </section>
 
         <section class="rj-scr" data-i="3" hidden>
+          <div class="rj-confetti" id="rj-confetti" aria-hidden="true"></div>
           <div class="rj-hero">
             <div class="rj-bubble">${esc(rt("bubble3", "Bien joué."))}</div>
             <img class="rj-mascot" src="${MASCOT.cheer}" alt="" />
@@ -527,6 +598,77 @@ function renderFlow(root, { solo, prefillCode, prefillEmail }) {
   let busy = false;
   let timer = null;
 
+  // ─── Réactions ──────────────────────────────────────────────────
+  // Tout ce bloc n'existe que pour une chose : que l'élève SENTE qu'on lui
+  // répond pendant qu'il écrit. Un formulaire muet se remplit ; un formulaire
+  // qui réagit se joue.
+
+  /** Fait dire une nouvelle réplique à la mascotte. Ne rejoue le mouvement
+   *  que si la phrase change vraiment : sinon la bulle sautillerait à chaque
+   *  caractère tapé. */
+  function dit(sel, texte) {
+    const el = root.querySelector(sel);
+    if (!el || el.textContent === texte) return;
+    el.textContent = texte;
+    if (RM) return;
+    // Retrait + relecture forcée du layout + rajout : c'est ce qui relance une
+    // animation CSS déjà jouée. Tout se passe dans la même tâche, l'écran ne
+    // voit jamais l'état intermédiaire.
+    el.classList.remove("say");
+    void el.offsetWidth;
+    el.classList.add("say");
+    const m = el.parentElement?.querySelector(".rj-mascot");
+    if (m) {
+      m.classList.remove("hop");
+      void m.offsetWidth;
+      m.classList.add("hop");
+    }
+  }
+
+  /** Allume un bouton principal. Le petit sursaut et la vibration marquent le
+   *  moment où la réponse devient valable : c'est la récompense de la frappe. */
+  function armer(btn, ok) {
+    const etaitActif = !btn.disabled;
+    btn.disabled = !ok;
+    if (!ok || etaitActif) return;
+    haptic("select");
+    if (RM) return;
+    btn.classList.remove("wake");
+    void btn.offsetWidth;
+    btn.classList.add("wake");
+  }
+
+  /** Prénom présentable : « yanis » → « Yanis ». */
+  const joliPrenom = (v) => {
+    const p = (v || "").trim();
+    return p ? p.charAt(0).toUpperCase() + p.slice(1) : "";
+  };
+
+  function confettis() {
+    const box = root.querySelector("#rj-confetti");
+    if (!box || RM || box.dataset.done === "1") return;
+    box.dataset.done = "1";
+    const teintes = [
+      "var(--a)",
+      "var(--a-lt)",
+      "#ffce4d",
+      "#2f9e44",
+      "#ff6b9d",
+    ];
+    let html = "";
+    for (let i = 0; i < 22; i++) {
+      const g = Math.random();
+      const style = [
+        `left:${(i * 4.4 + g * 4).toFixed(1)}%`,
+        `background:${teintes[i % teintes.length]}`,
+        `animation-delay:${(g * 1.1).toFixed(2)}s`,
+        `animation-duration:${(2 + g * 1.4).toFixed(2)}s`,
+      ].join(";");
+      html += `<i style="${style}"></i>`;
+    }
+    box.innerHTML = html;
+  }
+
   function paint() {
     const bs = dots.querySelectorAll("b");
     bs.forEach((b, i) => {
@@ -537,11 +679,14 @@ function renderFlow(root, { solo, prefillCode, prefillEmail }) {
     if (cur === 3) {
       const nmEl = root.querySelector("#rj-nm");
       if (nmEl) {
-        const p = state.prenom.trim();
-        nmEl.textContent = p
-          ? p.charAt(0).toUpperCase() + p.slice(1)
-          : rt("h1_3_you", "toi");
+        nmEl.textContent = joliPrenom(state.prenom) || rt("h1_3_you", "toi");
+        if (!RM) {
+          nmEl.classList.remove("pop");
+          void nmEl.offsetWidth;
+          nmEl.classList.add("pop");
+        }
       }
+      confettis();
     }
   }
 
@@ -559,6 +704,7 @@ function renderFlow(root, { solo, prefillCode, prefillEmail }) {
   function go(n, isBack) {
     if (busy || n === cur || n < 0 || n >= scrs.length) return;
     busy = true;
+    haptic("tap");
     const from = scrs[cur];
     const to = scrs[n];
     to.hidden = false;
@@ -584,9 +730,25 @@ function renderFlow(root, { solo, prefillCode, prefillEmail }) {
   // ─── Écran 0 · Prénom ───────────────────────────────────────────
   const prenomEl = root.querySelector("#rj-prenom");
   const go0Btn = root.querySelector("#rj-go0");
+  // La mascotte salue par le prénom dès qu'il est lisible. Temporisé : sans
+  // ça elle relancerait sa réplique à chaque lettre (« Y », « Ya », « Yan »…)
+  // et la bulle sautillerait en continu pendant la frappe.
+  let prenomTimer = null;
   prenomEl.addEventListener("input", () => {
     state.prenom = prenomEl.value;
-    go0Btn.disabled = prenomEl.value.trim().length < 2;
+    const ok = prenomEl.value.trim().length >= 2;
+    armer(go0Btn, ok);
+    prenomEl.parentElement?.classList.toggle("ok", ok);
+    clearTimeout(prenomTimer);
+    prenomTimer = setTimeout(() => {
+      const p = joliPrenom(state.prenom);
+      dit(
+        "#rj-b0",
+        p.length >= 2
+          ? rt("bubble0_ok", "Enchanté {name}").replace("{name}", p)
+          : rt("bubble0", "Salut. Moi c'est PermiGo."),
+      );
+    }, 450);
   });
   go0Btn.addEventListener("click", () => go(1, false));
 
@@ -640,13 +802,56 @@ function renderFlow(root, { solo, prefillCode, prefillEmail }) {
     });
   }
 
+  // Force du mot de passe, en trois crans. On ne refuse rien au-delà des 8
+  // caractères exigés par Supabase : la jauge donne un objectif, elle ne pose
+  // pas un mur de plus devant quelqu'un qui essaie de s'inscrire.
+  const gaugeEl = root.querySelector("#rj-gauge");
+  const gaugeTxt = root.querySelector("#rj-gauge-txt");
+  const gaugeSegs = gaugeEl ? Array.from(gaugeEl.querySelectorAll("i")) : [];
+
+  function forcePwd(v) {
+    if (v.length < 8) return 0;
+    const varie =
+      (/[A-Z]/.test(v) ? 1 : 0) +
+      (/[0-9]/.test(v) ? 1 : 0) +
+      (/[^A-Za-z0-9]/.test(v) ? 1 : 0);
+    if (v.length >= 12 && varie >= 2) return 3;
+    return varie >= 1 ? 2 : 1;
+  }
+
+  function peindreJauge(v) {
+    if (!gaugeEl) return;
+    gaugeEl.hidden = !v;
+    if (!v) return;
+    const n = forcePwd(v);
+    gaugeSegs.forEach((seg, i) => {
+      seg.classList.toggle("on", i < n);
+      seg.classList.toggle("full", n === 3);
+    });
+    gaugeTxt.classList.toggle("full", n === 3);
+    gaugeTxt.textContent =
+      n === 0
+        ? rt("pwd_weak", "Trop court")
+        : n === 3
+          ? rt("pwd_strong", "Solide")
+          : rt("pwd_ok", "Ça tient");
+  }
+
   function validateScreen1() {
     const emailOk = emailValid(emailEl.value);
     const pwdOk = pwdEl.value.length >= 8;
     const codeOk = solo || (codeValid && !codeChecking);
-    go1Btn.disabled = !(emailOk && pwdOk && codeOk);
+    armer(go1Btn, emailOk && pwdOk && codeOk);
     emailEl.classList.toggle("err", !!emailEl.value && !emailOk);
     pwdEl.classList.toggle("err", !!pwdEl.value && !pwdOk);
+    emailEl.parentElement?.classList.toggle("ok", emailOk);
+    peindreJauge(pwdEl.value);
+    dit(
+      "#rj-b1",
+      emailOk && pwdOk && codeOk
+        ? rt("bubble1_ok", "Parfait. On y va.")
+        : rt("bubble1", "Ton email et un mot de passe."),
+    );
   }
 
   emailEl.addEventListener("input", () => {
