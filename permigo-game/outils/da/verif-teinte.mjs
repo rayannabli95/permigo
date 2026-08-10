@@ -20,7 +20,20 @@ const URL = process.argv[2] || "http://localhost:5173/#/avance";
 const SEUILS = {
   grisMax: 0.2, // part de pixels quasi gris (saturation < 8 %)
   chaudMin: 0.3, // part de teintes chaudes (20° à 75°)
-  saturationMin: 0.18, // saturation moyenne
+  // ⚠️ DESCENDU DE 0,18 À 0,13 LE 10/08, ET C'EST UNE DÉCISION ASSUMÉE.
+  //
+  // 0,18 avait été calibré quand les FAÇADES portaient la couleur : six
+  // teintes franches sur toute la hauteur de la rue. Rayan a tranché contre
+  // (« ça fait blocs et généré ») et la palette est passée à quatre pierres
+  // + deux accents, le pigment descendant aux volets, stores et enseignes,
+  // qui sont petits. La saturation MOYENNE de l'image baisse mécaniquement,
+  // sans qu'il y ait la moindre dérive.
+  //
+  // 🔴 Le garde-fou qui compte reste `grisMax` : c'est LUI qui attrape la
+  // dérive gris-beige, et il tient large (0,15 mesuré pour 0,20 permis). Et
+  // `accentMin` garantit qu'il y a toujours un amas saturé dans le cadre.
+  // Ne remonter ce seuil que si la couleur revient sur les grandes surfaces.
+  saturationMin: 0.13, // saturation moyenne
   accentMin: 0.015, // il faut au moins UN amas saturé dans le cadre
 };
 

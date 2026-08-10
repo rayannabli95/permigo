@@ -71,7 +71,7 @@ export async function creerPartie(
   const monde = creerMonde(THREE, hote, { heure: "seize" });
   const kit = creerKit(THREE);
 
-  const { groupe, animer } = construireRue(THREE, kit, {
+  const { groupe, cibles, animer } = construireRue(THREE, kit, {
     trous: TROUS,
   });
   monde.scene.add(groupe);
@@ -111,9 +111,22 @@ export async function creerPartie(
   // ⚠️ 1,05 et pas 1,12 : au-dessus, les façades sorbet virent au Lego. La
   // chaîne ACES sature déjà d'elle-même, l'étalonnage ne doit pas en rajouter.
   Object.assign(post.uniforms.uSaturation, { value: 1.05 });
-  Object.assign(post.uniforms.uVignette, { value: 0.3 });
-  Object.assign(post.uniforms.uGrain, { value: 0.016 });
-  Object.assign(post.uniforms.uAberration, { value: 0.0005 });
+  Object.assign(post.uniforms.uVignette, { value: 0.26 });
+  Object.assign(post.uniforms.uGrain, { value: 0.014 });
+  // 🔴 LE FLOU DE BORD ÉTAIT À FOND, ET IL MANGEAIT TOUT LE DÉTAIL.
+  //
+  // `uFlou = 1` ouvre l'objectif jusqu'à 85 % de flou sur les bords du cadre.
+  // Sur un écran de cinéma, c'est une signature. Sur un téléphone en portrait,
+  // les « bords » commencent à un tiers de la largeur : les façades y étaient
+  // dédoublées et laiteuses, et c'est une bonne part du « ça manque de
+  // qualité ». Il ne restait net qu'un couloir central, exactement là où il
+  // n'y a que du bitume. On garde un soupçon d'ouverture (0,3) parce qu'un
+  // rendu net partout fait maquette d'architecte, et on rend le reste au
+  // dessin.
+  // ⚠️ Par `objectif()` et surtout PAS en écrivant les uniformes : le
+  // gouverneur de qualité les réécrit à chaque changement de cran (cf. le
+  // piège documenté dans post.js).
+  post.objectif({ flou: 0.28, aberration: 0.00025 });
   const qualite = creerQualite(monde, {});
   qualite.brancherPost(post);
   const son = creerSon();
@@ -159,26 +172,93 @@ export async function creerPartie(
 
   function fabriquer(a) {
     if (a.type === "porte") {
-      // Une portière tourne autour de sa CHARNIÈRE, pas de son centre : on la
-      // décale dans un pivot, sinon elle pivote sur elle-même comme une
-      // hélice et personne ne comprend ce qu'il regarde.
-      const pivot = new THREE.Group();
-      const m = new THREE.Mesh(
-        new THREE.BoxGeometry(0.07, 1.02, 1.05),
-        // Un bleu plus clair que la carrosserie : en s'ouvrant, la face
-        // extérieure se tourne vers nous et prend le soleil. C'est ce qui la
-        // rend lisible à trente mètres, où elle ne fait que douze pixels.
+      // 🔴 LE BUG DU 10/08, ET IL ÉTAIT INVISIBLE EN LISANT LE CODE.
+      //
+      // La portière était bien montée sur une charnière VERTICALE, et le
+      // pivot était bien remonté à 62 cm du sol… dans `fabriquer`. Sauf que
+      // `poser()` réécrit la position de chaque acteur à chaque image, et le
+      // script de la scène ne donne pas de hauteur : `q.y ?? 0` remettait donc
+      // le pivot à zéro à la première image. La portière était enterrée à
+      // mi-hauteur et on n'en voyait que le haut, qui balayait le sol. D'où
+      // « elle s'ouvre depuis le bas » : ce n'était pas la rotation, c'était
+      // l'altitude. La leçon vaut pour tout le fichier — ce qu'on règle à la
+      // construction, le script l'écrase.
+      //
+      // Le remède est structurel : la charnière est désormais à l'origine du
+      // groupe, au niveau du SOL, et toutes les pièces portent leur hauteur
+      // dans leurs coordonnées locales. Plus rien à écraser.
+      const g = new THREE.Group();
+      const teinte = VEHICULES_PORTEURS.bleu;
+      const tole = new THREE.MeshStandardMaterial({
+        color: teinte,
+        roughness: 0.2,
+        metalness: 0.05,
+        envMapIntensity: 1.3,
+      });
+      // Le panneau, de 30 cm à 92 cm : la ceinture de caisse d'une berline.
+      const bas = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.64, 1.02), tole);
+      bas.position.set(0, 0.61, 0.52);
+      g.add(bas);
+      // ⭐ L'ENCADREMENT DE VITRE. C'est LUI qui fait lire une portière plutôt
+      // qu'une plaque : une porte de voiture n'est pas un rectangle plein, sa
+      // moitié haute est un cadre qui laisse passer le ciel. À trente mètres,
+      // c'est ce vide qui la distingue de la carrosserie derrière.
+      for (const [l, h, y, z] of [
+        [0.05, 0.44, 1.15, 0.05],
+        [0.05, 0.44, 1.15, 0.99],
+        [0.05, 0.05, 1.35, 0.52],
+      ]) {
+        const m = new THREE.Mesh(new THREE.BoxGeometry(0.07, h, l), tole);
+        m.position.set(0, y, z);
+        g.add(m);
+      }
+      const vitre = new THREE.Mesh(
+        new THREE.BoxGeometry(0.03, 0.42, 0.9),
         new THREE.MeshStandardMaterial({
-          color: lisere(VEHICULES_PORTEURS.bleu, 0.22),
-          roughness: 0.34,
-          metalness: 0.1,
+          color: 0x232d3f,
+          roughness: 0.08,
+          metalness: 0.6,
+          envMapIntensity: 1.6,
         }),
       );
-      m.position.set(0, 0, 0.52);
-      m.castShadow = true;
-      pivot.add(m);
-      pivot.position.y = 0.62;
-      return pivot;
+      vitre.position.set(0, 1.14, 0.52);
+      g.add(vitre);
+      // La poignée et le liseré de bas de caisse : deux détails de rien du
+      // tout, et la portière cesse d'être une planche peinte.
+      const poignee = new THREE.Mesh(
+        new THREE.BoxGeometry(0.05, 0.06, 0.22),
+        new THREE.MeshStandardMaterial({
+          color: lisere(teinte, 0.3),
+          roughness: 0.3,
+          metalness: 0.4,
+        }),
+      );
+      poignee.position.set(-0.05, 0.86, 0.72);
+      g.add(poignee);
+      g.traverse((o) => (o.castShadow = true));
+      return g;
+    }
+    if (a.type === "ouverture") {
+      // ⭐ LE TROU NOIR DE L'HABITACLE. Ce qui rend une portière ouverte
+      // lisible de loin n'est pas la portière : c'est la CAVITÉ sombre
+      // qu'elle laisse dans le flanc de la voiture. Sans elle, une portière
+      // ouverte ressemble à un aileron collé sur une voiture intacte.
+      const g = new THREE.Group();
+      // ⚠️ Deux centimètres d'épaisseur, plaqués à cinq millimètres devant le
+      // flanc : assez pour passer devant la tôle, assez peu pour que la
+      // portière fermée le recouvre entièrement. Un centimètre de trop et on
+      // voyait un liseré noir autour d'une portière pourtant fermée.
+      const m = new THREE.Mesh(
+        new THREE.BoxGeometry(0.02, 0.66, 1.0),
+        new THREE.MeshStandardMaterial({
+          color: 0x14161f,
+          roughness: 0.95,
+          metalness: 0,
+        }),
+      );
+      m.position.set(0, 0.62, 0);
+      g.add(m);
+      return g;
     }
     if (a.type === "poubelle") {
       const m = new THREE.Mesh(
@@ -202,6 +282,7 @@ export async function creerPartie(
       const g = new THREE.Group();
       g.add(p);
       g.userData.buste = p.userData.buste;
+      g.userData.tete = p.userData.tete;
       g.userData.pas = p.userData.pas;
       return g;
     }
@@ -210,7 +291,9 @@ export async function creerPartie(
       const g = new THREE.Group();
       g.add(v);
       g.userData.buste = v.userData.buste;
+      g.userData.tete = v.userData.tete;
       g.userData.pas = v.userData.pas;
+      g.userData.braquer = v.userData.braquer;
       return g;
     }
     // 🔴 AUCUN MODÈLE 3D POUR UN VÉHICULE DE SCÈNE, et c'est un piège tombé
@@ -268,13 +351,13 @@ export async function creerPartie(
     };
   });
 
-  // Les voitures garées sont touchables elles aussi : c'est indispensable.
-  // Sans elles, « ce qui est touchable » trahit où sont les événements et le
-  // jeu se résout en tapant partout.
-  groupe.traverse((o) => {
-    if (o.isGroup && o.children.length && o.position.y === 0)
-      touchables.push(o);
-  });
+  // Les voitures garées et les passants sont touchables eux aussi : c'est
+  // indispensable. Sans eux, « ce qui répond au doigt » trahit où sont les
+  // événements et le jeu se résout en tapant partout.
+  // ⚠️ Depuis le banc d'instances, la flotte garée n'est plus faite d'objets
+  // séparés : `cibles` porte les lots concernés, et le lancer de rayon sait
+  // interroger une InstancedMesh.
+  touchables.push(...cibles);
 
   // ── L'état de la partie ────────────────────────────────────────────────
   const etat = {
@@ -665,12 +748,22 @@ export async function creerPartie(
       if (!o) continue;
       const q = p[id];
       o.position.set(q.x, q.y ?? 0, q.z);
-      o.rotation.y = q.cap ?? 0;
+      // ⚠️ YXZ : le roulis doit s'appliquer DANS le repère de l'objet, sinon
+      // un vélo qui se penche en tournant se penche vers le nord au lieu de
+      // se pencher vers l'intérieur de sa courbe.
+      o.rotation.order = "YXZ";
+      o.rotation.set(0, q.cap ?? 0, q.roulis ?? 0);
       if (q.visible !== undefined) o.visible = q.visible && e.actif;
-      // Le buste d'un cycliste qui regarde derrière lui : c'est le premier
-      // enfant du groupe qui tourne, pas le vélo entier.
+      // La tête tourne, puis le buste suit. Les deux angles sont écrits en
+      // RADIANS dans le scénario : c'est là qu'on décide de la lisibilité
+      // d'un geste, pas ici.
       const buste = o.userData.buste ?? o.children[0];
-      if (q.buste !== undefined && buste) buste.rotation.y = q.buste * 1.5;
+      if (q.buste !== undefined && buste) buste.rotation.y = q.buste;
+      if (q.regard !== undefined && o.userData.tete)
+        o.userData.tete.rotation.y = q.regard;
+      // La roue avant d'un vélo braque AVANT que le vélo ne tourne. C'est ce
+      // décalage, minuscule, qui rend un changement de trajectoire crédible.
+      if (q.braquage !== undefined) o.userData.braquer?.(q.braquage);
       // ⭐ La marche est pilotée par le DÉPLACEMENT MESURÉ, jamais par un
       // drapeau posé à la main dans le scénario. Conséquence : un piéton ne
       // peut pas glisser, un enfant qui s'élance court forcément, et le

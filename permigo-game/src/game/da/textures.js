@@ -144,14 +144,96 @@ export function trottoir(THREE) {
   return finir(THREE, c);
 }
 
-// ── LA FAÇADE ──────────────────────────────────────────────────────────
-// ⭐ LA TEXTURE CLÉ DE TOUTE LA DIRECTION ARTISTIQUE.
+// ── LE PLÂTRE ──────────────────────────────────────────────────────────
+// ⭐ LA TEXTURE QUI A REMPLACÉ « LA FAÇADE PEINTE », ET POURQUOI.
 //
-// Les fenêtres sont PEINTES ICI, elles ne sont pas de la géométrie. La rue
-// actuelle dessine des centaines de plans-fenêtres : coût énorme et rendu
-// d'autocollant. Une façade = UN mesh + UNE texture, où tout est dessiné :
-// l'encadrement, la vitre et son reflet, l'appui clair, le bas de mur assombri
-// (l'occlusion de contact, peinte au lieu d'être calculée).
+// Jusqu'au 10/08 une façade était UN plan portant une texture où la fenêtre
+// était DESSINÉE : encadrement, vitre, appui, tout en aplat. Ça tenait le
+// budget, et ça donnait exactement le défaut que Rayan a nommé : un
+// autocollant. Une fenêtre plate ne peut pas projeter d'ombre, donc une
+// façade n'a pas d'épaisseur, donc un immeuble reste une boîte peinte.
+//
+// Depuis le banc d'instances, les fenêtres sont de la GÉOMÉTRIE et ne coûtent
+// plus rien. Cette texture n'a donc plus qu'un travail : donner la MATIÈRE du
+// mur. Elle est volontairement presque blanche, parce qu'elle est MULTIPLIÉE
+// par la couleur de chaque copie — un seul dessin sert les six familles de la
+// palette, et le lot entier tient en un ordre de dessin.
+//
+// La tuile couvre une travée sur un étage (environ 3 m × 3,1 m).
+export function platre(THREE) {
+  const T = 256;
+  const [c, g] = toile(T);
+  const alea = des(20260812);
+  g.fillStyle = "#ffffff";
+  g.fillRect(0, 0, T, T);
+
+  // Le crépi : un semis de points à peine plus clairs et plus sombres. Vu de
+  // près c'est du grain, vu de loin c'est une matière qui n'est pas du
+  // plastique. C'est la différence entre un aplat et un enduit.
+  for (let i = 0; i < 2600; i++) {
+    const v = alea();
+    g.fillStyle = v > 0.5 ? "rgba(255,255,255,0.5)" : "rgba(96,84,74,0.14)";
+    g.beginPath();
+    g.arc(alea() * T, alea() * T, 0.7 + alea() * 1.5, 0, 6.283);
+    g.fill();
+  }
+
+  // Le dégradé d'étage : un mur reçoit toujours moins de ciel à sa base, et
+  // le bandeau du niveau au-dessus lui porte une ombre. Peint ici, il coûte
+  // zéro et il donne de la hauteur.
+  const dg = g.createLinearGradient(0, 0, 0, T);
+  dg.addColorStop(0, "rgba(58,44,66,0.20)"); // sous le bandeau
+  dg.addColorStop(0.1, "rgba(255,252,244,0.05)");
+  dg.addColorStop(0.62, "rgba(0,0,0,0)");
+  dg.addColorStop(1, "rgba(48,36,58,0.13)");
+  g.fillStyle = dg;
+  g.fillRect(0, 0, T, T);
+
+  // Quelques coulures verticales sous les appuis. Discrètes, irrégulières :
+  // c'est le détail qui dit qu'il a plu sur cet immeuble.
+  g.globalAlpha = 0.055;
+  for (let i = 0; i < 7; i++) {
+    const x = alea() * T;
+    g.fillStyle = "#4a3a52";
+    g.fillRect(x, alea() * T * 0.4, 1 + alea() * 2.5, T * (0.3 + alea() * 0.5));
+  }
+  g.globalAlpha = 1;
+  return finir(THREE, c);
+}
+
+// ── LA VITRE ───────────────────────────────────────────────────────────
+// Une vitre n'est jamais un rectangle sombre uni : c'est un miroir sale qui
+// renvoie le ciel en haut et la rue d'en face en bas, avec la trace des
+// rideaux. Deux minutes de canvas, et une fenêtre cesse d'être un trou noir.
+export function vitrage(THREE) {
+  const T = 128;
+  const [c, g] = toile(T);
+  const alea = des(20260813);
+  const dg = g.createLinearGradient(0, 0, T * 0.35, T);
+  dg.addColorStop(0, "#cfe2f6"); // le ciel, en haut
+  dg.addColorStop(0.34, "#7d93b4");
+  dg.addColorStop(0.58, "#2f3b52");
+  dg.addColorStop(1, "#1b2231"); // le fond de la pièce, en bas
+  g.fillStyle = dg;
+  g.fillRect(0, 0, T, T);
+  // Un rideau clair, une fois sur deux, tiré d'un côté.
+  if (alea() > 0.35) {
+    g.fillStyle = "rgba(240,232,214,0.34)";
+    g.fillRect(alea() > 0.5 ? 0 : T * 0.6, 0, T * 0.4, T);
+  }
+  // La barre de reflet en biais : c'est elle qui fait « verre » et pas « trou ».
+  g.save();
+  g.translate(T * 0.2, 0);
+  g.rotate(0.42);
+  g.fillStyle = "rgba(255,255,255,0.22)";
+  g.fillRect(0, -T, T * 0.22, T * 3);
+  g.restore();
+  return finir(THREE, c);
+}
+
+// ── LA FAÇADE (héritée) ────────────────────────────────────────────────
+// Conservée pour les devantures de commerce, où la vitrine est vraiment un
+// aplat vu de loin. Les étages, eux, passent par `platre` + géométrie.
 //
 // La tuile couvre UN étage sur UNE travée. On la répète.
 export function facade(THREE, couleur, graine, { commerce = false } = {}) {

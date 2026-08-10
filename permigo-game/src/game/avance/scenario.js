@@ -31,10 +31,24 @@ const lisser = (a, b, t) => Math.max(0, Math.min(1, (t - a) / (b - a)));
 // linéaire. Un piéton qui se déplace à vitesse constante a l'air d'un jouet.
 const doux = (t) => t * t * (3 - 2 * t);
 const entre = (a, b, t) => doux(lisser(a, b, t));
+// ⭐ L'ÉLAN : comme `entre`, mais avec un léger dépassement amorti à
+// l'arrivée. Une portière poussée de l'intérieur ne s'arrête pas pile, elle
+// va un peu trop loin et revient. Six pour cent de dépassement suffisent, et
+// c'est la différence entre un objet et un mécanisme.
+const elan = (a, b, t) => {
+  const u = lisser(a, b, t);
+  return u >= 1 ? 1 : 1 - Math.pow(1 - u, 2.2) * Math.cos(u * Math.PI * 1.15);
+};
 
 // Le trottoir fait quinze centimètres. Un piéton posé à y = 0 s'y enfonce
 // jusqu'aux chevilles, et une voiture qui en descend doit descendre vraiment.
 const HAUT = (x) => 0.15 * Math.min(1, Math.max(0, (x - 5.2) / 0.8));
+
+// La trajectoire du cycliste, isolée pour qu'on puisse la DÉRIVER. C'est ce
+// qui donne son cap : voir la scène 2.
+const VELO = { x0: 3.6, v: 6.5 };
+const xVelo = (te) =>
+  VELO.x0 - entre(3.4, 4.8, te) * 0.45 - entre(5.6, 6.7, te) * 1.35;
 
 export const EVENEMENTS = [
   // ───────────────────────────────────────────────────────────────────────
@@ -72,22 +86,35 @@ export const EVENEMENTS = [
     },
     acteurs: [
       { id: "gare", type: "voiture", couleur: VEHICULES_PORTEURS.bleu },
+      { id: "trou", type: "ouverture" },
       { id: "porte", type: "porte" },
-      { id: "homme", type: "pieton", couleur: "rouge" },
+      // ⚠️ Un hexadécimal, pas un nom de couleur : `"rouge"` était passé tel
+      // quel à Three.js, qui ne le connaît pas et rendait l'homme en BLANC.
+      // Le seul acteur humain du tutoriel était donc désaturé, c'est-à-dire
+      // habillé comme un figurant, dans un jeu où la saturation dit « ceci
+      // compte ».
+      { id: "homme", type: "pieton", couleur: VETEMENTS.acteur },
     ],
     porteur: "porte",
     pose(te) {
       const z = -28;
-      // Elle s'entrouvre, elle marque un temps, puis elle s'ouvre en grand.
-      // C'est ce temps d'arrêt qui la rend crédible — et qui laisse le temps
-      // de comprendre qu'on a le droit de toucher.
-      const a = entre(2.0, 2.7, te) * 0.62 + entre(3.6, 4.4, te) * 0.66;
+      // ⭐ LE GESTE, EN TROIS TEMPS. Elle se déverrouille et s'entrouvre d'un
+      // coup sec, elle marque un temps d'arrêt, puis quelqu'un la POUSSE en
+      // grand et elle dépasse légèrement avant de se caler. C'est le temps
+      // d'arrêt du milieu qui la rend crédible, et c'est lui qui laisse
+      // comprendre qu'on a le droit de toucher avant qu'il soit trop tard.
+      const a = entre(1.9, 2.3, te) * 0.5 + elan(3.5, 4.5, te) * 0.66;
       const sorti = entre(4.5, 5.6, te);
       return {
         gare: { x: X_STATIONNE, z, cap: 0 },
+        // La cavité sombre, plaquée sur le flanc : la portière fermée la
+        // couvre exactement, et l'ouverture la révèle.
+        trou: { x: X_STATIONNE - 0.897, z: z - 0.1, cap: 0, visible: true },
         // La charnière est à l'AVANT de la portière : elle s'ouvre donc vers
         // la route, et sa face extérieure se tourne vers nous en prenant le
         // soleil. C'est ce qui la rend lisible de trente mètres.
+        // ⚠️ Elle est posée au SOL : toutes ses cotes en hauteur vivent dans
+        // sa géométrie, sinon `poser()` écrase le pivot (bug du 10/08).
         porte: { x: X_STATIONNE - 0.95, z: z - 0.62, cap: -a, visible: true },
         homme: {
           x: X_STATIONNE - 1.0 - sorti * 1.9,
@@ -132,21 +159,45 @@ export const EVENEMENTS = [
     ],
     porteur: "velo",
     pose(te) {
-      const z = -60 - 6.5 * te;
-      // Le regard par-dessus l'épaule. ⚠️ 1,0 d'amplitude et pas 0,6 : à
-      // quatorze mètres, un buste qui tourne de trente degrés fait quatre
-      // pixels de silhouette. On exagère, sinon la scène n'existe pas.
-      const tete = entre(2.2, 2.7, te) - entre(3.6, 4.0, te);
-      // Puis il se rapproche de l'axe. Quarante-cinq centimètres, et c'est la
-      // moitié de l'information.
-      const glisse = entre(3.4, 4.8, te) * 0.45;
-      const deboite = entre(5.6, 6.7, te) * 1.35;
+      const z = -60 - VELO.v * te;
+      // Le regard par-dessus l'épaule, en deux temps : la TÊTE part la
+      // première, le buste la suit avec un retard de quinze centièmes. C'est
+      // l'ordre naturel, et c'est lui qui rend le geste lisible.
+      // ⚠️ Amplitudes larges (1,05 + 0,48 rad, soit ~88°) : à quatorze mètres,
+      // un buste qui tourne de trente degrés fait quatre pixels de silhouette.
+      // On exagère, sinon la scène n'existe pas.
+      const regard = (entre(2.2, 2.7, te) - entre(3.6, 4.0, te)) * 1.05;
+      const buste = (entre(2.35, 2.87, te) - entre(3.75, 4.17, te)) * 0.48;
+
+      // 🔴 LE BUG DU 10/08 : « le vélo pivote sur lui-même ».
+      //
+      // Son cap était ÉCRIT à la main (`tete * 0.5 - deboite * 0.12`), donc il
+      // tournait de trente degrés au moment du coup d'œil, alors que sa
+      // position ne bougeait pas d'un centimètre. Un objet qui change de cap
+      // sans changer de trajectoire, c'est exactement la définition d'une
+      // toupie. Et l'erreur était structurelle : un cap ne s'écrit pas, il SE
+      // DÉDUIT du déplacement.
+      //
+      // Ici on dérive la trajectoire, et le cap tombe tout seul : quatre
+      // degrés quand il glisse vers l'axe, seize quand il déboîte. Le regard
+      // n'y touche plus du tout — c'est bien ça qu'on voulait faire lire.
+      const h = 0.07;
+      const dxdt = (xVelo(te + h) - xVelo(te - h)) / (2 * h);
+      const cap = Math.atan2(-dxdt, VELO.v);
+      // Le braquage est le cap qu'il AURA dans trois dixièmes : une roue avant
+      // tourne toujours avant le vélo.
+      const apres = (xVelo(te + 0.38) - xVelo(te + 0.24)) / 0.14;
       return {
         velo: {
-          x: 3.6 - glisse - deboite,
+          x: xVelo(te),
           z,
-          cap: tete * 0.5 - deboite * 0.12,
-          buste: tete, // le buste tourne, pas seulement la roue
+          cap,
+          // Un cycliste se penche DANS sa courbe. Sans ce roulis, un vélo qui
+          // change de file glisse latéralement comme un palet.
+          roulis: cap * 0.8,
+          braquage: Math.atan2(-apres, VELO.v),
+          regard,
+          buste,
         },
         camionnette: { x: X_STATIONNE, z: -105, cap: 0 },
       };
@@ -180,7 +231,8 @@ export const EVENEMENTS = [
       vague: "Quelqu'un va-t-il traverser ?",
     },
     acteurs: [
-      { id: "passant", type: "pieton", couleur: "gris" },
+      // Désaturé exprès : la fausse alerte ne doit RIEN avoir d'un porteur.
+      { id: "passant", type: "pieton", couleur: VETEMENTS.adulte[1] },
       { id: "bac", type: "poubelle" },
     ],
     porteur: "passant",
@@ -230,7 +282,12 @@ export const EVENEMENTS = [
       vague: "Regarde loin.",
     },
     acteurs: [
-      { id: "sortante", type: "voiture", couleur: VEHICULES_PORTEURS.rouge, feux: true },
+      {
+        id: "sortante",
+        type: "voiture",
+        couleur: VEHICULES_PORTEURS.rouge,
+        feux: true,
+      },
     ],
     porteur: "sortante",
     pose(te) {
@@ -239,19 +296,30 @@ export const EVENEMENTS = [
       // quelqu'un dedans et il va y aller ».
       const acoup = entre(3.4, 4.2, te) * 0.9;
       const sortie = entre(6.5, 8.6, te);
+      // 🔴 LE BUG DU 10/08 : « elle semble sortir directement d'un immeuble ».
+      // Elle démarrait à x = 6,9, c'est-à-dire EN PLEIN SUR LE TROTTOIR,
+      // devant une façade pleine. Le joueur voyait qu'elle allait le gêner,
+      // mais il ne pouvait pas comprendre d'où elle venait — et une leçon
+      // qu'on ne peut pas expliquer ne s'apprend pas.
+      //
+      // Il y a désormais une VRAIE rue transversale à cet endroit (cf.
+      // `CARREFOURS` dans rue.js) : chaussée, bordures, trottoirs, immeubles
+      // en enfilade. Elle attend derrière sa ligne de « cédez le passage »,
+      // à huit mètres dans la rue perpendiculaire, et elle sort par la
+      // chaussée. Plus aucune roue sur un trottoir.
       // ⚠️ La trajectoire est écrite en clair, pas intégrée à partir du cap :
       // un cap qui revient à zéro ramenait la voiture à son point de départ.
-      const x = 6.9 - acoup * 0.8 - sortie * 5.4;
+      const x = 8.2 - acoup * 0.9 - sortie * 7.5;
       return {
         sortante: {
           x,
-          y: HAUT(x),
           z: -213 - acoup * 0.55 - sortie * 9,
-          // ⚠️ 1,05 rad (60°) et pas 0,95 : à soixante-dix mètres, ce qui
-          // distingue cette voiture d'une voiture garée n'est ni sa couleur ni
-          // ses feux, c'est sa SILHOUETTE de travers. Plus elle est en biais,
-          // plus elle montre son flanc, plus elle se repère de loin.
-          cap: 1.05 * (1 - sortie), // braquée vers la route, puis alignée
+          // ⚠️ 1,25 rad (72°) : à soixante-dix mètres, ce qui distingue cette
+          // voiture d'une voiture garée n'est ni sa couleur ni ses feux,
+          // c'est sa SILHOUETTE en travers. Elle sort d'une perpendiculaire,
+          // donc elle montre presque tout son flanc, et c'est ce qui la rend
+          // repérable six secondes à l'avance.
+          cap: 1.25 * (1 - sortie), // braquée vers la route, puis alignée
           stop: te < 6.4, // feux de stop allumés tant qu'elle attend
         },
       };

@@ -12,15 +12,12 @@
 // ⚠️ MAIS ILS NE DOIVENT JAMAIS SE TROUVER DANS UNE SCÈNE. Un potelet devant
 // l'enfant, un abribus devant la voiture qui hésite, et une leçon devient
 // injouable. Le placement respecte les mêmes trous que le stationnement.
+//
+// 🔴 TOUT PASSE PAR LE BANC D'INSTANCES. Ces objets ne bougent jamais : les
+// laisser en objets séparés coûtait un ordre de dessin par pièce, pour rien.
 
-import {
-  MOBILIER,
-  SOL,
-  VEGETATION,
-  lisere,
-  assombrir,
-  NUIT,
-} from "./palette.js";
+import { MOBILIER, SOL, VEGETATION, lisere, assombrir } from "./palette.js";
+import { CUBE } from "./instances.js";
 
 const cache = new Map();
 const geoDe = (cle, f) => {
@@ -28,203 +25,225 @@ const geoDe = (cle, f) => {
   return cache.get(cle);
 };
 
-// Même cache que pour les immeubles : le mobilier n'a qu'une poignée de
-// matières, il ne doit pas en fabriquer une par objet posé.
-const MATS = new Map();
-const mat = (THREE, c, rug = 0.8, met = 0) => {
-  const cle = `${c}|${rug}|${met}`;
-  if (!MATS.has(cle))
-    MATS.set(
-      cle,
-      new THREE.MeshStandardMaterial({
-        color: c,
-        roughness: rug,
-        metalness: met,
-        envMapIntensity: 0.45,
-      }),
-    );
-  return MATS.get(cle);
-};
-
-// Un lampadaire : un mât, une crosse, une lanterne. Sa VALEUR pour nous n'est
-// pas d'éclairer (on est en plein jour) mais de donner une verticale régulière
-// qui rythme la fuite de la rue.
-export function lampadaire(THREE, versRue = 1) {
-  const g = new THREE.Group();
-  const metal = mat(THREE, MOBILIER.metal, 0.55, 0.3);
-  const mat0 = new THREE.Mesh(
-    geoDe("lmat", () => new THREE.CylinderGeometry(0.07, 0.1, 4.6, 8)),
-    metal,
-  );
-  mat0.position.y = 2.3;
-  mat0.castShadow = true;
-  g.add(mat0);
-  const crosse = new THREE.Mesh(
-    geoDe("lcrosse", () => new THREE.CylinderGeometry(0.05, 0.05, 1.1, 6)),
-    metal,
-  );
-  crosse.position.set(versRue * 0.5, 4.55, 0);
-  crosse.rotation.z = Math.PI / 2 - versRue * 0.22;
-  g.add(crosse);
-  const lampe = new THREE.Mesh(
-    geoDe("llampe", () => new THREE.BoxGeometry(0.5, 0.14, 0.28)),
-    mat(THREE, lisere(MOBILIER.metal, 0.22), 0.4, 0.2),
-  );
-  lampe.position.set(versRue * 1.0, 4.44, 0);
-  lampe.castShadow = true;
-  g.add(lampe);
-  return g;
-}
-
-// Un banc : deux piètements et deux planches. Le bois est la seule matière
-// chaude du mobilier, et il tranche avec le métal.
-export function banc(THREE) {
-  const g = new THREE.Group();
-  const bois = mat(THREE, MOBILIER.bois, 0.88);
-  const metal = mat(THREE, MOBILIER.metal, 0.6, 0.3);
-  for (const dz of [-0.72, 0.72]) {
-    const p = new THREE.Mesh(
-      geoDe("bpied", () => new THREE.BoxGeometry(0.5, 0.42, 0.08)),
-      metal,
-    );
-    p.position.set(0, 0.21, dz);
-    p.castShadow = true;
-    g.add(p);
-  }
-  const assise = new THREE.Mesh(
-    geoDe("bassise", () => new THREE.BoxGeometry(0.46, 0.07, 1.7)),
-    bois,
-  );
-  assise.position.y = 0.45;
-  assise.castShadow = true;
-  g.add(assise);
-  const dossier = new THREE.Mesh(
-    geoDe("bdos", () => new THREE.BoxGeometry(0.07, 0.4, 1.7)),
-    bois,
-  );
-  dossier.position.set(0.2, 0.68, 0);
-  dossier.rotation.z = 0.12;
-  dossier.castShadow = true;
-  g.add(dossier);
-  return g;
-}
-
-// Un potelet. Le plus petit objet du jeu, et celui qui dit le plus fort
-// « ceci est un vrai trottoir ».
-export function potelet(THREE) {
-  const g = new THREE.Group();
-  const m = new THREE.Mesh(
-    geoDe("pot", () => new THREE.CylinderGeometry(0.055, 0.07, 0.95, 8)),
-    mat(THREE, MOBILIER.metal, 0.5, 0.35),
-  );
-  m.position.y = 0.48;
-  m.castShadow = true;
-  g.add(m);
-  const tete = new THREE.Mesh(
-    geoDe("pott", () => new THREE.SphereGeometry(0.06, 8, 6)),
-    mat(THREE, lisere(MOBILIER.metal, 0.25), 0.4, 0.35),
-  );
-  tete.position.y = 0.96;
-  g.add(tete);
-  return g;
-}
-
-export function corbeille(THREE) {
-  const g = new THREE.Group();
-  const c = new THREE.Mesh(
-    geoDe("corb", () => new THREE.CylinderGeometry(0.24, 0.2, 0.78, 10)),
-    mat(THREE, assombrir(MOBILIER.metal, 0.12), 0.75, 0.2),
-  );
-  c.position.y = 0.55;
-  c.castShadow = true;
-  g.add(c);
-  const anneau = new THREE.Mesh(
-    geoDe("corba", () => new THREE.TorusGeometry(0.24, 0.02, 5, 12)),
-    mat(THREE, lisere(MOBILIER.metal, 0.2), 0.5, 0.35),
-  );
-  anneau.position.y = 0.94;
-  anneau.rotation.x = Math.PI / 2;
-  g.add(anneau);
-  return g;
-}
-
-// Un abribus : deux poteaux, un toit, un panneau vitré. Il sert aussi de
-// masque, donc il ne se pose JAMAIS près d'une scène.
-export function abribus(THREE, versRue = 1) {
-  const g = new THREE.Group();
-  const metal = mat(THREE, MOBILIER.metal, 0.5, 0.35);
-  for (const dz of [-1.5, 1.5])
-    for (const dx of [-0.55, 0.55]) {
-      const p = new THREE.Mesh(
-        geoDe("apot", () => new THREE.BoxGeometry(0.09, 2.5, 0.09)),
-        metal,
-      );
-      p.position.set(dx, 1.25, dz);
-      p.castShadow = true;
-      g.add(p);
-    }
-  const toit = new THREE.Mesh(
-    geoDe("atoit", () => new THREE.BoxGeometry(1.5, 0.1, 3.4)),
-    mat(THREE, lisere(MOBILIER.metal, 0.18), 0.45, 0.3),
-  );
-  toit.position.y = 2.55;
-  toit.castShadow = true;
-  g.add(toit);
-  const vitre = new THREE.Mesh(
-    geoDe("avitre", () => new THREE.BoxGeometry(0.06, 1.9, 3.2)),
+let MATS = null;
+function materiaux(THREE) {
+  if (MATS) return MATS;
+  const std = (o) =>
     new THREE.MeshStandardMaterial({
+      color: 0xffffff,
+      metalness: 0,
+      envMapIntensity: 0.45,
+      ...o,
+    });
+  MATS = {
+    metal: std({ roughness: 0.5, metalness: 0.35 }),
+    mat: std({ roughness: 0.85 }),
+    verre: new THREE.MeshStandardMaterial({
       color: 0x2a3a4c,
       roughness: 0.1,
       metalness: 0.5,
       transparent: true,
-      opacity: 0.55,
+      opacity: 0.5,
       envMapIntensity: 1.4,
     }),
-  );
-  vitre.position.set(-versRue * 0.55, 1.35, 0);
-  g.add(vitre);
-  const assis = banc(THREE);
-  assis.position.set(0.2, 0, 0);
-  g.add(assis);
-  return g;
+  };
+  return MATS;
 }
 
-// ⭐ L'ARBRE ET SA CALOTTE. Signature secondaire de la bible : la lumière
-// n'est pas seulement calculée, elle est PEINTE. Une seconde masse de
-// feuillage, plus claire, décalée du côté du soleil.
-export function arbre(THREE, soleil, echelle = 1) {
-  const g = new THREE.Group();
-  const masse = new THREE.Mesh(
-    geoDe("amasse", () => new THREE.IcosahedronGeometry(1, 1)),
-    mat(THREE, VEGETATION.ombre, 0.85),
-  );
-  masse.scale.set(1.5, 1.25, 1.5);
-  masse.position.y = 3.5;
-  masse.castShadow = true;
-  g.add(masse);
-  const calotte = new THREE.Mesh(
-    geoDe("acal", () => new THREE.IcosahedronGeometry(1, 1)),
-    mat(THREE, VEGETATION.calotte, 0.8),
-  );
-  calotte.scale.set(1.12, 0.95, 1.12);
-  calotte.position.set(soleil.x * 0.55, 3.5 + soleil.y * 0.5, soleil.z * 0.55);
-  g.add(calotte);
-  const tronc = new THREE.Mesh(
-    geoDe("atronc", () => new THREE.CylinderGeometry(0.16, 0.24, 2.6, 7)),
-    mat(THREE, VEGETATION.tronc, 0.92),
-  );
-  tronc.position.y = 1.3;
-  tronc.castShadow = true;
-  g.add(tronc);
-  // La grille d'arbre : un carré sombre au pied. Deux triangles, et l'arbre
-  // cesse d'être planté dans du béton.
-  const grille = new THREE.Mesh(
-    geoDe("agrille", () => new THREE.PlaneGeometry(1.2, 1.2)),
-    mat(THREE, assombrir(SOL.trottoir, 0.3), 0.95),
-  );
-  grille.rotation.x = -Math.PI / 2;
-  grille.position.y = 0.005;
-  g.add(grille);
-  g.scale.multiplyScalar(echelle);
-  return g;
+/**
+ * Poser une pièce de mobilier dans le banc.
+ *
+ * @param genre    lampadaire · banc · potelet · corbeille · abribus · arbre
+ * @param versRue  +1 ou -1 : le côté vers lequel la pièce se tourne
+ */
+export function poserMobilier(
+  THREE,
+  banc,
+  genre,
+  { x = 0, z = 0, versRue = 1, echelle = 1, soleil = null } = {},
+) {
+  const M = materiaux(THREE);
+  const cube = CUBE(THREE);
+  const repere = new THREE.Matrix4().setPosition(x, 0, z);
+
+  // Une boîte posée par son centre, dans le repère local de la pièce.
+  const bloc = (cle, c, lx, ly, lz, px, py, pz, rz = 0) => {
+    const p = banc.neuf();
+    p.position.set(px, py, pz);
+    p.rotation.z = rz;
+    p.scale.set(lx, ly, lz);
+    banc.poser(cle, cube, M.mat, c, { ombre: ly > 0.2 });
+  };
+  const cyl = (cle, geo, mat, c, px, py, pz, rz = 0, ombre = true) => {
+    const p = banc.neuf();
+    p.position.set(px, py, pz);
+    p.rotation.z = rz;
+    banc.poser(cle, geo, mat, c, { ombre });
+  };
+
+  banc.sousRepere(repere, () => {
+    if (genre === "lampadaire") {
+      // Sa valeur n'est pas d'éclairer (on est en plein jour) mais de donner
+      // une verticale régulière qui rythme la fuite de la rue.
+      cyl(
+        "lmat",
+        geoDe("lmat", () => new THREE.CylinderGeometry(0.07, 0.11, 4.6, 8)),
+        M.metal,
+        MOBILIER.metal,
+        0,
+        2.3,
+        0,
+      );
+      cyl(
+        "lcrosse",
+        geoDe("lcrosse", () => new THREE.CylinderGeometry(0.05, 0.05, 1.1, 6)),
+        M.metal,
+        MOBILIER.metal,
+        versRue * 0.5,
+        4.55,
+        0,
+        Math.PI / 2 - versRue * 0.22,
+      );
+      bloc(
+        "llampe",
+        lisere(MOBILIER.metal, 0.22),
+        0.5,
+        0.14,
+        0.3,
+        versRue * 1.0,
+        4.44,
+        0,
+      );
+      // L'embase : un tronc de cône au pied du mât. Sans elle, un lampadaire
+      // a l'air planté dans le trottoir comme une aiguille.
+      cyl(
+        "lpied",
+        geoDe("lpied", () => new THREE.CylinderGeometry(0.13, 0.17, 0.4, 8)),
+        M.mat,
+        assombrir(MOBILIER.metal, 0.2),
+        0,
+        0.2,
+        0,
+      );
+    } else if (genre === "banc" || genre === "assise") {
+      for (const dz of [-0.72, 0.72])
+        bloc("bpied", MOBILIER.metal, 0.5, 0.42, 0.08, 0, 0.21, dz);
+      bloc("bassise", MOBILIER.bois, 0.46, 0.07, 1.7, 0, 0.45, 0);
+      bloc("bdos", MOBILIER.bois, 0.07, 0.4, 1.7, 0.2, 0.68, 0, 0.12);
+    } else if (genre === "potelet") {
+      cyl(
+        "pot",
+        geoDe("pot", () => new THREE.CylinderGeometry(0.055, 0.07, 0.95, 8)),
+        M.metal,
+        MOBILIER.metal,
+        0,
+        0.48,
+        0,
+      );
+      cyl(
+        "pott",
+        geoDe("pott", () => new THREE.SphereGeometry(0.06, 8, 6)),
+        M.metal,
+        lisere(MOBILIER.metal, 0.25),
+        0,
+        0.96,
+        0,
+        0,
+        false,
+      );
+    } else if (genre === "corbeille") {
+      cyl(
+        "corb",
+        geoDe("corb", () => new THREE.CylinderGeometry(0.24, 0.2, 0.78, 10)),
+        M.mat,
+        assombrir(MOBILIER.metal, 0.12),
+        0,
+        0.55,
+        0,
+      );
+      cyl(
+        "corba",
+        geoDe("corba", () => new THREE.TorusGeometry(0.24, 0.02, 5, 12)),
+        M.metal,
+        lisere(MOBILIER.metal, 0.2),
+        0,
+        0.94,
+        0,
+        Math.PI / 2,
+        false,
+      );
+    } else if (genre === "abribus") {
+      for (const dz of [-1.5, 1.5])
+        for (const dx of [-0.55, 0.55])
+          bloc("apot", MOBILIER.metal, 0.09, 2.5, 0.09, dx, 1.25, dz);
+      bloc("atoit", lisere(MOBILIER.metal, 0.18), 1.5, 0.1, 3.4, 0, 2.55, 0);
+      const p = banc.neuf();
+      p.position.set(-versRue * 0.55, 1.35, 0);
+      p.scale.set(0.06, 1.9, 3.2);
+      banc.poser("avitre", cube, M.verre, null, { ombre: false });
+      for (const dz of [-0.72, 0.72])
+        bloc("bpied", MOBILIER.metal, 0.5, 0.42, 0.08, 0.2, 0.21, dz);
+      bloc("bassise", MOBILIER.bois, 0.46, 0.07, 1.7, 0.2, 0.45, 0);
+    } else if (genre === "arbre") {
+      // ⭐ TROIS MASSES, PAS UNE. Une seule boule fait un sucre d'orge ; trois
+      // volumes décalés donnent une silhouette qu'on ne peut pas confondre
+      // avec une primitive, et le ciel passe entre eux.
+      const geoMasse = geoDe(
+        "amasse",
+        () => new THREE.IcosahedronGeometry(1, 1),
+      );
+      const S = soleil || { x: -0.6, y: 0.7, z: 0.35 };
+      const grappe = [
+        [0, 3.5, 0, 1.5, 1.28, 1.5],
+        [0.62 * echelle, 3.0, -0.5 * echelle, 0.95, 0.85, 0.95],
+        [-0.55 * echelle, 3.9, 0.45 * echelle, 0.85, 0.78, 0.85],
+      ];
+      for (const [px, py, pz, sx, sy, sz] of grappe) {
+        const p = banc.neuf();
+        p.position.set(px, py * echelle, pz);
+        p.scale.set(sx * echelle, sy * echelle, sz * echelle);
+        banc.poser("feuille", geoMasse, M.mat, VEGETATION.ombre, {
+          ombre: true,
+          recoit: true,
+        });
+      }
+      // La calotte : la lumière n'est pas seulement calculée, elle est PEINTE.
+      // Une seconde masse plus claire, décalée du côté du soleil.
+      {
+        const p = banc.neuf();
+        p.position.set(
+          S.x * 0.6 * echelle,
+          (3.5 + S.y * 0.55) * echelle,
+          S.z * 0.6 * echelle,
+        );
+        p.scale.set(1.12 * echelle, 0.95 * echelle, 1.12 * echelle);
+        banc.poser("calotte", geoMasse, M.mat, VEGETATION.calotte, {
+          ombre: false,
+          recoit: false,
+        });
+      }
+      const p = banc.neuf();
+      p.position.set(0, 1.3 * echelle, 0);
+      p.scale.set(echelle, echelle, echelle);
+      banc.poser(
+        "tronc",
+        geoDe("atronc", () => new THREE.CylinderGeometry(0.16, 0.26, 2.6, 7)),
+        M.mat,
+        VEGETATION.tronc,
+        { ombre: true },
+      );
+      // La grille d'arbre : un carré sombre au pied, et l'arbre cesse d'être
+      // planté dans du béton.
+      bloc(
+        "grille",
+        assombrir(SOL.trottoir, 0.34),
+        1.3,
+        0.03,
+        1.3,
+        0,
+        0.015,
+        0,
+      );
+    }
+  });
 }

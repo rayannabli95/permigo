@@ -20,6 +20,7 @@
 // bleu marine en plein jour (piège tombé deux fois, 09 et 10/08).
 
 import { jitter, lisere, assombrir, NUIT } from "./palette.js";
+import { CUBE } from "./instances.js";
 
 // Chaque gabarit tient en quelques cotes. `profil` est la silhouette vue de
 // côté, en mètres, avec y = 0 au sol et x = 0 au milieu du véhicule.
@@ -224,13 +225,25 @@ export function vehicule(
   corps.receiveShadow = true;
   g.add(corps);
 
-  // La visière : un seul bandeau sombre, en retrait de la carrosserie. Un
-  // vitrage découpé en fenêtres séparées fait maquette ; d'un seul tenant, il
-  // fait jouet premium.
+  // La visière : un seul bandeau sombre qui ceinture l'habitacle. Un vitrage
+  // découpé en fenêtres séparées fait maquette ; d'un seul tenant, il fait
+  // jouet premium.
+  //
+  // 🔴 LE BUG DU 10/08, ET IL DATAIT DE LA CRÉATION DU FICHIER : le vitrage
+  // était extrudé sur `larg - 0,1`, c'est-à-dire cinq centimètres PLUS ÉTROIT
+  // que la carrosserie de chaque côté. Il était donc entièrement enfermé dans
+  // le volume plein du corps, et parfaitement invisible. Toutes les voitures
+  // du jeu étaient des savonnettes sans vitres depuis le premier jour, et
+  // aucune relecture ne pouvait le voir : le code disait exactement ce qu'on
+  // voulait, c'est la géométrie qui ne le permettait pas.
+  //
+  // Il déborde maintenant d'un centimètre : la visière ceinture l'habitacle,
+  // et le toit reste peint parce que le profil du vitrage s'arrête quatre
+  // centimètres sous la ligne de pavillon.
   if (G.vitrage) {
     const vitres = new THREE.Mesh(
       geoDe(THREE, `v${type}`, () =>
-        extruder(THREE, G.vitrage, G.larg - 0.1, 0.02),
+        extruder(THREE, G.vitrage, G.larg + 0.012, 0.02),
       ),
       new THREE.MeshStandardMaterial({
         color: 0x232d3f,
@@ -334,6 +347,158 @@ export function vehicule(
   };
   g.userData.gabarit = G;
   return g;
+}
+
+// ── LA VERSION INSTANCIÉE, POUR LES SOIXANTE VOITURES GARÉES ───────────
+//
+// 🔴 C'ÉTAIT LA MOITIÉ DU PROBLÈME DE PERFORMANCE. Une voiture garée compte
+// quatorze pièces ; soixante voitures faisaient donc plus de huit cents
+// ordres de dessin, pour des objets qui ne bougent JAMAIS. Ici on pose les
+// mêmes pièces dans le banc : la flotte entière tombe à une dizaine d'ordres,
+// et chaque voiture garde sa teinte grâce à la couleur par copie.
+//
+// ⚠️ Réservé au DÉCOR. Les véhicules d'une scène restent des objets normaux :
+// ils bougent, ils freinent, ils s'ouvrent.
+
+let MATV = null;
+function materiauxV(THREE) {
+  if (MATV) return MATV;
+  MATV = {
+    // Blanc : la teinte arrive par copie. Mat (0,55) et peu réfléchissant,
+    // parce qu'une voiture garée fait la MASSE, jamais l'événement.
+    peinture: new THREE.MeshStandardMaterial({
+      color: 0xffffff,
+      roughness: 0.55,
+      metalness: 0,
+      envMapIntensity: 0.5,
+    }),
+    verre: new THREE.MeshStandardMaterial({
+      color: 0x232d3f,
+      roughness: 0.08,
+      metalness: 0.6,
+      envMapIntensity: 1.5,
+    }),
+    gomme: new THREE.MeshStandardMaterial({
+      color: NUIT,
+      roughness: 0.92,
+      metalness: 0,
+    }),
+    jante: new THREE.MeshStandardMaterial({
+      color: 0xd8d4c8,
+      roughness: 0.35,
+      metalness: 0.35,
+      envMapIntensity: 1.1,
+    }),
+    creux: new THREE.MeshStandardMaterial({
+      color: 0xffffff,
+      roughness: 0.95,
+      metalness: 0,
+    }),
+    feu: new THREE.MeshBasicMaterial({ color: 0xfff2d6 }),
+    stop: new THREE.MeshBasicMaterial({ color: 0x8f3630 }),
+  };
+  return MATV;
+}
+
+/** Une voiture de décor, posée dans le banc à (x, z), cap en radians. */
+export function vehiculeAuBanc(
+  THREE,
+  banc,
+  type,
+  teinte,
+  { x = 0, z = 0, cap = 0, alea = null } = {},
+) {
+  const G = GABARITS[type] || GABARITS.citadine;
+  const M = materiauxV(THREE);
+  const couleur = alea ? jitter(teinte, alea) : teinte;
+  const seg = { segmente: true };
+  const repere = new THREE.Matrix4().makeRotationY(cap).setPosition(x, 0, z);
+
+  banc.sousRepere(repere, () => {
+    banc.neuf();
+    banc.poser(
+      `corps${type}`,
+      geoDe(THREE, `c${type}`, () => extruder(THREE, G.profil, G.larg, 0.055)),
+      M.peinture,
+      couleur,
+      seg,
+    );
+    if (G.vitrage) {
+      banc.neuf();
+      banc.poser(
+        `vitres${type}`,
+        geoDe(THREE, `v${type}`, () =>
+          extruder(THREE, G.vitrage, G.larg + 0.012, 0.02),
+        ),
+        M.verre,
+        null,
+        { segmente: true, ombre: false },
+      );
+    }
+    const geoRoue = geoDe(THREE, `r${type}`, () =>
+      new THREE.CylinderGeometry(G.roue, G.roue, 0.2, 14).rotateZ(Math.PI / 2),
+    );
+    const geoJante = geoDe(THREE, `j${type}`, () =>
+      new THREE.CylinderGeometry(
+        G.roue * 0.55,
+        G.roue * 0.55,
+        0.21,
+        12,
+      ).rotateZ(Math.PI / 2),
+    );
+    const geoArche = geoDe(THREE, `a${type}`, () =>
+      new THREE.CylinderGeometry(G.roue * 1.2, G.roue * 1.2, 0.06, 14).rotateZ(
+        Math.PI / 2,
+      ),
+    );
+    const essieux =
+      type === "bus" ? [G.essieu, -G.essieu * 0.72] : [G.essieu, -G.essieu];
+    for (const dz of essieux)
+      for (const sx of [-1, 1]) {
+        const bx = (sx * G.larg) / 2 - sx * 0.03;
+        banc.neuf().position.set(bx, G.roue, -dz);
+        banc.poser(`roue${type}`, geoRoue, M.gomme, null, seg);
+        banc.neuf().position.set(bx + sx * 0.015, G.roue, -dz);
+        banc.poser(`jante${type}`, geoJante, M.jante, null, {
+          segmente: true,
+          ombre: false,
+        });
+        banc.neuf().position.set((sx * G.larg) / 2 - sx * 0.06, G.roue, -dz);
+        banc.poser(
+          `arche${type}`,
+          geoArche,
+          M.creux,
+          assombrir(couleur, 0.42),
+          {
+            segmente: true,
+            ombre: false,
+          },
+        );
+      }
+    // Le liseré de bas de caisse : une fine bande claire sous les portes.
+    const p = banc.neuf();
+    p.position.set(0, G.profil[0][1] + 0.02, 0);
+    p.scale.set(G.larg + 0.02, 0.05, G.l * 0.62);
+    banc.poser("basdecaisse", CUBE(THREE), M.peinture, lisere(couleur, 0.12), {
+      segmente: true,
+      ombre: false,
+    });
+    // La signature lumineuse : un BANDEAU, jamais deux petits cubes.
+    if (type !== "bus") {
+      const av = G.profil.reduce((m, q) => Math.max(m, q[0]), 0);
+      const ar = G.profil.reduce((m, q) => Math.min(m, q[0]), 0);
+      const hFeu = type === "utilitaire" ? 1.05 : G.h * 0.55;
+      const f = banc.neuf();
+      f.position.set(0, hFeu, -av - 0.01);
+      f.scale.set(G.larg * 0.82, 0.13, 0.07);
+      banc.poser("phare", CUBE(THREE), M.feu, null, { ombre: false });
+      const s = banc.neuf();
+      s.position.set(0, hFeu, -ar + 0.01);
+      s.scale.set(G.larg * 0.84, 0.14, 0.07);
+      banc.poser("stop", CUBE(THREE), M.stop, null, { ombre: false });
+    }
+  });
+  return G;
 }
 
 // La flotte des figurants : des silhouettes VARIÉES, sinon une file de

@@ -39,16 +39,25 @@ export const SOL = {
 // dans la bible. Une couleur de façade se choisit APRÈS le rendu : la chaîne
 // (tone mapping ACES + exposition + étalonnage) sature toujours plus que le
 // nuancier. Ces valeurs-ci sont désaturées d'environ un tiers.
+//
+// 🔴 SECONDE CALIBRATION, 10/08 — « le rendu fait trop blocs et généré ».
+// Six teintes toutes également colorées donnaient une rue de Lego : rouge,
+// jaune, vert et orange côte à côte, sans hiérarchie. Or une vraie rue de
+// ville est majoritairement MINÉRALE (pierre, enduit, crème) et la couleur y
+// est un ACCENT rare. La palette bascule donc à quatre pierres et deux
+// accents, et le vrai pigment passe aux volets, aux stores et aux enseignes,
+// qui sont petits : c'est le rapport de surfaces qui fait le chic, pas la
+// saturation des teintes.
 export const FACADES = [
-  0xdd937c, // corail
-  0xdfb779, // ocre
-  0xd7a7a2, // rose
-  0xa3b596, // sauge
-  0xecdfc6, // crème
-  0xc88a7a, // brique
+  0xd8cbb2, // pierre claire
+  0xc9ae88, // pierre dorée
+  0xe0d6c4, // crème
+  0xbfa892, // grège
+  0xc98d74, // brique douce · accent chaud
+  0x9fae9a, // sauge grisée · accent froid
 ];
 
-export const COMMERCES = [0x3f6f74, 0x8a4d68, 0x4a6b52]; // canard · prune · bouteille
+export const COMMERCES = [0x2f7d86, 0x9c4a6b, 0x3f7a55, 0xc0662f, 0x4a5aa0];
 
 export const VEGETATION = {
   ombre: 0x3e7d4f,
@@ -70,13 +79,18 @@ export const VITRE = 0x6f8aa0;
 // lisse renvoie tellement de ciel que ses faces horizontales partent au blanc :
 // six voitures de six teintes différentes ressortaient toutes blanches. Le
 // nuancier doit viser la valeur qu'on veut À L'ÉCRAN, pas dans un aplat.
+// ⚠️ ASSOMBRIES UNE SECONDE FOIS LE 10/08. Une fois les vitrages réparés (ils
+// étaient enfermés dans la carrosserie, cf. `vehicules.js`), la file de
+// stationnement restait une file de savonnettes blanches : les trois teintes
+// claires renvoyaient assez de ciel pour saturer. On descend de quinze pour
+// cent et on élargit l'écart de VALEUR entre la plus claire et la plus sombre.
 export const VEHICULES_NEUTRES = [
-  0xb9b2a2, // crème
-  0x9e988c, // pierre
-  0x848f98, // brume
-  0xa89d8a, // sable
-  0x76808c, // ardoise
-  0x8f8391, // lilas gris
+  0x9c9587, // crème
+  0x847f75, // pierre
+  0x6d7780, // brume
+  0x8d8474, // sable
+  0x5c646e, // ardoise
+  0x776c79, // lilas gris
 ];
 
 // Saturation ≥ 55 % : un porteur de scène est TOUJOURS dans cette famille.

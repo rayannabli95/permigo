@@ -254,34 +254,49 @@ export function cycliste(THREE, { couleur = null, alea = null } = {}) {
     "vroue",
     () => new THREE.TorusGeometry(0.34, 0.028, 6, 20),
   );
-  for (const dz of [0.52, -0.52]) {
+  // La roue arrière est solidaire du cadre.
+  {
     const r = new THREE.Mesh(geoRoue, gomme);
-    r.position.set(0, 0.34, dz);
+    r.position.set(0, 0.34, 0.52);
     r.rotation.y = Math.PI / 2;
     r.castShadow = true;
     g.add(r);
   }
-  // Le cadre : deux tubes et une potence. Trois primitives suffisent, la
-  // silhouette d'un vélo tient dans son triangle.
-  const tube = (l, x, y, z, rx, rz) => {
+  // ⭐ LA DIRECTION EST UN GROUPE À PART. Sans elle, un vélo ne peut que
+  // pivoter en bloc, et c'est exactement ce que Rayan a vu : « on dirait
+  // qu'il pivote sur lui-même ». Un vrai vélo braque d'abord sa roue avant,
+  // puis le reste suit. Ce décalage-là ne se simule pas, il se modélise.
+  const direction = new THREE.Group();
+  direction.position.set(0, 0, -0.52);
+  g.add(direction);
+  {
+    const r = new THREE.Mesh(geoRoue, gomme);
+    r.position.set(0, 0.34, 0);
+    r.rotation.y = Math.PI / 2;
+    r.castShadow = true;
+    direction.add(r);
+  }
+  // Le cadre : quelques tubes. La silhouette d'un vélo tient dans son triangle.
+  const tube = (parent, l, x, y, z, rx, rz) => {
     const m = new THREE.Mesh(
       new THREE.CylinderGeometry(0.028, 0.028, l, 6),
       cadre,
     );
     m.position.set(x, y, z);
     m.rotation.set(rx || 0, 0, rz || 0);
-    g.add(m);
+    parent.add(m);
   };
-  tube(1.0, 0, 0.62, 0, Math.PI / 2.6, 0);
-  tube(0.5, 0, 0.5, 0.18, 0, 0);
-  tube(0.62, 0, 0.72, -0.42, -0.35, 0);
+  tube(g, 1.0, 0, 0.62, 0, Math.PI / 2.6, 0);
+  tube(g, 0.5, 0, 0.5, 0.18, 0, 0);
+  // La fourche et la potence tournent avec la roue avant.
+  tube(direction, 0.72, 0, 0.66, 0.06, -0.2, 0);
   const guidon = new THREE.Mesh(
     new THREE.CylinderGeometry(0.022, 0.022, 0.44, 6),
     cadre,
   );
-  guidon.position.set(0, 0.98, -0.5);
+  guidon.position.set(0, 0.98, 0.02);
   guidon.rotation.z = Math.PI / 2;
-  g.add(guidon);
+  direction.add(guidon);
 
   // Le cycliste lui-même, penché sur son guidon.
   const homme = personnage(THREE, {
@@ -299,5 +314,10 @@ export function cycliste(THREE, { couleur = null, alea = null } = {}) {
   g.userData.tete = homme.userData.tete;
   g.userData.regarder = homme.userData.regarder;
   g.userData.pas = (t, k) => pasHomme(t, Math.max(0.35, k));
+  // ⚠️ Le braquage est amplifié : à quinze mètres, la roue avant d'un vélo
+  // fait quelques pixels. On exagère le geste de trois, sinon il n'existe pas.
+  g.userData.braquer = (angle) => {
+    direction.rotation.y = angle * 3;
+  };
   return g;
 }

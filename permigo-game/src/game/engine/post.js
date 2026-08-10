@@ -193,6 +193,15 @@ export function creerPost(THREE, monde) {
   });
 
   // Ce que le gouverneur peut couper, et ce que la caméra pilote.
+  //
+  // 🔴 PIÈGE DU 10/08. Ces trois valeurs sont la SOURCE : `appliquerObjectif`
+  // les réécrit dans les uniformes à chaque changement de cran de qualité.
+  // Une page qui réglait `uniforms.uFlou.value` directement voyait donc son
+  // réglage effacé à la première seconde de jeu, sans le moindre message. Le
+  // rendu de `#/avance` tournait avec le flou de bord à FOND (0,85 de flou sur
+  // tout le pourtour du cadre) alors que le code de la page demandait 0,3 :
+  // les façades étaient dédoublées et laiteuses, et c'était une bonne part du
+  // « ça manque de qualité, on dirait généré ». Passer par `objectif()`.
   const reglages = { flou: 1, aberration: u.uAberration.value, objectif: 1 };
 
   const dessiner = (dt) => {
@@ -225,6 +234,15 @@ export function creerPost(THREE, monde) {
     // au loin), 2,5 = tout se ferme sauf le centre (on regarde tout près).
     point(valeur) {
       reglages.flou = valeur;
+      appliquerObjectif();
+    },
+
+    // ⭐ La signature d'objectif de la page : combien de flou de bord et
+    // combien d'aberration. C'est le SEUL point d'entrée qui survit au
+    // gouverneur de qualité.
+    objectif({ flou, aberration }) {
+      if (flou !== undefined) reglages.flou = flou;
+      if (aberration !== undefined) reglages.aberration = aberration;
       appliquerObjectif();
     },
 
