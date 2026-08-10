@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Le verdict d'une mise en situation — trois directions</title>
+<style>
+  @font-face{ font-family:'Archivo'; font-style:normal; font-weight:400 900;
+    src:url('/fonts/archivo-latin.woff2') format('woff2'); font-display:swap; }
+
+  :root{
+    --nuit:#150f34; --nuit-haut:#241a4f;
+    --or:#f4c75e; --or-clair:#ffe08a;
+    --violet:#8f7ae8; --violet-clair:#c3b6f0;
+    --vert:#5fd6a4; --rouge:#ef7a86;
+    --texte:#f6f1ff; --gris:#a397c9;
+  }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:#0a0820; font-family:'Archivo',system-ui,sans-serif; color:var(--texte); }
+
+  .banc{ display:flex; gap:26px; padding:26px; align-items:flex-start; }
+  .cadre{ width:390px; flex:0 0 390px; }
+  .cadre h2{ margin:0 0 10px; font:800 15px/1.2 'Archivo',sans-serif; color:var(--or); }
+  .cadre p.sous{ margin:0 0 14px; font:600 12.5px/1.45 'Archivo',sans-serif; color:var(--gris); min-height:54px; }
+
+  .tel{ width:390px; height:844px; overflow:hidden; position:relative; display:flex; flex-direction:column;
+    background:linear-gradient(180deg,var(--nuit-haut) 0%,var(--nuit) 46%,#100c28 100%);
+    border-radius:26px; }
+
+  /* ── le haut, identique dans les trois ─────────────────────── */
+  .hud{ display:flex; align-items:center; gap:12px; padding:12px 16px 0; }
+  .hud .back{ width:44px; height:44px; border-radius:14px; background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.12); display:grid; place-items:center; }
+  .hud .back i{ display:block; width:14px; height:14px; border-left:2.6px solid #efe9ff;
+    border-bottom:2.6px solid #efe9ff; transform:rotate(45deg); margin-left:4px; }
+  .hud .mid{ flex:1; }
+  .hud .mid span{ display:block; text-align:center; font:800 12px/1 'Archivo',sans-serif;
+    letter-spacing:.14em; color:var(--violet-clair); text-transform:uppercase; }
+  .hud .barre{ margin-top:9px; height:9px; border-radius:99px; background:#0d0a22; overflow:hidden; }
+  .hud .barre i{ display:block; height:100%; width:50%; border-radius:99px;
+    background:linear-gradient(90deg,#7d63e0,var(--or)); }
+  .hud .cnt{ font:800 14px/1 'Archivo',sans-serif; color:var(--gris); }
+
+  .titre{ padding:16px 18px 12px; }
+  .titre small{ display:block; font:800 12px/1 'Archivo',sans-serif; letter-spacing:.13em;
+    text-transform:uppercase; color:var(--violet); margin-bottom:8px; }
+  .titre h1{ margin:0; font:800 23px/1.22 'Archivo',sans-serif; }
+
+  /* La scène prend TOUTE la place laissée : c'est elle le jeu, et c'est ce
+     vide de 225 px sous elle qui donnait l'impression d'un écran bâclé. */
+  .scene{ position:relative; flex:1 1 auto; min-height:0; overflow:hidden; }
+  .scene img{ width:100%; height:100%; object-fit:cover; object-position:center 42%; display:block; }
+  .hud, .titre, .a-bas, .b-wrap, .c-wrap{ flex:0 0 auto; }
+
+  /* la zone touchée, qui devient la réponse */
+  .zone{ position:absolute; border-radius:12px; }
+  .zone.juste{ left:17%; top:52%; width:23%; height:12%;
+    border:2px solid var(--vert); background:rgba(95,214,164,.16);
+    box-shadow:0 0 0 4px rgba(95,214,164,.14), 0 0 26px rgba(95,214,164,.5); }
+  .zone.faux{ left:60%; top:52%; width:23%; height:12%;
+    border:2px solid var(--rouge); background:rgba(239,122,134,.14);
+    box-shadow:0 0 0 4px rgba(239,122,134,.12); }
+  .zone .etq{ position:absolute; left:50%; bottom:calc(100% + 8px); transform:translateX(-50%);
+    white-space:nowrap; padding:4px 9px; border-radius:99px;
+    font:800 11px/1 'Archivo',sans-serif; color:#06301f; background:var(--vert); }
+  .zone.faux .etq{ background:var(--rouge); color:#3a0710; }
+
+  /* ═══ A · le verdict monte sur la scène ═══════════════════════ */
+  .a-veil{ position:absolute; left:0; right:0; bottom:0; padding:70px 18px 18px;
+    background:linear-gradient(180deg,transparent 0%,rgba(10,7,28,.72) 42%,#100c28 100%); }
+  .a-tag{ display:inline-flex; align-items:center; gap:7px; padding:6px 12px 6px 8px;
+    border-radius:99px; background:var(--vert); color:#06301f;
+    font:900 12.5px/1 'Archivo',sans-serif; letter-spacing:.04em; text-transform:uppercase; }
+  .a-tag b{ width:17px; height:17px; border-radius:50%; background:#06301f; color:var(--vert);
+    display:grid; place-items:center; font-size:10px; }
+  .a-h{ margin:10px 0 0; font:900 26px/1.15 'Archivo',sans-serif; }
+  .a-p{ margin:7px 0 0; font:600 14.5px/1.45 'Archivo',sans-serif; color:#cfc4ee; }
+  .a-bas{ padding:14px 18px 20px; }
+  .a-devoir{ display:flex; gap:11px; align-items:flex-start; padding:13px 14px; border-radius:16px;
+    background:linear-gradient(180deg,rgba(244,199,94,.14),rgba(244,199,94,.06));
+    border:1px solid rgba(244,199,94,.32); }
+  .a-devoir .cle{ flex:0 0 30px; height:30px; border-radius:10px; background:rgba(244,199,94,.2);
+    display:grid; place-items:center; font-size:15px; }
+  .a-devoir small{ display:block; font:900 10px/1 'Archivo',sans-serif; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--or); margin-bottom:5px; }
+  .a-devoir strong{ font:700 14px/1.4 'Archivo',sans-serif; }
+  .cta{ margin-top:13px; width:100%; height:58px; border:0; border-radius:17px;
+    background:linear-gradient(180deg,var(--or-clair),#e8ab33); box-shadow:0 5px 0 #a9761c;
+    color:#3a2a05; font:900 17px/1 'Archivo',sans-serif; display:grid; place-items:center; }
+
+  /* ═══ B · la carte du geste, sous la scène ════════════════════ */
+  .b-wrap{ padding:14px 18px 20px; }
+  .b-card{ border-radius:22px; overflow:hidden; border:1px solid rgba(95,214,164,.34);
+    background:linear-gradient(180deg,rgba(95,214,164,.13),rgba(20,14,48,.4)); }
+  .b-head{ display:flex; align-items:center; gap:12px; padding:14px 16px;
+    background:linear-gradient(90deg,rgba(95,214,164,.22),transparent); }
+  .b-head .rond{ flex:0 0 40px; height:40px; border-radius:14px; background:var(--vert);
+    color:#06301f; display:grid; place-items:center; font:900 20px/1 'Archivo',sans-serif; }
+  .b-head b{ font:900 19px/1.15 'Archivo',sans-serif; }
+  .b-head small{ display:block; font:800 10.5px/1 'Archivo',sans-serif; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--vert); margin-bottom:4px; }
+  .b-body{ padding:12px 16px 14px; font:600 14.5px/1.5 'Archivo',sans-serif; color:#cfc4ee; }
+  .b-sep{ height:1px; background:rgba(255,255,255,.10); margin:0 16px; }
+  .b-devoir{ display:flex; gap:11px; align-items:flex-start; padding:13px 16px 15px; }
+  .b-devoir .cle{ flex:0 0 30px; height:30px; border-radius:10px; background:rgba(244,199,94,.18);
+    display:grid; place-items:center; font-size:15px; }
+  .b-devoir small{ display:block; font:900 10px/1 'Archivo',sans-serif; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--or); margin-bottom:5px; }
+  .b-devoir strong{ font:700 14px/1.4 'Archivo',sans-serif; }
+
+  /* ═══ C · le tampon posé sur la scène ═════════════════════════ */
+  .c-stamp{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%) rotate(-7deg);
+    padding:10px 22px; border-radius:14px; border:3px solid var(--vert); color:var(--vert);
+    background:rgba(6,48,31,.55); font:900 30px/1 'Archivo',sans-serif; letter-spacing:.06em;
+    text-transform:uppercase; box-shadow:0 0 34px rgba(95,214,164,.35); }
+  .c-wrap{ padding:16px 18px 20px; }
+  .c-h{ margin:0; font:900 24px/1.18 'Archivo',sans-serif; }
+  .c-p{ margin:8px 0 0; font:600 14.5px/1.5 'Archivo',sans-serif; color:#cfc4ee; }
+  .c-devoir{ margin-top:14px; padding-left:14px; border-left:3px solid var(--or); }
+  .c-devoir small{ display:block; font:900 10px/1 'Archivo',sans-serif; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--or); margin-bottom:5px; }
+  .c-devoir strong{ font:700 14.5px/1.42 'Archivo',sans-serif; }
+</style>
+</head>
+<body>
+<div class="banc">
+
+  <!-- ══════════════ A ══════════════ -->
+  <div class="cadre" id="cadre-a">
+    <h2>A · Le verdict monte sur la scène</h2>
+    <p class="sous">La réponse se lit là où on a touché. Le trou de 225 px disparaît, le verdict est collé à l'image.</p>
+    <div class="tel">
+      <div class="hud"><div class="back"><i></i></div><div class="mid"><span>Trouver</span><div class="barre"><i></i></div></div><div class="cnt">1/2</div></div>
+      <div class="titre"><small>Le signal fantôme</small><h1>Tu vas tourner à gauche. Touche la commande que ta main doit trouver.</h1></div>
+      <div class="scene">
+        <img src="scene.jpg" alt="">
+        <div class="zone juste"><span class="etq">Commodo gauche</span></div>
+        <div class="a-veil">
+          <span class="a-tag"><b>✓</b> Trouvé</span>
+          <p class="a-h">C'est bien lui.</p>
+          <p class="a-p">Ta main le trouve sans quitter la route des yeux.</p>
+        </div>
+      </div>
+      <div class="a-bas">
+        <div class="a-devoir"><span class="cle">🔑</span><div><small>Dans la vraie voiture</small><strong>Moteur coupé, actionne trois fois le clignotant sans baisser les yeux.</strong></div></div>
+        <div class="cta">Continuer →</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ B ══════════════ -->
+  <div class="cadre" id="cadre-b">
+    <h2>B · La carte du geste</h2>
+    <p class="sous">Un seul bloc au lieu de trois : le verdict, le pourquoi et le devoir tiennent dans la même carte, cousue à la scène.</p>
+    <div class="tel">
+      <div class="hud"><div class="back"><i></i></div><div class="mid"><span>Trouver</span><div class="barre"><i></i></div></div><div class="cnt">1/2</div></div>
+      <div class="titre"><small>Le signal fantôme</small><h1>Tu vas tourner à gauche. Touche la commande que ta main doit trouver.</h1></div>
+      <div class="scene">
+        <img src="scene.jpg" alt="">
+        <div class="zone juste"><span class="etq">Commodo gauche</span></div>
+      </div>
+      <div class="b-wrap">
+        <div class="b-card">
+          <div class="b-head"><span class="rond">✓</span><div><small>Trouvé</small><b>Le commodo gauche</b></div></div>
+          <div class="b-body">C'est le seul que ta main atteint sans lâcher le volant. Les essuie-glaces sont de l'autre côté.</div>
+          <div class="b-sep"></div>
+          <div class="b-devoir"><span class="cle">🔑</span><div><small>Dans la vraie voiture</small><strong>Moteur coupé, actionne trois fois le clignotant sans baisser les yeux.</strong></div></div>
+        </div>
+        <div class="cta">Continuer →</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ C ══════════════ -->
+  <div class="cadre" id="cadre-c">
+    <h2>C · Le tampon</h2>
+    <p class="sous">Le plus jeu des trois. Un tampon claque sur la scène, et le texte redevient du texte, sans carte ni cadre.</p>
+    <div class="tel">
+      <div class="hud"><div class="back"><i></i></div><div class="mid"><span>Trouver</span><div class="barre"><i></i></div></div><div class="cnt">1/2</div></div>
+      <div class="titre"><small>Le signal fantôme</small><h1>Tu vas tourner à gauche. Touche la commande que ta main doit trouver.</h1></div>
+      <div class="scene">
+        <img src="scene.jpg" alt="">
+        <div class="zone juste"></div>
+        <div class="c-stamp">Trouvé</div>
+      </div>
+      <div class="c-wrap">
+        <h3 class="c-h">Le commodo gauche.</h3>
+        <p class="c-p">Ta main le trouve sans quitter la route des yeux. Les essuie-glaces sont de l'autre côté.</p>
+        <div class="c-devoir"><small>Dans la vraie voiture</small><strong>Moteur coupé, actionne trois fois le clignotant sans baisser les yeux.</strong></div>
+        <div class="cta">Continuer →</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

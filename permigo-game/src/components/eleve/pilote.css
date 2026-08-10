@@ -626,6 +626,77 @@ body.mp-open #header-bar {
   box-shadow: 0 0 0 7px rgb(244 199 94 / 14%);
 }
 
+/* La zone touchée porte le verdict. Sans elle, l'élève lisait « commodo gauche
+   trouvé » 250 px plus bas sans que rien ne désigne l'endroit dont on parle. */
+.mp-hotspot.is-juste,
+.mp-hotspot.is-faux {
+  border-style: solid;
+  border-width: 2px;
+}
+
+.mp-hotspot.is-juste {
+  border-color: #5fd6a4;
+  background: rgb(95 214 164 / 16%);
+  box-shadow:
+    0 0 0 4px rgb(95 214 164 / 14%),
+    0 0 26px rgb(95 214 164 / 45%);
+}
+
+.mp-hotspot.is-faux {
+  border-color: #ef7a86;
+  background: rgb(239 122 134 / 14%);
+  box-shadow: 0 0 0 4px rgb(239 122 134 / 12%);
+}
+
+/* Le viseur du centre s'efface : la zone est désormais désignée par sa
+   couleur et par son nom, deux marques valent mieux que trois. */
+.mp-hotspot.is-juste::before,
+.mp-hotspot.is-faux::before,
+.mp-hotspot.is-juste > span,
+.mp-hotspot.is-faux > span {
+  display: none;
+}
+
+/* Le nom sort AU-DESSUS de la zone, jamais dedans : une zone fait 44 px de
+   haut au minimum et le mot n'y tiendrait pas sur les plus petites. */
+.mp-hotspot-nom {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 7px);
+  padding: 4px 9px;
+  border-radius: 99px;
+  color: #06301f;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+  background: #5fd6a4;
+  transform: translateX(-50%);
+}
+
+.mp-play .mp-hotspot.is-faux .mp-hotspot-nom {
+  color: #3a0710;
+  background: #ef7a86;
+}
+
+.mp-hotspot.nom-dessous .mp-hotspot-nom {
+  top: calc(100% + 7px);
+  bottom: auto;
+}
+
+/* Les zones qui n'ont pas été touchées s'effacent une fois le verdict tombé :
+   leurs pointillés donnaient à la photo un air de planche technique, juste au
+   moment où l'élève regarde le résultat de son geste. */
+.mp-hotspot.is-eteint {
+  border-color: transparent;
+  background: transparent;
+  opacity: 0.35;
+}
+
+.mp-hotspot.is-eteint::before,
+.mp-hotspot.is-eteint > span {
+  opacity: 0.3;
+}
+
 .mp-scene-instruction {
   margin: 10px 0 0;
   color: #8f82a8;
@@ -769,89 +840,183 @@ body.mp-open #header-bar {
    sous la page (cf. la colonne en flex, `.mp-play`). Les réponses descendent
    vers le pouce au passage. Le 13 px reste le minimum quand la page est
    pleine et que rien ne dépasse. */
+/* ⚠️ Le bloc du bas était collé en bas par `margin-top: auto`. Résultat, une
+   fois la réponse donnée : jusqu'à 225 px de vide entre la scène et le verdict,
+   mesurés le 10/08 sur « Le signal fantôme ». Le texte flottait sans rien
+   désigner et l'écran avait l'air bâclé.
+   Le verdict suit donc la scène immédiatement, et seul le bouton reste collé en
+   bas, là où le pouce le cherche. */
 .mp-play-bottom {
   margin-top: auto;
   padding-top: 13px;
 }
 
+/* ── Le verdict recolle le texte à la scène ────────────────────────────────
+   Tant qu'on joue, le groupe titre + scène + consigne est centré dans la
+   colonne (les marges `auto` plus haut) et le bloc du bas reste collé en bas :
+   c'est la bonne mise en page pour jouer.
+   Mais une fois la réponse donnée, ces deux réglages mettaient jusqu'à 225 px
+   de vide entre la scène et le verdict (mesuré le 10/08 sur « Le signal
+   fantôme ») : le texte flottait au milieu de nulle part, sans rien désigner.
+   Le verdict tombé, tout remonte donc en haut, le texte suit l'image, et seul
+   le bouton reste en bas, là où le pouce le cherche. */
+.mp-play--verdict:has(.mp-spot-interaction) .mp-play-title,
+.mp-play--verdict:has(.mp-placement-interaction) .mp-play-title,
+.mp-play--verdict:has(.mp-balayage-interaction) .mp-play-title {
+  margin-top: 19px;
+}
+
+.mp-play--verdict .mp-spot-interaction,
+.mp-play--verdict .mp-placement-interaction,
+.mp-play--verdict .mp-balayage-interaction {
+  margin-bottom: 0;
+}
+
+.mp-play--verdict .mp-play-bottom {
+  /* `1 0 auto` et pas `1 1 auto` : le bloc prend la place libre mais ne se
+     laisse jamais comprimer, sinon il vole ses marges au titre du haut, qui
+     vient alors coller le bandeau. */
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  margin-top: 0;
+}
+
+.mp-play--verdict .mp-play-bottom .mp-primary-button {
+  margin-top: auto;
+}
+
+/* ── Le verdict ────────────────────────────────────────────────────────────
+   Direction « le tampon », choisie par Rayan le 10/08/2026. Le verdict claque
+   SUR la scène (cf. .mp-stamp) et ici le texte redevient du texte : plus de
+   carte à liseré, plus de pastille ronde, plus de paragraphe gris. C'est ce
+   vocabulaire de cartes empilées qui faisait « écran fabriqué par une IA ». */
 .mp-feedback {
-  min-height: 63px;
-  display: grid;
-  grid-template-columns: 35px 1fr;
-  align-items: start;
-  gap: 10px;
-  padding: 12px;
-  border: 1px solid rgb(255 255 255 / 8%);
-  border-radius: 17px;
-  background: rgb(255 255 255 / 4%);
+  margin-top: 2px;
+  animation: mp-verdict-monte 260ms var(--ease-out) both;
 }
 
-.mp-feedback > span:first-child {
-  width: 35px;
-  height: 35px;
-  display: grid;
-  place-items: center;
-  border: 1px solid rgb(255 255 255 / 14%);
-  border-radius: 12px;
-  color: #bbaee0;
-  font-size: 14px;
-  font-weight: 950;
-}
-
-.mp-feedback > span:first-child svg {
-  width: 20px;
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 2.7;
-}
-
-.mp-feedback p {
-  display: grid;
-  gap: 4px;
+.mp-play .mp-feedback h2 {
   margin: 0;
+  font-size: 23px;
+  font-weight: 900;
+  line-height: 1.16;
+  letter-spacing: -0.015em;
 }
 
-.mp-feedback strong {
-  font-size: 15px;
+.mp-play .mp-feedback p {
+  margin: 7px 0 0;
+  color: rgb(246 241 255 / 78%);
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.5;
 }
 
-.mp-feedback small {
-  color: #9d90b7;
-  font-size: 13px;
-  line-height: 1.4;
+.mp-play .mp-feedback-success h2 {
+  color: #9df3cd;
 }
 
-.mp-feedback-success {
-  border-color: rgb(56 217 148 / 27%);
-  background: rgb(56 217 148 / 8%);
+.mp-play .mp-feedback-retry h2 {
+  color: #ffa9a3;
 }
 
-.mp-feedback-success > span:first-child {
-  border-color: rgb(56 217 148 / 35%);
-  color: #78e8b5;
-  background: rgb(56 217 148 / 10%);
+.mp-play .mp-feedback-progress h2 {
+  color: color-mix(in srgb, var(--world) 45%, #fff);
 }
 
-.mp-feedback-success small {
-  color: #a7d8c2;
+@keyframes mp-verdict-monte {
+  from {
+    opacity: 0;
+    transform: translateY(9px);
+  }
 }
 
-.mp-feedback-retry {
-  border-color: rgb(255 118 110 / 26%);
-  background: rgb(255 118 110 / 7%);
+/* ── Le tampon ─────────────────────────────────────────────────────────────
+   Posé de travers sur la scène, comme un tampon encreur. Il tombe au tiers
+   haut et jamais au centre bas : c'est là que vivent les commandes des décors
+   et c'est souvent là qu'on vient de toucher. */
+.mp-stamp {
+  position: absolute;
+  z-index: 12;
+  left: 50%;
+  top: 27%;
+  padding: 9px 20px;
+  border: 3px solid currentcolor;
+  border-radius: 13px;
+  font-size: clamp(23px, 7.2vw, 31px);
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: mp-tampon 340ms cubic-bezier(0.2, 1.5, 0.4, 1) both;
 }
 
-.mp-feedback-retry > span:first-child {
-  border-color: rgb(255 118 110 / 35%);
+.mp-play .mp-stamp span {
+  color: inherit;
+}
+
+.mp-stamp-juste {
+  color: #6ee7b0;
+  background: rgb(6 48 31 / 55%);
+  box-shadow: 0 0 34px rgb(95 214 164 / 35%);
+}
+
+.mp-stamp-faux {
   color: #ff9c96;
-  background: rgb(255 118 110 / 9%);
+  background: rgb(58 7 16 / 55%);
+  box-shadow: 0 0 30px rgb(255 118 110 / 28%);
 }
 
-.mp-feedback-progress {
-  border-color: color-mix(in srgb, var(--world) 28%, transparent);
-  background: color-mix(in srgb, var(--world) 7%, transparent);
+@keyframes mp-tampon {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(-7deg) scale(2.1);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(-7deg) scale(1);
+  }
+}
+
+/* ── Le devoir ─────────────────────────────────────────────────────────────
+   Il n'avait AUCUN style dans ce fichier : le libellé et la consigne se
+   suivaient en ligne courante, comme un paragraphe cassé. Un rail doré le
+   tient, dans la même grammaire que le verdict au-dessus. */
+.mp-transfer {
+  display: grid;
+  gap: 5px;
+  margin: 16px 0 0;
+  padding: 2px 0 2px 14px;
+  border-left: 3px solid #f4c75e;
+}
+
+.mp-play .mp-transfer small {
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #f4c75e;
+}
+
+.mp-play .mp-transfer strong {
+  font-size: 14.5px;
+  font-weight: 700;
+  line-height: 1.42;
+  color: #f6f1ff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mp-feedback {
+    animation: none;
+  }
+
+  .mp-stamp {
+    animation: none;
+    transform: translate(-50%, -50%) rotate(-7deg);
+  }
 }
 
 .mp-hint {
