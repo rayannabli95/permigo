@@ -154,8 +154,10 @@ export function monterMissions(
     // Un décor portrait prend l'écran : la scène passe au-dessus du titre et
     // la question descend dans un bloc plein posé sur le bas, sous le pouce.
     const plein = estDecorPlein(m.visual) ? " mp-play--plein" : "";
+    // Réponse donnée : le texte remonte contre la scène, cf. .mp-play--verdict.
+    const verdict = etat.retour ? " mp-play--verdict" : "";
     hote.innerHTML = `
-      <div class="mp-game mp-play${plein}" style="--world:${clair};--world-dark:${sombre}">
+      <div class="mp-game mp-play${plein}${verdict}" style="--world:${clair};--world-dark:${sombre}">
         ${enTete(m)}
         <section class="mp-play-title">
           <!-- Le rang de l'étape est DÉJÀ dans le bandeau du haut, en chiffres
@@ -177,7 +179,7 @@ export function monterMissions(
           ${
             etat.resolu
               ? `<div class="mp-transfer">
-                   <small>À FAIRE DANS LA VRAIE VOITURE</small>
+                   <small>Dans la vraie voiture</small>
                    <strong>${esc(m.transfer)}</strong>
                  </div>
                  <button class="mp-primary-button mp-success-button" type="button" data-suite>
@@ -223,9 +225,27 @@ export function monterMissions(
         ? m.hotspots
             .map((z, i) => {
               const montre = etat.indice && z.id === m.solution;
-              return `<button class="mp-hotspot ${montre ? "is-hint" : ""}" type="button"
+              // La zone touchée porte le verdict : c'est le seul endroit de
+              // l'écran qui dit à l'élève CE QU'IL a touché. Sans elle, la
+              // réponse tombait 250 px plus bas sans rien désigner.
+              const juste = etat.resolu && z.id === m.solution;
+              const faux =
+                !etat.resolu &&
+                etat.retour?.ton === "retry" &&
+                z.id === etat.dernier;
+              const marque = juste ? " is-juste" : faux ? " is-faux" : "";
+              // Une zone collée au bord haut ferait sortir son étiquette du
+              // cadre : elle bascule alors dessous.
+              const dessous = marque && z.y < 12 ? " nom-dessous" : "";
+              // Une fois le verdict tombé, les autres zones n'ont plus rien à
+              // proposer : elles s'effacent au lieu de garder leurs pointillés
+              // sur l'image, qui la faisaient ressembler à un plan technique.
+              const eteint = etat.retour && !marque ? " is-eteint" : "";
+              return `<button class="mp-hotspot ${montre ? "is-hint" : ""}${marque}${dessous}${eteint}" type="button"
               data-reponse="${escAttr(z.id)}" aria-label="${escAttr(z.label)}"
-              style="--x:${z.x}%;--y:${z.y}%;--w:${z.w}%;--h:${z.h}%;--delay:${i * 80}ms"><span></span></button>`;
+              style="--x:${z.x}%;--y:${z.y}%;--w:${z.w}%;--h:${z.h}%;--delay:${i * 80}ms"><span></span>${
+                marque ? `<b class="mp-hotspot-nom">${esc(z.label)}</b>` : ""
+              }</button>`;
             })
             .join("")
         : "";
@@ -264,6 +284,7 @@ export function monterMissions(
         <div class="mp-scene-scan" aria-hidden="true"></div>
         <div class="mp-scene-art mp-art-${esc(m.visual)}" aria-hidden="true">${renderArt(m.visual, m.reglages)}</div>
         ${zones}${trajets}${placement}
+        ${tampon(m)}
       </div>`;
   }
 
@@ -298,9 +319,11 @@ export function monterMissions(
 
   function interaction(m) {
     if (m.mode === "spot") {
+      // La consigne de manipulation disparaît dès qu'on a répondu : elle
+      // demandait de toucher une zone alors que le verdict est déjà tombé.
       return `<section class="mp-interaction mp-spot-interaction">
         ${scene(m, true)}
-        <p class="mp-scene-instruction">Touche directement la zone dans la scène.</p>
+        ${etat.resolu ? "" : `<p class="mp-scene-instruction">Touche directement la zone dans la scène.</p>`}
       </section>`;
     }
     if (m.mode === "trajectory") {
@@ -513,16 +536,44 @@ export function monterMissions(
     // une carte pleine largeur, sous les réponses, qui n'apprend rien et
     // n'attend rien. La place appartient à la scène et aux réponses.
     if (!etat.retour) return "";
-    const signe =
-      etat.retour.ton === "success"
-        ? icon("check", { size: 16 })
-        : etat.retour.ton === "retry"
-          ? "↺"
-          : "→";
+    // Direction « le tampon », choisie par Rayan le 10/08 : le verdict claque
+    // SUR la scène (cf. tampon()), et ici le texte redevient du texte. Plus de
+    // carte à liseré, plus de pastille ronde, plus de paragraphe gris : c'est
+    // ce vocabulaire là qui faisait « écran produit par une IA ». Un titre,
+    // deux lignes, et le fond de l'écran dessous.
     return `<div class="mp-feedback mp-feedback-${etat.retour.ton}" role="status">
-      <span>${signe}</span>
-      <p><strong>${esc(etat.retour.titre)}</strong><small>${esc(etat.retour.texte)}</small></p>
+      <h2>${esc(etat.retour.titre)}</h2>
+      <p>${esc(etat.retour.texte)}</p>
     </div>`;
+  }
+
+  // Le mot du tampon. Il reprend le verbe du mode (Trouver → TROUVÉ) : c'est
+  // ce que l'élève vient de FAIRE, pas une note qu'on lui donne.
+  const MOT_TAMPON = {
+    Trouver: "Trouvé",
+    Ordonner: "Dans l'ordre",
+    Placer: "Bien placé",
+    Doser: "Bien dosé",
+    Balayer: "Rien oublié",
+    Tracer: "Belle trajectoire",
+    Décider: "Bien vu",
+    Diagnostiquer: "Bien lu",
+  };
+
+  function tampon(m) {
+    // Un enchaînement en cours (« bon enchaînement ») n'est pas un verdict :
+    // tamponner à chaque maillon viderait le geste de son sens.
+    if (!etat.retour || etat.retour.ton === "progress") return "";
+    const juste = etat.retour.ton === "success";
+    const mot = juste ? MOT_TAMPON[m.modeLabel] || "Juste" : "Pas encore";
+    // Le tampon se pose dans la MOITIÉ OPPOSÉE à la zone touchée, sinon il
+    // recouvre l'étiquette de la zone, donc la seule chose qui dit ce qu'on
+    // vient de toucher. Sans zone (autres modes), il se pose au tiers haut.
+    const vise = (m.hotspots || []).find(
+      (z) => z.id === (juste ? m.solution : etat.dernier),
+    );
+    const y = vise ? (vise.y + vise.h / 2 < 50 ? 76 : 24) : 27;
+    return `<div class="mp-stamp mp-stamp-${juste ? "juste" : "faux"}" style="top:${y}%" aria-hidden="true"><span>${esc(mot)}</span></div>`;
   }
 
   // Fait réagir la mascotte du coin (bonne/mauvaise réponse). matchMedia,
