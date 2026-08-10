@@ -5,17 +5,36 @@
 // ⭐ LA CONTRAINTE QUI DÉCIDE DE TOUT : notre gameplay n'est pas « repérer un
 // piéton », c'est « lire une INTENTION ». Or une intention se lit dans une
 // orientation de tête et un transfert de poids. Un personnage PermiGo est donc
-// conçu à l'envers d'un personnage de jeu classique : on ne cherche ni le
-// visage, ni les doigts, ni les plis de vêtement — on grossit l'organe que le
-// joueur doit lire, et on jette tout le reste.
+// conçu à l'envers d'un personnage de jeu classique : on ne cherche ni les
+// doigts ni les plis de vêtement, on grossit l'organe que le joueur doit lire
+// et on jette tout le reste.
 //
-// D'où trois partis pris :
-//   · la TÊTE est énorme (20 % de la taille chez l'adulte, 26 % chez l'enfant,
-//     contre 13 % dans la réalité) ;
-//   · elle porte une CHEVELURE qui couvre l'arrière du crâne, parce qu'une
-//     sphère nue n'a aucune orientation lisible à trente mètres — c'est ce
-//     contraste peau/cheveux qui dit « il regarde par là » ;
-//   · le torse porte un DEVANT plus clair, pour la même raison.
+// 🔴 CE QUI A CHANGÉ LE 10/08 — « on dirait des persos de Roblox ».
+//
+// Verdict juste, et la cause tenait en trois manques. Un personnage était un
+// assemblage de primitives qui s'ARRÊTAIENT en l'air : pas de mains au bout
+// des bras, pas de pieds au bout des jambes, pas de regard sur la tête. L'œil
+// humain cherche d'abord un visage, ensuite les extrémités ; quand il ne
+// trouve ni l'un ni les autres, il conclut « mannequin », et aucune finesse
+// ailleurs ne rattrape ça.
+//
+// D'où quatre pièces ajoutées, toutes minuscules et toutes décisives :
+//   · le REGARD — une calotte sombre à l'avant du crâne, à hauteur des yeux.
+//     Elle sert aussi le jeu : notre mécanique entière repose sur « où
+//     regarde cette personne », et un bandeau se lit à trente mètres là où la
+//     seule frontière peau/cheveux demandait d'être à quinze ;
+//   · les MAINS, deux boules de peau ;
+//   · les CHAUSSURES, dont la hauteur EST l'écart au sol (calculé, pas
+//     deviné) : les jambes flottaient à quinze centimètres du trottoir ;
+//   · les ÉPAULES, un yoke un peu plus large qui donne une carrure.
+//
+// ⭐ ET ÇA NE COÛTE RIEN, PARCE QU'ON FOND. Ces quatre pièces faisaient passer
+// un personnage de dix à quatorze objets, soit 163 ordres de dessin pour un
+// budget de 140. On fusionne donc chaque MEMBRE en une seule géométrie, les
+// couleurs passant par sommet : un personnage tient désormais en six objets,
+// moins qu'avant, avec deux fois plus de détail. La règle est simple — ce qui
+// ne bouge PAS l'un par rapport à l'autre n'a aucune raison d'être dessiné
+// séparément.
 //
 // Aucune animation squelettale, aucun fichier : des groupes qu'on tourne, et
 // des fonctions pures du temps. Le rembobinage reste gratuit.
@@ -30,16 +49,19 @@ const CORPS = {
     jambe: { r: 0.078, h: 0.4, y: 0.44, ecart: 0.095 },
     bras: { r: 0.058, h: 0.38, y: 1.22, ecart: 0.215 },
   },
-  // ⚠️ 1,28 m et pas 1,15 : la loi de lisibilité (bible §2) veut 24 px pour un
-  // indice statique, soit une distance maximale de 26 × la taille. À 1,15 m la
-  // scène de l'enfant n'était lisible qu'à 30 m alors qu'elle commence à 34.
-  // On vieillit l'enfant de deux ans plutôt que de rendre la scène injouable.
+  // 🔴 REMONTÉ DE 1,28 À 1,42 LE 10/08 — « l'enfant on le voit à peine ».
+  // La loi de lisibilité (bible §2) veut 24 px pour un indice statique, soit
+  // une distance maximale de 26 × la taille. À 1,28 m la scène n'était lisible
+  // qu'à 33 m alors qu'elle commence à 36, et elle se joue en bord de cadre,
+  // là où le regard passe le moins. On préfère vieillir l'enfant de deux ans
+  // plutôt que garder une scène que personne ne peut jouer. Sa tête grossit
+  // avec : c'est elle qu'on lit, pas son corps.
   enfant: {
-    taille: 1.28,
-    tete: 0.167,
-    torse: { r: 0.15, h: 0.29, y: 0.8 },
-    jambe: { r: 0.067, h: 0.335, y: 0.355, ecart: 0.078 },
-    bras: { r: 0.05, h: 0.29, y: 0.93, ecart: 0.166 },
+    taille: 1.42,
+    tete: 0.192,
+    torse: { r: 0.166, h: 0.32, y: 0.89 },
+    jambe: { r: 0.074, h: 0.37, y: 0.395, ecart: 0.086 },
+    bras: { r: 0.055, h: 0.32, y: 1.03, ecart: 0.184 },
   },
 };
 
@@ -57,10 +79,60 @@ const materiau = (THREE, couleur, rug = 0.82) =>
     envMapIntensity: 0.4,
   });
 
+// Un seul matériau pour toute la population : la couleur voyage dans les
+// sommets. Deux cents personnages partagent donc le même programme de rendu.
+let PEAUX = null;
+const matFondu = (THREE) =>
+  (PEAUX ||= new THREE.MeshStandardMaterial({
+    vertexColors: true,
+    roughness: 0.82,
+    metalness: 0,
+    envMapIntensity: 0.4,
+  }));
+
+/**
+ * ⭐ LA FONTE. Plusieurs primitives, chacune avec sa place et sa couleur,
+ * ressortent en UNE géométrie coloriée par sommet.
+ *
+ * ⚠️ On dé-indexe avant de concaténer : deux géométries indexées ne
+ * s'additionnent pas sans recalculer les index, et pour des objets de deux
+ * cents triangles le gain d'un index ne vaut pas le risque.
+ */
+function fondre(THREE, pieces) {
+  const pion = new THREE.Object3D();
+  const pos = [];
+  const nor = [];
+  const col = [];
+  const c = new THREE.Color();
+  for (const p of pieces) {
+    pion.position.set(...(p.p || [0, 0, 0]));
+    pion.rotation.set(...(p.r || [0, 0, 0]));
+    pion.scale.set(...(p.s || [1, 1, 1]));
+    pion.updateMatrix();
+    const g = (p.geo.index ? p.geo.toNonIndexed() : p.geo.clone()).applyMatrix4(
+      pion.matrix,
+    );
+    const P = g.attributes.position.array;
+    const N = g.attributes.normal.array;
+    c.setHex(p.c);
+    for (let i = 0; i < P.length; i += 3) {
+      pos.push(P[i], P[i + 1], P[i + 2]);
+      nor.push(N[i], N[i + 1], N[i + 2]);
+      col.push(c.r, c.g, c.b);
+    }
+    g.dispose();
+  }
+  const out = new THREE.BufferGeometry();
+  out.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  out.setAttribute("normal", new THREE.Float32BufferAttribute(nor, 3));
+  out.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
+  return out;
+}
+
 /**
  * Un passant.
  *
- * @param enfant  true = 1,15 m et vêtements très saturés
+ * @param enfant  true = 1,42 m et vêtements très saturés
  * @param alea    générateur reproductible (peau, vêtements, cadence)
  * @param couleur force la couleur du haut (les acteurs de scène s'en servent)
  */
@@ -71,6 +143,7 @@ export function personnage(
   const C = enfant ? CORPS.enfant : CORPS.adulte;
   const tire = alea || (() => 0.5);
   const g = new THREE.Group();
+  const M = matFondu(THREE);
 
   const peau = PEAU[Math.floor(tire() * PEAU.length) % PEAU.length];
   // ⭐ Les enfants sont les êtres les plus saturés de la rue. Ce n'est pas une
@@ -85,9 +158,9 @@ export function personnage(
     Math.floor(tire() * 4) % 4
   ];
 
-  const matPeau = materiau(THREE, peau, 0.78);
-  const matHaut = materiau(THREE, haut);
-  const matBas = materiau(THREE, bas);
+  const k = enfant ? "E" : "A";
+  const geoCapsule = (cle, r, h, seg = 8) =>
+    geoDe(THREE, `${cle}${k}`, () => new THREE.CapsuleGeometry(r, h, 3, seg));
 
   // ── Le buste : tout ce qui tourne quand on regarde ailleurs ───────────
   const buste = new THREE.Group();
@@ -95,95 +168,170 @@ export function personnage(
   g.add(buste);
 
   const torse = new THREE.Mesh(
-    geoDe(
-      THREE,
-      `t${enfant}`,
-      () => new THREE.CapsuleGeometry(C.torse.r, C.torse.h, 4, 10),
-    ),
-    matHaut,
+    fondre(THREE, [
+      // ⚠️ Un humain est plus LARGE que profond. Une capsule de révolution
+      // donne un tronc parfaitement cylindrique, et c'est une des raisons du
+      // « on dirait Roblox » : personne n'a un torse rond.
+      {
+        geo: geoCapsule("t", C.torse.r, C.torse.h, 10),
+        c: haut,
+        s: [1.06, 1, 0.74],
+      },
+      // Le devant du torse, plus clair. Trois centimètres, et une silhouette
+      // de dos cesse d'être identique à une silhouette de face.
+      {
+        geo: geoDe(
+          THREE,
+          `d${k}`,
+          () => new THREE.BoxGeometry(C.torse.r * 1.25, C.torse.h * 0.9, 0.03),
+        ),
+        c: lisere(haut, 0.13),
+        p: [0, 0, -C.torse.r * 0.92],
+      },
+      // ⭐ Les épaules. Sans elles, une capsule reste une quille.
+      {
+        geo: geoCapsule("e", C.torse.r * 0.62, C.torse.r * 2.1),
+        c: assombrir(haut, 0.07),
+        r: [0, 0, Math.PI / 2],
+        s: [1, 1, 0.8],
+        p: [0, C.torse.h / 2 - C.torse.r * 0.1, 0],
+      },
+    ]),
+    M,
   );
   torse.castShadow = true;
   buste.add(torse);
 
-  // Le devant du torse, plus clair. Une plaque de trois centimètres, et une
-  // silhouette de dos cesse d'être identique à une silhouette de face.
-  const devant = new THREE.Mesh(
-    geoDe(
-      THREE,
-      `d${enfant}`,
-      () => new THREE.BoxGeometry(C.torse.r * 1.25, C.torse.h * 0.9, 0.03),
-    ),
-    materiau(THREE, lisere(haut, 0.13)),
-  );
-  devant.position.set(0, 0, -C.torse.r * 0.92);
-  buste.add(devant);
-
-  const geoBras = geoDe(
-    THREE,
-    `b${enfant}`,
-    () => new THREE.CapsuleGeometry(C.bras.r, C.bras.h, 3, 8),
-  );
+  // ── Les bras, main comprise ───────────────────────────────────────────
   const bras = [];
   for (const s of [-1, 1]) {
     const pivot = new THREE.Group();
     pivot.position.set(s * C.bras.ecart, C.bras.y - C.torse.y, 0);
-    const m = new THREE.Mesh(geoBras, matHaut);
-    m.position.y = -C.bras.h / 2;
+    const m = new THREE.Mesh(
+      fondre(THREE, [
+        {
+          geo: geoCapsule("b", C.bras.r, C.bras.h),
+          c: haut,
+          p: [0, -C.bras.h / 2, 0],
+        },
+        // ⭐ Une main. Un bras qui se termine par une section de cylindre
+        // coupée net est le signal « mannequin » le plus fort après le visage.
+        {
+          geo: geoDe(
+            THREE,
+            `m${k}`,
+            () => new THREE.SphereGeometry(C.bras.r * 1.32, 8, 6),
+          ),
+          c: peau,
+          p: [0, -(C.bras.h + C.bras.r * 0.75), 0],
+          s: [1, 1.12, 0.85],
+        },
+      ]),
+      M,
+    );
     m.castShadow = true;
     pivot.add(m);
     buste.add(pivot);
     bras.push(pivot);
   }
 
-  // ── La tête, et sa chevelure qui donne le cap ─────────────────────────
+  // ── La tête : chevelure et regard ─────────────────────────────────────
   const col = new THREE.Group();
   col.position.y = C.torse.h / 2 + C.tete * 0.55;
   buste.add(col);
 
   const tete = new THREE.Mesh(
-    geoDe(THREE, `h${enfant}`, () => new THREE.SphereGeometry(C.tete, 14, 10)),
-    matPeau,
+    fondre(THREE, [
+      {
+        geo: geoDe(
+          THREE,
+          `h${k}`,
+          () => new THREE.SphereGeometry(C.tete, 14, 10),
+        ),
+        c: peau,
+      },
+      // 🔴 SANS LA CHEVELURE, LE JEU NE MARCHE PAS. Une sphère nue tourne sans
+      // qu'on le voie : « le cycliste a regardé derrière lui » deviendrait
+      // invisible. Elle couvre l'arrière et le dessus du crâne, et c'est la
+      // frontière peau/cheveux qui trahit l'orientation.
+      {
+        geo: geoDe(
+          THREE,
+          `c${k}`,
+          () =>
+            new THREE.SphereGeometry(
+              C.tete * 1.06,
+              14,
+              10,
+              0,
+              Math.PI * 2,
+              0,
+              1.15,
+            ),
+        ),
+        c: cheveux,
+        p: [0, 0, C.tete * 0.16], // basculée vers l'arrière : le front se dégage
+        r: [-0.28, 0, 0],
+      },
+      // ⭐⭐ LE REGARD. Une calotte sombre plaquée sur l'AVANT du crâne, à
+      // hauteur des yeux, épousant exactement la sphère. Ni yeux séparés, ni
+      // bouche, ni nez : ça tomberait dans le dessin animé. Une seule bande
+      // suffit à ce que le cerveau voie quelqu'un plutôt qu'un mannequin.
+      {
+        geo: geoDe(
+          THREE,
+          `y${k}`,
+          () =>
+            new THREE.SphereGeometry(
+              C.tete * 1.035,
+              14,
+              6,
+              -Math.PI / 2 - 0.86, // centrée sur -Z, c'est-à-dire devant
+              1.72,
+              1.24, // juste au-dessus de l'équateur
+              0.36,
+            ),
+        ),
+        c: 0x2b2438,
+      },
+    ]),
+    M,
   );
   tete.castShadow = true;
   col.add(tete);
 
-  // 🔴 SANS ELLE, LE JEU NE MARCHE PAS. Une sphère nue tourne sans qu'on le
-  // voie : « le cycliste a regardé derrière lui » deviendrait invisible. La
-  // chevelure couvre l'arrière et le dessus du crâne ; c'est la frontière
-  // peau/cheveux qui trahit l'orientation, et elle se lit à trente mètres.
-  const chev = new THREE.Mesh(
-    geoDe(
-      THREE,
-      `c${enfant}`,
-      () =>
-        new THREE.SphereGeometry(
-          C.tete * 1.06,
-          14,
-          10,
-          0,
-          Math.PI * 2,
-          0,
-          1.15,
-        ),
-    ),
-    materiau(THREE, cheveux, 0.9),
-  );
-  chev.position.z = C.tete * 0.16; // basculée vers l'arrière : le front se dégage
-  chev.rotation.x = -0.28;
-  col.add(chev);
-
-  // ── Les jambes ────────────────────────────────────────────────────────
-  const geoJambe = geoDe(
-    THREE,
-    `j${enfant}`,
-    () => new THREE.CapsuleGeometry(C.jambe.r, C.jambe.h, 3, 8),
-  );
+  // ── Les jambes, chaussure comprise ────────────────────────────────────
+  // ⚠️ La hauteur de la chaussure EST l'écart entre le bas de la jambe et le
+  // sol. Elle se calcule, elle ne se devine pas : avant, les jambes
+  // s'arrêtaient à quinze centimètres du trottoir, en l'air.
+  const hPied = C.jambe.y - C.jambe.h / 2 - C.jambe.r;
   const jambes = [];
   for (const s of [-1, 1]) {
     const pivot = new THREE.Group();
     pivot.position.set(s * C.jambe.ecart, C.jambe.y + C.jambe.h / 2, 0);
-    const m = new THREE.Mesh(geoJambe, matBas);
-    m.position.y = -C.jambe.h / 2;
+    const m = new THREE.Mesh(
+      fondre(THREE, [
+        {
+          geo: geoCapsule("j", C.jambe.r, C.jambe.h),
+          c: bas,
+          p: [0, -C.jambe.h / 2, 0],
+        },
+        {
+          geo: geoDe(
+            THREE,
+            `p${k}`,
+            () =>
+              new THREE.BoxGeometry(C.jambe.r * 1.9, hPied, C.jambe.r * 3.5),
+          ),
+          // ⚠️ Une valeur FIXE et sombre, pas une nuance du pantalon : une
+          // chaussure claire sous un pantalon clair fait deux taches pâles au
+          // ras du sol, et le personnage a l'air de flotter quand même.
+          c: 0x2a2434,
+          p: [0, -(C.jambe.h + C.jambe.r) - hPied / 2, -C.jambe.r * 0.75],
+        },
+      ]),
+      M,
+    );
     m.castShadow = true;
     pivot.add(m);
     g.add(pivot);
@@ -203,17 +351,17 @@ export function personnage(
   // partir du DÉPLACEMENT RÉEL de l'acteur, donc l'animation ne peut jamais
   // désynchroniser d'avec la position. Un piéton qui glisse est impossible.
   function pas(t, intensite = 1) {
-    const k = Math.max(0, Math.min(1, intensite));
-    const phase = t * cadence * (0.6 + 0.4 * k);
-    const balancier = Math.sin(phase) * k;
+    const q = Math.max(0, Math.min(1, intensite));
+    const phase = t * cadence * (0.6 + 0.4 * q);
+    const balancier = Math.sin(phase) * q;
     jambes[0].rotation.x = balancier * 0.62;
     jambes[1].rotation.x = -balancier * 0.62;
     bras[0].rotation.x = -balancier * 0.45;
     bras[1].rotation.x = balancier * 0.45;
     // Le rebond du pas : trois centimètres, à deux fois la cadence.
-    g.position.y = (g.userData.sol || 0) + Math.abs(Math.sin(phase)) * 0.03 * k;
+    g.position.y = (g.userData.sol || 0) + Math.abs(Math.sin(phase)) * 0.03 * q;
     // Le repos n'est jamais immobile : une respiration de six millimètres.
-    if (k < 0.05) buste.position.y = C.torse.y + Math.sin(t * 1.6) * 0.006;
+    if (q < 0.05) buste.position.y = C.torse.y + Math.sin(t * 1.6) * 0.006;
   }
 
   // Regarder quelque part. Les épaules suivent à 40 %, et la tête arrive
@@ -245,7 +393,6 @@ export function personnage(
 export function cycliste(THREE, { couleur = null, alea = null } = {}) {
   const g = new THREE.Group();
   const tire = alea || (() => 0.5);
-
   const cadre = materiau(THREE, 0x2f3644, 0.5);
   const gomme = materiau(THREE, NUIT, 0.92);
 
@@ -276,7 +423,6 @@ export function cycliste(THREE, { couleur = null, alea = null } = {}) {
     r.castShadow = true;
     direction.add(r);
   }
-  // Le cadre : quelques tubes. La silhouette d'un vélo tient dans son triangle.
   const tube = (parent, l, x, y, z, rx, rz) => {
     const m = new THREE.Mesh(
       new THREE.CylinderGeometry(0.028, 0.028, l, 6),
@@ -305,8 +451,6 @@ export function cycliste(THREE, { couleur = null, alea = null } = {}) {
   });
   homme.position.set(0, 0.5, 0.06);
   homme.userData.buste.rotation.x = 0.34; // penché vers l'avant
-  // Les jambes pédalent : on les fige à l'horizontale et c'est `pas` qui les
-  // fait tourner. Un cycliste aux jambes droites a l'air d'être porté.
   g.add(homme);
 
   const pasHomme = homme.userData.pas;

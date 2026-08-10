@@ -44,11 +44,28 @@ const elan = (a, b, t) => {
 // jusqu'aux chevilles, et une voiture qui en descend doit descendre vraiment.
 const HAUT = (x) => 0.15 * Math.min(1, Math.max(0, (x - 5.2) / 0.8));
 
+// ⭐⭐ LE DÉNOUEMENT. `vu` est l'instant local où l'élève a repéré la scène,
+// ou `null` s'il ne l'a pas vue. Renvoie 0 puis monte à 1 en neuf dixièmes.
+//
+// C'est la pièce qui manquait au jeu, et elle touche sa promesse : « voir
+// suffit ». Avant, un script se déroulait à l'identique qu'on ait vu le
+// danger ou non, donc l'homme sortait quand même de sa voiture et se plantait
+// dans notre voie. Le jeu affirmait une chose et en montrait une autre.
+//
+// ⚠️ Ce n'est PAS « le danger disparaît ». Chaque scène se dénoue de la façon
+// dont elle se dénouerait pour de vrai quand un conducteur a levé le pied :
+// l'homme reste assis, la voiture attend son tour, l'enfant s'arrête au
+// caniveau. On ne supprime pas le danger, on lui laisse le temps de ne pas en
+// devenir un — c'est exactement ce qu'on veut enseigner.
+const apaise = (vu, te) => (vu == null ? 0 : entre(vu, vu + 0.9, te));
+
 // La trajectoire du cycliste, isolée pour qu'on puisse la DÉRIVER. C'est ce
 // qui donne son cap : voir la scène 2.
 const VELO = { x0: 3.6, v: 6.5 };
-const xVelo = (te) =>
-  VELO.x0 - entre(3.4, 4.8, te) * 0.45 - entre(5.6, 6.7, te) * 1.35;
+const xVelo = (te, vu) =>
+  VELO.x0 -
+  entre(3.4, 4.8, te) * 0.45 -
+  entre(5.6, 6.7, te) * 1.35 * (1 - apaise(vu, te) * 0.75);
 
 export const EVENEMENTS = [
   // ───────────────────────────────────────────────────────────────────────
@@ -96,15 +113,18 @@ export const EVENEMENTS = [
       { id: "homme", type: "pieton", couleur: VETEMENTS.acteur },
     ],
     porteur: "porte",
-    pose(te) {
+    pose(te, vu) {
       const z = -28;
+      // Repérée à temps : il ne descend pas. S'il avait déjà un pied dehors,
+      // il le rentre. C'est ce que fait quelqu'un qui entend une voiture.
+      const calme = apaise(vu, te);
       // ⭐ LE GESTE, EN TROIS TEMPS. Elle se déverrouille et s'entrouvre d'un
       // coup sec, elle marque un temps d'arrêt, puis quelqu'un la POUSSE en
       // grand et elle dépasse légèrement avant de se caler. C'est le temps
       // d'arrêt du milieu qui la rend crédible, et c'est lui qui laisse
       // comprendre qu'on a le droit de toucher avant qu'il soit trop tard.
       const a = entre(1.9, 2.3, te) * 0.5 + elan(3.5, 4.5, te) * 0.66;
-      const sorti = entre(4.5, 5.6, te);
+      const sorti = entre(4.5, 5.6, te) * (1 - calme);
       return {
         gare: { x: X_STATIONNE, z, cap: 0 },
         // La cavité sombre, plaquée sur le flanc : la portière fermée la
@@ -120,7 +140,7 @@ export const EVENEMENTS = [
           x: X_STATIONNE - 1.0 - sorti * 1.9,
           z: z - 1.0,
           cap: -1.4 + sorti * 0.5,
-          visible: te > 4.4,
+          visible: te > 4.4 && sorti > 0.02,
         },
       };
     },
@@ -158,8 +178,10 @@ export const EVENEMENTS = [
       { id: "camionnette", type: "camion", couleur: 0xd9d2c4 },
     ],
     porteur: "velo",
-    pose(te) {
+    pose(te, vu) {
       const z = -60 - VELO.v * te;
+      // Repéré à temps : il se déporte quand même (c'est son droit et c'est
+      // la leçon), mais d'un tiers seulement. On a levé le pied, il a la place.
       // Le regard par-dessus l'épaule, en deux temps : la TÊTE part la
       // première, le buste la suit avec un retard de quinze centièmes. C'est
       // l'ordre naturel, et c'est lui qui rend le geste lisible.
@@ -182,14 +204,14 @@ export const EVENEMENTS = [
       // degrés quand il glisse vers l'axe, seize quand il déboîte. Le regard
       // n'y touche plus du tout — c'est bien ça qu'on voulait faire lire.
       const h = 0.07;
-      const dxdt = (xVelo(te + h) - xVelo(te - h)) / (2 * h);
+      const dxdt = (xVelo(te + h, vu) - xVelo(te - h, vu)) / (2 * h);
       const cap = Math.atan2(-dxdt, VELO.v);
       // Le braquage est le cap qu'il AURA dans trois dixièmes : une roue avant
       // tourne toujours avant le vélo.
-      const apres = (xVelo(te + 0.38) - xVelo(te + 0.24)) / 0.14;
+      const apres = (xVelo(te + 0.38, vu) - xVelo(te + 0.24, vu)) / 0.14;
       return {
         velo: {
-          x: xVelo(te),
+          x: xVelo(te, vu),
           z,
           cap,
           // Un cycliste se penche DANS sa courbe. Sans ce roulis, un vélo qui
@@ -237,6 +259,7 @@ export const EVENEMENTS = [
     ],
     porteur: "passant",
     pose(te) {
+      // Pas de dénouement : cette scène n'est jamais dangereuse.
       const vers = entre(3.0, 3.9, te) - entre(5.8, 6.6, te);
       const pas = entre(3.2, 4.3, te) * 0.7 - entre(6.0, 7.0, te) * 0.7;
       const x = 7.5 - pas;
@@ -290,12 +313,15 @@ export const EVENEMENTS = [
       },
     ],
     porteur: "sortante",
-    pose(te) {
+    pose(te, vu) {
+      // Repérée à temps : elle ne sort pas, elle attend son tour, feux de
+      // stop allumés. C'est ce que fait un conducteur qui voit qu'on arrive.
+      const calme = apaise(vu, te);
       // Le petit à-coup : elle avance de quatre-vingt-dix centimètres, elle
       // s'arrête, elle repart. C'est ce faux départ qui dit « il y a
       // quelqu'un dedans et il va y aller ».
       const acoup = entre(3.4, 4.2, te) * 0.9;
-      const sortie = entre(6.5, 8.6, te);
+      const sortie = entre(6.5, 8.6, te) * (1 - calme);
       // 🔴 LE BUG DU 10/08 : « elle semble sortir directement d'un immeuble ».
       // Elle démarrait à x = 6,9, c'est-à-dire EN PLEIN SUR LE TROTTOIR,
       // devant une façade pleine. Le joueur voyait qu'elle allait le gêner,
@@ -320,7 +346,7 @@ export const EVENEMENTS = [
           // donc elle montre presque tout son flanc, et c'est ce qui la rend
           // repérable six secondes à l'avance.
           cap: 1.25 * (1 - sortie), // braquée vers la route, puis alignée
-          stop: te < 6.4, // feux de stop allumés tant qu'elle attend
+          stop: te < 6.4 || calme > 0.3, // allumés tant qu'elle attend
         },
       };
     },
@@ -358,31 +384,41 @@ export const EVENEMENTS = [
       { id: "copain", type: "enfant", couleur: VETEMENTS.enfant[1] },
     ],
     porteur: "gamin",
-    pose(te) {
+    pose(te, vu) {
+      // Repéré à temps : il s'arrête au caniveau, et il tourne enfin la tête
+      // vers la route. C'est le seul dénouement où le danger REGARDE le
+      // joueur, et c'est voulu : c'est la scène la plus difficile du jeu.
+      const calme = apaise(vu, te);
       const bord = entre(1.6, 2.6, te) * 0.75; // il s'avance au caniveau
-      const course = entre(3.2, 5.0, te);
-      // ⚠️ 6,3 et pas 6,7 : le champ horizontal fait 36°, donc tout ce qui est
+      const course = entre(3.2, 5.0, te) * (1 - calme);
+      // ⚠️ 5,9 et pas 6,7 : le champ horizontal fait 36°, donc tout ce qui est
       // à cinq mètres sur le côté sort du cadre en dessous de seize mètres.
-      // Quarante centimètres vers la chaussée, c'est une seconde de plus où
-      // l'enfant reste visible — et c'est là qu'un enfant attend, de toute
-      // façon, quand il veut traverser.
-      const x = 6.3 - bord - course * 13.0;
+      // Chaque décimètre gagné vers la chaussée est du temps de lecture en
+      // plus — et c'est là qu'un enfant attend, de toute façon, avant de
+      // traverser.
+      const x = 5.9 - bord - course * 13.0;
       return {
         gamin: {
           x,
           y: HAUT(x),
           z: -250 + course * 1.2,
           // Tourné vers l'autre trottoir depuis le début. Il ne regarde
-          // jamais la route, pas même en s'élançant.
-          cap: Math.PI / 2 - course * 0.2,
+          // jamais la route, pas même en s'élançant. Sauf s'il nous a
+          // entendus ralentir : alors il se tourne vers nous et il attend.
+          cap: Math.PI / 2 - course * 0.2 - calme * 0.62,
+          regard: -calme * 0.5,
           court: course > 0.02,
         },
         copain: {
-          x: -6.3,
-          // ⚠️ 30 cm de saut, pas 15 : à trente mètres, quinze centimètres
-          // font trois pixels. Le seul signe de la scène doit s'attraper du
-          // coin de l'œil, donc il s'exagère.
-          y: 0.15 + Math.abs(Math.sin(te * 3.6)) * 0.3,
+          // 🔴 RAMENÉ DE -6,3 À -5,7 LE 10/08 — « l'enfant on le voit à
+          // peine ». À trente-six mètres, huit mètres de décalage latéral
+          // mettent le copain à douze degrés de l'axe, c'est-à-dire dans le
+          // tiers extérieur du cadre, là où personne ne regarde en conduisant.
+          x: -5.7,
+          // ⚠️ 42 cm de saut : à trente mètres, quinze centimètres font trois
+          // pixels. Le seul signe de la scène doit s'attraper du coin de
+          // l'œil, donc il s'exagère franchement.
+          y: 0.15 + Math.abs(Math.sin(te * 3.6)) * 0.42,
           z: -253,
           cap: -Math.PI / 2,
         },

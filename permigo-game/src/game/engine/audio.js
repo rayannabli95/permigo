@@ -85,10 +85,16 @@ export function creerSon() {
   bruit.buffer = bufferBruit(ctx, 2);
   bruit.loop = true;
 
-  const roulement = voie(bruit, "bandpass", 500, 1.1);
+  // ⚠️ Q = 0,5 et non 1,1 : un filtre étroit RÉSONNE, c'est-à-dire qu'il
+  // chante une note. Deux notes tenues (le moteur et lui) faisaient le bourdon.
+  const roulement = voie(bruit, "bandpass", 500, 0.5);
   const vent = voie(bruit, "highpass", 900, 0.7);
   const freins = voie(bruit, "bandpass", 2600, 14);
   bruit.start();
+
+  // L'horloge du son : elle ne sert qu'à faire respirer ce qui, sinon, serait
+  // parfaitement stable. C'est la stabilité qui s'entend comme une machine.
+  let horloge = 0;
 
   function voie(source, type, freq, q) {
     const f = ctx.createBiquadFilter();
@@ -152,8 +158,9 @@ export function creerSon() {
 
     // Appelé une fois par image. `fige` = la manche est finie : tout se tait
     // sauf ce qu'on déclenche explicitement (le choc, par exemple).
-    maj(_dt, { vitesse = 0, gaz = 0, freinage = 0, fige = false } = {}) {
+    maj(dt, { vitesse = 0, gaz = 0, freinage = 0, fige = false } = {}) {
       if (coupe || ctx.state !== "running") return;
+      horloge += dt || 0;
 
       // Le régime : dans quel rapport on est, et où on en est dedans.
       let i = RAPPORTS.length - 2;
@@ -163,17 +170,37 @@ export function creerSon() {
       const dans = Math.min(1, Math.max(0, (vitesse - bas) / (haut - bas)));
       const regime = fige ? 0 : 0.22 + dans * 0.78;
 
-      const f0 = 32 + regime * 148; // ~32 Hz au ralenti, ~180 Hz en haut
+      // 🔴 « ON DIRAIT UN DRONE, C'EST HORRIBLE. » (Rayan, 10/08) Et c'était
+      // mécanique : ce moteur a été réglé pour un jeu où l'on ACCÉLÈRE, où la
+      // fréquence raconte la montée en régime. Dans « Secondes d'avance » on
+      // roule à 36 km/h constants pendant trente secondes, donc la même note
+      // de scie tenait trente secondes. Une note tenue, c'est la définition
+      // d'un bourdon.
+      //
+      // Trois corrections, et la troisième est la vraie :
+      //   · le moteur descend à un GRONDEMENT (filtre à 130 Hz au lieu de
+      //     260) trois fois moins fort : à cette allure, une voiture moderne
+      //     ne s'entend quasiment pas de l'intérieur ;
+      //   · sa hauteur RESPIRE de deux pour cent (deux sinusoïdes lentes et
+      //     désaccordées). Une fréquence parfaitement stable est ce que
+      //     l'oreille appelle « une machine » ;
+      //   · ⭐ c'est le ROULEMENT qui mène, pas le moteur. À 36 km/h on entend
+      //     les pneus sur le bitume, et un bruit large n'est jamais un bourdon.
+      const souffle =
+        1 + 0.02 * Math.sin(horloge * 0.7) + 0.012 * Math.sin(horloge * 2.3);
+      const f0 = (30 + regime * 120) * souffle;
       for (const { o, ratio } of oscs) vers(o.frequency, f0 * ratio, 0.06);
-      vers(filtreMoteur.frequency, 260 + regime * 1500 + gaz * 800, 0.06);
-      vers(gainMoteur.gain, fige ? 0 : 0.05 + gaz * 0.1 + regime * 0.05);
+      vers(filtreMoteur.frequency, 130 + regime * 620 + gaz * 800, 0.08);
+      vers(gainMoteur.gain, fige ? 0 : 0.014 + gaz * 0.06 + regime * 0.014);
 
-      // Le roulement monte avec la vitesse, le vent avec son carré : à 30
-      // km/h on entend les pneus, à 90 on n'entend plus que l'air.
+      // Le roulement monte avec la vitesse, le vent avec son carré. Le filtre
+      // est LARGE (Q = 0,5) : à Q = 1,1 il résonnait sur une note et ajoutait
+      // son propre bourdon à celui du moteur.
       const vr = fige ? 0 : vitesse;
-      vers(roulement.g.gain, Math.min(1, vr / 15) * 0.085);
-      vers(roulement.f.frequency, 420 + vr * 26, 0.1);
-      vers(vent.g.gain, Math.pow(Math.min(1, vr / 24), 2) * 0.075);
+      const route = 1 + 0.09 * Math.sin(horloge * 1.7 + 0.6); // le grain du bitume
+      vers(roulement.g.gain, Math.min(1, vr / 15) * 0.125 * route);
+      vers(roulement.f.frequency, 380 + vr * 22, 0.1);
+      vers(vent.g.gain, Math.pow(Math.min(1, vr / 24), 2) * 0.1);
 
       // Les freins ne chantent qu'en ralentissant vraiment, et jamais à
       // l'arrêt : un crissement continu à 3 km/h serait faux et agaçant.

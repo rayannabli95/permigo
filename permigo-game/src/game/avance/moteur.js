@@ -460,6 +460,7 @@ export async function creerPartie(
     // ⭐ Trouvé. Le gain est le temps qu'il reste avant que ça arrive.
     const gain = Math.max(0, e.def.incident - e.te);
     e.trouve = true;
+    e.teTrouve = e.te; // l'instant où la scène se met à se dénouer
     etat.trouves++;
     etat.avance += gain;
     etat.journal.push({
@@ -569,7 +570,24 @@ export async function creerPartie(
     // fonction pure de cette horloge : c'est ce qui rend le rembobinage
     // gratuit.
     for (const e of evts) {
-      if (e.fini) continue;
+      if (e.fini) {
+        // ⚠️ Une scène terminée ne s'efface pas SUR PLACE. L'ancien code
+        // rendait ses acteurs invisibles dès la fin du script : un cycliste
+        // s'évaporait à trois mètres du capot, en plein champ. On garde donc
+        // le décor figé jusqu'à ce qu'il soit passé derrière nous.
+        if (!e.range) {
+          const o = e.objets[e.def.porteur];
+          if (!o || o.position.z > v.z + 6) {
+            e.range = true;
+            for (const id in e.objets) {
+              e.objets[id].visible = false;
+              if (e.objets[id].userData.tache)
+                e.objets[id].userData.tache.visible = false;
+            }
+          }
+        }
+        continue;
+      }
       if (!e.actif) {
         if (v.z > e.def.zDeclenche) continue;
         e.actif = true;
@@ -641,14 +659,9 @@ export async function creerPartie(
         rembobine = { e, te: e.te, attente: 1.1 };
         sur("consequence", {});
       }
-      if (e.te > e.def.fin) {
-        e.fini = true;
-        for (const id in e.objets) {
-          e.objets[id].visible = false;
-          if (e.objets[id].userData.tache)
-            e.objets[id].userData.tache.visible = false;
-        }
-      }
+      // Le script est joué. On l'oublie pour la logique du jeu, mais on ne
+      // l'efface pas de l'écran avant qu'il soit derrière nous (voir plus haut).
+      if (e.te > e.def.fin) e.fini = true;
     }
 
     // La conséquence, puis le rembobinage.
@@ -693,8 +706,15 @@ export async function creerPartie(
           });
         }
       } else if (suspension <= 0) {
+        // Ici l'effacement immédiat est VOULU : on vient de rejouer la scène
+        // pour la montrer, elle appartient au passé et on reprend la route.
         e.fini = true;
-        for (const id in e.objets) e.objets[id].visible = false;
+        e.range = true;
+        for (const id in e.objets) {
+          e.objets[id].visible = false;
+          if (e.objets[id].userData.tache)
+            e.objets[id].userData.tache.visible = false;
+        }
         v.z = rembobine.zDepart; // on reprend la route où on l'avait laissée
         rembobine = null;
         etat.phase = "roule";
@@ -742,7 +762,23 @@ export async function creerPartie(
   });
 
   function poser(e) {
-    const p = e.def.pose(e.te);
+    // ⭐⭐ « MÊME SI JE L'AI REPÉRÉ, IL ME PERCUTE. » (Rayan, 10/08)
+    //
+    // C'était le défaut le plus grave du jeu, et il touchait sa PROMESSE. Un
+    // script de scène était une fonction du seul temps : il se déroulait
+    // identiquement qu'on ait vu le danger ou non. L'homme sortait donc de sa
+    // voiture et se plantait dans notre voie même quand on avait ralenti pour
+    // lui. Le jeu disait « voir suffit » et démontrait le contraire.
+    //
+    // Chaque scène reçoit maintenant l'instant où elle a été VUE, et se
+    // dénoue toute seule : l'homme reste assis, la voiture attend son tour,
+    // l'enfant s'arrête au caniveau. C'est la vraie leçon de la conduite —
+    // on ne fait pas disparaître le danger, on lui laisse le temps de ne pas
+    // en devenir un.
+    //
+    // ⚠️ On passe l'INSTANT et pas un booléen : le dénouement doit rester une
+    // fonction pure du temps local, sinon le rembobinage ment.
+    const p = e.def.pose(e.te, e.trouve ? e.teTrouve : null);
     for (const id in p) {
       const o = e.objets[id];
       if (!o) continue;

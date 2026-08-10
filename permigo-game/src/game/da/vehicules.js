@@ -159,7 +159,20 @@ function forme(THREE, points) {
 // ⭐ L'extrusion biseautée. `bevelSize` est ce qui casse les arêtes : c'est le
 // réglage le plus important du fichier, et c'est lui qui fait « métal peint »
 // plutôt que « boîte ».
-function extruder(THREE, points, largeur, biseau) {
+//
+// 🔴 ET LE GALBE, AJOUTÉ LE 10/08 — « on dirait des véhicules de Roblox ».
+//
+// Une extrusion droite donne un objet de LARGEUR CONSTANTE : même largeur au
+// nez qu'au milieu, même largeur au pavillon qu'au bas de caisse. Autrement
+// dit une savonnette, et c'est exactement ce que ça donnait à l'écran. Or
+// aucune voiture n'est droite : vue de dessus elle se rétreint aux deux bouts,
+// et vue de face son toit est plus étroit que ses hanches (les carrossiers
+// appellent ça la tonture et le rentrant de pavillon).
+//
+// On déforme donc les sommets APRÈS extrusion, avec deux lois d'une ligne
+// chacune. Ça ne coûte rien (c'est fait une fois par gabarit, au chargement)
+// et c'est la seule différence entre un pain de savon et une voiture.
+function extruder(THREE, points, largeur, biseau, galbe = null) {
   const geo = new THREE.ExtrudeGeometry(forme(THREE, points), {
     depth: Math.max(0.02, largeur - biseau * 2),
     bevelEnabled: biseau > 0,
@@ -173,8 +186,30 @@ function extruder(THREE, points, largeur, biseau) {
   // envoie sa longueur sur -Z (l'avant du moteur) et son épaisseur sur X.
   geo.rotateY(Math.PI / 2);
   geo.translate(-(largeur - biseau * 2) / 2 - biseau, 0, 0);
+  if (galbe) galber(geo, galbe);
   geo.computeVertexNormals();
   return geo;
+}
+
+// ⚠️ Le galbe se calcule sur les cotes du GABARIT, jamais sur la boîte
+// englobante de la pièce : sinon la visière, plus courte que la carrosserie,
+// se rétreindrait beaucoup plus vite qu'elle et flotterait au-dessus.
+function galber(geo, { demiLong, haut }) {
+  const pos = geo.attributes.position;
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i);
+    const y = pos.getY(i);
+    const z = pos.getZ(i);
+    // Le rétreint en plan : la puissance 2,4 garde les flancs droits sur les
+    // deux tiers du milieu et ne pince que les extrémités.
+    const u = Math.min(1, Math.abs(z) / demiLong);
+    const plan = 1 - 0.19 * Math.pow(u, 2.4);
+    // Le rentrant de pavillon : rien sous la ceinture de caisse, puis le toit
+    // se resserre. C'est lui qui donne une « épaule » à la carrosserie.
+    const v = Math.max(0, (y - haut * 0.52) / (haut * 0.48));
+    pos.setX(i, x * plan * (1 - 0.16 * v * v));
+  }
+  pos.needsUpdate = true;
 }
 
 // Un cache de géométries : cinq gabarits, et une rue en contient soixante.
@@ -218,7 +253,7 @@ export function vehicule(
   });
 
   const corps = new THREE.Mesh(
-    geoDe(THREE, `c${type}`, () => extruder(THREE, G.profil, G.larg, 0.055)),
+    geoDe(THREE, `c${type}`, () => extruder(THREE, G.profil, G.larg, 0.055, { demiLong: G.l / 2, haut: G.h })),
     peinture,
   );
   corps.castShadow = true;
@@ -243,7 +278,7 @@ export function vehicule(
   if (G.vitrage) {
     const vitres = new THREE.Mesh(
       geoDe(THREE, `v${type}`, () =>
-        extruder(THREE, G.vitrage, G.larg + 0.012, 0.02),
+        extruder(THREE, G.vitrage, G.larg + 0.012, 0.02, { demiLong: G.l / 2, haut: G.h }),
       ),
       new THREE.MeshStandardMaterial({
         color: 0x232d3f,
@@ -418,7 +453,7 @@ export function vehiculeAuBanc(
     banc.neuf();
     banc.poser(
       `corps${type}`,
-      geoDe(THREE, `c${type}`, () => extruder(THREE, G.profil, G.larg, 0.055)),
+      geoDe(THREE, `c${type}`, () => extruder(THREE, G.profil, G.larg, 0.055, { demiLong: G.l / 2, haut: G.h })),
       M.peinture,
       couleur,
       seg,
@@ -428,7 +463,7 @@ export function vehiculeAuBanc(
       banc.poser(
         `vitres${type}`,
         geoDe(THREE, `v${type}`, () =>
-          extruder(THREE, G.vitrage, G.larg + 0.012, 0.02),
+          extruder(THREE, G.vitrage, G.larg + 0.012, 0.02, { demiLong: G.l / 2, haut: G.h }),
         ),
         M.verre,
         null,
