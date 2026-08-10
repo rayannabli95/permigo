@@ -188,6 +188,82 @@ const CRENEAU = {
   ar: "مساحة أمامك بقدر ما خلفك. والعجلات مستقيمة.",
 };
 
+// ── Les dix objets, photographiés EN SITUATION ──────────────────
+// Générés pour le quiz de certification (quiz-visuals.js) puis servis ici :
+// ce sont les mêmes fichiers, la même voiture, la même nuit. Un objet posé
+// sur un socle redevient une planche technique — celui-ci est toujours dans
+// la voiture ou sur la route.
+
+const GPS = {
+  src: "br-obj-gps",
+  fr: "Le téléphone se pose sur son support. L'itinéraire se règle moteur coupé.",
+  en: "The phone goes in its cradle. Set the route with the engine off.",
+  ar: "يوضع الهاتف في حامله. اضبط المسار والمحرّك متوقّف.",
+};
+
+const CARTE = {
+  src: "br-obj-carte",
+  fr: "Le trajet se prépare avant de partir. Tu repères les grands axes et ta sortie.",
+  en: "Plan the trip before you set off. Spot the main roads and your exit.",
+  ar: "حضّر رحلتك قبل الانطلاق. حدّد الطرق الكبرى ومخرجك.",
+};
+
+const HORLOGE = {
+  src: "br-obj-horloge",
+  fr: "Tu pars avec de l'avance. Un conducteur pressé prend des risques.",
+  en: "Leave early. A driver in a hurry takes risks.",
+  ar: "انطلق مبكرًا. السائق المستعجل يخاطر.",
+};
+
+const JAUGE = {
+  src: "br-obj-jauge",
+  fr: "Le niveau se regarde avant de rouler. Une panne sèche tombe toujours au mauvais endroit.",
+  en: "Check the level before you drive. Running dry always happens in the worst spot.",
+  ar: "تحقّق من مستوى الوقود قبل القيادة. نفاد الوقود يحدث دائمًا في أسوأ مكان.",
+};
+
+const COMPTEUR = {
+  src: "br-obj-compteur",
+  fr: "Une vitesse stable use moins de carburant. Le compteur se lit du coin de l'œil.",
+  en: "A steady speed burns less fuel. Glance at the dial, never stare.",
+  ar: "السرعة الثابتة تستهلك وقودًا أقل. انظر إلى العدّاد بطرف عينك.",
+};
+
+const PNEU = {
+  src: "br-obj-pneu",
+  fr: "Le pneu se contrôle à froid. Tu cherches l'usure et les coupures.",
+  en: "Check tyres cold. Look for wear and cuts.",
+  ar: "افحص الإطار وهو بارد. ابحث عن التآكل والشقوق.",
+};
+
+const SECOURS = {
+  src: "br-obj-secours",
+  fr: "Le gilet reste à portée de main. Le triangle se pose derrière la voiture.",
+  en: "Keep the vest within reach. The triangle goes behind the car.",
+  ar: "احتفظ بالسترة في متناول يدك. ويوضع المثلث خلف السيارة.",
+};
+
+const DISQUE_A = {
+  src: "br-obj-disqueA",
+  fr: "Le disque A se colle à l'arrière. Il reste tout le temps de la période probatoire.",
+  en: "The A disc goes on the back. It stays on for the whole probation period.",
+  ar: "يُلصق قرص A في الخلف. ويبقى طوال فترة القيادة تحت الاختبار.",
+};
+
+const PERMIS = {
+  src: "br-obj-permis",
+  fr: "Le permis reste sur toi à chaque trajet. Un contrôle peut arriver n'importe quand.",
+  en: "Carry your licence on every trip. A check can happen at any time.",
+  ar: "احمل رخصتك في كل رحلة. فقد تُوقَف للتفتيش في أي وقت.",
+};
+
+const ETHYLO = {
+  src: "br-obj-ethylo",
+  fr: "En période probatoire la limite est de 0,2 g par litre. Un seul verre la dépasse.",
+  en: "On probation the limit is 0.2 g per litre. One drink is already over.",
+  ar: "خلال فترة الاختبار الحد هو 0,2 غرام لكل لتر. وكأس واحدة تتجاوزه.",
+};
+
 const FICHE_SCHEMAS = {
   // ── MONDE 1 · Maniement ──────────────────────────────────────
   C1a: [CLIGNO, PEDALES, CONTACT],
@@ -196,7 +272,9 @@ const FICHE_SCHEMAS = {
   C1d: [FREIN_MAIN, CONTACT, LEVIER],
   C1e: [PEDALES],
   C1f: [LEVIER],
-  C1g: [PHARES, FREIN_MAIN],
+  // Le tour de voiture, c'est ce qu'on regarde DEHORS avant de monter : les
+  // pneus, les feux, le niveau, et le gilet qui doit être là le jour où.
+  C1g: [PNEU, PHARES, JAUGE, SECOURS],
   C1h: [CRENEAU, MARCHE_ARRIERE],
   C1i: [MARCHE_ARRIERE, ANGLE_MORT],
 
@@ -306,11 +384,13 @@ const FICHE_SCHEMAS = {
   C3g: [CYCLISTE, REGARD_LOIN],
 
   // ── MONDE 4 · Conduite autonome ──────────────────────────────
-  C4b: [REGARD_LOIN],
-  C4c: [LEVIER, REGARD_LOIN],
+  C4a: [CARTE, GPS, HORLOGE],
+  C4b: [GPS, REGARD_LOIN],
+  C4c: [COMPTEUR, LEVIER, REGARD_LOIN],
   C4d: [DISTANCE, REGARD_LOIN, RETRO_INT],
   C4e: [CYCLISTE, ANGLE_MORT],
   C4f: [CEINTURE, RETRO_GAUCHE, VOLANT],
+  C4g: [DISQUE_A, PERMIS, ETHYLO],
 };
 
 /**
