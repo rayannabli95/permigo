@@ -318,7 +318,7 @@ const ROUTE_TITLES = {
   "en-situation": "En situation",
   "situation-3d": "En situation 3D",
   slice: "Banc d'essai du regard",
-  avance: "Secondes d'avance",
+  avance: "Au volant",
   boutique: "Boutique",
   "mes-coffres": "Mes coffres",
   messages: "Messages",

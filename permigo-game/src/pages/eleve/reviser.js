@@ -58,6 +58,11 @@ const RV_I18N = {
     centre_m: "Exam day",
     centre_v: "View",
     neuf: "New",
+    beta: "Beta",
+    volant_t: "Behind the wheel",
+    volant_s: "Spot the hazard before it happens",
+    volant_m: "Duration",
+    volant_v: "30 s",
     duel_t: "Challenge your friends",
     duel_s: "They do not need an account",
     duel_m: "Players",
@@ -85,6 +90,11 @@ const RV_I18N = {
     centre_m: "يوم الامتحان",
     centre_v: "عرض",
     neuf: "جديد",
+    beta: "تجريبي",
+    volant_t: "خلف المقود",
+    volant_s: "اكتشف الخطر قبل وقوعه",
+    volant_m: "المدة",
+    volant_v: "30 ثانية",
     duel_t: "تحدَّ أصدقاءك",
     duel_s: "لا يحتاجون إلى حساب",
     duel_m: "لاعبون",
@@ -105,6 +115,7 @@ const HERO_IMG = "/showcase/eleve-en-situation.webp"; // vraie capture du jeu (c
 
 // Badges 3D glossy (public/art/reviser/), posés sans cadre sur les cartes.
 const BADGE = {
+  volant: "/art/reviser/voiture.webp",
   exam: "/art/reviser/cible.webp",
   fiche: "/art/reviser/livre.webp",
   duel: "/art/reviser/epees.png", // pas de .webp dans la bibliothèque
@@ -200,6 +211,12 @@ ${chromeNight("#241a52", "#1a1340")}
 .rv4-tag { display:inline-block; margin-bottom:5px; padding:4px 9px; border-radius:999px;
   background:linear-gradient(180deg,#f7cf68,#f0aa2c); color:#2a1e05;
   font:800 9.5px/1 'Archivo',sans-serif; letter-spacing:.1em; text-transform:uppercase; }
+/* La carte « bêta » : liseré violet pâle, pas d'or. L'or dit « regarde ça »,
+   le violet dit « c'est en chantier » — deux messages différents. */
+.rv4-item.beta { border-color:rgba(142,135,255,.5);
+  background:linear-gradient(180deg,#352c72,#2a2160); }
+.rv4-tag-beta { background:rgba(142,135,255,.2); color:#c8c3ff;
+  border:1px solid rgba(142,135,255,.45); }
 .rv4-meta { flex:none; text-align:right; font:800 14px/1.1 'Archivo',sans-serif; letter-spacing:-.01em; color:#f5c451; }
 .rv4-meta small { display:block; font:700 10px/1 'Archivo',sans-serif; letter-spacing:.08em; text-transform:uppercase; color:#9089c7; margin-bottom:3px; }
 
@@ -244,10 +261,14 @@ function render({
       ? `<small${R}>${rv("best", "Record")}</small>${examBest} %`
       : `<small${R}>${rv("goal", "Objectif")}</small>/31`;
 
+  // Un seul emplacement d'étiquette par carte : « Nouveau » en or, « Bêta » en
+  // violet pâle. Le bêta ne se vend pas comme une nouveauté, il PRÉVIENT —
+  // l'élève doit savoir qu'il essuie les plâtres avant de donner son avis.
   const item = (id, badge, title, meta, opts = {}) => `
-    <button class="rv4-item${opts.neuf ? " neuf" : ""}" data-go="${id}">
+    <button class="rv4-item${opts.neuf ? " neuf" : ""}${opts.beta ? " beta" : ""}" data-go="${id}">
       <span class="rv4-badge"><img src="${badge}" alt="" width="512" height="512" loading="lazy" decoding="async"></span>
       <span class="rv4-itx">
+        ${opts.beta ? `<span class="rv4-tag rv4-tag-beta"${R}>${rv("beta", "Bêta")}</span>` : ""}
         ${opts.neuf ? `<span class="rv4-tag"${R}>${rv("neuf", "Nouveau")}</span>` : ""}
         <h3${R}>${title}</h3>
         ${opts.sub ? `<p${R}>${opts.sub}</p>` : ""}
@@ -279,6 +300,16 @@ function render({
 
     <div class="rv4-rail">
       <div class="rv4-railhead"><span${R}>${rv("rail", "Aussi pour s'entraîner")}</span><div class="rule"></div></div>
+      ${item(
+        "avance",
+        BADGE.volant,
+        rv("volant_t", "Au volant"),
+        `<small${R}>${rv("volant_m", "Durée")}</small>${rv("volant_v", "30 s")}`,
+        {
+          beta: true,
+          sub: rv("volant_s", "Repère le danger avant qu'il arrive"),
+        },
+      )}
       ${item("exam-conduite", BADGE.exam, rv("exam_t", "Examen blanc"), examMeta)}
       ${item("revision-conduite", BADGE.fiche, rv("fiches_t", "Fiches de révision"), `<small${R}>${rv("fiches_m", "Fiches")}</small>${fichesLues} / ${fichesTotal}`)}
       ${item(

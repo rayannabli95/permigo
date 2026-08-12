@@ -11,6 +11,18 @@
  * moteur.js), et la profondeur revient. Le poste n'est pas de la décoration :
  * c'est lui qui rend le champ de vision jouable. */
 
+/* 🔴 LE JEU PREND TOUT L'ÉCRAN, BARRES DE L'APP COMPRISES. Découvert le
+   12/08 en le branchant au hub Réviser : jusque-là on n'y arrivait que par
+   l'URL, sans le chrome. Depuis le hub, le bandeau du haut et la barre du bas
+   se posaient PAR-DESSUS — ils masquaient la mention bêta, la croix de sortie
+   et le bas du poste de conduite. Une barre de navigation n'a rien à faire
+   dans un jeu de trente secondes. `body.av-plein` est posée par la page et
+   retirée à la sortie. */
+body.av-plein #header-bar,
+body.av-plein #bottom-nav {
+  display: none !important;
+}
+
 .av {
   --poste: 38%;
   --capot: 9%;
@@ -509,7 +521,17 @@
   z-index: 6;
   display: grid;
   place-items: center;
-  background: rgb(12 22 34 / 0.76);
+  /* ⚠️ La carte de fin porte maintenant le formulaire d'avis : sur un petit
+     écran, clavier ouvert, elle dépasse. Sans ces deux lignes le bouton
+     « Envoyer » est hors de l'écran et personne ne peut le toucher — et
+     `touch-action` doit être rendu, `.av` le coupe pour le jeu. */
+  overflow-y: auto;
+  touch-action: auto;
+  padding: calc(env(safe-area-inset-top) + 3rem) 1.2rem
+    calc(env(safe-area-inset-bottom) + 1.6rem);
+  background: rgb(12 22 34 / 0.82);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
@@ -554,6 +576,170 @@
   font-size: 0.98rem;
   font-weight: 700;
   color: rgb(255 255 255 / 0.78);
+}
+
+/* ── La mention « bêta » et la sortie ─────────────────────────────────── */
+
+/* En haut, petit, et surtout DISCRET : c'est un avertissement honnête, pas
+   une décoration. Il ne doit jamais entrer en concurrence avec la route. */
+.av-beta {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + 10px);
+  left: 14px;
+  z-index: 7;
+  padding: 0.16rem 0.5rem;
+  border: 1px solid rgb(255 255 255 / 0.28);
+  border-radius: 999px;
+  background: rgb(10 16 26 / 0.42);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.78);
+  pointer-events: none;
+}
+
+.av-sortie {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + 4px);
+  right: 8px;
+  z-index: 7;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(10 16 26 / 0.34);
+  color: rgb(255 255 255 / 0.85);
+  cursor: pointer;
+}
+
+.av-sortie svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+}
+
+/* ── L'avis de l'élève, une seule fois ────────────────────────────────── */
+
+.av-avis {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  width: min(100%, 22rem);
+  padding: 1.05rem 1.1rem 1.15rem;
+  border: 1px solid rgb(255 255 255 / 0.14);
+  border-radius: 1.15rem;
+  background: rgb(255 255 255 / 0.06);
+}
+
+.av-avis-t {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 800;
+  text-wrap: balance;
+  color: rgb(255 255 255 / 0.9);
+}
+
+.av-notes {
+  display: flex;
+  gap: 0.25rem;
+}
+
+/* 44px de cible tactile pour une étoile de 30 : la règle mobile du projet
+   s'applique aussi à un formulaire d'avis. */
+.av-note {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: rgb(255 255 255 / 0.26);
+  cursor: pointer;
+  transition:
+    color 0.14s ease,
+    transform 0.14s ease;
+}
+
+.av-note svg {
+  width: 30px;
+  height: 30px;
+  fill: currentColor;
+}
+
+.av-note.on {
+  color: #f5c451;
+  transform: scale(1.06);
+}
+
+.av-mot {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: rgb(255 255 255 / 0.62);
+}
+
+/* Le mot libre n'existe qu'une fois la note posée. */
+.av-suite {
+  display: none;
+  width: 100%;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.av-avis.choisi .av-suite {
+  display: flex;
+  animation: av-lecon 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.av-texte {
+  width: 100%;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid rgb(255 255 255 / 0.18);
+  border-radius: 0.8rem;
+  background: rgb(8 14 24 / 0.5);
+  color: #fff;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  resize: none;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.av-texte::placeholder {
+  color: rgb(255 255 255 / 0.42);
+}
+
+.av-envoi {
+  min-height: 48px;
+  padding: 0 1.4rem;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #8e87ff, #6c63ff);
+  box-shadow: 0 4px 0 #4a3fc9;
+  color: #fff;
+  font: inherit;
+  font-size: 0.98rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.av-envoi:disabled {
+  opacity: 0.6;
+}
+
+.av-merci {
+  margin: 0;
+  padding: 0.4rem 0;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #f5c451;
 }
 
 @media (prefers-reduced-motion: reduce) {
