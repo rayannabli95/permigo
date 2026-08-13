@@ -120,6 +120,18 @@ async function boot() {
         const { mount } = await import("@/pages/public/pass-simple.js");
         return mount(app);
       }
+      // Le jeu et le banc d'essai du regard, sans compte : on tend un
+      // téléphone à un élève dans un couloir d'auto-école, et c'est une
+      // ARRIVÉE DIRECTE sur un lien, donc c'est ici que ça se joue, pas
+      // seulement dans router.js.
+      if (location.hash.startsWith("#/avance")) {
+        const { mount } = await import("@/pages/eleve/avance.js");
+        return mount(app);
+      }
+      if (location.hash.startsWith("#/slice")) {
+        const { mount } = await import("@/pages/eleve/slice-regard.js");
+        return mount(app);
+      }
       // ⚠️ #/pass n'est plus la page par défaut, mais elle DOIT rester ici :
       // Stripe renvoie l'acheteur sur #/pass?checkout=success, écrit en dur
       // dans l'edge function pass-checkout, déjà déployée côté serveur. Un
