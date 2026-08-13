@@ -1,0 +1,888 @@
+// « Secondes d'avance ». Trente secondes, une rue, cinq événements.
+//
+// La boucle tient en une ligne :
+//   JE VOIS AVANT → JE TOUCHE → LE MONDE RÉAGIT → JE GAGNE DU TEMPS.
+//
+// Un seul geste : toucher ce qui va poser problème. Pas de caméra à bouger,
+// pas de frein, pas de volant, pas de choix A/B. ⭐ VOIR SUFFIT : quand la
+// lecture est juste, la voiture se comporte comme quelqu'un qui a vu.
+//
+// La récompense n'est pas un score, c'est `incident − instant du doigt`, en
+// secondes. Le même nombre sert de plaisir au joueur et de mesure au produit.
+//
+// 🔴 CE QUI A CHANGÉ LE 10/08 — le retour de Rayan, en une phrase :
+// « minimaliste ≠ incompréhensible ». Le moteur était bon, l'expérience
+// autour était muette. Donc : le champ de vision est refait (voir plus bas),
+// chaque scène porte une phrase qui dit où regarder, la première scène est un
+// tutoriel qui se relance tout seul si rien n'est touché, et l'aide diminue
+// au fil des parties.
+
+import { creerMonde } from "../engine/world.js";
+import { creerSon } from "../engine/audio.js";
+import { creerPost } from "../engine/post.js";
+import { creerQualite } from "../engine/qualite.js";
+import { creerKit } from "../environments/kit.js";
+import { construireRue, X_STATIONNE } from "./rue.js";
+import { EVENEMENTS, TROUS, DUREE, VITESSE, DEPART } from "./scenario.js";
+import { VEHICULES_PORTEURS, VETEMENTS, lisere } from "../da/palette.js";
+import { vehicule } from "../da/vehicules.js";
+import { personnage, cycliste } from "../da/personnages.js";
+
+// 🔴 PLUS AUCUN FICHIER À TÉLÉCHARGER. Les quatre modèles restants (camion,
+// piéton, vélo, arbre) sont devenus morts avec les phases 2, 4 et 5 : tout est
+// procédural. C'est le lint de performance qui les a trouvés, pas une
+// relecture — ils continuaient d'être chargés avant la première image sans que
+// rien ne s'en serve. Conséquence : `#/avance` n'émet plus une seule requête
+// d'asset, donc plus de dépendance à la CSP et un démarrage instantané.
+// Le moment de découverte, au centième. Court, sinon il casse le rythme ;
+// trop court, il ne claque pas. 0,42 s en tout — sauf la toute première fois,
+// où il dure le temps d'expliquer ce qu'est une seconde d'avance.
+const SUSPENSION = { creux: 0.3, sortie: 0.12, tempo: 0.08 };
+const SUSPENSION_PREMIERE = 2.4;
+
+// 🔴 LE CHAMP HORIZONTAL, PAS LE VERTICAL. C'est le réglage qui a fait dire
+// « j'ai l'impression de regarder une scène 3D de loin ».
+//
+// Un téléphone en portrait est haut et étroit. Three.js prend un champ
+// VERTICAL : en fixer 44° sur un écran de rapport 0,46 donne 21° horizontaux,
+// c'est-à-dire un téléobjectif. Un téléobjectif écrase la profondeur, et une
+// image sans profondeur ressemble exactement à ce que Rayan a décrit : une
+// scène regardée de loin, pas une route vue du siège conducteur.
+//
+// On fixe donc l'horizontal à 36° et on DÉDUIT le vertical du format réel de
+// la fenêtre. Le pare-brise n'occupe plus tout l'écran (le poste de conduite
+// prend le bas), donc le rapport de la zone 3D est bien plus proche du carré
+// et le vertical reste raisonnable.
+const FOV_H = 36;
+
+// Le doigt n'est pas un rayon laser. Un enfant à trente mètres fait trente
+// pixels de haut : exiger de le toucher au pixel près, c'est transformer un
+// jeu de lecture en jeu d'adresse.
+const TOLERANCE = 46;
+
+export async function creerPartie(
+  hote,
+  { sur = () => {}, niveau = "guide", expliquer = false } = {},
+) {
+  const THREE = await import("three");
+  // 📖 « Seize heures », la recette de lumière de la bible §4. C'est elle qui
+  // donne du volume à un monde fait de primitives, et les ombres violettes
+  // qui font qu'une capture est reconnaissable.
+  const monde = creerMonde(THREE, hote, { heure: "seize" });
+  const kit = creerKit(THREE);
+
+  const { groupe, cibles, animer } = construireRue(THREE, kit, {
+    trous: TROUS,
+  });
+  monde.scene.add(groupe);
+
+  // 🔴 L'ombre ne couvrait que trente mètres autour de la voiture, et les
+  // immeubles projettent en travers de toute la chaussée : leur ombre
+  // s'arrêtait donc NET au milieu de la route, sur une arête bien droite qui
+  // ressemble à une tache sale. Le champ passe à cinquante-cinq mètres, et la
+  // carte double pour garder la même finesse par mètre.
+  {
+    const c = monde.soleil.shadow.camera;
+    c.left = -55;
+    c.right = 55;
+    c.top = 55;
+    c.bottom = -55;
+    c.far = 170;
+    c.updateProjectionMatrix();
+    monde.soleil.shadow.mapSize.set(2048, 2048);
+  }
+
+  monde.surRedimension((l, h) => {
+    const v = 2 * Math.atan((Math.tan((FOV_H * Math.PI) / 360) * h) / l);
+    monde.camera.fov = Math.max(26, Math.min(64, (v * 180) / Math.PI));
+    monde.camera.updateProjectionMatrix();
+  });
+
+  // ⭐ LE POSTE DE CONDUITE, EN VRAIE 3D (décision Rayan, 10/08 : « mets celui
+  // de la Cupra qu'on utilisait pour les fiches »).
+  //
+  // C'était un arc violet en CSS collé en bas de l'écran. Il faisait le
+  // travail de cadrage, mais il ne pouvait rien faire d'autre : un
+  // autocollant ne bouge pas avec la caméra, ne reçoit pas la lumière de
+  // seize heures, et surtout ne MASQUE rien. Or apprendre à contourner du
+  // regard un montant de pare-brise est exactement une des compétences qu'on
+  // enseigne. C'est donc la même géométrie que le mode course : capot,
+  // planche de bord, montants et volant.
+  // 🔴 ET CE QUE J'AI RETIRÉ, PARCE QUE C'EST LA VRAIE DÉCISION DU JOUR.
+  //
+  // J'ai monté l'habitacle complet, mesuré, et il ne tient pas sur un
+  // téléphone en portrait. La raison est géométrique, pas artistique : l'œil
+  // du conducteur est à 1,22 m et le capot à 0,93, donc TOUT ce qui se trouve
+  // à plus de huit degrés sous l'horizon est de l'intérieur de voiture. Avec
+  // un champ vertical de 50°, ça fait 45 % du cadre. Résultat mesuré : la
+  // route passait de 53 % à 31 % de l'écran. Le jeu demande de repérer un
+  // enfant à trente mètres ; lui prendre un tiers de sa fenêtre pour montrer
+  // une planche de bord est un mauvais échange.
+  //
+  // Le capot reste donc le violet en CSS (la laque de la Cupra, signature X
+  // de la bible), et on ne garde de la 3D QUE LES MONTANTS DE PARE-BRISE.
+  // Eux sont verticaux, ils ne coûtent presque rien en surface d'écran, et
+  // ils font le seul travail que le CSS ne pouvait pas faire : MASQUER pour
+  // de vrai. Contourner du regard un montant est exactement une des
+  // compétences qu'on enseigne.
+  const poste = kit.poste("violet");
+  for (const enfant of [...poste.children])
+    if (Math.abs(enfant.position.x) < 0.8) poste.remove(enfant);
+  monde.scene.add(poste);
+
+  const post = creerPost(THREE, monde);
+  // 🔴 L'étalonnage par défaut est celui du CRÉPUSCULE : les ombres tirent
+  // vers le violet, les hautes lumières vers l'ambre, et le vignettage est
+  // lourd. Appliqué à une rue de plein jour, il rend une image sale et
+  // bleuâtre. Ici : neutre, contrasté, propre.
+  // L'étalonnage « Seize heures » (bible §4) : CHAUD dans les hautes lumières,
+  // VIOLET dans les ombres. C'est ce contraste de température qui fait le
+  // « cinéma », et il ne coûte rien puisque la chaîne d'effets tourne déjà.
+  Object.assign(post.uniforms.uFroid, { value: 0.05 });
+  Object.assign(post.uniforms.uChaud, { value: 0.1 });
+  // ⚠️ 1,05 et pas 1,12 : au-dessus, les façades sorbet virent au Lego. La
+  // chaîne ACES sature déjà d'elle-même, l'étalonnage ne doit pas en rajouter.
+  Object.assign(post.uniforms.uSaturation, { value: 1.05 });
+  Object.assign(post.uniforms.uVignette, { value: 0.26 });
+  Object.assign(post.uniforms.uGrain, { value: 0.014 });
+  // 🔴 LE FLOU DE BORD ÉTAIT À FOND, ET IL MANGEAIT TOUT LE DÉTAIL.
+  //
+  // `uFlou = 1` ouvre l'objectif jusqu'à 85 % de flou sur les bords du cadre.
+  // Sur un écran de cinéma, c'est une signature. Sur un téléphone en portrait,
+  // les « bords » commencent à un tiers de la largeur : les façades y étaient
+  // dédoublées et laiteuses, et c'est une bonne part du « ça manque de
+  // qualité ». Il ne restait net qu'un couloir central, exactement là où il
+  // n'y a que du bitume. On garde un soupçon d'ouverture (0,3) parce qu'un
+  // rendu net partout fait maquette d'architecte, et on rend le reste au
+  // dessin.
+  // ⚠️ Par `objectif()` et surtout PAS en écrivant les uniformes : le
+  // gouverneur de qualité les réécrit à chaque changement de cran (cf. le
+  // piège documenté dans post.js).
+  post.objectif({ flou: 0.28, aberration: 0.00025 });
+  const qualite = creerQualite(monde, {});
+  qualite.brancherPost(post);
+  const son = creerSon();
+
+  // L'anneau qui se referme sur ce qu'on vient de trouver. Une seule pièce.
+  const anneau = new THREE.Mesh(
+    new THREE.RingGeometry(0.82, 0.94, 44),
+    new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0,
+      side: THREE.DoubleSide,
+      depthTest: false,
+      fog: false,
+    }),
+  );
+  anneau.renderOrder = 50;
+  anneau.visible = false;
+  monde.scene.add(anneau);
+
+  // ⭐ Le halo du tutoriel. Il n'existe QU'AU premier niveau d'aide, et il
+  // n'apparaît que si l'élève n'a rien touché alors que le signe est déjà là.
+  // Son rôle n'est pas de désigner le danger : c'est d'apprendre qu'on a le
+  // droit de toucher l'image.
+  const halo = new THREE.Mesh(
+    new THREE.RingGeometry(1.05, 1.22, 40),
+    new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0,
+      side: THREE.DoubleSide,
+      depthTest: false,
+      fog: false,
+    }),
+  );
+  halo.renderOrder = 49;
+  halo.visible = false;
+  monde.scene.add(halo);
+  let cibleHalo = null;
+
+  // ── Les acteurs des cinq événements ────────────────────────────────────
+  const touchables = [];
+
+  function fabriquer(a) {
+    if (a.type === "porte") {
+      // 🔴 LE BUG DU 10/08, ET IL ÉTAIT INVISIBLE EN LISANT LE CODE.
+      //
+      // La portière était bien montée sur une charnière VERTICALE, et le
+      // pivot était bien remonté à 62 cm du sol… dans `fabriquer`. Sauf que
+      // `poser()` réécrit la position de chaque acteur à chaque image, et le
+      // script de la scène ne donne pas de hauteur : `q.y ?? 0` remettait donc
+      // le pivot à zéro à la première image. La portière était enterrée à
+      // mi-hauteur et on n'en voyait que le haut, qui balayait le sol. D'où
+      // « elle s'ouvre depuis le bas » : ce n'était pas la rotation, c'était
+      // l'altitude. La leçon vaut pour tout le fichier — ce qu'on règle à la
+      // construction, le script l'écrase.
+      //
+      // Le remède est structurel : la charnière est désormais à l'origine du
+      // groupe, au niveau du SOL, et toutes les pièces portent leur hauteur
+      // dans leurs coordonnées locales. Plus rien à écraser.
+      const g = new THREE.Group();
+      const teinte = VEHICULES_PORTEURS.bleu;
+      const tole = new THREE.MeshStandardMaterial({
+        color: teinte,
+        roughness: 0.2,
+        metalness: 0.05,
+        envMapIntensity: 1.3,
+      });
+      // Le panneau, de 30 cm à 92 cm : la ceinture de caisse d'une berline.
+      const bas = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.64, 1.02), tole);
+      bas.position.set(0, 0.61, 0.52);
+      g.add(bas);
+      // ⭐ L'ENCADREMENT DE VITRE. C'est LUI qui fait lire une portière plutôt
+      // qu'une plaque : une porte de voiture n'est pas un rectangle plein, sa
+      // moitié haute est un cadre qui laisse passer le ciel. À trente mètres,
+      // c'est ce vide qui la distingue de la carrosserie derrière.
+      for (const [l, h, y, z] of [
+        [0.05, 0.44, 1.15, 0.05],
+        [0.05, 0.44, 1.15, 0.99],
+        [0.05, 0.05, 1.35, 0.52],
+      ]) {
+        const m = new THREE.Mesh(new THREE.BoxGeometry(0.07, h, l), tole);
+        m.position.set(0, y, z);
+        g.add(m);
+      }
+      const vitre = new THREE.Mesh(
+        new THREE.BoxGeometry(0.03, 0.42, 0.9),
+        new THREE.MeshStandardMaterial({
+          color: 0x232d3f,
+          roughness: 0.08,
+          metalness: 0.6,
+          envMapIntensity: 1.6,
+        }),
+      );
+      vitre.position.set(0, 1.14, 0.52);
+      g.add(vitre);
+      // La poignée et le liseré de bas de caisse : deux détails de rien du
+      // tout, et la portière cesse d'être une planche peinte.
+      const poignee = new THREE.Mesh(
+        new THREE.BoxGeometry(0.05, 0.06, 0.22),
+        new THREE.MeshStandardMaterial({
+          color: lisere(teinte, 0.3),
+          roughness: 0.3,
+          metalness: 0.4,
+        }),
+      );
+      poignee.position.set(-0.05, 0.86, 0.72);
+      g.add(poignee);
+      g.traverse((o) => (o.castShadow = true));
+      return g;
+    }
+    if (a.type === "ouverture") {
+      // ⭐ LE TROU NOIR DE L'HABITACLE. Ce qui rend une portière ouverte
+      // lisible de loin n'est pas la portière : c'est la CAVITÉ sombre
+      // qu'elle laisse dans le flanc de la voiture. Sans elle, une portière
+      // ouverte ressemble à un aileron collé sur une voiture intacte.
+      const g = new THREE.Group();
+      // ⚠️ Deux centimètres d'épaisseur, plaqués à cinq millimètres devant le
+      // flanc : assez pour passer devant la tôle, assez peu pour que la
+      // portière fermée le recouvre entièrement. Un centimètre de trop et on
+      // voyait un liseré noir autour d'une portière pourtant fermée.
+      const m = new THREE.Mesh(
+        new THREE.BoxGeometry(0.02, 0.66, 1.0),
+        new THREE.MeshStandardMaterial({
+          color: 0x14161f,
+          roughness: 0.95,
+          metalness: 0,
+        }),
+      );
+      m.position.set(0, 0.62, 0);
+      g.add(m);
+      return g;
+    }
+    if (a.type === "poubelle") {
+      const m = new THREE.Mesh(
+        new THREE.BoxGeometry(0.7, 1.05, 0.7),
+        new THREE.MeshStandardMaterial({ color: 0x3f4a3f, roughness: 0.9 }),
+      );
+      m.position.y = 0.52;
+      m.castShadow = true;
+      const g = new THREE.Group();
+      g.add(m);
+      return g;
+    }
+    if (a.type === "enfant" || a.type === "pieton") {
+      // ⭐ Plus de modèle importé : une quille dessinée, dont la tête tourne
+      // indépendamment du corps. C'est la condition pour que « il a regardé
+      // derrière lui » et « il regarde l'autre trottoir » soient LISIBLES.
+      const p = personnage(THREE, {
+        enfant: a.type === "enfant",
+        couleur: a.couleur ?? null,
+      });
+      const g = new THREE.Group();
+      g.add(p);
+      g.userData.buste = p.userData.buste;
+      g.userData.tete = p.userData.tete;
+      g.userData.pas = p.userData.pas;
+      return g;
+    }
+    if (a.type === "velo") {
+      const v = cycliste(THREE, { couleur: a.couleur ?? null });
+      const g = new THREE.Group();
+      g.add(v);
+      g.userData.buste = v.userData.buste;
+      g.userData.tete = v.userData.tete;
+      g.userData.pas = v.userData.pas;
+      g.userData.braquer = v.userData.braquer;
+      return g;
+    }
+    // 🔴 AUCUN MODÈLE 3D POUR UN VÉHICULE DE SCÈNE, et c'est un piège tombé
+    // deux fois : les GLB sont texturés pour la DA de NUIT, donc en plein jour
+    // ils rendent tous le même bleu marine. La voiture qui hésite est censée
+    // être rouge et se repérer à soixante-dix mètres ; elle sortait bleu
+    // sombre au milieu d'une file de voitures garées bleu sombre.
+    //
+    // ⭐ Un PORTEUR de scène est toujours laqué : son reflet le détache des
+    // figurants, qui sont mats. La couleur et la finition font le travail
+    // qu'un contour ou une flèche feraient dans un jeu moins soigné.
+    const m = vehicule(
+      THREE,
+      a.type === "camion" ? "utilitaire" : "berline",
+      a.couleur,
+      { laque: true },
+    );
+    const g = new THREE.Group();
+    g.add(m);
+    g.userData.freiner = m.userData.freiner;
+    return g;
+  }
+
+  const evts = EVENEMENTS.map((e) => {
+    const objets = {};
+    for (const a of e.acteurs) {
+      const o = fabriquer(a);
+      o.visible = false;
+      o.traverse((x) => {
+        if (x.isMesh) x.castShadow = true;
+      });
+      o.userData.evenement = e.id;
+      monde.scene.add(o);
+      objets[a.id] = o;
+      touchables.push(o);
+      // Une tache de contact sous ce qui roule : sans elle un véhicule flotte.
+      if (a.type === "voiture" || a.type === "camion") {
+        const t = kit.tache(1.9, a.type === "camion" ? 7 : 4.3, 0.45);
+        t.visible = false;
+        monde.scene.add(t);
+        o.userData.tache = t;
+      }
+    }
+    return {
+      def: e,
+      objets,
+      actif: false,
+      fini: false,
+      te: 0,
+      trouve: false,
+      rate: false,
+      amorceDite: false,
+      relanceDite: false,
+      zLisible: undefined, // où était la voiture quand le signe est apparu
+    };
+  });
+
+  // Les voitures garées et les passants sont touchables eux aussi : c'est
+  // indispensable. Sans eux, « ce qui répond au doigt » trahit où sont les
+  // événements et le jeu se résout en tapant partout.
+  // ⚠️ Depuis le banc d'instances, la flotte garée n'est plus faite d'objets
+  // séparés : `cibles` porte les lots concernés, et le lancer de rayon sait
+  // interroger une InstancedMesh.
+  touchables.push(...cibles);
+
+  // ── L'état de la partie ────────────────────────────────────────────────
+  const etat = {
+    phase: "roule", // roule · consequence · rembobine · fini
+    t: 0,
+    avance: 0,
+    fauxPositifs: 0,
+    trouves: 0,
+    manques: 0,
+    dangers: EVENEMENTS.filter((e) => e.danger).length,
+    journal: [],
+  };
+  const v = { x: DEPART.x, z: DEPART.z, vitesse: VITESSE, ecart: 0 };
+  let securiteJusqu = -1; // « voir suffit » : la voiture lève le pied
+  let freinUrgence = 0;
+  let suspension = 0;
+  let cibleFocus = null;
+  let rembobine = null;
+  let premierTrouve = true;
+
+  const camera = monde.camera;
+  const rayon = new THREE.Raycaster();
+  const ndc = new THREE.Vector2();
+  const projete = new THREE.Vector3();
+
+  function versEcran(objet, hauteur = 0.9) {
+    if (!objet) return [0.5, 0.5];
+    objet.getWorldPosition(projete);
+    projete.y += hauteur;
+    projete.project(camera);
+    return [projete.x * 0.5 + 0.5, projete.y * 0.5 + 0.5];
+  }
+
+  // ── Le doigt ───────────────────────────────────────────────────────────
+  //
+  // `undefined` = le ciel, ça ne coûte rien. `null` = quelque chose d'inerte.
+  // Sinon, l'événement visé.
+  function viser(px, py) {
+    const r = hote.getBoundingClientRect();
+    // 1. Le porteur actif le plus proche, en pixels d'écran. C'est cette
+    //    tolérance qui rend le jeu jouable au pouce.
+    let meilleur = null;
+    let dMin = Infinity;
+    for (const e of evts) {
+      if (!e.actif || e.fini || e.trouve || e.rate) continue;
+      const o = e.objets[e.def.porteur];
+      if (!o || !o.visible) continue;
+      o.getWorldPosition(projete);
+      projete.y += 0.6;
+      projete.project(camera);
+      if (projete.z > 1) continue; // derrière nous
+      const ex = r.left + (projete.x * 0.5 + 0.5) * r.width;
+      const ey = r.top + (-projete.y * 0.5 + 0.5) * r.height;
+      const d = Math.hypot(px - ex, py - ey);
+      if (d < dMin) {
+        dMin = d;
+        meilleur = e;
+      }
+    }
+    if (meilleur && dMin <= TOLERANCE) return meilleur;
+
+    // 2. Sinon le rayon, sur le décor.
+    ndc.set(
+      ((px - r.left) / r.width) * 2 - 1,
+      -((py - r.top) / r.height) * 2 + 1,
+    );
+    rayon.setFromCamera(ndc, camera);
+    const touches = rayon.intersectObjects(touchables, true);
+    if (!touches.length) return undefined;
+    let o = touches[0].object;
+    while (o && !o.userData.evenement && o.parent) o = o.parent;
+    const id = o?.userData?.evenement;
+    return evts.find((x) => x.def.id === id) || null;
+  }
+
+  function toucher(px, py) {
+    if (etat.phase !== "roule") return;
+    const e = viser(px, py);
+    if (e === undefined) return; // le ciel ne coûte rien
+
+    // Rien de vivant, ou pas encore lisible : « pas encore ». C'est une
+    // hypothèse, pas une faute. ⭐ La punition monte doucement, sinon on
+    // fabrique un joueur qui n'ose plus toucher, et c'est le pire résultat
+    // possible pour un jeu qui veut apprendre à formuler des hypothèses.
+    if (
+      !e ||
+      !e.actif ||
+      e.trouve ||
+      e.def.lisible === null ||
+      e.te < e.def.lisible
+    ) {
+      etat.fauxPositifs++;
+      const cout =
+        etat.fauxPositifs === 1 ? 0 : etat.fauxPositifs === 2 ? 0.5 : 1;
+      etat.avance = Math.max(0, etat.avance - cout);
+      sur("pasencore", { cout, total: etat.avance });
+      return;
+    }
+
+    // ⭐ Trouvé. Le gain est le temps qu'il reste avant que ça arrive.
+    const gain = Math.max(0, e.def.incident - e.te);
+    e.trouve = true;
+    e.teTrouve = e.te; // l'instant où la scène se met à se dénouer
+    etat.trouves++;
+    etat.avance += gain;
+    etat.journal.push({
+      evenement: e.def.id,
+      te: +e.te.toFixed(2),
+      gain: +gain.toFixed(2),
+    });
+
+    // La toute première réussite de l'élève, une seule fois dans sa vie : le
+    // monde reste suspendu le temps de dire ce que le nombre veut dire.
+    const premier = expliquer && premierTrouve;
+    premierTrouve = false;
+
+    suspension = premier
+      ? SUSPENSION_PREMIERE
+      : SUSPENSION.creux + SUSPENSION.sortie;
+    cibleFocus = e.objets[e.def.porteur];
+    anneau.visible = true;
+    anneau.material.opacity = 0;
+    cibleHalo = null;
+    halo.visible = false;
+    son.jouer("clic");
+    // « Voir suffit » : la voiture lève le pied et s'écarte, toute seule.
+    securiteJusqu = etat.t + 2.6;
+    sur("trouve", {
+      gain,
+      total: etat.avance,
+      ecran: versEcran(cibleFocus),
+      indice: e.def.indice,
+      premier,
+    });
+  }
+
+  const surAppui = (e) => toucher(e.clientX, e.clientY);
+  hote.addEventListener("pointerdown", surAppui);
+
+  // ── La boucle ──────────────────────────────────────────────────────────
+  monde.demarrer((dtReel) => {
+    qualite.maj(dtReel);
+
+    let tempo = 1;
+    if (suspension > 0) {
+      suspension -= dtReel;
+      const sortie = Math.max(0, Math.min(1, suspension / SUSPENSION.sortie));
+      tempo = SUSPENSION.tempo + (1 - SUSPENSION.tempo) * (1 - sortie);
+      if (suspension <= 0) {
+        cibleFocus = null;
+        anneau.visible = false;
+        post.focaliser(0);
+      }
+    }
+    if (etat.phase === "consequence") tempo = 0.35;
+    if (etat.phase === "rembobine") tempo = 0;
+    const dt = dtReel * tempo;
+
+    // Le focus suit sa cible : l'objet bouge encore un peu pendant la
+    // suspension, et un halo figé à côté de lui trahirait tout.
+    if (cibleFocus) {
+      const total =
+        suspension > SUSPENSION.creux + SUSPENSION.sortie
+          ? SUSPENSION_PREMIERE
+          : SUSPENSION.creux + SUSPENSION.sortie;
+      const force = Math.min(1, (total - suspension) * 9);
+      // ⚠️ 0,86 et pas 1 : à pleine force le hors-champ tombe au gris sombre
+      // et on ne reconnaît plus la rue autour de ce qu'on vient de trouver.
+      // Et un rayon de 0,16 : c'est la LARGEUR de la zone épargnée, donc la
+      // taille de ce que l'élève lit comme « ça, c'est ce que j'ai vu ».
+      post.focaliser(force * 0.86, versEcran(cibleFocus), 0.16);
+      cibleFocus.getWorldPosition(anneau.position);
+      anneau.position.y += 0.9;
+      anneau.lookAt(camera.position);
+      anneau.material.opacity = force * 0.9;
+      anneau.scale.setScalar(1.9 - force * 0.9);
+    }
+
+    // Le halo d'apprentissage, qui respire doucement.
+    if (cibleHalo) {
+      cibleHalo.getWorldPosition(halo.position);
+      halo.position.y += 0.7;
+      halo.lookAt(camera.position);
+      halo.material.opacity = 0.26 + 0.2 * Math.sin(etat.t * 4.4);
+      halo.scale.setScalar(1 + 0.09 * Math.sin(etat.t * 4.4));
+    }
+
+    if (etat.phase === "roule" || etat.phase === "consequence") {
+      etat.t += dt;
+      // 🔴 CE QUE COÛTENT LES RALENTISSEMENTS. Chaque scène ratée freinait à
+      // 1,2 m/s pendant 1,4 s, et chaque scène trouvée levait le pied pendant
+      // 4,2 s : vingt mètres perdus à chaque fois. Au bout de deux scènes, la
+      // voiture avait vingt-cinq mètres de retard sur la chorégraphie, et les
+      // deux dernières scènes ne se jouaient tout simplement jamais dans les
+      // trente secondes. Le remède tient en deux endroits : on freine moins
+      // fort ici, et la partie ne se termine plus à l'heure mais quand les
+      // cinq scènes ont été jouées (voir la fin de la boucle).
+      const vise =
+        freinUrgence > 0 ? 3.4 : etat.t < securiteJusqu ? 6.4 : VITESSE;
+      const ecartVise = etat.t < securiteJusqu ? -0.55 : 0;
+      v.vitesse +=
+        (vise - v.vitesse) * Math.min(1, dt * (vise < v.vitesse ? 2.6 : 1.1));
+      v.ecart += (ecartVise - v.ecart) * Math.min(1, dt * 2.2);
+      v.z -= v.vitesse * dt;
+      v.x = DEPART.x + v.ecart;
+      if (freinUrgence > 0) freinUrgence -= dt;
+    }
+
+    // Les événements. Chacun a son horloge locale, et son script est une
+    // fonction pure de cette horloge : c'est ce qui rend le rembobinage
+    // gratuit.
+    for (const e of evts) {
+      if (e.fini) {
+        // ⚠️ Une scène terminée ne s'efface pas SUR PLACE. L'ancien code
+        // rendait ses acteurs invisibles dès la fin du script : un cycliste
+        // s'évaporait à trois mètres du capot, en plein champ. On garde donc
+        // le décor figé jusqu'à ce qu'il soit passé derrière nous.
+        if (!e.range) {
+          const o = e.objets[e.def.porteur];
+          if (!o || o.position.z > v.z + 6) {
+            e.range = true;
+            for (const id in e.objets) {
+              e.objets[id].visible = false;
+              if (e.objets[id].userData.tache)
+                e.objets[id].userData.tache.visible = false;
+            }
+          }
+        }
+        continue;
+      }
+      if (!e.actif) {
+        if (v.z > e.def.zDeclenche) continue;
+        e.actif = true;
+        for (const id in e.objets) e.objets[id].visible = true;
+      }
+      if (etat.phase === "rembobine" && rembobine?.e === e) {
+        e.te = rembobine.te;
+      } else if (etat.phase !== "rembobine") {
+        e.te += dt;
+      }
+      poser(e);
+
+      // 🔴 On note OÙ ÉTAIT LA VOITURE au moment où le signe est devenu
+      // lisible. Sans ça, le rembobinage remettait la scène en arrière mais
+      // pas la caméra : on se retrouvait à montrer une portière située
+      // trente mètres DERRIÈRE le joueur, donc un écran gris. Le seul moment
+      // du jeu censé faire comprendre ce qu'on a raté ne montrait rien.
+      if (
+        e.zLisible === undefined &&
+        e.def.lisible !== null &&
+        e.te >= e.def.lisible
+      )
+        e.zLisible = v.z;
+
+      // ⭐ L'amorce : la phrase qui donne une raison de regarder CET élément.
+      // C'est elle qui remplace le tutoriel qu'on ne fera pas.
+      const a = e.def.amorce;
+      if (a && !e.amorceDite && e.te >= a.te && etat.phase === "roule") {
+        e.amorceDite = true;
+        const texte =
+          niveau === "guide" ? a.guide : niveau === "vague" ? a.vague : null;
+        if (texte) sur("amorce", { texte, evenement: e.def.id });
+      }
+      // La relance du tutoriel, au premier niveau d'aide seulement.
+      const r = e.def.relance;
+      if (
+        r &&
+        niveau === "guide" &&
+        !e.relanceDite &&
+        !e.trouve &&
+        e.te >= r.te &&
+        etat.phase === "roule"
+      ) {
+        e.relanceDite = true;
+        cibleHalo = e.objets[e.def.porteur];
+        halo.visible = true;
+        sur("relance", { texte: r.texte });
+      }
+      if ((e.trouve || e.rate) && cibleHalo === e.objets[e.def.porteur]) {
+        cibleHalo = null;
+        halo.visible = false;
+      }
+
+      // L'incident se produit sans qu'on l'ait vu : la conséquence se joue.
+      if (
+        !e.trouve &&
+        !e.rate &&
+        e.def.incident !== null &&
+        e.te >= e.def.incident &&
+        etat.phase === "roule"
+      ) {
+        e.rate = true;
+        etat.manques++;
+        freinUrgence = 1.0;
+        cibleHalo = null;
+        halo.visible = false;
+        son.jouer("alerte");
+        etat.phase = "consequence";
+        rembobine = { e, te: e.te, attente: 1.1 };
+        sur("consequence", {});
+      }
+      // Le script est joué. On l'oublie pour la logique du jeu, mais on ne
+      // l'efface pas de l'écran avant qu'il soit derrière nous (voir plus haut).
+      if (e.te > e.def.fin) e.fini = true;
+    }
+
+    // La conséquence, puis le rembobinage.
+    if (etat.phase === "consequence" && rembobine) {
+      rembobine.attente -= dtReel;
+      if (rembobine.attente <= 0) {
+        const e = rembobine.e;
+        etat.phase = "rembobine";
+        rembobine.te = e.te;
+        rembobine.depart = e.te;
+        rembobine.but = e.def.lisible ?? 0;
+        // La caméra rembobine avec la scène. On revient exactement là où on
+        // était quand le signe est apparu — et on repartira d'ici, sans
+        // rejouer les trente mètres : le rembobinage est un REPLAY, il ne
+        // doit rien coûter de plus que les secondes déjà perdues.
+        rembobine.zDepart = v.z;
+        rembobine.zBut =
+          e.zLisible ?? v.z + VITESSE * (rembobine.depart - rembobine.but);
+        sur("flash", {});
+      }
+    }
+    if (etat.phase === "rembobine" && rembobine) {
+      const e = rembobine.e;
+      const but = rembobine.but;
+      if (rembobine.te > but) {
+        // 🔴 On rembobine à 2,6× : plus lent, on s'ennuie ; plus rapide, on
+        // ne voit pas ce qu'on nous montre, et c'est tout l'intérêt.
+        rembobine.te = Math.max(but, rembobine.te - dtReel * 2.6);
+        const k =
+          rembobine.depart > but
+            ? (rembobine.te - but) / (rembobine.depart - but)
+            : 0;
+        v.z = rembobine.zBut + (rembobine.zDepart - rembobine.zBut) * k;
+        if (rembobine.te <= but) {
+          cibleFocus = e.objets[e.def.porteur];
+          anneau.visible = true;
+          suspension = 1.6;
+          sur("rate", {
+            indice: e.def.indice,
+            secondes: +(e.def.incident - e.def.lisible).toFixed(1),
+            ecran: versEcran(cibleFocus),
+          });
+        }
+      } else if (suspension <= 0) {
+        // Ici l'effacement immédiat est VOULU : on vient de rejouer la scène
+        // pour la montrer, elle appartient au passé et on reprend la route.
+        e.fini = true;
+        e.range = true;
+        for (const id in e.objets) {
+          e.objets[id].visible = false;
+          if (e.objets[id].userData.tache)
+            e.objets[id].userData.tache.visible = false;
+        }
+        v.z = rembobine.zDepart; // on reprend la route où on l'avait laissée
+        rembobine = null;
+        etat.phase = "roule";
+      }
+    }
+
+    // La caméra : le siège du conducteur, et RIEN à manipuler.
+    // ⚠️ 1,22 m et non 1,30 : c'est la hauteur d'œil réelle dans une berline,
+    // et elle change tout — plus haut on survole la route comme une caméra de
+    // drone, plus bas on ne voit plus par-dessus les voitures garées.
+    // ⚠️ -0,36 et non -0,32 : c'est l'écart exact entre l'axe de la voiture et
+    // la place du conducteur dans `kit.poste`. Un décalage de quatre
+    // centimètres suffit à faire passer le volant de travers.
+    camera.position.set(v.x - 0.32, 1.22, v.z);
+    camera.rotation.order = "YXZ";
+    camera.rotation.set(-0.05, 0, 0);
+    // Le poste suit la voiture, et son volant se tourne avec l'écart de
+    // trajectoire : quand « voir suffit » fait s'écarter la voiture, on voit
+    // ses propres mains le faire.
+    // ⚠️ REMONTÉ DE DIX CENTIMÈTRES, et c'est LE réglage du cadrage. La part
+    // d'écran qu'occupe un capot ne dépend que de sa hauteur SOUS L'ŒIL : à
+    // 0,83 m il mangeait la moitié basse de l'image, à 0,93 il en prend un
+    // cinquième. Et c'est juste : une Cupra a une ceinture de caisse haute.
+    poste.position.set(v.x, 0.1, v.z);
+    poste.userData.volant.rotation.z = -v.ecart * 1.1;
+    animer(etat.t);
+    monde.majOmbres(v.x, v.z);
+    son.maj(dtReel, {
+      vitesse: v.vitesse,
+      gaz: 0,
+      freinage: freinUrgence > 0 ? 0.9 : 0,
+      fige: suspension > 0 || etat.phase === "rembobine",
+    });
+
+    // ⭐ La partie ne s'arrête pas au chronomètre : elle s'arrête quand les
+    // cinq scènes ont été jouées. Trente secondes est une CIBLE, pas une
+    // guillotine — un élève qui rate tout roule moins vite, et il a le droit
+    // de voir l'enfant lui aussi.
+    if (
+      etat.phase !== "fini" &&
+      etat.t >= DUREE &&
+      evts.every((e) => e.fini) &&
+      suspension <= 0
+    ) {
+      etat.phase = "fini";
+      sur("fin", {
+        avance: +etat.avance.toFixed(1),
+        trouves: etat.trouves,
+        dangers: etat.dangers,
+        manques: etat.manques,
+        fauxPositifs: etat.fauxPositifs,
+        journal: etat.journal,
+      });
+    }
+
+    sur("image", { t: etat.t, avance: etat.avance, kmh: v.vitesse * 3.6 });
+  });
+
+  function poser(e) {
+    // ⭐⭐ « MÊME SI JE L'AI REPÉRÉ, IL ME PERCUTE. » (Rayan, 10/08)
+    //
+    // C'était le défaut le plus grave du jeu, et il touchait sa PROMESSE. Un
+    // script de scène était une fonction du seul temps : il se déroulait
+    // identiquement qu'on ait vu le danger ou non. L'homme sortait donc de sa
+    // voiture et se plantait dans notre voie même quand on avait ralenti pour
+    // lui. Le jeu disait « voir suffit » et démontrait le contraire.
+    //
+    // Chaque scène reçoit maintenant l'instant où elle a été VUE, et se
+    // dénoue toute seule : l'homme reste assis, la voiture attend son tour,
+    // l'enfant s'arrête au caniveau. C'est la vraie leçon de la conduite —
+    // on ne fait pas disparaître le danger, on lui laisse le temps de ne pas
+    // en devenir un.
+    //
+    // ⚠️ On passe l'INSTANT et pas un booléen : le dénouement doit rester une
+    // fonction pure du temps local, sinon le rembobinage ment.
+    const p = e.def.pose(e.te, e.trouve ? e.teTrouve : null);
+    for (const id in p) {
+      const o = e.objets[id];
+      if (!o) continue;
+      const q = p[id];
+      o.position.set(q.x, q.y ?? 0, q.z);
+      // ⚠️ YXZ : le roulis doit s'appliquer DANS le repère de l'objet, sinon
+      // un vélo qui se penche en tournant se penche vers le nord au lieu de
+      // se pencher vers l'intérieur de sa courbe.
+      o.rotation.order = "YXZ";
+      o.rotation.set(0, q.cap ?? 0, q.roulis ?? 0);
+      if (q.visible !== undefined) o.visible = q.visible && e.actif;
+      // La tête tourne, puis le buste suit. Les deux angles sont écrits en
+      // RADIANS dans le scénario : c'est là qu'on décide de la lisibilité
+      // d'un geste, pas ici.
+      const buste = o.userData.buste ?? o.children[0];
+      if (q.buste !== undefined && buste) buste.rotation.y = q.buste;
+      if (q.regard !== undefined && o.userData.tete)
+        o.userData.tete.rotation.y = q.regard;
+      // La roue avant d'un vélo braque AVANT que le vélo ne tourne. C'est ce
+      // décalage, minuscule, qui rend un changement de trajectoire crédible.
+      if (q.braquage !== undefined) o.userData.braquer?.(q.braquage);
+      // ⭐ La marche est pilotée par le DÉPLACEMENT MESURÉ, jamais par un
+      // drapeau posé à la main dans le scénario. Conséquence : un piéton ne
+      // peut pas glisser, un enfant qui s'élance court forcément, et le
+      // rembobinage reste cohérent puisque la vitesse redevient nulle.
+      if (o.userData.pas) {
+        const av = o.userData.dernier;
+        const dt = av ? Math.abs(e.te - av.te) : 0;
+        const d = av ? Math.hypot(q.x - av.x, q.z - av.z) : 0;
+        o.userData.pas(e.te, dt > 1e-4 ? Math.min(1, d / dt / 1.3) : 0);
+        o.userData.dernier = { x: q.x, z: q.z, te: e.te };
+      }
+      if (q.court !== undefined && o.children[0])
+        o.children[0].rotation.z = q.court ? Math.sin(e.te * 18) * 0.14 : 0;
+      o.userData.freiner?.(!!q.stop);
+      const t = o.userData.tache;
+      if (t) {
+        t.visible = o.visible;
+        t.position.set(q.x, 0.014, q.z);
+        t.rotation.z = -(q.cap ?? 0);
+      }
+    }
+  }
+
+  return {
+    monde,
+    etat,
+    son,
+    post,
+    qualite,
+    get position() {
+      return { ...v };
+    },
+    detruire() {
+      hote.removeEventListener("pointerdown", surAppui);
+      son.detruire();
+      post.detruire();
+      monde.detruire();
+    },
+  };
+}
+
+export { X_STATIONNE };

@@ -1,0 +1,752 @@
+/* « Secondes d'avance ».
+ *
+ * 🔴 LE CADRAGE EST LE SUJET DE CE FICHIER. « Je ne me sens pas au volant,
+ * j'ai l'impression de regarder une scène 3D de loin » : la cause n'était pas
+ * la 3D, c'était que l'image occupait tout l'écran d'un téléphone en portrait.
+ * Un cadre haut et étroit oblige à un champ horizontal minuscule, donc à un
+ * téléobjectif, donc à une image sans profondeur.
+ *
+ * On rend donc le bas de l'écran au POSTE DE CONDUITE. Le pare-brise devient
+ * un cadre presque carré, le moteur peut ouvrir le champ horizontal (36°, cf.
+ * moteur.js), et la profondeur revient. Le poste n'est pas de la décoration :
+ * c'est lui qui rend le champ de vision jouable. */
+
+/* 🔴 LE JEU PREND TOUT L'ÉCRAN, BARRES DE L'APP COMPRISES. Découvert le
+   12/08 en le branchant au hub Réviser : jusque-là on n'y arrivait que par
+   l'URL, sans le chrome. Depuis le hub, le bandeau du haut et la barre du bas
+   se posaient PAR-DESSUS — ils masquaient la mention bêta, la croix de sortie
+   et le bas du poste de conduite. Une barre de navigation n'a rien à faire
+   dans un jeu de trente secondes. `body.av-plein` est posée par la page et
+   retirée à la sortie. */
+body.av-plein #header-bar,
+body.av-plein #bottom-nav {
+  display: none !important;
+}
+
+.av {
+  --poste: 38%;
+  --capot: 9%;
+  /* 📖 Bible §3 : notre « noir » est un violet très sombre, jamais un gris.
+     La planche de bord appartient à la même voiture que le capot. */
+  --nuit: #14102a;
+  --planche: #241d44;
+  --arete: rgb(255 255 255 / 0.1);
+
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: #b9d3ea;
+  color: #fff;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Sur un écran large, le pare-brise est déjà un rectangle couché : le poste
+   n'a plus besoin de reprendre autant de place. */
+@media (min-aspect-ratio: 4 / 5) {
+  .av {
+    --poste: 24%;
+    --capot: 9%;
+  }
+}
+
+/* ⭐ LE CAPOT. Le dernier défaut du cadrage, et le plus bête : le bas du
+   pare-brise montrait dix mètres de bitume nu, soit un tiers de l'image
+   occupé par la seule zone de la route où il n'y a jamais rien à voir. Dans
+   une vraie voiture, le capot la cache — donc on met un capot. Il coûte huit
+   lignes de dégradé, il rend un tiers de l'image utile, et il fait
+   davantage pour le sentiment d'être au volant que n'importe quel réglage
+   de caméra. */
+.av-capot {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--poste) - 1px);
+  width: 168%;
+  height: var(--capot);
+  transform: translateX(-50%);
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  /* ⭐⭐ SIGNATURE X DE LA BIBLE : LE CAPOT VIOLET.
+     L'élève conduit LA voiture PermiGo, la Cupra laquée du 5 août. Aucun
+     autre jeu de conduite n'a un capot violet en bas de l'écran : c'est la
+     chose la moins chère et la plus reconnaissable de toute la DA.
+     Trois couches, dans cet ordre : le reflet du ciel qui glisse sur la
+     laque, la nervure centrale, la peinture. */
+  background:
+    /* les flancs qui fuient : sans eux la laque est un aplat de plastique */
+    radial-gradient(
+      92% 240% at 50% 100%,
+      rgb(255 255 255 / 0) 58%,
+      rgb(18 8 40 / 0.34) 100%
+    ),
+    radial-gradient(
+      130% 95% at 50% -6%,
+      rgb(236 226 255 / 0.5) 0%,
+      rgb(236 226 255 / 0.1) 34%,
+      rgb(236 226 255 / 0) 58%
+    ),
+    linear-gradient(
+      90deg,
+      rgb(255 255 255 / 0) 46%,
+      rgb(255 255 255 / 0.11) 50%,
+      rgb(255 255 255 / 0) 54%
+    ),
+    linear-gradient(180deg, #9d80e6 0%, #6f4fc9 20%, #4a3192 58%, #241848 100%);
+  box-shadow:
+    inset 0 2px 0 rgb(255 255 255 / 0.62),
+    0 -12px 26px rgb(24 12 48 / 0.3);
+  pointer-events: none;
+}
+
+.av-vue {
+  position: absolute;
+  inset: 0 0 var(--poste);
+}
+
+.av-charge {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 2rem;
+  color: #24405c;
+}
+
+/* ── Le poste de conduite ─────────────────────────────────────────────── */
+
+.av-poste {
+  position: absolute;
+  inset: auto 0 0;
+  height: var(--poste);
+  background: linear-gradient(
+    180deg,
+    #2b323f 0%,
+    var(--planche) 18%,
+    var(--nuit) 78%,
+    #0b0d12 100%
+  );
+  /* L'arête basse du pare-brise. Une ligne claire d'un pixel : c'est elle qui
+     dit « ceci est une vitre », et elle ne coûte rien. */
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.16),
+    0 -14px 26px rgb(0 0 0 / 0.32);
+  overflow: hidden;
+}
+
+/* Le haut du volant, qui dépasse. Un arc, rien de plus : ça suffit pour que
+   le cerveau place le corps derrière. */
+.av-volant {
+  position: absolute;
+  left: 50%;
+  bottom: -30%;
+  width: 132%;
+  height: 82%;
+  transform: translateX(-50%);
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  background: linear-gradient(180deg, #2f3644 0%, #1a1f29 40%, #14181f 100%);
+  box-shadow:
+    inset 0 2px 0 rgb(255 255 255 / 0.12),
+    0 -6px 18px rgb(0 0 0 / 0.4);
+}
+
+/* ── Le compteur, posé sur la planche comme un instrument ──────────────── */
+
+.av-compteur {
+  position: absolute;
+  top: 11%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  text-align: center;
+  line-height: 1;
+  transition: transform 0.18s ease;
+}
+
+.av-compteur.on {
+  transform: translateX(-50%) scale(1.12);
+}
+
+.av-compteur b {
+  display: block;
+  font-size: clamp(2.2rem, 12vw, 3.1rem);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  text-shadow: 0 0 26px rgb(167 139 250 / 0.4);
+}
+
+.av-compteur span {
+  display: block;
+  margin-top: 0.42rem;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #b9a6ff;
+}
+
+/* ── Ce qu'on dit à l'élève ────────────────────────────────────────────── */
+
+/* ⭐ UN SEUL EMPLACEMENT pour tout ce qui s'adresse à l'élève : la phrase qui
+   dit où regarder, la relance du tutoriel, le « pas encore ». Deux messages ne
+   doivent jamais s'empiler, sinon on retombe dans le bruit qu'on vient de
+   retirer. Il se pose juste au-dessus de l'arête du pare-brise, là où l'œil
+   revient naturellement. */
+.av-dire {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--poste) + var(--capot) + 12px);
+  z-index: 3;
+  margin: 0;
+  max-width: min(86%, 30rem);
+  padding: 0.5rem 0.95rem;
+  border-radius: 999px;
+  transform: translate(-50%, 8px);
+  background: rgb(10 16 24 / 0.62);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  text-align: center;
+  text-wrap: balance;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: rgb(255 255 255 / 0.95);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.av-dire.on {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* La relance du tutoriel se distingue : c'est la seule phrase du jeu qui
+   demande explicitement une action. */
+.av-relance {
+  background: rgb(124 58 237 / 0.86);
+  box-shadow: 0 6px 24px rgb(76 29 149 / 0.5);
+}
+
+.av-note {
+  background: rgb(10 16 24 / 0.74);
+  color: rgb(255 255 255 / 0.86);
+}
+
+/* ── Les deux phrases du lancement ────────────────────────────────────── */
+
+.av-intro {
+  position: absolute;
+  inset: 0 0 var(--poste);
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: linear-gradient(
+    180deg,
+    rgb(8 14 24 / 0.62),
+    rgb(8 14 24 / 0.28) 62%,
+    rgb(8 14 24 / 0)
+  );
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.45s ease;
+}
+
+.av-intro.on {
+  opacity: 1;
+}
+
+.av-intro strong {
+  display: block;
+  font-size: clamp(1.45rem, 7.4vw, 2.1rem);
+  font-weight: 900;
+  line-height: 1.06;
+  text-align: center;
+  text-wrap: balance;
+  text-shadow: 0 3px 22px rgb(0 0 0 / 0.6);
+}
+
+.av-intro em {
+  display: block;
+  margin-top: 0.7rem;
+  font-style: normal;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: center;
+  text-wrap: balance;
+  color: rgb(255 255 255 / 0.86);
+  text-shadow: 0 2px 14px rgb(0 0 0 / 0.7);
+}
+
+/* ── Le nombre qui monte, là où le doigt s'est posé ───────────────────── */
+
+.av-gains {
+  position: absolute;
+  inset: 0 0 var(--poste);
+  pointer-events: none;
+}
+
+.av-gain {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-size: 1.7rem;
+  font-weight: 900;
+  color: #fff;
+  text-shadow:
+    0 2px 14px rgb(0 0 0 / 0.6),
+    0 0 30px rgb(255 255 255 / 0.35);
+  animation: av-monte 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes av-monte {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -30%) scale(0.7);
+  }
+  18% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.06);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -120%) scale(1);
+  }
+}
+
+.av-souffle {
+  position: absolute;
+  inset: 0 0 var(--poste);
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    circle at 50% 46%,
+    rgb(255 255 255 / 0) 34%,
+    rgb(255 255 255 / 0.16) 46%,
+    rgb(255 255 255 / 0) 62%
+  );
+}
+
+.av-souffle.on {
+  animation: av-souffle 0.42s ease-out;
+}
+
+@keyframes av-souffle {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+/* ── L'explication du compteur, une seule fois ────────────────────────── */
+
+/* ⚠️ En bas, jamais au centre. La carte explique ce qu'on vient de trouver :
+   si elle se pose dessus, elle cache exactement la chose qu'on célèbre. */
+.av-lecon {
+  position: absolute;
+  inset: 0 0 var(--poste);
+  z-index: 5;
+  display: grid;
+  place-items: end center;
+  padding: 1.5rem 1.5rem calc(var(--capot) + 14px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s ease;
+}
+
+.av-lecon.on {
+  opacity: 1;
+}
+
+.av-lecon-carte {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 22rem;
+  padding: 1.05rem 1.3rem;
+  border-radius: 1.1rem;
+  background: rgb(10 16 26 / 0.9);
+  box-shadow: 0 18px 48px rgb(0 0 0 / 0.45);
+  text-align: center;
+  text-wrap: balance;
+  animation: av-lecon 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.av-lecon-carte b {
+  font-size: 1.55rem;
+  font-weight: 900;
+}
+
+.av-lecon-carte span {
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: rgb(255 255 255 / 0.82);
+}
+
+@keyframes av-lecon {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.94);
+  }
+}
+
+/* ── Le blanc, puis ce qu'on n'a pas vu ───────────────────────────────── */
+
+.av-flash {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.av-flash.on {
+  animation: av-flash 0.52s ease-out;
+}
+
+@keyframes av-flash {
+  0% {
+    opacity: 0.96;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.av-perdu {
+  position: absolute;
+  inset: 0 0 var(--poste);
+  z-index: 5;
+  display: grid;
+  /* ⚠️ `align-content` et pas seulement `place-items` : sans lui, les lignes
+     d'une grille automatique s'étirent sur toute la hauteur et le chiffre se
+     retrouve à cent cinquante pixels de sa légende. */
+  /* Même règle que la carte d'explication : le chiffre se pose EN BAS. Au
+     centre, il masquait la portière qu'on est précisément en train de
+     remontrer. */
+  place-content: end center;
+  place-items: center;
+  padding: 0 1.4rem calc(var(--capot) + 10px);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+
+.av-perdu.on {
+  opacity: 1;
+}
+
+.av-perdu b {
+  display: block;
+  font-size: clamp(2.6rem, 15vw, 4rem);
+  font-weight: 900;
+  color: #fff;
+  text-align: center;
+  text-shadow: 0 4px 26px rgb(0 0 0 / 0.7);
+}
+
+.av-perdu span {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.98rem;
+  font-weight: 700;
+  text-align: center;
+  text-wrap: balance;
+  color: rgb(255 255 255 / 0.9);
+  text-shadow: 0 2px 14px rgb(0 0 0 / 0.75);
+}
+
+/* ── L'écran de départ et celui de fin ───────────────────────────────── */
+
+.av-accueil {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2.4rem;
+  padding: 2rem;
+  background: linear-gradient(180deg, #2f74c8 0%, #8fc0e6 58%, #d8e6f0 100%);
+}
+
+.av-marque h1 {
+  margin: 0;
+  font-size: clamp(2.2rem, 11vw, 3.4rem);
+  font-weight: 900;
+  line-height: 1.02;
+  text-align: center;
+  text-wrap: balance;
+  text-shadow: 0 3px 20px rgb(0 0 0 / 0.28);
+}
+
+.av-marque p {
+  margin: 0.8rem 0 0;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  text-wrap: balance;
+  color: rgb(255 255 255 / 0.92);
+  text-shadow: 0 2px 12px rgb(0 0 0 / 0.3);
+}
+
+.av-go,
+.av-encore {
+  min-height: 58px;
+  padding: 0 2.6rem;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  color: #16324c;
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.av-fin {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  /* ⚠️ La carte de fin porte maintenant le formulaire d'avis : sur un petit
+     écran, clavier ouvert, elle dépasse. Sans ces deux lignes le bouton
+     « Envoyer » est hors de l'écran et personne ne peut le toucher — et
+     `touch-action` doit être rendu, `.av` le coupe pour le jeu. */
+  overflow-y: auto;
+  touch-action: auto;
+  padding: calc(env(safe-area-inset-top) + 3rem) 1.2rem
+    calc(env(safe-area-inset-bottom) + 1.6rem);
+  background: rgb(12 22 34 / 0.82);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.av-fin.on {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.av-carte {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  text-align: center;
+}
+
+.av-total {
+  margin: 0;
+}
+
+.av-total b {
+  display: block;
+  font-size: clamp(3.4rem, 18vw, 5.4rem);
+  font-weight: 900;
+  line-height: 1;
+}
+
+.av-total span {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.av-bilan {
+  margin: -0.5rem 0 0;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: rgb(255 255 255 / 0.78);
+}
+
+/* ── La mention « bêta » et la sortie ─────────────────────────────────── */
+
+/* En haut, petit, et surtout DISCRET : c'est un avertissement honnête, pas
+   une décoration. Il ne doit jamais entrer en concurrence avec la route. */
+.av-beta {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + 10px);
+  left: 14px;
+  z-index: 7;
+  padding: 0.16rem 0.5rem;
+  border: 1px solid rgb(255 255 255 / 0.28);
+  border-radius: 999px;
+  background: rgb(10 16 26 / 0.42);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.78);
+  pointer-events: none;
+}
+
+.av-sortie {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + 4px);
+  right: 8px;
+  z-index: 7;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(10 16 26 / 0.34);
+  color: rgb(255 255 255 / 0.85);
+  cursor: pointer;
+}
+
+.av-sortie svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+}
+
+/* ── L'avis de l'élève, une seule fois ────────────────────────────────── */
+
+.av-avis {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  width: min(100%, 22rem);
+  padding: 1.05rem 1.1rem 1.15rem;
+  border: 1px solid rgb(255 255 255 / 0.14);
+  border-radius: 1.15rem;
+  background: rgb(255 255 255 / 0.06);
+}
+
+.av-avis-t {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 800;
+  text-wrap: balance;
+  color: rgb(255 255 255 / 0.9);
+}
+
+.av-notes {
+  display: flex;
+  gap: 0.25rem;
+}
+
+/* 44px de cible tactile pour une étoile de 30 : la règle mobile du projet
+   s'applique aussi à un formulaire d'avis. */
+.av-note {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: rgb(255 255 255 / 0.26);
+  cursor: pointer;
+  transition:
+    color 0.14s ease,
+    transform 0.14s ease;
+}
+
+.av-note svg {
+  width: 30px;
+  height: 30px;
+  fill: currentColor;
+}
+
+.av-note.on {
+  color: #f5c451;
+  transform: scale(1.06);
+}
+
+.av-mot {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: rgb(255 255 255 / 0.62);
+}
+
+/* Le mot libre n'existe qu'une fois la note posée. */
+.av-suite {
+  display: none;
+  width: 100%;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.av-avis.choisi .av-suite {
+  display: flex;
+  animation: av-lecon 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.av-texte {
+  width: 100%;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid rgb(255 255 255 / 0.18);
+  border-radius: 0.8rem;
+  background: rgb(8 14 24 / 0.5);
+  color: #fff;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  resize: none;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.av-texte::placeholder {
+  color: rgb(255 255 255 / 0.42);
+}
+
+.av-envoi {
+  min-height: 48px;
+  padding: 0 1.4rem;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #8e87ff, #6c63ff);
+  box-shadow: 0 4px 0 #4a3fc9;
+  color: #fff;
+  font: inherit;
+  font-size: 0.98rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.av-envoi:disabled {
+  opacity: 0.6;
+}
+
+.av-merci {
+  margin: 0;
+  padding: 0.4rem 0;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #f5c451;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .av-gain,
+  .av-souffle.on,
+  .av-flash.on,
+  .av-lecon-carte {
+    animation-duration: 0.01s;
+  }
+}
