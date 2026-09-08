@@ -117,16 +117,16 @@ const STYLE = `<style>
 /* éditeur lot perso */
 .mrw-editor { margin-top: 12px; padding: 14px; border-radius: 16px; background: var(--ind-softer); border: 1px solid var(--line); }
 .mrw-editor label { display: block; font: 700 11px/1 'Archivo', sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--mu2); margin-bottom: 6px; }
-.mrw-editor input[type=text] { width: 100%; min-height: 44px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: #fff; font: 700 14px/1.2 'Archivo', sans-serif; color: var(--ink); outline: none; }
+.mrw-editor input[type=text] { width: 100%; min-height: 44px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--su); font: 700 14px/1.2 'Archivo', sans-serif; color: var(--ink); outline: none; }
 .mrw-editor input[type=text]:focus { border-color: var(--ind-2); }
 .mrw-icons { display: grid; grid-template-columns: repeat(6, 1fr); gap: 7px; margin: 10px 0 12px; }
-.mrw-ico-btn { aspect-ratio: 1; border-radius: 11px; border: 1.5px solid var(--line); background: #fff; cursor: pointer; display: grid; place-items: center; }
+.mrw-ico-btn { aspect-ratio: 1; border-radius: 11px; border: 1.5px solid var(--line); background: var(--su); cursor: pointer; display: grid; place-items: center; }
 .mrw-ico-btn svg { display: block; }
 .mrw-ico-btn.on { border-color: var(--ind); background: var(--ind-soft); box-shadow: 0 0 0 3px rgba(99,102,241,.12); }
 .mrw-editor-actions { display: flex; gap: 8px; }
 .mrw-btn-add { flex: 1; min-height: 44px; border: 0; border-radius: 12px; background: linear-gradient(180deg, var(--ind-2), var(--ind)); color: #fff; font: 600 14px/1 'Archivo', sans-serif; cursor: pointer; }
 .mrw-btn-add:disabled { opacity: .5; cursor: default; }
-.mrw-btn-cancel { min-height: 44px; padding: 0 16px; border: 1px solid var(--line); border-radius: 12px; background: #fff; color: var(--mu); font: 600 14px/1 'Archivo', sans-serif; cursor: pointer; }
+.mrw-btn-cancel { min-height: 44px; padding: 0 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--su); color: var(--mu); font: 600 14px/1 'Archivo', sans-serif; cursor: pointer; }
 
 /* générosité */
 .mrw-seg { margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; padding: 5px; border-radius: 16px; background: var(--ind-softer); border: 1px solid var(--line); }

@@ -348,7 +348,7 @@
   color: var(--a-ink);
 }
 .update-badge .pill {
-  background: #fff;
+  background: var(--su);
   color: var(--ink);
   padding: 3px 10px;
   border-radius: 999px;

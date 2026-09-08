@@ -63,7 +63,7 @@ const STYLE = `<style>
   .a2hs-install:active { transform: translateY(1px); }
   /* Actions bas */
   .a2hs-continue { width: 100%; max-width: 400px; margin-top: 22px; border: 0; border-radius: 14px;
-                   background: var(--ink, #11131f); color: #fff; font: 800 16px/1 'Archivo'; padding: 16px; cursor: pointer; }
+                   background: #11131f; color: #fff; font: 800 16px/1 'Archivo'; padding: 16px; cursor: pointer; }
   .a2hs-later { margin-top: 14px; background: none; border: 0; color: var(--mu2, #5b6072);
                 font: 600 14px/1 'Archivo'; text-decoration: underline; cursor: pointer; }
 </style>`;

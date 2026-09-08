@@ -490,7 +490,7 @@ export function ensureChestStyles() {
     .chest-modal-bg{
       position:absolute;inset:0;
       background:
-        radial-gradient(ellipse at center,var(--ch-2) 0%,var(--ink) 60%,#000 100%);
+        radial-gradient(ellipse at center,var(--ch-2) 0%,#0b0d1a 60%,#000 100%);
       backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
       animation:fadeIn .3s;
     }
@@ -510,7 +510,7 @@ export function ensureChestStyles() {
 
     .chest-modal-panel{
       position:relative;
-      background:linear-gradient(160deg,#1a1208 0%,#2d1810 30%,var(--ink) 100%);
+      background:linear-gradient(160deg,#1a1208 0%,#2d1810 30%,#0b0d1a 100%);
       width:100%;max-width:480px;border-radius:32px;
       padding:36px 24px 24px;
       color:#fff;text-align:center;

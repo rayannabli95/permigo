@@ -998,7 +998,7 @@ function wireItems(root, me, initialUnread) {
       const id = wrap.dataset.id;
       const undoEl = document.createElement("div");
       undoEl.style.cssText =
-        "position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;font:600 13px/1 'Archivo',sans-serif;z-index:999;display:flex;align-items:center;gap:12px;box-shadow:0 8px 24px rgba(0,0,0,.3)";
+        "position:fixed;bottom:calc(80px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:var(--su);padding:12px 20px;border-radius:12px;font:600 13px/1 'Archivo',sans-serif;z-index:999;display:flex;align-items:center;gap:12px;box-shadow:0 8px 24px rgba(0,0,0,.3)";
       undoEl.dir = getLang() === "ar" ? "rtl" : "ltr";
       if (getLang() === "ar") undoEl.lang = "ar";
       undoEl.innerHTML = `<span>${esc(nt("deleted", "Notification supprimée"))}</span><button style="background:none;border:none;color:var(--a);font:700 12px/1 'Archivo',sans-serif;cursor:pointer;padding:0">${esc(nt("cancel", "Annuler"))}</button>`;

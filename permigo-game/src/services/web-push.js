@@ -225,7 +225,7 @@ function _createSoftBanner() {
   el.innerHTML = `
     <style>
       #push-soft-banner {
-        position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+        position: fixed; bottom: calc(80px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%);
         z-index: 8000; width: calc(100% - 32px); max-width: 420px;
         background: linear-gradient(135deg, #1a1d2e, #0f1220);
         border: 1px solid color-mix(in srgb, var(--a) 35%, transparent); border-radius: 18px;
