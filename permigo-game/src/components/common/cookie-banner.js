@@ -22,7 +22,7 @@ const CK_I18N = {
     privacy: "Privacy policy",
     essential: "Essential only",
     accept: "Accept all",
-    txt_short: "Audience measurement to improve the app. No ads.",
+    txt_short: "Audience measurement to improve the app · no ads",
     essential_short: "Refuse",
     accept_short: "Accept",
   },
@@ -33,7 +33,7 @@ const CK_I18N = {
     privacy: "سياسة الخصوصية",
     essential: "الضروري فقط",
     accept: "قبول الكل",
-    txt_short: "قياس الجمهور لتحسين التطبيق. بدون إعلانات.",
+    txt_short: "قياس الجمهور لتحسين التطبيق · بدون إعلانات",
     essential_short: "رفض",
     accept_short: "قبول",
   },
@@ -174,7 +174,7 @@ export function mountCookieBanner() {
   root.innerHTML = `${STYLE}
     <div class="ck-banner" role="dialog" aria-label="${ckt("aria", "Préférences cookies")}" aria-live="polite" dir="${getLang() === "ar" ? "rtl" : "ltr"}">
       <p class="ck-txt">
-        ${ckt("txt_short", "Mesure d\u0027audience pour améliorer l\u0027app. Aucune publicité.")}
+        ${ckt("txt_short", "Mesure d\u0027audience pour améliorer l\u0027app · aucune publicité")}
         <a href="#/legal/privacy">${ckt("privacy", "Politique de confidentialité")}</a>
       </p>
       <div class="ck-row">

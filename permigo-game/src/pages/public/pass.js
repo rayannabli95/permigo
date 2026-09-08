@@ -62,11 +62,11 @@ const STR = {
     // en gros. « Réserve ta place » vit déjà dans le CTA, « 90 jours » sur le
     // billet — rien ne se perd.
     docTitle:
-      "PermiGo. Le compagnon qui te prépare avant chaque heure de conduite",
-    h1: `Prépare ta leçon <br><em>avant de monter en voiture.</em>`,
+      "PermiGo · le compagnon qui te prépare avant chaque heure de conduite",
+    h1: `Prépare ta leçon <br><em>avant de monter en voiture</em>`,
     // ⚠️ Pas de « la seule app » : allégation de supériorité invérifiable
     // (pratiques commerciales trompeuses). On dit ce qu'on fait, pas qu'on est seul.
-    lead: `L'app qui travaille ta <strong>conduite</strong> entre les leçons.`,
+    lead: `L'app qui travaille ta <strong>conduite</strong> entre les leçons`,
     // Le billet annonçait « OBJECTIF PERMIS EN 90 JOURS ». Personne ne peut
     // tenir un délai qui dépend des places d'examen, du rythme de l'élève et
     // de son auto-école. Une promesse qu'on ne maîtrise pas se retourne : le
@@ -92,8 +92,8 @@ const STR = {
     // Un seul prix, une seule offre (v4) : ce titre disait aussi « c'est bien
     // plus que conduire, » — une virgule dans un titre affiché, contraire à la
     // regle maison. Reformule pour rester sans ponctuation.
-    secCode: `Le permis exige <em>plus</em> que conduire.`,
-    secCodeSub: "Tout ce qui compte le jour J.",
+    secCode: `Le permis exige <em>plus</em> que conduire`,
+    secCodeSub: "Tout ce qui compte le jour J",
     // v5 (03/08/2026, refonte demandee par Rayan) : les DEUX cartes texte
     // (mini-jeu + centre d'examen) et les 3 cartes « feat » melangeaient deux
     // langages d'icone (trait fin pour le cahier, medaille en 3D pour les deux
@@ -106,17 +106,17 @@ const STR = {
       {
         icon: "zap",
         t: "Mini-jeux en situation",
-        d: "Une scène. Une décision. Comme au volant.",
+        d: "Une scène · une décision · comme au volant",
       },
       {
         icon: "map",
         t: "Ton centre d'examen",
-        d: "Décortiqué · centre par centre.",
+        d: "Décortiqué · centre par centre",
       },
       {
         icon: "book",
         t: "Chaque leçon préparée",
-        d: "Une fiche claire avant de monter en voiture.",
+        d: "Une fiche claire avant de monter en voiture",
       },
       {
         icon: "target",
@@ -125,32 +125,32 @@ const STR = {
         // examinateur pressé ou un giratoire inconnu suffit à le rendre faux
         // (audit confiance du 03/08/2026). On garde ce qui est vérifiable :
         // la grille de l'examen est publique, et on note dessus.
-        d: "Notée sur la grille officielle de l'examen.",
+        d: "Notée sur la grille officielle de l'examen",
       },
     ],
     mathsRows: [
       ["1 heure de conduite", "55 €"],
       ["Budget permis moyen", "1 800 €"],
-      ["PermiGo, par mois", "4,99 €"],
+      ["PermiGo · par mois", "4,99 €"],
     ],
     // « Une leçon mal préparée = 55 € de perdus » se conteste en une seconde
     // (une leçon mal préparée n'est pas une leçon perdue) et accuse l'élève
     // de gâcher son argent. La ligne dit maintenant un fait que le tableau
     // juste au-dessus démontre tout seul.
-    mathsNote: "PermiGo coûte moins qu'un dixième d'heure de conduite.",
-    mathsSrc: "Sources : UFC-Que Choisir (budget permis) · Sécurité routière",
+    mathsNote: "PermiGo coûte moins qu'un dixième d'heure de conduite",
+    mathsSrc: "Sources · UFC-Que Choisir pour le budget permis · Sécurité routière",
     // Le mot « seulement » est EXIGÉ à l'écran, pas seulement le chiffre
     // (demande Rayan, 07/08/2026) : « 4,99 € » seul se lit comme un tarif,
     // « 4,99 € seulement » se lit comme un argument. Il vit donc dans le
     // titre de section, en grand, juste au-dessus de la carte d'offre.
-    // ⚠️ Points et non virgules dans ce titre : règle maison.
-    secPass: "4,99 € seulement. Tout est dedans.",
+    // ⚠️ Point médian entre les deux idées, ni point ni virgule : règle maison.
+    secPass: "4,99 € seulement · tout est dedans",
     secPassSub:
       "Pas de formule à choisir, pas d'engagement. Tu commences gratuitement, et le jour où tu veux la suite, c'est 4,99 € seulement par mois. Moins de 6 minutes de conduite.",
     passes: {
       mensuel: {
         name: "Pass PermiGo",
-        desc: "Tout le parcours, l'examen blanc, ta progression et tes récompenses. Annulable en un clic.",
+        desc: "Tout le parcours · l'examen blanc · ta progression et tes récompenses · annulable en un clic",
         price: "4,99 €",
         per: "/mois",
         // « Commencer » était le mot du bouton gratuit ET du bouton payant.
@@ -163,7 +163,7 @@ const STR = {
     btnWait: "Ouverture du paiement…",
     secAvis: "Ce qu'en disent nos élèves",
     secAvisSub:
-      "Dix élèves de l'auto-école. Ils ont relu et validé leur phrase.",
+      "Dix élèves de l'auto-école · ils ont relu et validé leur phrase",
     avisAge: "ans",
     // ⛔ RETIRÉ (03/08/2026) — le graphique « 74,7 % conduite accompagnée
     // contre 56,8 % filière classique, Sécurité routière 2022 ».
@@ -223,9 +223,9 @@ const STR = {
     login: "Log in",
     langBtn: "FR",
     kicker: "Driving school or self-taught",
-    docTitle: "PermiGo. Prepare every driving lesson before you get in the car",
-    h1: `Prepare every lesson <br><em>before you get in the car.</em>`,
-    lead: `The app that trains your <strong>driving</strong> between lessons.`,
+    docTitle: "PermiGo · prepare every driving lesson before you get in the car",
+    h1: `Prepare every lesson <br><em>before you get in the car</em>`,
+    lead: `The app that trains your <strong>driving</strong> between lessons`,
     tTitle: `READY BEFORE<br>EVERY LESSON`,
     tSub: "Driving · mini-games · exam simulations",
     tBoardLbl: "Start",
@@ -238,48 +238,48 @@ const STR = {
     freeNote: "3 lessons + 1 mock test free · no card needed",
     bulle: "3 skills validated!",
     bulleSub: "this week",
-    secCode: `Getting your licence takes <em>more</em> than driving.`,
-    secCodeSub: "Everything that counts on test day.",
+    secCode: `Getting your licence takes <em>more</em> than driving`,
+    secCodeSub: "Everything that counts on test day",
     feats: [
       {
         icon: "zap",
         t: "On-the-road mini-games",
-        d: "One scene. One decision. Like behind the wheel.",
+        d: "One scene · one decision · like behind the wheel",
       },
       {
         icon: "map",
         t: "Your test centre",
-        d: "Decoded · centre by centre.",
+        d: "Decoded · centre by centre",
       },
       {
         icon: "book",
         t: "Every lesson prepped",
-        d: "A clear sheet before you get in the car.",
+        d: "A clear sheet before you get in the car",
       },
       {
         icon: "target",
         t: "Exam simulation",
-        d: "Scored on the official exam grid.",
+        d: "Scored on the official exam grid",
       },
     ],
     nonFranco: {
-      title: "Learning in French? You keep your language.",
+      title: "Learning in French? You keep your language",
       txt: "The app speaks English: driving lessons, questions, mini-games. And it keeps the French right underneath, word for word. Your exam is in French, so you learn the exact words you'll hear on test day instead of guessing them.",
     },
     mathsRows: [
       ["1 hour of driving lessons", "€55"],
       ["Average licence budget (France)", "€1,800"],
-      ["PermiGo, per month", "€4.99"],
+      ["PermiGo · per month", "€4.99"],
     ],
-    mathsNote: "PermiGo costs less than a tenth of one driving hour.",
-    mathsSrc: "Sources: UFC-Que Choisir (licence budget) · Sécurité routière",
-    secPass: "Only €4.99. Everything is in it.",
+    mathsNote: "PermiGo costs less than a tenth of one driving hour",
+    mathsSrc: "Sources · UFC-Que Choisir for the licence budget · Sécurité routière",
+    secPass: "Only €4.99 · everything is in it",
     secPassSub:
       "No plan to pick, no commitment. You start for free, and the day you want the rest, it is only €4.99 a month. Less than 6 minutes of driving lessons.",
     passes: {
       mensuel: {
         name: "PermiGo Pass",
-        desc: "The full course, the mock exam, your progress and your rewards. Cancel in one click.",
+        desc: "The full course · the mock exam · your progress and your rewards · cancel in one click",
         price: "€4.99",
         per: "/mo",
         btn: "Unlock everything",
@@ -289,7 +289,7 @@ const STR = {
     btnWait: "Opening checkout…",
     secAvis: "What our students say",
     secAvisSub:
-      "Ten students from the driving school. Each one read and approved their own line.",
+      "Ten students from the driving school · each one read and approved their own line",
     avisAge: "years old",
     // ⛔ Section « Regular practice pays off » retirée. Cf. le commentaire de
     // la version française : le graphique comparait deux filières de conduite
@@ -338,9 +338,9 @@ const STR = {
     login: "تسجيل الدخول",
     langBtn: "FR",
     kicker: "مدرسة قيادة أو مترشّح حر",
-    docTitle: "PermiGo. حضّر كل درس قيادة قبل أن تركب السيارة",
-    h1: `حضِّر كل درس <br><em>قبل أن تركب السيارة.</em>`,
-    lead: `التطبيق الذي يدرّبك على <strong>القيادة</strong> بين الدروس.`,
+    docTitle: "PermiGo · حضّر كل درس قيادة قبل أن تركب السيارة",
+    h1: `حضِّر كل درس <br><em>قبل أن تركب السيارة</em>`,
+    lead: `التطبيق الذي يدرّبك على <strong>القيادة</strong> بين الدروس`,
     tTitle: `جاهز قبل<br>كل حصة`,
     tSub: "قيادة · ألعاب مصغّرة · محاكاة الامتحان",
     tBoardLbl: "الانطلاق",
@@ -355,48 +355,48 @@ const STR = {
     freeNote: "3 دروس + امتحان تجريبي هدية · بدون بطاقة بنكية",
     bulle: "تم التحقق من 3 مهارات!",
     bulleSub: "هذا الأسبوع",
-    secCode: `الحصول على الرخصة يتطلّب <em>أكثر</em> من مجرّد القيادة.`,
-    secCodeSub: "كل ما يهمّ يوم الامتحان.",
+    secCode: `الحصول على الرخصة يتطلّب <em>أكثر</em> من مجرّد القيادة`,
+    secCodeSub: "كل ما يهمّ يوم الامتحان",
     feats: [
       {
         icon: "zap",
         t: "ألعاب على الطريق",
-        d: "مشهد واحد. قرار واحد. كما خلف المقود.",
+        d: "مشهد واحد · قرار واحد · كما خلف المقود",
       },
       {
         icon: "map",
         t: "مركز امتحانك",
-        d: "مفصّل · مركزاً بمركز.",
+        d: "مفصّل · مركزاً بمركز",
       },
       {
         icon: "book",
         t: "كل درس محضّر",
-        d: "بطاقة واضحة قبل أن تركب السيارة.",
+        d: "بطاقة واضحة قبل أن تركب السيارة",
       },
       {
         icon: "target",
         t: "محاكاة الامتحان",
-        d: "تُقيَّم وفق شبكة الامتحان الرسمية.",
+        d: "تُقيَّم وفق شبكة الامتحان الرسمية",
       },
     ],
     nonFranco: {
-      title: "تتعلّم القيادة بالفرنسية؟ لغتك تبقى معك.",
+      title: "تتعلّم القيادة بالفرنسية؟ لغتك تبقى معك",
       txt: "التطبيق بالعربية: دروس القيادة والأسئلة والألعاب المصغّرة، مع بقاء الفرنسية أسفلها مباشرة، كلمة بكلمة. امتحانك بالفرنسية، فتتعلّم الكلمات نفسها التي ستسمعها يوم الامتحان بدل أن تخمّنها.",
     },
     mathsRows: [
       ["ساعة قيادة واحدة", "€55"],
       ["متوسط ميزانية الرخصة (فرنسا)", "€1,800"],
-      ["PermiGo، شهرياً", "€4.99"],
+      ["PermiGo · شهرياً", "€4.99"],
     ],
-    mathsNote: "يكلّف PermiGo أقلّ من عُشر ساعة قيادة واحدة.",
-    mathsSrc: "المصادر: UFC-Que Choisir (ميزانية الرخصة) · Sécurité routière",
-    secPass: "€4.99 فقط. كل شيء بداخله.",
+    mathsNote: "يكلّف PermiGo أقلّ من عُشر ساعة قيادة واحدة",
+    mathsSrc: "المصادر · UFC-Que Choisir لميزانية الرخصة · Sécurité routière",
+    secPass: "€4.99 فقط · كل شيء بداخله",
     secPassSub:
       "لا صيغ تختار بينها ولا التزام. تبدأ مجاناً، وفي اليوم الذي تريد فيه البقية، السعر €4.99 فقط شهرياً. أقل من 6 دقائق قيادة.",
     passes: {
       mensuel: {
         name: "باقة PermiGo",
-        desc: "المسار كاملاً، والامتحان التجريبي، وتقدّمك ومكافآتك. ألغِ بنقرة واحدة.",
+        desc: "المسار كاملاً · الامتحان التجريبي · تقدّمك ومكافآتك · إلغاء بنقرة واحدة",
         price: "€4.99",
         per: "/شهر",
         btn: "افتح كل شيء",
@@ -406,7 +406,7 @@ const STR = {
     btnWait: "جارٍ فتح صفحة الدفع…",
     secAvis: "ماذا يقول طلابنا",
     secAvisSub:
-      "عشرة طلاب من مدرسة تعليم القيادة. كلّ واحد قرأ جملته ووافق على نشرها.",
+      "عشرة طلاب من مدرسة تعليم القيادة · كلّ واحد قرأ جملته ووافق على نشرها",
     avisAge: "سنة",
     // ⛔ Section « التدرّب المنتظم يؤتي ثماره » retirée. Cf. le commentaire de
     // la version française.

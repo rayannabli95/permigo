@@ -41,8 +41,8 @@ const OK_ANIM = [{ veh: "v1" }, { veh: "moi", delai: 1100 }];
 const STR = {
   fr: {
     kick: "Essaie maintenant",
-    alt: "Croisement sans panneau ni feu. Un camion arrive par ta droite.",
-    q: "Un camion arrive par ta droite.",
+    alt: "Croisement sans panneau ni feu · un camion arrive par ta droite",
+    q: "Un camion arrive par ta droite",
     qAsk: "Qui passe en premier ?",
     r: { v1: "Le camion", moi: "Toi" },
     // Une ligne, pas trois, et sans point final. Personne ne lit un
@@ -58,12 +58,12 @@ const STR = {
     // retombait sur trois avis puis un billet doré. Cette ligne referme la
     // boucle (la démo → PermiGo en vrai) sans ajouter de deuxième bouton.
     demoCtaLine:
-      "C'est exactement comme ça que PermiGo te prépare avant de conduire.",
+      "C'est exactement comme ça que PermiGo te prépare avant de conduire",
   },
   en: {
     kick: "Try it now",
-    alt: "Crossroads with no sign and no lights. A truck is coming from your right.",
-    q: "A truck is coming from your right.",
+    alt: "Crossroads with no sign and no lights · a truck is coming from your right",
+    q: "A truck is coming from your right",
     qAsk: "Who goes first?",
     r: { v1: "The truck", moi: "You" },
     ok: "Well spotted",
@@ -71,12 +71,12 @@ const STR = {
     ko: "Almost",
     koSub: "It comes from your right so it goes before you",
     retry: "Try again",
-    demoCtaLine: "That's exactly how PermiGo gets you ready before you drive.",
+    demoCtaLine: "That's exactly how PermiGo gets you ready before you drive",
   },
   ar: {
     kick: "جرّب الآن",
-    alt: "تقاطع بلا لافتة ولا إشارة. شاحنة قادمة من يمينك.",
-    q: "شاحنة قادمة من يمينك.",
+    alt: "تقاطع بلا لافتة ولا إشارة · شاحنة قادمة من يمينك",
+    q: "شاحنة قادمة من يمينك",
     qAsk: "من يمرّ أولًا؟",
     r: { v1: "الشاحنة", moi: "أنت" },
     ok: "أحسنت",
@@ -84,7 +84,7 @@ const STR = {
     ko: "تقريبًا",
     koSub: "هي قادمة من يمينك فتمرّ قبلك",
     retry: "أعد المحاولة",
-    demoCtaLine: "هكذا بالضبط يُحضّرك PermiGo قبل أن تقود.",
+    demoCtaLine: "هكذا بالضبط يُحضّرك PermiGo قبل أن تقود",
   },
 };
 

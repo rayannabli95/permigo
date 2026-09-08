@@ -22,14 +22,14 @@ export const GUIDES = [
   {
     slug: "reviser-le-code",
     metaTitle:
-      "Comment réviser le code de la route efficacement (méthode 2026)",
+      "Comment réviser le code de la route efficacement · méthode 2026",
     metaDesc:
       "La méthode pour réviser le code de la route sans t'épuiser : petites sessions quotidiennes, séries blanches, et travail des erreurs. Réussis tes 35/40.",
     h1: "Comment réviser le code de la route efficacement",
     lead: "Réviser le code, ce n'est pas lire le livret dix fois d'affilée la veille. C'est s'entraîner un peu chaque jour, comprendre ses erreurs, et arriver à l'examen avec des réflexes. Pas juste de la mémoire. Voici la méthode qui marche.",
     sections: [
       {
-        h2: "Le seul objectif : 35 bonnes réponses sur 40",
+        h2: "Le seul objectif · 35 bonnes réponses sur 40",
         blocks: [
           {
             type: "p",
@@ -42,7 +42,7 @@ export const GUIDES = [
         ],
       },
       {
-        h2: "1. Des petites sessions tous les jours, pas un marathon",
+        h2: "1 · Des petites sessions tous les jours plutôt qu'un marathon",
         blocks: [
           {
             type: "p",
@@ -59,7 +59,7 @@ export const GUIDES = [
         ],
       },
       {
-        h2: "2. Travaille tes erreurs, pas tes réussites",
+        h2: "2 · Travaille tes erreurs plutôt que tes réussites",
         blocks: [
           {
             type: "p",
@@ -72,7 +72,7 @@ export const GUIDES = [
         ],
       },
       {
-        h2: "3. Lis la question en entier. Les pièges sont dans les mots",
+        h2: "3 · Lis la question en entier · les pièges sont dans les mots",
         blocks: [
           {
             type: "p",
@@ -89,7 +89,7 @@ export const GUIDES = [
         ],
       },
       {
-        h2: "4. Passe en conditions réelles avant le jour J",
+        h2: "4 · Passe en conditions réelles avant le jour J",
         blocks: [
           {
             type: "p",
@@ -122,10 +122,10 @@ export const GUIDES = [
   {
     slug: "examen-blanc-code",
     metaTitle:
-      "Examen blanc du code : pourquoi (et comment) t'entraîner pour de vrai",
+      "Examen blanc du code · pourquoi et comment t'entraîner pour de vrai",
     metaDesc:
       "L'examen blanc du code reproduit les conditions réelles : 40 questions, le chrono, le stress. C'est le meilleur test pour savoir si tu es prêt à passer.",
-    h1: "Examen blanc du code : le test qui dit si tu es prêt",
+    h1: "Examen blanc du code · le test qui dit si tu es prêt",
     lead: "Un examen blanc, c'est une série de 40 questions dans les conditions de l'examen officiel : le format, le rythme, le chrono. C'est le seul vrai moyen de savoir si tu es prêt. Bien plus fiable que ton ressenti.",
     sections: [
       {
@@ -188,7 +188,7 @@ export const GUIDES = [
 
   {
     slug: "fautes-eliminatoires-permis",
-    metaTitle: "Les fautes éliminatoires au permis : la liste à connaître",
+    metaTitle: "Les fautes éliminatoires au permis · la liste à connaître",
     metaDesc:
       "Une faute éliminatoire = échec immédiat à l'examen pratique, quel que soit ton score. Voici la liste des fautes éliminatoires et comment les éviter.",
     h1: "Les fautes éliminatoires à l'examen du permis",
@@ -267,7 +267,7 @@ export const GUIDES = [
   {
     slug: "deroulement-examen-pratique",
     metaTitle:
-      "Comment se passe l'examen pratique du permis B (déroulement complet)",
+      "Comment se passe l'examen pratique du permis B · déroulement complet",
     metaDesc:
       "Durée, étapes, manœuvre, questions de vérification, bilan : voici comment se déroule l'examen pratique du permis B, minute par minute, pour arriver serein.",
     h1: "Le déroulement de l'examen pratique du permis B",
@@ -287,7 +287,7 @@ export const GUIDES = [
         blocks: [
           {
             type: "h3",
-            text: "1. L'accueil et l'installation",
+            text: "1 · L'accueil et l'installation",
           },
           {
             type: "p",
@@ -295,7 +295,7 @@ export const GUIDES = [
           },
           {
             type: "h3",
-            text: "2. La conduite autonome et le parcours",
+            text: "2 · La conduite autonome et le parcours",
           },
           {
             type: "p",
@@ -303,7 +303,7 @@ export const GUIDES = [
           },
           {
             type: "h3",
-            text: "3. Une manœuvre",
+            text: "3 · Une manœuvre",
           },
           {
             type: "p",
@@ -311,7 +311,7 @@ export const GUIDES = [
           },
           {
             type: "h3",
-            text: "4. Les questions de vérification et de sécurité",
+            text: "4 · Les questions de vérification et de sécurité",
           },
           {
             type: "p",
@@ -319,7 +319,7 @@ export const GUIDES = [
           },
           {
             type: "h3",
-            text: "5. Le bilan",
+            text: "5 · Le bilan",
           },
           {
             type: "p",
@@ -361,14 +361,14 @@ export const GUIDES = [
   {
     slug: "conduite-supervisee",
     metaTitle:
-      "Conduite supervisée : conditions, démarches et vrais avantages (2026)",
+      "Conduite supervisée en 2026 · conditions · démarches · vrais avantages",
     metaDesc:
       "Dès 18 ans, la conduite supervisée te fait rouler avec un accompagnateur entre les leçons : moins d'heures payées, plus d'expérience. Conditions et démarches.",
-    h1: "Conduite supervisée : rouler plus, payer moins",
+    h1: "Conduite supervisée · rouler plus · payer moins",
     lead: "La conduite supervisée, c'est le droit de conduire avec un accompagnateur (parent, proche) en dehors des leçons, dès 18 ans. Résultat : tu engranges de l'expérience sans payer une leçon à chaque sortie, et tu arrives à l'examen avec beaucoup plus de kilomètres dans les mains. Voici comment ça marche, sans jargon.",
     sections: [
       {
-        h2: "C'est quoi, exactement ?",
+        h2: "C'est quoi exactement ?",
         blocks: [
           {
             type: "p",
@@ -461,7 +461,7 @@ export const GUIDES = [
   {
     slug: "combien-heures-de-conduite",
     metaTitle:
-      "Combien d'heures de conduite avant l'examen ? (minimum légal vs réalité)",
+      "Combien d'heures de conduite avant l'examen ? Minimum légal et réalité",
     metaDesc:
       "20 h minimum légal, ~30-35 h en moyenne réelle : ce qui fait varier le nombre d'heures de conduite, et comment en faire moins sans bâcler.",
     h1: "Combien d'heures de conduite faut-il vraiment ?",
@@ -485,7 +485,7 @@ export const GUIDES = [
         ],
       },
       {
-        h2: "Ce qui fait grimper (ou baisser) le compteur",
+        h2: "Ce qui fait grimper ou baisser le compteur",
         blocks: [
           {
             type: "ul",
@@ -548,14 +548,14 @@ export const GUIDES = [
 
   {
     slug: "rater-son-permis",
-    metaTitle: "Rater son permis : et maintenant ? (délais, repassage, mental)",
+    metaTitle: "Rater son permis · et maintenant ? Délais · repassage · mental",
     metaDesc:
       "Échouer à l'examen du permis arrive à plus de 4 candidats sur 10. Ce qu'il faut faire dans l'ordre : lire ton bilan, garder le rythme, repasser au bon moment.",
-    h1: "Tu as raté ton permis ? Voilà le plan.",
+    h1: "Tu as raté ton permis ? Voilà le plan",
     lead: "D'abord, remets les choses à leur place : plus de 4 candidats sur 10 échouent à leur premier passage. Ce n'est ni rare, ni définitif, ni un jugement sur ta capacité à conduire un jour. Ce qui compte maintenant, c'est ce que tu fais des trois prochaines semaines.",
     sections: [
       {
-        h2: "Étape 1 : lis vraiment ton bilan",
+        h2: "Étape 1 · lis vraiment ton bilan",
         blocks: [
           {
             type: "p",
@@ -568,7 +568,7 @@ export const GUIDES = [
         ],
       },
       {
-        h2: "Étape 2 : ne coupe pas le moteur",
+        h2: "Étape 2 · ne coupe pas le moteur",
         blocks: [
           {
             type: "p",
@@ -585,7 +585,7 @@ export const GUIDES = [
         ],
       },
       {
-        h2: "Étape 3 : repasse au bon moment",
+        h2: "Étape 3 · repasse au bon moment",
         blocks: [
           {
             type: "p",
@@ -643,10 +643,10 @@ export const GUIDES = [
   {
     slug: "prix-permis-moniteur-independant",
     metaTitle:
-      "Prix du permis avec un moniteur indépendant : combien ça coûte vraiment ?",
+      "Prix du permis avec un moniteur indépendant · combien ça coûte vraiment ?",
     metaDesc:
       "Heures à l'unité, pas de frais de structure, suivi direct : ce que coûte le permis avec un moniteur indépendant, et comment payer moins sans bâcler.",
-    h1: "Le permis avec un moniteur indépendant : combien ça coûte ?",
+    h1: "Le permis avec un moniteur indépendant · combien ça coûte ?",
     lead: "Le permis B coûte en moyenne entre 1 500 et 2 000 € en France, tout compris. Passer par un moniteur indépendant change la structure du prix : tu paies la personne qui t'apprend à conduire, pas les murs d'une agence. Voici comment lire les prix. Et surtout comment faire baisser la facture intelligemment.",
     sections: [
       {
@@ -667,7 +667,7 @@ export const GUIDES = [
         ],
       },
       {
-        h2: "Indépendant ou agence : ce qui change vraiment",
+        h2: "Indépendant ou agence · ce qui change vraiment",
         blocks: [
           {
             type: "ul",
@@ -730,7 +730,7 @@ export const GUIDES = [
       },
     ],
     cta: {
-      text: "Fais moins d'heures, pas moins de niveau",
+      text: "Fais moins d'heures · pas moins de niveau",
       sub: "PermiGo te fait réviser entre les leçons pour progresser plus vite. Gratuit pour commencer.",
       href: "/#/signup",
     },
