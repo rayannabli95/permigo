@@ -45,8 +45,9 @@ export const ACCOUNT_SCOPED_KEYS = [
   "pg_freetier_v1",
   // roue.js — date du dernier tour gratuit (mode aperçu de repli)
   "pg-roue-free-last",
-  // level-up.js / world-unlock-cinematic.js / weekly-replay.js / streak-launch.js
-  // — jalons et cinématiques "déjà montrés"
+  // level-up.js / world-unlock-cinematic.js / streak-launch.js
+  // — jalons et cinématiques "déjà montrés" (pg-replay-week : clé héritée
+  // du replay hebdo, module retiré ; on la purge encore pour les anciens comptes)
   "pg-level-seen",
   "pg-unlock-seen",
   "pg-replay-week",
