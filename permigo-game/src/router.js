@@ -542,8 +542,6 @@ window.addEventListener("hashchange", () => {
       console.error("[router:hashchange]", e);
       reloadOnceOnChunkError(e);
     });
-    phPageview(); // hash-router SPA : PostHog ne détecte pas les hashchanges seul
-    fbPageview(); // idem pour le pixel Meta (inerte si non configuré)
   } else {
     // Visiteur déconnecté → route vers la page publique correspondant au hash
     routePublic(document.getElementById("app")).catch((e) => {
@@ -551,6 +549,13 @@ window.addEventListener("hashchange", () => {
       reloadOnceOnChunkError(e);
     });
   }
+  // Hors du if/else : un VISITEUR déconnecté navigue aussi (page de vente vers
+  // #/rejoindre, par exemple). Compter la vue seulement pour les connectés
+  // rendait le haut de l'entonnoir invisible — le seul endroit qui compte pour
+  // mesurer l'acquisition. Les deux appels sont inertes tant que le
+  // consentement n'est pas donné.
+  phPageview(); // hash-router SPA : PostHog ne détecte pas les hashchanges seul
+  fbPageview(); // idem pour le pixel Meta (inerte si non configuré)
 });
 
 export function navigate(path) {
