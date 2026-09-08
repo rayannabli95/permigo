@@ -145,7 +145,7 @@ ${ld}
 <body>
 <header class="top"><div class="wrap">
 <a class="brand" href="/"><img src="/logo-permigo.png" alt="PermiGo" width="30" height="30"/>PermiGo</a>
-<a class="btn btn-ghost" href="/#/signup">Ouvrir l'app</a>
+<a class="btn btn-ghost" href="/#/rejoindre?solo=1">Ouvrir l'app</a>
 </div></header>
 <main class="wrap">
 ${body}
@@ -300,7 +300,7 @@ ${conseils}
 ${renderCta({
     text: `Révise les pièges de ${c.nom} dans PermiGo`,
     sub: "Questions ciblées sur ce secteur, examens blancs et suivi de progression. Gratuit pour commencer.",
-    href: "/#/signup",
+    href: "/#/rejoindre?solo=1",
   })}
 ${renderFaq(c.faq)}
 ${relatedHtml}
@@ -347,7 +347,7 @@ ${groups}
 ${renderCta({
     text: "Prépare ton centre dans PermiGo",
     sub: "Entraînement ciblé sur les pièges de ton secteur. Gratuit pour démarrer.",
-    href: "/#/signup",
+    href: "/#/rejoindre?solo=1",
   })}
 `;
   return layout({
@@ -429,7 +429,7 @@ ${crumbHtml(trail)}
 ${renderCta({
     text: "Révise avec PermiGo",
     sub: "Code, examens blancs et préparation du jour J. Gratuit pour commencer.",
-    href: "/#/signup",
+    href: "/#/rejoindre?solo=1",
   })}
 `;
   return layout({

@@ -115,7 +115,7 @@ export const GUIDES = [
     cta: {
       text: "Révise le code en 10 min/jour avec PermiGo",
       sub: "Séries quotidiennes, suivi de tes thèmes faibles, examens blancs. Gratuit pour commencer.",
-      href: "/#/signup",
+      href: "/#/rejoindre?solo=1",
     },
   },
 
@@ -182,7 +182,7 @@ export const GUIDES = [
     cta: {
       text: "Lance un examen blanc dans PermiGo",
       sub: "Conditions réelles, score suivi, erreurs expliquées. Commence gratuitement.",
-      href: "/#/signup",
+      href: "/#/rejoindre?solo=1",
     },
   },
 
@@ -260,7 +260,7 @@ export const GUIDES = [
     cta: {
       text: "Entraîne tes réflexes anti-faute avec PermiGo",
       sub: "Questions ciblées sur les priorités, vitesses et angles morts. Gratuit pour démarrer.",
-      href: "/#/signup",
+      href: "/#/rejoindre?solo=1",
     },
   },
 
@@ -354,7 +354,7 @@ export const GUIDES = [
     cta: {
       text: "Prépare le jour J avec PermiGo",
       sub: "Vérifications, sécurité, pièges des centres d'examen. Commence gratuitement.",
-      href: "/#/signup",
+      href: "/#/rejoindre?solo=1",
     },
   },
 
@@ -454,7 +454,7 @@ export const GUIDES = [
     cta: {
       text: "Garde le niveau entre deux sorties avec PermiGo",
       sub: "Quiz et mises en situation sur les compétences du permis. Gratuit pour commencer.",
-      href: "/#/signup",
+      href: "/#/rejoindre?solo=1",
     },
   },
 
@@ -542,7 +542,7 @@ export const GUIDES = [
     cta: {
       text: "Rentabilise chaque heure de conduite avec PermiGo",
       sub: "Révise les compétences entre les leçons et arrive préparé. Gratuit pour commencer.",
-      href: "/#/signup",
+      href: "/#/rejoindre?solo=1",
     },
   },
 
@@ -636,7 +636,7 @@ export const GUIDES = [
     cta: {
       text: "Corrige les points de ton bilan avec PermiGo",
       sub: "Révise compétence par compétence et reviens plus fort au prochain passage.",
-      href: "/#/signup",
+      href: "/#/rejoindre?solo=1",
     },
   },
 
@@ -732,7 +732,7 @@ export const GUIDES = [
     cta: {
       text: "Fais moins d'heures, pas moins de niveau",
       sub: "PermiGo te fait réviser entre les leçons pour progresser plus vite. Gratuit pour commencer.",
-      href: "/#/signup",
+      href: "/#/rejoindre?solo=1",
     },
   },
 ];
@@ -821,6 +821,6 @@ export const MONITEUR_PILLAR = {
   cta: {
     text: "Essayer PermiGo (9,99 €/mois, sans engagement)",
     sub: "Mets en place l'app à ta marque avec quelques élèves cette semaine.",
-    href: "/#/signup",
+    href: "/#/rejoindre?solo=1",
   },
 };
