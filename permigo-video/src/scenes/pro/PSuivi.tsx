@@ -71,7 +71,7 @@ export const PSuivi: React.FC = () => {
         }}
       >
         <KineticText
-          text="Vous suivez leur engagement."
+          text="Vous suivez leur engagement"
           delay={2}
           size={66}
           accentWords={["engagement"]}

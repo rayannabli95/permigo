@@ -85,7 +85,7 @@ export const PCta: React.FC = () => {
           style={{ marginTop: 44 }}
         />
         <KineticText
-          text="d'avance à vos élèves."
+          text="d'avance à vos élèves"
           delay={18}
           size={62}
           style={{ marginTop: 4 }}

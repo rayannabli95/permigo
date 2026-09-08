@@ -56,7 +56,7 @@ export const S6Standard: React.FC = () => {
           accentGlow={`${C.a}66`}
         />
         <KineticText
-          text="de chaque leçon."
+          text="de chaque leçon"
           delay={12}
           size={76}
           style={{ marginTop: 4 }}
@@ -76,7 +76,7 @@ export const S6Standard: React.FC = () => {
               fontSize: 38,
             }}
           >
-            🤝 Et ton moniteur adore un élève préparé.
+            🤝 Et ton moniteur adore un élève préparé
           </div>
         </FadeUp>
       </AbsoluteFill>

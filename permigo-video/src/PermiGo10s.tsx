@@ -45,28 +45,28 @@ type Copy = {
 
 const COPY: Record<Lang, Copy> = {
   fr: {
-    hook: ["Chaque heure de conduite", "compte."],
-    hookAccent: "compte.",
+    hook: ["Chaque heure de conduite", "compte"],
+    hookAccent: "compte",
     s1: ["Prépare", "ta prochaine leçon"],
     s2: ["Entraîne-toi", "comme sur la route"],
     s3: ["Fiches · Quiz", "Mises en situation"],
-    cta: ["L'appli qui te prépare", "avant chaque leçon."],
+    cta: ["L'appli qui te prépare", "avant chaque leçon"],
   },
   en: {
-    hook: ["Every driving lesson", "counts."],
-    hookAccent: "counts.",
+    hook: ["Every driving lesson", "counts"],
+    hookAccent: "counts",
     s1: ["Prep", "your next lesson"],
     s2: ["Train like", "you're on the road"],
     s3: ["Flashcards · Quizzes", "Real-road scenarios"],
-    cta: ["The app that gets you ready", "before every lesson."],
+    cta: ["The app that gets you ready", "before every lesson"],
   },
   ar: {
-    hook: ["كل ساعة قيادة", "تهمّ."],
-    hookAccent: "تهمّ.",
+    hook: ["كل ساعة قيادة", "تهمّ"],
+    hookAccent: "تهمّ",
     s1: ["استعدّ", "لحصتك القادمة"],
     s2: ["تدرّب", "كأنك على الطريق"],
     s3: ["بطاقات · اختبارات", "ومواقف حقيقية"],
-    cta: ["التطبيق الذي يُجهّزك", "قبل كل حصة قيادة."],
+    cta: ["التطبيق الذي يُجهّزك", "قبل كل حصة قيادة"],
   },
 };
 

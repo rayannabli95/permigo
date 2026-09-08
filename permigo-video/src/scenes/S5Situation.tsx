@@ -63,7 +63,7 @@ export const S5Situation: React.FC = () => {
               color: C.muOnDark,
             }}
           >
-            De vraies situations. Pas juste réciter le code.
+            De vraies situations · pas juste réciter le code
           </div>
         </FadeUp>
       </AbsoluteFill>
