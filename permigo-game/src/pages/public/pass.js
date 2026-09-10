@@ -11,7 +11,7 @@
 // payant se propose au moment où l'élève est frustré (mur des 3 questions).
 //
 // DA « Ticket d'Or » (retours Rayan après SON vrai paiement, 15/07 soir) :
-//  - logo = le badge de marque (/p-badge.png), plus de wordmark illisible
+//  - logo = le badge de marque (/p-badge.webp), plus de wordmark illisible
 //  - PLUS de compteur de places ni de billet numéroté (retiré à sa demande)
 //  - la garantie « satisfait ou remboursé » ne sert PLUS d'argument de vente
 //    (carte retirée par #704, puis les 3 derniers restes le 05/08/2026 : pied
@@ -50,7 +50,7 @@ import {
   wireBackdrop,
 } from "@/components/public/route-backdrop.js";
 
-const LOGO = "/p-badge.webp"; // 8 Ko au lieu de 64 : le PNG reste pour le reste de l'app
+const LOGO = "/p-badge.webp"; // 8 Ko : le PNG de 64 Ko n'était chargé nulle part, retiré
 
 // ── Textes FR / EN ─────────────────────────────────────────────
 const STR = {

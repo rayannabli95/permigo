@@ -51,7 +51,7 @@ if (typeof window !== "undefined") {
   window.addEventListener("keydown", _preloadOnce, { once: true });
 }
 
-// ─── Exports existants — haptic.js, reward-reveal.js, celebrate-screen.js déjà câblés ───
+// ─── Exports existants — haptic.js, celebrate-screen.js déjà câblés ───
 export const playClick = () => play("click");
 export const playSuccess = () => play("success");
 export const playReward = () => play("reward");

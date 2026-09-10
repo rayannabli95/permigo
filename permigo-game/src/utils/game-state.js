@@ -8,7 +8,7 @@
  *
  * ⚠️ XP/Niveau/Ligue/Streak ne vivent PLUS ici (retiré le 08/08/2026, code
  * mort depuis le 06/08 : la série élève vient de `services/streak.js`, le
- * classement/ligue de `utils/league-shared.js` — ce module gardait une 2e
+ * classement/ligue de `pages/eleve/classement.js` — ce module gardait une 2e
  * implémentation de chacun, jamais appelée, seulement testée à l'audit).
  *
  * Usage :

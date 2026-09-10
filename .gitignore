@@ -23,3 +23,21 @@ test-results/
 
 # Sources médias lourdes (assets exportés uniquement)
 /DOCUMENT:IMAGES:SONS/
+
+# Vidéos lourdes hors dépôt (promo à la racine, rush créateur, rendus Remotion)
+/*.mp4
+permigo-video/public/creator-ad/
+permigo-video/out/
+permigo-video/*.mp4
+
+# Assets de génération Higgsfield (162 Mo, jamais versionnés)
+PERMIGO-ASSETS-HIGGSFIELD/
+
+# Cache de la CLI Supabase
+permigo-game/supabase/.temp/
+supabase/.temp/
+
+# Scripts jetables et fichiers temporaires à suffixe aléatoire
+permigo-game/.m.mjs
+permigo-game/.check-latable-live.mjs
+*.tmp.*
