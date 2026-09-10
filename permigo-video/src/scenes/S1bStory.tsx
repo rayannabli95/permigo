@@ -62,7 +62,7 @@ export const S1bStory: React.FC = () => {
           >
             pensé et créé par
             <br />
-            <span style={{ color: C.aLt }}>des enseignants du permis.</span>
+            <span style={{ color: C.aLt }}>des enseignants du permis</span>
           </div>
         </FadeUp>
       </AbsoluteFill>

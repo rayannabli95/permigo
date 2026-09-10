@@ -73,9 +73,9 @@ export const S7Debrief: React.FC = () => {
               letterSpacing: "-.02em",
             }}
           >
-            Après la leçon, tu débriefes.
+            Après la leçon tu débriefes
             <br />
-            <span style={{ color: C.aLt }}>Sans culpabiliser.</span>
+            <span style={{ color: C.aLt }}>Sans culpabiliser</span>
           </div>
         </FadeUp>
       </AbsoluteFill>
@@ -152,7 +152,7 @@ export const S7Debrief: React.FC = () => {
                 boxShadow: `0 6px 16px ${C.green}55`,
               }}
             />
-            <span style={{ position: "relative" }}>c'est NORMAL.</span>
+            <span style={{ position: "relative" }}>c'est NORMAL</span>
           </span>
         </div>
 

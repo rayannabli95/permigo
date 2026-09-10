@@ -72,7 +72,7 @@ export const S8Cta: React.FC = () => {
             <br />
             avant de monter
             <br />
-            dans la voiture.
+            dans la voiture
           </GradientText>
         </div>
       </AbsoluteFill>

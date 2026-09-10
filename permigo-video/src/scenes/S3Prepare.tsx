@@ -69,9 +69,9 @@ export const S3Prepare: React.FC = () => {
               letterSpacing: "-.02em",
             }}
           >
-            Avant de monter en voiture,
+            Avant de monter en voiture
             <br />
-            <span style={{ color: C.aLt }}>tu prépares ta leçon.</span>
+            <span style={{ color: C.aLt }}>tu prépares ta leçon</span>
           </div>
         </FadeUp>
       </AbsoluteFill>

@@ -19,7 +19,7 @@ export const PImage: React.FC = () => {
       >
         <KineticText text="Une auto-école" delay={2} size={82} />
         <KineticText
-          text="moderne."
+          text="moderne"
           delay={12}
           size={82}
           color={C.aLt}
@@ -40,9 +40,9 @@ export const PImage: React.FC = () => {
               color: C.muOnDark,
             }}
           >
-            Qui rassure, engage
+            Qui rassure · engage
             <br />
-            et fidélise ses élèves.
+            et fidélise ses élèves
           </div>
         </FadeUp>
       </AbsoluteFill>

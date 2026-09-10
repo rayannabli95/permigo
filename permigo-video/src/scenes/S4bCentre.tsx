@@ -92,7 +92,7 @@ export const S4bCentre: React.FC = () => {
               color: C.muOnDark,
             }}
           >
-            Le terrain, les pièges, l'accès — avant le jour J.
+            Le terrain · les pièges · l'accès · avant le jour J
           </div>
         </FadeUp>
 

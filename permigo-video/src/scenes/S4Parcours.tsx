@@ -74,7 +74,7 @@ export const S4Parcours: React.FC = () => {
           >
             Tu sais <span style={{ color: C.aLt }}>exactement</span>
             <br />
-            où tu en es.
+            où tu en es
           </div>
         </FadeUp>
       </AbsoluteFill>

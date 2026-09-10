@@ -15,9 +15,9 @@ export const S2Loterie: React.FC = () => {
           paddingTop: 300,
         }}
       >
-        <KineticText text="Une heure de conduite," delay={2} size={72} />
+        <KineticText text="Une heure de conduite" delay={2} size={72} />
         <KineticText
-          text="ça compte."
+          text="ça compte"
           delay={11}
           size={72}
           color={C.goldLt}
@@ -33,7 +33,7 @@ export const S2Loterie: React.FC = () => {
               color: C.muOnDark,
             }}
           >
-            Prépare-toi, profite de chaque minute.
+            Prépare-toi · profite de chaque minute
           </div>
         </FadeUp>
 

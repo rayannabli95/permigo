@@ -36,7 +36,7 @@ export const PPrepare: React.FC = () => {
         }}
       >
         <KineticText
-          text="Ils arrivent préparés."
+          text="Ils arrivent préparés"
           delay={2}
           size={68}
           accentWords={["préparés"]}
@@ -55,9 +55,9 @@ export const PPrepare: React.FC = () => {
               color: C.muOnDark,
             }}
           >
-            Vos leçons vont plus loin.
+            Vos leçons vont plus loin
             <br />
-            Votre travail est allégé.
+            Votre travail est allégé
           </div>
         </FadeUp>
       </AbsoluteFill>

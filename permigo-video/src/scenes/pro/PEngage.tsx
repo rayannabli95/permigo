@@ -36,7 +36,7 @@ export const PEngage: React.FC = () => {
         }}
       >
         <KineticText
-          text="Des élèves motivés."
+          text="Des élèves motivés"
           delay={2}
           size={68}
           accentWords={["motivés"]}
@@ -55,9 +55,9 @@ export const PEngage: React.FC = () => {
               color: C.muOnDark,
             }}
           >
-            Ils travaillent leur conduite,
+            Ils travaillent leur conduite
             <br />
-            même entre deux leçons.
+            même entre deux leçons
           </div>
         </FadeUp>
       </AbsoluteFill>

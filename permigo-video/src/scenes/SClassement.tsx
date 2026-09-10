@@ -50,9 +50,9 @@ export const SClassement: React.FC = () => {
               letterSpacing: "-.02em",
             }}
           >
-            Un <span style={{ color: C.aLt }}>classement</span>,
+            Un <span style={{ color: C.aLt }}>classement</span>
             <br />
-            entre élèves.
+            entre élèves
           </div>
         </FadeUp>
         <FadeUp delay={10} y={16} dur={10}>
@@ -65,7 +65,7 @@ export const SClassement: React.FC = () => {
               color: C.muOnDark,
             }}
           >
-            Tu montes en révisant. Skins & récompenses à la clé.
+            Tu montes en révisant · skins et récompenses à la clé
           </div>
         </FadeUp>
       </AbsoluteFill>
