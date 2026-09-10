@@ -600,7 +600,7 @@ function renderStyles() {
 .msg-input {
   flex: 1;
   padding: 12px 16px;
-  background: var(--ink2);
+  background: #1a1d2e;
   border: 1.5px solid rgba(255,255,255,.08);
   border-radius: 24px;
   color: #e8ecf5;
@@ -645,8 +645,8 @@ function renderStyles() {
   word-break: break-word;
 }
 .msg-bubble--other {
-  background: var(--ink2);
-  color: var(--bo3);
+  background: #1e2236;
+  color: #e8ecf5;
   border-bottom-left-radius: 4px;
 }
 .msg-bubble--mine {

@@ -41,7 +41,8 @@ function cbDir() {
 
 const STYLE = `<style>
   .cb { position:fixed; inset:0; z-index:9000; overflow-y:auto;
-    background:linear-gradient(180deg,var(--ink) 0%,var(--ink4,#0f1424) 100%);
+    /* fond FIXE : var(--ink) s'inverse en theme sombre (fond clair + texte blanc = page blanche) */
+    background:linear-gradient(180deg,#0b0d1a 0%,#0f1424 100%);
     display:flex; flex-direction:column; align-items:center; justify-content:center;
     padding:32px 22px max(40px,env(safe-area-inset-bottom)); font-family:'Archivo',sans-serif; color:#fff; text-align:center; }
   .cb-ico { font-size:60px; margin-bottom:18px; }

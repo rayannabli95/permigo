@@ -35,7 +35,7 @@ function ensureRoot() {
     .loot-toast{
       position:relative;display:flex;align-items:center;gap:12px;
       padding:13px 16px;
-      background:linear-gradient(135deg,#1e1b4b 0%,var(--ink) 60%,#1a1208 100%);
+      background:linear-gradient(135deg,#1e1b4b 0%,#0b0d1a 60%,#1a1208 100%);
       border:1px solid rgba(255,255,255,.14);
       border-radius:13px;
       color:#fff;

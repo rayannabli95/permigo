@@ -49,7 +49,7 @@ export function mount(root) {
     .nf-sub{font-size:15px;color:var(--mu);margin:0 0 24px;max-width:320px;}
     .nf-cta{display:inline-flex;align-items:center;justify-content:center;
       min-height:44px;padding:12px 28px;border-radius:14px;border:0;
-      background:var(--a);color:var(--a-txt);font-size:16px;font-weight:700;
+      background:var(--a);color:var(--a-ink);font-size:16px;font-weight:700;
       text-decoration:none;cursor:pointer;}
   </style>
   <div class="nf-wrap"${nfDir()}>

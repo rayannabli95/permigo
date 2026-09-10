@@ -135,7 +135,7 @@ const STYLE = `
   .ht-vp-txt { margin: 0; font: 600 12.5px/1.4 'Archivo', sans-serif; color: var(--mu); }
   .ht-vp-cta {
     margin-top: 2px; width: 100%; min-height: 40px; border: 0; border-radius: 12px; cursor: pointer;
-    background: var(--a, #6366f1); color: var(--a-txt, #fff);
+    background: var(--a, #6366f1); color: var(--a-ink, #fff);
     font: 800 13.5px/1 'Archivo', sans-serif;
     transition: transform .1s ease;
   }

@@ -13,7 +13,15 @@ const STYLE = `<style>
   .ec {
     max-width: 640px;
     margin: 0 auto;
-    background: var(--ink);
+    /* Page concue SOMBRE dans les deux themes : le fond est FIXE et les jetons
+       qui s'inversent en theme sombre (ink, bo, mu) sont redefinis ici en clair,
+       comme sur login.js. Sinon var(--ink) devient presque blanc en sombre
+       et le texte blanc disparait. */
+    --ink:#f4f1ff; --ink4:#2a3149;
+    --bo3:#e2e8f0; --bo4:#cbd5e1; --bg4:#f1f5f9;
+    --mu2:#cfd4e6; --mu3:#c5cbe0; --mu4:#b8bfd6;
+    --a-txt:var(--a-lt, var(--a));
+    background: #0b0d1a;
     font-family: 'Archivo', sans-serif;
     color: var(--bg4);
     min-height: 100dvh;
@@ -106,7 +114,7 @@ const STYLE = `<style>
     gap: 10px;
   }
   .ec-feature {
-    background: var(--ink);
+    background: #0b0d1a;
     border: 1px solid var(--ink4);
     border-radius: 18px;
     padding: 18px 16px;
@@ -137,7 +145,7 @@ const STYLE = `<style>
   }
   .ec-moniteur {
     display: flex; align-items: center; gap: 14px;
-    background: var(--ink);
+    background: #0b0d1a;
     border: 1px solid var(--ink4);
     border-radius: 18px;
     padding: 16px;
@@ -175,7 +183,7 @@ const STYLE = `<style>
     display: flex; flex-direction: column; gap: 12px;
   }
   .ec-temoignage {
-    background: var(--ink);
+    background: #0b0d1a;
     border: 1px solid var(--ink4);
     border-radius: 18px;
     padding: 18px 20px;
@@ -263,7 +271,7 @@ const STYLE = `<style>
 
   /* ── Skeleton ── */
   .ec-skel {
-    background: linear-gradient(90deg, var(--ink) 0%, #1a2236 50%, var(--ink) 100%);
+    background: linear-gradient(90deg, #0b0d1a 0%, #1a2236 50%, #0b0d1a 100%);
     background-size: 200% 100%;
     animation: ecShim 1.6s ease-in-out infinite;
     border-radius: 16px;
