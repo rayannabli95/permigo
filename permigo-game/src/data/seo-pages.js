@@ -742,85 +742,119 @@ export const GUIDES = [
 // ─────────────────────────────────────────────────────────────
 export const MONITEUR_PILLAR = {
   slug: "pour-moniteurs",
-  metaTitle: "PermiGo. L'app à TA marque pour moniteur indépendant",
+  metaTitle: "PermiGo pour moniteurs · tes élèves arrivent préparés",
   metaDesc:
-    "L'app d'entraînement au permis à ta marque, qui rend tes élèves accros à réviser entre les leçons et prouve tes résultats. Pas une plateforme qui te prend tes élèves. 9,99 €/mois.",
-  h1: "Ton app de permis. À ton nom. Pas à celui d'une plateforme.",
-  lead: "PermiGo, c'est l'outil du moniteur indépendant : une app d'entraînement à ta marque qui garde tes élèves actifs entre les leçons, et qui matérialise ton travail. Qui progresse, qui est prêt, ton taux de réussite. Tes élèves, ta marque, tes résultats.",
+    "Tes élèves préparent chaque leçon dans PermiGo. Tu ne remplis rien : tu vois qui s'entraîne, qui avance, qui décroche. Moniteur : 9,99 €/mois, sans engagement.",
+  h1: "Tes élèves arrivent préparés · tu ne remplis rien",
+  lead: "PermiGo prépare l'élève avant chaque heure de conduite et l'accompagne entre deux leçons. Toi, tu n'as aucune saisie à faire : l'élève travaille, certifie lui-même ce qu'il a pratiqué avec toi, et ton tableau de bord te montre qui prépare, qui avance et qui bloque.",
   sections: [
     {
-      h2: "Le problème : entre deux leçons, ton élève est seul",
+      h2: "Une saisie de moins · pas une de plus",
       blocks: [
         {
           type: "p",
-          text: "Un bon moniteur, ça se voit en leçon. Mais entre deux leçons, l'élève décroche : il ne révise pas, il oublie, il revient en ayant régressé. Et le livret papier que personne ne regarde ne prouve rien à personne.",
+          text: "Tu as déjà un livret à tenir, un planning à remplir et des élèves qui t'écrivent le soir. Un outil qui te demande de tout ressaisir finit au fond d'un tiroir au bout de trois semaines. PermiGo est construit sur cette règle : le moniteur n'a rien d'obligatoire à remplir.",
         },
         {
           type: "callout",
-          text: "PermiGo comble ce vide : tes élèves s'entraînent quand tu n'es pas là, tu vois leur progression en temps réel, et ton travail devient enfin visible. À ton nom.",
+          text: "L'élève prépare sa leçon, s'entraîne entre deux heures de conduite et certifie lui-même les compétences qu'il a pratiquées avec toi. Tout ce qu'il fait remonte dans ton espace. Tu observes, tu n'écris pas.",
         },
       ],
     },
     {
-      h2: "3 raisons d'en faire ton outil",
+      h2: "Ce que tu vois d'un coup d'œil",
       blocks: [
         {
           type: "h3",
-          text: "1. À ton nom, pas à celui d'Ornikar",
+          text: "Qui s'entraîne entre deux leçons",
         },
         {
           type: "p",
-          text: "Les plateformes outillent le moniteur, mais à LEUR marque. Et elles possèdent ton élève. PermiGo fait l'inverse : l'app et le suivi sont à TA marque. L'élève est à toi, la relation est à toi.",
+          text: "Chaque fiche de conduite lue, chaque exercice fait, chaque jour d'activité est compté. Dans Mes élèves, une pastille te dit qui est déterminé, qui garde un rythme normal et qui se refroidit. Tu peux trier tes élèves par engagement, avant même de les voir en voiture.",
         },
         {
           type: "h3",
-          text: "2. Tes élèves reviennent tout seuls",
+          text: "Où en est chaque élève",
         },
         {
           type: "p",
-          text: "Parcours gamifié, séries quotidiennes, examens blancs, défis : l'élève prend l'habitude de réviser sans que tu aies à le relancer. Un élève qui s'entraîne entre les leçons, c'est un élève qui progresse plus vite. Et un taux de réussite qui monte.",
+          text: "Les 31 objectifs du livret REMC, compétence par compétence, avec la date à laquelle l'élève l'a certifiée après l'avoir travaillée en leçon. Une barre de progression par élève, et le compteur de ceux qui ont couvert les compétences de base et se rapprochent de l'examen.",
         },
         {
           type: "h3",
-          text: "3. La preuve qui remplit ton agenda",
+          text: "Qui décroche",
         },
         {
           type: "p",
-          text: "Tu vois qui progresse, qui est prêt à présenter, et tu construis un taux de réussite à TON nom. Cette preuve, c'est ton meilleur argument pour signer de nouveaux élèves.",
+          text: "Un élève silencieux depuis quatorze jours remonte tout seul dans ton radar de relance. Le message est déjà écrit, tu le modifies si tu veux, et il part de ton téléphone par WhatsApp, SMS ou notification. C'est toi qui relances, pas un robot.",
+        },
+        {
+          type: "h3",
+          text: "Tes chiffres de la semaine",
+        },
+        {
+          type: "p",
+          text: "Un écran de stats répond aux questions que tu te poses vraiment : quoi faire aujourd'hui, qui est le plus proche de l'examen, qui n'a pas ouvert l'app, combien tes élèves ont révisé sur les sept derniers jours et où en est ton portefeuille. Et pour chaque élève, un bilan imprimable pour faire le point avec lui ou avec ses parents.",
         },
       ],
     },
     {
-      h2: "Simple, sans engagement",
+      h2: "Comment ça démarre",
+      blocks: [
+        {
+          type: "ul",
+          items: [
+            "Tu crées ton compte moniteur en deux minutes et tu actives ton abonnement.",
+            "Tu choisis ton code moniteur. Tu le donnes à tes élèves en voiture ou par message, ou tu leur envoies un lien d'invitation depuis ton espace.",
+            "Chaque élève crée son compte, entre ton code et t'est rattaché tout seul. Il n'a rien à payer.",
+            "Il apparaît aussitôt dans ton tableau de bord, avec tout ce qu'il fera ensuite.",
+          ],
+        },
+        {
+          type: "p",
+          text: "Rien à installer : PermiGo est une application web qui s'ajoute à l'écran d'accueil du téléphone, le tien comme celui de tes élèves. PermiGo ne stocke ni téléphone ni adresse de tes élèves.",
+        },
+      ],
+    },
+    {
+      h2: "9,99 € par mois · sans engagement",
       blocks: [
         {
           type: "p",
-          text: "Abonnement individuel à 9,99 €/mois, sans engagement, en self-service. Pas de logiciel lourd, pas d'installation compliquée : tu invites tes élèves, ils révisent, tu pilotes. C'est tout.",
+          text: "Un seul abonnement, pour toi, réglé par carte. Tes élèves rattachés par ton code utilisent PermiGo sans rien payer. Tu résilies quand tu veux depuis ton espace, et tes élèves gardent leur accès.",
         },
       ],
     },
   ],
   faq: [
     {
-      q: "PermiGo, c'est quoi exactement ?",
-      r: "Une app d'entraînement au permis à la marque du moniteur indépendant. Tes élèves révisent entre les leçons (quiz, parcours, examens blancs) et tu suis leur progression et qui est prêt à présenter.",
+      q: "Qu'est-ce que je dois remplir ?",
+      r: "Rien d'obligatoire. L'élève prépare, s'entraîne et certifie lui-même ses compétences. Ton espace est en lecture : il te montre ce que tes élèves ont fait. Si tu veux relancer quelqu'un, le message est déjà écrit, tu n'as qu'à l'envoyer.",
     },
     {
-      q: "En quoi c'est différent d'Ornikar ou En Voiture Simone ?",
-      r: "Ces plateformes possèdent l'élève et travaillent à leur marque. PermiGo est TON outil, à TA marque : l'élève et la relation restent à toi.",
+      q: "Mes élèves doivent-ils payer ?",
+      r: "Non. Un élève rattaché à toi par ton code utilise PermiGo sans rien payer. Seul ton abonnement moniteur est facturé, 9,99 € par mois.",
     },
     {
-      q: "Combien ça coûte ?",
-      r: "9,99 €/mois, sans engagement, en abonnement individuel self-service.",
+      q: "Est-ce que ça remplace le livret d'apprentissage ?",
+      r: "Non. Le livret officiel reste le tien. PermiGo suit les 31 objectifs du même référentiel, le REMC, certifiés par l'élève après les avoir pratiqués avec toi. Tu vois où il en est sans rien ressaisir, et tu confirmes en voiture si tu le juges utile.",
+    },
+    {
+      q: "Comment mes élèves me rejoignent ?",
+      r: "Tu choisis un code moniteur dans ton espace. L'élève crée son compte, entre ce code et t'est rattaché tout seul. Si tu préfères, tu lui envoies un lien d'invitation depuis ton espace : il crée son compte en une minute et arrive déjà rattaché.",
+    },
+    {
+      q: "Combien ça coûte et je peux arrêter quand ?",
+      r: "9,99 € par mois, sans engagement, réglé par carte. Tu résilies quand tu veux depuis ton espace, et tes élèves gardent leur accès à l'app.",
     },
     {
       q: "Faut-il installer un logiciel ?",
-      r: "Non. PermiGo est une application web : tu invites tes élèves, ils révisent depuis leur téléphone, tu pilotes depuis le tien.",
+      r: "Non. PermiGo est une application web : elle s'ouvre dans le navigateur et s'ajoute à l'écran d'accueil du téléphone, comme une app.",
     },
   ],
   cta: {
-    text: "Essayer PermiGo (9,99 €/mois, sans engagement)",
-    sub: "Mets en place l'app à ta marque avec quelques élèves cette semaine.",
-    href: "/#/rejoindre?solo=1",
+    text: "Crée ton compte moniteur · 9,99 €/mois sans engagement",
+    sub: "Deux minutes pour créer ton compte. Donne ton code à un élève, il apparaît dans ton tableau de bord dès qu'il l'entre.",
+    href: "/#/creer-compte",
   },
 };

@@ -457,16 +457,35 @@ ${renderSections(m.sections)}
 ${renderCta(m.cta)}
 ${renderFaq(m.faq)}
 `;
+  // ⚠️ Pas de second « SoftwareApplication » nommé « PermiGo » : index.html en
+  // déclare déjà un (l'app, Pass élève à 4,99 €) et deux entités de même nom
+  // et de même type laissaient Google en choisir une au hasard. Cette page
+  // vend autre chose : l'ABONNEMENT MONITEUR. On le déclare sous son propre
+  // nom, avec son prix mensuel, rattaché à la même marque.
   const software = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    name: "PermiGo",
+    "@id": `${SITE}/pour-moniteurs/#abonnement-moniteur`,
+    name: "PermiGo pour moniteurs",
+    url: `${SITE}/pour-moniteurs/`,
+    image: `${SITE}/icon-512.png`,
     applicationCategory: "EducationalApplication",
     operatingSystem: "Web",
+    brand: { "@type": "Brand", name: "PermiGo" },
     offers: {
       "@type": "Offer",
+      name: "Abonnement moniteur",
       price: "9.99",
       priceCurrency: "EUR",
+      url: `${SITE}/pour-moniteurs/`,
+      availability: "https://schema.org/InStock",
+      priceSpecification: {
+        "@type": "UnitPriceSpecification",
+        price: "9.99",
+        priceCurrency: "EUR",
+        billingDuration: 1,
+        unitCode: "MON",
+      },
     },
     description: m.metaDesc,
   };
